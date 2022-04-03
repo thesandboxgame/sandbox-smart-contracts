@@ -1,7 +1,11 @@
 import {ethers} from 'hardhat';
-import {setupPolygonAsset} from './fixtures';
-import {waitFor} from '../../utils';
-import {transferSand} from '../catalyst/utils';
+import {
+  assetFixtures,
+  assetSignedAuctionFixtures,
+  signAuthMessageAs,
+} from '../common/fixtures/asset';
+import {waitFor, withSnapshot} from '../utils';
+import {transferSand} from '../polygon/catalyst/utils';
 import BN from 'bn.js';
 import crypto from 'crypto';
 import {BigNumber, constants} from 'ethers';
@@ -9,8 +13,24 @@ import {assert, expect} from 'chai';
 
 const zeroAddress = constants.AddressZero;
 
+const backendAuthWallet = new ethers.Wallet(
+  '0x4242424242424242424242424242424242424242424242424242424242424242'
+);
+
+const AUCTION_TYPEHASH = ethers.utils.keccak256(
+  ethers.utils.toUtf8Bytes(
+    'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)'
+  )
+);
+
+const setupAsset = withSnapshot(['Asset'], assetFixtures);
+const setupAssetSignedAuction = withSnapshot(
+  ['AuthValidator', 'AssetSignedAuctionWithAuth', 'Sand'],
+  assetSignedAuctionFixtures
+);
+
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('assetSignedAuctionAuth', function () {
+describe('assetSignedAuctionWithAuth', function () {
   const startingPrice = new BN('1000000000000000000');
   const endingPrice = new BN('5000000000000000000');
   const duration = 1000;
@@ -19,12 +39,8 @@ describe('assetSignedAuctionAuth', function () {
   const amounts = [1];
 
   it('should be able to claim seller offer in ETH', async function () {
-    const {
-      Asset,
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {Asset, users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -88,6 +104,7 @@ describe('assetSignedAuctionAuth', function () {
         },
       },
     ]);
+
     const auctionData = [
       offerId,
       startingPrice.toString(),
@@ -96,6 +113,21 @@ describe('assetSignedAuctionAuth', function () {
       duration,
       packs,
     ];
+
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
 
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
@@ -110,13 +142,14 @@ describe('assetSignedAuctionAuth', function () {
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
           buyer: users[1].address,
-          seller: users[0].address,
+          seller: seller,
           token: zeroAddress,
           purchase: [buyAmount, '5000000000000000000'],
           auctionData,
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )
@@ -143,11 +176,8 @@ describe('assetSignedAuctionAuth', function () {
   });
 
   it('should NOT be able to claim offer if signature mismatches', async function () {
-    const {
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -220,6 +250,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -236,20 +281,135 @@ describe('assetSignedAuctionAuth', function () {
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )
     ).to.be.revertedWith('signer != from');
   });
 
+  it('should NOT be able to claim offer with invalid backend signature', async function () {
+    const {users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
+    const tokenId = await mintAsset(users[0].address, 20);
+
+    const seller = users[0].address;
+
+    const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
+    const startedAt = Math.floor(Date.now() / 1000) - 500;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[1].address)
+    );
+
+    // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
+    const signature = await ethers.provider.send('eth_signTypedData_v4', [
+      seller,
+      {
+        types: {
+          EIP712Domain: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              type: 'string',
+            },
+            {
+              name: 'verifyingContract',
+              type: 'address',
+            },
+          ],
+          Auction: [
+            {name: 'from', type: 'address'},
+            {name: 'token', type: 'address'},
+            {name: 'offerId', type: 'uint256'},
+            {name: 'startingPrice', type: 'uint256'},
+            {name: 'endingPrice', type: 'uint256'},
+            {name: 'startedAt', type: 'uint256'},
+            {name: 'duration', type: 'uint256'},
+            {name: 'packs', type: 'uint256'},
+            {name: 'ids', type: 'bytes'},
+            {name: 'amounts', type: 'bytes'},
+          ],
+        },
+        primaryType: 'Auction',
+        domain: {
+          name: 'Wrong domain',
+          version: '1',
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
+        },
+        message: {
+          from: seller,
+          token: zeroAddress,
+          offerId,
+          startingPrice: startingPrice.toString(),
+          endingPrice: endingPrice.toString(),
+          startedAt,
+          duration,
+          packs,
+          ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
+          amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
+        },
+      },
+    ]);
+
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
+    const wrongBackendSig = new ethers.Wallet(users[0].address);
+
+    const backendSignature = await signAuthMessageAs(
+      wrongBackendSig,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
+    await users[0].Asset.setApprovalForAll(
+      assetSignedAuctionAuthContract.address,
+      true
+    );
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
+        {
+          buyer: users[1].address,
+          seller: users[0].address,
+          token: zeroAddress,
+          purchase: [buyAmount, '5000000000000000000'],
+          auctionData,
+          ids: [tokenId.toString()],
+          amounts,
+          signature,
+          backendSignature,
+        },
+        {value: '5000000000000000000'}
+      )
+    ).to.be.revertedWith('INVALID_AUTH');
+  });
+
   it('should be able to claim seller offer in SAND', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
     const {
-      Asset,
-      users,
-      mintAsset,
       assetSignedAuctionAuthContract,
       Sand,
-    } = await setupPolygonAsset();
+    } = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -326,6 +486,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      Sand.address,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await transferSand(
       Sand,
       users[1].address,
@@ -353,6 +528,7 @@ describe('assetSignedAuctionAuth', function () {
         ids: [tokenId.toString()],
         amounts,
         signature,
+        backendSignature,
       })
     ).to.be.ok;
 
@@ -378,12 +554,8 @@ describe('assetSignedAuctionAuth', function () {
   });
 
   it('should be able to claim seller offer with basic signature', async function () {
-    const {
-      Asset,
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {Asset, users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -446,6 +618,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -466,6 +653,7 @@ describe('assetSignedAuctionAuth', function () {
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )
@@ -492,11 +680,8 @@ describe('assetSignedAuctionAuth', function () {
   });
 
   it('should be able to cancel offer', async function () {
-    const {
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -561,6 +746,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -577,6 +777,7 @@ describe('assetSignedAuctionAuth', function () {
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )
@@ -584,12 +785,8 @@ describe('assetSignedAuctionAuth', function () {
   });
 
   it('should NOT be able to claim offer without sending ETH', async function () {
-    const {
-      Asset,
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {Asset, users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -654,6 +851,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await Asset.setApprovalForAll(assetSignedAuctionAuthContract.address, true);
 
     await expect(
@@ -666,17 +878,17 @@ describe('assetSignedAuctionAuth', function () {
         ids: [tokenId.toString()],
         amounts,
         signature,
+        backendSignature,
       })
     ).to.be.revertedWith('ETH < total');
   });
 
   it('should NOT be able to claim offer without enough SAND', async function () {
+    const {users, mintAsset} = await setupAsset();
     const {
-      users,
-      mintAsset,
       assetSignedAuctionAuthContract,
       Sand,
-    } = await setupPolygonAsset();
+    } = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -753,6 +965,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -777,16 +1004,14 @@ describe('assetSignedAuctionAuth', function () {
         ids: [tokenId.toString()],
         amounts,
         signature,
+        backendSignature,
       })
     ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });
 
   it('should NOT be able to claim offer if it did not start yet', async function () {
-    const {
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -859,6 +1084,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -875,6 +1115,7 @@ describe('assetSignedAuctionAuth', function () {
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )
@@ -882,11 +1123,8 @@ describe('assetSignedAuctionAuth', function () {
   });
 
   it('should NOT be able to claim offer if it already ended', async function () {
-    const {
-      users,
-      mintAsset,
-      assetSignedAuctionAuthContract,
-    } = await setupPolygonAsset();
+    const {users, mintAsset} = await setupAsset();
+    const {assetSignedAuctionAuthContract} = await setupAssetSignedAuction();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -959,6 +1197,21 @@ describe('assetSignedAuctionAuth', function () {
       packs,
     ];
 
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
     await users[0].Asset.setApprovalForAll(
       assetSignedAuctionAuthContract.address,
       true
@@ -975,6 +1228,7 @@ describe('assetSignedAuctionAuth', function () {
           ids: [tokenId.toString()],
           amounts,
           signature,
+          backendSignature,
         },
         {value: '5000000000000000000'}
       )

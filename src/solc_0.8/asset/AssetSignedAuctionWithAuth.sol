@@ -98,33 +98,6 @@ contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSa
         emit FeeSetup(feeCollector, fee10000th);
     }
 
-    function _verifyParameters(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256 buyAmount,
-        uint256[] memory auctionData,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal view {
-        require(ids.length == amounts.length, "ids and amounts length not matching");
-        require(
-            buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]),
-            "not authorized"
-        );
-        uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
-        require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
-
-        uint256 total = amountAlreadyClaimed + buyAmount;
-        require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
-
-        require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
-        require(
-            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
-            "Auction finished"
-        );
-    }
-
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
     function claimSellerOffer(ClaimSellerOfferRequest memory input)
@@ -365,6 +338,13 @@ contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSa
         );
     }
 
+    /// @notice cancel a offer previously signed, new offer need to use a id not used yet
+    /// @param offerId offer to cancel
+    function cancelSellerOffer(uint256 offerId) external {
+        claimed[msg.sender][offerId] = MAX_UINT256;
+        emit OfferCancelled(msg.sender, offerId);
+    }
+
     function _executeDeal(
         address token,
         uint256[] memory purchase,
@@ -417,13 +397,6 @@ contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSa
         emit OfferClaimed(seller, buyer, auctionData[AuctionData_OfferId], purchase[0], offer, fee);
     }
 
-    /// @notice cancel a offer previously signed, new offer need to use a id not used yet
-    /// @param offerId offer to cancel
-    function cancelSellerOffer(uint256 offerId) external {
-        claimed[msg.sender][offerId] = MAX_UINT256;
-        emit OfferCancelled(msg.sender, offerId);
-    }
-
     function _ensureCorrectSigner(
         address from,
         address token,
@@ -463,6 +436,33 @@ contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSa
         }
 
         return signer;
+    }
+
+    function _verifyParameters(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256 buyAmount,
+        uint256[] memory auctionData,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal view {
+        require(ids.length == amounts.length, "ids and amounts length not matching");
+        require(
+            buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]),
+            "not authorized"
+        );
+        uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
+        require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
+
+        uint256 total = amountAlreadyClaimed + buyAmount;
+        require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
+
+        require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
+        require(
+            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
+            "Auction finished"
+        );
     }
 
     function _encodeBasicSignatureHash(
