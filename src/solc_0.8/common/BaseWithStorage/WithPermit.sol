@@ -4,7 +4,6 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "../../common/interfaces/IERC20Extended.sol";
 import "../../common/Base/TheSandbox712.sol";
-import "hardhat/console.sol";
 
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
