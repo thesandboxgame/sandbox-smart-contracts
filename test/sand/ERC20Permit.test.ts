@@ -37,11 +37,8 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    //is this the same?
+
     const permitData712 = data712(luckGem, approve);
-    console.log(luckGem.address);
-    console.log('permitData712');
-    console.log(permitData712);
 
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       gemOwner,
@@ -52,13 +49,6 @@ describe('Gems & Catalysts permit', function () {
 
     const gemAllowanceBefore = await luckGem.allowance(gemOwner, user3);
     expect(gemAllowanceBefore).to.equal(0);
-
-    console.log('gemOwner');
-    console.log(gemOwner);
-    console.log('user3');
-    console.log(user3);
-    console.log('Amount');
-    console.log(TEST_AMOUNT);
 
     const receipt = await waitFor(
       luckGem.permit(

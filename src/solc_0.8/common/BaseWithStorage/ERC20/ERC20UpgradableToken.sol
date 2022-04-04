@@ -2,11 +2,18 @@
 pragma solidity 0.8.2;
 
 import "./ERC20BaseTokenUpgradeable.sol";
-import "../WithPermit.sol";
+//import "../WithPermit.sol";
+//import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
+import "../WithPermitUpgradable.sol";
 import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
+import "hardhat/console.sol";
 
-contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20BaseTokenUpgradeable {
+contract ERC20UpgradableToken is
+    ERC677Extension,
+    WithPermitUpgradable, /* WithPermit */
+    ERC20BaseTokenUpgradeable
+{
     function __ERC20UpgradableToken_init(
         string memory name,
         string memory symbol,
@@ -14,6 +21,7 @@ contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20BaseTokenUpgr
         address admin
     ) public initializer {
         __ERC20BaseTokenUpgradeable_init(name, symbol, trustedForwarder, admin);
+        __WithPermitUpgradable_init("The Sandbox");
     }
 
     function mint(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -35,8 +43,8 @@ contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20BaseTokenUpgr
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s
-    ) public override {
+        bytes32 s /* override */
+    ) public {
         checkApproveFor(owner, spender, value, deadline, v, r, s);
         _approveFor(owner, spender, value);
     }
