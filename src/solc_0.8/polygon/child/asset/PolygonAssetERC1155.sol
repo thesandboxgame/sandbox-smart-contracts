@@ -100,7 +100,8 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     /// @param user user address for whom deposit is being done
     /// @param depositData abi encoded tokenIds. Batch deposit also supported.
     function deposit(address user, bytes calldata depositData) external override {
-        require(user != address(0x0), "PolygonAssetERC1155: !CHILD_CHAIN_MANAGER");
+        require(_msgSender() == _childChainManager, "!DEPOSITOR");
+        require(user != address(0), "INVALID_DEPOSIT_USER");
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
 
