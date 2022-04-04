@@ -68,12 +68,6 @@ interface IAssetERC1155 {
         bytes calldata data
     ) external;
 
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external;
-
     function burnFrom(
         address from,
         uint256 id,
