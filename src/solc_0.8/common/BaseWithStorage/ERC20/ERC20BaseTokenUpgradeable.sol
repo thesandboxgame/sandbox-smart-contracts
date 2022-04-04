@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
-import "hardhat/console.sol";
 
 abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
@@ -221,19 +220,13 @@ abstract contract ERC20BaseTokenUpgradeable is
     function _burn(address from, uint256 amount) internal {
         require(amount > 0, "BURN_O_TOKENS");
         if (_msgSender() != from && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
-            console.log("different owner");
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-                console.log("from ERC20");
-                console.log(from);
-                console.log("msg sender ERC20 ");
-                console.log(_msgSender());
                 require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
                 _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
-        console.log("is owner");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "INSUFFICIENT_FUNDS");
         _balances[from] = currentBalance - amount;
