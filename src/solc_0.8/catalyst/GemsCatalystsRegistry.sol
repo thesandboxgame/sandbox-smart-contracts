@@ -9,9 +9,6 @@ import "../common/interfaces/IERC20Extended.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-//import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-//import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "hardhat/console.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalyst must be registered here.
