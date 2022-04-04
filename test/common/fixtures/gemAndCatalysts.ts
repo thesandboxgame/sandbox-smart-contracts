@@ -170,6 +170,8 @@ export const gemsAndCatalystsFixtures = async () => {
     .grantRole(superOperator, gemsCatalystsRegistrySuperOperator);
   //.setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
 
+  console.log('inside fixture the owner is:');
+  console.log(catalystOwner);
   const gemsCatalystsRegistryAsCataystOwner = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(catalystOwner)
   );

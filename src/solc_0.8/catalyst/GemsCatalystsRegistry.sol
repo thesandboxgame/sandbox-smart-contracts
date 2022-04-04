@@ -174,11 +174,6 @@ contract GemsCatalystsRegistry is
         uint16 catalystId,
         uint256 amount
     ) public override {
-        console.log("inside burn catalyst");
-        console.log("from GCR");
-        console.log(from);
-        console.log("msg sender GCR");
-        console.log(_msgSender());
         _checkAuthorization(from);
         ICatalyst catalyst = getCatalyst(catalystId);
         require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
