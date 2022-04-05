@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"; //Ownable.sol;
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IGem.sol";
 import "./interfaces/ICatalyst.sol";
 import "../common/interfaces/IERC20Extended.sol";
@@ -14,17 +14,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is
-    ERC2771Handler,
-    IGemsCatalystsRegistry,
-    OwnableUpgradeable,
-    AccessControlUpgradeable
-    /* AccessControl
-    Initializable */
-{
+contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
-    bytes32 public constant TRUSTED_FORWARDER_ROLE = keccak256("TRUSTED_FORWARDER_ROLE");
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     IGem[] internal _gems;
@@ -34,7 +26,6 @@ contract GemsCatalystsRegistry is
 
     function initV1(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(TRUSTED_FORWARDER_ROLE, trustedForwarder);
         __ERC2771Handler_initialize(trustedForwarder);
         __Ownable_init();
     }

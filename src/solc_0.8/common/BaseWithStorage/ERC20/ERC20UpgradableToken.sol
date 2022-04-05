@@ -36,8 +36,8 @@ contract ERC20UpgradableToken is ERC677Extension, WithPermitUpgradable, ERC20Bas
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s /* override */
-    ) public {
+        bytes32 s
+    ) public override {
         checkApproveFor(owner, spender, value, deadline, v, r, s);
         _approveFor(owner, spender, value);
     }

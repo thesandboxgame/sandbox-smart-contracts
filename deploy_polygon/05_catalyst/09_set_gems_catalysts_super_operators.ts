@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {execute, read} = deployments;
 
   const AssetMinter = await deployments.get('PolygonAssetMinter');
-  const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   const superOperatorRole = await read(
     'PolygonGemsCatalystsRegistry',
@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isAssetMinterSuperOperator) {
     await execute(
       'PolygonGemsCatalystsRegistry',
-      {from: gemsCatalystsRegistryAdmin, log: true},
+      {from: deployer, log: true},
       'grantRole',
       superOperatorRole,
       AssetMinter.address

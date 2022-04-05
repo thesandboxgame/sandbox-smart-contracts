@@ -164,7 +164,7 @@ abstract contract ERC20BaseTokenUpgradeable is
     function _addAllowanceIfNeeded(
         address owner,
         address spender,
-        uint256 amountNeeded /*(ERC20Internal, ERC20ExecuteExtension, ERC20BasicApproveExtension)*/
+        uint256 amountNeeded
     ) internal virtual override {
         if (amountNeeded > 0 && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[owner][spender];
@@ -178,7 +178,7 @@ abstract contract ERC20BaseTokenUpgradeable is
     function _approveFor(
         address owner,
         address spender,
-        uint256 amount /*(ERC20BasicApproveExtension, ERC20Internal)*/
+        uint256 amount
     ) internal virtual override {
         require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
         _allowances[owner][spender] = amount;
@@ -189,7 +189,7 @@ abstract contract ERC20BaseTokenUpgradeable is
     function _transfer(
         address from,
         address to,
-        uint256 amount /*(ERC20Internal, ERC20ExecuteExtension)*/
+        uint256 amount
     ) internal virtual override {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(to != address(this), "NOT_TO_THIS");
@@ -240,7 +240,7 @@ abstract contract ERC20BaseTokenUpgradeable is
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
         returns (address sender)
     {
-        return ERC2771ContextUpgradeable._msgSender(); //I think the problem is here
+        return ERC2771ContextUpgradeable._msgSender();
     }
 
     function _msgData() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes calldata) {
