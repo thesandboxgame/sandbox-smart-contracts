@@ -14,8 +14,44 @@ export interface User {
   Game: Contract;
 }
 
-export const setupTest = withSnapshot(['ChildGameToken'], async () => {
-  const {gameTokenAdmin} = await getNamedAccounts();
+const setApprovalForAll = async (
+  assetConstractName: string,
+  gameContractAddress: string,
+  gameOwnerAddress: string
+) => {
+  const assetContractAsGameOwner = await ethers.getContract(
+    assetConstractName,
+    gameOwnerAddress
+  );
+  await assetContractAsGameOwner.setApprovalForAll(gameContractAddress, true);
+};
+
+const changeAssetMinter = async (
+  assetConstractName: string,
+  assetAdminAddress: string,
+  assetMinterAddress: string
+) => {
+  const assetContractAsAdmin = await ethers.getContract(
+    assetConstractName,
+    assetAdminAddress
+  );
+  await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+};
+
+export interface GameFixturesData {
+  gameToken: Contract;
+  gameTokenAsAdmin: Contract;
+  gameTokenAsMinter: Contract;
+  assetAdmin: string;
+  GameOwner: User;
+  GameEditor1: User;
+  GameEditor2: User;
+  users: User[];
+  trustedForwarder: Contract;
+}
+
+const gameFixtures = async (): Promise<GameFixturesData> => {
+  const {gameTokenAdmin, assetAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 
   const gameToken = await ethers.getContract('ChildGameToken');
@@ -27,6 +63,9 @@ export const setupTest = withSnapshot(['ChildGameToken'], async () => {
   const gameTokenAsAdmin = await ethers.getContract(
     'ChildGameToken',
     gameTokenAdmin
+  );
+  const gameTokenAsMinter = await gameToken.connect(
+    ethers.provider.getSigner(gameTokenAdmin)
   );
 
   const users = [];
@@ -52,13 +91,58 @@ export const setupTest = withSnapshot(['ChildGameToken'], async () => {
     Game: gameToken.connect(ethers.provider.getSigner(users[2].address)),
   };
 
+  setApprovalForAll(
+    'GameAsset1155',
+    gameTokenAsAdmin.address,
+    users[0].address
+  );
+
+  setApprovalForAll('GameAsset721', gameTokenAsAdmin.address, users[0].address);
+
   return {
     gameToken,
     gameTokenAsAdmin,
+    gameTokenAsMinter,
+    assetAdmin,
     GameOwner,
     GameEditor1,
     GameEditor2,
     users,
     trustedForwarder,
   };
-});
+};
+
+export const setupTest = withSnapshot(
+  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+  gameFixtures
+);
+
+const gameFixturesWithAdminGameMinter = async (): Promise<GameFixturesData> => {
+  const gameFixturesData: GameFixturesData = await gameFixtures();
+  const {gameTokenAdmin} = await getNamedAccounts();
+  const {gameTokenAsAdmin} = gameFixturesData;
+  await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+  return gameFixturesData;
+};
+
+export const setupTestWithAdminGameMinter = withSnapshot(
+  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+  gameFixturesWithAdminGameMinter
+);
+
+const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
+  const gameFixturesData: GameFixturesData = await gameFixtures();
+  const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
+  await changeAssetMinter('GameAsset1155', assetAdmin, GameOwner.address);
+  await changeAssetMinter('GameAsset721', assetAdmin, GameOwner.address);
+
+  const {gameTokenAdmin} = await getNamedAccounts();
+  await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+
+  return gameFixturesData;
+};
+
+export const setupTestWithGameOwnerMinter = withSnapshot(
+  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+  gameFixturesWithGameOwnerMinter
+);

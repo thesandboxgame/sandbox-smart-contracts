@@ -919,7 +919,7 @@ module.exports = (init, extensions) => {
 
   function preTest(test) {
     return async () => {
-      const {contractAddress, mint, deployer, users} = await init();
+      const {contractAddress, mint, grant, deployer, users} = await init();
 
       const mandatoryReceiverFactory = new ContractFactory(
         mandatoryReceiver.abi,
@@ -952,6 +952,11 @@ module.exports = (init, extensions) => {
         erc721ABI,
         ethers.provider
       );
+
+      if (grant) {
+        await grant(contract, users);
+      }
+
       const owner = users[0];
       const user0 = users[1];
       const user1 = users[2];
