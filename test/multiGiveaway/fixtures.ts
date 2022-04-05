@@ -11,7 +11,12 @@ import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getCl
 import helpers from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
-import {expectReceiptEventWithArgs, waitFor, withSnapshot} from '../utils';
+import {
+  expectReceiptEventWithArgs,
+  sequentially,
+  waitFor,
+  withSnapshot,
+} from '../utils';
 import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
@@ -44,8 +49,7 @@ export const setupTestGiveaway = withSnapshot(
       gemMinter,
       multiGiveawayAdmin,
     } = await getNamedAccounts();
-    const otherAccounts = await getUnnamedAccounts();
-    const others = otherAccounts;
+    const others = await getUnnamedAccounts();
     const sandContract = await ethers.getContract('Sand');
     const assetContract = await ethers.getContract('Asset');
     const speedGemContract = await ethers.getContract('Gem_SPEED');
@@ -102,7 +106,8 @@ export const setupTestGiveaway = withSnapshot(
       'Asset',
       assetBouncerAdmin
     );
-    async function mintTestAssets(id: number, value: number) {
+
+    async function mintTestAssets(id: number, value: number): Promise<string> {
       // Asset to be minted
       const creator = others[0];
       const packId = id;
@@ -156,64 +161,52 @@ export const setupTestGiveaway = withSnapshot(
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function mintNewAssetIds(dataSet: any) {
-      return await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataSet.map(async (claim: any) => {
-          if (claim.erc1155) {
-            const newAsset = {
-              ids: [],
-              values: [],
-              contractAddress: '',
-            };
-            const newClaim = {
-              ...claim,
-              erc1155: await Promise.all(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                claim.erc1155.map(async (asset: any, assetIndex: number) => {
-                  newAsset.ids = await Promise.all(
-                    asset.ids.map(
-                      async (assetPackId: number, index: number) =>
-                        await mintTestAssets(assetPackId, asset.values[index])
-                    )
-                  );
-                  (newAsset.values = claim.erc1155[assetIndex].values),
-                    (newAsset.contractAddress =
-                      claim.erc1155[assetIndex].contractAddress);
-                  return newAsset;
-                })
-              ),
-            };
-            return newClaim;
-          } else return claim;
-        })
-      );
+      return await sequentially(dataSet, async (claim: any) => {
+        if (claim.erc1155) {
+          const newAsset = {
+            ids: [] as string[],
+            values: [],
+            contractAddress: '',
+          };
+          return {
+            ...claim,
+            erc1155: await sequentially(
+              claim.erc1155,
+              async (asset: any, assetIndex: number) => {
+                newAsset.ids = await sequentially(
+                  asset.ids,
+                  async (assetPackId: number, index: number) =>
+                    await mintTestAssets(assetPackId, asset.values[index])
+                );
+                (newAsset.values = claim.erc1155[assetIndex].values),
+                  (newAsset.contractAddress =
+                    claim.erc1155[assetIndex].contractAddress);
+                return newAsset;
+              }
+            ),
+          };
+        } else return claim;
+      });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function assignReservedAddressToClaim(dataSet: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return dataSet.map(async (claim: any) => {
+      return dataSet.map((claim: any) => {
         claim.to = others[0];
         return claim;
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function assignTestContractAddressesToClaim(dataSet: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return dataSet.map(async (claim: any) => {
+      return dataSet.map((claim: any) => {
         if (claim.erc1155) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          claim.erc1155.map(async (asset: any) => {
+          claim.erc1155.map((asset: any) => {
             asset.contractAddress = assetContract.address;
             return asset;
           });
         }
         if (claim.erc721) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          claim.erc721.map(async (land: any) => {
+          claim.erc721.map((land: any) => {
             land.contractAddress = landContract.address;
             return land;
           });
@@ -232,7 +225,6 @@ export const setupTestGiveaway = withSnapshot(
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function setAssets(dataSet: any, amount: number) {
       dataSet[0].erc1155[0].ids = [];
       dataSet[0].erc1155[0].values = [];
@@ -243,10 +235,8 @@ export const setupTestGiveaway = withSnapshot(
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let dataWithIds0: any = JSON.parse(JSON.stringify(testData0));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let dataWithIds1: any = JSON.parse(JSON.stringify(testData1));
 
     // To ensure the same address for others[0] for all tests
@@ -272,29 +262,27 @@ export const setupTestGiveaway = withSnapshot(
       await mintTestLands();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function mintSingleAssetWithId(claim: any) {
       const newAsset = {
-        ids: [],
+        ids: [] as string[],
         values: [],
         contractAddress: '',
       };
       return {
         ...claim,
-        erc1155: await Promise.all(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          claim.erc1155.map(async (asset: any, assetIndex: number) => {
-            newAsset.ids = await Promise.all(
-              asset.ids.map(
-                async (assetPackId: number, index: number) =>
-                  await mintTestAssets(assetPackId, asset.values[index])
-              )
+        erc1155: await sequentially(
+          claim.erc1155,
+          async (asset: any, assetIndex: number) => {
+            newAsset.ids = await sequentially(
+              asset.ids,
+              async (assetPackId: number, index: number) =>
+                await mintTestAssets(assetPackId, asset.values[index])
             );
             (newAsset.values = claim.erc1155[assetIndex].values),
               (newAsset.contractAddress =
                 claim.erc1155[assetIndex].contractAddress);
             return newAsset;
-          })
+          }
         ),
       };
     }
@@ -302,10 +290,8 @@ export const setupTestGiveaway = withSnapshot(
     if (mintSingleAsset) {
       await mintTestLands();
       // Set up blank testData for thousands of users
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const emptyData: any = [];
       for (let i = 0; i < 1; i++) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const claim: any = {
           to: others[0],
           erc1155: [
@@ -329,7 +315,6 @@ export const setupTestGiveaway = withSnapshot(
         emptyData.push(await mintSingleAssetWithId(claim));
       }
       for (let i = 1; i < mintSingleAsset; i++) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const claim: any = {
           to: others[0],
           erc1155: [

@@ -1,6 +1,6 @@
 import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
 import {expect} from '../../chai-setup';
-import {waitFor} from '../../utils';
+import {sequentially, waitFor} from '../../utils';
 import {setupLand} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
@@ -332,17 +332,15 @@ describe('PolygonLand.sol', function () {
         const numberOfTokens = mintingData[0]
           .map((elem) => elem * elem)
           .reduce((a, b) => a + b, 0);
-        await Promise.all(
-          [...Array(numberOfLands).keys()].map((idx) => {
-            waitFor(
-              landMinter.Land.mintQuad(
-                landHolder.address,
-                ...mintingData.map((x) => x[idx]),
-                bytes
-              )
-            );
-          })
-        );
+        await sequentially([...Array(numberOfLands).keys()], async (idx) => {
+          waitFor(
+            landMinter.Land.mintQuad(
+              landHolder.address,
+              ...mintingData.map((x) => x[idx]),
+              bytes
+            )
+          );
+        });
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(
           numberOfTokens
         );
@@ -559,16 +557,14 @@ describe('PolygonLand.sol', function () {
           const numberOfTokens = mintingData[0]
             .map((elem) => elem * elem)
             .reduce((a, b) => a + b, 0);
-          await Promise.all(
-            [...Array(numberOfLands).keys()].map((idx) => {
-              waitFor(
-                landMinter.Land.mintQuad(
-                  landHolder.address,
-                  ...mintingData.map((x) => x[idx]),
-                  bytes
-                )
-              );
-            })
+          await sequentially([...Array(numberOfLands).keys()], (idx) =>
+            waitFor(
+              landMinter.Land.mintQuad(
+                landHolder.address,
+                ...mintingData.map((x) => x[idx]),
+                bytes
+              )
+            )
           );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(
             numberOfTokens
@@ -1138,16 +1134,14 @@ describe('PolygonLand.sol', function () {
         const numberOfTokens = mintingData[0]
           .map((elem) => elem * elem)
           .reduce((a, b) => a + b, 0);
-        await Promise.all(
-          [...Array(numberOfLands).keys()].map((idx) => {
-            waitFor(
-              landMinter.Land.mintQuad(
-                landHolder.address,
-                ...mintingData.map((x) => x[idx]),
-                bytes
-              )
-            );
-          })
+        await sequentially([...Array(numberOfLands).keys()], (idx) =>
+          waitFor(
+            landMinter.Land.mintQuad(
+              landHolder.address,
+              ...mintingData.map((x) => x[idx]),
+              bytes
+            )
+          )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(
           numberOfTokens
@@ -1230,16 +1224,14 @@ describe('PolygonLand.sol', function () {
         const numberOfTokens = mintingData[0]
           .map((elem) => elem * elem)
           .reduce((a, b) => a + b, 0);
-        await Promise.all(
-          [...Array(numberOfLands).keys()].map((idx) => {
-            waitFor(
-              landMinter.Land.mintQuad(
-                landHolder.address,
-                ...mintingData.map((x) => x[idx]),
-                bytes
-              )
-            );
-          })
+        await sequentially([...Array(numberOfLands).keys()], (idx) =>
+          waitFor(
+            landMinter.Land.mintQuad(
+              landHolder.address,
+              ...mintingData.map((x) => x[idx]),
+              bytes
+            )
+          )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(
           numberOfTokens
