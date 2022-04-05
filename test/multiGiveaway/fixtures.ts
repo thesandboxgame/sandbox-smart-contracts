@@ -8,7 +8,7 @@ import {BigNumber} from 'ethers';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
-import helpers from '../../lib/merkleTreeHelper';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
 import {
@@ -107,7 +107,7 @@ export const setupTestGiveaway = withSnapshot(
       assetBouncerAdmin
     );
 
-    async function mintTestAssets(id: number, value: number): Promise<string> {
+    async function mintTestAssets(id: string, value: number): Promise<string> {
       // Asset to be minted
       const creator = others[0];
       const packId = id;
@@ -161,27 +161,27 @@ export const setupTestGiveaway = withSnapshot(
       }
     }
 
-    async function mintNewAssetIds(dataSet: any) {
-      return await sequentially(dataSet, async (claim: any) => {
+    async function mintNewAssetIds(dataSet: MultiClaim[]) {
+      return await sequentially(dataSet, async (claim) => {
         if (claim.erc1155) {
           const newAsset = {
             ids: [] as string[],
-            values: [],
+            values: [] as number[],
             contractAddress: '',
           };
           return {
             ...claim,
             erc1155: await sequentially(
               claim.erc1155,
-              async (asset: any, assetIndex: number) => {
+              async (asset, assetIndex: number) => {
                 newAsset.ids = await sequentially(
                   asset.ids,
-                  async (assetPackId: number, index: number) =>
+                  async (assetPackId: string, index: number) =>
                     await mintTestAssets(assetPackId, asset.values[index])
                 );
-                (newAsset.values = claim.erc1155[assetIndex].values),
-                  (newAsset.contractAddress =
-                    claim.erc1155[assetIndex].contractAddress);
+                newAsset.values = claim.erc1155[assetIndex].values;
+                newAsset.contractAddress =
+                  claim.erc1155[assetIndex].contractAddress;
                 return newAsset;
               }
             ),
@@ -190,23 +190,23 @@ export const setupTestGiveaway = withSnapshot(
       });
     }
 
-    function assignReservedAddressToClaim(dataSet: any) {
-      return dataSet.map((claim: any) => {
+    function assignReservedAddressToClaim(dataSet: MultiClaim[]) {
+      return dataSet.map((claim) => {
         claim.to = others[0];
         return claim;
       });
     }
 
-    function assignTestContractAddressesToClaim(dataSet: any) {
-      return dataSet.map((claim: any) => {
+    function assignTestContractAddressesToClaim(dataSet: MultiClaim[]) {
+      return dataSet.map((claim) => {
         if (claim.erc1155) {
-          claim.erc1155.map((asset: any) => {
+          claim.erc1155.map((asset) => {
             asset.contractAddress = assetContract.address;
             return asset;
           });
         }
         if (claim.erc721) {
-          claim.erc721.map((land: any) => {
+          claim.erc721.map((land) => {
             land.contractAddress = landContract.address;
             return land;
           });
@@ -225,19 +225,19 @@ export const setupTestGiveaway = withSnapshot(
       });
     }
 
-    function setAssets(dataSet: any, amount: number) {
+    function setAssets(dataSet: MultiClaim[], amount: number) {
       dataSet[0].erc1155[0].ids = [];
       dataSet[0].erc1155[0].values = [];
       for (let i = 0; i < amount; i++) {
         // a big id to avoid collision with other setups
-        dataSet[0].erc1155[0].ids.push(i + 1000);
+        dataSet[0].erc1155[0].ids.push((i + 1000).toString());
         dataSet[0].erc1155[0].values.push(5);
       }
     }
 
-    let dataWithIds0: any = JSON.parse(JSON.stringify(testData0));
+    let dataWithIds0 = JSON.parse(JSON.stringify(testData0));
 
-    let dataWithIds1: any = JSON.parse(JSON.stringify(testData1));
+    let dataWithIds1 = JSON.parse(JSON.stringify(testData1));
 
     // To ensure the same address for others[0] for all tests
     assignReservedAddressToClaim(dataWithIds0);
@@ -252,35 +252,33 @@ export const setupTestGiveaway = withSnapshot(
     }
 
     if (mint) {
-      const claimsWithAssetIds0 = await mintNewAssetIds(dataWithIds0);
-      dataWithIds0 = claimsWithAssetIds0;
+      dataWithIds0 = await mintNewAssetIds(dataWithIds0);
       if (multi) {
-        const claimsWithAssetIds1 = await mintNewAssetIds(dataWithIds1);
-        dataWithIds1 = claimsWithAssetIds1;
+        dataWithIds1 = await mintNewAssetIds(dataWithIds1);
       }
 
       await mintTestLands();
     }
 
-    async function mintSingleAssetWithId(claim: any) {
+    async function mintSingleAssetWithId(claim: MultiClaim) {
       const newAsset = {
         ids: [] as string[],
-        values: [],
+        values: [] as number[],
         contractAddress: '',
       };
       return {
         ...claim,
         erc1155: await sequentially(
           claim.erc1155,
-          async (asset: any, assetIndex: number) => {
+          async (asset, assetIndex: number) => {
             newAsset.ids = await sequentially(
               asset.ids,
-              async (assetPackId: number, index: number) =>
+              async (assetPackId: string, index: number) =>
                 await mintTestAssets(assetPackId, asset.values[index])
             );
-            (newAsset.values = claim.erc1155[assetIndex].values),
-              (newAsset.contractAddress =
-                claim.erc1155[assetIndex].contractAddress);
+            newAsset.values = claim.erc1155[assetIndex].values;
+            newAsset.contractAddress =
+              claim.erc1155[assetIndex].contractAddress;
             return newAsset;
           }
         ),
@@ -290,13 +288,13 @@ export const setupTestGiveaway = withSnapshot(
     if (mintSingleAsset) {
       await mintTestLands();
       // Set up blank testData for thousands of users
-      const emptyData: any = [];
+      const emptyData = [];
       for (let i = 0; i < 1; i++) {
-        const claim: any = {
+        const claim: MultiClaim = {
           to: others[0],
           erc1155: [
             {
-              ids: [i],
+              ids: [i.toString()],
               values: [1],
               contractAddress: assetContract.address,
             },
@@ -315,7 +313,7 @@ export const setupTestGiveaway = withSnapshot(
         emptyData.push(await mintSingleAssetWithId(claim));
       }
       for (let i = 1; i < mintSingleAsset; i++) {
-        const claim: any = {
+        const claim = {
           to: others[0],
           erc1155: [
             {
