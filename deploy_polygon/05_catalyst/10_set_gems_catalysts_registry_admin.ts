@@ -13,7 +13,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'DEFAULT_ADMIN_ROLE'
   );
 
-  if (deployer.toLowerCase() !== gemsCatalystsRegistryAdmin.toLowerCase()) {
+  const isDeployerAdmin = await read(
+    'PolygonGemsCatalystsRegistry',
+    'hasRole',
+    adminRole,
+    deployer
+  );
+
+  const isGemsCatalystsRegistryAdmin = await read(
+    'PolygonGemsCatalystsRegistry',
+    'hasRole',
+    adminRole,
+    gemsCatalystsRegistryAdmin
+  );
+
+  if (
+    isDeployerAdmin &&
+    !isGemsCatalystsRegistryAdmin &&
+    deployer.toLowerCase() !== gemsCatalystsRegistryAdmin.toLowerCase()
+  ) {
     await execute(
       'PolygonGemsCatalystsRegistry',
       {from: deployer, log: true},

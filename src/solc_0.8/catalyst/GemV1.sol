@@ -14,11 +14,11 @@ contract GemV1 is IGem, ERC20UpgradableToken {
         address trustedForwarder,
         address admin,
         uint16 _gemId,
-        address operator
+        address approver
     ) public initializer {
         __ERC20UpgradableToken_init(name, symbol, trustedForwarder, admin);
         gemId = _gemId;
-        _grantRole(APPROVER_ROLE, operator);
+        _grantRole(APPROVER_ROLE, approver);
     }
 
     /// @notice Approve `spender` to transfer `amount` tokens from `owner`.

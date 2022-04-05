@@ -10,6 +10,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const GemsCatalystsRegistry = await deployments.get(
     'PolygonGemsCatalystsRegistry'
   );
+  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
+    'TRUSTED_FORWARDER_V2'
+  );
 
   const {catalystAdmin, upgradeAdmin, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
@@ -25,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           args: [
             `Sandbox ${catalyst.symbol} Catalysts`, //name
             catalyst.symbol, //symbol
-            deployer, //trusted forwarder
+            TRUSTED_FORWARDER_V2?.address, //trusted forwarder
             catalystAdmin, //admin
             catalyst.maxGems, //maxGems
             catalyst.catalystId, //catalystId
