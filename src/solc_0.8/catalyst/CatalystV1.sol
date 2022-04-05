@@ -2,7 +2,6 @@
 pragma solidity 0.8.2;
 
 import "../common/interfaces/IAssetAttributesRegistry.sol";
-//import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
 import "../common/BaseWithStorage/ERC20/ERC20UpgradableToken.sol";
 import "./interfaces/ICatalyst.sol";
 
@@ -21,13 +20,13 @@ contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
         uint8 maxGems,
         uint16 _catalystId,
         IAttributes attributes,
-        address operator
+        address approver
     ) public initializer {
         __ERC20UpgradableToken_init(name, symbol, trustedForwarder, admin);
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;
-        _grantRole(APPROVER_ROLE, operator);
+        _grantRole(APPROVER_ROLE, approver);
     }
 
     /// @notice Used by Admin to update the attributes contract.

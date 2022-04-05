@@ -10,6 +10,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonGemsCatalystsRegistry'
   );
 
+  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
+    'TRUSTED_FORWARDER_V2'
+  );
+
   const {gemMinter, deployer, upgradeAdmin} = await getNamedAccounts();
 
   for (const gem of gems) {
@@ -25,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           args: [
             `Sandbox ${gem.symbol} Gems`,
             gem.symbol,
-            deployer, //trustedforwarder
+            TRUSTED_FORWARDER_V2?.address, //trustedforwarder
             gemMinter,
             gem.gemId,
             GemsCatalystsRegistry.address,

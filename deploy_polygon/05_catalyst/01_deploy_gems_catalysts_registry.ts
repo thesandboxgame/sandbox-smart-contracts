@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     contract: `GemsCatalystsRegistry`,
     proxy: {
       owner: upgradeAdmin,
-      proxyContract: 'OpenZeppelinTransparentProxy',
+      proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initV1',
         args: [TRUSTED_FORWARDER.address, deployer],
