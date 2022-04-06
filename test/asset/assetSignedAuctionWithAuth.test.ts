@@ -9,7 +9,8 @@ import {transferSand} from '../polygon/catalyst/utils';
 import BN from 'bn.js';
 import crypto from 'crypto';
 import {BigNumber, constants} from 'ethers';
-import {assert, expect} from 'chai';
+import {assert} from 'chai';
+import {expect} from '../../chai-setup';
 
 const zeroAddress = constants.AddressZero;
 
@@ -446,12 +447,11 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should be able to claim seller offer in ETH', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {Asset, users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
-
+      PolygonAssetERC1155,
+      users,
+      mintAsset,
+      assetSignedAuctionAuthContract,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -540,10 +540,9 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
+    await PolygonAssetERC1155.connect(
+      ethers.provider.getSigner(users[0].address)
+    ).setApprovalForAll(assetSignedAuctionAuthContract.address, true);
 
     const prevSellerEtherBalance = await ethers.provider.getBalance(
       users[0].address
@@ -574,13 +573,13 @@ describe('assetSignedAuctionWithAuth', function () {
     );
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[0].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[0].address], [tokenId])
       ).toString(),
       '19'
     );
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[1].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[1].address], [tokenId])
       ).toString(),
       '1'
     );
@@ -588,11 +587,11 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should NOT be able to claim offer if signature mismatches', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+      users,
+      mintAsset,
+      PolygonAssetERC1155,
+      assetSignedAuctionAuthContract,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -680,10 +679,9 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
+    await PolygonAssetERC1155.connect(
+      ethers.provider.getSigner(users[0].address)
+    ).setApprovalForAll(assetSignedAuctionAuthContract.address, true);
 
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
@@ -825,11 +823,12 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should be able to claim seller offer in SAND', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {Asset, users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract, Sand} = assetSignedAuctionFixture;
+      PolygonAssetERC1155,
+      users,
+      mintAsset,
+      assetSignedAuctionAuthContract,
+      Sand,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -927,10 +926,10 @@ describe('assetSignedAuctionWithAuth', function () {
       BigNumber.from('5000000000000000000')
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
+    await PolygonAssetERC1155.connect(
+      ethers.provider.getSigner(users[0].address)
+    ).setApprovalForAll(assetSignedAuctionAuthContract.address, true);
+
     await sandAsUser.approve(
       assetSignedAuctionAuthContract.address,
       '5000000000000000000'
@@ -954,13 +953,13 @@ describe('assetSignedAuctionWithAuth', function () {
 
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[0].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[0].address], [tokenId])
       ).toString(),
       '19'
     );
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[1].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[1].address], [tokenId])
       ).toString(),
       '1'
     );
@@ -975,11 +974,11 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should be able to claim seller offer with basic signature', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {Asset, users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+      PolygonAssetERC1155,
+      users,
+      mintAsset,
+      assetSignedAuctionAuthContract,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -1052,10 +1051,9 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
+    await PolygonAssetERC1155.connect(
+      ethers.provider.getSigner(users[0].address)
+    ).setApprovalForAll(assetSignedAuctionAuthContract.address, true);
 
     const prevSellerEtherBalance = await ethers.provider.getBalance(
       users[0].address
@@ -1086,13 +1084,13 @@ describe('assetSignedAuctionWithAuth', function () {
     );
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[0].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[0].address], [tokenId])
       ).toString(),
       '19'
     );
     assert.equal(
       new BN(
-        await Asset.balanceOfBatch([users[1].address], [tokenId])
+        await PolygonAssetERC1155.balanceOfBatch([users[1].address], [tokenId])
       ).toString(),
       '1'
     );
@@ -1100,11 +1098,11 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should be able to cancel offer', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+      PolygonAssetERC1155,
+      users,
+      mintAsset,
+      assetSignedAuctionAuthContract,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -1179,10 +1177,9 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
+    await PolygonAssetERC1155.connect(
+      ethers.provider.getSigner(users[0].address)
+    ).setApprovalForAll(assetSignedAuctionAuthContract.address, true);
 
     expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig(
@@ -1204,11 +1201,11 @@ describe('assetSignedAuctionWithAuth', function () {
 
   it('should NOT be able to claim offer without sending ETH', async function () {
     const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
-    const {Asset, users, mintAsset} = assetFixture;
-    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+      PolygonAssetERC1155,
+      users,
+      mintAsset,
+      assetSignedAuctionAuthContract,
+    } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
 
     const seller = users[0].address;
@@ -1283,7 +1280,10 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await Asset.setApprovalForAll(assetSignedAuctionAuthContract.address, true);
+    await PolygonAssetERC1155.setApprovalForAll(
+      assetSignedAuctionAuthContract.address,
+      true
+    );
 
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig({
