@@ -10,9 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonGemsCatalystsRegistry'
   );
 
-  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
-    'TRUSTED_FORWARDER_V2'
-  );
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
 
   const {gemMinter, deployer, upgradeAdmin} = await getNamedAccounts();
 
@@ -23,13 +21,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       log: true,
       proxy: {
         owner: upgradeAdmin,
-        proxyContract: 'OpenZeppelinTransparentProxy',
+        proxyContract: 'OptimizedTransparentProxy',
         execute: {
           methodName: '__GemV1_init',
           args: [
             `Sandbox ${gem.symbol} Gems`,
             gem.symbol,
-            TRUSTED_FORWARDER_V2?.address, //trustedforwarder
+            TRUSTED_FORWARDER_V2.address, //trustedforwarder
             gemMinter,
             gem.gemId,
             GemsCatalystsRegistry.address,
