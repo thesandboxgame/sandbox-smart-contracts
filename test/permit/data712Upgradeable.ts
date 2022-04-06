@@ -10,7 +10,7 @@ type Contract = {
   address: string;
 };
 
-type Data712 = {
+type Data712Upgradeable = {
   types: {
     EIP712Domain: [
       {
@@ -55,18 +55,21 @@ type Data712 = {
   };
   primaryType: 'Permit';
   domain: {
-    name: 'The Sandbox';
-    version: '1';
-    chainId: '31337';
+    name: string;
+    version: string;
+    chainId: number;
     verifyingContract: string;
   };
   message: Message;
 };
 
-export const data712 = function (
+export const data712Upgradeable = function (
+  name: string,
+  version: string,
+  chainId: number,
   verifyingContract: Contract,
   message: Message
-): Data712 {
+): Data712Upgradeable {
   return {
     types: {
       EIP712Domain: [
@@ -112,9 +115,9 @@ export const data712 = function (
     },
     primaryType: 'Permit',
     domain: {
-      name: 'The Sandbox',
-      version: '1',
-      chainId: '31337',
+      name: name,
+      version: version,
+      chainId: chainId,
       verifyingContract: verifyingContract.address,
     },
     message: message,

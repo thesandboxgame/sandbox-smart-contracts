@@ -2,19 +2,19 @@
 pragma solidity 0.8.2;
 
 import "./ERC20BaseTokenUpgradeable.sol";
-import "../WithPermitUpgradable.sol";
+import "../WithPermitUpgradeable.sol";
 import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
 
-contract ERC20UpgradableToken is ERC677Extension, WithPermitUpgradable, ERC20BaseTokenUpgradeable {
-    function __ERC20UpgradableToken_init(
+contract ERC20TokenUpgradeable is ERC677Extension, WithPermitUpgradeable, ERC20BaseTokenUpgradeable {
+    function __ERC20TokenUpgradeable_init(
         string memory name,
         string memory symbol,
         address trustedForwarder,
         address admin
     ) public initializer {
         __ERC20BaseTokenUpgradeable_init(name, symbol, trustedForwarder, admin);
-        __WithPermitUpgradable_init("The Sandbox");
+        __WithPermitUpgradeable_init("The Sandbox");
     }
 
     function mint(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
