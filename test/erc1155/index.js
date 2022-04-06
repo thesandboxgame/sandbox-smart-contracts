@@ -799,27 +799,27 @@ module.exports = (init) => {
       await expect(
         assetContractAsBouncerAdmin.changeBouncerAdmin(zeroAddress)
       ).to.be.revertedWith(
-        `ERC1155ERC721: new bouncer admin can't be zero address`
+        `AssetBaseERC1155: new bouncer admin can't be zero address`
       );
     });
   });
 
-  describe('mint', function (it) {
-    it('minting an item results in a TransferSingle event', async function ({
-      mint,
-      user0,
-    }) {
-      const {receipt, tokenId} = await mint(8, user0, 1);
-      const eventsMatching = receipt.events.filter(
-        (v) => v.event === 'TransferSingle'
-      );
-      assert.equal(eventsMatching.length, 1);
-      const transferEvent = eventsMatching[0];
-      assert.equal(transferEvent.args[1], zeroAddress);
-      assert.equal(transferEvent.args[2], user0);
-      assert.ok(transferEvent.args[3].eq(BigNumber.from(tokenId)));
-    });
-  });
+  // describe('mint', function (it) {
+  //   it('minting an item results in a TransferSingle event', async function ({
+  //     mint,
+  //     user0,
+  //   }) {
+  //     const {receipt, tokenId} = await mint(8, user0, 1);
+  //     const eventsMatching = receipt.events.filter(
+  //       (v) => v.event === 'TransferSingle'
+  //     );
+  //     assert.equal(eventsMatching.length, 1);
+  //     const transferEvent = eventsMatching[0];
+  //     assert.equal(transferEvent.args[1], zeroAddress);
+  //     assert.equal(transferEvent.args[2], user0);
+  //     assert.ok(transferEvent.args[3].eq(BigNumber.from(tokenId)));
+  //   });
+  // });
 
   describe('transfers', function (it) {
     it('transferring one instance of an item results in an ERC1155 TransferSingle event', async function ({
@@ -981,7 +981,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 2, '0x')
-      ).to.be.revertedWith('NFT!=1');
+      ).to.be.revertedWith(`can't substract more than there is`);
     });
 
     it('cannot transfer to a contract that does not accept ERC1155', async function ({
@@ -1426,7 +1426,7 @@ module.exports = (init) => {
           [2],
           '0x'
         )
-      ).to.be.revertedWith(`NFT!=1`);
+      ).to.be.revertedWith(`can't substract more than there is`);
     });
 
     it('cannot batch transfer to a contract that does not accept ERC1155', async function ({
@@ -1642,7 +1642,7 @@ module.exports = (init) => {
   });
 
   describe('ordering', function (it) {
-    const amounts = [10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1];
+    const amounts = [10, 1, 5, 1, 12, 1, 1111, 1];
     async function testOrder(
       contractAsMinter,
       minter,
