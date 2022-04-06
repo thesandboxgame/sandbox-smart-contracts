@@ -28,13 +28,21 @@ const polygonAssetFixtures = async function () {
 
   const {assetBouncerAdmin} = await getNamedAccounts();
 
+  const Sand = await ethers.getContract('SandBaseToken');
+  const Asset = await ethers.getContract('Asset', assetBouncerAdmin);
   const PolygonAssetERC1155 = await ethers.getContract(
     'PolygonAssetERC1155',
     assetBouncerAdmin
   );
   await waitFor(PolygonAssetERC1155.setBouncer(minter, true));
 
-  const Asset = await ethers.getContract('Asset', minter);
+  const assetSignedAuctionAuthContract = await ethers.getContract(
+    'AssetSignedAuctionAuth'
+  );
+
+  // const Asset = await ethers.getContract('Asset', minter);
+  await waitFor(Asset.setBouncer(minter, true));
+
   const AssetERC1155Tunnel = await ethers.getContract('AssetERC1155Tunnel');
   const PolygonAssetERC1155Tunnel = await ethers.getContract(
     'PolygonAssetERC1155Tunnel'
@@ -98,10 +106,12 @@ const polygonAssetFixtures = async function () {
   const users = await setupUsers(otherAccounts, {Asset});
 
   return {
+    Sand,
     Asset,
     PolygonAssetERC1155,
     AssetERC1155Tunnel,
     PolygonAssetERC1155Tunnel,
+    assetSignedAuctionAuthContract,
     users,
     minter,
     mintAsset,
@@ -174,7 +184,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       PolygonAssetERC1155,
     });
 
-    await assetAdmin.AssetERC1155.setPredicate(AssetERC1155Tunnel.address);
+    await assetAdmin.AssetERC1155.setPredicate(MockAssetERC1155Tunnel.address);
 
     await deployer.FxRoot.setFxChild(FxChild.address);
 
