@@ -15,7 +15,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'PolygonGemsCatalystsRegistry'
   );
-  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER_V2');
   const sandContract: Contract = await ethers.getContract('PolygonSand');
   const powerGem: Contract = await ethers.getContract('PolygonGem_POWER');
   const defenseGem: Contract = await ethers.getContract('PolygonGem_DEFENSE');
@@ -51,7 +51,7 @@ export const gemsAndCatalystsFixtures = async () => {
   await deployments.deploy(`PolygonGem_Example`, {
     contract: 'GemV1',
     from: gemOwner,
-    log: true, //put initializer
+    log: true,
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OptimizedTransparentProxy',
@@ -61,7 +61,7 @@ export const gemsAndCatalystsFixtures = async () => {
           'Gem_Example',
           'Gem_Example',
           deployer,
-          gemMinter, //trusted forwarder
+          gemMinter,
           exampleGemId,
           gemsCatalystsRegistry.address,
         ],
@@ -168,11 +168,8 @@ export const gemsAndCatalystsFixtures = async () => {
   await gemsCatalystsRegistry
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
     .grantRole(superOperator, gemsCatalystsRegistrySuperOperator);
-  //.setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
 
-  console.log('inside fixture the owner is:');
-  console.log(catalystOwner);
-  const gemsCatalystsRegistryAsCataystOwner = gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsCatalystOwner = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(catalystOwner)
   );
 
@@ -188,7 +185,7 @@ export const gemsAndCatalystsFixtures = async () => {
     ethers.provider.getSigner(gemsCatalystsRegistryAdmin)
   );
 
-  const gemsCatalystsRegistryAsCataystMinter = gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsCatalystMinter = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(catalystMinter)
   );
 
@@ -225,11 +222,11 @@ export const gemsAndCatalystsFixtures = async () => {
     catalystOwner,
     gemOwner,
     user3,
-    gemsCatalystsRegistryAsCataystOwner,
+    gemsCatalystsRegistryAsCatalystOwner,
     gemsCatalystsRegistryAsRegistrySuperOperator,
     gemsCatalystsRegistryAsUser3,
     gemsCatalystsRegistryAsRegAdmin,
-    gemsCatalystsRegistryAsCataystMinter,
+    gemsCatalystsRegistryAsCatalystMinter,
     gemsCatalystsRegistryAsGemOwner,
     gemsCatalystsRegistryAsGemMinter,
     gemsCatalystsRegistryAsDeployer,

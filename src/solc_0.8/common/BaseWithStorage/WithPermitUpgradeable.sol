@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/draft-ERC20Permit.sol)
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-abstract contract WithPermitUpgradable is EIP712Upgradeable, IERC20Permit {
+abstract contract WithPermitUpgradeable is EIP712Upgradeable, IERC20PermitUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     mapping(address => CountersUpgradeable.Counter) private _nonces;
@@ -16,7 +15,7 @@ abstract contract WithPermitUpgradable is EIP712Upgradeable, IERC20Permit {
     bytes32 public constant _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
-    function __WithPermitUpgradable_init(string memory name) internal onlyInitializing {
+    function __WithPermitUpgradeable_init(string memory name) internal onlyInitializing {
         __EIP712_init_unchained(name, "1");
     }
 

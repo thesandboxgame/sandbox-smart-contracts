@@ -2,10 +2,10 @@
 pragma solidity 0.8.2;
 
 import "../common/interfaces/IAssetAttributesRegistry.sol";
-import "../common/BaseWithStorage/ERC20/ERC20UpgradableToken.sol";
+import "../common/BaseWithStorage/ERC20/ERC20TokenUpgradeable.sol";
 import "./interfaces/ICatalyst.sol";
 
-contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
+contract CatalystV1 is ICatalyst, ERC20TokenUpgradeable {
     uint16 public override catalystId;
     uint8 internal _maxGems;
     bytes32 public constant APPROVER_ROLE = keccak256("APPROVER_ROLE");
@@ -22,7 +22,7 @@ contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
         IAttributes attributes,
         address approver
     ) public initializer {
-        __ERC20UpgradableToken_init(name, symbol, trustedForwarder, admin);
+        __ERC20TokenUpgradeable_init(name, symbol, trustedForwarder, admin);
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;
