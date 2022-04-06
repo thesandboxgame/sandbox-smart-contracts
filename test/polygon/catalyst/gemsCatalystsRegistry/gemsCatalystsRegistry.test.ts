@@ -30,30 +30,25 @@ describe('GemsCatalystsRegistry', function () {
 
   it('burnCatalyst should burn 2 common catalysts from catalystOwner account', async function () {
     const {
-      gemsCatalystsRegistryAsCataystOwner,
+      gemsCatalystsRegistryAsCatalystOwner,
       commonCatalyst,
       catalystOwner,
     } = await setupGemsAndCatalysts();
     const catalystId = await commonCatalyst.catalystId();
     const totalSupplyBefore = await commonCatalyst.totalSupply();
-    console.log('total supply before burn');
-    console.log(totalSupplyBefore);
     const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystOwner);
-    console.log('catalist owner inside test');
-    console.log(catalystOwner);
 
     //approving all
-    await gemsCatalystsRegistryAsCataystOwner.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsCatalystOwner.setGemsAndCatalystsMaxAllowance();
 
     const burnAmount = BigNumber.from('2');
-    const receipt = await waitFor(
-      gemsCatalystsRegistryAsCataystOwner.burnCatalyst(
+    await waitFor(
+      gemsCatalystsRegistryAsCatalystOwner.burnCatalyst(
         catalystOwner,
         catalystId,
         burnAmount
       )
     );
-    console.log(receipt);
     const totalSupplyAfter = await commonCatalyst.totalSupply();
     const balanceAfterBurning = await commonCatalyst.balanceOf(catalystOwner);
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
@@ -76,7 +71,7 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
-    await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
 
     expect(
       await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
@@ -159,7 +154,7 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
-    await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
     await gemsCatalystsRegistryAsUser3.revokeGemsandCatalystsMaxAllowance();
 
     expect(
@@ -226,7 +221,7 @@ describe('GemsCatalystsRegistry', function () {
 
   it('burnCatalyst should fail for insufficient amount', async function () {
     const {
-      gemsCatalystsRegistryAsCataystMinter,
+      gemsCatalystsRegistryAsCatalystMinter,
       commonCatalyst,
       catalystMinter,
     } = await setupGemsAndCatalysts();
@@ -234,10 +229,10 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('200');
 
     //approving
-    await gemsCatalystsRegistryAsCataystMinter.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsCatalystMinter.setGemsAndCatalystsMaxAllowance();
 
     await expect(
-      gemsCatalystsRegistryAsCataystMinter.burnCatalyst(
+      gemsCatalystsRegistryAsCatalystMinter.burnCatalyst(
         catalystMinter,
         catalystId,
         burnAmount
@@ -255,7 +250,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('200');
 
     //making approve
-    await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
 
     await expect(
       gemsCatalystsRegistryAsUser3.burnGem(user3, catalystId, burnAmount)
@@ -274,7 +269,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('3');
 
     //approving
-    await gemsCatalystsRegistryAsGemOwner.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
       gemsCatalystsRegistryAsGemOwner.burnGem(gemOwner, gemId, burnAmount)
@@ -318,7 +313,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('200');
 
     //making approve
-    await gemsCatalystsRegistryAsGemMinter.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsGemMinter.setGemsAndCatalystsMaxAllowance();
 
     await expect(
       gemsCatalystsRegistryAsGemMinter.burnGem(gemMinter, gemId, burnAmount)
@@ -335,7 +330,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('200');
 
     //approving
-    gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+    gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
 
     expect(
       gemsCatalystsRegistryAsUser3.burnGem(user3, gemId, burnAmount)
@@ -423,7 +418,7 @@ describe('GemsCatalystsRegistry', function () {
     } = await setupGemsAndCatalysts();
     await expect(
       gemsCatalystsRegistryAsUser3.addGemsAndCatalysts([gemExample.address], [])
-    ).to.be.revertedWith('NOT_AUTHORIZED');
+    ).to.be.reverted;
   });
 
   it('addGemsAndCatalysts should fail if too many G&C', async function () {
@@ -431,7 +426,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       gemsCatalystsRegistryAsRegAdmin,
       gemOwner,
-      deployer,
+      trustedForwarder,
       upgradeAdmin,
     } = await setupGemsAndCatalysts();
 
@@ -442,13 +437,13 @@ describe('GemsCatalystsRegistry', function () {
       log: true,
       proxy: {
         owner: upgradeAdmin,
-        proxyContract: 'OpenZeppelinTransparentProxy',
+        proxyContract: 'OptimizedTransparentProxy',
         execute: {
           methodName: '__GemV1_init',
           args: [
             `Gem_MaxLimit`,
             `Gem_MaxLimit`,
-            deployer, //trustedforwarder
+            trustedForwarder.address,
             gemOwner,
             255,
             gemsCatalystsRegistry.address,
@@ -473,8 +468,8 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       gemsCatalystsRegistryAsRegAdmin,
       gemOwner,
-      deployer,
       upgradeAdmin,
+      trustedForwarder,
     } = await setupGemsAndCatalysts();
 
     const addresses = [];
@@ -484,13 +479,13 @@ describe('GemsCatalystsRegistry', function () {
       log: true,
       proxy: {
         owner: upgradeAdmin,
-        proxyContract: 'OpenZeppelinTransparentProxy',
+        proxyContract: 'OptimizedTransparentProxy',
         execute: {
           methodName: '__GemV1_init',
           args: [
             `Gem_MaxLimit`,
             `Gem_MaxLimit`,
-            deployer, //trustedforwarder
+            trustedForwarder.address,
             gemOwner,
             255,
             gemsCatalystsRegistry.address,
@@ -525,7 +520,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('15555');
 
     //approving
-    await gemsCatalystsRegistryAsGemOwner.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
       gemsCatalystsRegistryAsGemOwner.burnDifferentGems(
@@ -554,7 +549,7 @@ describe('GemsCatalystsRegistry', function () {
 
   it('burnDifferentCatalysts for two different catalyst tokens', async function () {
     const {
-      gemsCatalystsRegistryAsCataystOwner,
+      gemsCatalystsRegistryAsCatalystOwner,
       rareCatalyst,
       commonCatalyst,
       catalystOwner,
@@ -572,10 +567,10 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmount = BigNumber.from('100');
 
     //approving
-    await gemsCatalystsRegistryAsCataystOwner.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsCatalystOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
-      gemsCatalystsRegistryAsCataystOwner.burnDifferentCatalysts(
+      gemsCatalystsRegistryAsCatalystOwner.burnDifferentCatalysts(
         catalystOwner,
         [rareCatalystId, commonCatalystId],
         burnAmount
@@ -619,7 +614,7 @@ describe('GemsCatalystsRegistry', function () {
     const burnAmounts = [BigNumber.from('4'), BigNumber.from('6')];
 
     //approving
-    gemsCatalystsRegistryAsGemOwner.setGemsandCatalystsMaxAllowance();
+    gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
       gemsCatalystsRegistryAsGemOwner.batchBurnGems(
@@ -648,14 +643,13 @@ describe('GemsCatalystsRegistry', function () {
 
   it('Change trusted forwarder ', async function () {
     const {
-      gemsCatalystsRegistryAsCataystMinter,
+      gemsCatalystsRegistryAsCatalystMinter,
       gemsCatalystsRegistryAsDeployer,
       trustedForwarder,
       powerGem,
     } = await setupGemsAndCatalysts();
     const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
-    console.log('initial forwarder ' + initialTrustedForwarder);
 
     await waitFor(
       gemsCatalystsRegistryAsDeployer.setTrustedForwarder(powerGem.address)
@@ -663,10 +657,9 @@ describe('GemsCatalystsRegistry', function () {
 
     const newTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
     expect(newTrustedForwarder).to.equal(powerGem.address);
-    console.log('new forwarder ' + newTrustedForwarder);
 
     await expect(
-      gemsCatalystsRegistryAsCataystMinter.setTrustedForwarder(
+      gemsCatalystsRegistryAsCatalystMinter.setTrustedForwarder(
         trustedForwarder.address
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');

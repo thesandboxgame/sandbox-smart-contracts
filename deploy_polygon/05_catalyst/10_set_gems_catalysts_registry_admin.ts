@@ -41,7 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     await execute(
       'PolygonGemsCatalystsRegistry',
-      {from: gemsCatalystsRegistryAdmin, log: true},
+      {from: deployer, log: true},
       'revokeRole',
       adminRole,
       deployer

@@ -116,8 +116,12 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @notice Adds both arrays of gems and catalysts to registry
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
-    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts) external override {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
+    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        //require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
 
         require(
             uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
@@ -161,8 +165,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16 catalystId,
         uint256 amount
-    ) public override {
-        _checkAuthorization(from);
+    ) public override checkAuthorization(from) {
         ICatalyst catalyst = getCatalyst(catalystId);
         require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
@@ -176,8 +179,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16 gemId,
         uint256 amount
-    ) public override {
-        _checkAuthorization(from);
+    ) public override checkAuthorization(from) {
         IGem gem = getGem(gemId);
         require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
@@ -195,7 +197,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         _setGemsAndCatalystsAllowance(0);
     }
 
-    function setGemsandCatalystsMaxAllowance() external {
+    function setGemsAndCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(MAX_UINT256);
     }
 
@@ -235,8 +237,9 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     /// @dev verify that the caller is authorized for this function call.
     /// @param from The original signer of the transaction.
-    function _checkAuthorization(address from) internal view {
+    modifier checkAuthorization(address from) {
         require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
+        _;
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX

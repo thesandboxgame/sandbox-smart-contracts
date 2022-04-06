@@ -2,9 +2,9 @@
 pragma solidity 0.8.2;
 
 import "./interfaces/IGem.sol";
-import "../common/BaseWithStorage/ERC20/ERC20UpgradableToken.sol";
+import "../common/BaseWithStorage/ERC20/ERC20TokenUpgradeable.sol";
 
-contract GemV1 is IGem, ERC20UpgradableToken {
+contract GemV1 is IGem, ERC20TokenUpgradeable {
     uint16 public override gemId;
     bytes32 public constant APPROVER_ROLE = keccak256("APPROVER_ROLE");
 
@@ -16,7 +16,7 @@ contract GemV1 is IGem, ERC20UpgradableToken {
         uint16 _gemId,
         address approver
     ) public initializer {
-        __ERC20UpgradableToken_init(name, symbol, trustedForwarder, admin);
+        __ERC20TokenUpgradeable_init(name, symbol, trustedForwarder, admin);
         gemId = _gemId;
         _grantRole(APPROVER_ROLE, approver);
     }
