@@ -77,7 +77,6 @@ export const assetFixtures = async function () {
       .batchTransferToL1(to, [tokenId], [value], '0x00');
 
     // For Tests only
-    // TODO: mint only on L2 for tests
 
     const admin = await Asset.getAdmin();
     await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
