@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {execute, read} = deployments;
+  const {execute, read, catchUnknownSigner} = deployments;
   const {deployer} = await getNamedAccounts();
 
   const sandCurrentAdmin = await read('PolygonSand', 'getAdmin');
@@ -16,12 +16,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   if (!isAssetUpgraderSandSuperOperator) {
-    await execute(
-      'PolygonSand',
-      {from: sandCurrentAdmin, log: true},
-      'setSuperOperator',
-      AssetUpgrader.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'PolygonSand',
+        {from: sandCurrentAdmin, log: true},
+        'setSuperOperator',
+        AssetUpgrader.address,
+        true
+      )
     );
   }
 
