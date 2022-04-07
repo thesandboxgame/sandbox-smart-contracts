@@ -121,8 +121,6 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        //require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
-
         require(
             uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
             "GemsCatalystsRegistry: Too many gem and catalyst contracts"
