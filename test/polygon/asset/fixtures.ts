@@ -139,6 +139,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     const AssetERC1155Tunnel = await ethers.getContract('AssetERC1155Tunnel');
     const FxRoot = await ethers.getContract('FXROOT');
     const FxChild = await ethers.getContract('FXCHILD');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
     const CheckpointManager = await ethers.getContract('CHECKPOINTMANAGER');
     const MockAssetERC1155Tunnel = await ethers.getContract(
       'MockAssetERC1155Tunnel'
@@ -243,6 +244,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       FxRoot,
       FxChild,
       CheckpointManager,
+      childChainManager,
       MockAssetERC1155Tunnel,
       trustedForwarder,
     };
