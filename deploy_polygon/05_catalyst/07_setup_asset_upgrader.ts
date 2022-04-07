@@ -6,6 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {execute, read} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  const sandCurrentAdmin = await read('PolygonSand', 'getAdmin');
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
   const isAssetUpgraderSandSuperOperator = await read(
@@ -17,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isAssetUpgraderSandSuperOperator) {
     await execute(
       'PolygonSand',
-      {from: deployer, log: true},
+      {from: sandCurrentAdmin, log: true},
       'setSuperOperator',
       AssetUpgrader.address,
       true
