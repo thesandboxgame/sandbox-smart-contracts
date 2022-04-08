@@ -5,8 +5,6 @@ import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC7
 import {IERC721Base} from "./IERC721Base.sol";
 
 interface IPolygonAssetERC721 is IERC721Base {
-    event Minted(address indexed user, uint256 tokenId);
-
     function mint(address to, uint256 id) external override;
 
     function mint(
