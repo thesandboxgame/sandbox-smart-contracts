@@ -49,7 +49,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(owner != address(0), "TO==0");
         id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
-        require(!withdrawnTokens[id], "TOKEN_EXISTS_ON_ROOT_CHAIN");
 
         _mint(hash, supply, rarity, _msgSender(), owner, id, data, false);
     }
@@ -95,7 +94,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     /// @notice called when token is deposited to root chain
     /// @dev Should be callable only by ChildChainManager
     /// @dev Should handle deposit by minting the required tokenId(s) for user
-    /// @dev Should set `withdrawnTokens` mapping to `false` for the tokenId being deposited
     /// @dev Minting can also be done by other functions
     /// @param user user address for whom deposit is being done
     /// @param depositData abi encoded tokenIds. Batch deposit also supported.
