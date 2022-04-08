@@ -274,7 +274,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint256 id,
         address to
     ) external returns (uint256 newId, string memory metaData) {
-        require(_bouncers[msg.sender], "!BOUNCER"); // TODO: should we limit this call to asset upgrader?
+        require(_bouncers[_msgSender()], "!BOUNCER"); // TODO: should we limit this call to asset upgrader?
         require(balanceOf(to, id) == 1, "!NFT");
         uint32 tokenCollectionIndex = _nextCollectionIndex[id];
         metaData = tokenURI(id);
