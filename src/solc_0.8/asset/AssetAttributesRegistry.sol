@@ -91,6 +91,39 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
+    /// @notice sets the catalyst and gems when an asset goes over layers
+    /// @param assetId id of the asset
+    /// @param catalystId id of the catalyst to set
+    /// @param gemIds list of gems ids to set
+    function setCatalystWhenDepositOnOtherLayer(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds
+    ) external override {
+        require(
+            _msgSender() == overLayerDepositor || _msgSender() == _admin,
+            "AssetAttributesRegistry: not overLayerDepositor"
+        );
+        // We have to ignore all 0 gemid in case of L2 to L1 deposit
+        // In this case we get gems data in a form of an array of MAX_NUM_GEMS padded with 0
+        if (gemIds.length == MAX_NUM_GEMS) {
+            uint256 firstZeroIndex;
+            for (firstZeroIndex = 0; firstZeroIndex < gemIds.length; firstZeroIndex++) {
+                if (gemIds[firstZeroIndex] == 0) {
+                    break;
+                }
+            }
+            uint16[] memory gemIdsWithoutZero = new uint16[](firstZeroIndex);
+            // find first 0
+            for (uint256 i = 0; i < firstZeroIndex; i++) {
+                gemIdsWithoutZero[i] = gemIds[i];
+            }
+            _setCatalyst(assetId, catalystId, gemIdsWithoutZero, _getBlockNumber(), false);
+        } else {
+            _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), false);
+        }
+    }
+
     /// @notice sets the catalyst and gems for an asset, minter only
     /// @param assetId id of the asset
     /// @param catalystId id of the catalyst to set
