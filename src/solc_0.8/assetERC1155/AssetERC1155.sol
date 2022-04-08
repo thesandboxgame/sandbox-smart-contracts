@@ -2,8 +2,6 @@
 pragma solidity 0.8.2;
 
 import "./AssetBaseERC1155.sol";
-import "../asset/libraries/AssetHelper.sol";
-import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IMintableERC1155.sol";
 
 // solhint-disable-next-line no-empty-blocks
