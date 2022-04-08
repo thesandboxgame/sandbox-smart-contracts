@@ -10,7 +10,8 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title ASSETERC721 bridge on L1
 contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    address public rootToken;
+    IAssetERC721 public rootToken;
+    mapping(uint256 => bytes) public tokenUris; // TODO: keep as bytes ?
 
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
@@ -18,7 +19,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        address _rootToken,
+        IAssetERC721 _rootToken,
         address _trustedForwarder
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootToken = _rootToken;
@@ -47,17 +48,20 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
-    function batchTransferToL2(
+    function batchTransferToChild(
         address to,
         uint256[] memory ids,
-        bytes memory data // TODO: test data format
+        bytes memory data
     ) public whenNotPaused() {
-        IAssetERC721(rootToken).safeBatchTransferFrom(_msgSender(), address(this), ids, data);
-
-        for (uint256 index = 0; index < ids.length; index++) {
-            bytes memory message = abi.encode(to, ids[index], data);
+        string[] memory uris = abi.decode(data, (string[]));
+        for (uint256 i = 0; i < ids.length; i++) {
+            // save the token uris and lock the root tokens in this contract
+            uint256 id = ids[i];
+            tokenUris[id] = abi.encode(uris[i]);
+            bytes memory message = abi.encode(to, ids[i], tokenUris[id]);
+            rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], tokenUris[id]);
             _sendMessageToChild(message);
-            emit Deposit(to, ids[index], data);
+            emit Deposit(to, ids[i], tokenUris[id]);
         }
     }
 
@@ -80,8 +84,11 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     function _processMessageFromChild(bytes memory message) internal override {
         (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
         for (uint256 index = 0; index < ids.length; index++) {
-            IAssetERC721(rootToken).safeTransferFrom(address(this), to, ids[index], data); // TODO: test data format
-            emit Withdraw(to, ids[index], data);
+            string[] memory uris = abi.decode(data, (string[]));
+            bytes memory metadata = abi.encode(uris[index]);
+            if (!rootToken.exists(ids[index])) rootToken.mint(to, ids[index], metadata);
+            else rootToken.safeTransferFrom(address(this), to, ids[index], metadata);
+            emit Withdraw(to, ids[index], metadata);
         }
     }
 
