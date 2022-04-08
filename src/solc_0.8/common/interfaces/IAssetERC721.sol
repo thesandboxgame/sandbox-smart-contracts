@@ -12,7 +12,7 @@ interface IAssetERC721 is IERC721Base {
         bytes calldata data
     ) external override;
 
-    function setTokenMetadata(uint256 id, bytes memory data) external;
+    function setTokenURI(uint256 id, string memory uri) external;
 
     function tokenURI(uint256 id) external view returns (string memory);
 }

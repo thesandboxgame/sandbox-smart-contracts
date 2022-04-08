@@ -23,7 +23,7 @@ abstract contract BaseERC721 is
 
     string public baseTokenURI;
 
-    mapping(uint256 => bytes32) public metadataHashes;
+    mapping(uint256 => string) public tokenUris;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -42,13 +42,13 @@ abstract contract BaseERC721 is
     /// @dev If you want to retain token metadata from L2 to L1 during exit, you must implement this method.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    /// @param data Associated token metadata, which is decoded & used to set the token's metadata hash.
+    /// @param data Associated token metadata, which is decoded & used to set the full tokenUri.
     function mint(
         address to,
         uint256 id,
         bytes calldata data
     ) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) {
-        _setTokenMetadataHash(id, data);
+        _setTokenURI(id, data);
         _safeMint(to, id, data);
     }
 
@@ -173,9 +173,8 @@ abstract contract BaseERC721 is
         return _trustedForwarder;
     }
 
-    function _setTokenMetadataHash(uint256 id, bytes memory data) internal {
-        require(data.length > 0, "DATA_MISSING_METADATAHASH");
-        metadataHashes[id] = abi.decode(data, (bytes32));
+    function _setTokenURI(uint256 id, bytes memory data) internal {
+        tokenUris[id] = abi.decode(data, (string));
     }
 
     function _msgSender() internal view virtual override returns (address sender) {

@@ -20,78 +20,42 @@ contract PolygonAssetERC721Tunnel is
     Pausable
 {
     IPolygonAssetERC721 public childToken;
-    uint32 public maxGasLimitOnL1;
-    mapping(uint8 => uint32) public gasLimits;
+    uint256 public maxTransferLimit = 20;
+    mapping(uint256 => bytes) public tokenUris; // TODO: keep as bytes ?
 
-    event SetGasLimit(uint8 size, uint32 limit);
-    event SetMaxGasLimit(uint32 maxGasLimit);
+    event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
 
-    function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
-        maxGasLimitOnL1 = _maxGasLimit;
-        emit SetMaxGasLimit(_maxGasLimit);
-    }
-
-    function _setLimit(uint8 size, uint32 limit) internal {
-        gasLimits[size] = limit;
-        emit SetGasLimit(size, limit);
-    }
-
-    function setLimit(uint8 size, uint32 limit) external onlyOwner {
-        _setLimit(size, limit);
-    }
-
-    // setupLimits([5, 10, 20, 90, 340]);
-    function setupLimits(uint32[5] memory limits) public onlyOwner {
-        _setLimit(1, limits[0]);
-        _setLimit(3, limits[1]);
-        _setLimit(6, limits[2]);
-        _setLimit(12, limits[3]);
-        _setLimit(24, limits[4]);
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
     }
 
     constructor(
         address _fxChild,
         IPolygonAssetERC721 _childToken,
         address _trustedForwarder,
-        uint32 _maxGasLimit,
-        uint32[5] memory limits
+        uint256 _maxTransferLimit
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
-        maxGasLimitOnL1 = _maxGasLimit;
-        setupLimits(limits);
+        maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function withdrawToRoot(
-        address to,
-        uint256 id,
-        bytes memory data
-    ) external whenNotPaused() {
-        uint32 gasLimit = 0;
-        gasLimit += gasLimits[uint8(id)];
-        require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
-        // lock the child token in this contract
-        childToken.safeTransferFrom(_msgSender(), address(this), id, data); // TODO: test data format
-        emit Withdraw(to, id, data);
-        _sendMessageToRoot(abi.encode(to, id, data));
-    }
-
-    function batchWithdrawToL1(
+    function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
         bytes memory data
     ) external whenNotPaused() {
-        uint32 gasLimit = 0;
+        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        string[] memory uris = abi.decode(data, (string[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            gasLimit += gasLimits[uint8(ids[i])];
-        }
-        require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
-        for (uint256 i = 0; i < ids.length; i++) {
-            // lock the child tokens in this contract
-            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], data); // TODO: test data format
-            emit Withdraw(to, ids[i], data);
+            // save the token uris and lock the child tokens in this contract
+            uint256 id = ids[i];
+            tokenUris[id] = abi.encode(uris[i]);
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], tokenUris[id]);
+            emit Withdraw(to, ids[i], tokenUris[id]);
         }
         _sendMessageToRoot(abi.encode(to, ids, data));
     }
@@ -115,7 +79,7 @@ contract PolygonAssetERC721Tunnel is
     function _processMessageFromRoot(
         uint256, /* stateId */
         address sender,
-        bytes memory data
+        bytes memory data /* encoded message from root tunnel */
     ) internal override validateSender(sender) {
         _syncDeposit(data);
     }
