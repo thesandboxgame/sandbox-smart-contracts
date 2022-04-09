@@ -129,42 +129,7 @@ describe('AssetUpgrader', function () {
     const newOwner = await assetContract.callStatic.ownerOf(tokenId);
     expect(newOwner).to.equal(catalystOwner);
   });
-  it('extractAndSetCatalyst should fail for NFT', async function () {
-    const {
-      catalystOwner,
-      rareCatalyst,
-      powerGem,
-      gemsCatalystsUnit,
-      assetUpgraderContractAsCatalystOwner,
-    } = await setupAssetUpgrader();
-    const catalystId = await rareCatalyst.catalystId();
-    const mintingAmount = BigNumber.from('8').mul(
-      BigNumber.from(gemsCatalystsUnit)
-    );
-    await mintCatalyst(rareCatalyst, mintingAmount, catalystOwner);
-    await mintGem(powerGem, mintingAmount, catalystOwner);
 
-    const powerGemId = await powerGem.gemId();
-
-    const assetId = await mintAsset(
-      catalystOwner,
-      BigNumber.from('2233'),
-      '0x1111111111111111111100111111111111111111111111111111111111111111',
-      1,
-      0,
-      catalystOwner,
-      Buffer.from('ff')
-    );
-    await expect(
-      assetUpgraderContractAsCatalystOwner.extractAndSetCatalyst(
-        catalystOwner,
-        assetId,
-        catalystId,
-        [powerGemId],
-        catalystOwner
-      )
-    ).to.be.revertedWith(`!1155`);
-  });
   it('setting a rareCatalyst with powerGem and defenseGem', async function () {
     const {
       user2,
