@@ -66,6 +66,25 @@ describe('assetSignedAuctionWithAuth', function () {
     expect(fee).to.be.equal(newFee);
   });
 
+  it('should fail setting fee - no admin', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users} = assetFixture;
+    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[0].address)
+    );
+
+    const newFee = 500;
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.setFee(users[1].address, newFee)
+    ).to.be.revertedWith('only admin can change fee');
+  });
+
   it('should fail is buyer == seller', async function () {
     const {
       assetSignedAuctionFixture,
@@ -183,6 +202,127 @@ describe('assetSignedAuctionWithAuth', function () {
         {value: '5000000000000000000'}
       )
     ).to.be.revertedWith('not authorized');
+  });
+
+  it('should fail is ids.length != amounts.length', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users, mintAsset} = assetFixture;
+    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+
+    const tokenId = await mintAsset(users[0].address, 20);
+
+    const seller = users[0].address;
+
+    const wrongAmount = [0, 1];
+
+    const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
+    const startedAt = Math.floor(Date.now() / 1000) - 500;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[1].address)
+    );
+
+    // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
+    const signature = await ethers.provider.send('eth_signTypedData_v4', [
+      seller,
+      {
+        types: {
+          EIP712Domain: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              type: 'string',
+            },
+            {
+              name: 'verifyingContract',
+              type: 'address',
+            },
+          ],
+          Auction: [
+            {name: 'from', type: 'address'},
+            {name: 'token', type: 'address'},
+            {name: 'offerId', type: 'uint256'},
+            {name: 'startingPrice', type: 'uint256'},
+            {name: 'endingPrice', type: 'uint256'},
+            {name: 'startedAt', type: 'uint256'},
+            {name: 'duration', type: 'uint256'},
+            {name: 'packs', type: 'uint256'},
+            {name: 'ids', type: 'bytes'},
+            {name: 'amounts', type: 'bytes'},
+          ],
+        },
+        primaryType: 'Auction',
+        domain: {
+          name: 'The Sandbox',
+          version: '1',
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
+        },
+        message: {
+          from: seller,
+          token: zeroAddress,
+          offerId,
+          startingPrice: startingPrice.toString(),
+          endingPrice: endingPrice.toString(),
+          startedAt,
+          duration,
+          packs,
+          ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
+          amounts: ethers.utils.solidityPack(['uint[]'], [wrongAmount]),
+        },
+      },
+    ]);
+
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      wrongAmount
+    );
+
+    await users[0].Asset.setApprovalForAll(
+      assetSignedAuctionAuthContract.address,
+      true
+    );
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
+        {
+          buyer: users[1].address,
+          seller: seller,
+          token: zeroAddress,
+          purchase: [buyAmount, '5000000000000000000'],
+          auctionData,
+          ids: [tokenId.toString()],
+          amounts: wrongAmount,
+          signature,
+          backendSignature,
+        },
+        {value: '5000000000000000000'}
+      )
+    ).to.be.revertedWith('ids and amounts length not matching');
   });
 
   it('should fail - insuficient amount', async function () {
