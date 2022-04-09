@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155Receiver.sol";
+import "../common/interfaces/IAssetERC721.sol";
 import "../common/Libraries/ObjectLib32.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../asset/libraries/ERC1155ERC721Helper.sol";
@@ -48,22 +49,28 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     address internal _trustedForwarder;
 
+    IAssetERC721 internal _assetERC721;
+
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
+    event Extraction(uint256 indexed id, uint256 indexed newId);
+    event AssetERC721Set(IAssetERC721 assetERC721);
 
     function init(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
+        IAssetERC721 assetERC721,
         uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(1);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
+        _assetERC721 = assetERC721;
         __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
     }
@@ -265,22 +272,33 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
 
-    /// @notice Call to perform all AssetERC1155 operations before minting to AssetERC721.
-    /// @param id the token id for which the next collection index is fetched.
-    /// @return newId generated after extraction
-    /// @return metaData required for minting on AssetERC721.
-    function prepareForExtract(
+    /// @notice Extracts an EIP-721 Asset from an EIP-1155 Asset.
+    /// @param sender address which own the token to be extracted.
+    /// @param id the token type to extract from.
+    /// @param to address which will receive the token.
+    /// @return newId the id of the newly minted NFT.
+    function extractERC721From(
         address sender,
         uint256 id,
         address to
-    ) external returns (uint256 newId, string memory metaData) {
-        require(_bouncers[_msgSender()], "!BOUNCER"); // TODO: should we limit this call to asset upgrader?
+    ) external returns (uint256 newId) {
+        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        require(to != address(0), "TO==0");
         require(balanceOf(to, id) == 1, "!NFT");
         uint32 tokenCollectionIndex = _nextCollectionIndex[id];
-        metaData = tokenURI(id);
-        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET; // TODO: To review
+        string memory metaData = tokenURI(id);
+        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
         _nextCollectionIndex[id] = tokenCollectionIndex + 1;
         _burnFT(sender, id, 1);
+        _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
+        emit Extraction(id, newId);
+    }
+
+    function setAssetERC721(IAssetERC721 assetERC721) external returns (bool) {
+        require(_admin == _msgSender(), "AUTHORIZED");
+        _assetERC721 = assetERC721;
+        emit AssetERC721Set(assetERC721);
+        return true;
     }
 
     /// @notice Queries the approval status of `operator` for owner `owner`.

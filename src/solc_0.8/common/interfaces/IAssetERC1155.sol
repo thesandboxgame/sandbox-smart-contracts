@@ -76,11 +76,11 @@ interface IAssetERC1155 {
 
     function getBouncerAdmin() external view returns (address);
 
-    function prepareForExtract(
+    function extractERC721From(
         address sender,
         uint256 id,
         address to
-    ) external view returns (uint256 newId, string memory metaData);
+    ) external returns (uint256 newId);
 
     function isBouncer(address who) external view returns (bool);
 
