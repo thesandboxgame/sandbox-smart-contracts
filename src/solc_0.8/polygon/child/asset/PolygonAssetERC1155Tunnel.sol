@@ -18,7 +18,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     // uint256 public maxGasLimitOnL1;
     // uint256 public maxGasLimitOnL2;
 
-    event Deposit(address user, uint256 id, uint256 value, bytes data);
+    event Deposit(address user, uint256[] id, uint256[] value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
 
     constructor(
@@ -68,12 +68,15 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256 id, uint256 value, bytes memory data) =
-            abi.decode(syncData, (address, uint256, uint256, bytes));
-        childToken.wasEverMinted(id)
-            ? childToken.safeTransferFrom(address(this), to, id, value, data)
-            : childToken.mint(to, id, value, data);
-        emit Deposit(to, id, value, data);
+        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
+            abi.decode(syncData, (address, uint256[], uint256[], bytes));
+        uint256 numberOfTokens = ids.length;
+        for (uint256 i = 0; i < numberOfTokens; i++) {
+            childToken.wasEverMinted(ids[i])
+                ? childToken.safeTransferFrom(address(this), to, ids[i], values[i], data)
+                : childToken.mint(to, ids[i], values[i], data);
+        }
+        emit Deposit(to, ids, values, data);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
