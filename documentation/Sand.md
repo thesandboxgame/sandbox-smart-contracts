@@ -26,5 +26,5 @@ But as time passed it became clear that 1) was not that strong a reason. ERC-777
 
 Secondly, we found out we could design meta-transaction outside of the SAND contract, while preserving efficiency.
 
-The new contract can be found here : [Sand.sol](old_src/Sand.sol)
+The new contract can be found here : [Sand.sol](../src/solc_0.5/Sand.sol)
 It implements Hooks so that our meta transaction implementation remains efficient. But our overall system also support for external meta transaction processor, including external one such as [GSN](https://gsn.openzeppelin.com)
