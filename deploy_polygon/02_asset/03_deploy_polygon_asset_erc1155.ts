@@ -16,6 +16,7 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
+  const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const assetHelperLib = await deploy('AssetHelper', {
     from: deployer,
@@ -42,6 +43,7 @@ const func: DeployFunction = async function (
           assetAdmin,
           assetBouncerAdmin,
           CHILD_CHAIN_MANAGER.address,
+          PolygonAssetERC721.address,
           1,
         ],
       },
@@ -53,5 +55,9 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['PolygonAssetERC1155', 'PolygonAssetERC1155_deploy', 'L2'];
-func.dependencies = ['TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'];
+func.dependencies = [
+  'TRUSTED_FORWARDER',
+  'CHILD_CHAIN_MANAGER',
+  'PolygonAssetERC721',
+];
 func.skip = skipUnlessTestnet;
