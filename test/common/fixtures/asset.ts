@@ -123,9 +123,12 @@ export const assetSignedAuctionFixtures = async function () {
 
   const Sand = await ethers.getContract('Sand');
 
+  const Admin = await read('AssetSignedAuctionWithAuth', 'getAdmin');
+
   return {
     assetSignedAuctionAuthContract,
     Sand,
+    Admin,
   };
 };
 

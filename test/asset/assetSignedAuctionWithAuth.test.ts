@@ -17,10 +17,11 @@ const backendAuthWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-const AUCTION_TYPEHASH = ethers.utils.keccak256(
-  ethers.utils.toUtf8Bytes(
-    'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)'
-  )
+const AUCTION_TYPEHASH = ethers.utils.solidityKeccak256(
+  ['string'],
+  [
+    'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
+  ]
 );
 
 const setupAssetSignedAuction = withSnapshot(
@@ -41,6 +42,267 @@ describe('assetSignedAuctionWithAuth', function () {
   const packs = 1;
   const buyAmount = 1;
   const amounts = [1];
+
+  it('should be able to set fee', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users} = assetFixture;
+    const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
+
+    const AssetSignedAuctionAuthContractAsAdmin = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(Admin)
+    );
+
+    const newFee = 500;
+
+    await waitFor(
+      AssetSignedAuctionAuthContractAsAdmin.setFee(users[1].address, newFee)
+    );
+
+    const fee = await assetSignedAuctionAuthContract._fee10000th();
+
+    expect(fee).to.be.equal(newFee);
+  });
+
+  it('should fail is buyer == seller', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users, mintAsset} = assetFixture;
+    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+
+    const tokenId = await mintAsset(users[0].address, 20);
+
+    const seller = users[0].address;
+
+    const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
+    const startedAt = Math.floor(Date.now() / 1000) - 500;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[1].address)
+    );
+
+    // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
+    const signature = await ethers.provider.send('eth_signTypedData_v4', [
+      seller,
+      {
+        types: {
+          EIP712Domain: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              type: 'string',
+            },
+            {
+              name: 'verifyingContract',
+              type: 'address',
+            },
+          ],
+          Auction: [
+            {name: 'from', type: 'address'},
+            {name: 'token', type: 'address'},
+            {name: 'offerId', type: 'uint256'},
+            {name: 'startingPrice', type: 'uint256'},
+            {name: 'endingPrice', type: 'uint256'},
+            {name: 'startedAt', type: 'uint256'},
+            {name: 'duration', type: 'uint256'},
+            {name: 'packs', type: 'uint256'},
+            {name: 'ids', type: 'bytes'},
+            {name: 'amounts', type: 'bytes'},
+          ],
+        },
+        primaryType: 'Auction',
+        domain: {
+          name: 'The Sandbox',
+          version: '1',
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
+        },
+        message: {
+          from: seller,
+          token: zeroAddress,
+          offerId,
+          startingPrice: startingPrice.toString(),
+          endingPrice: endingPrice.toString(),
+          startedAt,
+          duration,
+          packs,
+          ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
+          amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
+        },
+      },
+    ]);
+
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
+    await users[0].Asset.setApprovalForAll(
+      assetSignedAuctionAuthContract.address,
+      true
+    );
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
+        {
+          buyer: seller,
+          seller: seller,
+          token: zeroAddress,
+          purchase: [buyAmount, '5000000000000000000'],
+          auctionData,
+          ids: [tokenId.toString()],
+          amounts,
+          signature,
+          backendSignature,
+        },
+        {value: '5000000000000000000'}
+      )
+    ).to.be.revertedWith('not authorized');
+  });
+
+  it('should fail - insuficient amount', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users, mintAsset} = assetFixture;
+    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+
+    const tokenId = await mintAsset(users[0].address, 20);
+
+    const seller = users[0].address;
+
+    const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
+    const startedAt = Math.floor(Date.now() / 1000) - 500;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[1].address)
+    );
+
+    // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
+    const signature = await ethers.provider.send('eth_signTypedData_v4', [
+      seller,
+      {
+        types: {
+          EIP712Domain: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              type: 'string',
+            },
+            {
+              name: 'verifyingContract',
+              type: 'address',
+            },
+          ],
+          Auction: [
+            {name: 'from', type: 'address'},
+            {name: 'token', type: 'address'},
+            {name: 'offerId', type: 'uint256'},
+            {name: 'startingPrice', type: 'uint256'},
+            {name: 'endingPrice', type: 'uint256'},
+            {name: 'startedAt', type: 'uint256'},
+            {name: 'duration', type: 'uint256'},
+            {name: 'packs', type: 'uint256'},
+            {name: 'ids', type: 'bytes'},
+            {name: 'amounts', type: 'bytes'},
+          ],
+        },
+        primaryType: 'Auction',
+        domain: {
+          name: 'The Sandbox',
+          version: '1',
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
+        },
+        message: {
+          from: seller,
+          token: zeroAddress,
+          offerId,
+          startingPrice: startingPrice.toString(),
+          endingPrice: endingPrice.toString(),
+          startedAt,
+          duration,
+          packs,
+          ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
+          amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
+        },
+      },
+    ]);
+
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData[0],
+      auctionData[1],
+      auctionData[2],
+      auctionData[3],
+      auctionData[4],
+      auctionData[5],
+      [tokenId],
+      [amounts]
+    );
+
+    await users[0].Asset.setApprovalForAll(
+      assetSignedAuctionAuthContract.address,
+      true
+    );
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
+        {
+          buyer: users[1].address,
+          seller: seller,
+          token: zeroAddress,
+          purchase: [30, '5000000000000000000'],
+          auctionData,
+          ids: [tokenId.toString()],
+          amounts,
+          signature,
+          backendSignature,
+        },
+        {value: '5000000000000000000'}
+      )
+    ).to.be.revertedWith('Buy amount exceeds sell amount');
+  });
 
   it('should be able to claim seller offer in ETH', async function () {
     const {
@@ -606,12 +868,7 @@ describe('assetSignedAuctionWithAuth', function () {
       ],
       [
         assetSignedAuctionAuthContract.address,
-        ethers.utils.solidityKeccak256(
-          ['string'],
-          [
-            'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
-          ]
-        ),
+        AUCTION_TYPEHASH,
         seller,
         zeroAddress,
         offerId,
@@ -738,12 +995,7 @@ describe('assetSignedAuctionWithAuth', function () {
       ],
       [
         assetSignedAuctionAuthContract.address,
-        ethers.utils.solidityKeccak256(
-          ['string'],
-          [
-            'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
-          ]
-        ),
+        AUCTION_TYPEHASH,
         seller,
         zeroAddress,
         offerId,
@@ -847,12 +1099,7 @@ describe('assetSignedAuctionWithAuth', function () {
       ],
       [
         assetSignedAuctionAuthContract.address,
-        ethers.utils.solidityKeccak256(
-          ['string'],
-          [
-            'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
-          ]
-        ),
+        AUCTION_TYPEHASH,
         seller,
         zeroAddress,
         offerId,
