@@ -5,6 +5,9 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
+import {Wallet} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
+
 const {read, execute, deploy} = deployments;
 import {Event} from '@ethersproject/contracts';
 
@@ -112,6 +115,22 @@ export const assetFixtures = async function () {
     predicate,
   };
 };
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const assetSignedAuctionFixtures = async function () {
+  const assetSignedAuctionAuthContract = await ethers.getContract(
+    'AssetSignedAuctionWithAuth'
+  );
+
+  const Sand = await ethers.getContract('Sand');
+
+  const Admin = await read('AssetSignedAuctionWithAuth', 'getAdmin');
+
+  return {
+    assetSignedAuctionAuthContract,
+    Sand,
+    Admin,
+  };
+};
 
 export const gemsAndCatalystsFixture = async function (
   isSetupForL2: boolean
@@ -210,4 +229,41 @@ export const gemsAndCatalystsFixture = async function (
   );
 
   return assetAttributesRegistryAsRegistryAdmin;
+};
+
+export const signAuthMessageAs = async (
+  wallet: Wallet | SignerWithAddress,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...args: any[]
+): Promise<string> => {
+  const hashedData = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'bytes32',
+        'address',
+        'address',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'bytes32',
+        'bytes32',
+      ],
+      [
+        ...args.slice(0, args.length - 2),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 2]])]
+        ),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 1]])]
+        ),
+      ]
+    )
+  );
+
+  return wallet.signMessage(ethers.utils.arrayify(hashedData));
 };
