@@ -6,7 +6,7 @@ import {setupAssetERC721Tunnels} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 
-describe.only('PolygonAssetERC721.sol', function () {
+describe('PolygonAssetERC721.sol', function () {
   describe('AssetERC721 <> PolygonAssetERC721: Transfer', function () {
     describe('L1 to L2', function () {
       it('only owner can pause tunnels', async function () {
@@ -123,21 +123,22 @@ describe.only('PolygonAssetERC721.sol', function () {
 
         const assetHolder = users[0];
         const numberOfAssetERC721s = 25;
-        const startId = 0;
+        const startId = 1;
         const ids = [];
         const uriArray = [];
 
-        // Mint on L1
-        for (let i = startId; i < numberOfAssetERC721s; i++) {
-          const uriForId = `${uriBase}/${ids[i]}`;
-          uriArray.push(uriForId);
-          const data = abiCoder.encode(['string'], [uriForId]);
+        // Set up arrays and mint on L1
+        for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
+          ids.push(i);
+          const uniqueUri = `${uriBase}/${i}`;
+          uriArray.push(uniqueUri);
+
+          const data = abiCoder.encode(['string'], [uniqueUri]);
           await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
             assetHolder.address,
             i,
             data
           );
-          ids.push(i);
         }
         const dataArray = abiCoder.encode(['string[]'], [uriArray]);
 
@@ -150,6 +151,7 @@ describe.only('PolygonAssetERC721.sol', function () {
           MockAssetERC721Tunnel.address,
           true
         );
+
         await assetHolder.MockAssetERC721Tunnel.batchTransferToChild(
           assetHolder.address,
           ids,
@@ -163,10 +165,78 @@ describe.only('PolygonAssetERC721.sol', function () {
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
         ).to.be.equal(numberOfAssetERC721s);
-        // TODO: tests to show minting and transfers with higher startId
-        // TODO: tests to show that different token ids can have different uris
-        // TODO:: tests to show extraction on L2
+        for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
+          expect(await PolygonAssetERC721.tokenUris(i)).to.be.equal(
+            `${uriBase}/${i}`
+          );
+        }
       });
+
+      it('should be able to transfer multiple assets to L2 - higher starting token id', async function () {
+        const {
+          AssetERC721,
+          assetMinter,
+          users,
+          MockAssetERC721Tunnel,
+          PolygonAssetERC721,
+        } = await setupAssetERC721Tunnels();
+
+        const abiCoder = new AbiCoder();
+        const uriBase = 'http://myMetadata.io';
+
+        const assetHolder = users[0];
+        const numberOfAssetERC721s = 25;
+        const startId = 10124;
+        const ids = [];
+        const uriArray = [];
+
+        // Set up arrays and mint on L1
+        for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
+          ids.push(i);
+          const uniqueUri = `${uriBase}/${i}`;
+          uriArray.push(uniqueUri);
+
+          const data = abiCoder.encode(['string'], [uniqueUri]);
+          await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
+            assetHolder.address,
+            i,
+            data
+          );
+        }
+        const dataArray = abiCoder.encode(['string[]'], [uriArray]);
+
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
+          numberOfAssetERC721s
+        );
+
+        // Transfer to L1 Tunnel
+        await assetHolder.AssetERC721.setApprovalForAll(
+          MockAssetERC721Tunnel.address,
+          true
+        );
+
+        await assetHolder.MockAssetERC721Tunnel.batchTransferToChild(
+          assetHolder.address,
+          ids,
+          dataArray
+        );
+
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);
+        expect(
+          await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
+        ).to.be.equal(numberOfAssetERC721s);
+        expect(
+          await PolygonAssetERC721.balanceOf(assetHolder.address)
+        ).to.be.equal(numberOfAssetERC721s);
+        for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
+          expect(await PolygonAssetERC721.tokenUris(i)).to.be.equal(
+            `${uriBase}/${i}`
+          );
+        }
+      });
+
+      // TODO:: tests to show extraction on L2
+      // TODO: test where token already exists so is not minted again
 
       // describe('Through meta transaction', function () {
       //   it('should be able to transfer 1 AssetERC721', async function () {
