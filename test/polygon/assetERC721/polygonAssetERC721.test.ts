@@ -69,4 +69,3 @@ describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () 
 });
 // TODO:
 // e2e flow
-// TOKEN_EXISTS_ON_ROOT_CHAIN check
