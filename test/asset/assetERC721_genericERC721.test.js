@@ -27,8 +27,8 @@ const erc721Tests = require('../erc721')(
     async function mint(to) {
       id = ++id;
       const abiCoder = new AbiCoder();
-      const dummyMetadataHash = ethers.utils.keccak256('0x42');
-      const data = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
+      const uri = 'http://myMetadata.io/1';
+      const data = abiCoder.encode(['string'], [uri]);
 
       const receipt = await waitFor(
         // assetContractAsAssetAdmin.mint(to, id, data)
