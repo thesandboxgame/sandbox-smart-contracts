@@ -1,6 +1,6 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {BigNumber} from '@ethersproject/bignumber';
 import {parseEther} from '@ethersproject/units';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
