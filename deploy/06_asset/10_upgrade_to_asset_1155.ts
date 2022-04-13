@@ -10,6 +10,7 @@ const func: DeployFunction = async function (
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const AssetERC721 = await deployments.get('AssetERC721');
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
     from: deployer,
@@ -31,7 +32,13 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [TRUSTED_FORWARDER.address, deployer, deployer, 0],
+        args: [
+          TRUSTED_FORWARDER.address,
+          deployer,
+          deployer,
+          AssetERC721.address,
+          0,
+        ],
       },
       upgradeIndex: 1,
     },
@@ -41,5 +48,10 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['AssetERC1155', 'AssetERC1155_deploy'];
-func.dependencies = ['Asset', 'TRUSTED_FORWARDER', 'ERC1155_PREDICATE'];
+func.dependencies = [
+  'Asset',
+  'AssetERC721',
+  'TRUSTED_FORWARDER',
+  'ERC1155_PREDICATE',
+];
 func.skip = skipUnlessTest;

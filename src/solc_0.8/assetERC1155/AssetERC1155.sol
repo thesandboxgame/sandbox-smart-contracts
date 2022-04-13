@@ -13,9 +13,10 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
+        IAssetERC721 assetERC721,
         uint8 chainIndex
     ) external {
-        init(trustedForwarder, admin, bouncerAdmin, chainIndex);
+        init(trustedForwarder, admin, bouncerAdmin, assetERC721, chainIndex);
     }
 
     /**

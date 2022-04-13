@@ -21,9 +21,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         address admin,
         address bouncerAdmin,
         address childChainManager,
+        IAssetERC721 polygonAssetERC721,
         uint8 chainIndex
     ) external {
-        init(trustedForwarder, admin, bouncerAdmin, chainIndex);
+        init(trustedForwarder, admin, bouncerAdmin, polygonAssetERC721, chainIndex);
         _childChainManager = childChainManager;
     }
 

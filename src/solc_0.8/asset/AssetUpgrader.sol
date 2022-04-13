@@ -30,7 +30,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
-    event Extraction(uint256 indexed id, uint256 indexed newId);
 
     /// @notice AssetUpgrader depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
@@ -79,7 +78,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-        tokenId = extractERC721From(from, assetId, from);
+        tokenId = _assetERC1155.extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
 
@@ -132,23 +131,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         _addGems(from, assetId, gemIds, to);
     }
 
-    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
-    /// @param sender address which own the token to be extracted.
-    /// @param id the token type to extract from.
-    /// @param to address which will receive the token.
-    /// @return newId the id of the newly minted NFT.
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) public override returns (uint256) {
-        require(sender == _msgSender() || _assetERC1155.isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-        require(to != address(0), "TO==0");
-        (uint256 newId, string memory metaData) = _assetERC1155.prepareForExtract(sender, id, to);
-        _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
-        emit Extraction(id, newId);
-        return newId;
-    }
 
     /// @dev Collect a fee in SAND tokens
     /// @param from The address paying the fee.
