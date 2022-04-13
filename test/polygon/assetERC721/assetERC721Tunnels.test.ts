@@ -62,8 +62,6 @@ describe('PolygonAssetERC721.sol', function () {
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
         const data = abiCoder.encode(['string'], [uri]);
-        const uriArray = [uri];
-        const dataArray = abiCoder.encode(['string[]'], [uriArray]);
 
         // Mint AssetERC721 on L1
         await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
@@ -81,20 +79,18 @@ describe('PolygonAssetERC721.sol', function () {
         await deployer.AssetERC721Tunnel.pause();
 
         await expect(
-          assetHolder.AssetERC721Tunnel.batchTransferToChild(
+          assetHolder.AssetERC721Tunnel.batchDepositToChild(
             assetHolder.address,
-            [123],
-            dataArray
+            [123]
           )
         ).to.be.revertedWith('Pausable: paused');
 
         await deployer.AssetERC721Tunnel.unpause();
 
         await waitFor(
-          assetHolder.AssetERC721Tunnel.batchTransferToChild(
+          assetHolder.AssetERC721Tunnel.batchDepositToChild(
             assetHolder.address,
-            [123],
-            dataArray
+            [123]
           )
         );
 
@@ -105,8 +101,6 @@ describe('PolygonAssetERC721.sol', function () {
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
         ).to.be.equal(1);
-
-        // TODO: check tokenUri is correctly stored
       });
 
       it('should be able to transfer multiple assets to L2', async function () {
@@ -125,14 +119,11 @@ describe('PolygonAssetERC721.sol', function () {
         const numberOfAssetERC721s = 25;
         const startId = 1;
         const ids = [];
-        const uriArray = [];
 
         // Set up arrays and mint on L1
         for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
           ids.push(i);
           const uniqueUri = `${uriBase}/${i}`;
-          uriArray.push(uniqueUri);
-
           const data = abiCoder.encode(['string'], [uniqueUri]);
           await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
             assetHolder.address,
@@ -140,7 +131,6 @@ describe('PolygonAssetERC721.sol', function () {
             data
           );
         }
-        const dataArray = abiCoder.encode(['string[]'], [uriArray]);
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
           numberOfAssetERC721s
@@ -152,10 +142,9 @@ describe('PolygonAssetERC721.sol', function () {
           true
         );
 
-        await assetHolder.MockAssetERC721Tunnel.batchTransferToChild(
+        await assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
           assetHolder.address,
-          ids,
-          dataArray
+          ids
         );
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);
@@ -172,7 +161,7 @@ describe('PolygonAssetERC721.sol', function () {
         }
       });
 
-      it('should be able to transfer multiple assets to L2 - higher starting token id', async function () {
+      it('should be able to transfer multiple assets to L2 - higher start id', async function () {
         const {
           AssetERC721,
           assetMinter,
@@ -188,14 +177,11 @@ describe('PolygonAssetERC721.sol', function () {
         const numberOfAssetERC721s = 25;
         const startId = 10124;
         const ids = [];
-        const uriArray = [];
 
         // Set up arrays and mint on L1
         for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
           ids.push(i);
           const uniqueUri = `${uriBase}/${i}`;
-          uriArray.push(uniqueUri);
-
           const data = abiCoder.encode(['string'], [uniqueUri]);
           await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
             assetHolder.address,
@@ -203,7 +189,6 @@ describe('PolygonAssetERC721.sol', function () {
             data
           );
         }
-        const dataArray = abiCoder.encode(['string[]'], [uriArray]);
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
           numberOfAssetERC721s
@@ -215,10 +200,9 @@ describe('PolygonAssetERC721.sol', function () {
           true
         );
 
-        await assetHolder.MockAssetERC721Tunnel.batchTransferToChild(
+        await assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
           assetHolder.address,
-          ids,
-          dataArray
+          ids
         );
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);

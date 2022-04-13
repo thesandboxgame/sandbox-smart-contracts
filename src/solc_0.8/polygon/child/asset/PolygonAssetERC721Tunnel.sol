@@ -21,7 +21,6 @@ contract PolygonAssetERC721Tunnel is
 {
     IPolygonAssetERC721 public childToken;
     uint256 public maxTransferLimit = 20;
-    mapping(uint256 => bytes) public tokenUris; // TODO: keep as bytes ?
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
@@ -43,21 +42,16 @@ contract PolygonAssetERC721Tunnel is
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function batchWithdrawToRoot(
-        address to,
-        uint256[] calldata ids,
-        bytes memory data
-    ) external whenNotPaused() {
+    function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused() {
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
-        string[] memory uris = abi.decode(data, (string[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            // save the token uris and lock the child tokens in this contract
+            // lock the child tokens in this contract
             uint256 id = ids[i];
-            tokenUris[id] = abi.encode(uris[i]);
-            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], tokenUris[id]);
-            emit Withdraw(to, ids[i], tokenUris[id]);
+            bytes memory uniqueUriData = abi.encode(childToken.tokenURI(id));
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
+            _sendMessageToRoot(abi.encode(to, ids, uniqueUriData));
+            emit Withdraw(to, ids[i], uniqueUriData);
         }
-        _sendMessageToRoot(abi.encode(to, ids, data));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
