@@ -1,5 +1,5 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {BigNumber} from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { DeployFunction } from 'hardhat-deploy/types';
 
 const catalysts: {[key: string]: string}[] = [
   {
@@ -33,10 +33,10 @@ const catalysts: {[key: string]: string}[] = [
 ];
 
 const func: DeployFunction = async function (hre) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const admin = await read('OldCatalysts', {}, 'getAdmin');
 
   for (let i = 0; i < 4; i++) {
     const config = await read('OldCatalysts', 'getMintData', i);
@@ -58,7 +58,7 @@ const func: DeployFunction = async function (hre) {
       await catchUnknownSigner(
         execute(
           'OldCatalysts',
-          {from: deployer},
+          {from: admin},
           'setConfiguration',
           i,
           setup.minQuantity,
