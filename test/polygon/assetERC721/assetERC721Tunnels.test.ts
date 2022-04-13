@@ -60,8 +60,8 @@ describe('PolygonAssetERC721.sol', function () {
         } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
         const abiCoder = new AbiCoder();
-        const dummyMetadataHash = ethers.utils.keccak256('0x42');
-        const data = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
+        const uri = 'http://myMetadata.io/1';
+        const data = abiCoder.encode(['string'], [uri]);
 
         // Mint AssetERC721 on L1
         await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
@@ -117,8 +117,8 @@ describe('PolygonAssetERC721.sol', function () {
         } = await setupAssetERC721Tunnels();
 
         const abiCoder = new AbiCoder();
-        const dummyMetadataHash = ethers.utils.keccak256('0x42');
-        const data = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
+        const uri = 'http://myMetadata.io/1';
+        const data = abiCoder.encode(['string'], [uri]);
         const assetHolder = users[0];
         const numberOfAssetERC721s = 25;
         const startId = 0;

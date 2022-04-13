@@ -62,8 +62,8 @@ describe('AssetERC721.sol', function () {
         const fixtures = await setupAssetERC721Test();
 
         const abiCoder = new AbiCoder();
-        const dummyMetadataHash = ethers.utils.keccak256('0x42');
-        const metadata = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
+        const uri = 'http://myMetadata.io/1';
+        const metadata = abiCoder.encode(['string'], [uri]);
 
         const assetERC721AsMinter = await ethers.getContract(
           'AssetERC721',
@@ -111,9 +111,7 @@ describe('AssetERC721.sol', function () {
             metadata
           )
         ).to.revertedWith('ERC721: token already minted');
-        expect(await fixtures.assetERC721.metadataHashes(123)).to.be.equal(
-          dummyMetadataHash
-        );
+        expect(await fixtures.assetERC721.tokenUris(123)).to.be.equal(uri);
       });
     });
     it('Can mint without metadata (although this is not the expected implementation)', async function () {
