@@ -10,8 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
-  const maxGasLimit = 500;
-  const limits = [5, 10, 20, 90, 340];
+  const maxTransferLimit = 20;
 
   const PolygonAssetERC721Tunnel = await deploy('PolygonAssetERC721Tunnel', {
     from: deployer,
@@ -20,8 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       FXCHILD.address,
       PolygonAssetERC721.address,
       TRUSTED_FORWARDER.address,
-      maxGasLimit,
-      limits,
+      maxTransferLimit,
     ],
     log: true,
     skipIfAlreadyDeployed: true,
