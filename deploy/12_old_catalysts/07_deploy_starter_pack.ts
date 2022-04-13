@@ -1,16 +1,16 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {ethers} from 'hardhat';
+import { ethers } from 'hardhat';
+import { DeployFunction } from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 const {BigNumber} = ethers;
 
 // sand price is in Sand unit (Sand has 18 decimals)
 const starterPackPrices = [
-  sandWei(18),
-  sandWei(55),
-  sandWei(182),
-  sandWei(727),
+  sandWei(0),
+  sandWei(0),
+  sandWei(0),
+  sandWei(0),
 ];
-const gemPrice = sandWei(18);
+const gemPrice = sandWei(0);
 
 function sandWei(amount: number) {
   return BigNumber.from(amount).mul('1000000000000000000').toString();
@@ -47,6 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       gemPrice,
     ],
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
