@@ -1,5 +1,5 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { DeployFunction } from 'hardhat-deploy/types';
+import {BigNumber} from '@ethersproject/bignumber';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const catalysts: {[key: string]: string}[] = [
   {

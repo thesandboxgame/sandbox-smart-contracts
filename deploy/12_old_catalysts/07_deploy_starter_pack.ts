@@ -1,15 +1,10 @@
-import { ethers } from 'hardhat';
-import { DeployFunction } from 'hardhat-deploy/types';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import {ethers} from 'hardhat';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 const {BigNumber} = ethers;
 
 // sand price is in Sand unit (Sand has 18 decimals)
-const starterPackPrices = [
-  sandWei(0),
-  sandWei(0),
-  sandWei(0),
-  sandWei(0),
-];
+const starterPackPrices = [sandWei(0), sandWei(0), sandWei(0), sandWei(0)];
 const gemPrice = sandWei(0);
 
 function sandWei(amount: number) {

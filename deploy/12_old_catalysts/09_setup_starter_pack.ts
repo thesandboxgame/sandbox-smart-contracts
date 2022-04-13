@@ -1,14 +1,9 @@
-import { BigNumber } from 'ethers';
-import { DeployFunction } from 'hardhat-deploy/types';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import {BigNumber} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 // sand price is in Sand unit (Sand has 18 decimals)
-const starterPackPrices = [
-  sandWei(0),
-  sandWei(0),
-  sandWei(0),
-  sandWei(0),
-];
+const starterPackPrices = [sandWei(0), sandWei(0), sandWei(0), sandWei(0)];
 const gemPrice = sandWei(0);
 
 function sandWei(amount: number) {
@@ -16,15 +11,26 @@ function sandWei(amount: number) {
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments } = hre;
-  const { read, execute, catchUnknownSigner } = deployments;
+  const {deployments} = hre;
+  const {read, execute, catchUnknownSigner} = deployments;
   const prices = await read('StarterPackV1', {}, 'getPrices');
 
-  const needsSetup = prices.pricesAfterSwitch.some((price: BigNumber, i: number) => !price.eq(starterPackPrices[i])) || !prices.gemPriceAfterSwitch.eq(gemPrice);
+  const needsSetup =
+    prices.pricesAfterSwitch.some(
+      (price: BigNumber, i: number) => !price.eq(starterPackPrices[i])
+    ) || !prices.gemPriceAfterSwitch.eq(gemPrice);
   if (needsSetup) {
-    console.log("Setting up new prices");
+    console.log('Setting up new prices');
     const admin = await read('StarterPackV1', {}, 'getAdmin');
-    await catchUnknownSigner(execute('StarterPackV1', { from: admin }, 'setPrices', starterPackPrices, gemPrice))
+    await catchUnknownSigner(
+      execute(
+        'StarterPackV1',
+        {from: admin},
+        'setPrices',
+        starterPackPrices,
+        gemPrice
+      )
+    );
   }
 };
 export default func;
