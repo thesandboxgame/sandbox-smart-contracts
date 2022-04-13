@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 /// @title ASSETERC721 bridge on L1
 contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC721 public rootToken;
-    mapping(uint256 => bytes) public tokenUris; // TODO: keep as bytes ?
 
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
@@ -48,20 +47,14 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
-    function batchTransferToChild(
-        address to,
-        uint256[] memory ids,
-        bytes memory data
-    ) public whenNotPaused() {
-        string[] memory uris = abi.decode(data, (string[]));
+    function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused() {
         for (uint256 i = 0; i < ids.length; i++) {
-            // save the token uris and lock the root tokens in this contract
+            // lock the root tokens in this contract
             uint256 id = ids[i];
-            tokenUris[id] = abi.encode(uris[i]);
-            bytes memory message = abi.encode(to, ids[i], tokenUris[id]);
-            rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], tokenUris[id]);
-            _sendMessageToChild(message);
-            emit Deposit(to, ids[i], tokenUris[id]);
+            bytes memory uniqueUriData = abi.encode(rootToken.tokenURI(id));
+            rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
+            _sendMessageToChild(abi.encode(to, ids[i], uniqueUriData));
+            emit Deposit(to, ids[i], uniqueUriData);
         }
     }
 
@@ -82,14 +75,10 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
-        for (uint256 index = 0; index < ids.length; index++) {
-            string[] memory uris = abi.decode(data, (string[]));
-            bytes memory metadata = abi.encode(uris[index]);
-            if (!rootToken.exists(ids[index])) rootToken.mint(to, ids[index], metadata);
-            else rootToken.safeTransferFrom(address(this), to, ids[index], metadata);
-            emit Withdraw(to, ids[index], metadata);
-        }
+        (address to, uint256 id, bytes memory data) = abi.decode(message, (address, uint256, bytes));
+        if (!rootToken.exists(id)) rootToken.mint(to, id, data);
+        else rootToken.safeTransferFrom(address(this), to, id, data);
+        emit Withdraw(to, id, data);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
