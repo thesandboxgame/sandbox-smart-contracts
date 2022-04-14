@@ -74,7 +74,7 @@ export const assetFixtures = async function () {
 
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
-      .batchTransferToL1(to, [tokenId], [value], '0x00');
+      .batchWithdrawToRoot(to, [tokenId], [value]);
 
     // For Tests only
 
