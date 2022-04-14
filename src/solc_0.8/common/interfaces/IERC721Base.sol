@@ -54,7 +54,7 @@ interface IERC721Base is IERC721Upgradeable {
 
     function setTrustedForwarder(address trustedForwarder) external;
 
-    function isTrustedForwarder(address forwarder) external;
+    function isTrustedForwarder(address forwarder) external returns (bool);
 
-    function getTrustedForwarder() external;
+    function getTrustedForwarder() external returns (address trustedForwarder);
 }

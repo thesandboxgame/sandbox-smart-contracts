@@ -31,12 +31,15 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
             interfaceId == 0x01ffc9a7; // ERC165
     }
 
-    function batchTransferToL2(
+    function batchDepositToChild(
         address to,
         uint256[] memory ids,
-        uint256[] memory values,
-        bytes memory data
+        uint256[] memory values
     ) public whenNotPaused() {
+        require(ids.length > 0, "MISSING_TOKEN_IDS");
+        uint256 id = ids[0];
+        string memory uri = rootToken.tokenURI(id);
+        bytes memory data = abi.encode(uri); // TODO: test
         rootToken.safeBatchTransferFrom(to, address(this), ids, values, data);
 
         for (uint256 index = 0; index < ids.length; index++) {
