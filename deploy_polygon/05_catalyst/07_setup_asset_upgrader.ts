@@ -2,9 +2,11 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments} = hre;
-  const {execute, read} = deployments;
+  const {deployments, getNamedAccounts} = hre;
+  const {execute, read, catchUnknownSigner} = deployments;
+  const {deployer} = await getNamedAccounts();
 
+  const sandCurrentAdmin = await read('PolygonSand', 'getAdmin');
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
   const isAssetUpgraderSandSuperOperator = await read(
@@ -14,30 +16,36 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   if (!isAssetUpgraderSandSuperOperator) {
-    const currentAdmin = await read('PolygonSand', 'getAdmin');
-    await execute(
-      'PolygonSand',
-      {from: currentAdmin, log: true},
-      'setSuperOperator',
-      AssetUpgrader.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'PolygonSand',
+        {from: sandCurrentAdmin, log: true},
+        'setSuperOperator',
+        AssetUpgrader.address,
+        true
+      )
     );
   }
 
+  const superOperatorRole = await read(
+    'PolygonGemsCatalystsRegistry',
+    'SUPER_OPERATOR_ROLE'
+  );
+
   const isAssetUpgraderGemsCatalystsRegistrySuperOperator = await read(
     'PolygonGemsCatalystsRegistry',
-    'isSuperOperator',
+    'hasRole',
+    superOperatorRole,
     AssetUpgrader.address
   );
 
   if (!isAssetUpgraderGemsCatalystsRegistrySuperOperator) {
-    const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
     await execute(
       'PolygonGemsCatalystsRegistry',
-      {from: currentAdmin, log: true},
-      'setSuperOperator',
-      AssetUpgrader.address,
-      true
+      {from: deployer, log: true},
+      'grantRole',
+      superOperatorRole,
+      AssetUpgrader.address
     );
   }
 };
