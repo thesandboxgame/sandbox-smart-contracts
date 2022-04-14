@@ -515,28 +515,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return true;
     }
 
-    // function _mint(
-    //     bytes32 hash,
-    //     uint256 supply,
-    //     uint8 rarity,
-    //     address operator,
-    //     address owner,
-    //     uint256 id,
-    //     bytes memory data,
-    //     bool extraction
-    // ) internal {
-    //     uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
-    //     if (!extraction) {
-    //         require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
-    //         _metadataHash[uriId] = hash;
-    //         require(rarity < 4, "RARITY>=4");
-    //         bytes memory pack = new bytes(1);
-    //         pack[0] = bytes1(rarity * 64);
-    //         _rarityPacks[uriId] = pack;
-    //     }
-    //     _mint(operator, owner, id, supply, data);
-    // }
-
     function _mint(
         address operator,
         address account,
@@ -544,7 +522,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint256 amount,
         bytes memory data
     ) internal {
-        // TODO: review
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
             index,
