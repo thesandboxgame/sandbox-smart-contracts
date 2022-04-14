@@ -13,6 +13,7 @@ import "./PolygonAssetERC1155.sol";
 /// @title ASSETERC1155 bridge on L2
 contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC1155 public childToken;
+    uint256 public maxTransferLimit = 20;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256[] id, uint256[] value, bytes data);
