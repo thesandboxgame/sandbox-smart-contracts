@@ -381,8 +381,6 @@ describe.only('PolygonAssetERC721.sol', function () {
           MockAssetERC721Tunnel,
           PolygonAssetERC721,
           MockPolygonAssetERC721Tunnel,
-          // AssetERC721Tunnel,
-          // PolygonAssetERC721Tunnel,
         } = await setupAssetERC721Tunnels();
 
         const assetHolder = users[0];
