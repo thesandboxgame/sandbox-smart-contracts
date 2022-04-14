@@ -48,6 +48,7 @@ abstract contract BaseERC721 is
         uint256 id,
         bytes calldata data
     ) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) {
+        require(data.length > 0, "DATA_MUST_CONTAIN_TOKENURI");
         _setTokenURI(id, data);
         _safeMint(to, id, data);
     }
