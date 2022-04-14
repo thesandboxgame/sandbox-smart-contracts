@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./AssetERC721Tunnel.sol";
-import "../../../common/interfaces/IAssetERC721.sol";
+import "../polygon/root/asset/AssetERC721Tunnel.sol";
+import "../common/interfaces/IAssetERC721.sol";
 
 contract MockAssetERC721Tunnel is AssetERC721Tunnel {
     constructor(
