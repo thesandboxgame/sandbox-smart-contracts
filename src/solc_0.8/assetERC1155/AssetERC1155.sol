@@ -36,6 +36,7 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
         uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
+        require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
         _metadataHash[uriId] = abi.decode(data, (bytes32));
         _mint(_msgSender(), account, id, amount, data);
     }
@@ -55,7 +56,8 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         bytes32[] memory hashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
-            _metadataHash[uriId] = hashes[i]; // To Review
+            require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
+            _metadataHash[uriId] = hashes[i]; // TODO: review
         }
         _mintBatch(to, ids, amounts, data);
     }
