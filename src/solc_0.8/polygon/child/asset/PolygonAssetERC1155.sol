@@ -14,7 +14,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     address public _childChainManager;
 
     // We only mint on L2, so we track tokens transferred to L1 to avoid minting them twice.
-    mapping(uint256 => bool) public withdrawnTokens;
+    mapping(uint256 => bool) public withdrawnTokens; // TODO: this is not used - remove param?
 
     function initialize(
         address trustedForwarder,
@@ -42,7 +42,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         uint40 packId,
         bytes32 hash,
         uint256 supply,
-        uint8 rarity,
+        uint8 rarity, /* deprecated */ // TODO: remove param?
         address owner,
         bytes calldata data
     ) external returns (uint256 id) {
@@ -50,8 +50,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(owner != address(0), "TO==0");
         id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
-
-        _mint(hash, supply, rarity, _msgSender(), owner, id, data, false);
+        uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
+        require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
+        _metadataHash[uriId] = hash;
+        _mint(_msgSender(), owner, id, supply, data);
     }
 
     /// @notice Mint multiple token types for `creator` on slot `packId`.
