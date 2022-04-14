@@ -30,12 +30,15 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function batchTransferToL1(
+    function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes memory data
+        uint256[] calldata values
     ) external whenNotPaused() {
+        require(ids.length > 0, "MISSING_TOKEN_IDS");
+        uint256 id = ids[0];
+        string memory uri = childToken.tokenURI(id); // Identical token URIs for ERC155
+        bytes memory data = abi.encode(uri); // TODO: test
         for (uint256 i = 0; i < ids.length; i++) {
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], data);
             emit Withdraw(to, ids[i], values[i], data);

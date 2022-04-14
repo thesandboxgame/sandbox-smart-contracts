@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import {IAssetERC721} from "./IAssetERC721.sol";
+
 interface IAssetERC1155 {
     function changeBouncerAdmin(address newBouncerAdmin) external;
 
@@ -91,4 +93,32 @@ interface IAssetERC1155 {
     function isSuperOperator(address who) external view returns (bool);
 
     function isApprovedForAll(address owner, address operator) external view returns (bool isOperator);
+
+    function setApprovalForAllFor(
+        address sender,
+        address operator,
+        bool approved
+    ) external;
+
+    function setApprovalForAll(address operator, bool approved) external;
+
+    function balanceOfBatch(address[] calldata owners, uint256[] calldata ids) external returns (uint256[] memory);
+
+    function name() external returns (string memory _name);
+
+    function symbol() external returns (string memory _symbol);
+
+    function supportsInterface(bytes4 id) external returns (bool);
+
+    function tokenURI(uint256 id) external returns (string memory);
+
+    function setAssetERC721(IAssetERC721 assetERC721) external;
+
+    function exists(uint256 tokenId) external view returns (bool);
+
+    function setTrustedForwarder(address trustedForwarder) external;
+
+    function isTrustedForwarder(address forwarder) external returns (bool);
+
+    function getTrustedForwarder() external returns (address);
 }
