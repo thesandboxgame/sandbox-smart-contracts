@@ -14,19 +14,23 @@ import "./PolygonAssetERC1155.sol";
 contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC1155 public childToken;
 
-    // TODO
-    // uint256 public maxGasLimitOnL1;
-    // uint256 public maxGasLimitOnL2;
-
+    event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256[] id, uint256[] value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
+    }
 
     constructor(
         address _fxChild,
         IAssetERC1155 _childToken,
-        address _trustedForwarder
+        address _trustedForwarder,
+        uint256 _maxTransferLimit
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
+        maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
@@ -36,6 +40,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         uint256[] calldata values
     ) external whenNotPaused() {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
+        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         uint256 id = ids[0];
         string memory uri = childToken.tokenURI(id); // Identical token URIs for ERC155
         bytes memory data = abi.encode(uri); // TODO: test
