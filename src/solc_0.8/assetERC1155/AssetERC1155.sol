@@ -57,7 +57,7 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
             require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
-            _metadataHash[uriId] = hashes[i]; // TODO: review
+            _metadataHash[uriId] = hashes[i];
         }
         _mintBatch(to, ids, amounts, data);
     }
