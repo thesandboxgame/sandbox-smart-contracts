@@ -1,6 +1,7 @@
 import {ethers} from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipUnlessTest} from '../../utils/network';
 const {BigNumber} = ethers;
 
 // sand price is in Sand unit (Sand has 18 decimals)
@@ -53,4 +54,4 @@ func.dependencies = [
   'OldCatalysts_deploy',
   'OldGems_deploy',
 ];
-func.skip = async () => true;
+func.skip = skipUnlessTest; // not meant to be redeployed
