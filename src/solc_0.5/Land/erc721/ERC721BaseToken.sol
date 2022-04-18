@@ -2,7 +2,6 @@
 pragma solidity 0.5.9;
 
 import "../../contracts_common/Libraries/AddressUtils.sol";
-import "../../contracts_common/Interfaces/ERC721TokenReceiver.sol";
 import "../../contracts_common/Interfaces/ERC721Events.sol";
 import "../../contracts_common/BaseWithStorage/SuperOperators.sol";
 import "../../contracts_common/BaseWithStorage/MetaTransactionReceiver.sol";
@@ -293,11 +292,12 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @notice Check if the contract supports an interface
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
+     * 0x5e8bf644 is ERC721_MANDATORY_RECEIVER
      * @param id The id of the interface
      * @return True if the interface is supported
      */
     function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd;
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == ERC721_MANDATORY_RECEIVER;
     }
 
     /**
@@ -393,7 +393,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

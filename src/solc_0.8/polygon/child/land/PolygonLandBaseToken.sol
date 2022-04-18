@@ -512,7 +512,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     }
 
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
-        uint256 owner = _owners[id];
+        uint256 owner = _owners[id]; //check owner Of 
         if (owner != 0) {
             require(address(uint160(owner)) == from, "not owner");
             _owners[id] = 0;
