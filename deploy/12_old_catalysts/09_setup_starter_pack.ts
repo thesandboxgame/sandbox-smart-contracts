@@ -1,6 +1,7 @@
 import {BigNumber} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipUnlessTest} from '../../utils/network';
 
 // sand price is in Sand unit (Sand has 18 decimals)
 const starterPackPrices = [sandWei(0), sandWei(0), sandWei(0), sandWei(0)];
@@ -36,4 +37,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['StarterPackV1', 'StarterPackV1_setup'];
 func.dependencies = [];
-func.skip = async () => true;
+func.skip = skipUnlessTest; // not meant to be redeployed
