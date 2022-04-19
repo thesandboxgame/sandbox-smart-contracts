@@ -104,7 +104,7 @@ contract ContributionRules is Ownable {
             _listERC721[multContract].index = _listERC721Index.length - 1;
         }
 
-        ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
+        emit ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
     }
 
     function getERC721MultiplierList(address reqContract)
