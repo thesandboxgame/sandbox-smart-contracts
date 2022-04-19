@@ -26,6 +26,11 @@ contract LockRules is Context, Ownable {
         mapping(address => uint256) lastDeposit;
     }
 
+    event TimelockClaimSet(uint256 lockPeriodInSecs);
+    event TimelockDepositSet(uint256 newTimeDeposit);
+    event TimeLockWithdrawSet(uint256 newTimeWithdraw);
+    event AmountLockClaimSet(uint256 newAmountLockClaim, bool isEnabled);
+
     // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
     TimeLockClaim public timeLockClaim;
     AmountLockClaim public amountLockClaim;
@@ -68,23 +73,31 @@ contract LockRules is Context, Ownable {
         _;
     }
 
-    /// @notice set the lockPeriodInSecs for the anti-compound buffer
-    /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
-    function setTimelockClaim(uint256 lockPeriodInSecs) external onlyOwner {
-        timeLockClaim.lockPeriodInSecs = lockPeriodInSecs;
+    /// @notice set the _lockPeriodInSecs for the anti-compound buffer
+    /// @param _lockPeriodInSecs amount of time the user must wait between reward withdrawal
+    function setTimelockClaim(uint256 _lockPeriodInSecs) external onlyOwner {
+        timeLockClaim.lockPeriodInSecs = _lockPeriodInSecs;
+
+        emit TimelockClaimSet(_lockPeriodInSecs);
     }
 
-    function setTimelockDeposit(uint256 newTimeDeposit) external onlyOwner {
-        lockDeposit.lockPeriodInSecs = newTimeDeposit;
+    function setTimelockDeposit(uint256 _newTimeDeposit) external onlyOwner {
+        lockDeposit.lockPeriodInSecs = _newTimeDeposit;
+
+        emit TimelockDepositSet(_newTimeDeposit);
     }
 
-    function setTimeLockWithdraw(uint256 newTimeWithdraw) external onlyOwner {
-        lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
+    function setTimeLockWithdraw(uint256 _newTimeWithdraw) external onlyOwner {
+        lockWithdraw.lockPeriodInSecs = _newTimeWithdraw;
+
+        emit TimeLockWithdrawSet(_newTimeWithdraw);
     }
 
-    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external onlyOwner {
-        amountLockClaim.amount = newAmountLockClaim;
-        amountLockClaim.claimLockEnabled = isEnabled;
+    function setAmountLockClaim(uint256 _newAmountLockClaim, bool _isEnabled) external onlyOwner {
+        amountLockClaim.amount = _newAmountLockClaim;
+        amountLockClaim.claimLockEnabled = _isEnabled;
+
+        emit AmountLockClaimSet(_newAmountLockClaim, _isEnabled);
     }
 
     function getRemainingTimelockClaim() external view returns (uint256) {
