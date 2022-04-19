@@ -102,7 +102,7 @@ contract RequirementsRules is Ownable {
         emit MaxStakeOverallSet(newMaxStake, oldMaxStake);
     }
 
-    function setERC721tRequirementList(
+    function setERC721RequirementList(
         address contractERC721,
         uint256[] memory ids,
         bool balanceOf,
