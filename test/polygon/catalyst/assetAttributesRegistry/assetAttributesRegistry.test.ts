@@ -42,11 +42,8 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst for legendary catalyst with 4 gems', async function () {
-    const {
-      assetUpgrader,
-      assetAttributesRegistry,
-      user0,
-    } = await setupAssetAttributesRegistry();
+    const {assetUpgrader, assetAttributesRegistry, user0} =
+      await setupAssetAttributesRegistry();
     const assetId = await mintAsset(
       user0,
       BigNumber.from('2233'),
@@ -77,9 +74,8 @@ describe('AssetAttributesRegistry', function () {
     );
   });
   it('setCatalyst should fail for non minter account', async function () {
-    const {
-      assetAttributesRegistryAsUser0,
-    } = await setupAssetAttributesRegistry();
+    const {assetAttributesRegistryAsUser0} =
+      await setupAssetAttributesRegistry();
     const assetId = BigNumber.from('0x12000000000800000000000000000000000');
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = gems.filter((gem) => gem.gemId < 5).map((gem) => gem.gemId);
@@ -127,9 +123,8 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalystWithBlockNumber should fail for non migration contract', async function () {
-    const {
-      assetAttributesRegistryAsmockedMigrationContract,
-    } = await setupAssetAttributesRegistry();
+    const {assetAttributesRegistryAsmockedMigrationContract} =
+      await setupAssetAttributesRegistry();
     const assetId = 2;
     const legendaryCatalystId = catalysts[2].catalystId;
     const gemsIds = gems.filter((gem) => gem.gemId < 4).map((gem) => gem.gemId);
@@ -188,11 +183,8 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('should fail for non-nft', async function () {
-    const {
-      user0,
-      assetAttributesRegistry,
-      assetUpgrader,
-    } = await setupAssetAttributesRegistry();
+    const {user0, assetAttributesRegistry, assetUpgrader} =
+      await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '9435802489392532849329415225251965785597302377102806428109850929297113483264'
     );
@@ -270,11 +262,8 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('should fail for gemId = 0', async function () {
-    const {
-      user0,
-      assetUpgrader,
-      assetAttributesRegistry,
-    } = await setupAssetAttributesRegistry();
+    const {user0, assetUpgrader, assetAttributesRegistry} =
+      await setupAssetAttributesRegistry();
 
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'

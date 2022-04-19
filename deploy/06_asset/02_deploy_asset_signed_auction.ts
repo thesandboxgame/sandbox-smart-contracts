@@ -5,11 +5,8 @@ const func: DeployFunction = async function (hre) {
   const {ethers, deployments, getNamedAccounts} = hre;
   const {deploy, read, execute, catchUnknownSigner} = deployments;
 
-  const {
-    deployer,
-    assetAuctionAdmin,
-    assetAuctionFeeCollector,
-  } = await getNamedAccounts();
+  const {deployer, assetAuctionAdmin, assetAuctionFeeCollector} =
+    await getNamedAccounts();
 
   const fee10000th = 500;
 

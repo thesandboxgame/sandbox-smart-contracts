@@ -11,10 +11,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const OldCatalystRegistry = await deployments.get('OldCatalystRegistry');
 
-  const {
-    deployer,
-    collectionCatalystMigrationsAdmin,
-  } = await getNamedAccounts();
+  const {deployer, collectionCatalystMigrationsAdmin} =
+    await getNamedAccounts();
   await deploy(`CollectionCatalystMigrations`, {
     from: deployer,
     log: true,

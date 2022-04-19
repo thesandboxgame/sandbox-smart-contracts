@@ -29,9 +29,7 @@ function toHash(ipfsUri: string): string {
 }
 
 const bn2 = BigNumber.from(2);
-function extractFromId(
-  tokenID: string
-): {
+function extractFromId(tokenID: string): {
   packID: BigNumber;
   creator: string;
   // isNFT: boolean;
@@ -161,9 +159,10 @@ for (const collectionId of collectionIds) {
   collectionMints.push(collection);
 }
 
-function extractIpfsString(
-  tokenURI: string
-): {ipfsBase: string; counter: number} {
+function extractIpfsString(tokenURI: string): {
+  ipfsBase: string;
+  counter: number;
+} {
   const uri = tokenURI.substr(7);
   const split = uri.split('/');
   const ipfsBase = split[0];

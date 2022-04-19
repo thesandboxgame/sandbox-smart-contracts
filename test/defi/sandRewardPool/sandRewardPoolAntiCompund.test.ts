@@ -14,11 +14,8 @@ describe('new SandRewardPool anti compound tests', function () {
       expect(await contract.antiCompound()).to.be.equal(10000);
     });
     it('other should fail to call setAntiCompoundLockPeriod', async function () {
-      const {
-        getUser,
-        contract,
-        rewardCalculatorMock,
-      } = await setupSandRewardPoolTest();
+      const {getUser, contract, rewardCalculatorMock} =
+        await setupSandRewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       const user = await getUser();
       await expect(
@@ -27,12 +24,8 @@ describe('new SandRewardPool anti compound tests', function () {
     });
   });
   it('user can only get his rewards after lockTimeMS', async function () {
-    const {
-      contract,
-      rewardCalculatorMock,
-      balances,
-      getUser,
-    } = await setupSandRewardPoolTest();
+    const {contract, rewardCalculatorMock, balances, getUser} =
+      await setupSandRewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;
@@ -70,11 +63,8 @@ describe('new SandRewardPool anti compound tests', function () {
     expect(deltas2.reward).to.be.equal(80);
   });
   it('we can disable lockTimeMS check by setting it to zero', async function () {
-    const {
-      contract,
-      rewardCalculatorMock,
-      getUser,
-    } = await setupSandRewardPoolTest();
+    const {contract, rewardCalculatorMock, getUser} =
+      await setupSandRewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;

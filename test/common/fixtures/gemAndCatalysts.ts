@@ -29,12 +29,8 @@ export const gemsAndCatalystsFixtures = async () => {
     'Catalyst_LEGENDARY'
   );
   const users = await getUnnamedAccounts();
-  const {
-    deployer,
-    catalystMinter,
-    gemMinter,
-    gemsCatalystsRegistryAdmin,
-  } = await getNamedAccounts();
+  const {deployer, catalystMinter, gemMinter, gemsCatalystsRegistryAdmin} =
+    await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
   const gemsCatalystsRegistrySuperOperator = users[1];
@@ -134,9 +130,10 @@ export const gemsAndCatalystsFixtures = async () => {
     ethers.provider.getSigner(catalystOwner)
   );
 
-  const gemsCatalystsRegistryAsRegistrySuperOperator = gemsCatalystsRegistry.connect(
-    ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
-  );
+  const gemsCatalystsRegistryAsRegistrySuperOperator =
+    gemsCatalystsRegistry.connect(
+      ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
+    );
 
   const gemsCatalystsRegistryAsUser3 = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(users[3])

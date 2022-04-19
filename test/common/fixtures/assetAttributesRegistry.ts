@@ -59,18 +59,20 @@ export const assetAttributesRegistryFixture = async () => {
   const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
     ethers.provider.getSigner(user0)
   );
-  const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
-    ethers.provider.getSigner(assetAttributesRegistryAdmin)
-  );
+  const assetAttributesRegistryAsRegistryAdmin =
+    await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(assetAttributesRegistryAdmin)
+    );
   const assetUpgraderAsUser0 = await assetUpgrader.connect(
     ethers.provider.getSigner(user0)
   );
   const assetMinterAsUser0 = await assetMinter.connect(
     ethers.provider.getSigner(user0)
   );
-  const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
-    ethers.provider.getSigner(mockedMigrationContractAddress)
-  );
+  const assetAttributesRegistryAsmockedMigrationContract =
+    await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(mockedMigrationContractAddress)
+    );
 
   return {
     mockedMigrationContractAddress,

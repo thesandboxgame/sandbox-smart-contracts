@@ -59,24 +59,24 @@ describe('ERC20BasicApproveExtension', function () {
     if (land !== undefined) {
       const tree = new MerkleTree(landHashArray);
       const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
-      const totalSandBalance = BigNumber.from(100000).mul(
-        `1000000000000000000`
-      );
+      const totalSandBalance =
+        BigNumber.from(100000).mul(`1000000000000000000`);
       const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-      const encodedABI = await landSaleContract.populateTransaction.buyLandWithSand(
-        user0,
-        user0,
-        zeroAddress,
-        land.x,
-        land.y,
-        land.size,
-        land.price,
-        land.price,
-        land.salt,
-        [],
-        proof,
-        emptyReferral
-      );
+      const encodedABI =
+        await landSaleContract.populateTransaction.buyLandWithSand(
+          user0,
+          user0,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.price,
+          land.salt,
+          [],
+          proof,
+          emptyReferral
+        );
       expect(encodedABI.data).to.not.be.equal(undefined);
       if (encodedABI.data) {
         await transferSand(sandContract, user0, totalSandBalance);
@@ -108,11 +108,8 @@ describe('ERC20BasicApproveExtension', function () {
     }
   });
   it('ApproveAndCall should fail for input data too short', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -127,12 +124,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('ApproveAndCall should fail for first parameter != sender', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -149,11 +142,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('ApproveAndCall should fail for zero data', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const data = zeroPadding('0');
@@ -167,11 +157,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('ApproveAndCall should fail for Approving the zeroAddress', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -188,12 +175,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`Cannot approve with 0x0`);
   });
   it('ApproveAndCall should work for target = EOA with ether value = 1', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -232,12 +215,8 @@ describe('ERC20BasicApproveExtension', function () {
     );
   });
   it('ApproveAndCall should work for target = EOA with ether value = 0', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -276,12 +255,8 @@ describe('ERC20BasicApproveExtension', function () {
     );
   });
   it('ApproveAndCall for an empty contract as a target should revert', async function () {
-    const {
-      emptyContract,
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {emptyContract, sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -309,9 +284,8 @@ describe('ERC20BasicApproveExtension', function () {
     } = await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(
-      user0
-    );
+    const encodedABI =
+      await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(user0);
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(
       mockERC20BasicApprovalTarget.address
@@ -372,9 +346,8 @@ describe('ERC20BasicApproveExtension', function () {
     } = await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(
-      user0
-    );
+    const encodedABI =
+      await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(user0);
     expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const function4BytesId = encodedABI.data.substring(2, 10);
@@ -401,12 +374,12 @@ describe('ERC20BasicApproveExtension', function () {
       sandContract,
       user0,
     } = await setupERC20BasicApproveExtension();
-    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
+    const encodedABI =
+      await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
     expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
-      const totalSandBalance = BigNumber.from(100000).mul(
-        `1000000000000000000`
-      );
+      const totalSandBalance =
+        BigNumber.from(100000).mul(`1000000000000000000`);
       const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
       const function4BytesId = encodedABI.data.substring(2);
       const paddedMsgSender = zeroPadding(user0.substring(2));
@@ -447,24 +420,24 @@ describe('ERC20BasicApproveExtension', function () {
     if (land !== undefined) {
       const tree = new MerkleTree(landHashArray);
       const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
-      const totalSandBalance = BigNumber.from(100000).mul(
-        `1000000000000000000`
-      );
+      const totalSandBalance =
+        BigNumber.from(100000).mul(`1000000000000000000`);
       const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-      const encodedABI = await landSaleContract.populateTransaction.buyLandWithSand(
-        user0,
-        user0,
-        zeroAddress,
-        land.x,
-        land.y,
-        land.size,
-        land.price,
-        land.price,
-        land.salt,
-        [],
-        proof,
-        emptyReferral
-      );
+      const encodedABI =
+        await landSaleContract.populateTransaction.buyLandWithSand(
+          user0,
+          user0,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.price,
+          land.salt,
+          [],
+          proof,
+          emptyReferral
+        );
       expect(encodedABI.data).to.not.be.equal(undefined);
       if (encodedABI.data) {
         await transferSand(sandContract, user0, totalSandBalance);
@@ -496,11 +469,8 @@ describe('ERC20BasicApproveExtension', function () {
     }
   });
   it('PaidCall should fail for input data too short', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -515,12 +485,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('PaidCall should fail for first parameter != sender', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -537,11 +503,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('PaidCall should fail for zero data', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const data = zeroPadding('0');
@@ -555,11 +518,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`first param != sender`);
   });
   it('PaidCall should fail for Approving the zeroAddress', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -576,12 +536,8 @@ describe('ERC20BasicApproveExtension', function () {
     ).to.be.revertedWith(`Cannot approve with 0x0`);
   });
   it('PaidCall should work for target = EOA with ether value = 1', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -620,12 +576,8 @@ describe('ERC20BasicApproveExtension', function () {
     );
   });
   it('PaidCall should work for target = EOA with ether value = 0', async function () {
-    const {
-      sandContractAsUser0,
-      sandContract,
-      user0,
-      user1,
-    } = await setupERC20BasicApproveExtension();
+    const {sandContractAsUser0, sandContract, user0, user1} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -664,12 +616,8 @@ describe('ERC20BasicApproveExtension', function () {
     );
   });
   it('PaidCall for an empty contract as a target should revert', async function () {
-    const {
-      emptyContract,
-      sandContractAsUser0,
-      sandContract,
-      user0,
-    } = await setupERC20BasicApproveExtension();
+    const {emptyContract, sandContractAsUser0, sandContract, user0} =
+      await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
     const function4BytesId = '11111111';
@@ -697,9 +645,8 @@ describe('ERC20BasicApproveExtension', function () {
     } = await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(
-      user0
-    );
+    const encodedABI =
+      await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(user0);
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(
       mockERC20BasicApprovalTarget.address
@@ -761,7 +708,8 @@ describe('ERC20BasicApproveExtension', function () {
     } = await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
+    const encodedABI =
+      await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
     expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const function4BytesId = encodedABI.data.substring(2);

@@ -149,12 +149,8 @@ describe('PolygonAsset.sol', function () {
 
   describe('PolygonAsset: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
-      const {
-        Asset,
-        users,
-        mintAsset,
-        trustedForwarder,
-      } = await setupPolygonAsset();
+      const {Asset, users, mintAsset, trustedForwarder} =
+        await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await Asset.populateTransaction[
@@ -171,12 +167,8 @@ describe('PolygonAsset.sol', function () {
     });
 
     it('fails to transfer someone else token by metaTx', async function () {
-      const {
-        Asset,
-        users,
-        mintAsset,
-        trustedForwarder,
-      } = await setupPolygonAsset();
+      const {Asset, users, mintAsset, trustedForwarder} =
+        await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await Asset.populateTransaction[
@@ -195,12 +187,8 @@ describe('PolygonAsset.sol', function () {
     });
 
     it('can batch-transfer by metaTx', async function () {
-      const {
-        Asset,
-        users,
-        mintAsset,
-        trustedForwarder,
-      } = await setupPolygonAsset();
+      const {Asset, users, mintAsset, trustedForwarder} =
+        await setupPolygonAsset();
       const tokenId1 = await mintAsset(users[1].address, 7);
       const tokenId2 = await mintAsset(users[1].address, 3);
       const tokenIds = [tokenId1, tokenId2];
@@ -1160,11 +1148,8 @@ describe('PolygonAsset.sol', function () {
         );
       });
       it('Deposit asset from L1 to L2 without catalyst and gems', async function () {
-        const {
-          mainnet,
-          polygon,
-          polygonAssetRegistry,
-        } = await setupMainnetAndPolygonAsset();
+        const {mainnet, polygon, polygonAssetRegistry} =
+          await setupMainnetAndPolygonAsset();
 
         const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
 
@@ -1235,11 +1220,8 @@ describe('PolygonAsset.sol', function () {
     });
 
     it('Deposit 1 asset from 20 ERC1155 L1 to L2', async function () {
-      const {
-        mainnet,
-        polygon,
-        polygonAssetRegistry,
-      } = await setupMainnetAndPolygonAsset();
+      const {mainnet, polygon, polygonAssetRegistry} =
+        await setupMainnetAndPolygonAsset();
 
       const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
 
@@ -1309,11 +1291,8 @@ describe('PolygonAsset.sol', function () {
       async function executeL2toL1Deposit(
         gemsAndCatalystsdata: (number | number[] | void)[]
       ) {
-        const {
-          mainnet,
-          polygon,
-          polygonAssetRegistry,
-        } = await setupMainnetAndPolygonAsset();
+        const {mainnet, polygon, polygonAssetRegistry} =
+          await setupMainnetAndPolygonAsset();
 
         const tokenId = await polygon.mintAsset(polygon.users[0].address, 20);
 
@@ -1409,11 +1388,8 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L2 to L1 without catalyst and gems', async function () {
-        const {
-          mainnet,
-          polygon,
-          assetRegistry,
-        } = await setupMainnetAndPolygonAsset();
+        const {mainnet, polygon, assetRegistry} =
+          await setupMainnetAndPolygonAsset();
 
         const tokenId = await polygon.mintAsset(polygon.users[0].address, 20);
         const balance = await polygon.Asset['balanceOf(address,uint256)'](

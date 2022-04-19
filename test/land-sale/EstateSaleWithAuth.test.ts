@@ -10,11 +10,8 @@ import {
 
 describe('EstateSaleWithAuth', function () {
   it('should be able to purchase with valid signature', async function () {
-    const {
-      estateSaleWithAuthContract,
-      proofs,
-      approveSandForEstateSale,
-    } = await setupEstateSale();
+    const {estateSaleWithAuthContract, proofs, approveSandForEstateSale} =
+      await setupEstateSale();
     const {deployer} = await getNamedAccounts();
     const {x, y, size, price, salt, proof, assetIds} = proofs[0];
     const signature = await signAuthMessageAs(
@@ -52,11 +49,8 @@ describe('EstateSaleWithAuth', function () {
   });
 
   it('should NOT be able to purchase with invalid signature', async function () {
-    const {
-      estateSaleWithAuthContract,
-      proofs,
-      approveSandForEstateSale,
-    } = await setupEstateSale();
+    const {estateSaleWithAuthContract, proofs, approveSandForEstateSale} =
+      await setupEstateSale();
     const {deployer} = await getNamedAccounts();
     const {x, y, size, price, salt, proof, assetIds} = proofs[0];
     const wallet = await ethers.getSigner(deployer);
@@ -93,11 +87,8 @@ describe('EstateSaleWithAuth', function () {
   });
 
   it('should be able to purchase through sand contract', async function () {
-    const {
-      estateSaleWithAuthContract,
-      sandContract,
-      proofs,
-    } = await setupEstateSale();
+    const {estateSaleWithAuthContract, sandContract, proofs} =
+      await setupEstateSale();
     const {deployer} = await getNamedAccounts();
     const {x, y, size, price, salt, proof, assetIds} = proofs[0];
     const signature = await signAuthMessageAs(
@@ -138,9 +129,10 @@ describe('EstateSaleWithAuth', function () {
       )
     );
 
-    const landQuadPurchasedEvents = await estateSaleWithAuthContract.queryFilter(
-      estateSaleWithAuthContract.filters.LandQuadPurchased()
-    );
+    const landQuadPurchasedEvents =
+      await estateSaleWithAuthContract.queryFilter(
+        estateSaleWithAuthContract.filters.LandQuadPurchased()
+      );
     expect(landQuadPurchasedEvents.length).to.eq(1);
   });
 });
