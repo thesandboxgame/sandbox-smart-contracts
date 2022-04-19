@@ -33,11 +33,11 @@ const landSalePrefix = args[0];
       countBundleId(estate.bundleId);
     }
 
-    const landSaleName = `${landSalePrefix}_${sector.sector}`;
+    const landSaleName = `LandPreSale_${sector.sector}`;
 
     console.log({landSaleName});
 
-    const presale = await deployments.get(landSaleName);
+    const presale = await deployments.get(`LandPreSale_${sector.sector}`);
     const owner =
       networkName === 'mainnet'
         ? '0x7A9fe22691c811ea339D9B73150e6911a5343DcA'

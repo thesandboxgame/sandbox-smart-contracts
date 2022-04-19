@@ -63,11 +63,11 @@ export const setupEstateSale = withSnapshot(
     );
     const sandContract = await ethers.getContract('Sand');
     const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
-      './secret/estate-sale/hardhat/.proofs_EstateSaleWithAuth_0_0.json'
+      './secret/estate-sale/hardhat/.proofs_0.json'
     );
     await transferSandToDeployer(proofs);
     const approveSandForEstateSale = async (address: string, price: string) => {
-      const sandContractAsUser = await sandContract.connect(
+      const sandContractAsUser = sandContract.connect(
         ethers.provider.getSigner(address)
       );
       await sandContractAsUser.approve(
@@ -90,7 +90,7 @@ export const setupEstateSale = withSnapshot(
 async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContract = await ethers.getContract('Sand');
   const {deployer, sandBeneficiary} = await getNamedAccounts();
-  const sandContractAsSandBeneficiary = await sandContract.connect(
+  const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
   await sandContractAsSandBeneficiary.transfer(deployer, proofs[0].price);

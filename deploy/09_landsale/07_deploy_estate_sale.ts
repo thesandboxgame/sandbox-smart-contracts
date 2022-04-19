@@ -8,6 +8,7 @@ import {
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTest} from '../../utils/network';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {readJSONSync, removeSync, writeJSONSync} from 'fs-extra';
 
 type SaleDeployment = {
   name: string;
@@ -27,6 +28,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_14'},
   {name: 'LandPreSale_15'},
   {name: 'LandPreSale_16'},
+  {name: 'LandPreSale_17'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -51,6 +53,8 @@ const func: DeployFunction = async function (hre) {
     const landSaleName = `${name}_${sector}`;
     const deadline = getDeadline(hre, sector);
 
+    const newDeployment = await deployments.getOrNull(`LandPreSale_${sector}`);
+    if (newDeployment) return;
     const landSaleDeployment = await deploy(landSaleName, {
       from: deployer,
       linkedData: lands,
@@ -73,6 +77,7 @@ const func: DeployFunction = async function (hre) {
       skipIfAlreadyDeployed: true,
       log: true,
     });
+    checkAndUpdateExistingDeployments(hre.network.name, sector, landSaleName);
 
     writeProofs(hre, landSaleName, landSale);
 
@@ -105,6 +110,21 @@ const func: DeployFunction = async function (hre) {
     }
   }
 };
+
+function checkAndUpdateExistingDeployments(
+  networkName: string,
+  sector: number,
+  oldCompleteName: string
+) {
+  const oldPath = `./deployments/${networkName}/${oldCompleteName}.json`;
+  const oldExists = readJSONSync(oldPath, {throws: false});
+  if (oldExists) {
+    const newPath = `./deployments/${networkName}/LandPreSale_${sector}.json`;
+    const newExists = readJSONSync(newPath, {throws: false});
+    if (!newExists) writeJSONSync(newPath, oldExists, {spaces: 2});
+    removeSync(oldPath);
+  }
+}
 
 export default func;
 func.tags = ['EstateSaleWithAuth', 'EstateSaleWithAuth_deploy'];

@@ -53,7 +53,7 @@ const func: DeployFunction = async function (hre) {
       sand.address,
       catalystMinterAdmin,
       '0x0000000000000000000000000000000000000000', // TODO SAND : mintingFeeCollector
-      parseEther('1'), //TODO SAND : confirm
+      parseEther('0'), //TODO SAND : confirm
       catalyst.address,
       bakedMintData,
     ],

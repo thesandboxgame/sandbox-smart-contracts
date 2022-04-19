@@ -6,15 +6,16 @@ import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/PriceUtil.sol";
-import "../asset/AssetV2.sol";
 import "../common/Base/TheSandbox712.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/interfaces/ERC1271.sol";
 import "../common/interfaces/ERC1271Constants.sol";
 import "../common/interfaces/ERC1654.sol";
 import "../common/interfaces/ERC1654Constants.sol";
+import "../common/interfaces/IAuthValidator.sol";
+import "../common/interfaces/IERC1155.sol";
 
-contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
+contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
     struct ClaimSellerOfferRequest {
         address buyer;
         address payable seller;
@@ -24,6 +25,7 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         uint256[] ids;
         uint256[] amounts;
         bytes signature;
+        bytes backendSignature;
     }
 
     enum SignatureType {DIRECT, EIP1654, EIP1271}
@@ -56,18 +58,20 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     mapping(address => mapping(uint256 => uint256)) public claimed;
 
-    AssetV2 public _asset;
+    IAuthValidator internal _authValidator;
+    IERC1155 public _asset;
     uint256 public _fee10000th = 0;
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
     constructor(
-        AssetV2 asset,
+        IERC1155 asset,
         address admin,
         address initialMetaTx,
         address payable feeCollector,
-        uint256 fee10000th
+        uint256 fee10000th,
+        address authValidator
     ) TheSandbox712() {
         _asset = asset;
         _feeCollector = feeCollector;
@@ -75,6 +79,13 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         emit FeeSetup(feeCollector, fee10000th);
         _admin = admin;
         _setMetaTransactionProcessor(initialMetaTx, true);
+        _authValidator = IAuthValidator(authValidator);
+    }
+
+    // check backend signature to avoid front-running
+    modifier isAuthValid(bytes memory signature, bytes32 hashedData) {
+        require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
+        _;
     }
 
     /// @notice set fee parameters
@@ -87,36 +98,16 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         emit FeeSetup(feeCollector, fee10000th);
     }
 
-    function _verifyParameters(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256 buyAmount,
-        uint256[] memory auctionData,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal view {
-        require(ids.length == amounts.length, "ids and amounts length not matching");
-        require(
-            buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]),
-            "not authorized"
-        );
-        uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
-        require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
-
-        uint256 total = amountAlreadyClaimed + buyAmount;
-        require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
-
-        require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
-        require(
-            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
-            "Auction finished"
-        );
-    }
-
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
-    function claimSellerOffer(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOffer(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -149,7 +140,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -182,7 +180,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -215,7 +220,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSig(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSig(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -248,7 +260,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1271(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -281,7 +300,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1654(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -310,6 +336,13 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
             input.ids,
             input.amounts
         );
+    }
+
+    /// @notice cancel a offer previously signed, new offer need to use a id not used yet
+    /// @param offerId offer to cancel
+    function cancelSellerOffer(uint256 offerId) external {
+        claimed[msg.sender][offerId] = MAX_UINT256;
+        emit OfferCancelled(msg.sender, offerId);
     }
 
     function _executeDeal(
@@ -364,13 +397,6 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         emit OfferClaimed(seller, buyer, auctionData[AuctionData_OfferId], purchase[0], offer, fee);
     }
 
-    /// @notice cancel a offer previously signed, new offer need to use a id not used yet
-    /// @param offerId offer to cancel
-    function cancelSellerOffer(uint256 offerId) external {
-        claimed[msg.sender][offerId] = MAX_UINT256;
-        emit OfferCancelled(msg.sender, offerId);
-    }
-
     function _ensureCorrectSigner(
         address from,
         address token,
@@ -410,6 +436,33 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         }
 
         return signer;
+    }
+
+    function _verifyParameters(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256 buyAmount,
+        uint256[] memory auctionData,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal view {
+        require(ids.length == amounts.length, "ids and amounts length not matching");
+        require(
+            buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]),
+            "not authorized"
+        );
+        uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
+        require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
+
+        uint256 total = amountAlreadyClaimed + buyAmount;
+        require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
+
+        require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
+        require(
+            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
+            "Auction finished"
+        );
     }
 
     function _encodeBasicSignatureHash(

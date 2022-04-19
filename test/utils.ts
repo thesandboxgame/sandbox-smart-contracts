@@ -13,6 +13,17 @@ import {deployments, ethers, network} from 'hardhat';
 import {FixtureFunc} from 'hardhat-deploy/dist/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
+export async function sequentially<S, T>(
+  arr: Array<S>,
+  callbackfn: (value: S, index: number, array: S[]) => Promise<T>
+): Promise<T[]> {
+  const ret = [];
+  for (let i = 0; i < arr.length; i++) {
+    ret.push(await callbackfn(arr[i], i, arr));
+  }
+  return ret;
+}
+
 export async function mine(): Promise<void> {
   await ethers.provider.send('evm_mine', []);
 }
