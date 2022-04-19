@@ -4,12 +4,21 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
-const {waitFor, recurseTests, withSnapshot, expectEventWithArgs} = require('../utils');
+const {
+  AbiCoder,
+} = require('@ethersproject/contracts/node_modules/@ethersproject/abi');
+const {
+  waitFor,
+  recurseTests,
+  withSnapshot,
+  expectEventWithArgs,
+} = require('../utils');
 const generateERC1155Tests = require('../erc1155');
 
+// Generic ERC1155 tests for the AssetERC1155 contract - L1
 function testAsset() {
   const erc1155Tests = generateERC1155Tests(
-    withSnapshot(['AssetERC1155', 'PolygonAssetERC1155'], async () => {
+    withSnapshot(['Asset'], async () => {
       const {deployer, assetBouncerAdmin} = await getNamedAccounts();
       const otherAccounts = await getUnnamedAccounts();
       const minter = otherAccounts[0];
@@ -20,59 +29,32 @@ function testAsset() {
         assetBouncerAdmin
       );
 
-      const polygonAssetERC1155 = await ethers.getContract(
-        'PolygonAssetERC1155',
-        assetBouncerAdmin
-      );
+      await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
-      await waitFor(polygonAssetERC1155.setBouncer(minter, true));
-
-      const Asset = await ethers.getContract('Asset', minter);
-
-      const receiverAddress = Asset.address;
+      const assetERC1155 = await ethers.getContract('Asset', minter);
 
       const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
 
-      const ipfsHashString =
-        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-      const MOCK_DATA =
-        '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000084e42535759334450000000000000000000000000000000000000000000000000';
-    
+      // Note: only the designated predicate can mint on L1
+      // The ids will be determined by the PolygonAssetERC1155 contract and passed via the predicate (tunnel)
+      const admin = await assetERC1155.getAdmin();
+      await assetERC1155
+        .connect(ethers.provider.getSigner(admin))
+        .setPredicate(minter);
+
+      const MOCK_DATA = new AbiCoder().encode(['bytes32'], [testMetadataHash]);
+
+      // Set up single minting for test purposes
       async function mint(id, to, value) {
-        // Asset to be minted
-        const creator = to;
-        const supply = value;
-        const rarity = 0;
-        const owner = to;
-        const data = '0x';
-    
-        let receipt = await waitFor(
-          polygonAssetERC1155
+        // address account,
+        // uint256 id,
+        // uint256 amount,
+        // bytes calldata data
+
+        const receipt = await waitFor(
+          assetERC1155
             .connect(ethers.provider.getSigner(minter))
-            .mint(creator, id, ipfsHashString, supply, rarity, owner, data)
-        );
-    
-        const transferEvent = await expectEventWithArgs(
-          polygonAssetERC1155,
-          receipt,
-          'TransferSingle'
-        );
-        const tokenId = transferEvent.args[3];
-
-        // Minting directly for Tests only 
-    
-        const admin = await Asset.getAdmin();
-        await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
-
-        receipt = await waitFor(
-          Asset
-          .connect(ethers.provider.getSigner(minter))
-          .mint(
-            to,
-            tokenId,
-            value,
-            MOCK_DATA
-          )
+            .mint(to, id, value, MOCK_DATA)
         );
 
         return {
@@ -82,63 +64,78 @@ function testAsset() {
         };
       }
 
-      async function mintBatch(to, supplies) {
-        const creator = to;
-        const rarity = 0;
-        const owner = to;
-        const data = '0x';
-        const tokenIds = [];
-        let id = 10;
-        for (let i = 0; i < supplies.length; i++) {
-          const supply = supplies[i];
-          id++;
+      // Set up batch minting for test purposes
+      async function mintBatch(ids, to, supplies) {
+        // address to,
+        // uint256[] calldata ids,
+        // uint256[] calldata amounts,
+        // bytes calldata data
 
-          let receipt = await waitFor(
-            polygonAssetERC1155
-              .connect(ethers.provider.getSigner(minter))
-              .mint(creator, id, ipfsHashString, supply, rarity, owner, data)
-          );
-      
-          const transferEvent = await expectEventWithArgs(
-            polygonAssetERC1155,
-            receipt,
-            'TransferSingle'
-          );
-          tokenIds.push(transferEvent.args[3]);
+        const testMetadataHashes = [];
+        for (let i = 0; i < supplies.length; i++) {
+          testMetadataHashes.push(testMetadataHash);
         }
 
-        const admin = await Asset.getAdmin();
-        await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
-        const MOCK_DATA_BATCH = "0x68656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f00000000000000000000000000000000000000000000000000000068656c6c6f000000000000000000000000000000000000000000000000000000"
+        const MOCK_DATA_BATCH = new AbiCoder().encode(
+          ['bytes32[]'],
+          [testMetadataHashes]
+        );
 
-        const tx = await Asset.mintBatch(
+        const tx = await assetERC1155.mintBatch(
           to,
-          tokenIds,
+          ids,
           supplies,
           MOCK_DATA_BATCH
         );
 
         const receipt = await tx.wait();
+
         return {
           receipt,
           tokenIds: receipt.events.find((v) => v.event === 'TransferBatch')
             .args[3],
         };
       }
-  
-      const assetIds = [];
-      assetIds.push((await mint(1, minter, 10)).tokenId);
-      assetIds.push((await mint(2, minter, 1)).tokenId);
-      assetIds.push((await mint(3, minter, 5)).tokenId);
-      assetIds.push((await mint(4, minter, 1)).tokenId);
-      assetIds.push((await mint(5, minter, 12)).tokenId);
-      assetIds.push((await mint(6, minter, 1)).tokenId);
-      assetIds.push((await mint(7, minter, 1111)).tokenId);
-      assetIds.push((await mint(8, minter, 1)).tokenId);
 
-      // TODO: fix mintBatch for failing tests
-      // const batchIds = (
-      //   await mintBatch(minter, [
+      const assetIds = [
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000001000000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000002800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000003000000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000003800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000004000000',
+      ];
+
+      await mint(assetIds[0], minter, 10);
+      await mint(assetIds[1], minter, 1);
+      await mint(assetIds[2], minter, 5);
+      await mint(assetIds[3], minter, 1);
+      await mint(assetIds[4], minter, 12);
+      await mint(assetIds[5], minter, 1);
+      await mint(assetIds[6], minter, 1111);
+      await mint(assetIds[7], minter, 1);
+
+      // TODO: fix mintBatch, reverted with reason string 'ID_TAKEN'. Check format of ids
+      const ids = [
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005001',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005002',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005003',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005004',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005005',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005006',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005007',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005008',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005009',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000500500a',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd00000000800000000500500b',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000500500c',
+      ];
+      const batchIds = [];
+      // (
+      //   await mintBatch(ids, minter, [
       //     10,
       //     5,
       //     8,
@@ -157,24 +154,24 @@ function testAsset() {
 
       return {
         ethersProvider: ethers.provider,
-        contractAddress: Asset.address,
-        contract: Asset,
+        contractAddress: assetERC1155.address,
+        contract: assetERC1155,
         users,
         mint,
-        // mintBatch,
+        mintMultiple: mintBatch,
         deployer,
         tokenIds: assetIds,
-        batchIds: assetIds,
+        batchIds,
         minter,
         deployments,
-        receiverAddress,
+        receiverAddress: assetERC1155.address,
         assetContractAsBouncerAdmin,
       };
     }),
     {}
   );
 
-  describe('Asset:ERC1155', function () {
+  describe('AssetERC1155:ERC1155', function () {
     for (const test of erc1155Tests) {
       // eslint-disable-next-line mocha/no-setup-in-describe
       recurseTests(test);
