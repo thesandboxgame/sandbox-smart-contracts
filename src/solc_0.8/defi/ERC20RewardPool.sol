@@ -79,7 +79,7 @@ contract ERC20RewardPool is
     }
 
     modifier isValidAddress(address account) {
-        require(account != address(0), "ERC20RewardPool: is not contract");
+        require(account != address(0), "ERC20RewardPool: zero address");
 
         _;
     }
