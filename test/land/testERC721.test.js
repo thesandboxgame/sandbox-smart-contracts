@@ -1,4 +1,3 @@
-// const {ethers, getNamedAccounts, ethereum} = require('@nomiclabs/buidler');
 const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
 const {withSnapshot} = require('../utils');
 
