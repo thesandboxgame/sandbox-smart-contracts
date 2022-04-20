@@ -36,8 +36,8 @@
     "@types/mocha": "^8.0.2",
     "@types/node": "^14.10.2",
     "@types/objects-to-csv": "^1.3.1",
-    "@typescript-eslint/eslint-plugin": "^4.6.0",
-    "@typescript-eslint/parser": "^4.6.0",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
     "@urql/core": "^1.16.1",
     "chai": "^4.2.0",
     "cross-env": "^7.0.2",
@@ -96,8 +96,8 @@
     "fork:test": "node ./scripts.js fork:test",
     "claim:add": "yarn execute mainnet ./setup/add_new_multi_giveaway.ts Multi_Giveaway_1",
     "claim:send": "yarn execute mainnet ./setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1",
-    "landsale:send":"yarn execute mainnet ./setup/landsales/send_assets_to_sales.ts",
-    "landsale:withdraw":"yarn execute mainnet ./setup/landsales/withdraw_from_sales.ts",
+    "landsale:send": "yarn execute mainnet ./setup/landsales/send_assets_to_sales.ts",
+    "landsale:withdraw": "yarn execute mainnet ./setup/landsales/withdraw_from_sales.ts",
     "hardhat": "hardhat"
   }
 }
