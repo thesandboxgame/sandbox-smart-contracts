@@ -206,9 +206,10 @@ describe('Gems & Catalysts permit', function () {
   });
 
   it('should fail if owner == address(0) || spender == address(0)', async function () {
+    const nonce = BigNumber.from(await epicCatalyst._nonces(catalystOwner));
     const approve = {
       owner: catalystOwner,
-      spender: user3,
+      spender: zeroAddress,
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
       deadline: deadline._hex,
@@ -222,17 +223,6 @@ describe('Gems & Catalysts permit', function () {
 
     await expect(
       epicCatalyst.permit(
-        zeroAddress,
-        user3,
-        TEST_AMOUNT,
-        deadline,
-        sig.v,
-        sig.r,
-        sig.s
-      )
-    ).to.be.revertedWith('INVALID_OWNER_||_SPENDER');
-    await expect(
-      epicCatalyst.permit(
         catalystOwner,
         zeroAddress,
         TEST_AMOUNT,
@@ -241,6 +231,6 @@ describe('Gems & Catalysts permit', function () {
         sig.r,
         sig.s
       )
-    ).to.be.revertedWith('INVALID_OWNER_||_SPENDER');
+    ).to.be.revertedWith('INVALID_OWNER');
   });
 });
