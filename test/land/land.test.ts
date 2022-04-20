@@ -51,4 +51,23 @@ describe('Land Transfer quad', function () {
       contract.transferQuad(deployer, landAdmin, 1, 0, 0, '0x')
     ).to.be.revertedWith('token does not exist');
   });
+
+  it(`should NOT be able to transfer burned 1x1 quad through a parent quad`, async function () {
+    const {
+      landContract,
+      getNamedAccounts,
+      ethers,
+      mintQuad,
+    } = await setupLand();
+    const {deployer, landAdmin} = await getNamedAccounts();
+    const contract = landContract.connect(ethers.provider.getSigner(deployer));
+    const x = 0;
+    const y = 0;
+    await mintQuad(deployer, 3, x, y);
+    const tokenId = x + y * GRID_SIZE;
+    await contract.burn(tokenId);
+    await expect(
+      contract.transferQuad(deployer, landAdmin, 3, 0, 0, '0x')
+    ).to.be.revertedWith('not owner');
+  });
 });
