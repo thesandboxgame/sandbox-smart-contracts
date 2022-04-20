@@ -133,6 +133,10 @@ contract ContributionRules is Ownable {
         emit ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
     }
 
+    function getMaxGlobalMultiplier(address account) external view returns (uint256) {
+        return multiplierBalanceOfERC721(account) + multiplierBalanceOfERC1155(account);
+    }
+
     function getERC721MultiplierList(address reqContract)
         external
         view
