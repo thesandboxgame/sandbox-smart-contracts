@@ -11,8 +11,8 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 contract ContributionRules is Ownable {
     using Address for address;
 
-    uint256 public erc721MultiplierLimit;
-    uint256 public erc1155MultiplierLimit;
+    uint256 public multiplierLimitERC271 = type(uint256).max;
+    uint256 public multiplierLimitERC1155 = type(uint256).max;
 
     uint256 internal constant DECIMALS_9 = 1000000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
@@ -66,25 +66,25 @@ contract ContributionRules is Ownable {
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 
         // check if the calculated multipliers exceeds the limit
-        if (erc721MultiplierLimit < multiplierERC721) {
-            multiplierERC721 = erc721MultiplierLimit;
+        if (multiplierLimitERC271 < multiplierERC721) {
+            multiplierERC721 = multiplierLimitERC271;
         }
 
-        if (erc1155MultiplierLimit < multiplierERC1155) {
-            multiplierERC1155 = erc1155MultiplierLimit;
+        if (multiplierLimitERC1155 < multiplierERC1155) {
+            multiplierERC1155 = multiplierLimitERC1155;
         }
 
         return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)));
     }
 
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
-        erc721MultiplierLimit = _newLimit;
+        multiplierLimitERC271 = _newLimit;
 
         emit ERC721MultiplierLimitSet(_newLimit);
     }
 
     function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
-        erc1155MultiplierLimit = _newLimit;
+        multiplierLimitERC1155 = _newLimit;
 
         emit ERC1155MultiplierLimitSet(_newLimit);
     }
