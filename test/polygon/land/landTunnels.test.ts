@@ -1,9 +1,9 @@
-import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
 import {expect} from '../../chai-setup';
 import {sequentially, waitFor} from '../../utils';
 import {setupLand} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
+import {AbiCoder} from 'ethers/lib/utils';
 
 describe('PolygonLand.sol', function () {
   describe('Land <> PolygonLand: Transfer', function () {
