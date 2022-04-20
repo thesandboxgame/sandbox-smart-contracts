@@ -11,6 +11,9 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 contract ContributionRules is Ownable {
     using Address for address;
 
+    uint256 public erc721MultiplierLimit;
+    uint256 public erc1155MultiplierLimit;
+
     uint256 internal constant DECIMALS_9 = 1000000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
@@ -33,6 +36,8 @@ contract ContributionRules is Ownable {
     event ERC721MultiplierListSet(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
     event ERC1155MultiplierListDeleted(address indexed contractERC1155);
     event ERC721MultiplierListDeleted(address indexed contractERC721);
+    event ERC721MultiplierLimitSet(uint256 newERC721MultiplierLimit);
+    event ERC1155MultiplierLimitSet(uint256 newERC1155MultiplierLimit);
 
     modifier isContract(address account) {
         require(account.isContract(), "ContributionRules: is not contract");
@@ -60,7 +65,28 @@ contract ContributionRules is Ownable {
         uint256 multiplierERC721 = multiplierBalanceOfERC721(account);
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 
+        // check if the calculated multipliers exceeds the limit
+        if (erc721MultiplierLimit < multiplierERC721) {
+            multiplierERC721 = erc721MultiplierLimit;
+        }
+
+        if (erc1155MultiplierLimit < multiplierERC1155) {
+            multiplierERC1155 = erc1155MultiplierLimit;
+        }
+
         return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)));
+    }
+
+    function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        erc721MultiplierLimit = _newLimit;
+
+        emit ERC721MultiplierLimitSet(_newLimit);
+    }
+
+    function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        erc1155MultiplierLimit = _newLimit;
+
+        emit ERC1155MultiplierLimitSet(_newLimit);
     }
 
     function setERC1155MultiplierList(
