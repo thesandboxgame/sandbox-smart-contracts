@@ -26,22 +26,16 @@ export type Fixture = {
 export const setupFixtures = withSnapshot(
   ['DAI', 'Asset', 'Sand'],
   async function () {
-    const {
-      sandBeneficiary,
-      assetBouncerAdmin,
-      deployer,
-    } = await getNamedAccounts();
+    const {sandBeneficiary, assetBouncerAdmin, deployer} =
+      await getNamedAccounts();
 
     const daiBeneficiary = deployer;
     const fakeDai = await ethers.getContract('DAI', daiBeneficiary);
 
     const fakeMedianizer = await ethers.getContract('DAIMedianizer');
     const ethUsdPrice = BigNumber.from(await fakeMedianizer.read());
-    const [
-      ethBeneficiary,
-      polygonBundleSandSaleAdmin,
-      ...otherUsers
-    ] = await getUnnamedAccounts();
+    const [ethBeneficiary, polygonBundleSandSaleAdmin, ...otherUsers] =
+      await getUnnamedAccounts();
 
     // ERC20
     const sandContract = await ethers.getContract('Sand', sandBeneficiary);
@@ -273,9 +267,7 @@ export async function getTokenBalance(
   return tokenInfo;
 }
 
-export async function createPack(
-  fixtures: Fixture
-): Promise<{
+export async function createPack(fixtures: Fixture): Promise<{
   saleId: BigNumberish;
   tokenIds: BigNumberish[];
   tokensPre: BigNumber[];

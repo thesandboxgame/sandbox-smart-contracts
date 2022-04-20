@@ -10,11 +10,8 @@ describe('PeriodicRewardCalculator', function () {
       await expect(contractAsRewardPool.restartRewards()).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
-      const {
-        contract,
-        contractAsAdmin,
-        contractAsRewardDistribution,
-      } = await periodicSetup();
+      const {contract, contractAsAdmin, contractAsRewardDistribution} =
+        await periodicSetup();
 
       await expect(contract.restartRewards()).to.be.revertedWith(
         'not reward pool'
@@ -33,11 +30,8 @@ describe('PeriodicRewardCalculator', function () {
         .not.to.be.reverted;
     });
     it('other should fail to call notifyRewardAmount', async function () {
-      const {
-        contract,
-        contractAsAdmin,
-        contractAsRewardPool,
-      } = await periodicSetup();
+      const {contract, contractAsAdmin, contractAsRewardPool} =
+        await periodicSetup();
 
       await expect(contract.notifyRewardAmount(12345678)).to.be.revertedWith(
         'not reward distribution'
@@ -56,11 +50,8 @@ describe('PeriodicRewardCalculator', function () {
         .to.be.reverted;
     });
     it('other should fail to call setSavedRewards', async function () {
-      const {
-        contract,
-        contractAsAdmin,
-        contractAsRewardPool,
-      } = await periodicSetup();
+      const {contract, contractAsAdmin, contractAsRewardPool} =
+        await periodicSetup();
 
       await expect(contract.setSavedRewards(12345678)).to.be.revertedWith(
         'not reward distribution'
@@ -95,11 +86,8 @@ describe('PeriodicRewardCalculator', function () {
 
   describe('reward distribution', function () {
     it('setup: we use the rate, so REWARDS must be multiple of duration (or leftover + reward if we add in the middle)', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        durationInSeconds,
-      } = await periodicSetup();
+      const {contract, contractAsRewardDistribution, durationInSeconds} =
+        await periodicSetup();
       const rewards = BigNumber.from(12345678);
       const realRewards = rewards.div(durationInSeconds).mul(durationInSeconds);
       expect(await contract.duration()).to.be.equal(durationInSeconds);
@@ -120,11 +108,8 @@ describe('PeriodicRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(realRewards);
     });
     it('we distribute rewards linearly', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        durationInSeconds,
-      } = await periodicSetup();
+      const {contract, contractAsRewardDistribution, durationInSeconds} =
+        await periodicSetup();
       const rewards = BigNumber.from(durationInSeconds * 10000);
       const time = await doOnNextBlock(async () => {
         await contractAsRewardDistribution.notifyRewardAmount(rewards);
@@ -187,11 +172,8 @@ describe('PeriodicRewardCalculator', function () {
     });
 
     it('calling notifyRewardAmount in the middle of the distribution will distribute the remaining + what was added', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        durationInSeconds,
-      } = await periodicSetup();
+      const {contract, contractAsRewardDistribution, durationInSeconds} =
+        await periodicSetup();
       const rewards1 = BigNumber.from(
         durationInSeconds * durationInSeconds * 123
       );
@@ -230,11 +212,8 @@ describe('PeriodicRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
     });
     it('calling notifyRewardAmount after the distribution will distribute both amounts', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        durationInSeconds,
-      } = await periodicSetup();
+      const {contract, contractAsRewardDistribution, durationInSeconds} =
+        await periodicSetup();
       const rewards1 = BigNumber.from(
         durationInSeconds * durationInSeconds * 123
       );
@@ -269,11 +248,8 @@ describe('PeriodicRewardCalculator', function () {
     });
   });
   it('only Admin can call setDuration', async function () {
-    const {
-      contract,
-      durationInSeconds,
-      contractAsRewardDistribution,
-    } = await periodicSetup();
+    const {contract, durationInSeconds, contractAsRewardDistribution} =
+      await periodicSetup();
 
     expect(await contract.duration()).to.be.equal(durationInSeconds);
 
@@ -298,11 +274,8 @@ describe('PeriodicRewardCalculator', function () {
   });
 
   it('calling setDuration during the campaing should fail', async function () {
-    const {
-      contractAsRewardDistribution,
-      contract,
-      durationInSeconds,
-    } = await periodicSetup();
+    const {contractAsRewardDistribution, contract, durationInSeconds} =
+      await periodicSetup();
 
     expect(await contract.duration()).to.be.equal(durationInSeconds);
 

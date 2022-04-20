@@ -1772,13 +1772,13 @@ module.exports = (init) => {
       minter,
       user0,
     }) => {
-      await testOrder(contractAsMinter, minter, user0, batchIds, [
-        3,
-        4,
-        10,
-        9,
-        2,
-      ]);
+      await testOrder(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 10, 9, 2]
+      );
     });
 
     it('transfer multiple items in any order (v)', async ({

@@ -53,9 +53,10 @@ describe('CollectionCatalystMigrations', function () {
     for (let i = 0; i < gemIds.length; i++) {
       expect(record.gemIds[i]).to.equal(gemIds[i]);
     }
-    const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
-      assetAttributesRegistry.filters.CatalystApplied()
-    );
+    const assetAttributesRegistryEvents =
+      await assetAttributesRegistry.queryFilter(
+        assetAttributesRegistry.filters.CatalystApplied()
+      );
     const event = assetAttributesRegistryEvents.filter(
       (e) => e.event === 'CatalystApplied'
     )[eventIndex];
@@ -298,9 +299,8 @@ describe('CollectionCatalystMigrations', function () {
     ).to.be.revertedWith('NOT_ORIGINAL_NFT');
   });
   it('migrating assetId not from admin account should fail', async function () {
-    const {
-      collectionCatalystMigrationsContractAsUser0,
-    } = await setupCollectionCatalystMigrations();
+    const {collectionCatalystMigrationsContractAsUser0} =
+      await setupCollectionCatalystMigrations();
     const assetId = BigNumber.from(
       '0x0000011100000000000000000000000000000000800000000000000000000000'
     );
@@ -312,9 +312,8 @@ describe('CollectionCatalystMigrations', function () {
     ).to.be.revertedWith('NOT_AUTHORIZED');
   });
   it('migrating assetId that does not exist in old registry should fail', async function () {
-    const {
-      collectionCatalystMigrationsContractAsAdmin,
-    } = await setupCollectionCatalystMigrations();
+    const {collectionCatalystMigrationsContractAsAdmin} =
+      await setupCollectionCatalystMigrations();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );
@@ -382,9 +381,8 @@ describe('CollectionCatalystMigrations', function () {
     ).to.be.revertedWith('ALREADY_MIGRATED');
   });
   it('batch migrating assetId not from admin account should fail', async function () {
-    const {
-      collectionCatalystMigrationsContractAsUser0,
-    } = await setupCollectionCatalystMigrations();
+    const {collectionCatalystMigrationsContractAsUser0} =
+      await setupCollectionCatalystMigrations();
     await expect(
       collectionCatalystMigrationsContractAsUser0.batchMigrate([])
     ).to.be.revertedWith('NOT_AUTHORIZED');
@@ -446,14 +444,16 @@ describe('CollectionCatalystMigrations', function () {
       collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
 
-    const batchCatalystMigrationDoneEvent = await collectionCatalystMigrationsContractAsAdmin.queryFilter(
-      collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
-    );
+    const batchCatalystMigrationDoneEvent =
+      await collectionCatalystMigrationsContractAsAdmin.queryFilter(
+        collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
+      );
     expect(batchCatalystMigrationDoneEvent).to.not.equal(undefined);
 
-    const setCustomMintingAllowanceEvent = await collectionCatalystMigrationsContractAsAdmin.queryFilter(
-      collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
-    );
+    const setCustomMintingAllowanceEvent =
+      await collectionCatalystMigrationsContractAsAdmin.queryFilter(
+        collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
+      );
     const event = setCustomMintingAllowanceEvent.filter(
       (e) => e.event === 'BatchCatalystMigrationDone'
     )[0];

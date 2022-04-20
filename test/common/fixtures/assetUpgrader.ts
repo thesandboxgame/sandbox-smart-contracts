@@ -21,9 +21,12 @@ export const assetUpgraderFixtures = async () => {
   );
   const assetContract = await ethers.getContract('Asset');
   const sandContract: Contract = await ethers.getContract('Sand');
-  const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
-  const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
-  const gemAdditionFee: BigNumber = await assetUpgraderContract.callStatic.gemAdditionFee();
+  const feeRecipient: string =
+    await assetUpgraderContract.callStatic.feeRecipient();
+  const upgradeFee: BigNumber =
+    await assetUpgraderContract.callStatic.upgradeFee();
+  const gemAdditionFee: BigNumber =
+    await assetUpgraderContract.callStatic.gemAdditionFee();
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
   const powerGem: Contract = await ethers.getContract('Gem_POWER');
   const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
@@ -47,9 +50,10 @@ export const assetUpgraderFixtures = async () => {
     BigNumber.from(100000).mul(`1000000000000000000`)
   );
 
-  const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract.connect(
-    ethers.provider.getSigner(catalystOwner)
-  );
+  const assetUpgraderContractAsCatalystOwner =
+    await assetUpgraderContract.connect(
+      ethers.provider.getSigner(catalystOwner)
+    );
 
   const assetUpgraderContractAsUser4 = await assetUpgraderContract.connect(
     ethers.provider.getSigner(user4)

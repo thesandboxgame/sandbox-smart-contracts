@@ -11,11 +11,8 @@ describe('TwoPeriodsRewardCalculator', function () {
       await expect(contractAsRewardPool.restartRewards()).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
-      const {
-        contract,
-        contractAsAdmin,
-        contractAsRewardDistribution,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsAdmin, contractAsRewardDistribution} =
+        await twoPeriodsSetup();
 
       await expect(contract.restartRewards()).to.be.revertedWith(
         'not reward pool'
@@ -39,11 +36,8 @@ describe('TwoPeriodsRewardCalculator', function () {
         }
       );
       it('other should fail to call ' + method, async function () {
-        const {
-          contract,
-          contractAsAdmin,
-          contractAsRewardPool,
-        } = await twoPeriodsSetup();
+        const {contract, contractAsAdmin, contractAsRewardPool} =
+          await twoPeriodsSetup();
 
         await expect(method(contract)).to.be.revertedWith(
           'not reward distribution'
@@ -286,11 +280,8 @@ describe('TwoPeriodsRewardCalculator', function () {
 
   describe('restart reward', function () {
     it('before everything', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        contractAsRewardPool,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsRewardDistribution, contractAsRewardPool} =
+        await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!
@@ -321,11 +312,8 @@ describe('TwoPeriodsRewardCalculator', function () {
     });
 
     it('in middle of the first campaign', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        contractAsRewardPool,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsRewardDistribution, contractAsRewardPool} =
+        await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!
@@ -358,11 +346,8 @@ describe('TwoPeriodsRewardCalculator', function () {
     });
 
     it('in middle of the second campaign', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        contractAsRewardPool,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsRewardDistribution, contractAsRewardPool} =
+        await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!
@@ -394,11 +379,8 @@ describe('TwoPeriodsRewardCalculator', function () {
     });
 
     it('after everything', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        contractAsRewardPool,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsRewardDistribution, contractAsRewardPool} =
+        await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!
@@ -427,11 +409,8 @@ describe('TwoPeriodsRewardCalculator', function () {
       expect(await contract.isCampaignRunning()).to.be.false;
     });
     it('intermixed', async function () {
-      const {
-        contract,
-        contractAsRewardDistribution,
-        contractAsRewardPool,
-      } = await twoPeriodsSetup();
+      const {contract, contractAsRewardDistribution, contractAsRewardPool} =
+        await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const delta1 = duration1 / 3;
       const rate1 = 123;

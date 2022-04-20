@@ -454,13 +454,8 @@ describe('GameToken', function () {
       let intermediateGameTokenBalance2: number;
 
       before(async function () {
-        ({
-          gameToken,
-          GameOwner,
-          GameEditor1,
-          GameEditor2,
-          users,
-        } = await setupTest());
+        ({gameToken, GameOwner, GameEditor1, GameEditor2, users} =
+          await setupTest());
 
         const {gameTokenAdmin} = await getNamedAccounts();
         await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -1030,12 +1025,8 @@ describe('GameToken', function () {
     let GameEditor1: User;
 
     before(async function () {
-      ({
-        gameToken,
-        GameOwner,
-        GameEditor1,
-        gameTokenAsAdmin,
-      } = await setupTest());
+      ({gameToken, GameOwner, GameEditor1, gameTokenAsAdmin} =
+        await setupTest());
       const randomId = await getRandom();
       const {gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -1503,13 +1494,8 @@ describe('GameToken', function () {
     let assets: BigNumber[];
 
     before(async function () {
-      ({
-        gameToken,
-        users,
-        GameOwner,
-        gameTokenAsAdmin,
-        trustedForwarder,
-      } = await setupTest());
+      ({gameToken, users, GameOwner, gameTokenAsAdmin, trustedForwarder} =
+        await setupTest());
       const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
@@ -1616,14 +1602,12 @@ describe('GameToken', function () {
     });
 
     it('can call transferCreatorship via metaTx', async function () {
-      const {
-        to,
-        data,
-      } = await gameToken.populateTransaction.transferCreatorship(
-        gameId,
-        GameOwner.address,
-        users[2].address
-      );
+      const {to, data} =
+        await gameToken.populateTransaction.transferCreatorship(
+          gameId,
+          GameOwner.address,
+          users[2].address
+        );
 
       await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
       const currentCreator = await gameToken.creatorOf(gameId);

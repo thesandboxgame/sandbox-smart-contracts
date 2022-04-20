@@ -105,7 +105,8 @@ describe('SandRewardPool', function () {
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
 
-    const lastTimeRewardApplicable = await rewardCalculator.lastTimeRewardApplicable();
+    const lastTimeRewardApplicable =
+      await rewardCalculator.lastTimeRewardApplicable();
     const duration = await rewardCalculator.duration();
 
     const latestBlock = await ethers.provider.getBlock('latest');
@@ -125,11 +126,8 @@ describe('SandRewardPool', function () {
   });
 
   it('staking should update the reward balance, supply and staking token balance', async function () {
-    const {
-      rewardPoolContract,
-      stakeTokenContract,
-      others,
-    } = await setupSandRewardPool();
+    const {rewardPoolContract, stakeTokenContract, others} =
+      await setupSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     const initialRewardBalance = await rewardPoolContract.balanceOf(others[0]);
@@ -167,11 +165,8 @@ describe('SandRewardPool', function () {
   });
 
   it('withdraw should update the reward balance, supply and staking token', async function () {
-    const {
-      rewardPoolContract,
-      stakeTokenContract,
-      others,
-    } = await setupSandRewardPool();
+    const {rewardPoolContract, stakeTokenContract, others} =
+      await setupSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -214,11 +209,8 @@ describe('SandRewardPool', function () {
   });
 
   it('reward per token calculation', async function () {
-    const {
-      rewardCalculator,
-      rewardPoolContract,
-      others,
-    } = await setupSandRewardPool();
+    const {rewardCalculator, rewardPoolContract, others} =
+      await setupSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -226,8 +218,10 @@ describe('SandRewardPool', function () {
       .stake(BigNumber.from(stakeAmount));
 
     const totalSupply = await rewardPoolContract.totalSupply();
-    const lastTimeRewardApplicable = await rewardCalculator.lastTimeRewardApplicable();
-    const rewardPerTokenStored = await rewardPoolContract.rewardPerTokenStored();
+    const lastTimeRewardApplicable =
+      await rewardCalculator.lastTimeRewardApplicable();
+    const rewardPerTokenStored =
+      await rewardPoolContract.rewardPerTokenStored();
     const lastUpdateTime = await rewardCalculator.lastUpdateTime();
 
     const rewardRate = await rewardCalculator.rewardRate();
@@ -260,9 +254,8 @@ describe('SandRewardPool', function () {
     const earned = await rewardPoolContract.earned(others[0]);
     const rewardBalance = await rewardPoolContract.balanceOf(others[0]);
     const rewardPerToken = await rewardPoolContract.rewardPerToken();
-    const userRewardPerTokenPaid = await rewardPoolContract.userRewardPerTokenPaid(
-      others[0]
-    );
+    const userRewardPerTokenPaid =
+      await rewardPoolContract.userRewardPerTokenPaid(others[0]);
     const rewards = await rewardPoolContract.rewards(others[0]);
 
     expect(earned).to.be.equal(
@@ -437,11 +430,8 @@ describe('SandRewardPool', function () {
   });
 
   it('admin can notify to start a new reward process (without sending more reward tokens)', async function () {
-    const {
-      rewardCalculator,
-      liquidityRewardAdmin,
-      NEW_REWARD_AMOUNT,
-    } = await setupSandRewardPool();
+    const {rewardCalculator, liquidityRewardAdmin, NEW_REWARD_AMOUNT} =
+      await setupSandRewardPool();
 
     const periodFinish = await rewardCalculator.periodFinish();
     const initialRewardRate = await rewardCalculator.rewardRate();
@@ -467,12 +457,8 @@ describe('SandRewardPool', function () {
   });
 
   it('user cannot earn rewardTokens if they stake after the end time', async function () {
-    const {
-      rewardPoolContract,
-      STAKE_AMOUNT,
-      REWARD_DURATION,
-      others,
-    } = await setupSandRewardPool();
+    const {rewardPoolContract, STAKE_AMOUNT, REWARD_DURATION, others} =
+      await setupSandRewardPool();
 
     const latestBlock = await ethers.provider.getBlock('latest');
     const currentTimestamp = latestBlock.timestamp;
@@ -1232,11 +1218,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 0 NFT(s) match expected reward with 4 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(0, 1, 4, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(0, 1, 4, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1244,11 +1227,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 0 NFT(s) match expected reward with 10 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(0, 1, 10, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(0, 1, 10, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1262,11 +1242,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 1 NFT(s) match expected reward with 10 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(1, 1, 10, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(1, 1, 10, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1274,11 +1251,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 2 NFT(s) match expected reward with 1 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(2, 1, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(2, 1, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1286,11 +1260,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 3 NFT(s) match expected reward with 1 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(3, 1, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(3, 1, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1298,11 +1269,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 3 NFT(s) match expected reward with 10 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(3, 1, 10, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(3, 1, 10, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1310,11 +1278,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 89 NFT(s) match expected reward with 1 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(89, 1, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(89, 1, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1322,11 +1287,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 89 NFT(s) match expected reward with 10 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(89, 1, 10, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(89, 1, 10, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1334,11 +1296,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 0 NFTs match expected reward: 2 users, 10 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(0, 2, 10, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(0, 2, 10, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1346,11 +1305,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 0 NFTs match expected reward: 3 users, 1 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(0, 3, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(0, 3, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1358,11 +1314,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 1 NFTs match expected reward: 2 users, 1 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(1, 2, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(1, 2, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1370,11 +1323,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 1 NFTs match expected reward: 2 users, 10 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(1, 2, 1, true);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(1, 2, 1, true);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1382,11 +1332,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 3 NFTs match expected reward: 2 users, 1 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(3, 2, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(3, 2, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -1394,11 +1341,8 @@ describe('SandRewardPool', function () {
   });
 
   it(`Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 1 stake each`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(100, 2, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT, precisionLost} =
+      await multipleUsersEarnings(100, 2, 1);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
@@ -2054,11 +1998,8 @@ describe('SandRewardPool', function () {
 
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip(`THIS IS FALSE, EVERYBODY CAN DO IT: Only sender or reward distribution can compute sender's account`, async function () {
-    const {
-      rewardPoolContract,
-      others,
-      liquidityRewardAdmin,
-    } = await setupSandRewardPool();
+    const {rewardPoolContract, others, liquidityRewardAdmin} =
+      await setupSandRewardPool();
 
     await expect(
       rewardPoolContract

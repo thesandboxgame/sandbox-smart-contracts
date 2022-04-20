@@ -96,21 +96,11 @@ function testAsset() {
       assetIds.push((await mint(counter, minter, 1)).tokenId);
 
       const batchIds = (
-        await mintMultiple(counter, minter, [
-          10,
-          5,
-          8,
-          9,
-          10,
-          6,
-          8,
-          8,
-          10,
-          12,
-          1,
-          1,
-          1,
-        ])
+        await mintMultiple(
+          counter,
+          minter,
+          [10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1]
+        )
       ).tokenIds;
 
       return {

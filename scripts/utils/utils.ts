@@ -25,9 +25,7 @@ export function getBlockArgs(index = 0): number {
 
 // TODO: Upgrade the library and add types.
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-export function getArgParser(opts?: {
-  description: string;
-}): {
+export function getArgParser(opts?: {description: string}): {
   addArgument(arg: string | string[], options?: any): void;
   addFlag(arg: string | string[], options?: any): void;
   parseArgs(args?: string[], ns?: any): any;
