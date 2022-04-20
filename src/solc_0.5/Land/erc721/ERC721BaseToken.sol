@@ -292,7 +292,6 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @notice Check if the contract supports an interface
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
-     * 0x5e8bf644 is ERC721_MANDATORY_RECEIVER
      * @param id The id of the interface
      * @return True if the interface is supported
      */
