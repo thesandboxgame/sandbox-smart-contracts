@@ -24,6 +24,7 @@ const setupTest = withSnapshot(
 );
 
 const sizes = [1, 3, 6, 12, 24];
+const GRID_SIZE = 408;
 
 describe('MockLandWithMint.sol', function () {
   it('creation', async function () {
@@ -136,6 +137,46 @@ describe('MockLandWithMint.sol', function () {
     });
 
     describe('From self', function () {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      it(`should NOT be able to transfer burned quad twice through parent quad`, async function () {
+        let size1;
+        let size2;
+        for (let i = 0; i < sizes.length; i++) {
+          size1 = sizes[i];
+          for (let j = 0; j < sizes.length; j++) {
+            size2 = sizes[j];
+            if (size2 >= size1) continue;
+            const {landOwners} = await setupTest();
+            const bytes = '0x3333';
+            await waitFor(
+              landOwners[0].MockLandWithMint.mintQuad(
+                landOwners[0].address,
+                size1,
+                0,
+                0,
+                bytes
+              )
+            );
+            for (let x = 0; x < size2; x++) {
+              for (let y = 0; y < size2; y++) {
+                const tokenId = x + y * GRID_SIZE;
+                await landOwners[0].MockLandWithMint.burn(tokenId);
+              }
+            }
+            await expect(
+              landOwners[0].MockLandWithMint.transferQuad(
+                landOwners[0].address,
+                landOwners[1].address,
+                size1,
+                0,
+                0,
+                '0x'
+              )
+            ).to.be.revertedWith('not owner');
+          }
+        }
+      });
+
       it('transfers of quads of all sizes from self', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {landOwners} = await setupTest();
