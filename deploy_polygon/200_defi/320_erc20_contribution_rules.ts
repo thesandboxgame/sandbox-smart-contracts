@@ -6,12 +6,10 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
-  const Land = await deployments.get('PolygonLand');
 
   await deployments.deploy('ContributionRules', {
     from: deployer,
     contract: 'ContributionRules',
-    args: [Land.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });

@@ -47,6 +47,7 @@ nav:
           - Liquidity provider:
               - SAND staking: topics/defi/liquidity-provider/sand-staking.md
           - Sand Reward Pool: topics/defi/sand-reward-pool.md
+          - ERC20 Reward Pool: topics/defi/erc20-reward-pool.md
       - Catalyst:
           - Gems & catalysts: topics/catalyst/catalyst.md
           - Old gems & catalysts migration: topics/catalyst/migration-catalyst.md
