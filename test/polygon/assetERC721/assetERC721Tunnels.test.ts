@@ -6,7 +6,7 @@ import {setupAssetERC721Tunnels} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 
-describe('PolygonAssetERC721.sol', function () {
+describe.only('PolygonAssetERC721.sol', function () {
   describe('AssetERC721 <> PolygonAssetERC721: Transfer', function () {
     describe('L1 to L2', function () {
       it('only owner can pause tunnels', async function () {
