@@ -6,6 +6,8 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
+import {AbiCoder} from 'ethers/lib/utils';
+
 import {
   setupUsers,
   waitFor,
@@ -40,7 +42,6 @@ const polygonAssetFixtures = async function () {
     'AssetSignedAuctionAuth'
   );
 
-  // const Asset = await ethers.getContract('Asset', minter);
   await waitFor(Asset.setBouncer(minter, true));
 
   const AssetERC1155Tunnel = await ethers.getContract('AssetERC1155Tunnel');
@@ -206,14 +207,19 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     const ipfsHashString =
       '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
-    async function mintAsset(to: string, value: number, hash = ipfsHashString) {
+    const data = '0x';
+
+    async function mintAssetOnL2(
+      to: string,
+      value: number,
+      hash = ipfsHashString
+    ) {
       // Asset to be minted
       const creator = to;
       const packId = ++id;
       const supply = value;
       const rarity = 0;
       const owner = to;
-      const data = '0x';
 
       const receipt = await waitFor(
         PolygonAssetERC1155.connect(ethers.provider.getSigner(minter)).mint(
@@ -237,6 +243,28 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       return tokenId;
     }
 
+    async function mintAssetOnL1(to: string, value: number) {
+      // Asset to be minted
+
+      const receipt = await waitFor(
+        AssetERC1155.connect(ethers.provider.getSigner(minter)).mint(
+          to,
+          id,
+          value,
+          data
+        )
+      );
+
+      const transferEvent = await expectEventWithArgs(
+        AssetERC1155,
+        receipt,
+        'TransferSingle'
+      );
+      const tokenId = transferEvent.args[3];
+
+      return tokenId;
+    }
+
     return {
       users,
       deployer,
@@ -246,7 +274,8 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       AssetERC1155,
       PolygonAssetERC1155Tunnel,
       AssetERC1155Tunnel,
-      mintAsset,
+      mintAssetOnL1,
+      mintAssetOnL2,
       FxRoot,
       FxChild,
       CheckpointManager,

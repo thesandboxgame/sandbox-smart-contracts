@@ -38,16 +38,17 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
-        uint256[] calldata values
+        uint256[] calldata values,
+        bytes calldata data // Must contain encoded bytes32[] of metadata hashes from root contract
     ) external whenNotPaused() {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
+        require(data.length > 0, "MISSING_METADATAHASHES");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
-        uint256 id = ids[0];
-        string memory uri = childToken.tokenURI(id); // Identical token URIs for ERC155
-        bytes memory data = abi.encode(uri);
         for (uint256 i = 0; i < ids.length; i++) {
-            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], data);
-            emit Withdraw(to, ids[i], values[i], data);
+            bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
+            bytes memory metadata = abi.encode(["bytes"], [metadataHashes[i]]);
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], metadata);
+            emit Withdraw(to, ids[i], values[i], metadata);
         }
         _sendMessageToRoot(abi.encode(to, ids, values, data));
     }
