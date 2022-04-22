@@ -1424,6 +1424,92 @@ describe('MockLandWithMint.sol', function () {
     });
 
     describe('transferQuad from self', function () {
+      it('should revert transfer of quad twice through parent quad', async function () {
+        let size1;
+        let size2;
+        for (let i = 0; i < sizes.length; i++) {
+          size1 = sizes[i];
+          for (let j = 0; j < sizes.length; j++) {
+            size2 = sizes[j];
+            if (size2 < size1) {
+              const {
+                deployer,
+                Land,
+                landMinter,
+                users,
+                MockLandTunnel,
+                PolygonLand,
+                MockPolygonLandTunnel,
+              } = await setupLand();
+
+              const landHolder = users[0];
+              const landReceiver = users[1];
+              const landReceiver2 = users[2];
+              const x = 0;
+              const y = 0;
+              const bytes = '0x00';
+              const plotCount = size1 * size1;
+
+              // Mint LAND on L1
+              await landMinter.Land.mintQuad(
+                landHolder.address,
+                size1,
+                x,
+                y,
+                bytes
+              );
+              expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+                plotCount
+              );
+
+              // Set Mock PolygonLandTunnel in PolygonLand
+              await deployer.PolygonLand.setPolygonLandTunnel(
+                MockPolygonLandTunnel.address
+              );
+              expect(await PolygonLand.polygonLandTunnel()).to.equal(
+                MockPolygonLandTunnel.address
+              );
+              // Transfer to L1 Tunnel
+              await landHolder.Land.setApprovalForAll(
+                MockLandTunnel.address,
+                true
+              );
+              await landHolder.MockLandTunnel.batchTransferQuadToL2(
+                landHolder.address,
+                [size1],
+                [x],
+                [y],
+                bytes
+              );
+
+              expect(await landHolder.PolygonLand.ownerOf(0)).to.be.equal(
+                landHolder.address
+              );
+
+              await landHolder.PolygonLand.transferQuad(
+                landHolder.address,
+                landReceiver.address,
+                size2,
+                x,
+                y,
+                bytes
+              );
+
+              await expect(
+                landHolder.PolygonLand.transferQuad(
+                  landHolder.address,
+                  landReceiver2.address,
+                  size1,
+                  x,
+                  y,
+                  bytes
+                )
+              ).to.be.revertedWith('not owner');
+            }
+          }
+        }
+      });
+
       it('should transfer quads of any size', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {
