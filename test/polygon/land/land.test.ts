@@ -1563,6 +1563,110 @@ describe('MockLandWithMint.sol', function () {
         ).to.be.revertedWith('token does not exist');
       });
 
+      it('should revert transfer of quad if a sub quad is burned', async function () {
+        let size1;
+        let size2;
+        for (let i = 0; i < sizes.length; i++) {
+          size1 = sizes[i];
+          for (let j = 0; j < sizes.length; j++) {
+            size2 = sizes[j];
+            if (size2 >= size1) continue;
+            const {
+              deployer,
+              Land,
+              landMinter,
+              users,
+              MockLandTunnel,
+              PolygonLand,
+              MockPolygonLandTunnel,
+              trustedForwarder,
+            } = await setupLand();
+
+            const landHolder = users[0];
+            const landReceiver = users[1];
+            const x = 0;
+            const y = 0;
+            const bytes = '0x00';
+            const plotCount = size1 * size1;
+
+            // Mint LAND on L1
+            await landMinter.Land.mintQuad(
+              landHolder.address,
+              size1,
+              x,
+              y,
+              bytes
+            );
+            expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+              plotCount
+            );
+
+            // Set Mock PolygonLandTunnel in PolygonLand
+            await deployer.PolygonLand.setPolygonLandTunnel(
+              MockPolygonLandTunnel.address
+            );
+            expect(await PolygonLand.polygonLandTunnel()).to.equal(
+              MockPolygonLandTunnel.address
+            );
+            // Transfer to L1 Tunnel
+            await landHolder.Land.setApprovalForAll(
+              MockLandTunnel.address,
+              true
+            );
+            await landHolder.MockLandTunnel.batchTransferQuadToL2(
+              landHolder.address,
+              [size1],
+              [x],
+              [y],
+              bytes
+            );
+
+            expect(await landHolder.PolygonLand.ownerOf(0)).to.be.equal(
+              landHolder.address
+            );
+
+            for (let x = 0; x < size2; x++) {
+              for (let y = 0; y < size2; y++) {
+                const id =
+                  0x0000000000000000000000000000000000000000000000000000000000000000 +
+                  (x + y * GRID_SIZE);
+                const {to, data} = await PolygonLand.populateTransaction[
+                  'burn(uint256)'
+                ](id);
+
+                await sendMetaTx(
+                  to,
+                  trustedForwarder,
+                  data,
+                  landHolder.address,
+                  '10000000'
+                );
+              }
+            }
+
+            await expect(landHolder.PolygonLand.ownerOf(0)).to.be.revertedWith(
+              'NONEXISTANT_TOKEN'
+            );
+
+            await expect(
+              landHolder.PolygonLand.transferQuad(
+                landHolder.address,
+                landReceiver.address,
+                size1,
+                x,
+                y,
+                bytes
+              )
+            ).to.be.revertedWith('not owner');
+
+            //check override
+            await expect(landHolder.PolygonLand.ownerOf(0)).to.be.revertedWith(
+              'NONEXISTANT_TOKEN'
+            );
+          }
+        }
+      });
+
       it('should revert transfer of any size quad after burn', async function () {
         for (let i = 1; i < sizes.length; i++) {
           const {
