@@ -553,6 +553,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
             operatorEnabled = (owner1x1 & OPERATOR_FLAG) == OPERATOR_FLAG;
+            return (owner, operatorEnabled);
         }
 
         if (owner1x1 != 0) {
