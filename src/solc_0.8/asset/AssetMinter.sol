@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/interfaces/IAssetERC1155.sol";
+import "../common/interfaces/IPolygonAssetERC1155.sol";
 import "../common/interfaces/IERC721Token.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
@@ -20,7 +20,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     uint256 public catalystsFactor = 1000000000000000000;
 
     IAssetAttributesRegistry internal immutable _registry;
-    IAssetERC1155 internal immutable _assetERC1155;
+    IPolygonAssetERC1155 internal immutable _assetERC1155;
     IERC721Token internal immutable _assetERC721;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
@@ -40,7 +40,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     constructor(
         IAssetAttributesRegistry registry,
         IERC721Token assetERC721,
-        IAssetERC1155 assetERC1155,
+        IPolygonAssetERC1155 assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
         address trustedForwarder,
@@ -149,7 +149,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
             mintData.packId,
             mintData.metadataHash,
             quantity,
-            0,
             mintData.to,
             mintData.data
         );
@@ -364,7 +363,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
         _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
 
-        assetId = _assetERC1155.mint(from, packId, metadataHash, quantity, 0, to, data);
+        assetId = _assetERC1155.mint(from, packId, metadataHash, quantity, to, data);
         _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 }
