@@ -25,7 +25,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     mapping(address => mapping(address => bool)) private _operatorsForAll; // erc721 and erc1155
     mapping(uint256 => address) private _erc721operators; // erc721
     mapping(uint256 => bytes32) internal _metadataHash; // erc721 and erc1155
-    mapping(uint256 => bytes) internal _rarityPacks; // rarity configuration per packs (2 bits per Asset)
+    mapping(uint256 => bytes) internal _rarityPacks; // rarity configuration per packs (2 bits per Asset) *DEPRECATED*
     mapping(uint256 => uint32) private _nextCollectionIndex; // extraction
 
     // @note : Deprecated.
@@ -200,13 +200,13 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @notice A descriptive name for the collection of tokens in this contract.
     /// @return _name the name of the tokens.
     function name() external pure returns (string memory _name) {
-        return "Sandbox's ASSETs ERC1155";
+        return "Sandbox's ASSETs";
     }
 
     /// @notice An abbreviated name for the collection of tokens in this contract.
     /// @return _symbol the symbol of the tokens.
     function symbol() external pure returns (string memory _symbol) {
-        return "ASSETERC1155";
+        return "ASSET";
     }
 
     /// @notice Query if a contract implements interface `id`.

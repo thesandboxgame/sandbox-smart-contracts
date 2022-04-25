@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import "../../../common/interfaces/IAssetERC1155.sol";
+import "../../../common/interfaces/IPolygonAssetERC1155.sol";
 import "../../common/ERC1155Receiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
@@ -12,11 +12,11 @@ import "./PolygonAssetERC1155.sol";
 
 /// @title ASSETERC1155 bridge on L2
 contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
-    IAssetERC1155 public childToken;
+    IPolygonAssetERC1155 public childToken;
     uint256 public maxTransferLimit = 20;
 
     event SetTransferLimit(uint256 limit);
-    event Deposit(address user, uint256[] id, uint256[] value, bytes data);
+    event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
@@ -26,7 +26,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
 
     constructor(
         address _fxChild,
-        IAssetERC1155 _childToken,
+        IPolygonAssetERC1155 _childToken,
         address _trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseChildTunnel(_fxChild) {
@@ -78,15 +78,12 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
-            abi.decode(syncData, (address, uint256[], uint256[], bytes));
-        uint256 numberOfTokens = ids.length;
-        for (uint256 i = 0; i < numberOfTokens; i++) {
-            childToken.wasEverMinted(ids[i])
-                ? childToken.safeTransferFrom(address(this), to, ids[i], values[i], data)
-                : childToken.mint(to, ids[i], values[i], data);
-        }
-        emit Deposit(to, ids, values, data);
+        (address to, uint256 id, uint256 value, bytes memory data) =
+            abi.decode(syncData, (address, uint256, uint256, bytes));
+        childToken.wasEverMinted(id)
+            ? childToken.safeTransferFrom(address(this), to, id, value, data)
+            : childToken.mint(to, id, value, data);
+        emit Deposit(to, id, value, data);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

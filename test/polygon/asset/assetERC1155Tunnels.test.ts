@@ -5,7 +5,7 @@ import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
-// import {Event} from '@ethersproject/contracts';
+import {Event} from '@ethersproject/contracts';
 
 describe('PolygonAsset.sol', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
@@ -204,77 +204,77 @@ describe('PolygonAsset.sol', function () {
       expect(balance).to.be.equal(10);
     });
 
+    // TODO: more balances with different supplies
+    // TODO: cannot bridge more than supply
+    // TODO:: metadata hash is retained L2 to L1
+
     it('transfer assets from L1 to L2', async function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
         PolygonAssetERC1155Tunnel,
+        MockAssetERC1155Tunnel,
         users,
-        deployer,
         mintAssetOnL1,
       } = await setupAssetERC1155Tunnels();
 
       const supplies = [20, 5, 10, 25];
-      const tokenIds = [];
+
+      // Note: tokenIds cannot be 0, 1, 2, 3... as will revert with 'ID_TAKEN'
+      // IDs on L1 must follow the precise format as generated on L2
+      const tokenIds = [
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000001000000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000',
+      ];
+
+      const testMetadataHashArray = [];
       for (let i = 0; i < 4; i++) {
-        const id = await mintAssetOnL1(users[0].address, supplies[i]);
-        tokenIds.push(id);
+        testMetadataHashArray.push(
+          ethers.utils.formatBytes32String('metadataHash')
+        );
+        await mintAssetOnL1(users[0].address, tokenIds[i], supplies[i]);
       }
-
-      // Transfer to L1 Tunnel
-      await PolygonAssetERC1155.connect(
-        ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(PolygonAssetERC1155Tunnel.address, true);
-
-      const MOCK_DATA = '0x';
-
-      await waitFor(
-        PolygonAssetERC1155Tunnel.connect(
-          ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, tokenIds, supplies, MOCK_DATA)
-      );
-
-      const abiCoder = new AbiCoder();
-
-      await deployer.MockAssetERC1155Tunnel.receiveMessage(
-        abiCoder.encode(
-          ['address', 'uint256[]', 'uint256[]', 'bytes'],
-          [users[0].address, tokenIds, supplies, MOCK_DATA]
-        )
-      );
-
-      const balance = await AssetERC1155['balanceOf(address,uint256)'](
-        users[0].address,
-        tokenIds[0]
-      );
-      expect(balance).to.be.equal(supplies[0]);
-
-      const tokenData = abiCoder.encode(
-        ['address', 'uint256[]', 'uint256[]', 'bytes'],
-        [users[0].address, tokenIds, supplies, MOCK_DATA]
-      );
 
       // Transfer to L1 Tunnel
       await AssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(deployer.MockAssetERC1155Tunnel.address, true);
+      ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
 
-      // await waitFor(
-      //   await deployer.MockAssetERC1155Tunnel.connect(
-      //     ethers.provider.getSigner(users[0].address)
-      //   ).batchDepositToChild(tokenIds, supplies, tokenData)
-      // );
+      const MOCK_DATA = new AbiCoder().encode(
+        ['bytes32[]'],
+        [testMetadataHashArray]
+      );
 
-      // await waitFor(
-      //   PolygonAssetERC1155Tunnel.processMessageFromRoot(1, deployer, tokenData)
-      // );
+      await waitFor(
+        MockAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchDepositToChild(users[0].address, tokenIds, supplies, MOCK_DATA)
+      );
 
-      // balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
-      //   users[0].address,
-      //   tokenIds[0]
-      // );
-      // expect(balance).to.be.equal(1);
+      const balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceUserL1).to.be.equal(0);
+      const balanceL1Tunnel = await AssetERC1155['balanceOf(address,uint256)'](
+        MockAssetERC1155Tunnel.address,
+        tokenIds[0]
+      );
+      expect(balanceL1Tunnel).to.be.equal(supplies[0]);
+
+      const balanceUserL2 = await PolygonAssetERC1155[
+        'balanceOf(address,uint256)'
+      ](users[0].address, tokenIds[0]);
+      expect(balanceUserL2).to.be.equal(supplies[0]);
+      const balanceL2Tunnel = await PolygonAssetERC1155[
+        'balanceOf(address,uint256)'
+      ](PolygonAssetERC1155Tunnel.address, tokenIds[0]);
+      expect(balanceL2Tunnel).to.be.equal(0);
     });
+
+    // TODO: metadata is retained across L1 to L2
 
     //   it('can transfer partial supplies of L1 minted assets: L1 to L2', async function () {
     //     const {mainnet, polygon} = await setupMainnetAndPolygonAsset();

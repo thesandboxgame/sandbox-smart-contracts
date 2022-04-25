@@ -3,7 +3,7 @@ pragma solidity 0.8.2;
 
 import {IAssetERC721} from "./IAssetERC721.sol";
 
-interface IAssetERC1155 {
+interface IPolygonAssetERC1155 {
     function changeBouncerAdmin(address newBouncerAdmin) external;
 
     function setBouncer(address bouncer, bool enabled) external;
@@ -15,7 +15,6 @@ interface IAssetERC1155 {
         uint40 packId,
         bytes32 hash,
         uint256 supply,
-        uint8 rarity,
         address owner,
         bytes calldata data
     ) external returns (uint256 id);
@@ -28,11 +27,14 @@ interface IAssetERC1155 {
     ) external;
 
     function mintMultiple(
-        address account,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
+        address creator,
+        uint40 packId,
+        bytes32 hash,
+        uint256[] calldata supplies,
+        bytes calldata rarityPack,
+        address owner,
         bytes calldata data
-    ) external;
+    ) external returns (uint256[] memory ids);
 
     // fails on non-NFT or nft who do not have collection (was a mistake)
     function collectionOf(uint256 id) external view returns (uint256);

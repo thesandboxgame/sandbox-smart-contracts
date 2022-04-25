@@ -8,8 +8,8 @@ import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
-import "../common/interfaces/IAssetERC721.sol";
-import "../common/interfaces/IAssetERC1155.sol";
+import "../common/interfaces/IPolygonAssetERC721.sol";
+import "../common/interfaces/IPolygonAssetERC1155.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
@@ -25,8 +25,8 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
 
     IERC20Extended internal immutable _sand;
     IAssetAttributesRegistry internal immutable _registry;
-    IAssetERC721 internal immutable _assetERC721;
-    IAssetERC1155 internal immutable _assetERC1155;
+    IPolygonAssetERC721 internal immutable _assetERC721;
+    IPolygonAssetERC1155 internal immutable _assetERC1155;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
@@ -43,8 +43,8 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
-        IAssetERC721 assetERC721,
-        IAssetERC1155 assetERC1155,
+        IPolygonAssetERC721 assetERC721,
+        IPolygonAssetERC1155 assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
@@ -130,7 +130,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _addGems(from, assetId, gemIds, to);
     }
-
 
     /// @dev Collect a fee in SAND tokens
     /// @param from The address paying the fee.

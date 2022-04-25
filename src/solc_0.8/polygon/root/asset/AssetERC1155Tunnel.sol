@@ -35,7 +35,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         address to,
         uint256[] memory ids,
         uint256[] memory values,
-        bytes calldata data // Unused L1 to L2
+        bytes calldata data
     ) public whenNotPaused() {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         rootToken.safeBatchTransferFrom(_msgSender(), address(this), ids, values, data);
