@@ -4,8 +4,9 @@
 pragma solidity 0.8.2;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../../../common/interfaces/IPolygonLand.sol";
 
-contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
+abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721BaseToken {
     using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -158,7 +159,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes calldata data
-    ) external {
+    ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
@@ -201,7 +202,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256 x,
         uint256 y,
         bytes calldata data
-    ) external {
+    ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         if (_msgSender() != from) {
@@ -221,7 +222,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256 size,
         uint256 x,
         uint256 y
-    ) public view returns (bool) {
+    ) public view override returns (bool) {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 

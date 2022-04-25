@@ -30,7 +30,7 @@ contract PolygonLandV1 is PolygonLandBaseToken {
         uint256 x,
         uint256 y,
         bytes memory data
-    ) external {
+    ) external override {
         require(_msgSender() == polygonLandTunnel, "Invalid sender");
         _mintQuad(user, size, x, y, data);
     }

@@ -19,11 +19,4 @@ interface LandToken {
         uint256 y,
         bytes calldata data
     ) external;
-
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external;
 }

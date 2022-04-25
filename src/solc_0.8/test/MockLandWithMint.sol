@@ -25,4 +25,15 @@ contract MockLandWithMint is PolygonLandBaseToken {
     ) external {
         _mintQuad(to, size, x, y, data);
     }
+
+    /** @notice Removed caller validations */
+    function mint(
+        address user,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) external override {
+        _mintQuad(user, size, x, y, data);
+    }
 }
