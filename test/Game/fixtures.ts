@@ -92,12 +92,16 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
   };
 
   setApprovalForAll(
-    'GameAsset1155',
+    'MockERC1155Asset',
     gameTokenAsAdmin.address,
     users[0].address
   );
 
-  setApprovalForAll('GameAsset721', gameTokenAsAdmin.address, users[0].address);
+  setApprovalForAll(
+    'MockERC721Asset',
+    gameTokenAsAdmin.address,
+    users[0].address
+  );
 
   return {
     gameToken,
@@ -112,10 +116,7 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
   };
 };
 
-export const setupTest = withSnapshot(
-  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
-  gameFixtures
-);
+export const setupTest = withSnapshot(['ChildGameToken'], gameFixtures);
 
 const gameFixturesWithAdminGameMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
@@ -126,15 +127,15 @@ const gameFixturesWithAdminGameMinter = async (): Promise<GameFixturesData> => {
 };
 
 export const setupTestWithAdminGameMinter = withSnapshot(
-  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+  ['ChildGameToken'],
   gameFixturesWithAdminGameMinter
 );
 
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
   const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  await changeAssetMinter('GameAsset1155', assetAdmin, GameOwner.address);
-  await changeAssetMinter('GameAsset721', assetAdmin, GameOwner.address);
+  await changeAssetMinter('MockERC1155Asset', assetAdmin, GameOwner.address);
+  await changeAssetMinter('MockERC721Asset', assetAdmin, GameOwner.address);
 
   const {gameTokenAdmin} = await getNamedAccounts();
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -143,6 +144,6 @@ const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
 };
 
 export const setupTestWithGameOwnerMinter = withSnapshot(
-  ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+  ['MockERC1155Asset', 'MockERC721Asset', 'ChildGameToken'],
   gameFixturesWithGameOwnerMinter
 );

@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {assetAdmin} = await getNamedAccounts();
 
-  await deploy('GameAsset721', {
+  await deploy('MockERC721Asset', {
     from: assetAdmin,
     args: ['Test nft 721', 'NFT721', 'http://nft-test/nft-721-{id}'],
     log: true,
@@ -16,5 +16,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['GameAsset721', 'GameAsset721_deploy'];
+func.tags = ['MockERC721Asset', 'MockERC721Asset_deploy'];
 func.skip = skipUnlessTest; // TODO enable

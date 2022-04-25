@@ -49,7 +49,7 @@ export async function supplyAssets(
 
   // ------------ ERC1155 -------------
   const asset1155Contract = await ethers.getContract(
-    'GameAsset1155',
+    'MockERC1155Asset',
     assetAdmin
   );
   const assetReceipts1155: Receipt[] = [];
@@ -80,7 +80,10 @@ export async function supplyAssets721(
 
   // ------------ ERC721 -------------
 
-  const asset721Contract = await ethers.getContract('GameAsset721', assetAdmin);
+  const asset721Contract = await ethers.getContract(
+    'MockERC721Asset',
+    assetAdmin
+  );
   const assetReceipts721: Receipt[] = [];
 
   const asset721AsAdmin = await asset721Contract.connect(

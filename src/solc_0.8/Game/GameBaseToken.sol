@@ -9,19 +9,18 @@ import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IGameToken.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "hardhat/console.sol";
 
 contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initializable, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
-    IERC1155 internal _asset1155;
-    IERC721 internal _asset721;
+    IERC1155 internal _ERC1155Asset;
+    IERC721 internal _ERC721Asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets1155;
-    mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets721;
+    mapping(uint256 => mapping(uint256 => uint256)) private _gameERC1155Assets;
+    mapping(uint256 => mapping(uint256 => uint256)) private _gameERC721Assets;
     mapping(uint256 => address) private _creatorship; // creatorship transfer
 
     mapping(uint256 => bytes32) private _metaData;
@@ -29,7 +28,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
-    /// @param oldId The id of the previous erc721 GAME token.
+    /// @param oldId The id of the previous ERC721 GAME token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
 
@@ -55,8 +54,8 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         uint8 chainIndex
     ) public initializer {
         _admin = admin;
-        _asset1155 = asset1155;
-        _asset721 = asset721;
+        _ERC1155Asset = asset1155;
+        _ERC721Asset = asset721;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
@@ -78,7 +77,8 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         address, /*from*/
         uint256, /*id*/
         bytes calldata /*data*/
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(_msgSender() == address(_ERC721Asset));
         return IERC721Receiver.onERC721Received.selector;
     }
 
@@ -91,7 +91,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// along with the uri to set.
     /// @param editor The address to allow to edit (can also be set later).
     /// @param subId A random id created on the backend.
-    /// @return id The id of the new GAME token (erc721).
+    /// @return id The id of the new GAME token (ERC721).
     function createGame(
         address from,
         address to,
@@ -105,14 +105,18 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
             _setGameEditor(to, editor, true);
         }
 
-        GameData721 memory creation721 = creation.gameData721;
-        if (creation721.assetIdsToAdd.length != 0) {
-            _addAssets(from, strgId, creation721.assetIdsToAdd, new uint256[](0), false);
+        if (creation.gameData721.assetIdsToAdd.length != 0) {
+            _addAssets(from, strgId, creation.gameData721.assetIdsToAdd, new uint256[](0), false);
         }
 
-        GameData1155 memory creation1155 = creation.gameData1155;
-        if (creation1155.assetIdsToAdd.length != 0) {
-            _addAssets(from, strgId, creation1155.assetIdsToAdd, creation1155.assetAmountsToAdd, true);
+        if (creation.gameData1155.assetIdsToAdd.length != 0) {
+            _addAssets(
+                from,
+                strgId,
+                creation.gameData1155.assetIdsToAdd,
+                creation.gameData1155.assetAmountsToAdd,
+                true
+            );
         }
 
         _metaData[strgId] = creation.uri;
@@ -132,19 +136,24 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         IGameToken.GameData memory update
     ) external override onlyMinter returns (uint256) {
         uint256 id = _storageId(gameId);
-        GameData721 memory update721 = update.gameData721;
-        if (update721.assetIdsToAdd.length != 0) {
-            _addAssets(from, id, update721.assetIdsToAdd, new uint256[](0), false);
+        if (update.gameData721.assetIdsToAdd.length != 0) {
+            _addAssets(from, id, update.gameData721.assetIdsToAdd, new uint256[](0), false);
         }
-        if (update721.assetIdsToRemove.length != 0) {
-            _removeAssets(id, update721.assetIdsToRemove, new uint256[](0), _ownerOf(gameId), false);
+        if (update.gameData721.assetIdsToRemove.length != 0) {
+            _removeAssets(id, update.gameData721.assetIdsToRemove, new uint256[](0), _ownerOf(gameId), false);
         }
-        GameData1155 memory update1155 = update.gameData1155;
-        if (update1155.assetIdsToAdd.length != 0) {
-            _addAssets(from, id, update1155.assetIdsToAdd, update1155.assetAmountsToAdd, true);
+
+        if (update.gameData1155.assetIdsToAdd.length != 0) {
+            _addAssets(from, id, update.gameData1155.assetIdsToAdd, update.gameData1155.assetAmountsToAdd, true);
         }
-        if (update1155.assetIdsToRemove.length != 0) {
-            _removeAssets(id, update1155.assetIdsToRemove, update1155.assetAmountsToRemove, _ownerOf(gameId), true);
+        if (update.gameData1155.assetIdsToRemove.length != 0) {
+            _removeAssets(
+                id,
+                update.gameData1155.assetIdsToRemove,
+                update.gameData1155.assetAmountsToRemove,
+                _ownerOf(gameId),
+                true
+            );
         }
         _metaData[id] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
@@ -191,21 +200,21 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param from The address of the one destroying the game.
     /// @param to The address to send all GAME assets to.
     /// @param gameId The id of the GAME to destroy.
-    /// @param erc1155AssetIds The ERC1155 assets to recover from the burnt GAME.
-    /// @param erc721AssetIds The ERC721 assets to recover from the burnt GAME.
+    /// @param ERC1155AssetIds The ERC1155 assets to recover from the burnt GAME.
+    /// @param ERC721AssetIds The ERC721 assets to recover from the burnt GAME.
     function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata erc1155AssetIds,
-        uint256[] calldata erc721AssetIds
+        uint256[] calldata ERC1155AssetIds,
+        uint256[] calldata ERC721AssetIds
     ) external override notToZero(to) notToThis(to) {
         _burnGame(from, gameId);
-        if (erc1155AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, erc1155AssetIds, true);
+        if (ERC1155AssetIds.length != 0) {
+            _recoverAssets(from, to, gameId, ERC1155AssetIds, true);
         }
-        if (erc721AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, erc721AssetIds, false);
+        if (ERC721AssetIds.length != 0) {
+            _recoverAssets(from, to, gameId, ERC721AssetIds, false);
         }
     }
 
@@ -227,27 +236,27 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param from Previous owner of the burnt game.
     /// @param to Address that will receive the assets.
     /// @param gameId Id of the burnt GAME token.
-    /// @param erc1155AssetIds The ERC1155 assets to recover from the burnt GAME.
-    /// @param erc721AssetIds The ERC1155 assets to recover from the burnt GAME.
+    /// @param ERC1155AssetIds The ERC1155 assets to recover from the burnt GAME.
+    /// @param ERC721AssetIds The ERC1155 assets to recover from the burnt GAME.
     function recoverAssets(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata erc1155AssetIds,
-        uint256[] calldata erc721AssetIds
+        uint256[] calldata ERC1155AssetIds,
+        uint256[] calldata ERC721AssetIds
     ) public override {
-        if (erc1155AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, erc1155AssetIds, true);
+        if (ERC1155AssetIds.length != 0) {
+            _recoverAssets(from, to, gameId, ERC1155AssetIds, true);
         }
-        if (erc721AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, erc721AssetIds, false);
+        if (ERC721AssetIds.length != 0) {
+            _recoverAssets(from, to, gameId, ERC721AssetIds, false);
         }
     }
 
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
-    function getAssetBalancesERC1155(uint256 gameId, uint256[] calldata assetIds)
+    function getERC1155AssetBalances(uint256 gameId, uint256[] calldata assetIds)
         external
         view
         override
@@ -259,7 +268,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         uint256[] memory assets;
         assets = new uint256[](length);
         for (uint256 i = 0; i < length; i++) {
-            assets[i] = _gameAssets1155[storageId][assetIds[i]];
+            assets[i] = _gameERC1155Assets[storageId][assetIds[i]];
         }
         return assets;
     }
@@ -267,7 +276,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
-    function getAssetBalancesERC721(uint256 gameId, uint256[] calldata assetIds)
+    function getERC721AssetBalances(uint256 gameId, uint256[] calldata assetIds)
         external
         view
         override
@@ -279,7 +288,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         uint256[] memory assets;
         assets = new uint256[](length);
         for (uint256 i = 0; i < length; i++) {
-            assets[i] = _gameAssets721[storageId][assetIds[i]];
+            assets[i] = _gameERC721Assets[storageId][assetIds[i]];
         }
         return assets;
     }
@@ -292,7 +301,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         return _gameEditors[gameOwner][editor];
     }
 
-    /// @notice Called by other contracts to check if this can receive erc1155 batch.
+    /// @notice Called by other contracts to check if this can receive ERC1155 batch.
     /// @param operator The address of the operator in the current tx.
     /// @return the bytes4 value 0xbc197c81.
     function onERC1155BatchReceived(
@@ -308,7 +317,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         revert("ERC1155_BATCH_REJECTED");
     }
 
-    /// @notice Called by other contracts to check if this can receive erc1155 tokens.
+    /// @notice Called by other contracts to check if this can receive ERC1155 tokens.
     /// @param operator The address of the operator in the current tx.
     /// @return the bytes4 value 0xf23a6e61.
     function onERC1155Received(
@@ -382,10 +391,10 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         values = isERC1155 ? new uint256[](assetIds.length) : new uint256[](0);
         for (uint256 i = 0; i < assetIds.length; i++) {
             if (isERC1155) {
-                values[i] = _gameAssets1155[strgId][assetIds[i]];
-                delete _gameAssets1155[strgId][assetIds[i]];
+                values[i] = _gameERC1155Assets[strgId][assetIds[i]];
+                delete _gameERC1155Assets[strgId][assetIds[i]];
             } else {
-                delete _gameAssets721[strgId][assetIds[i]];
+                delete _gameERC721Assets[strgId][assetIds[i]];
             }
         }
         return values;
@@ -404,12 +413,12 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     ) internal {
         if (isERC1155) {
             require(amount != 0, "INVALID_ASSET_ADDITION");
-            uint256 currentValue = _gameAssets1155[strgId][assetId];
-            _gameAssets1155[strgId][assetId] = currentValue + amount;
+            uint256 currentValue = _gameERC1155Assets[strgId][assetId];
+            _gameERC1155Assets[strgId][assetId] = currentValue + amount;
         } else {
-            uint256 currentValue = _gameAssets721[strgId][assetId];
+            uint256 currentValue = _gameERC721Assets[strgId][assetId];
             require(amount == 1 && currentValue == 0, "INVALID_ASSET_ADDITION");
-            _gameAssets721[strgId][assetId] = 1;
+            _gameERC721Assets[strgId][assetId] = 1;
         }
     }
 
@@ -425,13 +434,13 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         bool isERC1155
     ) internal {
         if (isERC1155) {
-            uint256 currentValue = _gameAssets1155[strgId][assetId];
+            uint256 currentValue = _gameERC1155Assets[strgId][assetId];
             require(amount != 0 && currentValue >= amount, "INVALID_ASSET_REMOVAL");
-            _gameAssets1155[strgId][assetId] = currentValue - amount;
+            _gameERC1155Assets[strgId][assetId] = currentValue - amount;
         } else {
-            uint256 currentValue = _gameAssets721[strgId][assetId];
+            uint256 currentValue = _gameERC721Assets[strgId][assetId];
             require(amount == 1 && currentValue == 1, "INVALID_ASSET_REMOVAL");
-            _gameAssets721[strgId][assetId] = 0;
+            _gameERC721Assets[strgId][assetId] = 0;
         }
     }
 
@@ -450,13 +459,13 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     ) internal {
         if (isERC1155) {
             if (assetIds.length == 1) {
-                _asset1155.safeTransferFrom(from, to, assetIds[0], amounts[0], "");
+                _ERC1155Asset.safeTransferFrom(from, to, assetIds[0], amounts[0], "");
             } else {
-                _asset1155.safeBatchTransferFrom(from, to, assetIds, amounts, "");
+                _ERC1155Asset.safeBatchTransferFrom(from, to, assetIds, amounts, "");
             }
         } else {
             for (uint256 i = 0; i < assetIds.length; i++) {
-                _asset721.safeTransferFrom(from, to, assetIds[i], "");
+                _ERC721Asset.safeTransferFrom(from, to, assetIds[i], "");
             }
         }
     }
@@ -540,12 +549,10 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         _safeTransferFrom(address(this), to, assetIds, values, isERC1155);
         GameData memory recovery;
         if (isERC1155) {
-            GameData1155 memory recovery1155 = recovery.gameData1155;
-            recovery1155.assetIdsToRemove = assetIds;
-            recovery1155.assetAmountsToRemove = values;
+            recovery.gameData1155.assetIdsToRemove = assetIds;
+            recovery.gameData1155.assetAmountsToRemove = values;
         } else {
-            GameData721 memory recovery721 = recovery.gameData721;
-            recovery721.assetIdsToRemove = assetIds;
+            recovery.gameData721.assetIdsToRemove = assetIds;
         }
         emit GameTokenUpdated(gameId, 0, recovery);
     }

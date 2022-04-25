@@ -127,7 +127,7 @@ type User = {
 };
 
 const setupTest = withSnapshot(
-  ['GameAsset1155', 'GameAsset721', 'ChildGameToken', 'GameMinter'],
+  ['MockERC1155Asset', 'MockERC721Asset', 'ChildGameToken', 'GameMinter'],
   async (): Promise<{
     GameMinter: Contract;
     gameTokenContract: Contract;
@@ -142,10 +142,18 @@ const setupTest = withSnapshot(
       users: await Promise.all(
         users.map((acc: string) =>
           (async () => {
-            setApprovalForAll('GameAsset1155', GameMinter.address, acc);
-            setApprovalForAll('GameAsset721', GameMinter.address, acc);
-            setApprovalForAll('GameAsset1155', gameTokenContract.address, acc);
-            setApprovalForAll('GameAsset721', gameTokenContract.address, acc);
+            setApprovalForAll('MockERC1155Asset', GameMinter.address, acc);
+            setApprovalForAll('MockERC721Asset', GameMinter.address, acc);
+            setApprovalForAll(
+              'MockERC1155Asset',
+              gameTokenContract.address,
+              acc
+            );
+            setApprovalForAll(
+              'MockERC721Asset',
+              gameTokenContract.address,
+              acc
+            );
 
             return {
               address: acc,
@@ -184,12 +192,12 @@ describe('GameMinter', function () {
       await gameAsAdmin.changeMinter(GameMinter.address);
 
       setApprovalForAll(
-        'GameAsset1155',
+        'MockERC1155Asset',
         gameTokenContract.address,
         users[1].address
       );
       setApprovalForAll(
-        'GameAsset1155',
+        'MockERC1155Asset',
         gameTokenContract.address,
         users[8].address
       );
@@ -266,7 +274,7 @@ describe('GameMinter', function () {
       await setUpAndMint();
       await createGame();
 
-      const gameAssetsBefore = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsBefore = await gameTokenContract.getERC1155AssetBalances(
         gameId1,
         [assets[0], assets[1]]
       );
@@ -291,7 +299,7 @@ describe('GameMinter', function () {
       const newId = updateEvent.args[1];
       const updateArgs = updateEvent.args[2];
 
-      const gameAssetsAfter = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsAfter = await gameTokenContract.getERC1155AssetBalances(
         newId,
         [assets[0], assets[1]]
       );
@@ -351,7 +359,7 @@ describe('GameMinter', function () {
         users[8].address,
         gameTokenFeeBeneficiary
       );
-      const gameAssetsBefore = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsBefore = await gameTokenContract.getERC1155AssetBalances(
         gameId1,
         editorAssets
       );
@@ -371,7 +379,7 @@ describe('GameMinter', function () {
         users[8].address,
         gameTokenFeeBeneficiary
       );
-      const gameAssetsAfter = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsAfter = await gameTokenContract.getERC1155AssetBalances(
         gameId1,
         editorAssets
       );
@@ -404,7 +412,7 @@ describe('GameMinter', function () {
 
       gameId1 = increment(gameId1);
 
-      const gameAssetsBefore = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsBefore = await gameTokenContract.getERC1155AssetBalances(
         gameId1,
         [assets[1]]
       );
@@ -425,7 +433,7 @@ describe('GameMinter', function () {
         users[1].address,
         gameTokenFeeBeneficiary
       );
-      const gameAssetsAfter = await gameTokenContract.getAssetBalancesERC1155(
+      const gameAssetsAfter = await gameTokenContract.getERC1155AssetBalances(
         gameId1,
         [assets[1]]
       );
@@ -613,12 +621,12 @@ describe('GameMinter', function () {
       gameTokenContract = await ethers.getContract('ChildGameToken');
 
       setApprovalForAll(
-        'GameAsset1155',
+        'MockERC1155Asset',
         gameTokenContract.address,
         users[1].address
       );
       setApprovalForAll(
-        'GameAsset1155',
+        'MockERC1155Asset',
         gameTokenContract.address,
         users[8].address
       );
@@ -890,7 +898,7 @@ describe('GameMinter', function () {
         )
       );
 
-      const assetsBefore = await gameTokenContract.getAssetBalancesERC1155(
+      const assetsBefore = await gameTokenContract.getERC1155AssetBalances(
         gameId2,
         [editorAssets[0]]
       );
@@ -900,7 +908,7 @@ describe('GameMinter', function () {
 
       gameId2 = increment(gameId2);
 
-      const assetsAfter = await gameTokenContract.getAssetBalancesERC1155(
+      const assetsAfter = await gameTokenContract.getERC1155AssetBalances(
         gameId2,
         [editorAssets[0]]
       );
@@ -934,7 +942,7 @@ describe('GameMinter', function () {
         )
       );
 
-      const assetsBefore = await gameTokenContract.getAssetBalancesERC1155(
+      const assetsBefore = await gameTokenContract.getERC1155AssetBalances(
         gameId2,
         [editorAssets[0]]
       );
@@ -944,7 +952,7 @@ describe('GameMinter', function () {
 
       gameId2 = increment(gameId2);
 
-      const assetsAfter = await gameTokenContract.getAssetBalancesERC1155(
+      const assetsAfter = await gameTokenContract.getERC1155AssetBalances(
         gameId2,
         [editorAssets[0]]
       );

@@ -40,19 +40,9 @@ const newCreationAdd1155 = (creation, assetIdsToAdd1155) => {
   };
 };
 
-/*
-const creation = {
-  assetIdsToRemove: [],
-  assetAmountsToRemove: [],
-  assetIdsToAdd: [],
-  assetAmountsToAdd: [1],
-  uri: utils.keccak256(toUtf8Bytes('My GAME token URI!')),
-};
-*/
-
 const erc721Tests = require('../erc721')(
   withSnapshot(
-    ['GameAsset1155', 'GameAsset721', 'ChildGameToken'],
+    ['MockERC1155Asset', 'MockERC721Asset', 'ChildGameToken'],
     async () => {
       const {gameTokenAdmin} = await getNamedAccounts();
       const others = await getUnnamedAccounts();
@@ -63,6 +53,20 @@ const erc721Tests = require('../erc721')(
         ethers.provider.getSigner(gameTokenAdmin)
       );
       await gameAsAdmin.changeMinter(gameTokenAdmin);
+
+      const assetContract1155 = await ethers.getContract('MockERC1155Asset');
+      const assetContract721 = await ethers.getContract('MockERC721Asset');
+
+      await [...others].map(async (user) => {
+        const assetContract1155AsUser = await assetContract1155.connect(
+          ethers.provider.getSigner(user)
+        );
+        await assetContract1155AsUser.setApprovalForAll(contract.address, true);
+        const assetContract721AsUser = await assetContract721.connect(
+          ethers.provider.getSigner(user)
+        );
+        await assetContract721AsUser.setApprovalForAll(contract.address, true);
+      });
 
       async function mint(to) {
         const assets = await supplyAssets(to, [1]);
@@ -84,29 +88,7 @@ const erc721Tests = require('../erc721')(
         return {receipt, tokenId};
       }
 
-      async function grant(contract, users) {
-        const assetContract1155 = await ethers.getContract('GameAsset1155');
-        const assetContract721 = await ethers.getContract('GameAsset721');
-
-        await [...users].map(async (user) => {
-          const assetContract1155AsUser = await assetContract1155.connect(
-            ethers.provider.getSigner(user)
-          );
-          await assetContract1155AsUser.setApprovalForAll(
-            contract.address,
-            true
-          );
-          const assetContract721AsUser = await assetContract721.connect(
-            ethers.provider.getSigner(user)
-          );
-          await assetContract721AsUser.setApprovalForAll(
-            contract.address,
-            true
-          );
-        });
-      }
-
-      return {contractAddress: contract.address, users: others, mint, grant};
+      return {contractAddress: contract.address, users: others, mint};
     }
   ),
   {

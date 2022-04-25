@@ -39,16 +39,16 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata erc1155AssetIds,
-        uint256[] calldata erc721AssetIds
+        uint256[] calldata ERC1155AssetIds,
+        uint256[] calldata ERC721AssetIds
     ) external;
 
     function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata erc1155AssetIds,
-        uint256[] calldata erc721AssetIds
+        uint256[] calldata ERC1155AssetIds,
+        uint256[] calldata ERC721AssetIds
     ) external;
 
     function updateGame(
@@ -57,12 +57,12 @@ interface IGameToken {
         GameData calldata update
     ) external returns (uint256);
 
-    function getAssetBalancesERC1155(uint256 gameId, uint256[] calldata assetIds)
+    function getERC1155AssetBalances(uint256 gameId, uint256[] calldata assetIds)
         external
         view
         returns (uint256[] calldata);
 
-    function getAssetBalancesERC721(uint256 gameId, uint256[] calldata assetIds)
+    function getERC721AssetBalances(uint256 gameId, uint256[] calldata assetIds)
         external
         view
         returns (uint256[] calldata);
