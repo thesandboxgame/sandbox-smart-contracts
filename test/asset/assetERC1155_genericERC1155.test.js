@@ -54,7 +54,7 @@ function testAsset() {
         const receipt = await waitFor(
           assetERC1155
             .connect(ethers.provider.getSigner(minter))
-            .mint(to, id, value, MOCK_DATA)
+            ['mint(address,uint256,uint256,bytes)'](to, id, value, MOCK_DATA)
         );
 
         return {
@@ -65,7 +65,7 @@ function testAsset() {
       }
 
       // Set up batch minting for test purposes
-      async function mintBatch(ids, to, supplies) {
+      async function mintMultiple(ids, to, supplies) {
         // address to,
         // uint256[] calldata ids,
         // uint256[] calldata amounts,
@@ -81,7 +81,7 @@ function testAsset() {
           [testMetadataHashes]
         );
 
-        const tx = await assetERC1155.mintBatch(
+        const tx = await assetERC1155.mintMultiple(
           to,
           ids,
           supplies,
@@ -158,7 +158,7 @@ function testAsset() {
         contract: assetERC1155,
         users,
         mint,
-        mintMultiple: mintBatch,
+        mintMultiple,
         deployer,
         tokenIds: assetIds,
         batchIds,
