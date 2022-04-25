@@ -10,11 +10,7 @@ import "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 /// @dev This contract is final, don't inherit from it.
 contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
-
     address public _childChainManager;
-
-    // We only mint on L2, so we track tokens transferred to L1 to avoid minting them twice.
-    mapping(uint256 => bool) public withdrawnTokens; // TODO: this is not used - remove param?
 
     function initialize(
         address trustedForwarder,
@@ -29,11 +25,11 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
+    /// @dev For this function it is not required to provide data.
     /// @param creator address of the creator of the token.
     /// @param packId unique packId for that token.
     /// @param hash hash of an IPFS cidv1 folder that contains the metadata of the token type in the file 0.json.
     /// @param supply number of tokens minted for that token type.
-    /// @param rarity rarity power of the token.
     /// @param owner address that will receive the tokens.
     /// @param data extra data to accompany the minting call.
     /// @return id the id of the newly minted token type.
@@ -42,7 +38,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         uint40 packId,
         bytes32 hash,
         uint256 supply,
-        uint8 rarity, /* deprecated */ // TODO: remove param?
         address owner,
         bytes calldata data
     ) external returns (uint256 id) {
@@ -56,7 +51,31 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _mint(_msgSender(), owner, id, supply, data);
     }
 
+    /// @notice Creates `amount` tokens of token type `id`, and assigns them to `account`.
+    /// @dev Should be used only by PolygonAssetERC1155Tunnel.
+    /// @dev This function can be called when the token ID exists on another layer.
+    /// @dev Encoded bytes32 metadata hash must be provided as data.
+    /// @param owner address that will receive the tokens.
+    /// @param id the id of the newly minted token.
+    /// @param supply number of tokens minted for that token type.
+    /// @param data token metadata.
+    function mint(
+        address owner,
+        uint256 id,
+        uint256 supply,
+        bytes calldata data
+    ) external {
+        require(isBouncer(_msgSender()), "!BOUNCER");
+        require(data.length > 0, "METADATA_MISSING");
+        require(owner != address(0), "TO==0");
+        uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
+        require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
+        _metadataHash[uriId] = abi.decode(data, (bytes32));
+        _mint(_msgSender(), owner, id, supply, data);
+    }
+
     /// @notice Mint multiple token types for `creator` on slot `packId`.
+    /// @dev For this function it is not required to provide data.
     /// @param creator address of the creator of the tokens.
     /// @param packId unique packId for the tokens.
     /// @param hash hash of an IPFS cidv1 folder that contains the metadata of each token type in the files: 0.json, 1.json, 2.json, etc...
@@ -94,11 +113,11 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _burn(from, id, amount);
     }
 
-    /// @notice called when token is deposited to root chain
-    /// @dev Should be callable only by ChildChainManager
-    /// @dev Should handle deposit by minting the required tokenId(s) for user
-    /// @dev Minting can also be done by other functions
-    /// @param user user address for whom deposit is being done
+    /// @notice This function is called when a token is deposited to the root chain.
+    /// @dev Should be callable only by ChildChainManager.
+    /// @dev Should handle deposit by minting the required tokenId(s) for user.
+    /// @dev Minting can also be done by other functions.
+    /// @param user user address for whom deposit is being done.
     /// @param depositData abi encoded tokenIds. Batch deposit also supported.
     function deposit(address user, bytes calldata depositData) external override {
         require(_msgSender() == _childChainManager, "!DEPOSITOR");
@@ -109,22 +128,18 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _mintBatch(user, ids, amounts, data);
     }
 
-    /**
-     * @notice called when user wants to withdraw single token back to root chain
-     * @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
-     * @param id id to withdraw
-     * @param amount amount to withdraw
-     */
+    /// @notice called when user wants to withdraw single token back to root chain.
+    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain.
+    /// @param id id to withdraw.
+    /// @param amount amount to withdraw.
     function withdrawSingle(uint256 id, uint256 amount) external {
         _burn(_msgSender(), id, amount);
     }
 
-    /**
-     * @notice called when user wants to batch withdraw tokens back to root chain
-     * @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
-     * @param ids ids to withdraw
-     * @param amounts amounts to withdraw
-     */
+    /// @notice called when user wants to batch withdraw tokens back to root chain.
+    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain.
+    /// @param ids ids to withdraw.
+    /// @param amounts amounts to withdraw.
     function withdrawBatch(uint256[] calldata ids, uint256[] calldata amounts) external {
         _burnBatch(_msgSender(), ids, amounts);
     }
@@ -169,6 +184,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         return ids;
     }
 
+    // TODO: check and update comments
     function _generateTokenId(
         address creator,
         uint256 supply,
@@ -180,7 +196,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         return
             uint256(uint160(creator)) *
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT // TODO: review
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT
             uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *

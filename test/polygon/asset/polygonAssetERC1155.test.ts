@@ -5,7 +5,8 @@ import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {ethers} from 'hardhat';
 
-describe('PolygonAsset.sol', function () {
+// PolygonAssetERC1155 tests for 'Asset'
+describe('PolygonAssetERC1155.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
     const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 10);

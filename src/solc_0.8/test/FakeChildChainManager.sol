@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../polygon/child/asset/PolygonAssetV2.sol";
+import "../polygon/child/unused/PolygonAssetV2.sol";
 import "../polygon/child/sand/PolygonSand.sol";
 
 /// @dev This is NOT a secure ChildChainManager contract implementation!
