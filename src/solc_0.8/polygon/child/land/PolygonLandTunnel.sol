@@ -29,6 +29,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
+        require(_maxAllowedQuads > 0, "PolygonLandTunnel: max allowed value cannot be zero");
         maxAllowedQuads = _maxAllowedQuads;
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }

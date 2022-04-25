@@ -69,6 +69,16 @@ describe('PolygonLand.sol', function () {
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
+      it('cannot set Max Allowed Quads to zero', async function () {
+        const {deployer} = await setupLand();
+
+        await expect(
+          deployer.PolygonLandTunnel.setMaxAllowedQuads(0)
+        ).to.be.revertedWith(
+          'PolygonLandTunnel: max allowed value cannot be zero'
+        );
+      });
+
       it('should not be able to transfer Land when paused', async function () {
         const {
           deployer,
