@@ -10,6 +10,7 @@ const {read, execute, deploy} = deployments;
 import {setupUsers, waitFor, expectEventWithArgs} from '../../utils';
 
 import {Contract} from 'ethers';
+import {AbiCoder} from 'ethers/lib/utils';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 
@@ -39,9 +40,6 @@ export const assetFixtures = async function () {
     TRUSTED_FORWARDER.address
   );
 
-  const MOCK_DATA =
-    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000084e42535759334450000000000000000000000000000000000000000000000000';
-
   let id = 0;
   const ipfsHashString =
     '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -51,14 +49,20 @@ export const assetFixtures = async function () {
     const creator = to;
     const packId = ++id;
     const supply = value;
-    const rarity = 0;
     const owner = to;
     const data = '0x';
 
     const receipt = await waitFor(
       polygonAssetERC1155
         .connect(ethers.provider.getSigner(minter))
-        .mint(creator, packId, hash, supply, rarity, owner, data)
+        ['mint(address,uint40,bytes32,uint256,address,bytes)'](
+          creator,
+          packId,
+          hash,
+          supply,
+          owner,
+          data
+        )
     );
 
     const transferEvent = await expectEventWithArgs(
@@ -72,21 +76,27 @@ export const assetFixtures = async function () {
       .connect(ethers.provider.getSigner(to))
       .setApprovalForAll(polygonAssetTunnel.address, true);
 
+    const testMetadataHashArray = [];
+
+    testMetadataHashArray.push(
+      ethers.utils.formatBytes32String('metadataHash')
+    );
+
+    const MOCK_DATA = new AbiCoder().encode(
+      ['bytes32[]'],
+      [testMetadataHashArray]
+    );
+
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
-      .batchWithdrawToRoot(to, [tokenId], [value]);
-
-    // For Tests only
+      .batchWithdrawToRoot(to, [tokenId], [value], MOCK_DATA);
 
     const admin = await Asset.getAdmin();
     await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
     await waitFor(
-      Asset.connect(ethers.provider.getSigner(minter)).mint(
-        to,
-        tokenId,
-        value,
-        MOCK_DATA
-      )
+      Asset.connect(ethers.provider.getSigner(minter))[
+        'mint(address,uint256,uint256,bytes)'
+      ](to, tokenId, value, MOCK_DATA)
     );
 
     return tokenId;
