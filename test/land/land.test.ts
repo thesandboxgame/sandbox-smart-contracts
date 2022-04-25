@@ -22,7 +22,7 @@ describe('Land Transfer quad', function () {
         await mintQuad(deployer, size1, 0, 0);
         await contract.transferQuad(deployer, landAdmin, size2, 0, 0, '0x');
         await expect(
-          contract.transferQuad(deployer, landAdmin, size1, 0, 0, '0x')
+          contract.transferQuad(deployer, landAdmin, size2, 0, 0, '0x')
         ).to.be.reverted;
       });
     });
