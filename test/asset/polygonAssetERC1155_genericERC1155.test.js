@@ -52,19 +52,24 @@ function testAsset() {
         // uint40 packId,
         // bytes32 hash,
         // uint256 supply,
-        // uint8 rarity, /* deprecated */
         // address owner,
         // bytes calldata data
 
         const creator = to;
         const supply = value;
-        const rarity = 0;
         const owner = to;
 
         let receipt = await waitFor(
           polygonAssetERC1155
             .connect(ethers.provider.getSigner(minter))
-            .mint(creator, id, ipfsHashString, supply, rarity, owner, MOCK_DATA)
+            ['mint(address,uint40,bytes32,uint256,address,bytes)'](
+              creator,
+              id,
+              ipfsHashString,
+              supply,
+              owner,
+              MOCK_DATA
+            )
         );
 
         const transferEvent = await expectEventWithArgs(
@@ -157,7 +162,7 @@ function testAsset() {
     {}
   );
 
-  describe('PolygonAssetERC1155:ERC1155', function () {
+  describe.only('PolygonAssetERC1155:ERC1155', function () {
     for (const test of erc1155Tests) {
       // eslint-disable-next-line mocha/no-setup-in-describe
       recurseTests(test);
