@@ -142,7 +142,6 @@ function testAsset() {
         await mintMultiple(minter, [10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1])
       ).tokenIds;
 
-      console.log(assetIds);
       return {
         ethersProvider: ethers.provider,
         contractAddress: polygonAssetERC1155.address,
