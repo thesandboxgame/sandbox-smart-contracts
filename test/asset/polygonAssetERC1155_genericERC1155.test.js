@@ -161,7 +161,7 @@ function testAsset() {
     {}
   );
 
-  describe.only('PolygonAssetERC1155:ERC1155', function () {
+  describe('PolygonAssetERC1155:ERC1155', function () {
     for (const test of erc1155Tests) {
       // eslint-disable-next-line mocha/no-setup-in-describe
       recurseTests(test);
