@@ -48,6 +48,8 @@ via the matic bridge.
 
 - Sand Token SC: This is the [ERC20](https://eips.ethereum.org/EIPS/eip-20) smart contract that do the accounting of the
   Sand token.
+- Polygon bridge: This is a set of contracts and backends provided by Matic/Polygon and used to bridge assets between
+  L1 (Ethereum) and L2 (Matic/Polygon).
 
 ## Process
 
@@ -59,7 +61,6 @@ following:
 
 ```plantuml
 class BuyMessage {
-  address signer,
   address buyer,
   uint256 id,
   address seller,
@@ -101,7 +102,7 @@ deactivate AvatarSaleSC
 
 ```
 
-# Emitted Events Pos Bridge
+# Emitted Events FX Bridge
 
 ```plantuml
 title Avatar Emitted events
@@ -117,11 +118,11 @@ actor User
 participant AvatarSale <<L2>>
 participant AvatarL2 <<L2>>
 participant AvatarL1 <<L1>>
-participant RootChainManager <<PL1>>
+participant AvatarTunnelL2 <<L2>>
+participant AvatarTunnelL1 <<L1>>
 participant RootChain <<PL1>>
-participant ChildChainManager <<PL2>>
 participant StateReceiver <<PL2>>
-participant MintableERC721Predicate <<PL1>>
+participant StateSender <<PL2>>
 
 group Mint
 User -> AvatarSale: execute()
@@ -130,31 +131,29 @@ hnote over AvatarL2 #lime: MintedBatch(to, tokenIds)
 end
 
 group Move from L2 to L1
-User -> AvatarL2: withdraw()
-hnote over AvatarL2 #lime: Withdrawn(user, tokenId)
-AvatarL2 -> AvatarL2: burn return txHash
-PolygonServer -> RootChain: submitHeaderBlock(data,sigs)
-hnote over RootChain: NewHeaderBlock(start, end)
-User -> RootChainManager: exit(txHash)
-RootChainManager -> MintableERC721Predicate: exitTokens(sender,rootToken,logRLPList)
-MintableERC721Predicate -> AvatarL1: mint(user, tokenId) 
-hnote over AvatarL1 #lime: Transfer(address(0), to, tokenId);
+User -> AvatarL2: approve(AvatarTunnel, id)
+User -> AvatarTunnelL2: sendAvatarToL1()
+AvatarTunnelL2 <-> AvatarL2: transferFrom()
+AvatarL2 -> AvatarTunnelL2: transfer, lock
+hnote over AvatarTunnelL2 #lime:  AvatarSentToL1(AvatarTokenAdr, sender, to, tokenId)
+hnote over AvatarTunnelL2:  MessageSent(msg(sender, to, tokenId))
+== Polygon Checkpoint ==
+User -> AvatarTunnelL1: receiveAvatarFromL2(message)
+AvatarTunnelL1 -> AvatarL1: safeTransfer or mint (to, tokenId)
+hnote over AvatarTunnelL1 #lime: AvatarReceivedFromL2(AvatarToken, depositor, to, minted, tokenId);
 end
 
 group Move from L1 to L2
 User -> AvatarL1: approve()
-User -> RootChainManager: depositFor(user,rootToken,depositData)
-RootChainManager -> MintableERC721Predicate: lockTokens(depositor,depositReceiver,rootToken,depositData)
-hnote over MintableERC721Predicate: LockedMintableERC721(depositor, depositReceiver, rootToken, tokenId)
-hnote over MintableERC721Predicate: LockedMintableERC721Batch(depositor, depositReceiver, rootToken, tokenIds)
-MintableERC721Predicate -> AvatarL1: transfer(user, MintableERC721Predicate, tokenId)
-hnote over AvatarL1 #lime: Transfer(user, polygonPredicate, tokenId);
-MintableERC721Predicate -> RootChainManager
-hnote over RootChainManager:  StateSynced(id,contractAddress,data)
+User -> AvatarTunnelL1: sendAvatarToL2(to, tokenId)
+AvatarTunnelL1 -> AvatarL1: transferFrom
+AvatarL1 -> AvatarTunnelL1: transfer, lock
+hnote over AvatarTunnelL1: AvatarSentToL2(avatarToken, sender, to, tokenId);
+AvatarTunnelL1 -> StateSender: sendMessageToChild(childTunnel, message);
+hnote over StateSender: sendMessageToChild(receiver,data)
 PolygonServer -> StateReceiver: commitState(syncTime,recordBytes)
-StateReceiver -> ChildChainManager: onStateReceive(_, data)
-ChildChainManager -> AvatarL2: deposit(user, depositData)
-hnote over AvatarL2 #lime: Deposit(from, tokenId);
+StateReceiver -> AvatarTunnelL2: processMessageFromRoot(messageSender,data)
+AvatarTunnelL2 -> AvatarL2: safeTransferFrom(tunnel, to, tokenId);
+hnote over AvatarTunnelL2 #lime: AvatarReceivedFromL1(avatarToken, depositor, to, tokenId);
 end
-
 ```
