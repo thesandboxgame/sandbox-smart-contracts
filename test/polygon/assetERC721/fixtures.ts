@@ -17,7 +17,6 @@ const symbol = 'ASSETERC721';
 // Minting with metadata must be implemented to retain the metadata hash.
 
 export const setupAssetERC721Test = withSnapshot([], async function () {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const [
     trustedForwarder,

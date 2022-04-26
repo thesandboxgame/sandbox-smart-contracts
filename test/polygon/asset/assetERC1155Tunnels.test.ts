@@ -1,4 +1,4 @@
-import {setupAssetERC1155Tunnels, setupPolygonAsset} from './fixtures';
+import {setupAssetERC1155Tunnels} from './fixtures_tunnels';
 
 import {waitFor, getAssetChainIndex, setupUser} from '../../utils';
 import {expect} from '../../chai-setup';
