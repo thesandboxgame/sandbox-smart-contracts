@@ -95,7 +95,7 @@ function testAsset() {
         // bytes calldata data
 
         const creator = to;
-        const rarity = 0;
+        const rarityPack = 0;
         const owner = to;
         const packId = 10;
 
@@ -114,7 +114,7 @@ function testAsset() {
           packId,
           ipfsHashString,
           supplies,
-          rarity,
+          rarityPack,
           owner,
           MOCK_DATA_BATCH
         );

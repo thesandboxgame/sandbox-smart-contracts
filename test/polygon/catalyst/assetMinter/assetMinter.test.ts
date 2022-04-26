@@ -42,7 +42,6 @@ const mintOptions = {
   catalystId: catId,
   gemIds: ids,
   quantity: supply,
-  rarity: 0,
   to: ethers.constants.AddressZero,
   data: callData,
 };

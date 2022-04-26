@@ -66,7 +66,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('22'),
       '0x1111111111111111111111111111111111111111111111111111111111111111',
       assetSupply,
-      0,
       catalystOwner,
       Buffer.from('ff')
     );
@@ -162,7 +161,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('12312'),
       '0x1111111111111111111222211111111111111111111111111111111111111111',
       1,
-      0,
       user5,
       Buffer.from('ff')
     );
@@ -265,7 +263,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('2257'),
       '0x2211111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user4,
       Buffer.from('ff')
     );
@@ -368,7 +365,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('22'),
       '0x1111111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user5,
       Buffer.from('ff')
     );
@@ -437,7 +433,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('2257'),
       '0x2211111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user4,
       Buffer.from('ff')
     );
