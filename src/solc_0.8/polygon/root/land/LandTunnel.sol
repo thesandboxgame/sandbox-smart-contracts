@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 /// @title LAND bridge on L1
 contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     address public rootToken;
-    bool internal transferingToL2;
+    bool internal transferringToL2;
 
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -32,7 +32,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         uint256, /* tokenId */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferingToL2, "LandTunnel: !BRIDGING");
+        require(transferringToL2, "LandTunnel: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -42,7 +42,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         uint256[] calldata, /* ids */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferingToL2, "LandTunnel: !BRIDGING");
+        require(transferringToL2, "LandTunnel: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 
@@ -58,9 +58,9 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         bytes memory data
     ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
-        transferingToL2 = true;
+        transferringToL2 = true;
         LandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
-        transferingToL2 = false;
+        transferringToL2 = false;
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
             _sendMessageToChild(message);
