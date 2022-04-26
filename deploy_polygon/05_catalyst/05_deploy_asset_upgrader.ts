@@ -11,7 +11,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonAssetAttributesRegistry'
   );
   const Sand = await deployments.get('PolygonSand');
-  const Asset = await deployments.get('PolygonAssetERC1155');
+  const PolygonAssetERC1155 = await deployments.get('Asset');
+  const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const GemsCatalystsRegistry = await deployments.get(
@@ -26,8 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       AssetAttributesRegistry.address,
       Sand.address,
-      Asset.address, // TODO: asset contract split
-      Asset.address, // TODO: asset contract split
+      PolygonAssetERC1155.address,
+      PolygonAssetERC721.address,
       GemsCatalystsRegistry.address,
       upgradeFee,
       gemAdditionFee,
