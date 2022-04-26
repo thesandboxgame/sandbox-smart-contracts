@@ -102,7 +102,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external {
+    ) public virtual {
         _batchTransferFrom(from, to, ids, data, false);
     }
 

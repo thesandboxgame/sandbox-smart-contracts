@@ -218,6 +218,15 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
     }
 
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) public override(LandToken, ERC721BaseToken) {
+        super.batchTransferFrom(from, to, ids, data);
+    }
+
     function exists(
         uint256 size,
         uint256 x,
