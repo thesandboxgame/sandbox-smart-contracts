@@ -4,7 +4,7 @@ const generateERC20Tests = require('../../../erc20');
 
 function testCatalyst(catalystName) {
   const erc20Tests = generateERC20Tests(
-    withSnapshot(['Catalysts'], async () => {
+    withSnapshot(['PolygonCatalysts'], async () => {
       const others = await getUnnamedAccounts();
       const {catalystMinter} = await getNamedAccounts();
       const contract = await ethers.getContract(catalystName);
@@ -38,7 +38,7 @@ function testCatalyst(catalystName) {
   });
 }
 
-testCatalyst('Catalyst_EPIC');
+testCatalyst('PolygonCatalyst_EPIC');
 // testCatalyst('Catalyst_COMMON');
 // testCatalyst('Catalyst_RARE');
 // testCatalyst('Catalyst_LEGENDARY');
