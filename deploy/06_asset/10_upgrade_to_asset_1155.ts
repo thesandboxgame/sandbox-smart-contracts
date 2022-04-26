@@ -47,6 +47,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'Asset_deploy'];
+func.tags = ['Asset', 'Asset_deploy', 'AssetERC1155', 'AssetERC1155_deploy'];
 func.dependencies = ['AssetERC721', 'TRUSTED_FORWARDER', 'ERC1155_PREDICATE'];
 func.skip = skipUnlessTest;
