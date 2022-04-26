@@ -91,7 +91,7 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
   }
 }
 
-describe.only('AssetMinter', function () {
+describe('AssetMinter', function () {
   describe('AssetMinter: Mint', function () {
     it('the assetMInterAdmin is set correctly', async function () {
       const {assetMinterContract} = await setupAssetMinter();
