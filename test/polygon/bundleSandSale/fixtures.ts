@@ -24,7 +24,7 @@ export type Fixture = {
   receivingWallet: Address;
 };
 export const setupFixtures = withSnapshot(
-  ['DAI', 'Asset', 'Sand'],
+  ['DAI', 'PolygonAssetERC1155', 'Sand'],
   async function () {
     const {
       sandBeneficiary,
@@ -47,13 +47,16 @@ export const setupFixtures = withSnapshot(
     const sandContract = await ethers.getContract('Sand', sandBeneficiary);
     // ERC1155ERC721
     const assetContractAsBouncerAdmin = await ethers.getContract(
-      'Asset',
+      'PolygonAssetERC1155',
       assetBouncerAdmin
     );
     await waitFor(
       assetContractAsBouncerAdmin.setBouncer(sandBeneficiary, true)
     );
-    const assetContract = await ethers.getContract('Asset', sandBeneficiary);
+    const assetContract = await ethers.getContract(
+      'PolygonAssetERC1155',
+      sandBeneficiary
+    );
 
     async function deployPolygonBundleSandSale(
       receivingWallet: Address
