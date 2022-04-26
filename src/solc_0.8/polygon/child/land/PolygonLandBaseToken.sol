@@ -354,16 +354,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(3, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -397,14 +388,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(6, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -438,12 +422,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(12, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -486,6 +465,37 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
             return true;
         }
         return ownerOfAll || _owners[quadId] == uint256(uint160(address(from)));
+    }
+
+    function _ownerOfQuad(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) internal returns (address) {
+        uint256 layer;
+        uint256 parentSize = size * 2;
+        if (size == 1) {
+            layer = LAYER_1x1;
+            parentSize = 3;
+        } else if (size == 3) {
+            layer = LAYER_3x3;
+        } else if (size == 6) {
+            layer = LAYER_6x6;
+        } else if (size == 12) {
+            layer = LAYER_12x12;
+        } else if (size == 24) {
+            layer = LAYER_24x24;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        address owner = address(uint160(_owners[layer + (x / size) * size + ((y / size) * size) * GRID_SIZE]));
+        if (owner != address(0)) {
+            return owner;
+        } else if (size < 24) {
+            return _ownerOfQuad(parentSize, x, y);
+        }
+        return address(0);
     }
 
     function _ownerOf(uint256 id) internal view override returns (address) {

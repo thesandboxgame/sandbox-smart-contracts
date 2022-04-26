@@ -1499,7 +1499,7 @@ describe('MockLandWithMint.sol', function () {
                 landHolder.PolygonLand.transferQuad(
                   landHolder.address,
                   landReceiver2.address,
-                  size1,
+                  size2,
                   x,
                   y,
                   bytes
