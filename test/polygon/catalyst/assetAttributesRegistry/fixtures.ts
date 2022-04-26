@@ -8,7 +8,7 @@ import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts
 export const setupAssetAttributesRegistry = withSnapshot(
   [
     'Asset_setup', // we need to setup bounce admin.
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER --> PolygonGemPower
     'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
     'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
   ],
@@ -18,7 +18,7 @@ export const setupAssetAttributesRegistry = withSnapshot(
 export const setupAssetAttributesRegistryGemsAndCatalysts = withSnapshot(
   [
     'AssetMinter_setup', // we need to setup bounce admin.
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER --> PolygonGemPower
     'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
     'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
   ],

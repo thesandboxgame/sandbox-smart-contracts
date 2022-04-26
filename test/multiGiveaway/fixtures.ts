@@ -34,7 +34,13 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  ['Multi_Giveaway_1', 'Asset', 'Gems', 'Sand', 'Catalysts'],
+  [
+    'Multi_Giveaway_1',
+    'PolygonAssetERC1155',
+    'PolygonGems',
+    'PolygonSand',
+    'PolygonCatalysts',
+  ],
   async function (hre, options?: Options) {
     const {network, getChainId} = hre;
     const chainId = await getChainId();
@@ -49,11 +55,14 @@ export const setupTestGiveaway = withSnapshot(
       gemMinter,
       multiGiveawayAdmin,
     } = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
-    const sandContract = await ethers.getContract('Sand');
-    const assetContract = await ethers.getContract('Asset');
-    const speedGemContract = await ethers.getContract('Gem_SPEED');
-    const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
+    const otherAccounts = await getUnnamedAccounts();
+    const others = otherAccounts;
+    const sandContract = await ethers.getContract('PolygonSand');
+    const assetContract = await ethers.getContract('PolygonAssetERC1155');
+    const speedGemContract = await ethers.getContract('PolygonGem_SPEED');
+    const rareCatalystContract = await ethers.getContract(
+      'PolygonCatalyst_RARE'
+    );
 
     await deployments.deploy('TestMetaTxForwarder', {
       from: deployer,
@@ -103,7 +112,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
-      'Asset',
+      'PolygonAssetERC1155',
       assetBouncerAdmin
     );
 
