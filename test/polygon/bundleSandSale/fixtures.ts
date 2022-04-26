@@ -133,15 +133,15 @@ export async function mint(
   supply: BigNumberish
 ): Promise<BigNumberish> {
   const hash = keccak256(toUtf8Bytes('IPFS somehting'));
-  const rarity = 0;
 
   const receipt = await waitFor(
-    fixtures.assetContract.mint(
+    fixtures.assetContract[
+      'mint(address,uint40,bytes32,uint256,address,bytes)'
+    ](
       fixtures.sandBeneficiary,
       packId,
       hash,
       supply,
-      rarity,
       fixtures.sandBeneficiary,
       []
     )

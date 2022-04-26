@@ -9,7 +9,6 @@ export async function mintAsset(
   packId: BigNumber,
   hash: string,
   supply: number | BigNumber,
-  rarity: number,
   owner: string,
   callData: Buffer
 ): Promise<BigNumber> {
@@ -24,12 +23,26 @@ export async function mintAsset(
 
   const assetId = await assetContract
     .connect(ethers.provider.getSigner(assetBouncerAdmin))
-    .callStatic.mint(creator, packId, hash, supply, rarity, owner, callData);
+    .callStatic['mint(address,uint40,bytes32,uint256,address,bytes)'](
+      creator,
+      packId,
+      hash,
+      supply,
+      owner,
+      callData
+    );
 
   await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetBouncerAdmin))
-      .mint(creator, packId, hash, supply, rarity, owner, callData)
+      ['mint(address,uint40,bytes32,uint256,address,bytes)'](
+        creator,
+        packId,
+        hash,
+        supply,
+        owner,
+        callData
+      )
   );
   return assetId;
 }

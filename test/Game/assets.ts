@@ -3,6 +3,10 @@ import {BigNumber, Contract} from 'ethers';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {expectEventWithArgsFromReceipt} from '../utils';
 
+const emptyBytes = '0x';
+const dummyHash =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
+
 let packId = 0;
 
 async function getAssetsFromReceipts(
@@ -52,22 +56,29 @@ export async function supplyAssets(
     'MockERC1155Asset',
     assetAdmin
   );
-  const assetReceipts1155: Receipt[] = [];
+  const assetReceipts: Receipt[] = [];
 
-  const asset1155AsAdmin = await asset1155Contract.connect(
+  const assetAsAdmin = await asset1155Contract.connect(
     ethers.provider.getSigner(assetAdmin)
   );
   packId = 0;
   for (let i = 0; i < supplies.length; i++) {
-    assetReceipts1155.push(
-      await asset1155AsAdmin.mint(creator, packId, supplies[i], '0x00')
+    assetReceipts.push(
+      await assetAsAdmin['mint(address,uint40,bytes32,uint256,address,bytes)'](
+        creator,
+        packId,
+        dummyHash,
+        supplies[i],
+        creator,
+        emptyBytes
+      )
     );
     packId++;
   }
 
   const assetsFromReceipts = await getAssetsFromReceipts(
-    asset1155AsAdmin,
-    assetReceipts1155
+    assetAsAdmin,
+    assetReceipts
   );
   return assetsFromReceipts;
 }

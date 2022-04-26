@@ -17,7 +17,6 @@ const mintOptions = {
   catalystId: catalysts[1].catalystId,
   gemIds: [gems[0].gemId],
   quantity: NFT_SUPPLY,
-  rarity: 0,
   to: ethers.constants.AddressZero,
   data: Buffer.from(''),
 };

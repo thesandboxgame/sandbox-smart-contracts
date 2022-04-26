@@ -52,7 +52,6 @@ describe('AssetAttributesRegistry', function () {
       BigNumber.from('2233'),
       '0x1111111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user0,
       Buffer.from('ff')
     );
@@ -157,7 +156,6 @@ describe('AssetAttributesRegistry', function () {
       BigNumber.from('2233'),
       '0x1111111111111111111111111111111111111111111111111111111111fff111',
       1,
-      0,
       user0,
       Buffer.from('ff')
     );
@@ -224,7 +222,6 @@ describe('AssetAttributesRegistry', function () {
       BigNumber.from('22331'),
       '0x1111111111111112111111111111111111111111111111111111111111fff111',
       1,
-      0,
       user0,
       Buffer.from('ff')
     );
@@ -307,7 +304,6 @@ describe('AssetAttributesRegistry', function () {
       BigNumber.from('121'),
       '0x0011111111111112111111111111111111111111111111111111111111fff111',
       1,
-      0,
       user0,
       Buffer.from('ff')
     );

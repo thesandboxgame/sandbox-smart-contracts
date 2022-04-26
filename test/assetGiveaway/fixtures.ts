@@ -80,7 +80,6 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
     const packId = id;
     const hash = ipfsHashString;
     const supply = value;
-    const rarity = 1;
     const owner = assetsHolder ? others[5] : testContract.address;
     const data = '0x';
 
@@ -89,15 +88,9 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
     );
 
     const receipt = await waitFor(
-      assetContractAsCreator.mint(
-        creator,
-        packId,
-        hash,
-        supply,
-        rarity,
-        owner,
-        data
-      )
+      assetContractAsCreator[
+        'mint(address,uint40,bytes32,uint256,address,bytes)'
+      ](creator, packId, hash, supply, owner, data)
     );
 
     const transferEvent = await expectReceiptEventWithArgs(
