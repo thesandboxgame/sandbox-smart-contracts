@@ -5,7 +5,7 @@ import {assetFixtures} from '../common/fixtures/asset';
 
 const setupAsset = withSnapshot(
   [
-    'AssetERC1155',
+    'Asset',
     'PolygonAssetERC1155',
     'AssetERC1155Tunnel',
     'PolygonAssetERC1155Tunnel',

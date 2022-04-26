@@ -4,7 +4,6 @@ import {Address, Receipt} from 'hardhat-deploy/types';
 import {expectEventWithArgsFromReceipt} from '../utils';
 
 const emptyBytes = '0x';
-const rarity = 3;
 let dummyHash =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
@@ -46,12 +45,11 @@ export async function supplyAssets(
 
   for (let i = 0; i < supplies.length; i++) {
     assetReceipts.push(
-      await assetAsAdmin.mint(
+      await assetAsAdmin['mint(address,uint40,bytes32,uint256,address,bytes)'](
         creator,
         packId,
         dummyHash,
         supplies[i],
-        rarity,
         creator,
         emptyBytes
       )
