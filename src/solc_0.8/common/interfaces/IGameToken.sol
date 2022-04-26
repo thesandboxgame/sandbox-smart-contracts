@@ -39,16 +39,16 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata ERC1155AssetIds,
-        uint256[] calldata ERC721AssetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) external;
 
     function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata ERC1155AssetIds,
-        uint256[] calldata ERC721AssetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) external;
 
     function updateGame(

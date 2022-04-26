@@ -13,8 +13,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initializable, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
-    IERC1155 internal _ERC1155Asset;
-    IERC721 internal _ERC721Asset;
+    IERC1155 internal _assetERC1155;
+    IERC721 internal _assetERC721;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -54,8 +54,8 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         uint8 chainIndex
     ) public initializer {
         _admin = admin;
-        _ERC1155Asset = asset1155;
-        _ERC721Asset = asset721;
+        _assetERC1155 = asset1155;
+        _assetERC721 = asset721;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
@@ -78,7 +78,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
         uint256, /*id*/
         bytes calldata /*data*/
     ) external view override returns (bytes4) {
-        require(_msgSender() == address(_ERC721Asset));
+        require(_msgSender() == address(_assetERC721), "WRONG_SENDER");
         return IERC721Receiver.onERC721Received.selector;
     }
 
@@ -200,21 +200,21 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param from The address of the one destroying the game.
     /// @param to The address to send all GAME assets to.
     /// @param gameId The id of the GAME to destroy.
-    /// @param ERC1155AssetIds The ERC1155 assets to recover from the burnt GAME.
-    /// @param ERC721AssetIds The ERC721 assets to recover from the burnt GAME.
+    /// @param assetERC1155Ids The ERC1155 assets to recover from the burnt GAME.
+    /// @param assetERC721Ids The ERC721 assets to recover from the burnt GAME.
     function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata ERC1155AssetIds,
-        uint256[] calldata ERC721AssetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) external override notToZero(to) notToThis(to) {
         _burnGame(from, gameId);
-        if (ERC1155AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, ERC1155AssetIds, true);
+        if (assetERC1155Ids.length != 0) {
+            _recoverAssets(from, to, gameId, assetERC1155Ids, true);
         }
-        if (ERC721AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, ERC721AssetIds, false);
+        if (assetERC721Ids.length != 0) {
+            _recoverAssets(from, to, gameId, assetERC721Ids, false);
         }
     }
 
@@ -236,20 +236,20 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param from Previous owner of the burnt game.
     /// @param to Address that will receive the assets.
     /// @param gameId Id of the burnt GAME token.
-    /// @param ERC1155AssetIds The ERC1155 assets to recover from the burnt GAME.
-    /// @param ERC721AssetIds The ERC1155 assets to recover from the burnt GAME.
+    /// @param assetERC1155Ids The ERC1155 assets to recover from the burnt GAME.
+    /// @param assetERC721Ids The ERC1155 assets to recover from the burnt GAME.
     function recoverAssets(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata ERC1155AssetIds,
-        uint256[] calldata ERC721AssetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) public override {
-        if (ERC1155AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, ERC1155AssetIds, true);
+        if (assetERC1155Ids.length != 0) {
+            _recoverAssets(from, to, gameId, assetERC1155Ids, true);
         }
-        if (ERC721AssetIds.length != 0) {
-            _recoverAssets(from, to, gameId, ERC721AssetIds, false);
+        if (assetERC721Ids.length != 0) {
+            _recoverAssets(from, to, gameId, assetERC721Ids, false);
         }
     }
 
@@ -459,13 +459,13 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     ) internal {
         if (isERC1155) {
             if (assetIds.length == 1) {
-                _ERC1155Asset.safeTransferFrom(from, to, assetIds[0], amounts[0], "");
+                _assetERC1155.safeTransferFrom(from, to, assetIds[0], amounts[0], "");
             } else {
-                _ERC1155Asset.safeBatchTransferFrom(from, to, assetIds, amounts, "");
+                _assetERC1155.safeBatchTransferFrom(from, to, assetIds, amounts, "");
             }
         } else {
             for (uint256 i = 0; i < assetIds.length; i++) {
-                _ERC721Asset.safeTransferFrom(from, to, assetIds[i], "");
+                _assetERC721.safeTransferFrom(from, to, assetIds[i], "");
             }
         }
     }
