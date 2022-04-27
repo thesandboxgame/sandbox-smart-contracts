@@ -27,7 +27,7 @@ library TileLib {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         uint256 mask = quadMask(size);
         require(mask != 0, "invalid size");
-        uint256 i = 0;
+        uint256 i;
         for (; i < size; i++) {
             uint256 idx = (y + i) / 8;
             self.data[idx] |= mask << (x + 24 * ((y + i) % 8));
@@ -40,7 +40,7 @@ library TileLib {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         uint mask = quadMask(size);
         require(mask != 0, "invalid size");
-        uint256 i = 0;
+        uint256 i;
         for (; i < size; i++) {
             uint256 idx = (y + i) / 8;
             self.data[idx] &= ~(mask << (x + 24 * ((y + i) % 8)));
@@ -53,7 +53,7 @@ library TileLib {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         uint mask = quadMask(size);
         require(mask != 0, "invalid size");
-        uint256 i = 0;
+        uint256 i;
         for (; i < size; i++) {
             uint256 idx = (y + i) / 8;
             uint256 bitMask = mask << (x + 24 * ((y + i) % 8));
@@ -64,7 +64,7 @@ library TileLib {
         return true;
     }
 
-    // TODO: inline, destructive without clone version
+    // TODO: inline, destructive without clone version, TEST IT!!!
     function containTile(Tile memory self, Tile memory contained) internal pure returns (bool) {
         return isEqual(intersection(self, contained), contained);
     }
@@ -96,13 +96,6 @@ library TileLib {
         self.data[0] &= b.data[0];
         self.data[1] &= b.data[1];
         self.data[2] &= b.data[2];
-        return self;
-    }
-
-    function xor(Tile memory self, Tile memory b) internal pure returns (Tile memory){
-        self.data[0] ^= b.data[0];
-        self.data[1] ^= b.data[1];
-        self.data[2] ^= b.data[2];
         return self;
     }
 
