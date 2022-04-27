@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import {TileLib} from "../common/Libraries/TileLib.sol"; // TODO: Separate this code into a library + something to store the masks
+import {TileLib} from "../../common/Libraries/TileLib.sol"; // TODO: Separate this code into a library + something to store the masks
 
 // TODO: Check if a pure function is better than a mapping for the masks
 contract TileTester {
@@ -53,7 +53,6 @@ contract TileTester {
     function isEqual(uint256 idx1, uint256 idx2) external view returns (bool) {
         return tiles[idx1].isEqual(tiles[idx2]);
     }
-
 
     function containTile(uint256 idx1, uint256 idx2) external view returns (bool) {
         return tiles[idx1].containTile(tiles[idx2]);

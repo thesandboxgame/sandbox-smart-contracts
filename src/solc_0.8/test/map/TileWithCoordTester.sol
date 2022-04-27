@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol"; // TODO: Separate this code into a library + something to store the masks
+import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol"; // TODO: Separate this code into a library + something to store the masks
 
 // TODO: Check if a pure function is better than a mapping for the masks
 contract TileWithCoordTester {
@@ -35,9 +35,7 @@ contract TileWithCoordTester {
         return _quadMask(size);
     }
 
-
     function _quadMask(uint256 size) internal view returns (uint256) {
         return quadMap[size];
     }
-
 }
