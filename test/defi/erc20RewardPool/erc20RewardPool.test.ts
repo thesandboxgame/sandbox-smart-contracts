@@ -77,7 +77,7 @@ describe('ERC20RewardPool main contract tests', function () {
     it('recoverFunds must fail with address zero', async function () {
       const {contract} = await setupERC20RewardPoolTest();
       await expect(contract.recoverFunds(AddressZero)).to.be.revertedWith(
-        'ERC20RewardPool: is not contract'
+        'ERC20RewardPool: zero address'
       );
     });
   });
