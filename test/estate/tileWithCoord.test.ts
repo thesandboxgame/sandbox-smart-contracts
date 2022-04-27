@@ -32,7 +32,7 @@ describe('TileWithCoordLib', function () {
 
   it('x, y, key', async function () {
     const tester = await setupTileWithCoordsLibTest();
-    await tester.initTileWithCoord(0, 24 * 123 + 5, 24 * 321 + 9);
+    await tester.initTileWithCoord(0, 24 * 123, 24 * 321);
     const x = BigNumber.from(await tester.getX(0));
     expect(x).to.be.equal(123);
     const y = BigNumber.from(await tester.getY(0));

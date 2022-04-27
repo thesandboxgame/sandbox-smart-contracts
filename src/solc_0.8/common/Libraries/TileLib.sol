@@ -2,10 +2,8 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-// TODO: Separate this code into a library + something to store the masks
 // TODO: Check if a pure function is better than a mapping for the masks
 // A square of 24x24 bits
-// This lib does everything inline (destroying self information if necessary), you must clone before calling.
 library TileLib {
 
     struct Tile {
@@ -47,6 +45,13 @@ library TileLib {
             self.data[idx] &= ~(mask << (x + 24 * ((y + i) % 8)));
         }
         return self;
+    }
+
+    function containCoord(Tile memory self, uint256 x, uint256 y) internal pure returns (bool) {
+        require(x < 24 && y < 24, "Invalid tile coordinates");
+        uint256 idx = y / 8;
+        uint256 bitMask = 1 << (x + 24 * (y % 8));
+        return (self.data[idx] & bitMask == bitMask);
     }
 
     function containQuad(Tile memory self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (bool) {

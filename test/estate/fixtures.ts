@@ -14,25 +14,22 @@ export const setupTileWithCoordsLibTest = withSnapshot([], async () => {
   return await ethers.getContract('TileWithCoordTester', deployer);
 });
 
-export function printTile(jsTile: boolean[][]) {
-  console.log("     ", [...Array(jsTile.length).keys()].reduce((acc, val) => acc + val.toString().padEnd(3), ""));
-  for (let i = 0; i < jsTile.length; i++) {
-    const line = jsTile[i];
-    console.log(i.toString().padEnd(5),
-      line.reduce((acc, val) => acc + (val ? " X " : " O "), ""));
-  }
-}
-
-export function printTileWithCoord(jsTile: {
-  tile: boolean[][],
-  x: BigNumber,
-  y: BigNumber
-}) {
-  console.log("X", jsTile.x.toString(), jsTile.x.toHexString(), "X/24", jsTile.x.div(24).toString());
-  console.log("Y", jsTile.y.toString(), jsTile.y.toHexString(), "Y/24", jsTile.y.div(24).toString());
-  printTile(jsTile.tile);
-
-}
+export const setupMapTest = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  await deployments.deploy('MapTester', {from: deployer});
+  const tester = await ethers.getContract('MapTester', deployer)
+  return {
+    tester,
+    getMap: async function (idx: BigNumberish) {
+      const length = BigNumber.from(await tester.length(idx));
+      const ret = [];
+      for (let i = BigNumber.from(0); i.lt(length); i = i.add(1)) {
+        ret.push(tileWithCoordToJS(await tester.at(idx, i)));
+      }
+      return ret;
+    }
+  };
+});
 
 export function tileToArray(data: BigNumberish[]) {
   const ret = [];
@@ -60,4 +57,47 @@ export function tileWithCoordToJS(coord: { tile: { data: BigNumberish[] } }) {
 export function getEmptyTile() {
   return Array.from({length: 24},
     e => Array.from({length: 24}, e => false));
+}
+
+
+export function printTile(jsTile: boolean[][]) {
+  console.log("     ", [...Array(jsTile.length).keys()].reduce((acc, val) => acc + val.toString().padEnd(3), ""));
+  for (let i = 0; i < jsTile.length; i++) {
+    const line = jsTile[i];
+    console.log(i.toString().padEnd(5),
+      line.reduce((acc, val) => acc + (val ? " X " : " O "), ""));
+  }
+}
+
+export function printTileWithCoord(jsTile: {
+  tile: boolean[][],
+  x: BigNumber,
+  y: BigNumber
+}) {
+  console.log("X", jsTile.x.toString(), jsTile.x.toHexString());
+  console.log("Y", jsTile.y.toString(), jsTile.y.toHexString());
+  printTile(jsTile.tile);
+
+}
+
+export function printMap(tiles: {
+  tile: boolean[][],
+  x: BigNumber,
+  y: BigNumber
+}[]) {
+  for (const tile of tiles) {
+    printTileWithCoord(tile);
+  }
+}
+
+export function createTestMapQuads(xsize: number, ysize: number, cant: number, sizes = [1, 3, 6, 12, 24]) {
+  const quads = [];
+  for (let i = 0; i < cant; i++) {
+    const x = Math.floor(xsize * Math.random());
+    const y = Math.floor(ysize * Math.random());
+    const idx = Math.round((sizes.length - 1) * Math.random());
+    const size = sizes[idx];
+    quads.push([Math.floor(x / size) * size, Math.floor(y / size) * size, size]);
+  }
+  return quads;
 }
