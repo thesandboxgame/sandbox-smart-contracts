@@ -8,7 +8,7 @@ import {TileLib} from "../common/Libraries/TileLib.sol"; // TODO: Separate this 
 contract TileTester {
     using TileLib for TileLib.Tile;
     mapping(uint256 => uint256) public quadMap;
-    TileLib.Tile[30] tile;
+    TileLib.Tile[30] tiles;
 
     constructor() {
         quadMap[1] = 1;
@@ -19,15 +19,15 @@ contract TileTester {
     }
 
     function setQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
-        tile[idx] = tile[idx].setQuad(x, y, size, _quadMask);
+        tiles[idx] = tiles[idx].setQuad(x, y, size, _quadMask);
     }
 
     function clearQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
-        tile[idx] = tile[idx].clearQuad(x, y, size, _quadMask);
+        tiles[idx] = tiles[idx].clearQuad(x, y, size, _quadMask);
     }
 
     function getTile(uint256 idx) external view returns (TileLib.Tile memory) {
-        return tile[idx];
+        return tiles[idx];
     }
 
     function quadMask(uint256 size) external view returns (uint256) {
@@ -37,30 +37,30 @@ contract TileTester {
     function union(uint256[] calldata idxs, uint256 idxOut) external {
         TileLib.Tile memory t;
         for (uint256 i = 0; i < idxs.length; i++) {
-            t = t.union(tile[idxs[i]]);
+            t = t.union(tiles[idxs[i]]);
         }
-        tile[idxOut] = t;
+        tiles[idxOut] = t;
     }
 
     function intersection(uint256[] calldata idxs, uint256 idxOut) external {
-        TileLib.Tile memory t = tile[idxs[0]];
+        TileLib.Tile memory t = tiles[idxs[0]];
         for (uint256 i = 1; i < idxs.length; i++) {
-            t = t.intersection(tile[idxs[i]]);
+            t = t.intersection(tiles[idxs[i]]);
         }
-        tile[idxOut] = t;
+        tiles[idxOut] = t;
     }
 
     function isEqual(uint256 idx1, uint256 idx2) external view returns (bool) {
-        return tile[idx1].isEqual(tile[idx2]);
+        return tiles[idx1].isEqual(tiles[idx2]);
     }
 
 
     function containTile(uint256 idx1, uint256 idx2) external view returns (bool) {
-        return tile[idx1].containTile(tile[idx2]);
+        return tiles[idx1].containTile(tiles[idx2]);
     }
 
     function containQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external view returns (bool) {
-        return tile[idx].containQuad(x, y, size, _quadMask);
+        return tiles[idx].containQuad(x, y, size, _quadMask);
     }
 
     function _quadMask(uint256 size) internal view returns (uint256) {
