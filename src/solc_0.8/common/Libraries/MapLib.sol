@@ -79,9 +79,7 @@ library MapLib {
             self.indexes[key] = self.values.length;
             return tile;
         }
-        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].or(tile);
-        self.values[idx - 1] = t;
-        return t;
+        return self.values[idx - 1].merge(tile);
     }
 
     function setMap(Map storage self, Map storage contained) internal {
@@ -121,7 +119,7 @@ library MapLib {
         if (idx == 0) {// !contains
             return false;
         }
-        self.values[idx - 1] = self.values[idx - 1].clearTile(tile);
+        self.values[idx - 1] = self.values[idx - 1].subtract(tile);
         return true;
     }
 

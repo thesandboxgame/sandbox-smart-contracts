@@ -37,7 +37,7 @@ contract TileTester {
     function union(uint256[] calldata idxs, uint256 idxOut) external {
         TileLib.Tile memory t;
         for (uint256 i = 0; i < idxs.length; i++) {
-            t = t.union(tiles[idxs[i]]);
+            t = t.or(tiles[idxs[i]]);
         }
         tiles[idxOut] = t;
     }
@@ -45,17 +45,13 @@ contract TileTester {
     function intersection(uint256[] calldata idxs, uint256 idxOut) external {
         TileLib.Tile memory t = tiles[idxs[0]];
         for (uint256 i = 1; i < idxs.length; i++) {
-            t = t.intersection(tiles[idxs[i]]);
+            t = t.and(tiles[idxs[i]]);
         }
         tiles[idxOut] = t;
     }
 
     function isEqual(uint256 idx1, uint256 idx2) external view returns (bool) {
         return tiles[idx1].isEqual(tiles[idx2]);
-    }
-
-    function containTile(uint256 idx1, uint256 idx2) external view returns (bool) {
-        return tiles[idx1].containTile(tiles[idx2]);
     }
 
     function containQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external view returns (bool) {

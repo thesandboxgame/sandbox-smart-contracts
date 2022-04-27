@@ -1,46 +1,10 @@
-import {deployments, ethers, getNamedAccounts} from "hardhat";
 import {expect} from '../chai-setup';
-import {withSnapshot} from "../utils";
-import {BigNumber, BigNumberish} from "ethers";
+import {getEmptyTile, printTile, setupTileLibTest, tileToArray} from "./fixtures";
 
-const setupTest = withSnapshot([], async () => {
-  const {deployer} = await getNamedAccounts();
-  await deployments.deploy('TileTester', {from: deployer});
-  return await ethers.getContract('TileTester', deployer);
-});
-
-function printTile(jsTile: boolean[][]) {
-  console.log("     ", [...Array(jsTile.length).keys()].reduce((acc, val) => acc + val.toString().padEnd(3), ""));
-  for (let i = 0; i < jsTile.length; i++) {
-    const line = jsTile[i];
-    console.log(i.toString().padEnd(5),
-      line.reduce((acc, val) => acc + (val ? " X " : " O "), ""));
-  }
-}
-
-function tileToArray(tile: { data: BigNumberish[] }) {
-  const ret = [];
-  for (let r = 0; r < tile.data.length; r++) {
-    const bn = BigNumber.from(tile.data[r]);
-    for (let s = 0; s < 8; s++) {
-      const line = [];
-      for (let t = 0; t < 24; t++) {
-        line.push(bn.shr(s * 24 + t).and(1).eq(1));
-      }
-      ret.push(line);
-    }
-  }
-  return ret;
-}
-
-function getEmptyTile() {
-  return Array.from({length: 24},
-    e => Array.from({length: 24}, e => false));
-}
 
 describe('TileLib', function () {
   it('Available quads', async function () {
-    const tester = await setupTest();
+    const tester = await setupTileLibTest();
     expect(await tester.quadMask(1)).to.be.equal(0x1);
     expect(await tester.quadMask(3)).to.be.equal(0x7);
     expect(await tester.quadMask(6)).to.be.equal(0x3F);
@@ -50,19 +14,19 @@ describe('TileLib', function () {
   })
 
   it.skip('Some Tile', async function () {
-    const tester = await setupTest();
+    const tester = await setupTileLibTest();
     await tester.setQuad(0, 0, 0, 1);
     await tester.setQuad(0, 23, 23, 1);
     await tester.setQuad(0, 3, 0, 3);
     await tester.setQuad(0, 12, 6, 6);
     await tester.clearQuad(0, 15, 9, 3);
     const tile = await tester.getTile(0);
-    const jsTile = tileToArray(tile);
+    const jsTile = tileToArray(tile.data);
     printTile(jsTile);
   });
 
   it('union', async function () {
-    const tester = await setupTest();
+    const tester = await setupTileLibTest();
     const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
     // 0
     for (const t of tests) {
@@ -84,7 +48,7 @@ describe('TileLib', function () {
   });
 
   it('intersection', async function () {
-    const tester = await setupTest();
+    const tester = await setupTileLibTest();
     //const tests = [[12, 12, 1], [12, 12, 3], [12, 12, 6], [12, 12, 12], [0, 0, 24]]
     const tests = [[12, 12, 1], [12, 12, 3]]
 
@@ -96,33 +60,35 @@ describe('TileLib', function () {
     }
     const outIdx = 29;
     await tester.intersection(idxs, outIdx);
-    const intersection = tileToArray(await tester.getTile(outIdx));
+    const intersection = tileToArray((await tester.getTile(outIdx)).data);
     const tile = getEmptyTile();
     tile[12][12] = true;
     expect(intersection).to.be.eql(tile);
   });
 
   it('contains', async function () {
-    const tester = await setupTest();
+    const tester = await setupTileLibTest();
     const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
     // 0
     for (const t of tests) {
       await tester.setQuad(0, t[0], t[1], t[2]);
+      expect(await tester.containQuad(0, t[0], t[1], t[2])).to.be.true;
     }
+    for (const t of tests) {
+      expect(await tester.containQuad(0, t[0], t[1], t[2])).to.be.true;
+    }
+    expect(await tester.containQuad(0, 2, 2, 1)).to.be.false;
+    expect(await tester.containQuad(0, 22, 22, 1)).to.be.false;
+    expect(await tester.containQuad(0, 21, 21, 3)).to.be.false;
     // 1
     for (const t of tests) {
       await tester.clearQuad(1, 0, 0, 24);
       await tester.setQuad(1, t[0], t[1], t[2]);
-      expect(await tester.containTile(0, 1)).to.be.true;
-      expect(await tester.containQuad(0, t[0], t[1], t[2])).to.be.true;
+      expect(await tester.containQuad(1, t[0], t[1], t[2])).to.be.true;
+      expect(await tester.containQuad(1, 2, 2, 1)).to.be.false;
+      expect(await tester.containQuad(1, 22, 22, 1)).to.be.false;
+      expect(await tester.containQuad(1, 21, 21, 3)).to.be.false;
     }
-    await tester.setQuad(2, 2, 2, 1);
-    expect(await tester.containTile(0, 2)).to.be.false;
-    expect(await tester.containQuad(0, 2, 2, 1)).to.be.false;
-    await tester.setQuad(3, 22, 22, 1);
-    expect(await tester.containTile(0, 3)).to.be.false;
-    expect(await tester.containQuad(0, 22, 22, 1)).to.be.false;
-    expect(await tester.containQuad(0, 21, 21, 3)).to.be.false;
   });
 
   // TODO: Add more tests, specially for clear, grid like things, etc...

@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 
 import {TileLib} from "./TileLib.sol";
 
+// An abstraction over TileLib that add coordinates (x,y) and avoid overwriting self data by cloning when necessary
 // A square of 24x24 bits with coordinates
 library TileWithCoordLib {
     using TileLib for TileLib.Tile;
@@ -15,15 +16,11 @@ library TileWithCoordLib {
     uint256 constant COORD_MASK_POS = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
     uint256 constant COORD_MASK_NEG = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
-    function initTile(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
+    function initTileWithCoord(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
         ret.tile.data[1] = x << 192;
         ret.tile.data[2] = y << 192;
         return ret;
-    }
-
-    function clone(TileWithCoord memory self) internal pure returns (TileWithCoord memory) {
-        return TileWithCoord(self.tile.clone());
     }
 
     function getX(TileWithCoord memory self) internal pure returns (uint256) {
@@ -34,12 +31,12 @@ library TileWithCoordLib {
         return (self.tile.data[2] >> 192) / 24;
     }
 
-    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
-        return getKey(getX(self), getY(self));
-    }
-
     function getKey(uint256 x, uint256 y) internal pure returns (uint256) {
         return x / 24 | y / 24 << 32;
+    }
+
+    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
+        return getKey(getX(self), getY(self));
     }
 
     function setQuad(TileWithCoord memory self, uint256 xi, uint256 yi, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (TileWithCoord memory) {
@@ -58,7 +55,7 @@ library TileWithCoordLib {
     }
 
     function containTile(TileWithCoord memory self, TileWithCoord memory contained) internal pure returns (bool) {
-        return contained.tile.isEqual(self.tile.intersection(contained.tile));
+        return contained.tile.isEqual(contained.tile.clone().and(self.tile));
     }
 
     function isEmpty(TileWithCoord memory self) internal pure returns (bool) {
@@ -67,17 +64,17 @@ library TileWithCoordLib {
         && self.tile.data[2] & COORD_MASK_NEG == 0;
     }
 
-    function or(TileWithCoord memory self, TileWithCoord memory values) internal pure returns (TileWithCoord memory) {
-        require(getX(self) == getX(values) && getY(self) == getY(values), "Invalid tile coordinates");
-        return TileWithCoord(self.tile.or(values.tile));
+    // merge overwriting self
+    function merge(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
+        require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
+        self.tile.or(value.tile);
+        return self;
     }
 
-    function clearTile(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
+    // remove values from self overwriting self in the process
+    function subtract(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
-        TileLib.Tile memory mask = TileLib.Tile([
-            ~(value.tile.data[0] & COORD_MASK_NEG),
-            ~(value.tile.data[1] & COORD_MASK_NEG),
-            ~(value.tile.data[2] & COORD_MASK_NEG)]);
-        return TileWithCoord(self.tile.and(mask));
+        self.tile.subtractWitMask(value.tile, COORD_MASK_NEG);
+        return self;
     }
 }

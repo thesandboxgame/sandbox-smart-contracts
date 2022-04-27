@@ -5,6 +5,7 @@ pragma solidity 0.8.2;
 // TODO: Separate this code into a library + something to store the masks
 // TODO: Check if a pure function is better than a mapping for the masks
 // A square of 24x24 bits
+// This lib does everything inline (destroying self information if necessary), you must clone before calling.
 library TileLib {
 
     struct Tile {
@@ -64,25 +65,12 @@ library TileLib {
         return true;
     }
 
-    // TODO: inline, destructive without clone version, TEST IT!!!
-    function containTile(Tile memory self, Tile memory contained) internal pure returns (bool) {
-        return isEqual(intersection(self, contained), contained);
-    }
-
     function isEmpty(Tile memory self) internal pure returns (bool) {
         return self.data[0] == 0 && self.data[1] == 0 && self.data[2] == 0;
     }
 
     function isEqual(Tile memory self, Tile memory b) internal pure returns (bool) {
         return self.data[0] == b.data[0] && self.data[1] == b.data[1] && self.data[2] == b.data[2];
-    }
-
-    function union(Tile memory self, Tile memory b) internal pure returns (Tile memory){
-        return or(clone(self), b);
-    }
-
-    function intersection(Tile memory self, Tile memory b) internal pure returns (Tile memory) {
-        return and(clone(self), b);
     }
 
     function or(Tile memory self, Tile memory b) internal pure returns (Tile memory){
@@ -99,4 +87,10 @@ library TileLib {
         return self;
     }
 
+    function subtractWitMask(Tile memory self, Tile memory value, uint256 ignoreMask) internal pure returns (Tile memory) {
+        self.data[0] &= ~(value.data[0] & ignoreMask);
+        self.data[1] &= ~(value.data[1] & ignoreMask);
+        self.data[2] &= ~(value.data[2] & ignoreMask);
+        return self;
+    }
 }
