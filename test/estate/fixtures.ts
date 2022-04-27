@@ -23,6 +23,17 @@ export function printTile(jsTile: boolean[][]) {
   }
 }
 
+export function printTileWithCoord(jsTile: {
+  tile: boolean[][],
+  x: BigNumber,
+  y: BigNumber
+}) {
+  console.log("X", jsTile.x.toString(), jsTile.x.toHexString(), "X/24", jsTile.x.div(24).toString());
+  console.log("Y", jsTile.y.toString(), jsTile.y.toHexString(), "Y/24", jsTile.y.div(24).toString());
+  printTile(jsTile.tile);
+
+}
+
 export function tileToArray(data: BigNumberish[]) {
   const ret = [];
   for (let r = 0; r < data.length; r++) {
@@ -41,8 +52,8 @@ export function tileToArray(data: BigNumberish[]) {
 export function tileWithCoordToJS(coord: { tile: { data: BigNumberish[] } }) {
   return {
     tile: tileToArray(coord.tile.data),
-    x: BigNumber.from(coord.tile.data[1]).shl(192),
-    y: BigNumber.from(coord.tile.data[2]).shl(192)
+    x: BigNumber.from(coord.tile.data[1]).shr(192),
+    y: BigNumber.from(coord.tile.data[2]).shr(192)
   };
 }
 
