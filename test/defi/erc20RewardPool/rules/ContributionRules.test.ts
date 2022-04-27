@@ -97,6 +97,40 @@ describe('ContributionRules', function () {
         await contract.isERC1155MemberMultiplierList(ERC1155Token.address)
       ).to.be.equal(false);
     });
+    it('admin should be able to call setERC721MultiplierLimit', async function () {
+      const {contractAsAdmin, contract} = await ContributionRulesSetup();
+
+      const MAX_INT =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+      expect(await contract.multiplierLimitERC271()).to.be.equal(MAX_INT);
+
+      await expect(contract.setERC721MultiplierLimit(30)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+
+      await expect(contractAsAdmin.setERC721MultiplierLimit(30)).not.to.be
+        .reverted;
+
+      expect(await contract.multiplierLimitERC271()).to.be.equal(30);
+    });
+    it('admin should be able to call setERC1155MultiplierLimit', async function () {
+      const {contractAsAdmin, contract} = await ContributionRulesSetup();
+
+      const MAX_INT =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+      expect(await contract.multiplierLimitERC1155()).to.be.equal(MAX_INT);
+
+      await expect(contract.setERC1155MultiplierLimit(30)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+
+      await expect(contractAsAdmin.setERC1155MultiplierLimit(30)).not.to.be
+        .reverted;
+
+      expect(await contract.multiplierLimitERC1155()).to.be.equal(30);
+    });
   });
   describe('compute contribution', function () {
     it('0 ERC721 - 0 ERC1155', async function () {
@@ -316,6 +350,108 @@ describe('ContributionRules', function () {
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(15);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1250);
+    });
+  });
+  describe('multiplier limit', function () {
+    it('should limit ERC721 multiplier at 15%', async function () {
+      const {
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
+
+      const numERC721 = 2; // 17%
+
+      await ERC721Token.setFakeBalance(other, numERC721);
+
+      contractAsAdmin.setERC721MultiplierLimit(15);
+
+      //no id and no multiplier - only multiplierLogarithm
+      await contractAsAdmin.setERC721MultiplierList(
+        ERC721Token.address,
+        [],
+        [],
+        true
+      );
+      // user should have multiplier of 17%
+      expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(17);
+      // multiplier should be capped at 15% - and not 17%
+      expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1150);
+
+      await ERC721Token.setFakeBalance(other, 1); //10%
+      // user should have multiplier of 10%
+      expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
+      // as 10 <= 15, multiplier of 10% should be applied
+      expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1100);
+    });
+    it('should limit ERC1155 multiplier at 15%', async function () {
+      const {
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
+
+      const numERC1155 = 1; // 17%
+
+      const id = '0x123456';
+
+      await ERC1155Token.setFakeBalance(other, id, numERC1155);
+
+      contractAsAdmin.setERC1155MultiplierLimit(15);
+
+      await contractAsAdmin.setERC1155MultiplierList(
+        ERC1155Token.address,
+        [id],
+        [20] // 20%
+      );
+
+      expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(20);
+      // multiplier should be capped at 15% - and not 20%
+      expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1150);
+
+      await contractAsAdmin.setERC1155MultiplierList(
+        ERC1155Token.address,
+        [id],
+        [14] // 14%
+      );
+      // user should have multiplier of 14%
+      expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(14);
+      // as 10 <= 15, multiplier of 10% should be applied
+      expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1140);
+    });
+    it('should return MaxGlobalMultiplier', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
+
+      const numERC721 = 1; // 10%
+      const numERC1155 = 1;
+
+      const id = '0x123456';
+
+      await ERC721Token.setFakeBalance(other, numERC721);
+      await ERC1155Token.setFakeBalance(other, id, numERC1155);
+
+      await contractAsAdmin.setERC721MultiplierList(
+        ERC721Token.address,
+        [],
+        [],
+        true
+      );
+
+      await contractAsAdmin.setERC1155MultiplierList(
+        ERC1155Token.address,
+        [id],
+        [20] // 20%
+      );
+
+      expect(await contract.getMaxGlobalMultiplier(other)).to.be.equal(30);
     });
   });
 });
