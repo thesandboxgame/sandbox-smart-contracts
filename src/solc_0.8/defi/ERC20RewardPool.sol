@@ -8,6 +8,7 @@ import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
@@ -31,7 +32,8 @@ contract ERC20RewardPool is
     RequirementsRules,
     AccessControl,
     ReentrancyGuard,
-    ERC2771Handler
+    ERC2771Handler,
+    Pausable
 {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -79,7 +81,7 @@ contract ERC20RewardPool is
     }
 
     modifier isValidAddress(address account) {
-        require(account != address(0), "ERC20RewardPool: is not contract");
+        require(account != address(0), "ERC20RewardPool: zero address");
 
         _;
     }
@@ -231,6 +233,7 @@ contract ERC20RewardPool is
     function stake(uint256 amount)
         external
         nonReentrant
+        whenNotPaused()
         antiDepositCheck(_msgSender())
         checkRequirements(_msgSender(), amount, _balances[_msgSender()])
     {
@@ -263,14 +266,14 @@ contract ERC20RewardPool is
     /// @notice withdraw the stake from the contract
     /// @param amount the amount of tokens to withdraw
     /// @dev the user can withdraw his stake independently from the rewards
-    function withdraw(uint256 amount) external nonReentrant {
+    function withdraw(uint256 amount) external nonReentrant whenNotPaused() {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), amount);
         _updateContribution(_msgSender());
     }
 
     /// @notice withdraw the stake and the rewards from the contract
-    function exit() external nonReentrant {
+    function exit() external nonReentrant whenNotPaused() {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), _balances[_msgSender()]);
         _withdrawRewards(_msgSender());
@@ -280,7 +283,7 @@ contract ERC20RewardPool is
 
     /// @notice withdraw the rewards from the contract
     /// @dev the user can withdraw his stake independently from the rewards
-    function getReward() external nonReentrant {
+    function getReward() external nonReentrant whenNotPaused() {
         _processRewards(_msgSender());
         _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());

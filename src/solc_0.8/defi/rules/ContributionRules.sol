@@ -11,6 +11,9 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 contract ContributionRules is Ownable {
     using Address for address;
 
+    uint256 public multiplierLimitERC271 = type(uint256).max;
+    uint256 public multiplierLimitERC1155 = type(uint256).max;
+
     uint256 internal constant DECIMALS_7 = 10000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
@@ -33,6 +36,8 @@ contract ContributionRules is Ownable {
     event ERC721MultiplierListSet(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
     event ERC1155MultiplierListDeleted(address indexed contractERC1155);
     event ERC721MultiplierListDeleted(address indexed contractERC721);
+    event ERC721MultiplierLimitSet(uint256 newERC721MultiplierLimit);
+    event ERC1155MultiplierLimitSet(uint256 newERC1155MultiplierLimit);
 
     modifier isContract(address account) {
         require(account.isContract(), "ContributionRules: is not contract");
@@ -60,7 +65,28 @@ contract ContributionRules is Ownable {
         uint256 multiplierERC721 = multiplierBalanceOfERC721(account);
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 
+        // check if the calculated multipliers exceeds the limit
+        if (multiplierLimitERC271 < multiplierERC721) {
+            multiplierERC721 = multiplierLimitERC271;
+        }
+
+        if (multiplierLimitERC1155 < multiplierERC1155) {
+            multiplierERC1155 = multiplierLimitERC1155;
+        }
+
         return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)) / 100);
+    }
+
+    function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        multiplierLimitERC271 = _newLimit;
+
+        emit ERC721MultiplierLimitSet(_newLimit);
+    }
+
+    function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        multiplierLimitERC1155 = _newLimit;
+
+        emit ERC1155MultiplierLimitSet(_newLimit);
     }
 
     function setERC1155MultiplierList(
@@ -104,7 +130,11 @@ contract ContributionRules is Ownable {
             _listERC721[multContract].index = _listERC721Index.length - 1;
         }
 
-        ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
+        emit ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
+    }
+
+    function getMaxGlobalMultiplier(address account) external view returns (uint256) {
+        return multiplierBalanceOfERC721(account) + multiplierBalanceOfERC1155(account);
     }
 
     function getERC721MultiplierList(address reqContract)
