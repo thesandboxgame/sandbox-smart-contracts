@@ -14,7 +14,7 @@ contract ContributionRules is Ownable {
     uint256 public multiplierLimitERC271 = type(uint256).max;
     uint256 public multiplierLimitERC1155 = type(uint256).max;
 
-    uint256 internal constant DECIMALS_9 = 1000000000;
+    uint256 internal constant DECIMALS_7 = 10000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
     uint256 internal constant NFT_CONSTANT_3 = 9000;
@@ -74,7 +74,7 @@ contract ContributionRules is Ownable {
             multiplierERC1155 = multiplierLimitERC1155;
         }
 
-        return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)));
+        return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)) / 100);
     }
 
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
@@ -114,8 +114,8 @@ contract ContributionRules is Ownable {
 
     function setERC721MultiplierList(
         address contractERC721,
-        uint256[] memory multipliers,
         uint256[] memory ids,
+        uint256[] memory multipliers,
         bool balanceOf
     ) external onlyOwner isContract(contractERC721) {
         IERC721 multContract = IERC721(contractERC721);
@@ -190,11 +190,11 @@ contract ContributionRules is Ownable {
     }
 
     function isERC721MemberMultiplierList(IERC721 reqContract) public view returns (bool) {
-        return (_listERC721Index.length == 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
+        return !(_listERC721Index.length == 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
     function isERC1155MemberMultiplierList(IERC1155 reqContract) public view returns (bool) {
-        return (_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
+        return !(_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
     function multiplierBalanceOfERC721(address account) public view returns (uint256) {
@@ -248,6 +248,6 @@ contract ContributionRules is Ownable {
             _multiplierERC721 = MIDPOINT_9 + (_multiplierERC721 - MIDPOINT_9) / 10;
         }
 
-        return _multiplierERC721 / DECIMALS_9;
+        return _multiplierERC721 / DECIMALS_7;
     }
 }
