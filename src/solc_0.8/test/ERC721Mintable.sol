@@ -22,6 +22,10 @@ contract ERC721Mintable is ERC721 {
         return ERC721.balanceOf(owner);
     }
 
+    function ownerOf(uint256 tokenId) public view override returns (address) {
+        return ERC721.ownerOf(tokenId);
+    }
+
     function setFakeBalance(address owner, uint256 balance) external {
         fakeBalance[owner] = balance;
     }
