@@ -126,9 +126,9 @@ export const gemsAndCatalystsFixtures = async () => {
     BigNumber.from(gemsCatalystsUnit)
   );
 
-  await commonCatalyst
-    .connect(ethers.provider.getSigner(catalystAdmin))
-    .mint(catalystOwner, mintingAmount);
+  // await commonCatalyst
+  //   .connect(ethers.provider.getSigner(catalystAdmin))
+  //   .mint(catalystOwner, mintingAmount);
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystAdmin))

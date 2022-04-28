@@ -1,51 +1,12 @@
 import {expect} from '../../chai-setup';
-import {Fixtures, setupPolygonSand} from './fixtures';
-import {AbiCoder} from 'ethers/lib/utils';
-import {sendMetaTx} from '../../sendMetaTx';
-import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../../utils';
-import {BigNumber, BigNumberish, PopulatedTransaction} from 'ethers';
-
-const abiCoder = new AbiCoder();
-
-// The only way to deposit in L2 is via the childChainManager
-async function depositViaChildChainManager(
-  fixtures: Fixtures,
-  user: string,
-  amount: BigNumberish
-) {
-  // Lock tokens on ERC20 predicate contract
-  const pre = BigNumber.from(await fixtures.sand.balanceOf(user));
-  const data = abiCoder.encode(['uint256'], [amount.toString()]);
-  await waitFor(
-    fixtures.childChainManager.callSandDeposit(
-      fixtures.sand.address,
-      user,
-      data
-    )
-  );
-  expect(await fixtures.sand.balanceOf(user)).to.be.equal(pre.add(amount));
-}
-
-async function sendMeta(
-  fixtures: Fixtures,
-  signer: string,
-  populatedTx: Promise<PopulatedTransaction>
-) {
-  const {data} = await populatedTx;
-  // users[3] pay for the gas, of a message signed by signer.
-  const receipt = await sendMetaTx(
-    fixtures.sand.address,
-    fixtures.users[3].trustedForwarder,
-    data,
-    signer
-  );
-  const event = await expectEventWithArgsFromReceipt(
-    fixtures.trustedForwarder,
-    receipt,
-    'TXResult'
-  );
-  expect(event.args.success).to.be.true;
-}
+import {
+  Fixtures,
+  setupPolygonSand,
+  depositViaChildChainManager,
+  sendMeta,
+} from './fixtures';
+import {toWei} from '../../utils';
+import {BigNumber} from 'ethers';
 
 describe('PolygonSand.sol Meta TX', function () {
   let fixtures: Fixtures;
