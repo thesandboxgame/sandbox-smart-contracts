@@ -96,16 +96,7 @@ library MapLib {
         }
         TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size, quadMask);
         if (t.isEmpty()) {
-            // TODO: We remove an empty tile, maybe is just better to leave it there ?
-            uint256 toDeleteIndex = idx - 1;
-            uint256 lastIndex = self.values.length - 1;
-            if (lastIndex != toDeleteIndex) {
-                TileWithCoordLib.TileWithCoord memory lastValue = self.values[lastIndex];
-                self.values[toDeleteIndex] = lastValue;
-                self.indexes[lastValue.getKey()] = idx;
-            }
-            self.values.pop();
-            delete self.indexes[idx];
+            remove(self, idx, key);
         } else {
             self.values[idx - 1] = t;
         }
@@ -118,7 +109,12 @@ library MapLib {
         if (idx == 0) {// !contains
             return false;
         }
-        self.values[idx - 1] = self.values[idx - 1].subtract(tile);
+        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].subtract(tile);
+        if (t.isEmpty()) {
+            remove(self, idx, key);
+        } else {
+            self.values[idx - 1] = t;
+        }
         return true;
     }
 
@@ -144,4 +140,16 @@ library MapLib {
         return (idx != 0);
     }
 
+    function remove(Map storage self, uint256 idx, uint256 key) private {
+        // TODO: We remove an empty tile, maybe is just better to leave it there ?
+        uint256 toDeleteIndex = idx - 1;
+        uint256 lastIndex = self.values.length - 1;
+        if (lastIndex != toDeleteIndex) {
+            TileWithCoordLib.TileWithCoord memory lastValue = self.values[lastIndex];
+            self.values[toDeleteIndex] = lastValue;
+            self.indexes[lastValue.getKey()] = idx;
+        }
+        self.values.pop();
+        delete self.indexes[key];
+    }
 }

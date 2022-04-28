@@ -31,7 +31,7 @@ export const setupMapTest = withSnapshot([], async () => {
   };
 });
 
-export function tileToArray(data: BigNumberish[]) {
+export function tileToArray(data: BigNumberish[]): boolean[][] {
   const ret = [];
   for (let r = 0; r < data.length; r++) {
     const bn = BigNumber.from(data[r]);
@@ -46,7 +46,7 @@ export function tileToArray(data: BigNumberish[]) {
   return ret;
 }
 
-export function tileWithCoordToJS(coord: { tile: { data: BigNumberish[] } }) {
+export function tileWithCoordToJS(coord: { tile: { data: BigNumberish[] } }): { tile: boolean[][], x: BigNumber, y: BigNumber } {
   return {
     tile: tileToArray(coord.tile.data),
     x: BigNumber.from(coord.tile.data[1]).shr(192),
@@ -54,13 +54,13 @@ export function tileWithCoordToJS(coord: { tile: { data: BigNumberish[] } }) {
   };
 }
 
-export function getEmptyTile() {
+export function getEmptyTile(): boolean[][] {
   return Array.from({length: 24},
     e => Array.from({length: 24}, e => false));
 }
 
 
-export function printTile(jsTile: boolean[][]) {
+export function printTile(jsTile: boolean[][]): void {
   console.log("     ", [...Array(jsTile.length).keys()].reduce((acc, val) => acc + val.toString().padEnd(3), ""));
   for (let i = 0; i < jsTile.length; i++) {
     const line = jsTile[i];
@@ -73,7 +73,7 @@ export function printTileWithCoord(jsTile: {
   tile: boolean[][],
   x: BigNumber,
   y: BigNumber
-}) {
+}): void {
   console.log("X", jsTile.x.toString(), jsTile.x.toHexString());
   console.log("Y", jsTile.y.toString(), jsTile.y.toHexString());
   printTile(jsTile.tile);
@@ -84,20 +84,24 @@ export function printMap(tiles: {
   tile: boolean[][],
   x: BigNumber,
   y: BigNumber
-}[]) {
+}[]): void {
   for (const tile of tiles) {
     printTileWithCoord(tile);
   }
 }
 
-export function createTestMapQuads(xsize: number, ysize: number, cant: number, sizes = [1, 3, 6, 12, 24]) {
+export function roundedTo(x: number, size: number): number {
+  return Math.floor(x / size) * size;
+}
+
+export function createTestMapQuads(xsize: number, ysize: number, cant: number, sizes = [1, 3, 6, 12, 24]): number[][] {
   const quads = [];
   for (let i = 0; i < cant; i++) {
     const x = Math.floor(xsize * Math.random());
     const y = Math.floor(ysize * Math.random());
     const idx = Math.round((sizes.length - 1) * Math.random());
     const size = sizes[idx];
-    quads.push([Math.floor(x / size) * size, Math.floor(y / size) * size, size]);
+    quads.push([roundedTo(x, size), roundedTo(y, size), size]);
   }
   return quads;
 }
