@@ -114,7 +114,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     ) external override returns (uint256 assetId) {
         require(
             customMinterAllowance[_msgSender()] == true || _msgSender() == owner(),
-            "AssetyMinter: custom minting unauthorized"
+            "AssetMinter: custom minting unauthorized"
         );
         assetId = _burnAndMint(
             mintData.from,
