@@ -9,29 +9,33 @@ import {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetAttributesRegistryFixture = async () => {
   const assetAttributesRegistry: Contract = await ethers.getContract(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
-  const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
-  const assetMinter: Contract = await ethers.getContract('AssetMinter');
+  const assetUpgrader: Contract = await ethers.getContract(
+    'PolygonAssetUpgrader'
+  );
+  const assetMinter: Contract = await ethers.getContract('PolygonAssetMinter');
   const {assetAttributesRegistryAdmin} = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const user0 = users[0];
   const mockedMigrationContractAddress = users[1];
-  const sandContract = await ethers.getContract('Sand');
+  const sandContract = await ethers.getContract('PolygonSand');
   await transferSand(
     sandContract,
     user0,
     BigNumber.from(100000).mul('1000000000000000000')
   );
-  const power: Contract = await ethers.getContract('Gem_POWER');
-  const defense: Contract = await ethers.getContract('Gem_DEFENSE');
-  const speed: Contract = await ethers.getContract('Gem_SPEED');
-  const magic: Contract = await ethers.getContract('Gem_MAGIC');
-  const luck: Contract = await ethers.getContract('Gem_LUCK');
-  const common: Contract = await ethers.getContract('Catalyst_COMMON');
-  const rare: Contract = await ethers.getContract('Catalyst_RARE');
-  const epic: Contract = await ethers.getContract('Catalyst_EPIC');
-  const legendary: Contract = await ethers.getContract('Catalyst_LEGENDARY');
+  const power: Contract = await ethers.getContract('PolygonGem_POWER');
+  const defense: Contract = await ethers.getContract('PolygonGem_DEFENSE');
+  const speed: Contract = await ethers.getContract('PolygonGem_SPEED');
+  const magic: Contract = await ethers.getContract('PolygonGem_MAGIC');
+  const luck: Contract = await ethers.getContract('PolygonGem_LUCK');
+  const common: Contract = await ethers.getContract('PolygonCatalyst_COMMON');
+  const rare: Contract = await ethers.getContract('PolygonCatalyst_RARE');
+  const epic: Contract = await ethers.getContract('PolygonCatalyst_EPIC');
+  const legendary: Contract = await ethers.getContract(
+    'PolygonCatalyst_LEGENDARY'
+  );
 
   const gemsCatalystsUnit = '1000000000000000000';
   const mintingAmount = BigNumber.from('8').mul(

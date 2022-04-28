@@ -14,26 +14,28 @@ export const assetUpgraderFixtures = async () => {
   const user10 = users[10];
 
   const assetUpgraderContract: Contract = await ethers.getContract(
-    'AssetUpgrader'
+    'PolygonAssetUpgrader'
   );
   const assetAttributesRegistry: Contract = await ethers.getContract(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
-  const assetContract = await ethers.getContract('Asset');
-  const sandContract: Contract = await ethers.getContract('Sand');
+  const assetContract = await ethers.getContract('PolygonAssetERC1155');
+  const sandContract: Contract = await ethers.getContract('PolygonSand');
   const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
   const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
   const gemAdditionFee: BigNumber = await assetUpgraderContract.callStatic.gemAdditionFee();
-  const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
-  const powerGem: Contract = await ethers.getContract('Gem_POWER');
-  const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
+  const rareCatalyst: Contract = await ethers.getContract(
+    'PolygonCatalyst_RARE'
+  );
+  const powerGem: Contract = await ethers.getContract('PolygonGem_POWER');
+  const defenseGem: Contract = await ethers.getContract('PolygonGem_DEFENSE');
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
-    'GemsCatalystsRegistry'
+    'PolygonGemsCatalystsRegistry'
   );
   const gemsCatalystsUnit = '1000000000000000000';
 
   const assetUpgraderFeeBurnerContract: Contract = await ethers.getContract(
-    'AssetUpgraderFeeBurner'
+    'PolygonAssetUpgraderFeeBurner'
   );
 
   await waitFor(

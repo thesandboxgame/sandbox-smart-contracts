@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonAssetAttributesRegistry'
   );
   const Sand = await deployments.get('PolygonSand');
-  const PolygonAssetERC1155 = await deployments.get('Asset');
+  const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
   const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');

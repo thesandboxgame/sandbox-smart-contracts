@@ -91,9 +91,9 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
   }
 }
 
-describe('AssetMinter', function () {
+describe.only('AssetMinter', function () {
   describe('AssetMinter: Mint', function () {
-    it('the assetMInterAdmin is set correctly', async function () {
+    it('the assetMinterAdmin is set correctly', async function () {
       const {assetMinterContract} = await setupAssetMinter();
       const {assetMinterAdmin} = await getNamedAccounts();
       const minterAdmin = await assetMinterContract.owner();
@@ -261,7 +261,7 @@ describe('AssetMinter', function () {
       expect(args[2]).to.be.equal(assetId);
     });
 
-    // todo the same with 1155
+    // TODO: the same with 1155
     it('CatalystApplied event is emitted on minting an NFT with a catalyst', async function () {
       const {
         assetMinterContract,
