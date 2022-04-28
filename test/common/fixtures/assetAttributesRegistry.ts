@@ -1,10 +1,12 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
+import {mintCatalyst, mintGem} from '../../polygon/catalyst/utils';
 import {
-  mintCatalyst,
-  mintGem,
-  transferSand,
-} from '../../polygon/catalyst/utils';
+  depositViaChildChainManager,
+  sendMeta,
+} from '../../polygon/sand/fixtures';
+import {expect} from '../../chai-setup';
+import {setupUser} from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetAttributesRegistryFixture = async () => {
@@ -15,16 +17,36 @@ export const assetAttributesRegistryFixture = async () => {
     'PolygonAssetUpgrader'
   );
   const assetMinter: Contract = await ethers.getContract('PolygonAssetMinter');
-  const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+  const {
+    assetAttributesRegistryAdmin,
+    sandBeneficiary,
+  } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const user0 = users[0];
   const mockedMigrationContractAddress = users[1];
   const sandContract = await ethers.getContract('PolygonSand');
-  await transferSand(
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+
+  const sandBeneficiaryUser = await setupUser(sandBeneficiary, {
     sandContract,
-    user0,
-    BigNumber.from(100000).mul('1000000000000000000')
+  });
+
+  const sandAmount = BigNumber.from(100000).mul('1000000000000000000');
+
+  // The only way to deposit PolygonSand in L2 is via the childChainManager
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandBeneficiary,
+    sandAmount
   );
+
+  await sandContract.balanceOf(sandBeneficiary);
+
+  const tx = await sandBeneficiaryUser.sandContract.transfer(user0, sandAmount);
+  tx.wait();
+
+  expect(await sandContract.balanceOf(user0)).to.equal(sandAmount);
+
   const power: Contract = await ethers.getContract('PolygonGem_POWER');
   const defense: Contract = await ethers.getContract('PolygonGem_DEFENSE');
   const speed: Contract = await ethers.getContract('PolygonGem_SPEED');
