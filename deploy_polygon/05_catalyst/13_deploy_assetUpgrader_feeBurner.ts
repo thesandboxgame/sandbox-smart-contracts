@@ -7,10 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy, execute, read} = deployments;
 
-  const PolygonSand = await deployments.get('PolygonSand');
-  const PolygonAssetERC1155_deploy = await deployments.get(
-    'PolygonAssetERC1155_deploy'
-  );
+  // const PolygonSand = await deployments.get('PolygonSand');
+  // const PolygonAssetERC1155_deploy = await deployments.get(
+  //   'PolygonAssetERC1155_deploy'
+  // );
 
   // TODO: fix for new Polygon deployment
 
