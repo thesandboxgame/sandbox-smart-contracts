@@ -7,14 +7,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy, execute, read} = deployments;
 
-  const Sand = await deployments.get('Sand');
-  const Asset = await deployments.get('Asset');
+  const PolygonSand = await deployments.get('PolygonSand');
+  const PolygonAssetERC1155_deploy = await deployments.get(
+    'PolygonAssetERC1155_deploy'
+  );
+
+  // TODO: fix for new Polygon deployment
+
   // const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   // const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
   // const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
-
-  // TODO: fix
 
   // // @note For testing fee-burning only
   // const chainId = await getChainId();
@@ -72,15 +75,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
-  'AssetUpgraderFeeBurner',
-  'AssetUpgraderFeeBurner_deploy',
-  'AssetUpgraderFeeBurner_setup',
+  'PolygonAssetUpgraderFeeBurner',
+  'PolygonAssetUpgraderFeeBurner_deploy',
+  'PolygonAssetUpgraderFeeBurner_setup',
 ];
 func.dependencies = [
-  'AssetAttributesRegistry_deploy',
-  'Sand_Deploy',
-  'Asset_Deploy',
-  'GemsCatalystsRegistry_deploy',
+  // 'AssetAttributesRegistry_deploy',
+  'PolygonSand_deploy',
+  'PolygonAssetERC1155_deploy',
+  // 'GemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // TODO remove this deployment if this is just for test
