@@ -521,14 +521,24 @@ describe('PolygonAssetERC1155.sol', function () {
         ).extractERC721From(users[0].address, tokenId, users[0].address)
       ).to.be.revertedWith('!NFT');
     });
-    it('can get the new ERC721 ID returned from extraction tx - TODO: fix', async function () {
+    it('can get the new ERC721 ID returned from extraction tx: TODO', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
       const tokenId = await mintAsset(users[0].address, 1);
-      const newId = await PolygonAssetERC1155.connect(
+      const receipt = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
       ).extractERC721From(users[0].address, tokenId, users[0].address);
+      const txEvent = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt,
+        'Extraction'
+      );
+      const newId = txEvent.args.newId.toString();
       expect(tokenId).not.to.be.equal(newId);
-      console.log(newId);
+      // TODO: should this be checked here?
+      const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
+      // expect(collectionOf.toString()).to.be.equal(newId);
+      const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
+      expect(isCollection).to.be.true;
     });
   });
 });
