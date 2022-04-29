@@ -327,7 +327,7 @@ describe('AssetAttributesRegistry', function () {
   it('admin can change attributes contract', async function () {
     const {catalystAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
-    const commonCatalyst = await ethers.getContract('Catalyst_COMMON');
+    const commonCatalyst = await ethers.getContract('PolygonCatalyst_COMMON');
     const catalystAsAdmin = commonCatalyst.connect(
       ethers.provider.getSigner(catalystAdmin)
     );
@@ -338,7 +338,7 @@ describe('AssetAttributesRegistry', function () {
 
   it('fails if anyone other than admin trys to change attributes', async function () {
     const users = await getUnnamedAccounts();
-    const commonCatalyst = await ethers.getContract('Catalyst_COMMON');
+    const commonCatalyst = await ethers.getContract('PolygonCatalyst_COMMON');
     await expect(commonCatalyst.changeAttributes(users[6])).to.be.revertedWith(
       'ADMIN_ONLY'
     );

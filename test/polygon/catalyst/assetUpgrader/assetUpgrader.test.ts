@@ -60,7 +60,7 @@ describe('AssetUpgrader', function () {
 
     const sandBalanceFromBefore = await sandContract.balanceOf(catalystOwner);
     const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
-    const assetSupply = BigNumber.from('3');
+    const assetSupply = BigNumber.from('1'); // Must be supply == 1 in order for Extraction to be allowed
     const assetId = await mintAsset(
       catalystOwner,
       BigNumber.from('22'),

@@ -7,71 +7,95 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy, execute, read} = deployments;
 
-  // const PolygonSand = await deployments.get('PolygonSand');
-  // const PolygonAssetERC1155_deploy = await deployments.get(
-  //   'PolygonAssetERC1155_deploy'
-  // );
+  const PolygonSand = await deployments.get('PolygonSand');
+  const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
+  const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
   // TODO: fix for new Polygon deployment
 
-  // const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
-  // const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
-  // const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+  const {
+    deployer,
+    assetAttributesRegistryAdmin,
+    gemsCatalystsRegistryAdmin,
+  } = await getNamedAccounts();
+  const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
-  // // @note For testing fee-burning only
-  // const chainId = await getChainId();
-  // if (chainId == '31337') {
-  //   await deploy(`MockAssetAttributesRegistry`, {
-  //     from: deployer,
-  //     log: true,
-  //     args: [
-  //       GemsCatalystsRegistry.address,
-  //       assetAttributesRegistryAdmin,
-  //       assetAttributesRegistryAdmin,
-  //       assetAttributesRegistryAdmin,
-  //     ],
-  //   });
+  // @note For testing fee-burning only
+  const chainId = await getChainId();
+  if (chainId == '31337') {
+    await deploy(`MockAssetAttributesRegistry`, {
+      from: deployer,
+      log: true,
+      args: [
+        GemsCatalystsRegistry.address,
+        assetAttributesRegistryAdmin,
+        assetAttributesRegistryAdmin,
+        assetAttributesRegistryAdmin,
+      ],
+    });
 
-  //   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-  //   const MockAssetAttributesRegistry = await deployments.get(
-  //     'MockAssetAttributesRegistry'
-  //   );
-  //   await deploy(`AssetUpgraderFeeBurner`, {
-  //     from: deployer,
-  //     log: true,
-  //     args: [
-  //       MockAssetAttributesRegistry.address,
-  //       Sand.address,
-  //       Asset.address, // TODO: asset contract split
-  //       Asset.address, // TODO: asset contract split
-  //       GemsCatalystsRegistry.address,
-  //       upgradeFee,
-  //       gemAdditionFee,
-  //       BURN_ADDRESS,
-  //       TRUSTED_FORWARDER.address,
-  //     ],
-  //   });
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+    const MockAssetAttributesRegistry = await deployments.get(
+      'MockAssetAttributesRegistry'
+    );
+    await deploy(`PolygonAssetUpgraderFeeBurner`, {
+      from: deployer,
+      contract: 'AssetUpgraderFeeBurner',
+      log: true,
+      args: [
+        MockAssetAttributesRegistry.address,
+        PolygonSand.address,
+        PolygonAssetERC721.address,
+        PolygonAssetERC1155.address,
+        GemsCatalystsRegistry.address,
+        upgradeFee,
+        gemAdditionFee,
+        BURN_ADDRESS,
+        TRUSTED_FORWARDER.address,
+      ],
+    });
 
-  //   const upgraderFeeBurner = await deployments.get('AssetUpgraderFeeBurner');
-  //   const currentSandAdmin = await read('Sand', 'getAdmin');
-  //   await execute(
-  //     'Sand',
-  //     {from: currentSandAdmin, log: true},
-  //     'setSuperOperator',
-  //     upgraderFeeBurner.address,
-  //     true
-  //   );
+    const upgraderFeeBurner = await deployments.get(
+      'PolygonAssetUpgraderFeeBurner'
+    );
 
-  //   const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
-  //   await execute(
-  //     'GemsCatalystsRegistry',
-  //     {from: currentAdmin, log: true},
-  //     'setSuperOperator',
-  //     upgraderFeeBurner.address,
-  //     true
-  //   );
-  // }
+    // PolygonSand uses admin
+    const currentSandAdmin = await read('PolygonSand', 'getAdmin');
+    await execute(
+      'PolygonSand',
+      {from: currentSandAdmin, log: true},
+      'setSuperOperator',
+      upgraderFeeBurner.address,
+      true
+    );
+
+    // 'PolygonGemsCatalystsRegistry' uses DEFAULT_ADMIN_ROLE
+    const adminRole = await read(
+      'PolygonGemsCatalystsRegistry',
+      'DEFAULT_ADMIN_ROLE'
+    );
+
+    const isGemsCatalystsRegistryAdmin = await read(
+      'PolygonGemsCatalystsRegistry',
+      'hasRole',
+      adminRole,
+      upgraderFeeBurner.address
+    );
+
+    if (!isGemsCatalystsRegistryAdmin) {
+      await execute(
+        'PolygonGemsCatalystsRegistry',
+        {from: deployer, log: true},
+        'grantRole',
+        adminRole,
+        upgraderFeeBurner.address
+      );
+    }
+  }
 };
 export default func;
 func.tags = [
@@ -80,10 +104,10 @@ func.tags = [
   'PolygonAssetUpgraderFeeBurner_setup',
 ];
 func.dependencies = [
-  // 'AssetAttributesRegistry_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
   'PolygonSand_deploy',
   'PolygonAssetERC1155_deploy',
-  // 'GemsCatalystsRegistry_deploy',
+  'PolygonGemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // TODO remove this deployment if this is just for test
