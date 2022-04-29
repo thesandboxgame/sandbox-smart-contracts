@@ -2,7 +2,6 @@ import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
 import {depositViaChildChainManager} from '../../polygon/sand/fixtures';
-import {setupUser} from '../../utils';
 import {expect} from '../../chai-setup';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -10,7 +9,7 @@ export const assetUpgraderFixtures = async () => {
   const {
     assetAttributesRegistryAdmin,
     assetAdmin,
-    sandBeneficiary,
+    sandAdmin,
   } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
@@ -54,22 +53,18 @@ export const assetUpgraderFixtures = async () => {
   );
 
   const sandAmount = BigNumber.from(1000000).mul('1000000000000000000');
-  const sandBeneficiaryUser = await setupUser(sandBeneficiary, {
-    sandContract,
-  });
 
   // The only way to deposit PolygonSand in L2 is via the childChainManager
-  await depositViaChildChainManager(
-    {sand: sandContract, childChainManager},
-    sandBeneficiary,
-    sandAmount
+  const sandContractAsAdmin = await sandContract.connect(
+    ethers.provider.getSigner(sandAdmin)
   );
 
-  const tx = await sandBeneficiaryUser.sandContract.transfer(
-    catalystOwner,
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
     sandAmount
   );
-  tx.wait();
+  await sandContractAsAdmin.transfer(catalystOwner, sandAmount);
 
   expect(await sandContract.balanceOf(catalystOwner)).to.equal(sandAmount);
 

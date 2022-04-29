@@ -9,7 +9,7 @@ const assetMinterFixtures = async () => {
   const assetMinterContract = await ethers.getContract('PolygonAssetMinter');
   const assetContract = await ethers.getContract('PolygonAssetERC1155');
   const user3 = (await getUnnamedAccounts())[3];
-  const {assetMinterAdmin} = await getNamedAccounts();
+  const {assetMinterAdmin, sandAdmin} = await getNamedAccounts();
 
   const assetMinterContractAsOwner = assetMinterContract.connect(
     ethers.provider.getSigner(assetMinterAdmin)
@@ -25,6 +25,7 @@ const assetMinterFixtures = async () => {
     assetContract,
     assetMinterContractAsUser3,
     user3,
+    sandAdmin,
   };
 };
 
