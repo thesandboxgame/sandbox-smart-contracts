@@ -16,13 +16,13 @@ const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
 const setupAssetUpgrader = withSnapshot(
   [
     // taken from assetUpgraderFixtures
-    'AssetUpgrader',
-    'Catalysts',
-    'Gems',
-    'AssetUpgraderFeeBurner',
-    'AssetAttributesRegistry',
-    'GemsCatalystsRegistry',
-    'Asset',
+    'PolygonAssetUpgrader',
+    'PolygonCatalysts',
+    'PolygonGems',
+    'PolygonAssetUpgraderFeeBurner',
+    'PolygonAssetAttributesRegistry',
+    'PolygonGemsCatalystsRegistry',
+    'PolygonAssetERC1155',
   ],
   assetUpgraderFixtures
 );
