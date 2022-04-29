@@ -1,11 +1,17 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
-import {transferSand} from '../../polygon/catalyst/utils';
+import {depositViaChildChainManager} from '../../polygon/sand/fixtures';
+import {setupUser} from '../../utils';
+import {expect} from '../../chai-setup';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetUpgraderFixtures = async () => {
-  const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
+  const {
+    assetAttributesRegistryAdmin,
+    assetAdmin,
+    sandBeneficiary,
+  } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
   const user2 = users[2];
@@ -19,7 +25,9 @@ export const assetUpgraderFixtures = async () => {
   const assetAttributesRegistry: Contract = await ethers.getContract(
     'PolygonAssetAttributesRegistry'
   );
-  const assetContract = await ethers.getContract('PolygonAssetERC1155');
+  const assetContract: Contract = await ethers.getContract(
+    'PolygonAssetERC1155'
+  );
   const sandContract: Contract = await ethers.getContract('PolygonSand');
   const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
   const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
@@ -37,17 +45,33 @@ export const assetUpgraderFixtures = async () => {
   const assetUpgraderFeeBurnerContract: Contract = await ethers.getContract(
     'PolygonAssetUpgraderFeeBurner'
   );
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
   await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
   );
-  await transferSand(
+
+  const sandAmount = BigNumber.from(1000000).mul('1000000000000000000');
+  const sandBeneficiaryUser = await setupUser(sandBeneficiary, {
     sandContract,
-    catalystOwner,
-    BigNumber.from(100000).mul(`1000000000000000000`)
+  });
+
+  // The only way to deposit PolygonSand in L2 is via the childChainManager
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandBeneficiary,
+    sandAmount
   );
+
+  const tx = await sandBeneficiaryUser.sandContract.transfer(
+    catalystOwner,
+    sandAmount
+  );
+  tx.wait();
+
+  expect(await sandContract.balanceOf(catalystOwner)).to.equal(sandAmount);
 
   const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract.connect(
     ethers.provider.getSigner(catalystOwner)

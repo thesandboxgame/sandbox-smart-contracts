@@ -27,8 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       AssetAttributesRegistry.address,
       Sand.address,
-      PolygonAssetERC1155.address,
       PolygonAssetERC721.address,
+      PolygonAssetERC1155.address,
       GemsCatalystsRegistry.address,
       upgradeFee,
       gemAdditionFee,
