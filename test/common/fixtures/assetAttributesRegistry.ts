@@ -1,10 +1,7 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {mintCatalyst, mintGem} from '../../polygon/catalyst/utils';
-import {
-  depositViaChildChainManager,
-  sendMeta,
-} from '../../polygon/sand/fixtures';
+import {depositViaChildChainManager} from '../../polygon/sand/fixtures';
 import {expect} from '../../chai-setup';
 import {setupUser} from '../../utils';
 
