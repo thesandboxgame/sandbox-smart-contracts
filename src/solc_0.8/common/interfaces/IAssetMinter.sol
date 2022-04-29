@@ -36,7 +36,7 @@ interface IAssetMinter {
         uint256 quantity
     ) external returns (uint256 assetId);
 
-    function addOrReplaceQuantitiyByCatalystId(uint16 catalystId, uint256 newQuantity) external;
+    function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external;
 
     function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external;
 

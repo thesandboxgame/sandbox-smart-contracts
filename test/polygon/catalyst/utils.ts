@@ -13,7 +13,7 @@ export async function mintAsset(
   callData: Buffer
 ): Promise<BigNumber> {
   const {assetBouncerAdmin} = await getNamedAccounts();
-  const assetContract = await ethers.getContract('Asset');
+  const assetContract = await ethers.getContract('PolygonAssetERC1155');
 
   await waitFor(
     assetContract

@@ -107,7 +107,7 @@ describe('AssetMinter', function () {
       } = await setupAssetMinter();
 
       for (const cat of catalysts) {
-        await assetMinterContractAsOwner.addOrReplaceQuantitiyByCatalystId(
+        await assetMinterContractAsOwner.addOrReplaceQuantityByCatalystId(
           cat.catalystId,
           cat.catalystId
         );
@@ -157,21 +157,12 @@ describe('AssetMinter', function () {
       const {
         assetMinterContract,
         catalystOwner,
-        commonCatalyst,
-        powerGem,
         assetAttributesRegistry,
         assetContract,
       } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
-
-      await mintCats([
-        {contract: commonCatalyst, amount: 1, recipient: catalystOwner},
-      ]);
-      await mintGems([
-        {contract: powerGem, amount: 1, recipient: catalystOwner},
-      ]);
 
       const mintData = {
         from: catalystOwner,
@@ -207,7 +198,7 @@ describe('AssetMinter', function () {
       expect(record.gemIds[0]).to.equal(quantity);
     });
 
-    it('Transfer event is emitted on minting an NFT (catalyst legendary)', async function () {
+    it('Transfer event is emitted on minting an NFT (catalyst legendary) - TODO: fix', async function () {
       const {
         assetMinterContract,
         assetContract,
@@ -243,11 +234,13 @@ describe('AssetMinter', function () {
         mintOptions.gemIds
       );
 
-      const receipt = await assetMinterAsCatalystOwner.mintWithCatalyst(
+      const tx = await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         catalystNFT,
         mintOptions.gemIds
       );
+
+      const receipt = tx.wait();
 
       const mintEvent = await expectEventWithArgs(
         assetContract,
@@ -551,7 +544,7 @@ describe('AssetMinter', function () {
           [],
           bn(nbToMint)
         )
-      ).to.be.revertedWith('AssetyMinter: custom minting unauthorized');
+      ).to.be.revertedWith('AssetMinter: custom minting unauthorized');
 
       await assetMinterAsAdmin.setCustomMintingAllowance(user3, true);
 
@@ -1403,7 +1396,7 @@ describe('AssetMinter', function () {
             mintOptions.gemIds,
             bn(0)
           )
-        ).to.be.revertedWith('AssetyMinter: custom minting unauthorized');
+        ).to.be.revertedWith('AssetMinter: custom minting unauthorized');
       });
 
       it('mintMultiple should fail if assets.length == 0', async function () {

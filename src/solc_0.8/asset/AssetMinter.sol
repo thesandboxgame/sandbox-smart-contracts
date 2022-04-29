@@ -66,7 +66,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         }
     }
 
-    function addOrReplaceQuantitiyByCatalystId(uint16 catalystId, uint256 newQuantity) external override onlyOwner {
+    function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external override onlyOwner {
         quantitiesByCatalystId[catalystId] = newQuantity;
     }
 
