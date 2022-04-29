@@ -59,6 +59,7 @@ func.tags = [
   'MockPolygonAssetERC721Tunnel',
   'MockPolygonAssetERC721Tunnel_deploy',
   'L2',
+  'PolygonAsset',
 ];
 func.dependencies = [
   'PolygonAssetERC721',
