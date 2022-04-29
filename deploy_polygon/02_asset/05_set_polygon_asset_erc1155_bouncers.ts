@@ -26,6 +26,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_setup'];
+func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_setup', 'PolygonAsset'];
 func.dependencies = ['PolygonAssetERC1155'];
 func.skip = skipUnlessTestnet;

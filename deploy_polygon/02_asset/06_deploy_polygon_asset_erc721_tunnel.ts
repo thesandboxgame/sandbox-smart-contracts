@@ -54,6 +54,7 @@ func.tags = [
   'PolygonAssetERC721Tunnel',
   'PolygonAssetERC721Tunnel_deploy',
   'L2',
+  'PolygonAsset',
 ];
 func.dependencies = ['PolygonAssetERC721', 'FXCHILD'];
 func.skip = skipUnlessTestnet;
