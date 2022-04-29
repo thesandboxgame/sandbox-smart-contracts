@@ -4,7 +4,7 @@
  *  - yarn execute <NETWORK> ./scripts/analysis/addressIsContract.ts
  */
 import fs from 'fs-extra';
-import {ethers} from 'hardhat';
+import { ethers } from 'hardhat';
 
 const cachedCode: {[address: string]: string} = loadCached(
   'tmp/cachedCode.json'
@@ -80,6 +80,7 @@ async function getCode(address: string, retries = 3): Promise<string> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function isGnosisSafe(address: string): Promise<boolean> {
   const code = await getCode(address);
   return code.length === 344 || code.length === 342;
