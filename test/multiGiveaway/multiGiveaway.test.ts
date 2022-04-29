@@ -346,7 +346,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract', async function () {
@@ -1194,7 +1194,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract - multiple giveaways, 1 claim', async function () {
@@ -1556,7 +1556,7 @@ describe('Multi_Giveaway', function () {
 
       await expect(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract', async function () {
