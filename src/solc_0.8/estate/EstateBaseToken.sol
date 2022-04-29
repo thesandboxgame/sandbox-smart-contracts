@@ -13,12 +13,13 @@ import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import "../common/Base/TheSandbox712.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/MapLib.sol";
+import "../common/interfaces/IEstateToken.sol";
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
 
-contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandbox712 {
+contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandbox712, IEstateToken {
     //using EnumerableMap for EnumerableMap.UintToUintMap;
     using MapLib for MapLib.Map;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -39,8 +40,15 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     //map to a map
     //mapping(uint256 => EnumerableMap.UintToUintMap) internal estates;
 
-    //association between estate and map
-    mapping(uint256 => Map) internal estates;
+    //quadmaps put this somewhere else
+    mapping(uint256 => uint256) public quadMap;
+
+    struct Estate {
+        MapLib.Map freeLands;
+        mapping(uint256 => MapLib.Map) gamesMap; //game id to maps
+    }
+
+    mapping(uint256 => MapLib.Map) freeLands;
 
     // gamesToLands key = gameId, value = landIds
     //mapping(uint256 => EnumerableSet.UintSet) internal gamesToLands;
@@ -74,7 +82,15 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         //_minter = minter;
         _gameToken = gameToken;
         _land = land;
-        ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
+        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+
+        //start quad map
+        quadMap[1] = 1;
+        quadMap[3] = 2**3 - 1;
+        quadMap[6] = 2**6 - 1;
+        quadMap[12] = 2**12 - 1;
+        quadMap[24] = 2**24 - 1;
+        //ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
@@ -89,9 +105,41 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     ) external override onlyMinter() returns (uint256) {
         (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
-        _addLandsGames(from, storageId, creation.landIds, creation.gameIds);
+        _addLandsGames(
+            from,
+            storageId,
+            creation.quadTuple /* , creation.gameIds */
+        );
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
+    }
+
+    function _addLandsGames(
+        address sender,
+        uint256 storageId,
+        uint256[][3] memory quadTuple
+    ) internal {
+        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
+        _land.batchTransferQuad(sender, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
+
+        _landsMapping(sender, storageId, quadTuple);
+    }
+
+    function _landsMapping(
+        //maybe I can unify both with a bool isCreation
+        address sender,
+        uint256 storageId,
+        uint256[][3] memory quads
+    ) internal {
+        MapLib.Map storage newMap = freeLands[storageId];
+        for (uint256 i; i < quads[0].length; i++) {
+            newMap.setQuad(quads[i][1], quads[i][2], quads[i][0], _quadMask);
+        }
+    }
+
+    //put this somewhere else
+    function _quadMask(uint256 size) internal view returns (uint256) {
+        return quadMap[size];
     }
 
     /* function updateEstate(
@@ -135,19 +183,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         emit EstateTokenUpdatedII(estateId, newId, update);
     } */
 
-    function _addLandsGames(
-        address sender,
-        uint256 storageId,
-        uint256[] memory landIdsToAdd,
-        uint256[] memory gameIds
-    ) internal {
-        require(landIdsToAdd.length > 0, "EMPTY_LAND_IDS_ARRAY");
-        _land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
-
-        _addLandsGamesAssociation(sender, storageId, landIdsToAdd, gameIds);
-    }
-
-    function _addLandsGamesAssociation(
+    /* function _addLandsGamesAssociation(
         //maybe I can unify both with a bool isCreation
         address sender,
         uint256 storageId,
@@ -213,7 +249,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         } else {
             _gameToken.batchTransferFrom(sender, address(this), gameIds, "");
         }
-    }
+    } */
 
     /* function _addLandsGamesAssociationUpdate(
         address sender,
@@ -304,114 +340,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         _land.batchTransferFrom(address(this), from, landIdsToRemove, "");
     } */
 
-    /// @notice Burns token `id`.
-    /// @param id The token which will be burnt.
-    /*  function burn(uint256 id) public override {
-        address sender = _msgSender();
-        //_check_authorized(sender, BREAK);
-        _check_hasOwnerRights(sender, id);
-        _burn(sender, _ownerOf(id), id);
-    } */
-
-    /// @notice Burn token`id` from `from`.
-    /// @param from address whose token is to be burnt.
-    /// @param id The token which will be burnt.
-    /* function burnFrom(address from, uint256 id) external override {
-        require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
-
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-
-        require(owner != address(uint160(0)), "NONEXISTENT_TOKEN");
-
-        address msgSender = _msgSender();
-
-        require(
-            msgSender == from ||
-                (operatorEnabled && _operators[id] == msgSender) ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[from][msgSender],
-            "UNAUTHORIZED_BURN"
-        );
-
-        _burn(from, owner, id);
-    } */
-
-    /// @notice Used to recover Land tokens from a burned estate.
-    /// Note: Implemented separately from burn to avoid hitting the block gas-limit if estate has too many lands.
-    /// @param sender The sender of the request.
-    // / @param to The recipient of the Land tokens.
-    // / @param num The number of Lands to transfer.
-    /// @param estateId The estate to recover lands from.
-    /* function transferFromBurnedEstate(
-        //address sender,
-        //address to,
-        uint256 estateId,
-        IEstateToken.EstateData calldata associatioToRetrieve
-    ) public {
-        address sender = _msgSender();
-        require(isBurned(estateId), "ASSET_NOT_BURNED");
-        require(sender != address(this), "NOT_FROM_THIS");
-        uint256 storageId = _storageId(estateId);
-        _check_withdrawal_authorized(sender, estateId);
-        //_removeLandsGames(to, estateId, landsToRemove);
-        _removeGamesOfLands(sender, estateId, associatioToRetrieve.gameIds, associatioToRetrieve.gameIds);
-        _removeLands(storageId, sender, associatioToRetrieve.landIds, true);
-    } */
-
-    /* function getEstateData(uint256 estateId) public view returns (IEstateToken.EstateData memory) {
-        uint256 storageId = _storageId(estateId);
-        uint256 length = estates[storageId].length();
-
-        uint256[] memory landIds = new uint256[](length);
-        uint256[] memory gameIds = new uint256[](length);
-
-        for (uint256 i = 0; i < length; i++) {
-            (uint256 landId, uint256 gameId) = estates[storageId].at(i);
-            landIds[i] = landId;
-            gameIds[i] = gameId;
-        }
-
-        return IEstateToken.EstateData({landIds: landIds, gameIds: gameIds});
-    } */
-
-    /* function getLands(uint256 estateId) public view returns (uint256[] memory) {
-        uint256 storageId = _storageId(estateId);
-        uint256 length = estates[storageId].length();
-
-        uint256[] memory landIds = new uint256[](length);
-        uint256[] memory uniqueLands = new uint256[](length);
-        uint256 uniqueNumber = 0;
-
-        if (length == 1) {
-            (uint256 landId, uint256 gameId) = estates[storageId].at(0);
-            landIds[0] = landId;
-            return landIds;
-        } else {
-            for (uint256 i = 0; i < length; i++) {
-                (uint256 landId, uint256 gameId) = estates[storageId].at(i);
-                landIds[i] = landId;
-                if (i == 0) {
-                    uniqueLands[uniqueNumber] = landId;
-                    uniqueNumber++;
-                } else {
-                    if (landId != landIds[i - 1]) {
-                        uniqueLands[uniqueNumber] = landId;
-                        uniqueNumber++;
-                    }
-                }
-            }
-            if (uniqueNumber != length) {
-                uint256[] memory filteredArray = new uint256[](uniqueNumber);
-                for (uint256 i = 0; i < uniqueNumber; i++) {
-                    filteredArray[i] = uniqueLands[i];
-                }
-                return filteredArray;
-            } else {
-                return landIds;
-            }
-        }
-    } */
-
     /* function getGames(uint256 estateId) public view returns (uint256[] memory) {
         uint256 storageId = _storageId(estateId);
         uint256 length = estates[storageId].length();
@@ -471,15 +399,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     function symbol() external pure returns (string memory) {
         return "ESTATE";
     }
-
-    /// @notice Return the URI of a specific token.
-    /// @param id The id of the token.
-    /// @return uri The URI of the token metadata.
-    /* function tokenURI(uint256 id) public view returns (string memory uri) {
-        require(_ownerOf(id) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 immutableId = _storageId(id);
-        return _toFullURI(_metaData[immutableId]);
-    } */
 
     function onERC721Received(
         address, /*operator*/
