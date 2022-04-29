@@ -183,4 +183,6 @@ func.tags = [
 func.dependencies = [
   'PolygonGemsCatalystsRegistry_deploy',
   'PolygonAssetMinter_deploy',
+  'PolygonAssetUpgrader_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
 ];
