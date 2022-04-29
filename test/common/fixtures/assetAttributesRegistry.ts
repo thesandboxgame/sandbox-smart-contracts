@@ -37,8 +37,6 @@ export const assetAttributesRegistryFixture = async () => {
     sandAmount
   );
 
-  await sandContract.balanceOf(sandBeneficiary);
-
   const tx = await sandBeneficiaryUser.sandContract.transfer(user0, sandAmount);
   tx.wait();
 
