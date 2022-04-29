@@ -11,8 +11,9 @@ import {
   setupAssetMinterGemsAndCatalysts,
   setupAssetMinterUpgraderGemsAndCatalysts,
 } from './fixtures';
-import {mintCatalyst, mintGem, transferSand} from '../utils';
+import {mintCatalyst, mintGem} from '../utils';
 import {expectEventWithArgs, findEvents, waitFor} from '../../../utils';
+import {depositViaChildChainManager} from '../../../polygon/sand/fixtures';
 
 const packId = BigNumber.from('1');
 const hash = ethers.utils.keccak256('0x42');
@@ -1105,12 +1106,23 @@ describe('AssetMinter', function () {
           magicGem,
           powerGem,
           catalystOwner,
+          sandAdmin,
         } = await setupAssetMinterUpgraderGemsAndCatalysts();
-        await transferSand(
-          sandContract,
-          catalystOwner,
-          BigNumber.from(100000).mul(`1000000000000000000`)
+        const sandContractAsAdmin = await sandContract.connect(
+          ethers.provider.getSigner(sandAdmin)
         );
+
+        const SAND_AMOUNT = BigNumber.from(100000).mul(`1000000000000000000`);
+        const childChainManager = await ethers.getContract(
+          'CHILD_CHAIN_MANAGER'
+        );
+        await depositViaChildChainManager(
+          {sand: sandContract, childChainManager},
+          sandAdmin,
+          SAND_AMOUNT
+        );
+        await sandContractAsAdmin.transfer(catalystOwner, SAND_AMOUNT);
+
         const assetMinterAsCatalystOwner = assetMinterContract.connect(
           ethers.provider.getSigner(catalystOwner)
         );
