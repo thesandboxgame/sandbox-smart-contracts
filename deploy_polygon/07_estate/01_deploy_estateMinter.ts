@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest, skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
+import {estateMintingFee, estateUpdateFee} from "../../data/estateMinterFees";
 //import {estateMintingFee, estateUpdateFee} from '../../data/estateMinterFees';
 
 const func: DeployFunction = async function (hre) {
@@ -26,8 +27,8 @@ const func: DeployFunction = async function (hre) {
           TRUSTED_FORWARDER.address,
           estateTokenAdmin,
           //feeCollector.address,
-          //estateMintingFee,
-          //estateUpdateFee,
+          estateMintingFee,
+          estateUpdateFee,
         ],
       },
       upgradeIndex: 0,

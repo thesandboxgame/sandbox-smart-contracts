@@ -89,7 +89,14 @@ const config: HardhatUserConfig = {
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
-
+    estateTokenAdmin: {
+      default: 2,
+      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
+      rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
+      goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+    },
     sandAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
@@ -259,11 +266,11 @@ const config: HardhatUserConfig = {
       tags: ['testnet', 'L1', 'L2'],
       forking: process.env.HARDHAT_FORK
         ? {
-            url: node_url(process.env.HARDHAT_FORK),
-            blockNumber: process.env.HARDHAT_FORK_NUMBER
-              ? parseInt(process.env.HARDHAT_FORK_NUMBER)
-              : undefined,
-          }
+          url: node_url(process.env.HARDHAT_FORK),
+          blockNumber: process.env.HARDHAT_FORK_NUMBER
+            ? parseInt(process.env.HARDHAT_FORK_NUMBER)
+            : undefined,
+        }
         : undefined,
       deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
@@ -337,10 +344,10 @@ const config: HardhatUserConfig = {
 
   external: process.env.HARDHAT_FORK
     ? {
-        deployments: {
-          hardhat: ['deployments/' + process.env.HARDHAT_FORK],
-        },
-      }
+      deployments: {
+        hardhat: ['deployments/' + process.env.HARDHAT_FORK],
+      },
+    }
     : undefined,
   etherscan: {
     apiKey: {

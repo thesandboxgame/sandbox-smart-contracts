@@ -133,7 +133,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     ) internal {
         MapLib.Map storage newMap = freeLands[storageId];
         for (uint256 i; i < quads[0].length; i++) {
-            newMap.setQuad(quads[i][1], quads[i][2], quads[i][0], _quadMask);
+            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
         }
     }
 
@@ -449,7 +449,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     /// @param estateId The tokenId to increment.
     /// @return the version-incremented tokenId.
     function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
-        address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
+        // address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
 
         uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
         uint16 version = uint16(estateId);

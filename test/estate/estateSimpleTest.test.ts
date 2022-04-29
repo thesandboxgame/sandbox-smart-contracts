@@ -1,9 +1,8 @@
 import {setupEstate} from './estateFixture';
-import {waitFor, expectEventWithArgsFromReceipt} from '../utils';
+import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
-import {ethers, deployments} from 'hardhat';
+import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
-import ERC20Mock from '@openzeppelin/contracts-0.8/build/contracts/ERC20PresetMinterPauser.json';
 
 describe.only('Estate test with maps', function () {
   it('test fixtures', async function () {
@@ -13,6 +12,8 @@ describe.only('Estate test with maps', function () {
 
   it.only('start with free lands', async function () {
     const {
+      sandContractAsUser0,
+      sandContractAsBeneficiary,
       estateContract,
       estateMinter,
       estateMinterContract,
@@ -21,29 +22,17 @@ describe.only('Estate test with maps', function () {
       gameToken,
       gameMinter,
       minter,
+      childChainManager,
+      polygonSand
     } = await setupEstate();
     const uri =
       '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
     const bytes = '0x3333';
 
-    //deploying mock sand contract
-    console.log('deploying mock sand contract');
-    await deployments.deploy('SandMock', {
-      from: user0,
-      contract: ERC20Mock,
-      args: ['AToken', 'SAND'],
-      proxy: false,
-    });
 
-    //minting sand for user
-    const sandToken = await ethers.getContract('SandMock', user0);
-    await sandToken.mint(user0, 10000);
-
-    await waitFor(
-      gameMinter
-        .connect(ethers.provider.getSigner(user0))
-        .updateSand(sandToken.address)
-    );
+    // await childChainManager.callDeposit(user0,
+    //   ethers.utils.defaultAbiCoder.encode(['uint256'], [toWei(10)]));
+    await sandContractAsBeneficiary.transfer(user0, toWei(10))
 
     //Minting Land
     console.log('minting lands');
@@ -54,12 +43,7 @@ describe.only('Estate test with maps', function () {
     );
 
     //Minting games
-
-    await waitFor(
-      sandToken
-        .connect(ethers.provider.getSigner(user0))
-        .approve(gameMinter.address, 5000)
-    );
+    await sandContractAsUser0.approve(gameMinter.address, toWei(10));
 
     console.log('minting games');
     const minerAdd = await gameToken
@@ -112,14 +96,20 @@ describe.only('Estate test with maps', function () {
     );
 
     //Estate minting
+    /*
+uint256[][3] quadTuple; //(size, x, y)
+bytes32 uri;
+     */
     console.log('estate minting');
     await waitFor(
       estateMinterContract
         .connect(ethers.provider.getSigner(user0))
-        .createEstate({
-          quadTuple: [[12], [0], [0]],
-          uri,
-        })
+        .createEstate(
+          [
+            [[12], [0], [0]],
+            uri
+          ],
+          [])
     );
 
     const estateCreationEvents = await estateContract.queryFilter(
