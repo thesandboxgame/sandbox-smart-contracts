@@ -339,8 +339,6 @@ describe('AssetAttributesRegistry', function () {
   it('fails if anyone other than admin trys to change attributes', async function () {
     const users = await getUnnamedAccounts();
     const commonCatalyst = await ethers.getContract('PolygonCatalyst_COMMON');
-    await expect(commonCatalyst.changeAttributes(users[6])).to.be.revertedWith(
-      'ADMIN_ONLY'
-    );
+    await expect(commonCatalyst.changeAttributes(users[6])).to.be.reverted;
   });
 });
