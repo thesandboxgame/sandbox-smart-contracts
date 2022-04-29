@@ -7,20 +7,20 @@ import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts
 
 export const setupAssetAttributesRegistry = withSnapshot(
   [
-    'Asset_setup', // we need to setup bounce admin.
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER --> PolygonGemPower
-    'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
-    'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
+    'PolygonAsset_setup', // we need to setup bounce admin.
+    'PolygonGemsCatalystsRegistry_setup',
+    'PolygonAssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
+    'PolygonAssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
   ],
   assetAttributesRegistryFixture
 );
 
 export const setupAssetAttributesRegistryGemsAndCatalysts = withSnapshot(
   [
-    'AssetMinter_setup', // we need to setup bounce admin.
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER --> PolygonGemPower
-    'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
-    'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
+    'PolygonAssetMinter_setup', // we need to setup bounce admin.
+    'PolygonGemsCatalystsRegistry_setup',
+    'PolygonAssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
+    'PolygonAssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),
