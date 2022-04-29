@@ -30,6 +30,11 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['PolygonAssetERC721', 'PolygonAssetERC721_deploy', 'L2'];
+func.tags = [
+  'PolygonAssetERC721',
+  'PolygonAssetERC721_deploy',
+  'L2',
+  'PolygonAsset',
+];
 func.dependencies = ['TRUSTED_FORWARDER'];
 func.skip = skipUnlessTestnet;

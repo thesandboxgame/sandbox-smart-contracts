@@ -32,6 +32,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AssetSignedAuctionAuth', 'AssetSignedAuctionAuth_deploy'];
+func.tags = [
+  'AssetSignedAuctionAuth',
+  'AssetSignedAuctionAuth_deploy',
+  'PolygonAsset',
+];
 func.dependencies = ['PolygonAssetERC1155_deploy'];
 func.skip = skipUnlessTestnet;
