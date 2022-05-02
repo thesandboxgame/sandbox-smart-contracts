@@ -138,7 +138,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         uint256 y,
         bytes memory data
     ) external virtual override {
-        require(isMinter(_msgSender()), "Invalid sender");
+        require(isMinter(_msgSender()), "!AUTHORIZED");
         _mintQuad(user, size, x, y, data);
     }
 
