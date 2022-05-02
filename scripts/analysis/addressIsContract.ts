@@ -4,7 +4,7 @@
  *  - yarn execute <NETWORK> ./scripts/analysis/addressIsContract.ts
  */
 import fs from 'fs-extra';
-import { ethers } from 'hardhat';
+import {ethers} from 'hardhat';
 
 const cachedCode: {[address: string]: string} = loadCached(
   'tmp/cachedCode.json'
