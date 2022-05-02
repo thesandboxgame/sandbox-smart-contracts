@@ -10,6 +10,7 @@ export const assetUpgraderFixtures = async () => {
     assetAttributesRegistryAdmin,
     assetAdmin,
     sandAdmin,
+    sandBeneficiary,
   } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
@@ -23,6 +24,9 @@ export const assetUpgraderFixtures = async () => {
   );
   const assetAttributesRegistry: Contract = await ethers.getContract(
     'PolygonAssetAttributesRegistry'
+  );
+  const assetERC721Contract: Contract = await ethers.getContract(
+    'PolygonAssetERC721'
   );
   const assetContract: Contract = await ethers.getContract(
     'PolygonAssetERC1155'
@@ -52,12 +56,25 @@ export const assetUpgraderFixtures = async () => {
       .setSuperOperator(assetUpgraderContract.address, true)
   );
 
+  const MINTER_ROLE = await assetERC721Contract.MINTER_ROLE();
+  await waitFor(
+    assetERC721Contract
+      .connect(ethers.provider.getSigner(assetAdmin))
+      .grantRole(MINTER_ROLE, assetContract.address)
+  );
   const sandAmount = BigNumber.from(1000000).mul('1000000000000000000');
 
   // The only way to deposit PolygonSand in L2 is via the childChainManager
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
+
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandBeneficiary,
+    sandAmount
+  );
+  expect(await sandContract.balanceOf(sandBeneficiary)).to.equal(sandAmount);
 
   await depositViaChildChainManager(
     {sand: sandContract, childChainManager},
@@ -97,6 +114,7 @@ export const assetUpgraderFixtures = async () => {
     assetAttributesRegistry,
     sandContract,
     assetContract,
+    assetERC721Contract,
     feeRecipient,
     upgradeFee,
     gemAdditionFee,
