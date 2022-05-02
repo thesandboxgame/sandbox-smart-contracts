@@ -20,7 +20,7 @@ const landSalePrefix = args[0];
   );
 
   for (const sector of sectors) {
-    const landSaleName = `${landSalePrefix}_${sector.sector}`;
+    const landSaleName = `LandPreSale_${sector.sector}`;
     const LandSale = await deployments.get(landSaleName);
     const assetIds: {[id: string]: boolean} = {};
     for (const bundleId in bundleInfo) {
