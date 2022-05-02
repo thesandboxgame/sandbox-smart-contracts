@@ -52,17 +52,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'PolygonLand'
     );
     if (PolygonLand) {
-      const polygonLandTunnel = await deployments.read(
+      const isMinter = await deployments.read(
         'PolygonLand',
-        'polygonLandTunnel'
+        'isMinter',
+        PolygonLandTunnel.address
       );
 
-      if (polygonLandTunnel !== PolygonLandTunnel.address) {
+      if (!isMinter) {
         await deployments.execute(
           'PolygonLand',
           {from: deployerOnL2},
-          'setPolygonLandTunnel',
-          PolygonLandTunnel.address
+          'setMinter',
+          PolygonLandTunnel.address,
+          true
         );
       }
     }

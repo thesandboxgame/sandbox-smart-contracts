@@ -123,7 +123,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
-        if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
+        if (!childToken.exists(size, x, y)) childToken.mintQuad(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
         emit Deposit(to, size, x, y, data);
     }

@@ -61,17 +61,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  const polygonLandTunnel = await read('PolygonLand', 'polygonLandTunnel');
+  const isMinter = await deployments.read(
+    'PolygonLand',
+    'isMinter',
+    PolygonLandTunnel.address
+  );
 
-  if (polygonLandTunnel !== PolygonLandTunnel.address) {
-    const admin = await read('PolygonLand', 'getAdmin');
-    await catchUnknownSigner(
-      execute(
-        'PolygonLand',
-        {from: admin, log: true},
-        'setPolygonLandTunnel',
-        PolygonLandTunnel.address
-      )
+  if (!isMinter) {
+    await deployments.execute(
+      'PolygonLand',
+      {from: deployer},
+      'setMinter',
+      PolygonLandTunnel.address,
+      true
     );
   }
 };

@@ -18,6 +18,10 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
 
+    mapping(address => bool) internal _minters;
+
+    event Minter(address minter, bool enabled);
+
     modifier validQuad(
         uint256 size,
         uint256 x,
@@ -121,12 +125,23 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
 
     /**
      * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
-     * @param to The recipient of the new quad
+     * @param user The recipient of the new quad
      * @param size The size of the new quad
      * @param x The top left x coordinate of the new quad
      * @param y The top left y coordinate of the new quad
      * @param data extra data to pass to the transfer
      */
+    function mintQuad(
+        address user,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) external virtual override {
+        require(isMinter(_msgSender()), "Invalid sender");
+        _mintQuad(user, size, x, y, data);
+    }
+
     function _mintQuad(
         address to,
         uint256 size,
@@ -284,7 +299,24 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
 
         return false;
     }
-<
+
+    /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(_msgSender() == _admin, "only admin is allowed to add minters");
+        require(minter != address(0), "PolygonLand: Invalid address");
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
+    /// @notice check whether address `who` is given minter rights.
+    /// @param who The address to query.
+    /// @return whether the address has minter rights.
+    function isMinter(address who) public view returns (bool) {
+        return _minters[who];
+    }
+
     function _transferQuad(
         address from,
         address to,
