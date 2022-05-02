@@ -37,8 +37,9 @@ describe('MockLandWithMint.sol', function () {
     const {deployer} = await setupLand();
 
     await expect(
-      deployer.PolygonLand.setPolygonLandTunnel(
-        '0x0000000000000000000000000000000000000000'
+      deployer.PolygonLand.setMinter(
+        '0x0000000000000000000000000000000000000000',
+        true
       )
     ).to.be.revertedWith('PolygonLand: Invalid address');
   });
@@ -1380,12 +1381,13 @@ describe('MockLandWithMint.sol', function () {
           );
 
           // Set Mock PolygonLandTunnel in PolygonLand
-          await deployer.PolygonLand.setPolygonLandTunnel(
-            MockPolygonLandTunnel.address
+          await deployer.PolygonLand.setMinter(
+            MockPolygonLandTunnel.address,
+            true
           );
-          expect(await PolygonLand.polygonLandTunnel()).to.equal(
-            MockPolygonLandTunnel.address
-          );
+          expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to
+            .be.true;
+
           // Transfer to L1 Tunnel
           await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
           await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1450,12 +1452,13 @@ describe('MockLandWithMint.sol', function () {
             plotCount
           );
           // Set Mock PolygonLandTunnel in PolygonLand
-          await deployer.PolygonLand.setPolygonLandTunnel(
-            MockPolygonLandTunnel.address
+          await deployer.PolygonLand.setMinter(
+            MockPolygonLandTunnel.address,
+            true
           );
-          expect(await PolygonLand.polygonLandTunnel()).to.equal(
-            MockPolygonLandTunnel.address
-          );
+          expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to
+            .be.true;
+
           // Transfer to L1 Tunnel
           await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
           await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1535,12 +1538,13 @@ describe('MockLandWithMint.sol', function () {
               );
 
               // Set Mock PolygonLandTunnel in PolygonLand
-              await deployer.PolygonLand.setPolygonLandTunnel(
-                MockPolygonLandTunnel.address
+              await deployer.PolygonLand.setMinter(
+                MockPolygonLandTunnel.address,
+                true
               );
-              expect(await PolygonLand.polygonLandTunnel()).to.equal(
-                MockPolygonLandTunnel.address
-              );
+              expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address))
+                .to.be.true;
+
               // Transfer to L1 Tunnel
               await landHolder.Land.setApprovalForAll(
                 MockLandTunnel.address,
@@ -1610,12 +1614,13 @@ describe('MockLandWithMint.sol', function () {
           );
 
           // Set Mock PolygonLandTunnel in PolygonLand
-          await deployer.PolygonLand.setPolygonLandTunnel(
-            MockPolygonLandTunnel.address
+          await deployer.PolygonLand.setMinter(
+            MockPolygonLandTunnel.address,
+            true
           );
-          expect(await PolygonLand.polygonLandTunnel()).to.equal(
-            MockPolygonLandTunnel.address
-          );
+          expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to
+            .be.true;
+
           // Transfer to L1 Tunnel
           await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
           await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1678,12 +1683,13 @@ describe('MockLandWithMint.sol', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
         // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnel.address,
+          true
         );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to.be
+          .true;
+
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
         await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1760,12 +1766,13 @@ describe('MockLandWithMint.sol', function () {
             );
 
             // Set Mock PolygonLandTunnel in PolygonLand
-            await deployer.PolygonLand.setPolygonLandTunnel(
-              MockPolygonLandTunnel.address
+            await deployer.PolygonLand.setMinter(
+              MockPolygonLandTunnel.address,
+              true
             );
-            expect(await PolygonLand.polygonLandTunnel()).to.equal(
-              MockPolygonLandTunnel.address
-            );
+            expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to
+              .be.true;
+
             // Transfer to L1 Tunnel
             await landHolder.Land.setApprovalForAll(
               MockLandTunnel.address,
@@ -1853,12 +1860,13 @@ describe('MockLandWithMint.sol', function () {
           );
 
           // Set Mock PolygonLandTunnel in PolygonLand
-          await deployer.PolygonLand.setPolygonLandTunnel(
-            MockPolygonLandTunnel.address
+          await deployer.PolygonLand.setMinter(
+            MockPolygonLandTunnel.address,
+            true
           );
-          expect(await PolygonLand.polygonLandTunnel()).to.equal(
-            MockPolygonLandTunnel.address
-          );
+          expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to
+            .be.true;
+
           // Transfer to L1 Tunnel
           await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
           await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1924,12 +1932,13 @@ describe('MockLandWithMint.sol', function () {
         await landMinter.Land.mintQuad(landHolder.address, size, 0, 1, bytes);
 
         // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnel.address,
+          true
         );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to.be
+          .true;
+
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
         await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -1998,12 +2007,12 @@ describe('MockLandWithMint.sol', function () {
           190
         );
 
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnel.address,
+          true
         );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to.be
+          .true;
 
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
         await landHolder.MockLandTunnel.batchTransferQuadToL2(
@@ -2080,12 +2089,12 @@ describe('MockLandWithMint.sol', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
         // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnel.address,
+          true
         );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to.be
+          .true;
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
@@ -2145,12 +2154,12 @@ describe('MockLandWithMint.sol', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
         // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnel.address,
+          true
         );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnel.address)).to.be
+          .true;
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
