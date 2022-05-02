@@ -23,6 +23,7 @@ const setupAssetUpgrader = withSnapshot(
     'PolygonAssetAttributesRegistry',
     'PolygonGemsCatalystsRegistry',
     'PolygonAssetERC1155',
+    'PolygonAssetERC721',
   ],
   assetUpgraderFixtures
 );
@@ -225,8 +226,8 @@ describe('AssetUpgrader', function () {
     expect(record.catalystId).to.equal(catalystId);
     expect(record.exists).to.equal(true);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(assetId);
-    expect(newOwner).to.equal(user2);
+    const balance = await assetContract.callStatic.balanceOf(user2, assetId);
+    expect(balance).to.equal(1);
   });
   it('adding powerGem and defenseGem to a rareCatalyst with no gems', async function () {
     const {
