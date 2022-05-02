@@ -1,16 +1,16 @@
-import {setupEstate} from './estateFixture';
+import {setupEstate} from './fixtures';
 import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 
-describe.only('Estate test with maps', function () {
+describe('Estate test with maps', function () {
   it('test fixtures', async function () {
     const {user0} = await setupEstate();
     console.log(user0);
   });
 
-  it.only('start with free lands', async function () {
+  it('start with free lands', async function () {
     const {
       sandContractAsUser0,
       sandContractAsBeneficiary,

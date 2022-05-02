@@ -3,7 +3,7 @@ pragma solidity 0.8.2;
 
 import "./ILandToken.sol";
 
-interface IPolygonLand is LandToken {
+interface IPolygonLand is ILandToken {
     function mint(
         address user,
         uint256 size,
