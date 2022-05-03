@@ -284,7 +284,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     ) external returns (uint256) {
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(to != address(0), "TO==0");
-        require(balanceOf(sender, id) == 1, "!NFT");
+        require(id & ERC1155ERC721Helper.IS_NFT == 0, "NOT_ERC1155_TOKEN");
         uint32 tokenCollectionIndex = _nextCollectionIndex[id];
         string memory metaData = tokenURI(id);
         uint256 newId =
