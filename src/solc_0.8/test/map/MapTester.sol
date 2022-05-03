@@ -9,17 +9,22 @@ import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol";
 contract MapTester {
     using MapLib for MapLib.Map;
     mapping(uint256 => uint256) public quadMap;
-    MapLib.Map[30] maps;
+    MapLib.Map[30] public maps;
 
     constructor() {
         quadMap[1] = 1;
-        quadMap[3] = 2 ** 3 - 1;
-        quadMap[6] = 2 ** 6 - 1;
-        quadMap[12] = 2 ** 12 - 1;
-        quadMap[24] = 2 ** 24 - 1;
+        quadMap[3] = 2**3 - 1;
+        quadMap[6] = 2**6 - 1;
+        quadMap[12] = 2**12 - 1;
+        quadMap[24] = 2**24 - 1;
     }
 
-    function setQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function setQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         maps[idx].setQuad(x, y, size, _quadMask);
     }
 
@@ -31,7 +36,12 @@ contract MapTester {
         maps[idx].setMap(maps[contained]);
     }
 
-    function clearQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function clearQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         maps[idx].clearQuad(x, y, size, _quadMask);
     }
 
@@ -47,11 +57,20 @@ contract MapTester {
         return _quadMask(size);
     }
 
-    function containCoord(uint256 idx, uint256 x, uint256 y) external view returns (bool) {
+    function containCoord(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
         return maps[idx].containCoord(x, y);
     }
 
-    function containQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external view returns (bool) {
+    function containQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
         return maps[idx].containQuad(x, y, size, _quadMask);
     }
 
@@ -67,12 +86,15 @@ contract MapTester {
         return maps[idx].at(index);
     }
 
-    function containTileAtCoord(uint256 idx, uint256 x, uint256 y) external view returns (bool) {
+    function containTileAtCoord(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
         return maps[idx].containTileAtCoord(x, y);
     }
 
     function _quadMask(uint256 size) internal view returns (uint256) {
         return quadMap[size];
     }
-
 }

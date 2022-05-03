@@ -1,5 +1,5 @@
 import {setupL1EstateAndLand} from './fixtures';
-import {BigNumber, ethers} from "ethers";
+import {BigNumber, ethers} from 'ethers';
 import {expect} from '../chai-setup';
 
 describe('Estate test with maps on layer 1', function () {
@@ -11,38 +11,54 @@ describe('Estate test with maps on layer 1', function () {
           other,
           landContractAsOther,
           estateContract,
-          mintQuad
+          mintQuad,
         } = await setupL1EstateAndLand();
 
         const quadId = await mintQuad(other, size, 48, 96);
-        await landContractAsOther.setApprovalForAllFor(other, estateContract.address, quadId)
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContract.address,
+          quadId
+        );
         const tx = await estateContract.createEstate(
           other,
           {
             quadTuple: [[size], [48], [96]],
             tiles: [],
-            uri: ethers.utils.formatBytes32String("uri ???")
+            uri: ethers.utils.formatBytes32String('uri ???'),
           },
-          [])
+          []
+        );
         const receipt = await tx.wait();
-        console.log(`create one ${size}x${size} quads and create an estate with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
+        console.log(
+          `create one ${size}x${size} quads and create an estate with that, GAS USED: `,
+          BigNumber.from(receipt.gasUsed).toString()
+        );
       });
-    })
-  })
+    });
+  });
   describe('create a lot of states', function () {
     describe('start with 24x24', function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
-      [[576, 1], [4, 12], [16, 6], [256, 3]].forEach(([cant, size]) => {
-
+      [
+        [576, 1],
+        [4, 12],
+        [16, 6],
+        [256, 3],
+      ].forEach(([cant, size]) => {
         it(`@slow create ${cant} (how many we can in one tx?) ${size}x${size} estates with that`, async function () {
           const {
             other,
             landContractAsOther,
             estateContract,
-            mintQuad
+            mintQuad,
           } = await setupL1EstateAndLand();
           const quadId = await mintQuad(other, 24, 0, 0);
-          await landContractAsOther.setApprovalForAllFor(other, estateContract.address, quadId)
+          await landContractAsOther.setApprovalForAllFor(
+            other,
+            estateContract.address,
+            quadId
+          );
 
           const xs = [];
           const ys = [];
@@ -59,11 +75,15 @@ describe('Estate test with maps on layer 1', function () {
             {
               quadTuple: [sizes, xs, ys],
               tiles: [],
-              uri: ethers.utils.formatBytes32String("uri ???")
+              uri: ethers.utils.formatBytes32String('uri ???'),
             },
-            [])
+            []
+          );
           const receipt = await tx.wait();
-          console.log(`create ${cant} (how many we can in one tx?) ${size}x${size} estates with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
+          console.log(
+            `create ${cant} (how many we can in one tx?) ${size}x${size} estates with that, GAS USED: `,
+            BigNumber.from(receipt.gasUsed).toString()
+          );
         });
       });
     });
@@ -75,15 +95,27 @@ describe('Estate test with maps on layer 1', function () {
       estateContract,
       estateTunnel,
       mintQuad,
-      createEstate
+      createEstate,
     } = await setupL1EstateAndLand();
-    const quads = [[24, 0, 0], [24, 24, 0], [24, 0, 24], [6, 24, 24], [6, 30, 24], [6, 24, 30], [6, 30, 30]];
+    const quads = [
+      [24, 0, 0],
+      [24, 24, 0],
+      [24, 0, 24],
+      [6, 24, 24],
+      [6, 30, 24],
+      [6, 24, 30],
+      [6, 30, 30],
+    ];
     const sizes = [];
     const xs = [];
     const ys = [];
     for (const [size, x, y] of quads) {
       const quadId = await mintQuad(other, size, x, y);
-      await landContractAsOther.setApprovalForAllFor(other, estateContract.address, quadId);
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContract.address,
+        quadId
+      );
       sizes.push(size);
       xs.push(x);
       ys.push(y);

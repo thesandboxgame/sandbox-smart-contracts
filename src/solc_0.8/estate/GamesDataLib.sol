@@ -17,7 +17,7 @@ library GamesDataLib {
         mapping(uint256 => uint256) indexes;
     }
 
-    function contains(Games storage self, uint256 gameId) internal view returns (bool){
+    function contains(Games storage self, uint256 gameId) internal view returns (bool) {
         return (self.indexes[gameId] != 0);
     }
 
@@ -26,7 +26,7 @@ library GamesDataLib {
         return self.values[self.indexes[gameId]].map;
     }
 
-    function createGame(Games storage self, uint256 gameId) internal returns (bool){
+    function createGame(Games storage self, uint256 gameId) internal returns (bool) {
         if (self.indexes[gameId] != 0) {
             // already exists
             return false;

@@ -5,7 +5,6 @@ pragma solidity 0.8.2;
 // TODO: Check if a pure function is better than a mapping for the masks
 // A square of 24x24 bits
 library TileLib {
-
     struct Tile {
         uint256[3] data;
     }
@@ -21,7 +20,13 @@ library TileLib {
 
     // TODO: Optimize for 24x24 ?.
     // TODO: What about a method without the requires (we must check outside of this one)
-    function setQuad(Tile memory self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (Tile memory) {
+    function setQuad(
+        Tile memory self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (Tile memory) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         uint256 mask = quadMask(size);
@@ -34,10 +39,16 @@ library TileLib {
         return self;
     }
 
-    function clearQuad(Tile memory self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (Tile memory) {
+    function clearQuad(
+        Tile memory self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (Tile memory) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        uint mask = quadMask(size);
+        uint256 mask = quadMask(size);
         require(mask != 0, "invalid size");
         uint256 i;
         for (; i < size; i++) {
@@ -47,17 +58,27 @@ library TileLib {
         return self;
     }
 
-    function containCoord(Tile memory self, uint256 x, uint256 y) internal pure returns (bool) {
+    function containCoord(
+        Tile memory self,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (bool) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         uint256 idx = y / 8;
         uint256 bitMask = 1 << (x + 24 * (y % 8));
         return (self.data[idx] & bitMask == bitMask);
     }
 
-    function containQuad(Tile memory self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (bool) {
+    function containQuad(
+        Tile memory self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (bool) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        uint mask = quadMask(size);
+        uint256 mask = quadMask(size);
         require(mask != 0, "invalid size");
         uint256 i;
         for (; i < size; i++) {
@@ -78,21 +99,25 @@ library TileLib {
         return self.data[0] == b.data[0] && self.data[1] == b.data[1] && self.data[2] == b.data[2];
     }
 
-    function or(Tile memory self, Tile memory b) internal pure returns (Tile memory){
+    function or(Tile memory self, Tile memory b) internal pure returns (Tile memory) {
         self.data[0] |= b.data[0];
         self.data[1] |= b.data[1];
         self.data[2] |= b.data[2];
         return self;
     }
 
-    function and(Tile memory self, Tile memory b) internal pure returns (Tile memory){
+    function and(Tile memory self, Tile memory b) internal pure returns (Tile memory) {
         self.data[0] &= b.data[0];
         self.data[1] &= b.data[1];
         self.data[2] &= b.data[2];
         return self;
     }
 
-    function subtractWitMask(Tile memory self, Tile memory value, uint256 ignoreMask) internal pure returns (Tile memory) {
+    function subtractWitMask(
+        Tile memory self,
+        Tile memory value,
+        uint256 ignoreMask
+    ) internal pure returns (Tile memory) {
         self.data[0] &= ~(value.data[0] & ignoreMask);
         self.data[1] &= ~(value.data[1] & ignoreMask);
         self.data[2] &= ~(value.data[2] & ignoreMask);

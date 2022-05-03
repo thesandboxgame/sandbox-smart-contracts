@@ -4,7 +4,6 @@ pragma solidity 0.8.2;
 import "./EstateTunnel.sol";
 import "hardhat/console.sol";
 
-
 contract MockEstateTunnel is EstateTunnel {
     constructor(
         address _checkpointManager,

@@ -1,6 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
-import {estateMintingFee, estateUpdateFee} from "../../data/estateMinterFees";
+import {estateMintingFee, estateUpdateFee} from '../../data/estateMinterFees';
 //import {estateMintingFee, estateUpdateFee} from '../../data/estateMinterFees';
 
 const func: DeployFunction = async function (hre) {

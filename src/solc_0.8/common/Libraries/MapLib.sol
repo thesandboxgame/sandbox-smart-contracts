@@ -16,29 +16,46 @@ library MapLib {
         mapping(uint256 => uint256) indexes;
     }
 
-    function containCoord(Map storage self, uint256 x, uint256 y) internal view returns (bool) {
+    function containCoord(
+        Map storage self,
+        uint256 x,
+        uint256 y
+    ) internal view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             return false;
         }
         return self.values[idx - 1].containCoord(x, y);
     }
 
-    function containQuad(Map storage self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (bool) {
+    function containQuad(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             return false;
         }
         // TODO: We can call TileLib directly to use less gas ?
         return self.values[idx - 1].containQuad(x, y, size, quadMask);
     }
 
-    function containTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) internal view returns (bool) {
+    function containTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile)
+        internal
+        view
+        returns (bool)
+    {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             return false;
         }
         return self.values[idx - 1].containTile(tile);
@@ -56,15 +73,23 @@ library MapLib {
         return false;
     }
 
-    function setQuad(Map storage self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal {
+    function setQuad(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             // Add a new tile
             TileWithCoordLib.TileWithCoord memory t = TileWithCoordLib.initTileWithCoord(x, y);
             self.values.push(t.setQuad(x, y, size, quadMask));
             self.indexes[key] = self.values.length;
-        } else {// contains
+        } else {
+            // contains
             self.values[idx - 1] = self.values[idx - 1].setQuad(x, y, size, quadMask);
         }
     }
@@ -72,7 +97,8 @@ library MapLib {
     function setTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) internal {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             // Add a new tile
             self.values.push(tile);
             self.indexes[key] = self.values.length;
@@ -88,10 +114,17 @@ library MapLib {
         }
     }
 
-    function clearQuad(Map storage self, uint256 x, uint256 y, uint256 size, function (uint256) view returns (uint256) quadMask) internal returns (bool) {
+    function clearQuad(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains, nothing to clear
+        if (idx == 0) {
+            // !contains, nothing to clear
             return false;
         }
         TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size, quadMask);
@@ -106,7 +139,8 @@ library MapLib {
     function clearTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) internal returns (bool) {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
-        if (idx == 0) {// !contains
+        if (idx == 0) {
+            // !contains
             return false;
         }
         TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].subtract(tile);
@@ -133,7 +167,11 @@ library MapLib {
         return self.values[index];
     }
 
-    function at(Map storage self, uint256 offset, uint256 limit) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+    function at(
+        Map storage self,
+        uint256 offset,
+        uint256 limit
+    ) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
         TileWithCoordLib.TileWithCoord[] memory ret;
         for (uint256 i; i < limit; i++) {
             ret[i] = self.values[offset + i];
@@ -147,13 +185,21 @@ library MapLib {
     }
 
     // Just for testing
-    function containTileAtCoord(Map storage self, uint256 x, uint256 y) internal view returns (bool) {
+    function containTileAtCoord(
+        Map storage self,
+        uint256 x,
+        uint256 y
+    ) internal view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         return (idx != 0);
     }
 
-    function remove(Map storage self, uint256 idx, uint256 key) private {
+    function remove(
+        Map storage self,
+        uint256 idx,
+        uint256 key
+    ) private {
         // TODO: We remove an empty tile, maybe is just better to leave it there ?
         uint256 toDeleteIndex = idx - 1;
         uint256 lastIndex = self.values.length - 1;

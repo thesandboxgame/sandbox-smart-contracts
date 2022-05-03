@@ -1,17 +1,21 @@
 import {expect} from '../chai-setup';
-import {getEmptyTile, printTile, setupTileLibTest, tileToArray} from "./fixtures";
-
+import {
+  getEmptyTile,
+  printTile,
+  setupTileLibTest,
+  tileToArray,
+} from './fixtures';
 
 describe('TileLib', function () {
   it('Available quads', async function () {
     const tester = await setupTileLibTest();
     expect(await tester.quadMask(1)).to.be.equal(0x1);
     expect(await tester.quadMask(3)).to.be.equal(0x7);
-    expect(await tester.quadMask(6)).to.be.equal(0x3F);
-    expect(await tester.quadMask(12)).to.be.equal(0xFFF);
-    expect(await tester.quadMask(24)).to.be.equal(0xFFFFFF);
+    expect(await tester.quadMask(6)).to.be.equal(0x3f);
+    expect(await tester.quadMask(12)).to.be.equal(0xfff);
+    expect(await tester.quadMask(24)).to.be.equal(0xffffff);
     expect(await tester.quadMask(2)).to.be.equal(0);
-  })
+  });
 
   it.skip('Some Tile', async function () {
     const tester = await setupTileLibTest();
@@ -27,7 +31,12 @@ describe('TileLib', function () {
 
   it('union', async function () {
     const tester = await setupTileLibTest();
-    const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
+    const tests = [
+      [3, 0, 3],
+      [12, 6, 6],
+      [1, 1, 1],
+      [23, 23, 1],
+    ];
     // 0
     for (const t of tests) {
       await tester.setQuad(0, t[0], t[1], t[2]);
@@ -50,7 +59,10 @@ describe('TileLib', function () {
   it('intersection', async function () {
     const tester = await setupTileLibTest();
     //const tests = [[12, 12, 1], [12, 12, 3], [12, 12, 6], [12, 12, 12], [0, 0, 24]]
-    const tests = [[12, 12, 1], [12, 12, 3]]
+    const tests = [
+      [12, 12, 1],
+      [12, 12, 3],
+    ];
 
     const idxs = [];
     for (let idx = 0; idx < tests.length; idx++) {
@@ -68,7 +80,12 @@ describe('TileLib', function () {
 
   it('contains', async function () {
     const tester = await setupTileLibTest();
-    const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
+    const tests = [
+      [3, 0, 3],
+      [12, 6, 6],
+      [1, 1, 1],
+      [23, 23, 1],
+    ];
     // 0
     for (const t of tests) {
       await tester.setQuad(0, t[0], t[1], t[2]);

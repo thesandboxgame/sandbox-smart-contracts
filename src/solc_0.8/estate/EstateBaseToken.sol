@@ -34,10 +34,10 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         _land = land;
         // start quad map
         quadMap[1] = 1;
-        quadMap[3] = 2 ** 3 - 1;
-        quadMap[6] = 2 ** 6 - 1;
-        quadMap[12] = 2 ** 12 - 1;
-        quadMap[24] = 2 ** 24 - 1;
+        quadMap[3] = 2**3 - 1;
+        quadMap[6] = 2**6 - 1;
+        quadMap[12] = 2**12 - 1;
+        quadMap[24] = 2**24 - 1;
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
@@ -45,8 +45,8 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         address from,
         TileWithCoordLib.TileWithCoord[] calldata tiles,
         uint256[][3] calldata quadTuple,
-        bytes32 uri) internal returns (uint256 estateId, uint256 storageId)
-    {
+        bytes32 uri
+    ) internal returns (uint256 estateId, uint256 storageId) {
         // batchTransferQuad does that for us
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
         require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
@@ -64,8 +64,8 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         TileWithCoordLib.TileWithCoord[] calldata tilesToAdd,
         uint256[][3] calldata quadsToAdd,
         uint256[][3] calldata quadsToRemove,
-        bytes32 uri) internal returns (uint256)
-    {
+        bytes32 uri
+    ) internal returns (uint256) {
         require(_ownerOf(estateId) == from, "Invalid Owner");
         // batchTransferQuad does that for us
         // require(quadsToAdd[0].length == quadsToAdd[1].length && quadsToAdd[0].length == quadsToAdd[2].length, "Invalid data");
@@ -135,9 +135,8 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         return this.onERC721BatchReceived.selector;
     }
 
-
     function _addLandsMapping(
-    //maybe I can unify both with a bool isCreation
+        //maybe I can unify both with a bool isCreation
         uint256 storageId,
         TileWithCoordLib.TileWithCoord[] calldata tiles,
         uint256[][3] calldata quads
@@ -152,7 +151,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     }
 
     function _removeLandsMapping(
-    //maybe I can unify both with a bool isCreation
+        //maybe I can unify both with a bool isCreation
         uint256 storageId,
         uint256[][3] calldata quads
     ) internal {
@@ -181,7 +180,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         if (from == owner) {
             _burn(from, owner, estateId);
         }
-        (uint256 newId,) = _mintEstate(owner, subId, version, false);
+        (uint256 newId, ) = _mintEstate(owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         require(owner == newOwner, "NOT_OWNER");
         return newId;
@@ -196,7 +195,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     /// @return storageId The staorage Id for the token.
     function _mintEstate(
         address from,
-    //address to,
+        //address to,
         uint64 subId,
         uint16 version,
         bool isCreation
@@ -230,5 +229,4 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     function _toFullURI(bytes32 hash) internal pure override returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
-
 }

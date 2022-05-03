@@ -12,8 +12,8 @@ library TileWithCoordLib {
         TileLib.Tile tile;
     }
 
-    uint256 constant COORD_MASK_POS = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
-    uint256 constant COORD_MASK_NEG = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 public constant COORD_MASK_POS = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
+    uint256 public constant COORD_MASK_NEG = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
     // TileWithCoord x and y always start in multiples of 24
     function initTileWithCoord(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
@@ -23,13 +23,25 @@ library TileWithCoordLib {
         return ret;
     }
 
-    function setQuad(TileWithCoord memory self, uint256 xi, uint256 yi, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (TileWithCoord memory) {
+    function setQuad(
+        TileWithCoord memory self,
+        uint256 xi,
+        uint256 yi,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
         self.tile = self.tile.setQuad(xi % 24, yi % 24, size, quadMask);
         return self;
     }
 
-    function clearQuad(TileWithCoord memory self, uint256 xi, uint256 yi, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (TileWithCoord memory) {
+    function clearQuad(
+        TileWithCoord memory self,
+        uint256 xi,
+        uint256 yi,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
         self.tile = self.tile.clearQuad(xi % 24, yi % 24, size, quadMask);
         return self;
@@ -41,18 +53,32 @@ library TileWithCoordLib {
         return self;
     }
 
-    function subtract(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
+    function subtract(TileWithCoord memory self, TileWithCoord memory value)
+        internal
+        pure
+        returns (TileWithCoord memory)
+    {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
         self.tile = self.tile.subtractWitMask(value.tile, COORD_MASK_NEG);
         return self;
     }
 
-    function containCoord(TileWithCoord memory self, uint256 xi, uint256 yi) internal pure returns (bool) {
+    function containCoord(
+        TileWithCoord memory self,
+        uint256 xi,
+        uint256 yi
+    ) internal pure returns (bool) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
         return self.tile.containCoord(xi % 24, yi % 24);
     }
 
-    function containQuad(TileWithCoord memory self, uint256 xi, uint256 yi, uint256 size, function (uint256) view returns (uint256) quadMask) internal view returns (bool) {
+    function containQuad(
+        TileWithCoord memory self,
+        uint256 xi,
+        uint256 yi,
+        uint256 size,
+        function(uint256) view returns (uint256) quadMask
+    ) internal view returns (bool) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
         return self.tile.containQuad(xi % 24, yi % 24, size, quadMask);
     }
@@ -70,16 +96,17 @@ library TileWithCoordLib {
     }
 
     function getKey(uint256 x, uint256 y) internal pure returns (uint256) {
-        return (x / 24) | (y / 24) << 32;
+        return (x / 24) | ((y / 24) << 32);
     }
 
     function getKey(TileWithCoord memory self) internal pure returns (uint256) {
-        return getX(self) | getY(self) << 32;
+        return getX(self) | (getY(self) << 32);
     }
 
     function isEmpty(TileWithCoord memory self) internal pure returns (bool) {
-        return self.tile.data[0] & COORD_MASK_NEG == 0
-        && self.tile.data[1] & COORD_MASK_NEG == 0
-        && self.tile.data[2] & COORD_MASK_NEG == 0;
+        return
+            self.tile.data[0] & COORD_MASK_NEG == 0 &&
+            self.tile.data[1] & COORD_MASK_NEG == 0 &&
+            self.tile.data[2] & COORD_MASK_NEG == 0;
     }
 }

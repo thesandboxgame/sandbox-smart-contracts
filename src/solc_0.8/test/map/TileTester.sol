@@ -8,21 +8,31 @@ import {TileLib} from "../../common/Libraries/TileLib.sol"; // TODO: Separate th
 contract TileTester {
     using TileLib for TileLib.Tile;
     mapping(uint256 => uint256) public quadMap;
-    TileLib.Tile[30] tiles;
+    TileLib.Tile[30] public tiles;
 
     constructor() {
         quadMap[1] = 1;
-        quadMap[3] = 2 ** 3 - 1;
-        quadMap[6] = 2 ** 6 - 1;
-        quadMap[12] = 2 ** 12 - 1;
-        quadMap[24] = 2 ** 24 - 1;
+        quadMap[3] = 2**3 - 1;
+        quadMap[6] = 2**6 - 1;
+        quadMap[12] = 2**12 - 1;
+        quadMap[24] = 2**24 - 1;
     }
 
-    function setQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function setQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         tiles[idx] = tiles[idx].setQuad(x, y, size, _quadMask);
     }
 
-    function clearQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function clearQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         tiles[idx] = tiles[idx].clearQuad(x, y, size, _quadMask);
     }
 
@@ -54,12 +64,16 @@ contract TileTester {
         return tiles[idx1].isEqual(tiles[idx2]);
     }
 
-    function containQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external view returns (bool) {
+    function containQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
         return tiles[idx].containQuad(x, y, size, _quadMask);
     }
 
     function _quadMask(uint256 size) internal view returns (uint256) {
         return quadMap[size];
     }
-
 }
