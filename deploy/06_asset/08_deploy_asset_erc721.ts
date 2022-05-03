@@ -6,13 +6,13 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {assetAdmin, upgradeAdmin} = await getNamedAccounts();
+  const {assetAdmin, upgradeAdmin, deployer} = await getNamedAccounts();
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   await deploy('AssetERC721', {
-    from: upgradeAdmin,
+    from: deployer,
     contract: 'AssetERC721',
     proxy: {
       owner: upgradeAdmin,
