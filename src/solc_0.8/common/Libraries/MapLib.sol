@@ -133,6 +133,19 @@ library MapLib {
         return self.values[index];
     }
 
+    function at(Map storage self, uint256 offset, uint256 limit) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        TileWithCoordLib.TileWithCoord[] memory ret;
+        for (uint256 i; i < limit; i++) {
+            ret[i] = self.values[offset + i];
+        }
+        return ret;
+    }
+
+    // This can be problematic if it grows too much !!!
+    function getMap(Map storage self) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        return self.values;
+    }
+
     // Just for testing
     function containTileAtCoord(Map storage self, uint256 x, uint256 y) internal view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);

@@ -1,16 +1,15 @@
-//SPDX-License-Identifier: MIT
-// solhint-disable code-complexity
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
 import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import "../common/Base/TheSandbox712.sol";
-import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/MapLib.sol";
 import "../common/interfaces/IEstateToken.sol";
 
@@ -52,8 +51,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     // gamesToLands key = gameId, value = landIds
     //mapping(uint256 => EnumerableSet.UintSet) internal gamesToLands;
 
-    LandToken internal _land;
-    GameBaseToken internal _gameToken;
+    ILandToken internal _land;
 
     /// @dev Emits when a estate is updated.
     /// @param oldId The id of the previous erc721 ESTATE token.
@@ -67,26 +65,22 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     /// @param update The changes made to the Estate.
     event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
 
-    function initV1(
+    function _unchained_initV1(
         address trustedForwarder,
         address admin,
-        //address minter,
-        LandToken land,
-        GameBaseToken gameToken,
+        ILandToken land,
         uint8 chainIndex
-    ) public initializer {
+    ) internal {
         _admin = admin;
-        //_minter = minter;
-        _gameToken = gameToken;
         _land = land;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
 
         //start quad map
-        quadMap[1] = 1;
-        quadMap[3] = 2**3 - 1;
-        quadMap[6] = 2**6 - 1;
-        quadMap[12] = 2**12 - 1;
-        quadMap[24] = 2**24 - 1;
+        _quadMap[1] = 1;
+        _quadMap[3] = 2**3 - 1;
+        _quadMap[6] = 2**6 - 1;
+        _quadMap[12] = 2**12 - 1;
+        _quadMap[24] = 2**24 - 1;
         //ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
     }
 
@@ -347,7 +341,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
 
-    function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
+    function isItInArray(uint256 id, uint256[] memory landIds) external pure returns (bool) {
         uint256 size = landIds.length;
         bool flag = false;
 
@@ -357,19 +351,25 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
                 break;
             }
         }
-
         return flag;
     }
 
-    //address private backAddress;
-
-    /* function setBackAddress(address wallet) public {
-        backAddress = wallet;
+    function freeLandLength(uint256 estateId) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].length();
     }
 
-    function getBackAddress() public view returns (address) {
-        return backAddress;
-    } */
+    function freeLandAt(
+        uint256 estateId,
+        uint256 offset,
+        uint256 limit
+    ) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].at(offset, limit);
+    }
 
-    // solhint-enable code-complexity
+    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].getMap();
+    }
 }

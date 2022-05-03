@@ -1,5 +1,5 @@
-import {setupEstate} from './estateFixture';
-import {toWei, waitFor} from '../utils';
+import {setupEstate} from './fixtures';
+import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {ethers} from 'hardhat';
 
