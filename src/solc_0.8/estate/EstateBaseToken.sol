@@ -63,6 +63,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     {
         require(_ownerOf(estateId) == from, "Invalid Owner");
         uint256 storageId = _storageId(estateId);
+        _metaData[storageId] = uri;
         if (quadsToAdd[0].length > 0) {
             _addLands(from, storageId, tilesToAdd, quadsToAdd);
         }

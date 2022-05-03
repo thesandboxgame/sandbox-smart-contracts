@@ -165,12 +165,11 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
       createEstate: async (sizes: BigNumberish[], xs: BigNumberish[], ys: BigNumberish[]): Promise<BigNumber> => {
         const tx = await estateContract.createEstate(
           other,
-          [
-            [sizes, xs, ys],
-            // [{tile: {data: []}}],
-            [],
-            ethers.utils.formatBytes32String("uri ???")
-          ],
+          {
+            quadTuple: [sizes, xs, ys],
+            tiles: [],
+            uri: ethers.utils.formatBytes32String("uri ???")
+          },
           []);
         const receipt: ContractReceipt = await tx.wait();
         const estateCreationEvents = receipt.events?.filter(

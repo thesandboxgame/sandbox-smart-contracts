@@ -18,11 +18,11 @@ describe('Estate test with maps on layer 1', function () {
         await landContractAsOther.setApprovalForAllFor(other, estateContract.address, quadId)
         const tx = await estateContract.createEstate(
           other,
-          [
-            [[size], [48], [96]],
-            [],
-            ethers.utils.formatBytes32String("uri ???")
-          ],
+          {
+            quadTuple: [[size], [48], [96]],
+            tiles: [],
+            uri: ethers.utils.formatBytes32String("uri ???")
+          },
           [])
         const receipt = await tx.wait();
         console.log(`create one ${size}x${size} quads and create an estate with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
@@ -56,11 +56,11 @@ describe('Estate test with maps on layer 1', function () {
           }
           const tx = await estateContract.createEstate(
             other,
-            [
-              [sizes, xs, ys],
-              [],
-              ethers.utils.formatBytes32String("uri ???")
-            ],
+            {
+              quadTuple: [sizes, xs, ys],
+              tiles: [],
+              uri: ethers.utils.formatBytes32String("uri ???")
+            },
             [])
           const receipt = await tx.wait();
           console.log(`create ${cant} (how many we can in one tx?) ${size}x${size} estates with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
