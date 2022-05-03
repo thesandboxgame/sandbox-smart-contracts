@@ -50,6 +50,7 @@ describe('Estate test with maps', function () {
             [0, 18],
             [0, 18],
           ],
+          [],
           uri,
         ])
     );
@@ -103,7 +104,7 @@ describe('Estate test with maps', function () {
     await waitFor(
       estateMinterContract
         .connect(ethers.provider.getSigner(user0))
-        .createEstate([[[12], [0], [0]], uri])
+        .createEstate([[[12], [0], [0]], [], uri])
     );
 
     const estateCreationEvents = await estateContract.queryFilter(
@@ -122,6 +123,7 @@ describe('Estate test with maps', function () {
           .connect(ethers.provider.getSigner(user0))
           .updateLandsEstate({
             quadsToAdd: [[6], [30], [30]],
+            tilesToAdd: [],
             quadsToRemove: [[12], [0], [0]],
             estateId,
             uri,

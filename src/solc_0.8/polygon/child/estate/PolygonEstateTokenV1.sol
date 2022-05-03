@@ -7,9 +7,10 @@ import "../../../Game/GameBaseToken.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../estate/EstateBaseToken.sol";
 import "../../../common/interfaces/IEstateToken.sol";
+import "../../../common/interfaces/IPolygonEstateToken.sol";
 
 // TODO: IEstateToke != IPolygonEstateToken
-contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
+contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
     using MapLib for MapLib.Map;
 
     /// @dev Emits when a estate is updated.
@@ -45,6 +46,17 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         gameToken = _gameToken;
     }
 
+
+    // TODO: Implement the real thing.
+    function createEstateWithGame(address from, EstateCRUDWithGameData calldata creation) external override returns (uint256) {
+        uint256 estateId = _createEstate(from,
+            creation.estateData.tiles,
+            creation.estateData.quadTuple,
+            creation.estateData.uri
+        );
+        emit EstateTokenUpdated(0, estateId, creation.estateData);
+        return estateId;
+    }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
     /// @notice Create a new estate token with lands.
