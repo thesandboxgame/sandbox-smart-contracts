@@ -1,5 +1,5 @@
 import {setupL1EstateAndLand} from './fixtures';
-import {ethers} from "ethers";
+import {BigNumber, ethers} from "ethers";
 import {expect} from '../chai-setup';
 
 describe('Estate test with maps on layer 1', function () {
@@ -16,13 +16,15 @@ describe('Estate test with maps on layer 1', function () {
 
         const quadId = await mintQuad(other, size, 48, 96);
         await landContractAsOther.setApprovalForAllFor(other, estateContract.address, quadId)
-        await estateContract.createEstate(
+        const tx = await estateContract.createEstate(
           other,
           [
             [[size], [48], [96]],
             ethers.utils.formatBytes32String("uri ???")
           ],
           [])
+        const receipt = await tx.wait();
+        console.log(`create one ${size}x${size} quads and create an estate with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
       });
     })
   })
@@ -51,13 +53,15 @@ describe('Estate test with maps on layer 1', function () {
               sizes.push(size);
             }
           }
-          await estateContract.createEstate(
+          const tx = await estateContract.createEstate(
             other,
             [
               [sizes, xs, ys],
               ethers.utils.formatBytes32String("uri ???")
             ],
             [])
+          const receipt = await tx.wait();
+          console.log(`create ${cant} (how many we can in one tx?) ${size}x${size} estates with that, GAS USED: `, BigNumber.from(receipt.gasUsed).toString());
         });
       });
     });
