@@ -35,6 +35,13 @@ interface IEstateToken {
         bytes32 uri;
     }
 
+    struct UpdateEstateLands {
+        uint256[][3] quadsToAdd;
+        uint256[][3] quadsToRemove;
+        uint256 estateId;
+        bytes32 uri;
+    }
+
     /* function initV1(
         address trustedForwarder,
         address admin,
@@ -44,11 +51,9 @@ interface IEstateToken {
         uint8 chainIndex
     ) public initializer; */
 
-    function createEstate(
-        address from,
-        EstateCRUDData calldata creation,
-        bytes calldata signature /* , uint256 timeStamp */
-    ) external returns (uint256);
+    function createEstate(address from, EstateCRUDData calldata creation) external returns (uint256);
+
+    function updateLandsEstate(address from, UpdateEstateLands calldata update) external returns (uint256);
 
     /* function updateEstate(
         address from,

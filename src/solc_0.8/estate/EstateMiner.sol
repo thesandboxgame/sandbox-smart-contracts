@@ -39,14 +39,22 @@ contract EstateMinter is
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    function createEstate(
-        IEstateToken.EstateCRUDData calldata creation,
-        bytes calldata signature /* ,uint256 timeStamp */ /* override */
-    ) external returns (uint256) {
+    function createEstate(IEstateToken.EstateCRUDData calldata creation)
+        external
+        returns (
+            // bytes calldata signature
+            uint256
+        )
+    {
         address msgSender = _msgSender();
         //_feeCollector.chargeSand(msgSender, _estateMintingFee);
         //_verifyAdjacencyCreate(creation, signature);
-        return _estateToken.createEstate(msgSender, creation, signature);
+        return _estateToken.createEstate(msgSender, creation);
+    }
+
+    function updateLandsEstate(IEstateToken.UpdateEstateLands calldata update) external returns (uint256) {
+        address msgSender = _msgSender();
+        return _estateToken.updateLandsEstate(msgSender, update);
     }
 
     /* function updateEstate(

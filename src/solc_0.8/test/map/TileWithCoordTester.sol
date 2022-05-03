@@ -8,24 +8,39 @@ import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol"; //
 contract TileWithCoordTester {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
     mapping(uint256 => uint256) public quadMap;
-    TileWithCoordLib.TileWithCoord[30] tiles;
+    TileWithCoordLib.TileWithCoord[30] public tiles;
 
     constructor() {
         quadMap[1] = 1;
-        quadMap[3] = 2 ** 3 - 1;
-        quadMap[6] = 2 ** 6 - 1;
-        quadMap[12] = 2 ** 12 - 1;
-        quadMap[24] = 2 ** 24 - 1;
+        quadMap[3] = 2**3 - 1;
+        quadMap[6] = 2**6 - 1;
+        quadMap[12] = 2**12 - 1;
+        quadMap[24] = 2**24 - 1;
     }
-    function initTileWithCoord(uint256 idx, uint256 x, uint256 y) external {
+
+    function initTileWithCoord(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external {
         tiles[idx] = TileWithCoordLib.initTileWithCoord(x, y);
     }
 
-    function setQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function setQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         tiles[idx] = tiles[idx].setQuad(x, y, size, _quadMask);
     }
 
-    function clearQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external {
+    function clearQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
         tiles[idx] = tiles[idx].clearQuad(x, y, size, _quadMask);
     }
 
@@ -37,7 +52,12 @@ contract TileWithCoordTester {
         tiles[src] = tiles[src].subtract(tiles[value]);
     }
 
-    function containQuad(uint256 idx, uint256 x, uint256 y, uint256 size) external view returns (bool) {
+    function containQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
         return tiles[idx].containQuad(x, y, size, _quadMask);
     }
 
@@ -45,19 +65,19 @@ contract TileWithCoordTester {
         return tiles[idx];
     }
 
-    function getX(uint256 idx) external view returns (uint256){
+    function getX(uint256 idx) external view returns (uint256) {
         return tiles[idx].getX();
     }
 
-    function getY(uint256 idx) external view returns (uint256){
+    function getY(uint256 idx) external view returns (uint256) {
         return tiles[idx].getY();
     }
 
-    function getKey(uint256 idx) external view returns (uint256){
+    function getKey(uint256 idx) external view returns (uint256) {
         return tiles[idx].getKey();
     }
 
-    function isEmpty(uint256 idx) external view returns (bool){
+    function isEmpty(uint256 idx) external view returns (bool) {
         return tiles[idx].isEmpty();
     }
 

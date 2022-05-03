@@ -1,18 +1,21 @@
 import {expect} from '../chai-setup';
-import {printTileWithCoord, setupTileWithCoordsLibTest, tileWithCoordToJS} from "./fixtures";
-import {BigNumber} from "ethers";
-
+import {
+  printTileWithCoord,
+  setupTileWithCoordsLibTest,
+  tileWithCoordToJS,
+} from './fixtures';
+import {BigNumber} from 'ethers';
 
 describe('TileWithCoordLib', function () {
   it('Available quads', async function () {
     const tester = await setupTileWithCoordsLibTest();
     expect(await tester.quadMask(1)).to.be.equal(0x1);
     expect(await tester.quadMask(3)).to.be.equal(0x7);
-    expect(await tester.quadMask(6)).to.be.equal(0x3F);
-    expect(await tester.quadMask(12)).to.be.equal(0xFFF);
-    expect(await tester.quadMask(24)).to.be.equal(0xFFFFFF);
+    expect(await tester.quadMask(6)).to.be.equal(0x3f);
+    expect(await tester.quadMask(12)).to.be.equal(0xfff);
+    expect(await tester.quadMask(24)).to.be.equal(0xffffff);
     expect(await tester.quadMask(2)).to.be.equal(0);
-  })
+  });
 
   it.skip('Some Tile With Coords', async function () {
     const tester = await setupTileWithCoordsLibTest();
@@ -42,7 +45,12 @@ describe('TileWithCoordLib', function () {
 
   it('merge', async function () {
     const tester = await setupTileWithCoordsLibTest();
-    const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
+    const tests = [
+      [3, 0, 3],
+      [12, 6, 6],
+      [1, 1, 1],
+      [23, 23, 1],
+    ];
     const right = 24 * 123;
     const top = 24 * 321;
 
@@ -66,10 +74,14 @@ describe('TileWithCoordLib', function () {
     expect(result).to.be.eql(tile);
   });
 
-
   it('subtract', async function () {
     const tester = await setupTileWithCoordsLibTest();
-    const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
+    const tests = [
+      [3, 0, 3],
+      [12, 6, 6],
+      [1, 1, 1],
+      [23, 23, 1],
+    ];
     const right = 24 * 123;
     const top = 24 * 321;
 
@@ -100,7 +112,12 @@ describe('TileWithCoordLib', function () {
 
   it('contains', async function () {
     const tester = await setupTileWithCoordsLibTest();
-    const tests = [[3, 0, 3], [12, 6, 6], [1, 1, 1], [23, 23, 1]]
+    const tests = [
+      [3, 0, 3],
+      [12, 6, 6],
+      [1, 1, 1],
+      [23, 23, 1],
+    ];
     const right = 24 * 123;
     const top = 24 * 321;
     // 0
@@ -112,8 +129,10 @@ describe('TileWithCoordLib', function () {
     for (const t of tests) {
       await tester.initTileWithCoord(1, right, top);
       await tester.setQuad(1, right + t[0], top + t[1], t[2]);
-      expect(await tester.containQuad(1, right + t[0], top + t[1], t[2])).to.be.true;
-      expect(await tester.containQuad(0, right + t[0], top + t[1], t[2])).to.be.true;
+      expect(await tester.containQuad(1, right + t[0], top + t[1], t[2])).to.be
+        .true;
+      expect(await tester.containQuad(0, right + t[0], top + t[1], t[2])).to.be
+        .true;
     }
     expect(await tester.containQuad(0, right + 2, top + 2, 1)).to.be.false;
     expect(await tester.containQuad(0, right + 22, top + 22, 1)).to.be.false;
