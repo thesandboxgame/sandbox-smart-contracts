@@ -1,57 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
-import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "../common/Base/TheSandbox712.sol";
 import "../common/Libraries/MapLib.sol";
 import "../common/interfaces/IEstateToken.sol";
 
-import "hardhat/console.sol";
-
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
-
-contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandbox712, IEstateToken {
+contract EstateBaseToken is ImmutableERC721, WithMinter, IEstateToken {
     using MapLib for MapLib.Map;
-    //using EnumerableSet for EnumerableSet.UintSet;
-    uint8 internal constant OWNER = 0;
-    uint8 internal constant ADD = 1;
-    uint8 internal constant BREAK = 2;
-    uint8 internal constant WITHDRAWAL = 3;
-    uint16 internal constant GRID_SIZE = 408;
-    uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
+
+    uint8 public constant OWNER = 0;
+    uint8 public constant ADD = 1;
+    uint8 public constant BREAK = 2;
+    uint8 public constant WITHDRAWAL = 3;
+    uint16 public constant GRID_SIZE = 408;
+    uint64 public _nextId; // max uint64 = 18,446,744,073,709,551,615
+
+    ILandToken public _land;
+
     mapping(uint256 => bytes32) internal _metaData;
 
-    bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
-    bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
-
-    //quadmaps put this somewhere else
     mapping(uint256 => uint256) public quadMap;
 
-    struct Estate {
-        MapLib.Map freeLands;
-        mapping(uint256 => MapLib.Map) gamesMap; //game id to maps
-    }
-
-    //estate id => map
+    // estate id => free lands
     mapping(uint256 => MapLib.Map) freeLands;
 
-    //estateId => game
-    mapping(uint256 => uint256) estateGame;
-
-    //gameId => map
-    mapping(uint256 => MapLib.Map) gameLands;
-
-    // gamesToLands key = gameId, value = landIds
-    //mapping(uint256 => EnumerableSet.UintSet) internal gamesToLands;
-
-    ILandToken internal _land;
 
     /// @dev Emits when a estate is updated.
     /// @param oldId The id of the previous erc721 ESTATE token.
@@ -71,17 +47,16 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         ILandToken land,
         uint8 chainIndex
     ) internal {
+        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
         _admin = admin;
         _land = land;
-        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
-
-        //start quad map
-        _quadMap[1] = 1;
-        _quadMap[3] = 2**3 - 1;
-        _quadMap[6] = 2**6 - 1;
-        _quadMap[12] = 2**12 - 1;
-        _quadMap[24] = 2**24 - 1;
-        //ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
+        // start quad map
+        quadMap[1] = 1;
+        quadMap[3] = 2 ** 3 - 1;
+        quadMap[6] = 2 ** 6 - 1;
+        quadMap[12] = 2 ** 12 - 1;
+        quadMap[24] = 2 ** 24 - 1;
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
@@ -90,10 +65,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     /// @param to The address that will own the estate. */
     /// @param creation The data to use to create the estate.
     function createEstate(address from, IEstateToken.EstateCRUDData calldata creation)
-        external
-        override
-        onlyMinter()
-        returns (uint256)
+    external
+    override
+    onlyMinter()
+    returns (uint256)
     {
         (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
@@ -102,60 +77,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         return estateId;
     }
 
-    function _addLands(
-        address sender,
-        uint256 storageId,
-        uint256[][3] memory quadTuple
-    ) internal {
-        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
-        _land.batchTransferQuad(sender, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
-        _addLandsMapping(sender, storageId, quadTuple);
-    }
-
-    function _removeLands(
-        address sender,
-        uint256 storageId,
-        uint256[][3] memory quadTuple
-    ) internal {
-        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
-        _removeLandsMapping(sender, storageId, quadTuple);
-        _land.batchTransferQuad(address(this), sender, quadTuple[0], quadTuple[1], quadTuple[2], "");
-    }
-
-    function _addLandsMapping(
-        //maybe I can unify both with a bool isCreation
-        address sender,
-        uint256 storageId,
-        uint256[][3] memory quads
-    ) internal {
-        MapLib.Map storage newMap = freeLands[storageId];
-        for (uint256 i; i < quads[0].length; i++) {
-            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
-        }
-    }
-
-    function _removeLandsMapping(
-        //maybe I can unify both with a bool isCreation
-        address sender,
-        uint256 storageId,
-        uint256[][3] memory quads
-    ) internal {
-        MapLib.Map storage newMap = freeLands[storageId];
-        for (uint256 i; i < quads[0].length; i++) {
-            newMap.clearQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
-        }
-    }
-
-    //put this somewhere else
-    function _quadMask(uint256 size) internal view returns (uint256) {
-        return quadMap[size];
-    }
-
     function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
-        external
-        override
-        onlyMinter()
-        returns (uint256)
+    external
+    override
+    onlyMinter()
+    returns (uint256)
     {
         if (update.quadsToAdd[0].length > 0) {
             _addLands(from, update.estateId, update.quadsToAdd);
@@ -167,6 +93,25 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         uint256 newId = _incrementTokenVersion(from, update.estateId);
         emit EstateTokenUpdatedII(update.estateId, newId, update);
         return newId;
+    }
+
+    function freeLandLength(uint256 estateId) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].length();
+    }
+
+    function freeLandAt(
+        uint256 estateId,
+        uint256 offset,
+        uint256 limit
+    ) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].at(offset, limit);
+    }
+
+    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        uint256 storageId = _storageId(estateId);
+        return freeLands[storageId].getMap();
     }
 
     /// @notice Return the name of the token contract.
@@ -187,7 +132,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         uint256, /*id*/
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
-        return ERC721_RECEIVED;
+        return this.onERC721Received.selector;
     }
 
     function onERC721BatchReceived(
@@ -196,34 +141,55 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         uint256[] calldata, /*ids*/
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
-        return ERC721_BATCH_RECEIVED;
+        return this.onERC721BatchReceived.selector;
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //this is a function to separate land ids into its x and y coordianates
-    /* function _separateId(
-        uint256[] memory landIds //sizes are always 1
-    )
-        internal
-        returns (
-            uint256[] memory,
-            uint256[] memory,
-            uint256[] memory
-        )
-    {
-        uint256 numLds = landIds.length;
-        uint256[] memory sizes = new uint256[](numLds);
-        uint256[] memory xs = new uint256[](numLds);
-        uint256[] memory ys = new uint256[](numLds);
+    function _addLands(
+        address sender,
+        uint256 storageId,
+        uint256[][3] memory quadTuple
+    ) internal {
+        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
+        _land.batchTransferQuad(sender, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
+        _addLandsMapping(storageId, quadTuple);
+    }
 
-        for (uint256 i = 0; i < numLds; i++) {
-            sizes[i] = 1;
-            xs[i] = _land.getX(landIds[i]);
-            ys[i] = _land.getY(landIds[i]);
+    function _removeLands(
+        address sender,
+        uint256 storageId,
+        uint256[][3] memory quadTuple
+    ) internal {
+        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
+        _removeLandsMapping(storageId, quadTuple);
+        _land.batchTransferQuad(address(this), sender, quadTuple[0], quadTuple[1], quadTuple[2], "");
+    }
+
+    function _addLandsMapping(
+    //maybe I can unify both with a bool isCreation
+        uint256 storageId,
+        uint256[][3] memory quads
+    ) internal {
+        MapLib.Map storage newMap = freeLands[storageId];
+        for (uint256 i; i < quads[0].length; i++) {
+            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
         }
-        return (sizes, xs, ys);
-    } */
+    }
+
+    function _removeLandsMapping(
+    //maybe I can unify both with a bool isCreation
+        uint256 storageId,
+        uint256[][3] memory quads
+    ) internal {
+        MapLib.Map storage newMap = freeLands[storageId];
+        for (uint256 i; i < quads[0].length; i++) {
+            newMap.clearQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+        }
+    }
+
+    function _quadMask(uint256 size) internal view returns (uint256) {
+        return quadMap[size];
+    }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
     /// @param from The address of the token owner.
@@ -240,9 +206,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         if (from == owner) {
             _burn(from, owner, estateId);
         }
-
-        (uint256 newId, ) = _mintEstate(owner, subId, version, false);
-
+        (uint256 newId,) = _mintEstate(owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         require(owner == newOwner, "NOT_OWNER");
         return newId;
@@ -257,7 +221,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
     /// @return storageId The staorage Id for the token.
     function _mintEstate(
         address from,
-        //address to,
+    //address to,
         uint64 subId,
         uint16 version,
         bool isCreation
@@ -305,33 +269,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
 
         require(
             owner == sender ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[sender][msgSender] ||
-                (operatorEnabled && _operators[estateId] == msgSender),
+            _superOperators[msgSender] ||
+            _operatorsForAll[sender][msgSender] ||
+            (operatorEnabled && _operators[estateId] == msgSender),
             "NOT_APPROVED"
         );
-    }
-
-    function _encode(
-        uint16 x,
-        uint16 y,
-        uint8 size
-    ) internal pure returns (uint24) {
-        return uint24(size) * uint24(2**18) + (uint24(x) + uint24(y) * GRID_SIZE);
-    }
-
-    function _decode(uint24 data)
-        internal
-        pure
-        returns (
-            uint16 x,
-            uint16 y,
-            uint8 size
-        )
-    {
-        size = uint8(data / (2**18));
-        y = uint16((data % (2**18)) / GRID_SIZE);
-        x = uint16(data % GRID_SIZE);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
@@ -341,35 +283,4 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, TheSandb
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
 
-    function isItInArray(uint256 id, uint256[] memory landIds) external pure returns (bool) {
-        uint256 size = landIds.length;
-        bool flag = false;
-
-        for (uint256 i = 0; i < size; i++) {
-            if (landIds[i] == id) {
-                flag = true;
-                break;
-            }
-        }
-        return flag;
-    }
-
-    function freeLandLength(uint256 estateId) external view returns (uint256) {
-        uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].length();
-    }
-
-    function freeLandAt(
-        uint256 estateId,
-        uint256 offset,
-        uint256 limit
-    ) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
-        uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].at(offset, limit);
-    }
-
-    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
-        uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].getMap();
-    }
 }
