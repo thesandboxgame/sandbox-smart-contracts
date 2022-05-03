@@ -1,9 +1,9 @@
 import {setupEstate} from './fixtures';
-import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../utils';
+import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {ethers} from 'hardhat';
 
-describe.only('Estate test with maps', function () {
+describe('Estate test with maps', function () {
   it('start with free lands', async function () {
     const {
       sandContractAsBeneficiary,
