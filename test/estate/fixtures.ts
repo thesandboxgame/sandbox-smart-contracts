@@ -9,8 +9,8 @@ export const setupEstate = withSnapshot([
   'PolygonAsset',
   'ChildGameToken',
   'GameMinter',
-  'EstateToken',
-  'EstateMinter',
+  'PolygonEstateToken',
+  'PolygonEstateMinter',
   'PolygonSand',
 ], async () => {
 

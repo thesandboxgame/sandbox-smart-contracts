@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest, skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['EstateToken', 'EstateToken_setup'];
-func.dependencies = ['EstateToken_deploy', 'EstateMinter_deploy'];
+func.tags = ['PolygonEstateToken', 'PolygonEstateToken_setup'];
+func.dependencies = ['PolygonEstateToken_deploy', 'PolygonEstateMinter_deploy'];
 // TODO: Setup deploy-polygon folder and network.
 func.skip = skipUnlessTestnet; // TODO enable

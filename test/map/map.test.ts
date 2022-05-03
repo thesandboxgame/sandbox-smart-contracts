@@ -12,7 +12,7 @@ describe('MapLib', function () {
     expect(await tester.quadMask(2)).to.be.equal(0);
   });
 
-  it('Some Map With Coords', async function () {
+  it.skip('Some Map With Coords', async function () {
     const {tester, getMap} = await setupMapTest();
     // Create Test set
     const tests = createTestMapQuads(240, 240, 30, [1, 3, 6, 12]);
@@ -93,7 +93,6 @@ describe('MapLib', function () {
     }
     // clear
     expect(await getMap(0)).to.be.empty;
-    printMap(await getMap(0));
   });
 
   it('clear quad', async function () {

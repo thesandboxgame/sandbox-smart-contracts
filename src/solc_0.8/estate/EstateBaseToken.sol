@@ -6,40 +6,21 @@ import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/Libraries/MapLib.sol";
-import "../common/interfaces/IEstateToken.sol";
 
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
-contract EstateBaseToken is ImmutableERC721, WithMinter, IEstateToken {
+contract EstateBaseToken is ImmutableERC721, WithMinter {
     using MapLib for MapLib.Map;
 
-    uint8 public constant OWNER = 0;
-    uint8 public constant ADD = 1;
-    uint8 public constant BREAK = 2;
-    uint8 public constant WITHDRAWAL = 3;
-    uint16 public constant GRID_SIZE = 408;
     uint64 public _nextId; // max uint64 = 18,446,744,073,709,551,615
 
     ILandToken public _land;
 
-    mapping(uint256 => bytes32) internal _metaData;
+    mapping(uint256 => bytes32) public _metaData;
 
     mapping(uint256 => uint256) public quadMap;
 
     // estate id => free lands
-    mapping(uint256 => MapLib.Map) freeLands;
-
-
-    /// @dev Emits when a estate is updated.
-    /// @param oldId The id of the previous erc721 ESTATE token.
-    /// @param newId The id of the newly minted token.
-    /// @param update The changes made to the Estate.
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IEstateToken.EstateCRUDData update);
-
-    /// @dev Emits when a estate is updated.
-    /// @param oldId The id of the previous erc721 ESTATE token.
-    /// @param newId The id of the newly minted token.
-    /// @param update The changes made to the Estate.
-    event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
+    mapping(uint256 => MapLib.Map) internal freeLands;
 
     function _unchained_initV1(
         address trustedForwarder,
@@ -60,39 +41,25 @@ contract EstateBaseToken is ImmutableERC721, WithMinter, IEstateToken {
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
-    /// @notice Create a new estate token with lands.
-    /* /// @param from The address of the one creating the estate.
-    /// @param to The address that will own the estate. */
-    /// @param creation The data to use to create the estate.
-    function createEstate(address from, IEstateToken.EstateCRUDData calldata creation)
-    external
-    override
-    onlyMinter()
-    returns (uint256)
+    function _createEstate(address from, uint256[][3] calldata quadTuple, bytes32 uri) internal returns (uint256)
     {
         (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
-        _metaData[storageId] = creation.uri;
-        _addLands(from, storageId, creation.quadTuple);
-        emit EstateTokenUpdated(0, estateId, creation);
+        _metaData[storageId] = uri;
+        _addLands(from, storageId, quadTuple);
         return estateId;
     }
 
-    function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
-    external
-    override
-    onlyMinter()
-    returns (uint256)
+    function _updateLandsEstate(address from, uint256 estateId, uint256[][3] calldata quadsToAdd, uint256[][3] calldata quadsToRemove, bytes32 uri) internal returns (uint256)
     {
-        if (update.quadsToAdd[0].length > 0) {
-            _addLands(from, update.estateId, update.quadsToAdd);
+        require(_ownerOf(estateId) == from, "Invalid Owner");
+        uint256 storageId = _storageId(estateId);
+        if (quadsToAdd[0].length > 0) {
+            _addLands(from, storageId, quadsToAdd);
         }
-        if (update.quadsToRemove[0].length > 0) {
-            _removeLands(from, update.estateId, update.quadsToRemove);
+        if (quadsToRemove[0].length > 0) {
+            _removeLands(from, storageId, quadsToRemove);
         }
-
-        uint256 newId = _incrementTokenVersion(from, update.estateId);
-        emit EstateTokenUpdatedII(update.estateId, newId, update);
-        return newId;
+        return _incrementTokenVersion(from, estateId);
     }
 
     function freeLandLength(uint256 estateId) external view returns (uint256) {
@@ -156,13 +123,13 @@ contract EstateBaseToken is ImmutableERC721, WithMinter, IEstateToken {
     }
 
     function _removeLands(
-        address sender,
+        address from,
         uint256 storageId,
         uint256[][3] memory quadTuple
     ) internal {
         require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
         _removeLandsMapping(storageId, quadTuple);
-        _land.batchTransferQuad(address(this), sender, quadTuple[0], quadTuple[1], quadTuple[2], "");
+        _land.batchTransferQuad(address(this), from, quadTuple[0], quadTuple[1], quadTuple[2], "");
     }
 
     function _addLandsMapping(
@@ -247,33 +214,6 @@ contract EstateBaseToken is ImmutableERC721, WithMinter, IEstateToken {
         _numNFTPerAddress[from]++;
         emit Transfer(address(0), from, estateId);
         return (estateId, strgId);
-    }
-
-    function _check_authorized(address sender, uint8 action) internal view {
-        require(sender != address(uint160(0)), "SENDER_IS_ZERO_ADDRESS");
-        address msgSender = _msgSender();
-        if (action == ADD) {
-            address minter = _minter;
-            require(msgSender == minter || msgSender == sender, "UNAUTHORIZED_ADD");
-        } else {
-            require(msgSender == sender, "NOT_AUTHORIZED");
-        }
-    }
-
-    function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
-
-        require(owner != address(uint160(0)), "TOKEN_DOES_NOT_EXIST");
-
-        address msgSender = _msgSender();
-
-        require(
-            owner == sender ||
-            _superOperators[msgSender] ||
-            _operatorsForAll[sender][msgSender] ||
-            (operatorEnabled && _operators[estateId] == msgSender),
-            "NOT_APPROVED"
-        );
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.

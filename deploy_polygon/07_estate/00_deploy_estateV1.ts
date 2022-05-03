@@ -47,7 +47,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['EstateToken', 'EstateToken_deploy'];
+func.tags = ['PolygonEstateToken', 'PolygonEstateToken_deploy'];
 func.dependencies = [
   'MockLandWithMint_deploy',
   'ChildGameToken_setup',

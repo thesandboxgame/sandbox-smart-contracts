@@ -38,10 +38,10 @@ const func: DeployFunction = async function (hre) {
 };
 
 export default func;
-func.tags = ['EstateMinter', 'EstateMinter_deploy'];
+func.tags = ['PolygonEstateMinter', 'PolygonEstateMinter_deploy'];
 func.dependencies = [
   'FeeCollector_deploy',
-  'EstateToken_deploy',
+  'PolygonEstateToken_deploy',
   'PolygonSand_deploy',
   'TRUSTED_FORWARDER',
 ];
