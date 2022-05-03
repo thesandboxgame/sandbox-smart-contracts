@@ -294,6 +294,15 @@ const config: HardhatUserConfig = {
         l2: 'mumbai',
       },
     },
+    goerli_test: {
+      url: node_url('goerli'),
+      accounts: accounts('goerli'),
+      tags: ['testnet', 'L1'],
+      // gasPrice: 1000000000000, // Uncomment in case of pending txs, and adjust gas
+      companionNetworks: {
+        l2: 'mumbai_test',
+      },
+    },
     mainnet: {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
@@ -310,6 +319,16 @@ const config: HardhatUserConfig = {
       //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'goerli',
+      },
+    },
+    mumbai_test: {
+      url: node_url('mumbai'),
+      accounts: accounts('mumbai'),
+      tags: ['testnet', 'L2'],
+      deploy: ['deploy_polygon'],
+      //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
+      companionNetworks: {
+        l1: 'goerli_test',
       },
     },
     polygon: {
