@@ -11,17 +11,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
   const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
-  // TODO: fix for new Polygon deployment
-
   const GemsCatalystsRegistry = await deployments.get(
     'PolygonGemsCatalystsRegistry'
   );
 
-  const {
-    deployer,
-    assetAttributesRegistryAdmin,
-    gemsCatalystsRegistryAdmin,
-  } = await getNamedAccounts();
+  const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
   const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
   // @note For testing fee-burning only
@@ -110,4 +104,4 @@ func.dependencies = [
   'PolygonGemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
-func.skip = skipUnlessTest; // TODO remove this deployment if this is just for test
+func.skip = skipUnlessTest;

@@ -25,5 +25,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PolygonSand', 'PolygonSand_deploy'];
+func.tags = ['PolygonSand', 'PolygonSand_deploy', 'L2'];
 func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER_V2'];
