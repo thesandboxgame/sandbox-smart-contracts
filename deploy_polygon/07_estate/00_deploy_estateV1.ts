@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest, skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -25,7 +25,7 @@ const func: DeployFunction = async function (
 
   await deploy('EstateToken', {
     from: deployer,
-    contract: 'EstateTokenV1',
+    contract: 'PolygonEstateTokenV1',
     log: true,
     proxy: {
       owner: upgradeAdmin,
