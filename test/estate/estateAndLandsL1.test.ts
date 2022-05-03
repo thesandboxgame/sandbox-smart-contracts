@@ -20,6 +20,7 @@ describe('Estate test with maps on layer 1', function () {
           other,
           [
             [[size], [48], [96]],
+            [],
             ethers.utils.formatBytes32String("uri ???")
           ],
           [])
@@ -57,6 +58,7 @@ describe('Estate test with maps on layer 1', function () {
             other,
             [
               [sizes, xs, ys],
+              [],
               ethers.utils.formatBytes32String("uri ???")
             ],
             [])

@@ -167,6 +167,8 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
           other,
           [
             [sizes, xs, ys],
+            // [{tile: {data: []}}],
+            [],
             ethers.utils.formatBytes32String("uri ???")
           ],
           []);

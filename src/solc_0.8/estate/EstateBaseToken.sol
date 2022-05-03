@@ -41,20 +41,30 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
-    function _createEstate(address from, uint256[][3] calldata quadTuple, bytes32 uri) internal returns (uint256)
+    function _createEstate(
+        address from,
+        TileWithCoordLib.TileWithCoord[] calldata tiles,
+        uint256[][3] calldata quadTuple,
+        bytes32 uri) internal returns (uint256)
     {
         (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = uri;
-        _addLands(from, storageId, quadTuple);
+
+        _addLands(from, storageId, tiles, quadTuple);
         return estateId;
     }
 
-    function _updateLandsEstate(address from, uint256 estateId, uint256[][3] calldata quadsToAdd, uint256[][3] calldata quadsToRemove, bytes32 uri) internal returns (uint256)
+    function _updateLandsEstate(address from,
+        uint256 estateId,
+        TileWithCoordLib.TileWithCoord[] calldata tilesToAdd,
+        uint256[][3] calldata quadsToAdd,
+        uint256[][3] calldata quadsToRemove,
+        bytes32 uri) internal returns (uint256)
     {
         require(_ownerOf(estateId) == from, "Invalid Owner");
         uint256 storageId = _storageId(estateId);
         if (quadsToAdd[0].length > 0) {
-            _addLands(from, storageId, quadsToAdd);
+            _addLands(from, storageId, tilesToAdd, quadsToAdd);
         }
         if (quadsToRemove[0].length > 0) {
             _removeLands(from, storageId, quadsToRemove);
@@ -115,17 +125,18 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     function _addLands(
         address sender,
         uint256 storageId,
-        uint256[][3] memory quadTuple
+        TileWithCoordLib.TileWithCoord[] calldata tiles,
+        uint256[][3] calldata quadTuple
     ) internal {
         require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
         _land.batchTransferQuad(sender, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
-        _addLandsMapping(storageId, quadTuple);
+        _addLandsMapping(storageId, tiles, quadTuple);
     }
 
     function _removeLands(
         address from,
         uint256 storageId,
-        uint256[][3] memory quadTuple
+        uint256[][3] calldata quadTuple
     ) internal {
         require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
         _removeLandsMapping(storageId, quadTuple);
@@ -135,9 +146,13 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     function _addLandsMapping(
     //maybe I can unify both with a bool isCreation
         uint256 storageId,
-        uint256[][3] memory quads
+        TileWithCoordLib.TileWithCoord[] calldata tiles,
+        uint256[][3] calldata quads
     ) internal {
         MapLib.Map storage newMap = freeLands[storageId];
+        for (uint256 i; i < tiles.length; i++) {
+            newMap.setTileWithCoord(tiles[i]);
+        }
         for (uint256 i; i < quads[0].length; i++) {
             newMap.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
         }
@@ -146,7 +161,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     function _removeLandsMapping(
     //maybe I can unify both with a bool isCreation
         uint256 storageId,
-        uint256[][3] memory quads
+        uint256[][3] calldata quads
     ) internal {
         MapLib.Map storage newMap = freeLands[storageId];
         for (uint256 i; i < quads[0].length; i++) {

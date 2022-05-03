@@ -57,7 +57,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     onlyMinter()
     returns (uint256)
     {
-        uint256 estateId = _createEstate(from, creation.quadTuple, creation.uri);
+        uint256 estateId = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }
@@ -68,7 +68,12 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     onlyMinter()
     returns (uint256)
     {
-        uint256 newId = _updateLandsEstate(from, update.estateId, update.quadsToAdd, update.quadsToRemove, update.uri);
+        uint256 newId = _updateLandsEstate(from,
+            update.estateId,
+            update.tilesToAdd,
+            update.quadsToAdd,
+            update.quadsToRemove,
+            update.uri);
         emit EstateTokenUpdatedII(update.estateId, newId, update);
         return newId;
     }
