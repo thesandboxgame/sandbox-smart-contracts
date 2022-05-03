@@ -254,6 +254,7 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftBal).to.be.equal(1);
     });
     it('cannot extract ERC721 if ERC1155 supply > 1', async function () {
+      // TODO: change to 'can extract if supply > 1'. Add more tests for supply == 1 and > 1.
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
       const tokenId = await mintAsset(users[0].address, 100);
       const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
