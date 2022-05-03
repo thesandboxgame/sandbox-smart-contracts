@@ -25,5 +25,5 @@ async function deployTrustedForwarder(
 }
 
 export default func;
-func.tags = ['TRUSTED_FORWARDER', 'TRUSTED_FORWARDER_V2'];
+func.tags = ['TRUSTED_FORWARDER', 'TRUSTED_FORWARDER_V2', 'L2'];
 func.skip = skipUnlessTest; // @todo enable once we've setup actual trusted forwarder

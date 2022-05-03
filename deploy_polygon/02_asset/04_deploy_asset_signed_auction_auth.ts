@@ -36,6 +36,7 @@ func.tags = [
   'AssetSignedAuctionAuth',
   'AssetSignedAuctionAuth_deploy',
   'PolygonAsset',
+  'L2',
 ];
 func.dependencies = ['PolygonAssetERC1155_deploy'];
 func.skip = skipUnlessTestnet;
