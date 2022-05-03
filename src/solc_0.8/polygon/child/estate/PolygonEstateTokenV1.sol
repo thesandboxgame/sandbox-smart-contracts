@@ -8,9 +8,12 @@ import "../../../common/Libraries/MapLib.sol";
 import "../../../estate/EstateBaseToken.sol";
 import "../../../common/interfaces/IEstateToken.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
+import "../../../estate/GamesDataLib.sol";
+import "../../../estate/GamesDataLib.sol";
 
 // TODO: IEstateToke != IPolygonEstateToken
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
+    using GamesDataLib for GamesDataLib.Games;
     using MapLib for MapLib.Map;
 
     /// @dev Emits when a estate is updated.
@@ -25,13 +28,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     /// @param update The changes made to the Estate.
     event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
 
-    struct Games {
-        MapLib.Map[] gameLand;
-        mapping(uint256 => uint256) gameIdx;
-    }
 
     // Iterable mapping of games
-    Games games;
+    mapping(uint256 => GamesDataLib.Games) games;
 
     GameBaseToken public gameToken;
 
@@ -49,13 +48,28 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
 
     // TODO: Implement the real thing.
     function createEstateWithGame(address from, EstateCRUDWithGameData calldata creation) external override returns (uint256) {
-        uint256 estateId = _createEstate(from,
+        uint256 estateId;
+        uint256 storageId;
+        (estateId, storageId) = _createEstate(from,
             creation.estateData.tiles,
             creation.estateData.quadTuple,
             creation.estateData.uri
         );
-        emit EstateTokenUpdated(0, estateId, creation.estateData);
-        return estateId;
+        for (uint256 i; i < creation.landAndGameAssociations.length; i++) {
+            _land.batchTransferQuad(from, address(this),
+                creation.landAndGameAssociations[i].quadTupleToAdd[0],
+                creation.landAndGameAssociations[i].quadTupleToAdd[1],
+                creation.landAndGameAssociations[i].quadTupleToAdd[2],
+                "");
+            gameToken.transferFrom(from, address(this), creation.landAndGameAssociations[i].gameId);
+            require(games[storageId].createGame(creation.landAndGameAssociations[i].gameId), "game id already exists");
+            MapLib.Map storage map = games[storageId].getMap(creation.landAndGameAssociations[i].gameId);
+            _addQuads(map, creation.landAndGameAssociations[i].quadTupleToAdd);
+            _addQuadsFromFreeLand(map, storageId, creation.landAndGameAssociations[i].quadTupleToUse);
+            _addTilesFromFreeLand(map, storageId, creation.landAndGameAssociations[i].tilesToUse);
+        }
+        emit EstateTokenUpdated(0, storageId, creation.estateData);
+        return storageId;
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
@@ -69,9 +83,15 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     onlyMinter()
     returns (uint256)
     {
-        uint256 estateId = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
+        uint256 estateId;
+        (estateId,) = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
+    }
+
+    function getGameMap(uint256 estateId, uint256 gameId) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        uint256 storageId = _storageId(estateId);
+        return games[storageId].getMap(gameId).getMap();
     }
 
     function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
@@ -88,6 +108,30 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
             update.uri);
         emit EstateTokenUpdatedII(update.estateId, newId, update);
         return newId;
+    }
+
+
+    function _addQuads(MapLib.Map storage map, uint256[][3] calldata quads) internal {
+        for (uint256 i; i < quads[0].length; i++) {
+            map.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+        }
+    }
+
+    function _addQuadsFromFreeLand(MapLib.Map storage map, uint256 storageId, uint256[][3] calldata quads) internal {
+        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
+        for (uint256 i; i < quads[0].length; i++) {
+            require(freeLands[storageId].containQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask), "Quad missing");
+            freeLands[storageId].clearQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+            map.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+        }
+    }
+
+    function _addTilesFromFreeLand(MapLib.Map storage map, uint256 storageId, TileWithCoordLib.TileWithCoord[] calldata tiles) internal {
+        for (uint256 i; i < tiles.length; i++) {
+            require(freeLands[storageId].containTileWithCoord(tiles[i]));
+            freeLands[storageId].clearTileWithCoord(tiles[i]);
+            map.setTileWithCoord(tiles[i]);
+        }
     }
 
 }

@@ -45,16 +45,21 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         address from,
         TileWithCoordLib.TileWithCoord[] calldata tiles,
         uint256[][3] calldata quadTuple,
-        bytes32 uri) internal returns (uint256)
+        bytes32 uri) internal returns (uint256 estateId, uint256 storageId)
     {
+        // batchTransferQuad does that for us
+        // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
+        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
+
         (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = uri;
-
-        _addLands(from, storageId, tiles, quadTuple);
-        return estateId;
+        _land.batchTransferQuad(from, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
+        _addLandsMapping(storageId, tiles, quadTuple);
+        return (estateId, storageId);
     }
 
-    function _updateLandsEstate(address from,
+    function _updateLandsEstate(
+        address from,
         uint256 estateId,
         TileWithCoordLib.TileWithCoord[] calldata tilesToAdd,
         uint256[][3] calldata quadsToAdd,
@@ -62,13 +67,21 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         bytes32 uri) internal returns (uint256)
     {
         require(_ownerOf(estateId) == from, "Invalid Owner");
+        // batchTransferQuad does that for us
+        // require(quadsToAdd[0].length == quadsToAdd[1].length && quadsToAdd[0].length == quadsToAdd[2].length, "Invalid data");
+        // require(quadsToRemove[0].length == quadsToRemove[1].length && quadsToRemove[0].length == quadsToRemove[2].length, "Invalid data");
+
         uint256 storageId = _storageId(estateId);
         _metaData[storageId] = uri;
+
         if (quadsToAdd[0].length > 0) {
-            _addLands(from, storageId, tilesToAdd, quadsToAdd);
+            _land.batchTransferQuad(from, address(this), quadsToAdd[0], quadsToAdd[1], quadsToAdd[2], "");
+            _addLandsMapping(storageId, tilesToAdd, quadsToAdd);
         }
+
         if (quadsToRemove[0].length > 0) {
-            _removeLands(from, storageId, quadsToRemove);
+            _removeLandsMapping(storageId, quadsToRemove);
+            _land.batchTransferQuad(address(this), from, quadsToRemove[0], quadsToRemove[1], quadsToRemove[2], "");
         }
         return _incrementTokenVersion(from, estateId);
     }
@@ -122,27 +135,6 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         return this.onERC721BatchReceived.selector;
     }
 
-
-    function _addLands(
-        address sender,
-        uint256 storageId,
-        TileWithCoordLib.TileWithCoord[] calldata tiles,
-        uint256[][3] calldata quadTuple
-    ) internal {
-        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
-        _land.batchTransferQuad(sender, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
-        _addLandsMapping(storageId, tiles, quadTuple);
-    }
-
-    function _removeLands(
-        address from,
-        uint256 storageId,
-        uint256[][3] calldata quadTuple
-    ) internal {
-        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
-        _removeLandsMapping(storageId, quadTuple);
-        _land.batchTransferQuad(address(this), from, quadTuple[0], quadTuple[1], quadTuple[2], "");
-    }
 
     function _addLandsMapping(
     //maybe I can unify both with a bool isCreation

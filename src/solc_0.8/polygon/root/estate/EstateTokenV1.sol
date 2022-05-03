@@ -41,7 +41,8 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     onlyMinter()
     returns (uint256)
     {
-        uint256 estateId = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
+        uint256 estateId;
+        (estateId,) = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }

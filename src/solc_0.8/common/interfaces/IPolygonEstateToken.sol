@@ -10,14 +10,14 @@ import "./IEstateToken.sol";
 interface IPolygonEstateToken is IEstateToken {
     struct GameCRUD {
         uint256 gameId;
-        uint256[][3] quadTupleToAdd; //(size, x, y)
-        uint256[][3] quadTupleToUse; //(size, x, y)
+        uint256[][3] quadTupleToAdd; //(size, x, y) transfer when adding
+        uint256[][3] quadTupleToUse; //(size, x, y) take from free-lands
         TileWithCoordLib.TileWithCoord[] tilesToUse;
     }
 
     struct EstateCRUDWithGameData {
         EstateCRUDData estateData;
-        GameCRUD landAndGameAssociations;
+        GameCRUD[] landAndGameAssociations;
     }
 
     struct UpdateEstateData {
