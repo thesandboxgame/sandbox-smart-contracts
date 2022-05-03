@@ -25,7 +25,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['PolygonAssetERC721_setup', 'PolygonAsset'];
+func.tags = ['PolygonAssetERC721_setup', 'PolygonAsset', 'L2'];
 func.dependencies = [
   'PolygonAssetERC721_deploy',
   'PolygonAssetERC721Tunnel_deploy',

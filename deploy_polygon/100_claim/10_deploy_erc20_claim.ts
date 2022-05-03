@@ -31,6 +31,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['ERC20SignedClaim', 'ERC20SignedClaim_deploy'];
+func.tags = ['ERC20SignedClaim', 'ERC20SignedClaim_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER'];
 func.skip = skipUnlessTestnet;

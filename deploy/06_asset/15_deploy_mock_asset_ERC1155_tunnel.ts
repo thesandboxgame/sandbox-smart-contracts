@@ -5,7 +5,7 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const AssetERC1155 = await deployments.get('Asset');
   const FXROOT = await deployments.get('FXROOT');
@@ -53,7 +53,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // setting up predicate on L1
   await deployments.execute(
     'Asset',
-    {from: deployer},
+    {from: upgradeAdmin},
     'setPredicate',
     MockAssetERC1155Tunnel.address
   );

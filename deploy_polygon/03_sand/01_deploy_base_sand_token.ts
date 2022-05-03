@@ -17,5 +17,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['SandBaseToken', 'SandBaseToken_deploy'];
+func.tags = ['SandBaseToken', 'SandBaseToken_deploy', 'L2'];
 func.skip = skipUnlessTest;

@@ -22,6 +22,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonFaucet', 'PolygonFaucet_deploy'];
+func.tags = ['PolygonFaucet', 'PolygonFaucet_deploy', 'L2'];
 func.dependencies = ['PolygonSand_deploy'];
 func.skip = skipUnlessTestnet;
