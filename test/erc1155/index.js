@@ -1642,7 +1642,7 @@ module.exports = (init) => {
   });
 
   describe('ordering', function (it) {
-    const amounts = [10, 1, 5, 1, 12, 1, 1111, 1];
+    const amounts = [10, 1, 5, 1, 3, 1, 1111, 1];
     async function testOrder(
       contractAsMinter,
       minter,
@@ -1763,7 +1763,7 @@ module.exports = (init) => {
       minter,
       user0,
     }) => {
-      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 10, 2]);
+      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 1, 2]);
     });
 
     it('transfer multiple items in any order (iv)', async ({
@@ -1775,8 +1775,8 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [
         3,
         4,
-        10,
-        9,
+        1,
+        5,
         2,
       ]);
     });
@@ -1796,7 +1796,7 @@ module.exports = (init) => {
       minter,
       user0,
     }) => {
-      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 9, 2]);
+      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 1, 2]);
     });
 
     it('transfer multiple items in any order (vii)', async ({
@@ -1805,7 +1805,7 @@ module.exports = (init) => {
       minter,
       user0,
     }) => {
-      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 10, 5]);
+      await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 1, 5]);
     });
 
     it('transfer multiple items in any order (viii)', async ({
