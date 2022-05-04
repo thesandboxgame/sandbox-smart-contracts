@@ -87,7 +87,6 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
     estateMinter,
     checkpointManager,
     fxRoot,
-    rootToken,
     other,
   ] = await getUnnamedAccounts();
   // Land

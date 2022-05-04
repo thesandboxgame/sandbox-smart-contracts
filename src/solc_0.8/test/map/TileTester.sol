@@ -8,7 +8,7 @@ import {TileLib} from "../../common/Libraries/TileLib.sol"; // TODO: Separate th
 contract TileTester {
     using TileLib for TileLib.Tile;
     mapping(uint256 => uint256) public quadMap;
-    TileLib.Tile[30] public tiles;
+    TileLib.Tile[30] internal tiles;
 
     constructor() {
         quadMap[1] = 1;

@@ -12,6 +12,7 @@ describe('MapLib', function () {
     expect(await tester.quadMask(2)).to.be.equal(0);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Map With Coords', async function () {
     const {tester, getMap} = await setupMapTest();
     // Create Test set

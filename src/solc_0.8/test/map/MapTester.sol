@@ -9,7 +9,7 @@ import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol";
 contract MapTester {
     using MapLib for MapLib.Map;
     mapping(uint256 => uint256) public quadMap;
-    MapLib.Map[30] public maps;
+    MapLib.Map[30] internal maps;
 
     constructor() {
         quadMap[1] = 1;

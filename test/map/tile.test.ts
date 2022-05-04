@@ -17,6 +17,7 @@ describe('TileLib', function () {
     expect(await tester.quadMask(2)).to.be.equal(0);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Tile', async function () {
     const tester = await setupTileLibTest();
     await tester.setQuad(0, 0, 0, 1);

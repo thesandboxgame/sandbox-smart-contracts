@@ -62,9 +62,7 @@ export function tileWithCoordToJS(coord: {
 }
 
 export function getEmptyTile(): boolean[][] {
-  return Array.from({length: 24}, (e) =>
-    Array.from({length: 24}, (e) => false)
-  );
+  return Array.from({length: 24}, () => Array.from({length: 24}, () => false));
 }
 
 export function printTile(jsTile: boolean[][]): void {

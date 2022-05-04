@@ -10,9 +10,6 @@ const func: DeployFunction = async function (hre) {
   const EstateToken = await deployments.get('EstateToken');
   //const feeCollector = await deployments.get('FeeCollector');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-
-  const chainIndex = 1;
-
   await deploy('EstateMinter', {
     from: deployer,
     log: true,

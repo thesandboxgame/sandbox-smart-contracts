@@ -17,6 +17,7 @@ describe('TileWithCoordLib', function () {
     expect(await tester.quadMask(2)).to.be.equal(0);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Tile With Coords', async function () {
     const tester = await setupTileWithCoordsLibTest();
     const x0 = 12345;

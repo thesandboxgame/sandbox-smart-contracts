@@ -29,7 +29,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
 
     // Iterable mapping of games
-    mapping(uint256 => GamesDataLib.Games) public games;
+    mapping(uint256 => GamesDataLib.Games) internal games;
 
     GameBaseToken public gameToken;
 
