@@ -22,7 +22,11 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
-  const mapLib = await deployments.deploy('MapLib', {from: deployer});
+  const mapLib = await deployments.deploy('MapLib', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
   await deploy('EstateToken', {
     from: deployer,
     contract: 'PolygonEstateTokenV1',
