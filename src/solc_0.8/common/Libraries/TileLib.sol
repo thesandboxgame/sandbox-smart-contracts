@@ -24,12 +24,11 @@ library TileLib {
         Tile memory self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (Tile memory) {
+        uint256 size
+    ) internal pure returns (Tile memory) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        uint256 mask = quadMask(size);
+        uint256 mask = _quadMask(size);
         require(mask != 0, "invalid size");
         uint256 i;
         for (; i < size; i++) {
@@ -43,12 +42,11 @@ library TileLib {
         Tile memory self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (Tile memory) {
+        uint256 size
+    ) internal pure returns (Tile memory) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        uint256 mask = quadMask(size);
+        uint256 mask = _quadMask(size);
         require(mask != 0, "invalid size");
         uint256 i;
         for (; i < size; i++) {
@@ -73,12 +71,11 @@ library TileLib {
         Tile memory self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (bool) {
+        uint256 size
+    ) internal pure returns (bool) {
         require(x < 24 && y < 24, "Invalid tile coordinates");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        uint256 mask = quadMask(size);
+        uint256 mask = _quadMask(size);
         require(mask != 0, "invalid size");
         uint256 i;
         for (; i < size; i++) {
@@ -122,5 +119,20 @@ library TileLib {
         self.data[1] &= ~(value.data[1] & ignoreMask);
         self.data[2] &= ~(value.data[2] & ignoreMask);
         return self;
+    }
+
+    uint256 private constant QUAD_MASK_1 = 1;
+    uint256 private constant QUAD_MASK_3 = 2**3 - 1;
+    uint256 private constant QUAD_MASK_6 = 2**6 - 1;
+    uint256 private constant QUAD_MASK_12 = 2**12 - 1;
+    uint256 private constant QUAD_MASK_24 = 2**24 - 1;
+
+    function _quadMask(uint256 size) private pure returns (uint256) {
+        if (size == 1) return 1;
+        if (size == 3) return QUAD_MASK_3;
+        if (size == 6) return QUAD_MASK_6;
+        if (size == 12) return QUAD_MASK_12;
+        if (size == 24) return QUAD_MASK_24;
+        return 0;
     }
 }

@@ -16,7 +16,13 @@ export const setupTileWithCoordsLibTest = withSnapshot([], async () => {
 
 export const setupMapTest = withSnapshot([], async () => {
   const {deployer} = await getNamedAccounts();
-  await deployments.deploy('MapTester', {from: deployer});
+  const mapLib = await deployments.deploy('MapLib', {from: deployer});
+  await deployments.deploy('MapTester', {
+    from: deployer,
+    libraries: {
+      MapLib: mapLib.address,
+    },
+  });
   const tester = await ethers.getContract('MapTester', deployer);
   return {
     tester,

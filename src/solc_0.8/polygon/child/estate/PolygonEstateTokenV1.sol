@@ -134,7 +134,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
 
     function _addQuads(MapLib.Map storage map, uint256[][3] calldata quads) internal {
         for (uint256 i; i < quads[0].length; i++) {
-            map.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+            map.setQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
@@ -145,9 +145,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     ) internal {
         require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
         for (uint256 i; i < quads[0].length; i++) {
-            require(freeLands[storageId].containQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask), "Quad missing");
-            freeLands[storageId].clearQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
-            map.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+            require(freeLands[storageId].containQuad(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            freeLands[storageId].clearQuad(quads[1][i], quads[2][i], quads[0][i]);
+            map.setQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 

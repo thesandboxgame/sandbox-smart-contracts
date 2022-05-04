@@ -5,19 +5,9 @@ pragma solidity 0.8.2;
 import {MapLib} from "../../common/Libraries/MapLib.sol";
 import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol";
 
-// TODO: Check if a pure function is better than a mapping for the masks
 contract MapTester {
     using MapLib for MapLib.Map;
-    mapping(uint256 => uint256) public quadMap;
     MapLib.Map[30] internal maps;
-
-    constructor() {
-        quadMap[1] = 1;
-        quadMap[3] = 2**3 - 1;
-        quadMap[6] = 2**6 - 1;
-        quadMap[12] = 2**12 - 1;
-        quadMap[24] = 2**24 - 1;
-    }
 
     function setQuad(
         uint256 idx,
@@ -25,7 +15,7 @@ contract MapTester {
         uint256 y,
         uint256 size
     ) external {
-        maps[idx].setQuad(x, y, size, _quadMask);
+        maps[idx].setQuad(x, y, size);
     }
 
     function setTileWithCoord(uint256 idx, TileWithCoordLib.TileWithCoord calldata tile) external {
@@ -42,7 +32,7 @@ contract MapTester {
         uint256 y,
         uint256 size
     ) external {
-        maps[idx].clearQuad(x, y, size, _quadMask);
+        maps[idx].clearQuad(x, y, size);
     }
 
     function clearTileWithCoord(uint256 idx, TileWithCoordLib.TileWithCoord calldata tile) external {
@@ -51,10 +41,6 @@ contract MapTester {
 
     function clearMap(uint256 idx, uint256 contained) external {
         maps[idx].clearMap(maps[contained]);
-    }
-
-    function quadMask(uint256 size) external view returns (uint256) {
-        return _quadMask(size);
     }
 
     function containCoord(
@@ -71,7 +57,7 @@ contract MapTester {
         uint256 y,
         uint256 size
     ) external view returns (bool) {
-        return maps[idx].containQuad(x, y, size, _quadMask);
+        return maps[idx].containQuad(x, y, size);
     }
 
     function containMap(uint256 idx, uint256 contained) external view returns (bool) {
@@ -92,9 +78,5 @@ contract MapTester {
         uint256 y
     ) external view returns (bool) {
         return maps[idx].containTileAtCoord(x, y);
-    }
-
-    function _quadMask(uint256 size) internal view returns (uint256) {
-        return quadMap[size];
     }
 }

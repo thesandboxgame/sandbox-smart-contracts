@@ -127,10 +127,13 @@ async function setupEstateAndLand(gameContract?: Contract) {
       chainIndex,
     ];
   }
-  console.log(args.length);
+  const mapLib = await deployments.deploy('MapLib', {from: deployer});
   await deployments.deploy('Estate', {
     from: deployer,
     contract,
+    libraries: {
+      MapLib: mapLib.address,
+    },
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',

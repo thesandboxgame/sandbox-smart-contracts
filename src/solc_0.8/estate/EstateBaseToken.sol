@@ -17,8 +17,6 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
 
     mapping(uint256 => bytes32) public _metaData;
 
-    mapping(uint256 => uint256) public quadMap;
-
     // estate id => free lands
     mapping(uint256 => MapLib.Map) internal freeLands;
 
@@ -32,12 +30,6 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
         _admin = admin;
         _land = land;
-        // start quad map
-        quadMap[1] = 1;
-        quadMap[3] = 2**3 - 1;
-        quadMap[6] = 2**6 - 1;
-        quadMap[12] = 2**12 - 1;
-        quadMap[24] = 2**24 - 1;
     }
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
@@ -146,7 +138,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
             newMap.setTileWithCoord(tiles[i]);
         }
         for (uint256 i; i < quads[0].length; i++) {
-            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
@@ -157,12 +149,8 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     ) internal {
         MapLib.Map storage newMap = freeLands[storageId];
         for (uint256 i; i < quads[0].length; i++) {
-            newMap.clearQuad(quads[1][i], quads[2][i], quads[0][i], _quadMask);
+            newMap.clearQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
-    }
-
-    function _quadMask(uint256 size) internal view returns (uint256) {
-        return quadMap[size];
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.

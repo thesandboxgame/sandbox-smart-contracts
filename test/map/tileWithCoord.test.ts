@@ -7,16 +7,6 @@ import {
 import {BigNumber} from 'ethers';
 
 describe('TileWithCoordLib', function () {
-  it('Available quads', async function () {
-    const tester = await setupTileWithCoordsLibTest();
-    expect(await tester.quadMask(1)).to.be.equal(0x1);
-    expect(await tester.quadMask(3)).to.be.equal(0x7);
-    expect(await tester.quadMask(6)).to.be.equal(0x3f);
-    expect(await tester.quadMask(12)).to.be.equal(0xfff);
-    expect(await tester.quadMask(24)).to.be.equal(0xffffff);
-    expect(await tester.quadMask(2)).to.be.equal(0);
-  });
-
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Tile With Coords', async function () {
     const tester = await setupTileWithCoordsLibTest();

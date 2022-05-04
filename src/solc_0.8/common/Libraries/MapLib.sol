@@ -20,7 +20,7 @@ library MapLib {
         Map storage self,
         uint256 x,
         uint256 y
-    ) internal view returns (bool) {
+    ) public view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -34,9 +34,8 @@ library MapLib {
         Map storage self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (bool) {
+        uint256 size
+    ) public view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -44,11 +43,11 @@ library MapLib {
             return false;
         }
         // TODO: We can call TileLib directly to use less gas ?
-        return self.values[idx - 1].containQuad(x, y, size, quadMask);
+        return self.values[idx - 1].containQuad(x, y, size);
     }
 
     function containTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile)
-        internal
+        public
         view
         returns (bool)
     {
@@ -63,7 +62,7 @@ library MapLib {
 
     // TODO: Check gas consumption!!!
     // OBS: self can be huge, but contained must be small, we iterate over contained values.
-    function containMap(Map storage self, Map storage contained) internal view returns (bool) {
+    function containMap(Map storage self, Map storage contained) public view returns (bool) {
         for (uint256 i; i < contained.values.length; i++) {
             if (!containTileWithCoord(self, contained.values[i])) {
                 return false;
@@ -76,24 +75,23 @@ library MapLib {
         Map storage self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal {
+        uint256 size
+    ) public {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         if (idx == 0) {
             // !contains
             // Add a new tile
             TileWithCoordLib.TileWithCoord memory t = TileWithCoordLib.initTileWithCoord(x, y);
-            self.values.push(t.setQuad(x, y, size, quadMask));
+            self.values.push(t.setQuad(x, y, size));
             self.indexes[key] = self.values.length;
         } else {
             // contains
-            self.values[idx - 1] = self.values[idx - 1].setQuad(x, y, size, quadMask);
+            self.values[idx - 1] = self.values[idx - 1].setQuad(x, y, size);
         }
     }
 
-    function setTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) internal {
+    function setTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -106,7 +104,7 @@ library MapLib {
         }
     }
 
-    function setMap(Map storage self, Map storage contained) internal {
+    function setMap(Map storage self, Map storage contained) public {
         for (uint256 i; i < contained.values.length; i++) {
             setTileWithCoord(self, contained.values[i]);
         }
@@ -116,16 +114,15 @@ library MapLib {
         Map storage self,
         uint256 x,
         uint256 y,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal returns (bool) {
+        uint256 size
+    ) public returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         if (idx == 0) {
             // !contains, nothing to clear
             return false;
         }
-        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size, quadMask);
+        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size);
         if (t.isEmpty()) {
             remove(self, idx, key);
         } else {
@@ -134,7 +131,7 @@ library MapLib {
         return true;
     }
 
-    function clearTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) internal returns (bool) {
+    function clearTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public returns (bool) {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -150,17 +147,17 @@ library MapLib {
         return true;
     }
 
-    function clearMap(Map storage self, Map storage contained) internal {
+    function clearMap(Map storage self, Map storage contained) public {
         for (uint256 i; i < contained.values.length; i++) {
             clearTileWithCoord(self, contained.values[i]);
         }
     }
 
-    function length(Map storage self) internal view returns (uint256) {
+    function length(Map storage self) public view returns (uint256) {
         return self.values.length;
     }
 
-    function at(Map storage self, uint256 index) internal view returns (TileWithCoordLib.TileWithCoord memory) {
+    function at(Map storage self, uint256 index) public view returns (TileWithCoordLib.TileWithCoord memory) {
         return self.values[index];
     }
 
@@ -168,7 +165,7 @@ library MapLib {
         Map storage self,
         uint256 offset,
         uint256 limit
-    ) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+    ) public view returns (TileWithCoordLib.TileWithCoord[] memory) {
         TileWithCoordLib.TileWithCoord[] memory ret;
         for (uint256 i; i < limit; i++) {
             ret[i] = self.values[offset + i];
@@ -177,7 +174,7 @@ library MapLib {
     }
 
     // This can be problematic if it grows too much !!!
-    function getMap(Map storage self) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+    function getMap(Map storage self) public view returns (TileWithCoordLib.TileWithCoord[] memory) {
         return self.values;
     }
 
@@ -186,7 +183,7 @@ library MapLib {
         Map storage self,
         uint256 x,
         uint256 y
-    ) internal view returns (bool) {
+    ) public view returns (bool) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         return (idx != 0);

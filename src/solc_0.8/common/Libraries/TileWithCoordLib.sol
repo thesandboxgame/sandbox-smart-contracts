@@ -27,11 +27,10 @@ library TileWithCoordLib {
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (TileWithCoord memory) {
+        uint256 size
+    ) internal pure returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        self.tile = self.tile.setQuad(xi % 24, yi % 24, size, quadMask);
+        self.tile = self.tile.setQuad(xi % 24, yi % 24, size);
         return self;
     }
 
@@ -39,11 +38,10 @@ library TileWithCoordLib {
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (TileWithCoord memory) {
+        uint256 size
+    ) internal pure returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        self.tile = self.tile.clearQuad(xi % 24, yi % 24, size, quadMask);
+        self.tile = self.tile.clearQuad(xi % 24, yi % 24, size);
         return self;
     }
 
@@ -76,11 +74,10 @@ library TileWithCoordLib {
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
-        uint256 size,
-        function(uint256) view returns (uint256) quadMask
-    ) internal view returns (bool) {
+        uint256 size
+    ) internal pure returns (bool) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        return self.tile.containQuad(xi % 24, yi % 24, size, quadMask);
+        return self.tile.containQuad(xi % 24, yi % 24, size);
     }
 
     function containTile(TileWithCoord memory self, TileWithCoord memory contained) internal pure returns (bool) {

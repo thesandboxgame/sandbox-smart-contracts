@@ -2,16 +2,6 @@ import {expect} from '../chai-setup';
 import {createTestMapQuads, printMap, setupMapTest} from './fixtures';
 
 describe('MapLib', function () {
-  it('Available quads', async function () {
-    const {tester} = await setupMapTest();
-    expect(await tester.quadMask(1)).to.be.equal(0x1);
-    expect(await tester.quadMask(3)).to.be.equal(0x7);
-    expect(await tester.quadMask(6)).to.be.equal(0x3f);
-    expect(await tester.quadMask(12)).to.be.equal(0xfff);
-    expect(await tester.quadMask(24)).to.be.equal(0xffffff);
-    expect(await tester.quadMask(2)).to.be.equal(0);
-  });
-
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Map With Coords', async function () {
     const {tester, getMap} = await setupMapTest();
