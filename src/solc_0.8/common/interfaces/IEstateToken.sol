@@ -9,8 +9,6 @@ interface IEstateToken {
     struct EstateCRUDData {
         uint256[][3] quadTuple; //(size, x, y)
         TileWithCoordLib.TileWithCoord[] tiles;
-        /* uint256[] landIds;
-        uint256[] gameIds; */
         bytes32 uri;
     }
 

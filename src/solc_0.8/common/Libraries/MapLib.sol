@@ -64,8 +64,7 @@ library MapLib {
     // TODO: Check gas consumption!!!
     // OBS: self can be huge, but contained must be small, we iterate over contained values.
     function containMap(Map storage self, Map storage contained) internal view returns (bool) {
-        uint256 i;
-        for (; i < contained.values.length; i++) {
+        for (uint256 i; i < contained.values.length; i++) {
             if (!containTileWithCoord(self, contained.values[i])) {
                 return false;
             }
@@ -108,8 +107,7 @@ library MapLib {
     }
 
     function setMap(Map storage self, Map storage contained) internal {
-        uint256 i;
-        for (; i < contained.values.length; i++) {
+        for (uint256 i; i < contained.values.length; i++) {
             setTileWithCoord(self, contained.values[i]);
         }
     }
@@ -153,8 +151,7 @@ library MapLib {
     }
 
     function clearMap(Map storage self, Map storage contained) internal {
-        uint256 i;
-        for (; i < contained.values.length; i++) {
+        for (uint256 i; i < contained.values.length; i++) {
             clearTileWithCoord(self, contained.values[i]);
         }
     }

@@ -5,7 +5,7 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {withSnapshot} from '../utils';
-import {BigNumber, BigNumberish, ContractReceipt} from 'ethers';
+import {BigNumber, BigNumberish, Contract, ContractReceipt} from 'ethers';
 import {expect} from '../chai-setup';
 
 export const setupEstate = withSnapshot(
@@ -76,7 +76,7 @@ export const setupEstate = withSnapshot(
   }
 );
 
-export const setupL1EstateAndLand = withSnapshot([], async () => {
+async function setupEstateAndLand(gameContract?: Contract) {
   const {deployer} = await getNamedAccounts();
   const [
     upgradeAdmin,
@@ -108,20 +108,35 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
 
   // Estate
   const chainIndex = 100;
+  let args, contract;
+  if (gameContract) {
+    contract = 'PolygonEstateTokenV1';
+    args = [
+      trustedForwarder,
+      estateTokenAdmin,
+      landContract.address,
+      gameContract.address,
+      chainIndex,
+    ];
+  } else {
+    contract = 'EstateTokenV1';
+    args = [
+      trustedForwarder,
+      estateTokenAdmin,
+      landContract.address,
+      chainIndex,
+    ];
+  }
+  console.log(args.length);
   await deployments.deploy('Estate', {
     from: deployer,
-    contract: 'EstateTokenV1',
+    contract,
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initV1',
-        args: [
-          trustedForwarder,
-          estateTokenAdmin,
-          landContract.address,
-          chainIndex,
-        ],
+        args,
       },
     },
   });
@@ -179,6 +194,19 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
     other,
     GRID_SIZE,
     getId,
+    getXsYsSizes: (x0: number, y0: number, size: number) => {
+      const xs = [];
+      const ys = [];
+      const sizes = [];
+      for (let x = 0; x < Math.floor(24 / size); x++) {
+        for (let y = 0; y < Math.floor(24 / size); y++) {
+          xs.push(x0 + x * size);
+          ys.push(y0 + y * size);
+          sizes.push(size);
+        }
+      }
+      return {xs, ys, sizes};
+    },
     mintQuad: async (
       to: string,
       size: number,
@@ -194,7 +222,7 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
       sizes: BigNumberish[],
       xs: BigNumberish[],
       ys: BigNumberish[]
-    ): Promise<BigNumber> => {
+    ): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
       const tx = await estateContract.createEstate(
         other,
         {
@@ -213,7 +241,95 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
         estateCreationEvents.length > 0 &&
         estateCreationEvents[0].args &&
         estateCreationEvents[0].args[1];
-      return BigNumber.from(estateId);
+      return {
+        estateId: BigNumber.from(estateId),
+        gasUsed: BigNumber.from(receipt.gasUsed),
+      };
+    },
+    createEstateWithGame: async (data: {
+      freelandQuads: {
+        sizes: BigNumberish[];
+        xs: BigNumberish[];
+        ys: BigNumberish[];
+      };
+      games?: {
+        gameId: BigNumberish;
+        quadsToAdd?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+        quadsToUse?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+      }[];
+    }): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
+      const landAndGameAssociations = data.games
+        ? data.games.map((x) => ({
+            gameId: x.gameId,
+            quadTupleToAdd: x.quadsToAdd
+              ? [x.quadsToAdd.sizes, x.quadsToAdd.xs, x.quadsToAdd.ys]
+              : [],
+            quadTupleToUse: x.quadsToUse
+              ? [x.quadsToUse.sizes, x.quadsToUse.xs, x.quadsToUse.ys]
+              : [],
+            tilesToUse: [],
+          }))
+        : [];
+      //   uint256 gameId;
+      // uint256[][3] quadTupleToAdd; //(size, x, y) transfer when adding
+      // uint256[][3] quadTupleToUse; //(size, x, y) take from free-lands
+      // TileWithCoordLib.TileWithCoord[] tilesToUse;
+      const tx = await estateContract.createEstateWithGame(
+        other,
+        {
+          landAndGameAssociations,
+          estateData: {
+            quadTuple: [
+              data.freelandQuads.sizes,
+              data.freelandQuads.xs,
+              data.freelandQuads.ys,
+            ],
+            tiles: [],
+            uri: ethers.utils.formatBytes32String('uri ???'),
+          },
+        },
+        []
+      );
+      const receipt: ContractReceipt = await tx.wait();
+      const estateCreationEvents = receipt.events?.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      const estateId =
+        estateCreationEvents &&
+        estateCreationEvents.length > 0 &&
+        estateCreationEvents[0].args &&
+        estateCreationEvents[0].args[1];
+      return {
+        estateId: BigNumber.from(estateId),
+        gasUsed: BigNumber.from(receipt.gasUsed),
+      };
     },
   };
+}
+
+export const setupL1EstateAndLand = withSnapshot([], async () =>
+  setupEstateAndLand()
+);
+export const setupL2EstateGameAndLand = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  // Fake Game
+  await deployments.deploy('ERC721Mintable', {
+    from: deployer,
+    args: ['FAKEGAME', 'FAKEGAME'],
+  });
+  const gameContract = await ethers.getContract('ERC721Mintable', deployer);
+  const data = await setupEstateAndLand(gameContract);
+  const gameContractAsOther = await ethers.getContract(
+    'ERC721Mintable',
+    data.other
+  );
+  return {gameContract, gameContractAsOther, ...data};
 });

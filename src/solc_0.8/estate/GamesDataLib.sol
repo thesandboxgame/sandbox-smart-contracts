@@ -23,7 +23,7 @@ library GamesDataLib {
 
     function getMap(Games storage self, uint256 gameId) internal view returns (MapLib.Map storage map) {
         require(self.indexes[gameId] != 0, "invalid gameId");
-        return self.values[self.indexes[gameId]].map;
+        return self.values[self.indexes[gameId] - 1].map;
     }
 
     function createGame(Games storage self, uint256 gameId) internal returns (bool) {
@@ -31,11 +31,17 @@ library GamesDataLib {
             // already exists
             return false;
         }
-        uint256 idx = self.values.length;
         self.values.push();
-        GameEntry storage value = self.values[idx];
-        value.gameId = gameId;
+        self.values[self.values.length - 1].gameId = gameId;
         self.indexes[gameId] = self.values.length;
         return true;
+    }
+
+    function length(Games storage self) internal view returns (uint256) {
+        return self.values.length;
+    }
+
+    function getGameIdAt(Games storage self, uint256 idx) internal view returns (uint256) {
+        return self.values[idx].gameId;
     }
 }

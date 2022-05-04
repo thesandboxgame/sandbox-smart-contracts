@@ -51,7 +51,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
         require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
 
-        (uint256 estateId, uint256 storageId) = _mintEstate(from, _nextId++, 1, true);
+        (estateId, storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = uri;
         _land.batchTransferQuad(from, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
         _addLandsMapping(storageId, tiles, quadTuple);

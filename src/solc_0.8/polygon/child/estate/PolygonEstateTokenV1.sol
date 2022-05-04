@@ -11,7 +11,6 @@ import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/GamesDataLib.sol";
 import "../../../estate/GamesDataLib.sol";
 
-// TODO: IEstateToke != IPolygonEstateToken
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
     using GamesDataLib for GamesDataLib.Games;
     using MapLib for MapLib.Map;
@@ -102,6 +101,16 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     {
         uint256 storageId = _storageId(estateId);
         return games[storageId].getMap(gameId).getMap();
+    }
+
+    function getGamesLength(uint256 estateId) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return games[storageId].length();
+    }
+
+    function getGamesId(uint256 estateId, uint256 idx) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return games[storageId].getGameIdAt(idx);
     }
 
     function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
