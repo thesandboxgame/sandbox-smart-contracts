@@ -53,7 +53,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // setting up predicate on L1
   await deployments.execute(
     'Asset',
-    {from: upgradeAdmin},
+    {from: deployer},
     'setPredicate',
     MockAssetERC1155Tunnel.address
   );
