@@ -33,21 +33,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l1'
   ].getNamedAccounts();
 
-  // TODO:
-  // if (AssetERC721Tunnel) {
-  //   await hre.companionNetworks['l1'].deployments.execute(
-  //     'AssetERC721Tunnel',
-  //     {from: deployerOnL1},
-  //     'setFxChildTunnel',
-  //     PolygonAssetERC721Tunnel.address
-  //   );
-  //   await deployments.execute(
-  //     'PolygonAssetERC721Tunnel',
-  //     {from: deployer},
-  //     'setFxRootTunnel',
-  //     AssetERC721Tunnel.address
-  //   );
-  // }
+  // Note: if redeploy, delete tunnels, root & child tokens
+
+  if (AssetERC721Tunnel) {
+    await hre.companionNetworks['l1'].deployments.execute(
+      'AssetERC721Tunnel',
+      {from: deployerOnL1},
+      'setFxChildTunnel',
+      PolygonAssetERC721Tunnel.address
+    );
+    await deployments.execute(
+      'PolygonAssetERC721Tunnel',
+      {from: deployer},
+      'setFxRootTunnel',
+      AssetERC721Tunnel.address
+    );
+  }
 };
 
 export default func;
