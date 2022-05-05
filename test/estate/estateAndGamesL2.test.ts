@@ -96,4 +96,80 @@ describe('Estate test with maps and games on layer 2', function () {
       });
     });
   });
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('@slow one estate, free lands, increase land', async function () {
+    async function justDoIt(cant: number, tileSize: number) {
+      const {
+        other,
+        landContractAsOther,
+        estateContract,
+        mintQuad,
+        createEstate,
+      } = await setupL2EstateGameAndLand();
+      const quadId = await mintQuad(other, 24, 0, 0);
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContract.address,
+        quadId
+      );
+
+      const xs = [];
+      const ys = [];
+      const sizes = [];
+      for (let i = 0; i < cant; i++) {
+        xs.push((i * tileSize) % 24);
+        ys.push(Math.floor((i * tileSize) / 24) * tileSize);
+        sizes.push(tileSize);
+      }
+      console.log(xs, ys, sizes);
+      const {gasUsed} = await createEstate({
+        freelandQuads: {xs, ys, sizes},
+        games: [],
+      });
+      console.log(`\t${cant * tileSize * tileSize}\t`, gasUsed.toString());
+    }
+
+    const tileSize = 3;
+    for (let i = 1; i < 576 / tileSize / tileSize; i += 12 / tileSize) {
+      await justDoIt(i, tileSize);
+    }
+  });
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it('@slow one estate, free lands, increase land multiple tiles', async function () {
+    async function justDoIt(cant: number, tileSize: number) {
+      const {
+        other,
+        landContractAsOther,
+        estateContract,
+        mintQuad,
+        createEstate,
+      } = await setupL2EstateGameAndLand();
+      const xs = [];
+      const ys = [];
+      const sizes = [];
+      for (let i = 0; i < cant; i++) {
+        const x = 24 * (i % 17);
+        const y = 24 * Math.floor(i / 17);
+        const quadId = await mintQuad(other, tileSize, x, y);
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContract.address,
+          quadId
+        );
+        xs.push(x);
+        ys.push(y);
+        sizes.push(tileSize);
+      }
+      const {gasUsed} = await createEstate({
+        freelandQuads: {xs, ys, sizes},
+        games: [],
+      });
+      console.log(`\t${cant * tileSize}\t`, gasUsed.toString());
+    }
+
+    const tileSize = 12;
+    for (let i = 1; i < 289; i += 12 / tileSize) {
+      await justDoIt(i, tileSize);
+    }
+  });
 });
