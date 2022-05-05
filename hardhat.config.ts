@@ -87,6 +87,7 @@ const config: HardhatUserConfig = {
       polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+      goerli_test: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
@@ -96,6 +97,7 @@ const config: HardhatUserConfig = {
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
@@ -133,6 +135,7 @@ const config: HardhatUserConfig = {
       polygon: '0xbc4fE9A8a46442eDaF13Bd5c615D7CFe0953885B', // TODO: get sand admin multi sig contract
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
+      goerli_test: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
 
@@ -150,6 +153,7 @@ const config: HardhatUserConfig = {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
+      goerli_test: 'sandSaleBeneficiary',
       mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
     },
 
@@ -157,6 +161,8 @@ const config: HardhatUserConfig = {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
+      goerli_test: 'sandSaleBeneficiary',
+
       mainnet: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
@@ -166,6 +172,7 @@ const config: HardhatUserConfig = {
       default: 3,
       rinkeby: 5,
       goerli: 5,
+      goerli_test: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
@@ -175,6 +182,8 @@ const config: HardhatUserConfig = {
       polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
@@ -186,6 +195,7 @@ const config: HardhatUserConfig = {
       polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
 
@@ -201,6 +211,7 @@ const config: HardhatUserConfig = {
       mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
     // To be used with AuthValidator only
     backendAuthWallet: {
@@ -210,6 +221,7 @@ const config: HardhatUserConfig = {
       mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     backendCashbackWallet: {
       // default is computed from private key:
@@ -229,6 +241,7 @@ const config: HardhatUserConfig = {
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     sandboxFoundation: {
       default: 4,
@@ -239,6 +252,7 @@ const config: HardhatUserConfig = {
       mainnet: null,
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
     catalystMinter: 'sandAdmin', // account that can mint catalysts
@@ -320,7 +334,7 @@ const config: HardhatUserConfig = {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
       tags: ['testnet', 'L1'],
-      // gasPrice: 1000000000000, // Uncomment in case of pending txs, and adjust gas
+      // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
         l2: 'mumbai_test',
       },
@@ -348,7 +362,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('mumbai'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
-      //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
+      gasPrice: 100000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'goerli_test',
       },

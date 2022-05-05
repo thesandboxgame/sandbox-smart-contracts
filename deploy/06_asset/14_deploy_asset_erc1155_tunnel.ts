@@ -48,31 +48,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       PolygonAssetERC1155Tunnel.address
     );
   }
-
-  let currentAdmin;
-  try {
-    currentAdmin = await read('Asset', 'getAdmin');
-  } catch (e) {
-    // no admin
-  }
-
-  // setting up predicate on L1
-  if (currentAdmin) {
-    if (currentAdmin.toLowerCase() !== upgradeAdmin.toLowerCase()) {
-      await execute(
-        'Asset',
-        {from: currentAdmin},
-        'setPredicate',
-        AssetERC1155Tunnel.address
-      );
-    }
-  }
 };
 
 export default func;
 func.tags = ['AssetERC1155Tunnel', 'AssetERC1155Tunnel_deploy', 'L1'];
 func.dependencies = [
   'Asset',
+  'Asset_ERC1155',
   'FXROOT',
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
