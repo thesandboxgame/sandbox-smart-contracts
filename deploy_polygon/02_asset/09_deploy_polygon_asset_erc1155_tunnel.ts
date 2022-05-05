@@ -23,7 +23,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     log: true,
     skipIfAlreadyDeployed: true,
-    // gasLimit: 600000000000,
   });
 
   const AssetERC1155Tunnel = await hre.companionNetworks[
@@ -35,20 +34,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l1'
   ].getNamedAccounts();
 
-  if (AssetERC1155Tunnel) {
-    await hre.companionNetworks['l1'].deployments.execute(
-      'AssetERC1155Tunnel',
-      {from: deployerOnL1},
-      'setFxChildTunnel',
-      PolygonAssetERC1155Tunnel.address
-    );
-    await deployments.execute(
-      'PolygonAssetERC1155Tunnel',
-      {from: deployer},
-      'setFxRootTunnel',
-      AssetERC1155Tunnel.address
-    );
-  }
+  // TODO:
+  // if (AssetERC1155Tunnel) {
+  //   await hre.companionNetworks['l1'].deployments.execute(
+  //     'AssetERC1155Tunnel',
+  //     {from: deployerOnL1},
+  //     'setFxChildTunnel',
+  //     PolygonAssetERC1155Tunnel.address
+  //   );
+  //   await deployments.execute(
+  //     'PolygonAssetERC1155Tunnel',
+  //     {from: deployer},
+  //     'setFxRootTunnel',
+  //     AssetERC1155Tunnel.address
+  //   );
+  // }
 };
 
 export default func;
