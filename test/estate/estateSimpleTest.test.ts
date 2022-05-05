@@ -3,7 +3,7 @@ import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {ethers} from 'hardhat';
 
-describe('Estate test with maps', function () {
+describe('Estate Simple Test', function () {
   it('start with free lands', async function () {
     const {
       sandContractAsBeneficiary,
@@ -44,22 +44,25 @@ describe('Estate test with maps', function () {
     await waitFor(
       estateMinterContract
         .connect(ethers.provider.getSigner(user0))
-        .createEstate([
-          [
-            [12, 3],
-            [0, 18],
-            [0, 18],
-          ],
-          [],
+        .createEstate({
+          gameData: [],
+          freeLandData: {
+            quads: [
+              [12, 3],
+              [0, 18],
+              [0, 18],
+            ],
+            tiles: [],
+          },
           uri,
-        ])
+        })
     );
 
     const estateCreationEvents = await estateContract.queryFilter(
-      estateContract.filters.EstateTokenUpdated()
+      estateContract.filters.EstateTokenCreated()
     );
     const estateCreationEvent = estateCreationEvents.filter(
-      (e) => e.event === 'EstateTokenUpdated'
+      (e) => e.event === 'EstateTokenCreated'
     );
     expect(estateCreationEvent[0].args).not.be.equal(null);
   });
@@ -104,29 +107,40 @@ describe('Estate test with maps', function () {
     await waitFor(
       estateMinterContract
         .connect(ethers.provider.getSigner(user0))
-        .createEstate([[[12], [0], [0]], [], uri])
+        .createEstate({
+          gameData: [],
+          freeLandData: {
+            quads: [[12], [0], [0]],
+            tiles: [],
+          },
+          uri,
+        })
     );
 
     const estateCreationEvents = await estateContract.queryFilter(
-      estateContract.filters.EstateTokenUpdated()
+      estateContract.filters.EstateTokenCreated()
     );
     const estateCreationEvent = estateCreationEvents.filter(
-      (e) => e.event === 'EstateTokenUpdated'
+      (e) => e.event === 'EstateTokenCreated'
     );
     expect(estateCreationEvent[0].args).not.be.equal(null);
 
     let estateId;
     if (estateCreationEvent[0].args) {
-      estateId = estateCreationEvent[0].args[1];
+      estateId = estateCreationEvent[0].args[0];
       await waitFor(
         estateMinterContract
           .connect(ethers.provider.getSigner(user0))
           .updateLandsEstate({
-            quadsToAdd: [[6], [30], [30]],
-            tilesToAdd: [],
-            quadsToRemove: [[12], [0], [0]],
             estateId,
-            uri,
+            newUri: uri,
+            freeLandToAdd: {
+              quads: [[6], [30], [30]],
+              tiles: [],
+            },
+            freeLandToRemove: [[12], [0], [0]],
+            gamesToRemove: [],
+            gamesToAdd: [],
           })
       );
     }

@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre) {
   await deploy('EstateMinter', {
     from: deployer,
     log: true,
-    contract: 'EstateMinter',
+    contract: 'PolygonEstateMiner',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OptimizedTransparentProxy',

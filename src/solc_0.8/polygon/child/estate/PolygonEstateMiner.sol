@@ -4,27 +4,25 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
-import "../common/interfaces/IEstateToken.sol";
-/*import "../common/interfaces/IEstateMinter.sol";
-import "../common/interfaces/IFeeCollector.sol"; */
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
-import "../common/Libraries/SigUtil.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../../../common/interfaces/IPolygonEstateToken.sol";
+import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import "../../../common/Libraries/SigUtil.sol";
 
-contract EstateMinter is
+contract PolygonEstateMiner is
     ERC2771Handler, /* IEstateMinter, */
     Initializable
 {
     address internal _admin;
     //IFeeCollector internal _feeCollector;
-    IEstateToken internal _estateToken;
+    IPolygonEstateToken internal _estateToken;
     address internal _backAddress = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     uint256 internal _estateMintingFee;
     uint256 internal _estateUpdateFee;
 
     function initV1(
-        IEstateToken estateTokenContract,
+        IPolygonEstateToken estateTokenContract,
         address trustedForwarder,
         address admin,
         //IFeeCollector feeCollector, //uint8 chainIndex
@@ -39,7 +37,7 @@ contract EstateMinter is
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    function createEstate(IEstateToken.EstateCRUDData calldata creation)
+    function createEstate(IPolygonEstateToken.CreateEstateData calldata creation)
         external
         returns (
             // bytes calldata signature
@@ -52,9 +50,9 @@ contract EstateMinter is
         return _estateToken.createEstate(msgSender, creation);
     }
 
-    function updateLandsEstate(IEstateToken.UpdateEstateLands calldata update) external returns (uint256) {
+    function updateLandsEstate(IPolygonEstateToken.UpdateEstateData calldata update) external returns (uint256) {
         address msgSender = _msgSender();
-        return _estateToken.updateLandsEstate(msgSender, update);
+        return _estateToken.updateEstate(msgSender, update);
     }
 
     /* function updateEstate(
