@@ -9,16 +9,15 @@ import "../../../common/interfaces/IEstateToken.sol";
 // solhint-disable-next-line no-empty-blocks
 contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     /// @dev Emits when a estate is updated.
-    /// @param oldId The id of the previous erc721 ESTATE token.
-    /// @param newId The id of the newly minted token.
+    /// @param estateId The id of the newly minted token.
     /// @param update The changes made to the Estate.
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IEstateToken.EstateCRUDData update);
+    event EstateTokenCreated(uint256 indexed estateId, IEstateToken.EstateCRUDData update);
 
     /// @dev Emits when a estate is updated.
     /// @param oldId The id of the previous erc721 ESTATE token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Estate.
-    event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
+    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
 
     function initV1(
         address trustedForwarder,
@@ -42,7 +41,7 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     {
         uint256 estateId;
         (estateId, ) = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
-        emit EstateTokenUpdated(0, estateId, creation);
+        emit EstateTokenCreated(estateId, creation);
         return estateId;
     }
 
@@ -52,16 +51,16 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         onlyMinter()
         returns (uint256)
     {
-        uint256 newId =
-            _updateLandsEstate(
-                from,
-                update.estateId,
-                update.tilesToAdd,
-                update.quadsToAdd,
-                update.quadsToRemove,
-                update.uri
-            );
-        emit EstateTokenUpdatedII(update.estateId, newId, update);
+        uint256 newId;
+        (newId, ) = _updateLandsEstate(
+            from,
+            update.estateId,
+            update.tilesToAdd,
+            update.quadsToAdd,
+            update.quadsToRemove,
+            update.uri
+        );
+        emit EstateTokenUpdated(update.estateId, newId, update);
         return newId;
     }
 }

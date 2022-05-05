@@ -6,7 +6,7 @@ import "../../../common/interfaces/ILandToken.sol";
 import "../../../Game/GameBaseToken.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../estate/EstateBaseToken.sol";
-import "../../../common/interfaces/IEstateToken.sol";
+import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/GamesDataLib.sol";
 import "../../../estate/GamesDataLib.sol";
@@ -15,17 +15,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     using GamesDataLib for GamesDataLib.Games;
     using MapLib for MapLib.Map;
 
-    /// @dev Emits when a estate is updated.
-    /// @param oldId The id of the previous erc721 ESTATE token.
-    /// @param newId The id of the newly minted token.
-    /// @param update The changes made to the Estate.
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IEstateToken.EstateCRUDData update);
+    event EstateTokenCreated(uint256 indexed estateId, CreateEstateData data);
 
-    /// @dev Emits when a estate is updated.
-    /// @param oldId The id of the previous erc721 ESTATE token.
-    /// @param newId The id of the newly minted token.
-    /// @param update The changes made to the Estate.
-    event EstateTokenUpdatedII(uint256 indexed oldId, uint256 indexed newId, IEstateToken.UpdateEstateLands update);
+    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, UpdateEstateData data);
 
     // Iterable mapping of games
     mapping(uint256 => GamesDataLib.Games) internal games;
@@ -43,55 +35,50 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         gameToken = _gameToken;
     }
 
-    // TODO: Implement the real thing.
-    function createEstateWithGame(address from, EstateCRUDWithGameData calldata creation)
-        external
-        override
-        returns (uint256)
-    {
+    function createEstate(address from, CreateEstateData calldata data) external override returns (uint256) {
         uint256 estateId;
         uint256 storageId;
-        (estateId, storageId) = _createEstate(
-            from,
-            creation.estateData.tiles,
-            creation.estateData.quadTuple,
-            creation.estateData.uri
-        );
-        for (uint256 i; i < creation.landAndGameAssociations.length; i++) {
-            _land.batchTransferQuad(
-                from,
-                address(this),
-                creation.landAndGameAssociations[i].quadTupleToAdd[0],
-                creation.landAndGameAssociations[i].quadTupleToAdd[1],
-                creation.landAndGameAssociations[i].quadTupleToAdd[2],
-                ""
-            );
-            gameToken.transferFrom(from, address(this), creation.landAndGameAssociations[i].gameId);
-            require(games[storageId].createGame(creation.landAndGameAssociations[i].gameId), "game id already exists");
-            MapLib.Map storage map = games[storageId].getMap(creation.landAndGameAssociations[i].gameId);
-            _addQuads(map, creation.landAndGameAssociations[i].quadTupleToAdd);
-            _addQuadsFromFreeLand(map, storageId, creation.landAndGameAssociations[i].quadTupleToUse);
-            _addTilesFromFreeLand(map, storageId, creation.landAndGameAssociations[i].tilesToUse);
-        }
-        emit EstateTokenUpdated(0, storageId, creation.estateData);
+        (estateId, storageId) = _createEstate(from, data.freeLandData.tiles, data.freeLandData.quads, data.uri);
+        _addGamesToEstate(from, storageId, data.gameData);
+        emit EstateTokenCreated(estateId, data);
         return storageId;
     }
 
-    // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
-    /// @notice Create a new estate token with lands.
-    /* /// @param from The address of the one creating the estate.
-    /// @param to The address that will own the estate. */
-    /// @param creation The data to use to create the estate.
-    function createEstate(address from, IEstateToken.EstateCRUDData calldata creation)
+    function updateEstate(address from, UpdateEstateData calldata data)
         external
         override
         onlyMinter()
         returns (uint256)
     {
-        uint256 estateId;
-        (estateId, ) = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
-        emit EstateTokenUpdated(0, estateId, creation);
-        return estateId;
+        uint256 newId;
+        uint256 storageId;
+        (newId, storageId) = _updateLandsEstate(
+            from,
+            data.estateId,
+            data.freeLandToAdd.tiles,
+            data.freeLandToAdd.quads,
+            data.freeLandToRemove,
+            data.newUri
+        );
+        for (uint256 i; i < data.gamesToRemove.length; i++) {
+            MapLib.Map storage map = games[storageId].getMap(data.gamesToRemove[i].gameId);
+            _removeQuads(map, data.gamesToRemove[i].quadsToTransfer);
+            _land.batchTransferQuad(
+                from,
+                address(this),
+                data.gamesToRemove[i].quadsToTransfer[0],
+                data.gamesToRemove[i].quadsToTransfer[1],
+                data.gamesToRemove[i].quadsToTransfer[2],
+                ""
+            );
+            _removeQuadsToFreeLand(map, storageId, data.gamesToRemove[i].quadsToFree);
+
+            require(games[storageId].deleteGame(data.gamesToRemove[i].gameId), "game id already exists");
+            gameToken.transferFrom(address(this), from, data.gamesToRemove[i].gameId);
+        }
+        _addGamesToEstate(from, storageId, data.gamesToAdd);
+        emit EstateTokenUpdated(data.estateId, newId, data);
+        return newId;
     }
 
     function getGameMap(uint256 estateId, uint256 gameId)
@@ -113,28 +100,26 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return games[storageId].getGameIdAt(idx);
     }
 
-    function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
-        external
-        override
-        onlyMinter()
-        returns (uint256)
-    {
-        uint256 newId =
-            _updateLandsEstate(
+    function _addGamesToEstate(
+        address from,
+        uint256 storageId,
+        AddGameData[] calldata gameData
+    ) internal {
+        for (uint256 i; i < gameData.length; i++) {
+            gameToken.transferFrom(from, address(this), gameData[i].gameId);
+            _land.batchTransferQuad(
                 from,
-                update.estateId,
-                update.tilesToAdd,
-                update.quadsToAdd,
-                update.quadsToRemove,
-                update.uri
+                address(this),
+                gameData[i].transferQuads[0],
+                gameData[i].transferQuads[1],
+                gameData[i].transferQuads[2],
+                ""
             );
-        emit EstateTokenUpdatedII(update.estateId, newId, update);
-        return newId;
-    }
-
-    function _addQuads(MapLib.Map storage map, uint256[][3] calldata quads) internal {
-        for (uint256 i; i < quads[0].length; i++) {
-            map.setQuad(quads[1][i], quads[2][i], quads[0][i]);
+            require(games[storageId].createGame(gameData[i].gameId), "game id already exists");
+            MapLib.Map storage map = games[storageId].getMap(gameData[i].gameId);
+            _addQuads(map, gameData[i].transferQuads);
+            _addQuadsFromFreeLand(map, storageId, gameData[i].freeLandData.quads);
+            _addTilesFromFreeLand(map, storageId, gameData[i].freeLandData.tiles);
         }
     }
 
@@ -151,6 +136,19 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         }
     }
 
+    function _removeQuadsToFreeLand(
+        MapLib.Map storage map,
+        uint256 storageId,
+        uint256[][3] calldata quads
+    ) internal {
+        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
+        for (uint256 i; i < quads[0].length; i++) {
+            require(map.containQuad(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            map.clearQuad(quads[1][i], quads[2][i], quads[0][i]);
+            freeLands[storageId].setQuad(quads[1][i], quads[2][i], quads[0][i]);
+        }
+    }
+
     function _addTilesFromFreeLand(
         MapLib.Map storage map,
         uint256 storageId,
@@ -160,6 +158,18 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
             require(freeLands[storageId].containTileWithCoord(tiles[i]), "Tile missing");
             freeLands[storageId].clearTileWithCoord(tiles[i]);
             map.setTileWithCoord(tiles[i]);
+        }
+    }
+
+    function _removeQuadsToFreeLand(
+        MapLib.Map storage map,
+        uint256 storageId,
+        TileWithCoordLib.TileWithCoord[] calldata tiles
+    ) internal {
+        for (uint256 i; i < tiles.length; i++) {
+            require(map.containTileWithCoord(tiles[i]), "Tile missing");
+            map.clearTileWithCoord(tiles[i]);
+            freeLands[storageId].setTileWithCoord(tiles[i]);
         }
     }
 }

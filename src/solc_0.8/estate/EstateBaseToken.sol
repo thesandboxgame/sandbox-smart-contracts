@@ -57,7 +57,7 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         uint256[][3] calldata quadsToAdd,
         uint256[][3] calldata quadsToRemove,
         bytes32 uri
-    ) internal returns (uint256) {
+    ) internal returns (uint256 newEstateId, uint256 newStorageId) {
         require(_ownerOf(estateId) == from, "Invalid Owner");
         // batchTransferQuad does that for us
         // require(quadsToAdd[0].length == quadsToAdd[1].length && quadsToAdd[0].length == quadsToAdd[2].length, "Invalid data");
@@ -72,7 +72,8 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         }
 
         if (quadsToRemove[0].length > 0) {
-            _removeLandsMapping(storageId, quadsToRemove);
+            MapLib.Map storage map = freeLands[storageId];
+            _removeQuads(map, quadsToRemove);
             _land.batchTransferQuad(address(this), from, quadsToRemove[0], quadsToRemove[1], quadsToRemove[2], "");
         }
         return _incrementTokenVersion(from, estateId);
@@ -137,27 +138,32 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         for (uint256 i; i < tiles.length; i++) {
             newMap.setTileWithCoord(tiles[i]);
         }
+        _addQuads(newMap, quads);
+    }
+
+    function _addQuads(MapLib.Map storage map, uint256[][3] calldata quads) internal {
         for (uint256 i; i < quads[0].length; i++) {
-            newMap.setQuad(quads[1][i], quads[2][i], quads[0][i]);
+            map.setQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
-    function _removeLandsMapping(
-        //maybe I can unify both with a bool isCreation
-        uint256 storageId,
-        uint256[][3] calldata quads
-    ) internal {
-        MapLib.Map storage newMap = freeLands[storageId];
+    function _removeQuads(MapLib.Map storage map, uint256[][3] calldata quads) internal {
         for (uint256 i; i < quads[0].length; i++) {
-            newMap.clearQuad(quads[1][i], quads[2][i], quads[0][i]);
+            // TODO: We can skip this check ?
+            require(map.containQuad(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            map.clearQuad(quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
     /// @param from The address of the token owner.
     /// @param estateId The tokenId to increment.
-    /// @return the version-incremented tokenId.
-    function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
+    /// @return newEstateId the version-incremented tokenId.
+    /// @return newStorageId the version-incremented storageId.
+    function _incrementTokenVersion(address from, uint256 estateId)
+        internal
+        returns (uint256 newEstateId, uint256 newStorageId)
+    {
         // address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
 
         uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
@@ -168,10 +174,9 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
         if (from == owner) {
             _burn(from, owner, estateId);
         }
-        (uint256 newId, ) = _mintEstate(owner, subId, version, false);
-        address newOwner = _ownerOf(newId);
+        (newEstateId, newStorageId) = _mintEstate(owner, subId, version, false);
+        address newOwner = _ownerOf(newEstateId);
         require(owner == newOwner, "NOT_OWNER");
-        return newId;
     }
 
     /// @dev Create a new (or incremented) estateId and associate it with an owner.

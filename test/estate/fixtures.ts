@@ -221,13 +221,20 @@ async function setupEstateAndLand(gameContract?: Contract) {
       expect(await landContractAsMinter._owners(quadId)).to.be.equal(other);
       return quadId;
     },
+  };
+}
+
+export const setupL1EstateAndLand = withSnapshot([], async () => {
+  const setup = await setupEstateAndLand();
+  return {
+    ...setup,
     createEstate: async (
       sizes: BigNumberish[],
       xs: BigNumberish[],
       ys: BigNumberish[]
     ): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
-      const tx = await estateContract.createEstate(
-        other,
+      const tx = await setup.estateContract.createEstate(
+        setup.other,
         {
           quadTuple: [sizes, xs, ys],
           tiles: [],
@@ -237,19 +244,38 @@ async function setupEstateAndLand(gameContract?: Contract) {
       );
       const receipt: ContractReceipt = await tx.wait();
       const estateCreationEvents = receipt.events?.filter(
-        (e) => e.event === 'EstateTokenUpdated'
+        (e) => e.event === 'EstateTokenCreated'
       );
       const estateId =
         estateCreationEvents &&
         estateCreationEvents.length > 0 &&
         estateCreationEvents[0].args &&
-        estateCreationEvents[0].args[1];
+        estateCreationEvents[0].args[0];
       return {
         estateId: BigNumber.from(estateId),
         gasUsed: BigNumber.from(receipt.gasUsed),
       };
     },
-    createEstateWithGame: async (data: {
+  };
+});
+export const setupL2EstateGameAndLand = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  // Fake Game
+  await deployments.deploy('ERC721Mintable', {
+    from: deployer,
+    args: ['FAKEGAME', 'FAKEGAME'],
+  });
+  const gameContract = await ethers.getContract('ERC721Mintable', deployer);
+  const setup = await setupEstateAndLand(gameContract);
+  const gameContractAsOther = await ethers.getContract(
+    'ERC721Mintable',
+    setup.other
+  );
+  return {
+    gameContract,
+    gameContractAsOther,
+    ...setup,
+    createEstate: async (data: {
       freelandQuads: {
         sizes: BigNumberish[];
         xs: BigNumberish[];
@@ -269,70 +295,49 @@ async function setupEstateAndLand(gameContract?: Contract) {
         };
       }[];
     }): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
-      const landAndGameAssociations = data.games
+      const gameData = data.games
         ? data.games.map((x) => ({
             gameId: x.gameId,
-            quadTupleToAdd: x.quadsToAdd
+            transferQuads: x.quadsToAdd
               ? [x.quadsToAdd.sizes, x.quadsToAdd.xs, x.quadsToAdd.ys]
               : [],
-            quadTupleToUse: x.quadsToUse
-              ? [x.quadsToUse.sizes, x.quadsToUse.xs, x.quadsToUse.ys]
-              : [],
-            tilesToUse: [],
+            freeLandData: {
+              quads: x.quadsToUse
+                ? [x.quadsToUse.sizes, x.quadsToUse.xs, x.quadsToUse.ys]
+                : [],
+              tiles: [],
+            },
           }))
         : [];
       //   uint256 gameId;
       // uint256[][3] quadTupleToAdd; //(size, x, y) transfer when adding
       // uint256[][3] quadTupleToUse; //(size, x, y) take from free-lands
       // TileWithCoordLib.TileWithCoord[] tilesToUse;
-      const tx = await estateContract.createEstateWithGame(
-        other,
-        {
-          landAndGameAssociations,
-          estateData: {
-            quadTuple: [
-              data.freelandQuads.sizes,
-              data.freelandQuads.xs,
-              data.freelandQuads.ys,
-            ],
-            tiles: [],
-            uri: ethers.utils.formatBytes32String('uri ???'),
-          },
+      const tx = await setup.estateContract.createEstate(setup.other, {
+        gameData,
+        freeLandData: {
+          quads: [
+            data.freelandQuads.sizes,
+            data.freelandQuads.xs,
+            data.freelandQuads.ys,
+          ],
+          tiles: [],
         },
-        []
-      );
+        uri: ethers.utils.formatBytes32String('uri ???'),
+      });
       const receipt: ContractReceipt = await tx.wait();
       const estateCreationEvents = receipt.events?.filter(
-        (e) => e.event === 'EstateTokenUpdated'
+        (e) => e.event === 'EstateTokenCreated'
       );
       const estateId =
         estateCreationEvents &&
         estateCreationEvents.length > 0 &&
         estateCreationEvents[0].args &&
-        estateCreationEvents[0].args[1];
+        estateCreationEvents[0].args[0];
       return {
         estateId: BigNumber.from(estateId),
         gasUsed: BigNumber.from(receipt.gasUsed),
       };
     },
   };
-}
-
-export const setupL1EstateAndLand = withSnapshot([], async () =>
-  setupEstateAndLand()
-);
-export const setupL2EstateGameAndLand = withSnapshot([], async () => {
-  const {deployer} = await getNamedAccounts();
-  // Fake Game
-  await deployments.deploy('ERC721Mintable', {
-    from: deployer,
-    args: ['FAKEGAME', 'FAKEGAME'],
-  });
-  const gameContract = await ethers.getContract('ERC721Mintable', deployer);
-  const data = await setupEstateAndLand(gameContract);
-  const gameContractAsOther = await ethers.getContract(
-    'ERC721Mintable',
-    data.other
-  );
-  return {gameContract, gameContractAsOther, ...data};
 });

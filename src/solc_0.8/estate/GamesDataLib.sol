@@ -37,6 +37,26 @@ library GamesDataLib {
         return true;
     }
 
+    function deleteGame(Games storage self, uint256 gameId) internal returns (bool) {
+        uint256 idx = self.indexes[gameId];
+        if (idx == 0) {
+            return false;
+        }
+        require(self.values[idx].map.isEmpty(), "Map not empty");
+        uint256 toDeleteIndex = idx - 1;
+        uint256 lastIndex = self.values.length - 1;
+        if (lastIndex != toDeleteIndex) {
+            GameEntry storage lastValue = self.values[lastIndex];
+            self.values[toDeleteIndex].gameId = lastValue.gameId;
+            self.values[toDeleteIndex].map.clear();
+            self.values[toDeleteIndex].map.setMap(lastValue.map);
+            self.indexes[lastValue.gameId] = idx;
+        }
+        self.values.pop();
+        delete self.indexes[gameId];
+        return true;
+    }
+
     function length(Games storage self) internal view returns (uint256) {
         return self.values.length;
     }

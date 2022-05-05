@@ -153,6 +153,18 @@ library MapLib {
         }
     }
 
+    function clear(Map storage self) public {
+        for (uint256 i; i < self.values.length; i++) {
+            delete self.indexes[self.values[i].getKey()];
+        }
+        delete self.values;
+    }
+
+    function isEmpty(Map storage self) public view returns (bool) {
+        // We remove the tiles when they are empty
+        return self.values.length == 0;
+    }
+
     function length(Map storage self) public view returns (uint256) {
         return self.values.length;
     }

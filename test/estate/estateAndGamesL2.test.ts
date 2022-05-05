@@ -11,7 +11,7 @@ describe('Estate test with maps and games on layer 2', function () {
           landContractAsOther,
           estateContract,
           mintQuad,
-          createEstateWithGame,
+          createEstate,
         } = await setupL2EstateGameAndLand();
 
         const quadId = await mintQuad(other, size, 48, 96);
@@ -20,7 +20,7 @@ describe('Estate test with maps and games on layer 2', function () {
           estateContract.address,
           quadId
         );
-        const {gasUsed} = await createEstateWithGame({
+        const {gasUsed} = await createEstate({
           freelandQuads: {
             sizes: [size],
             xs: [48],
@@ -49,7 +49,7 @@ describe('Estate test with maps and games on layer 2', function () {
             landContractAsOther,
             estateContract,
             mintQuad,
-            createEstateWithGame,
+            createEstate,
             gameContractAsOther,
             getXsYsSizes,
           } = await setupL2EstateGameAndLand();
@@ -69,7 +69,7 @@ describe('Estate test with maps and games on layer 2', function () {
             estateContract.address,
             quadId
           );
-          const {estateId, gasUsed} = await createEstateWithGame({
+          const {estateId, gasUsed} = await createEstate({
             freelandQuads: getXsYsSizes(0, 0, 24),
             games: [
               {

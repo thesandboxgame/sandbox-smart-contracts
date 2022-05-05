@@ -7,29 +7,40 @@ import "./IEstateToken.sol";
 
 /// @title Interface for the Estate token
 
-interface IPolygonEstateToken is IEstateToken {
-    struct GameCRUD {
+interface IPolygonEstateToken {
+    struct FreeLandData {
+        uint256[][3] quads; //(size, x, y)
+        TileWithCoordLib.TileWithCoord[] tiles;
+    }
+
+    struct RemoveGameData {
         uint256 gameId;
-        uint256[][3] quadTupleToAdd; //(size, x, y) transfer when adding
-        uint256[][3] quadTupleToUse; //(size, x, y) take from free-lands
-        TileWithCoordLib.TileWithCoord[] tilesToUse;
+        uint256[][3] quadsToTransfer; //(size, x, y) transfer when adding
+        uint256[][3] quadsToFree; //(size, x, y) take from free-lands
     }
 
-    struct EstateCRUDWithGameData {
-        EstateCRUDData estateData;
-        GameCRUD[] landAndGameAssociations;
+    struct AddGameData {
+        uint256 gameId;
+        uint256[][3] transferQuads; //(size, x, y) transfer when adding
+        FreeLandData freeLandData;
     }
 
-    struct UpdateEstateData {
-        uint256[][] landAndGameAssociationsToAdd;
-        uint256[][] landAndGameAssociationsToRemove;
-        //uint256[] gameIdsToRemain;
-        uint256[] landIdsToAdd;
-        uint256[] landIdsToRemove;
-        uint256[] gameIdsToAdd;
-        uint256[] gameIdsToRemove;
+    struct CreateEstateData {
+        FreeLandData freeLandData;
+        AddGameData[] gameData;
         bytes32 uri;
     }
 
-    function createEstateWithGame(address from, EstateCRUDWithGameData calldata creation) external returns (uint256);
+    struct UpdateEstateData {
+        uint256 estateId;
+        bytes32 newUri;
+        FreeLandData freeLandToAdd;
+        uint256[][3] freeLandToRemove;
+        RemoveGameData[] gamesToRemove;
+        AddGameData[] gamesToAdd;
+    }
+
+    function createEstate(address from, CreateEstateData calldata data) external returns (uint256);
+
+    function updateEstate(address from, UpdateEstateData calldata data) external returns (uint256);
 }
