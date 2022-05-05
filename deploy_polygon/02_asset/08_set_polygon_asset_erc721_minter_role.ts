@@ -15,6 +15,8 @@ const func: DeployFunction = async function (
     'PolygonAssetERC721',
     'MINTER_ROLE'
   );
+
+  // TODO: add  'if hasRole'
   await deployments.execute(
     'PolygonAssetERC721',
     {from: assetAdmin, log: true},
@@ -26,6 +28,7 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['PolygonAssetERC721_setup', 'PolygonAsset', 'L2'];
+func.runAtTheEnd = true;
 func.dependencies = [
   'PolygonAssetERC721_deploy',
   'PolygonAssetERC721Tunnel_deploy',
