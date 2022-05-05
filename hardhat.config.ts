@@ -89,6 +89,7 @@ const config: HardhatUserConfig = {
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       goerli_test: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+      mumbai_test: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
@@ -99,6 +100,7 @@ const config: HardhatUserConfig = {
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     upgradeAdmin: 'sandAdmin',
@@ -137,6 +139,7 @@ const config: HardhatUserConfig = {
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       goerli_test: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
+      mumbai_test: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
 
     Foundation: {
@@ -185,6 +188,7 @@ const config: HardhatUserConfig = {
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
 
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     gemsAndCatalystsAdmin: 'sandAdmin',
@@ -197,6 +201,7 @@ const config: HardhatUserConfig = {
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -331,8 +336,8 @@ const config: HardhatUserConfig = {
       },
     },
     goerli_test: {
-      url: node_url('goerli'),
-      accounts: accounts('goerli'),
+      url: node_url('goerli_test'),
+      accounts: accounts('goerli_test'),
       tags: ['testnet', 'L1'],
       // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
@@ -354,15 +359,15 @@ const config: HardhatUserConfig = {
       deploy: ['deploy_polygon'],
       //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
-        l1: 'goerli',
+        l1: 'goerli_test',
       },
     },
     mumbai_test: {
-      url: node_url('mumbai'),
-      accounts: accounts('mumbai'),
+      url: node_url('mumbai_test'),
+      accounts: accounts('mumbai_test'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
-      gasPrice: 100000000000, // TODO: this fixes invalid sender issue
+      //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'goerli_test',
       },
