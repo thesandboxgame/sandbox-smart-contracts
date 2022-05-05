@@ -309,10 +309,6 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
             },
           }))
         : [];
-      //   uint256 gameId;
-      // uint256[][3] quadTupleToAdd; //(size, x, y) transfer when adding
-      // uint256[][3] quadTupleToUse; //(size, x, y) take from free-lands
-      // TileWithCoordLib.TileWithCoord[] tilesToUse;
       const tx = await setup.estateContract.createEstate(setup.other, {
         gameData,
         freeLandData: {

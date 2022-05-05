@@ -6,7 +6,7 @@ describe('Estate test with maps on layer 1', function () {
   describe('create one estate', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
-      it(`create one ${size}x${size} quads and create an estate with that`, async function () {
+      it(`create one ${size}x${size} quad and create an estate with that`, async function () {
         const {
           other,
           landContractAsOther,
@@ -38,7 +38,7 @@ describe('Estate test with maps on layer 1', function () {
         [16, 6],
         [256, 3],
       ].forEach(([cant, size]) => {
-        it(`@slow create ${cant} (how many we can in one tx?) ${size}x${size} estates with that`, async function () {
+        it(`@slow create ${cant} 1x1 quads then create an ${size}x${size} estate with that`, async function () {
           const {
             other,
             landContractAsOther,
@@ -56,7 +56,7 @@ describe('Estate test with maps on layer 1', function () {
           const {xs, ys, sizes} = getXsYsSizes(0, 0, size);
           const {gasUsed} = await createEstate(sizes, xs, ys);
           console.log(
-            `create ${cant} (how many we can in one tx?) ${size}x${size} estates with that, GAS USED: `,
+            `create ${cant} quads and ${size}x${size} estate with that, GAS USED: `,
             gasUsed.toString()
           );
         });
