@@ -535,6 +535,25 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
     }
 
+    function _mintBatches(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal {
+        for (uint256 i = 0; i < amounts.length; i++) {
+            if (amounts[i] > 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(
+                    index,
+                    amounts[i],
+                    ObjectLib32.Operations.REPLACE
+                );
+            }
+        }
+        _completeBatchMint(_msgSender(), to, ids, amounts, data);
+    }
+
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
     /// If the bit at the index corresponding to the given version is already set, revert.
     /// Otherwise, set the bit and return.
