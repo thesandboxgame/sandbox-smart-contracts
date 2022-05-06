@@ -13,7 +13,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     await deployments.fixture([
       'PolygonAssetERC1155',
       'Asset',
-      'PolygonAssetERC1155Tunnel',
+      'MockPolygonAssetERC1155Tunnel',
       'AssetERC1155Tunnel',
       'FXROOT',
       'FXCHILD',
@@ -22,8 +22,8 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     ]);
     const PolygonAssetERC1155 = await ethers.getContract('PolygonAssetERC1155');
     const AssetERC1155 = await ethers.getContract('Asset');
-    const PolygonAssetERC1155Tunnel = await ethers.getContract(
-      'PolygonAssetERC1155Tunnel'
+    const MockPolygonAssetERC1155Tunnel = await ethers.getContract(
+      'MockPolygonAssetERC1155Tunnel'
     );
     const AssetERC1155Tunnel = await ethers.getContract('AssetERC1155Tunnel');
     const FxRoot = await ethers.getContract('FXROOT');
@@ -41,6 +41,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
 
     const namedAccounts = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
+
     const otherAccounts = [...unnamedAccounts];
     const minter = otherAccounts[0];
     otherAccounts.splice(0, 1);
@@ -48,7 +49,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     const users = await setupUsers(otherAccounts, {
       PolygonAssetERC1155,
       AssetERC1155,
-      PolygonAssetERC1155Tunnel,
+      MockPolygonAssetERC1155Tunnel,
       AssetERC1155Tunnel,
       FxRoot,
       FxChild,
@@ -57,7 +58,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     const deployer = await setupUser(namedAccounts.deployer, {
       PolygonAssetERC1155,
       AssetERC1155,
-      PolygonAssetERC1155Tunnel,
+      MockPolygonAssetERC1155Tunnel,
       AssetERC1155Tunnel,
       FxRoot,
       FxChild,
@@ -68,7 +69,10 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       AssetERC1155,
       PolygonAssetERC1155,
     });
-
+    const assetBouncerAdmin = await setupUser(namedAccounts.assetBouncerAdmin, {
+      AssetERC1155,
+      PolygonAssetERC1155,
+    });
     const assetMinter = await setupUser(minter, {
       AssetERC1155,
       PolygonAssetERC1155,
@@ -77,19 +81,19 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     await assetAdmin.AssetERC1155.setPredicate(MockAssetERC1155Tunnel.address);
 
     await deployer.FxRoot.setFxChild(FxChild.address);
-    // await deployer.PolygonAssetERC1155Tunnel.setFxRootTunnel(
-    //   MockAssetERC1155Tunnel.address
-    // );
+    await deployer.MockPolygonAssetERC1155Tunnel.setFxRootTunnel(
+      MockAssetERC1155Tunnel.address
+    );
     await deployer.MockAssetERC1155Tunnel.setFxChildTunnel(
-      PolygonAssetERC1155Tunnel.address
+      MockPolygonAssetERC1155Tunnel.address
     );
 
-    await assetAdmin.PolygonAssetERC1155.setBouncer(
-      PolygonAssetERC1155Tunnel.address,
+    await assetBouncerAdmin.PolygonAssetERC1155.setBouncer(
+      MockPolygonAssetERC1155Tunnel.address,
       true
     );
 
-    await assetAdmin.PolygonAssetERC1155.setBouncer(minter, true);
+    await assetBouncerAdmin.PolygonAssetERC1155.setBouncer(minter, true);
 
     let id = 0;
     const ipfsHashString =
@@ -168,7 +172,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       assetMinter,
       PolygonAssetERC1155,
       AssetERC1155,
-      PolygonAssetERC1155Tunnel,
+      MockPolygonAssetERC1155Tunnel,
       AssetERC1155Tunnel,
       mintAssetOnL1,
       mintAssetOnL2,
