@@ -92,7 +92,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
             require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
             _metadataHash[uriId] = hashes[i];
         }
-        _mintBatch(to, ids, amounts, data);
+        _mintBatches(to, ids, amounts, data);
     }
 
     /// @notice Set the address that will be able to mint on L1 (limited to custom predicate).
