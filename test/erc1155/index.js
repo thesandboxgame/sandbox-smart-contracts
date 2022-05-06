@@ -1642,7 +1642,7 @@ module.exports = (init) => {
   });
 
   describe('ordering', function (it) {
-    const amounts = [10, 1, 5, 1, 3, 1, 1111, 1];
+    const amounts = [10, 1, 5, 1, 9, 1, 4, 8, 11, 1, 1, 1];
     async function testOrder(
       contractAsMinter,
       minter,
