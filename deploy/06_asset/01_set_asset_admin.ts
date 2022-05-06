@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
       await execute(
         'Asset',
-        {from: currentAdmin, log: true},
+        {from: currentBouncerAdmin, log: true},
         'changeBouncerAdmin',
         assetBouncerAdmin
       );
