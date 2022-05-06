@@ -17,6 +17,7 @@ import {
   waitFor,
   withSnapshot,
 } from '../utils';
+import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;

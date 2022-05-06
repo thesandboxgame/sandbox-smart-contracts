@@ -119,38 +119,37 @@ function testAsset() {
 
       // TODO: fix mintBatch, reverted with reason string 'ID_TAKEN'. Check format of ids
       const ids = [
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005000',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005001',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005002',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005003',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005004',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000005000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001005001',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000002005002',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000003005003',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000004005004',
         '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005005',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005006',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005007',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005008',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000005005009',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000500500a',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd00000000800000000500500b',
-        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000500500c',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000006005006',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000007005007',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000008005008',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000009005009',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000a00500a',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd00000000800000000b00500b',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000c00500c',
       ];
-      const batchIds = [];
-      // (
-      //   await mintBatch(ids, minter, [
-      //     10,
-      //     5,
-      //     8,
-      //     9,
-      //     10,
-      //     6,
-      //     8,
-      //     8,
-      //     10,
-      //     12,
-      //     1,
-      //     1,
-      //     1,
-      //   ])
-      // ).tokenIds;
+      const batchIds = (
+        await mintMultiple(ids, minter, [
+          10,
+          5,
+          8,
+          9,
+          10,
+          6,
+          8,
+          8,
+          10,
+          12,
+          1,
+          1,
+          1,
+        ])
+      ).tokenIds;
 
       return {
         ethersProvider: ethers.provider,
