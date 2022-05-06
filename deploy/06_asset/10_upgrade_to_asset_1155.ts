@@ -6,7 +6,12 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {
+    deployer,
+    upgradeAdmin,
+    assetAdmin,
+    assetBouncerAdmin,
+  } = await getNamedAccounts();
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
@@ -34,8 +39,8 @@ const func: DeployFunction = async function (
         methodName: 'initialize',
         args: [
           TRUSTED_FORWARDER.address,
-          deployer,
-          deployer,
+          assetAdmin,
+          assetBouncerAdmin,
           AssetERC721.address,
           0,
         ],

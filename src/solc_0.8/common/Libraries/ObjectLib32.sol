@@ -3,11 +3,7 @@
 pragma solidity 0.8.2;
 
 library ObjectLib32 {
-    enum Operations {
-        ADD,
-        SUB,
-        REPLACE
-    }
+    enum Operations {ADD, SUB, REPLACE}
     // Constants regarding bin or chunk sizes for balance packing
     uint256 internal constant TYPES_BITS_SIZE = 32; // Max size of each object
     uint256 internal constant TYPES_PER_UINT256 = 256 / TYPES_BITS_SIZE; // Number of types per uint256
@@ -23,9 +19,7 @@ library ObjectLib32 {
     /// @return index ID's index within that bin.
     function getTokenBinIndex(uint256 tokenId) internal pure returns (uint256 bin, uint256 index) {
         uint256 id = tokenId & TYPE_ELIMINATOR;
-        unchecked {
-            bin = (id * TYPES_BITS_SIZE) / 256;
-        }
+        unchecked {bin = (id * TYPES_BITS_SIZE) / 256;}
         index = tokenId % TYPES_PER_UINT256;
         return (bin, index);
     }

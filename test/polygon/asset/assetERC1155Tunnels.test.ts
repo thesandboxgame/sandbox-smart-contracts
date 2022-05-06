@@ -13,7 +13,7 @@ describe('PolygonAsset.sol', function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
-        PolygonAssetERC1155Tunnel,
+        MockPolygonAssetERC1155Tunnel,
         users,
         deployer,
         mintAssetOnL2,
@@ -29,7 +29,7 @@ describe('PolygonAsset.sol', function () {
       // Transfer to L1 Tunnel
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(PolygonAssetERC1155Tunnel.address, true);
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
 
       const testMetadataHashArray = [];
       testMetadataHashArray.push(
@@ -41,7 +41,7 @@ describe('PolygonAsset.sol', function () {
       );
 
       await waitFor(
-        PolygonAssetERC1155Tunnel.connect(
+        MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
         ).batchWithdrawToRoot(users[0].address, [tokenId], [10], MOCK_DATA)
       );
@@ -64,7 +64,7 @@ describe('PolygonAsset.sol', function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
-        PolygonAssetERC1155Tunnel,
+        MockPolygonAssetERC1155Tunnel,
         users,
         deployer,
         mintAssetOnL2,
@@ -80,7 +80,7 @@ describe('PolygonAsset.sol', function () {
       // Transfer to L1 Tunnel
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(PolygonAssetERC1155Tunnel.address, true);
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
 
       const testMetadataHashArray = [];
       testMetadataHashArray.push(
@@ -92,7 +92,7 @@ describe('PolygonAsset.sol', function () {
       );
 
       await waitFor(
-        PolygonAssetERC1155Tunnel.connect(
+        MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
         ).batchWithdrawToRoot(users[0].address, [tokenId], [1], MOCK_DATA)
       );
@@ -114,7 +114,7 @@ describe('PolygonAsset.sol', function () {
     it('cannot transfer more than L2 minted assets: L2 to L1', async function () {
       const {
         PolygonAssetERC1155,
-        PolygonAssetERC1155Tunnel,
+        MockPolygonAssetERC1155Tunnel,
         users,
         mintAssetOnL2,
       } = await setupAssetERC1155Tunnels();
@@ -129,7 +129,7 @@ describe('PolygonAsset.sol', function () {
       // Transfer to L1 Tunnel
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(PolygonAssetERC1155Tunnel.address, true);
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
 
       const testMetadataHashArray = [];
       testMetadataHashArray.push(
@@ -141,7 +141,7 @@ describe('PolygonAsset.sol', function () {
       );
 
       await expect(
-        PolygonAssetERC1155Tunnel.connect(
+        MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
         ).batchWithdrawToRoot(users[0].address, [tokenId], [2], MOCK_DATA)
       ).to.be.revertedWith(`can't substract more than there is`);
@@ -151,7 +151,7 @@ describe('PolygonAsset.sol', function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
-        PolygonAssetERC1155Tunnel,
+        MockPolygonAssetERC1155Tunnel,
         users,
         deployer,
         mintAssetOnL2,
@@ -175,10 +175,10 @@ describe('PolygonAsset.sol', function () {
       // Transfer to L1 Tunnel
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
-      ).setApprovalForAll(PolygonAssetERC1155Tunnel.address, true);
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
 
       await waitFor(
-        PolygonAssetERC1155Tunnel.connect(
+        MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
         ).batchWithdrawToRoot(
           users[0].address,
@@ -212,7 +212,7 @@ describe('PolygonAsset.sol', function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
-        PolygonAssetERC1155Tunnel,
+        MockPolygonAssetERC1155Tunnel,
         MockAssetERC1155Tunnel,
         users,
         mintAssetOnL1,
@@ -270,7 +270,7 @@ describe('PolygonAsset.sol', function () {
       expect(balanceUserL2).to.be.equal(supplies[0]);
       const balanceL2Tunnel = await PolygonAssetERC1155[
         'balanceOf(address,uint256)'
-      ](PolygonAssetERC1155Tunnel.address, tokenIds[0]);
+      ](MockPolygonAssetERC1155Tunnel.address, tokenIds[0]);
       expect(balanceL2Tunnel).to.be.equal(0);
     });
 
