@@ -314,7 +314,7 @@ const config: HardhatUserConfig = {
       },
     },
     goerli_test: {
-      url: node_url('goerli_test'),
+      url: node_url('goerli'),
       accounts: accounts('goerli_test'),
       tags: ['testnet', 'L1'],
       // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
@@ -337,11 +337,11 @@ const config: HardhatUserConfig = {
       deploy: ['deploy_polygon'],
       //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
-        l1: 'goerli_test',
+        l1: 'goerli',
       },
     },
     mumbai_test: {
-      url: node_url('mumbai_test'),
+      url: node_url('mumbai'),
       accounts: accounts('mumbai_test'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
@@ -382,7 +382,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
-      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY_MUMBAI || '',
     },
   },
 };
