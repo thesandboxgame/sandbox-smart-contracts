@@ -276,7 +276,7 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
     gameContractAsOther,
     ...setup,
     createEstate: async (data: {
-      freelandQuads: {
+      freelandQuads?: {
         sizes: BigNumberish[];
         xs: BigNumberish[];
         ys: BigNumberish[];
@@ -300,27 +300,33 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
             gameId: x.gameId,
             transferQuads: x.quadsToAdd
               ? [x.quadsToAdd.sizes, x.quadsToAdd.xs, x.quadsToAdd.ys]
-              : [],
+              : [[], [], []],
             freeLandData: {
               quads: x.quadsToUse
                 ? [x.quadsToUse.sizes, x.quadsToUse.xs, x.quadsToUse.ys]
-                : [],
+                : [[], [], []],
               tiles: [],
             },
           }))
         : [];
-      const tx = await setup.estateContract.createEstate(setup.other, {
+      const createEstateData = {
         gameData,
         freeLandData: {
-          quads: [
-            data.freelandQuads.sizes,
-            data.freelandQuads.xs,
-            data.freelandQuads.ys,
-          ],
+          quads: data.freelandQuads
+            ? [
+                data.freelandQuads.sizes,
+                data.freelandQuads.xs,
+                data.freelandQuads.ys,
+              ]
+            : [[], [], []],
           tiles: [],
         },
         uri: ethers.utils.formatBytes32String('uri ???'),
-      });
+      };
+      const tx = await setup.estateContract.createEstate(
+        setup.other,
+        createEstateData
+      );
       const receipt: ContractReceipt = await tx.wait();
       const estateCreationEvents = receipt.events?.filter(
         (e) => e.event === 'EstateTokenCreated'

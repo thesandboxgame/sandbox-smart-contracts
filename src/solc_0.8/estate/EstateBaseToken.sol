@@ -41,11 +41,11 @@ contract EstateBaseToken is ImmutableERC721, WithMinter {
     ) internal returns (uint256 estateId, uint256 storageId) {
         // batchTransferQuad does that for us
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
-        require(quadTuple[0].length > 0, "EMPTY_LAND_IDS_ARRAY");
-
         (estateId, storageId) = _mintEstate(from, _nextId++, 1, true);
         _metaData[storageId] = uri;
-        _land.batchTransferQuad(from, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
+        if (quadTuple[0].length > 0) {
+            _land.batchTransferQuad(from, address(this), quadTuple[0], quadTuple[1], quadTuple[2], "");
+        }
         _addLandsMapping(storageId, tiles, quadTuple);
         return (estateId, storageId);
     }

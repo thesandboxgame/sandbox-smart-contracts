@@ -97,7 +97,7 @@ describe('Estate test with maps and games on layer 2', function () {
     });
   });
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('@slow one estate, free lands, increase land', async function () {
+  it.skip('@slow one estate 1x1 lands 1 tile zero games', async function () {
     async function justDoIt(cant: number, tileSize: number) {
       const {
         other,
@@ -121,7 +121,6 @@ describe('Estate test with maps and games on layer 2', function () {
         ys.push(Math.floor((i * tileSize) / 24) * tileSize);
         sizes.push(tileSize);
       }
-      console.log(xs, ys, sizes);
       const {gasUsed} = await createEstate({
         freelandQuads: {xs, ys, sizes},
         games: [],
@@ -130,12 +129,12 @@ describe('Estate test with maps and games on layer 2', function () {
     }
 
     const tileSize = 3;
-    for (let i = 1; i < 576 / tileSize / tileSize; i += 12 / tileSize) {
+    for (let i = 1; i <= 576 / tileSize / tileSize; i++) {
       await justDoIt(i, tileSize);
     }
   });
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('@slow one estate, free lands, increase land multiple tiles', async function () {
+  it.skip('@slow one estate 1x1 lands a lot of tiles zero games', async function () {
     async function justDoIt(cant: number, tileSize: number) {
       const {
         other,
@@ -167,9 +166,64 @@ describe('Estate test with maps and games on layer 2', function () {
       console.log(`\t${cant * tileSize}\t`, gasUsed.toString());
     }
 
-    const tileSize = 12;
-    for (let i = 1; i < 289; i += 12 / tileSize) {
+    const tileSize = 3;
+    for (let i = 1; i <= 289; i += 12 / tileSize) {
       await justDoIt(i, tileSize);
+    }
+  });
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('@slow one estate one land one tile a lot of games', async function () {
+    async function justDoIt(cant: number) {
+      const {
+        other,
+        landContractAsOther,
+        estateContract,
+        gameContractAsOther,
+        mintQuad,
+        createEstate,
+      } = await setupL2EstateGameAndLand();
+      const noLands = false;
+
+      const quadId = await mintQuad(other, 24, 0, 0);
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContract.address,
+        quadId
+      );
+      const gameIds = [];
+      for (let gameId = 1; gameId <= cant; gameId++) {
+        await gameContractAsOther.mint(other, gameId);
+        await gameContractAsOther.approve(estateContract.address, gameId);
+        gameIds.push(gameId);
+      }
+
+      const {gasUsed} = await createEstate({
+        games: gameIds.map((gameId) => ({
+          gameId,
+          ...(noLands
+            ? {}
+            : {
+                quadsToAdd: {
+                  sizes: [1],
+                  xs: [gameId % 24],
+                  ys: [Math.floor(gameId / 24)],
+                },
+              }),
+        })),
+      });
+      console.log(`\t${cant}\t`, gasUsed.toString());
+    }
+
+    for (let i = 1; i <= 576; i++) {
+      await justDoIt(i);
+    }
+  });
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('create an empty states', async function () {
+    const {createEstate} = await setupL2EstateGameAndLand();
+    for (let i = 0; i < 10; i++) {
+      const {gasUsed} = await createEstate({});
+      console.log('gas used', gasUsed.toString());
     }
   });
 });
