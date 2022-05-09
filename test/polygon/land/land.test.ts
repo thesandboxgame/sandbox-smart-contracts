@@ -177,6 +177,51 @@ describe('MockLandWithMint.sol', function () {
         }
       });
 
+      it(`should NOT be able to transfer burned 1x1 through parent quad`, async function () {
+        const {landOwners} = await setupTest();
+        const bytes = '0x3333';
+
+        // to have enough balance after burning a 1x1
+        await waitFor(
+          landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].address,
+            3,
+            3,
+            0,
+            bytes
+          )
+        );
+
+        // let's mint all the 1x1 of a 3x3 quad
+        for (let x = 0; x < 3; x++) {
+          for (let y = 0; y < 3; y++) {
+            await waitFor(
+              landOwners[0].MockLandWithMint.mintQuad(
+                landOwners[0].address,
+                1,
+                x,
+                y,
+                bytes
+              )
+            );
+          }
+        }
+
+        await landOwners[0].MockLandWithMint.burn(0);
+
+        // should not be able to transfer a 3x3 quad that has a burnt 1x1
+        await expect(
+          landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].address,
+            landOwners[1].address,
+            3,
+            0,
+            0,
+            '0x'
+          )
+        ).to.be.revertedWith('not owner');
+      });
+
       it('transfers of quads of all sizes from self', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {landOwners} = await setupTest();

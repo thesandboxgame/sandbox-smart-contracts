@@ -534,6 +534,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
         uint256 owner = _owners[id];
         if (owner != 0) {
+            require((owner & BURNED_FLAG) != BURNED_FLAG, "not owner");
             require(address(uint160(owner)) == from, "not owner");
             _owners[id] = 0;
             return true;
