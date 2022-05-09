@@ -11,4 +11,6 @@ interface IGem is IERC20Extended {
         address spender,
         uint256 amount
     ) external override returns (bool success);
+
+    function getDecimals() external pure returns (uint8);
 }

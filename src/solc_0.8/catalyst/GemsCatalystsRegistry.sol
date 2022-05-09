@@ -53,31 +53,47 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         return catalyst.getMaxGems();
     }
 
+    /// @notice Returns the decimals for a given catalyst
+    /// @param catalystId catalyst identifier
+    function getCatalystDecimals(uint16 catalystId) external view override returns (uint8) {
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        return catalyst.getDecimals();
+    }
+
+    /// @notice Returns the decimals for a given gem
+    /// @param gemId gem identifier
+    function getGemDecimals(uint16 gemId) external view override returns (uint8) {
+        IGem gem = getGem(gemId);
+        require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
+        return gem.getDecimals();
+    }
+
     /// @notice Burns one gem unit from each gem id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn one gem from each
-    /// @param amount amount units to burn
+    /// @param amounts amount units to burn
     function burnDifferentGems(
         address from,
         uint16[] calldata gemIds,
-        uint256 amount
+        uint256[] calldata amounts
     ) external override {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            burnGem(from, gemIds[i], amount);
+            burnGem(from, gemIds[i], amounts[i]);
         }
     }
 
     /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
-    /// @param catalystIds list of catalysts to burn one catalyst from each
-    /// @param amount amount to burn
+    /// @param catalystIds list of catalysts to burn
+    /// @param amounts amount to burn
     function burnDifferentCatalysts(
         address from,
         uint16[] calldata catalystIds,
-        uint256 amount
+        uint256[] calldata amounts
     ) external override {
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            burnCatalyst(from, catalystIds[i], amount);
+            burnCatalyst(from, catalystIds[i], amounts[i]);
         }
     }
 
@@ -214,7 +230,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev Get the catalyst contract corresponding to the id.
     /// @param catalystId The catalyst id to use to retrieve the contract.
     /// @return The requested Catalyst contract.
-    function getCatalyst(uint16 catalystId) internal view returns (ICatalyst) {
+    function getCatalyst(uint16 catalystId) public view returns (ICatalyst) {
         if (catalystId > 0 && catalystId <= _catalysts.length) {
             return _catalysts[catalystId - 1];
         } else {
@@ -225,7 +241,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev Get the gem contract corresponding to the id.
     /// @param gemId The gem id to use to retrieve the contract.
     /// @return The requested Gem contract.
-    function getGem(uint16 gemId) internal view returns (IGem) {
+    function getGem(uint16 gemId) public view returns (IGem) {
         if (gemId > 0 && gemId <= _gems.length) {
             return _gems[gemId - 1];
         } else {
