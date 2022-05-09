@@ -100,6 +100,13 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _mintBatch(owner, ids, supplies, data);
     }
 
+    /// @notice Burns `amount` tokens of type `id`.
+    /// @param id token type which will be burnt.
+    /// @param amount amount of token to burn.
+    function burn(uint256 id, uint256 amount) external {
+        _burn(_msgSender(), id, amount);
+    }
+
     /// @notice Burns `amount` tokens of type `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id token type which will be burnt.
@@ -184,7 +191,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         return ids;
     }
 
-    // TODO: check and update comments
     function _generateTokenId(
         address creator,
         uint256 supply,
@@ -196,13 +202,13 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         return
             uint256(uint160(creator)) *
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0)
             uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
-            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
+            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack)
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // ERC1155ERC721Helper.URI_ID
-            packIndex; // packIndex (position in the pack) // PACK_INDEX
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack
+            packIndex; // packIndex (position in the pack)
     }
 }

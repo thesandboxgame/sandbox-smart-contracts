@@ -16,8 +16,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
-    uint256 public gemsFactor = 1000000000000000000;
-    uint256 public catalystsFactor = 1000000000000000000;
+    uint256 public gemsFactor = 1e18;
+    uint256 public catalystsFactor = 1e18;
 
     IAssetAttributesRegistry internal immutable _registry;
     IPolygonAssetERC1155 internal immutable _assetERC1155;
@@ -82,14 +82,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         numberOfCatalystBurnPerAsset = newQuantity;
     }
 
-    function setGemsFactor(uint256 newQuantity) external override onlyOwner {
-        gemsFactor = newQuantity;
-    }
-
-    function setCatalystsFactor(uint256 newQuantity) external override onlyOwner {
-        catalystsFactor = newQuantity;
-    }
-
     function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external override onlyOwner {
         customMinterAllowance[addressToModify] = isAddressAllowed;
 
@@ -122,6 +114,34 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
             mintData.metadataHash,
             catalystId,
             gemIds,
+            quantity,
+            mintData.to,
+            mintData.data
+        );
+    }
+
+    /// @notice mint "quantity" number of Asset token without using a catalyst.
+    /// @param mintData (-from address creating the Asset, need to be the tx sender or meta tx signer.
+    ///  -packId unused packId that will let you predict the resulting tokenId.
+    /// - metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// - to destination address receiving the minted tokens.
+    /// - data extra data)
+    /// @param quantity number of token to mint
+    /// @return assetId The new token Id.
+    function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
+        external
+        override
+        returns (uint256 assetId)
+    {
+        require(
+            customMinterAllowance[_msgSender()] == true || _msgSender() == owner(),
+            "AssetMinter: custom minting unauthorized"
+        );
+        _mintRequirements(mintData.from, quantity, mintData.to);
+        assetId = _assetERC1155.mint(
+            mintData.from,
+            mintData.packId,
+            mintData.metadataHash,
             quantity,
             mintData.to,
             mintData.data
