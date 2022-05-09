@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const catalystsToAdd = [];
   const gemsToAdd = [];
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
   for (const catalyst of catalysts) {
     const doesCatalystExist = await read(
@@ -38,20 +38,42 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
+  let admin = deployer;
+  const defaultAdminRole = await read(
+    'PolygonGemsCatalystsRegistry',
+    'DEFAULT_ADMIN_ROLE'
+  );
+
+  const isDeployerAdmin = await read(
+    'PolygonGemsCatalystsRegistry',
+    'hasRole',
+    defaultAdminRole,
+    deployer
+  );
+
+  if (!isDeployerAdmin) {
+    const isNewAdmin = await read(
+      'PolygonGemsCatalystsRegistry',
+      'hasRole',
+      defaultAdminRole,
+      gemsCatalystsRegistryAdmin
+    );
+    if (isNewAdmin) {
+      admin = gemsCatalystsRegistryAdmin;
+    }
+  }
+
   await execute(
     'PolygonGemsCatalystsRegistry',
-    {from: deployer, log: true},
+    {from: admin, log: true},
     'addGemsAndCatalysts',
     gemsToAdd,
     catalystsToAdd
   );
 };
 export default func;
-func.tags = [
-  'PolygonGemsCatalystsRegistry',
-  'PolygonGemsCatalystsRegistry_setup',
-  'L2',
-];
+func.runAtTheEnd = true;
+func.tags = ['PolygonGemsCatalystsRegistry_setup', 'L2'];
 func.dependencies = [
   'PolygonGemsCatalystsRegistry_deploy',
   'PolygonCatalysts',

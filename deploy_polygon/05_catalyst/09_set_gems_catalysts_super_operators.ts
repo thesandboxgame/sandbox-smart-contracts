@@ -15,7 +15,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const AssetMinter = await deployments.get('PolygonAssetMinter');
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
-  const {deployer, catalystAdmin, gemAdmin} = await getNamedAccounts();
+  const {
+    deployer,
+    catalystAdmin,
+    gemAdmin,
+    gemsCatalystsRegistryAdmin,
+  } = await getNamedAccounts();
 
   const superOperatorRole = await read(
     'PolygonGemsCatalystsRegistry',
@@ -29,10 +34,35 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     AssetMinter.address
   );
 
+  let admin = deployer;
+  const defaultAdminRole = await read(
+    'PolygonGemsCatalystsRegistry',
+    'DEFAULT_ADMIN_ROLE'
+  );
+
+  const isDeployerAdmin = await read(
+    'PolygonGemsCatalystsRegistry',
+    'hasRole',
+    defaultAdminRole,
+    deployer
+  );
+
+  if (!isDeployerAdmin) {
+    const isNewAdmin = await read(
+      'PolygonGemsCatalystsRegistry',
+      'hasRole',
+      defaultAdminRole,
+      gemsCatalystsRegistryAdmin
+    );
+    if (isNewAdmin) {
+      admin = gemsCatalystsRegistryAdmin;
+    }
+  }
+
   if (!isAssetMinterSuperOperator) {
     await execute(
       'PolygonGemsCatalystsRegistry',
-      {from: deployer, log: true},
+      {from: admin, log: true},
       'grantRole',
       superOperatorRole,
       AssetMinter.address
