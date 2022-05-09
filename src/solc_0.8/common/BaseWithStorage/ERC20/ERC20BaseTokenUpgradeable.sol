@@ -126,7 +126,7 @@ abstract contract ERC20BaseTokenUpgradeable is
 
     /// @notice Get the number of decimals for the token collection.
     /// @return The number of decimals.
-    function decimals() external pure virtual returns (uint8) {
+    function decimals() public pure virtual returns (uint8) {
         return uint8(18);
     }
 

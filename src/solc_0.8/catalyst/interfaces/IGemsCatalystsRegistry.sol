@@ -17,13 +17,13 @@ interface IGemsCatalystsRegistry {
     function burnDifferentGems(
         address from,
         uint16[] calldata gemIds,
-        uint256 amount
+        uint256[] calldata amounts
     ) external;
 
     function burnDifferentCatalysts(
         address from,
         uint16[] calldata catalystIds,
-        uint256 amount
+        uint256[] calldata amounts
     ) external;
 
     function batchBurnGems(
@@ -53,4 +53,8 @@ interface IGemsCatalystsRegistry {
         uint16 gemId,
         uint256 amount
     ) external;
+
+    function getCatalystDecimals(uint16 catalystId) external view returns (uint8);
+
+    function getGemDecimals(uint16 gemId) external view returns (uint8);
 }
