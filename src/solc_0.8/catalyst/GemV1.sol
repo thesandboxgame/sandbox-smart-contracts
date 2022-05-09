@@ -38,4 +38,8 @@ contract GemV1 is IGem, ERC20TokenUpgradeable {
         _approveFor(owner, spender, amount);
         return true;
     }
+
+    function getDecimals() external pure override returns (uint8) {
+        return ERC20BaseTokenUpgradeable.decimals();
+    }
 }

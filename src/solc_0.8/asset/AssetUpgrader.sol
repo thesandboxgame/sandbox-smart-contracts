@@ -18,8 +18,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     address public immutable feeRecipient;
     uint256 public immutable upgradeFee;
     uint256 public immutable gemAdditionFee;
-    uint256 private constant GEM_UNIT = 1000000000000000000;
-    uint256 private constant CATALYST_UNIT = 1000000000000000000;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 
@@ -208,14 +206,19 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param from The owner of the gems.
     /// @param gemIds The gem types to burn.
     function _burnGems(address from, uint16[] memory gemIds) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, GEM_UNIT);
+        uint256[] memory gemFactors;
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gemFactors[i] = _gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
+        }
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
     }
 
     /// @dev Burn a catalyst.
     /// @param from The owner of the catalyst.
     /// @param catalystId The catalyst type to burn.
     function _burnCatalyst(address from, uint16 catalystId) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
+        uint256 catalystFactor = _gemsCatalystsRegistry.getCatalystDecimals(catalystId);
+        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, catalystFactor);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX

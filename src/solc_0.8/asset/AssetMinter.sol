@@ -16,8 +16,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
-    uint256 public gemsFactor = 1e18;
-    uint256 public catalystsFactor = 1e18;
 
     IAssetAttributesRegistry internal immutable _registry;
     IPolygonAssetERC1155 internal immutable _assetERC1155;
@@ -307,7 +305,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint16[] memory gemIds,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, numTimes * gemsFactor);
+        uint256[] memory gemFactors;
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gemFactors[i] = _gemsCatalystsRegistry.getGemDecimals(gemIds[i]) * numTimes;
+        }
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
     }
 
     /// @dev Burn a single type of catalyst.
@@ -319,7 +321,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint16 catalystId,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * catalystsFactor);
+        _gemsCatalystsRegistry.burnCatalyst(
+            from,
+            catalystId,
+            numTimes * _gemsCatalystsRegistry.getCatalystDecimals(catalystId)
+        );
     }
 
     /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
@@ -332,7 +338,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * gemsFactor * numberOfGemsBurnPerAsset;
+            uint256 gemFactor = _gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
+            scaledQuantities[i] = quantities[i] * gemFactor * numberOfGemsBurnPerAsset;
         }
     }
 
@@ -346,7 +353,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * catalystsFactor * numberOfCatalystBurnPerAsset;
+            uint256 catalystFactor = _gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
+            scaledQuantities[i] = quantities[i] * catalystFactor * numberOfCatalystBurnPerAsset;
         }
     }
 
