@@ -23,11 +23,11 @@
     "@ethereumjs/tx": "^3.3.2",
     "@ethersproject/wallet": "^5.0.5",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@0.3.0-beta.7",
-    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@openzeppelin/contracts": "^3.2.1-solc-0.7",
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
-    "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.0.0",
-    "@openzeppelin/contracts-upgradeable": "^4.4.1",
+    "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
+    "@openzeppelin/contracts-upgradeable": "4.4.2",
     "@openzeppelin/hardhat-upgrades": "^1.4.3",
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^9.0.6",
@@ -41,6 +41,7 @@
     "@urql/core": "^1.16.1",
     "chai": "^4.2.0",
     "cross-env": "^7.0.2",
+    "csv-parser": "^3.0.0",
     "dotenv": "^8.2.0",
     "dotenv-cli": "^4.0.0",
     "eslint": "^7.7.0",
@@ -55,7 +56,7 @@
     "graphql": "^15.4.0",
     "hardhat": "^2.6.1",
     "hardhat-contract-sizer": "^2.0.3",
-    "hardhat-deploy": "^0.9.0",
+    "hardhat-deploy": "^0.10.5",
     "hardhat-gas-reporter": "^1.0.4",
     "inquirer": "^7.3.3",
     "isomorphic-unfetch": "^3.1.0",
@@ -69,8 +70,7 @@
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^9.0.0",
-    "typescript": "^4.0.5",
-    "csv-parser": "^3.0.0"
+    "typescript": "^4.0.5"
   },
   "scripts": {
     "postinstall": "node ./.setup.js",
@@ -94,6 +94,10 @@
     "fork:deploy": "node ./scripts.js fork:deploy",
     "fork:dev": "node ./scripts.js fork:dev",
     "fork:test": "node ./scripts.js fork:test",
+    "claim:add": "yarn execute mainnet ./setup/add_new_multi_giveaway.ts Multi_Giveaway_1",
+    "claim:send": "yarn execute mainnet ./setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1",
+    "landsale:send":"yarn execute mainnet ./setup/landsales/send_assets_to_sales.ts",
+    "landsale:withdraw":"yarn execute mainnet ./setup/landsales/withdraw_from_sales.ts",
     "hardhat": "hardhat"
   }
 }

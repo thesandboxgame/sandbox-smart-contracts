@@ -1,6 +1,6 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {BigNumber} from '@ethersproject/bignumber';
 import {parseEther} from '@ethersproject/units';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -53,7 +53,7 @@ const func: DeployFunction = async function (hre) {
       sand.address,
       catalystMinterAdmin,
       '0x0000000000000000000000000000000000000000', // TODO SAND : mintingFeeCollector
-      parseEther('1'), //TODO SAND : confirm
+      parseEther('0'), //TODO SAND : confirm
       catalyst.address,
       bakedMintData,
     ],

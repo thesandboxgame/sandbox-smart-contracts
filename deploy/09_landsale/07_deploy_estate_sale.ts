@@ -8,6 +8,7 @@ import {
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTest} from '../../utils/network';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {readJSONSync, removeSync, writeJSONSync} from 'fs-extra';
 
 type SaleDeployment = {
   name: string;
@@ -26,6 +27,9 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
   {name: 'LandPreSale_14'},
   {name: 'LandPreSale_15'},
+  {name: 'LandPreSale_16'},
+  {name: 'LandPreSale_17'},
+  {name: 'LandPreSale_18'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -50,30 +54,31 @@ const func: DeployFunction = async function (hre) {
     const landSaleName = `${name}_${sector}`;
     const deadline = getDeadline(hre, sector);
 
-    const args = {
-      asset: assetContract.address,
-      landAddress: landContract.address,
-      sandContractAddress: sandContract.address,
-      admin: landSaleAdmin,
-      estate: '0x0000000000000000000000000000000000000000',
-      feeDistributor: landSaleFeeRecipient,
-      initialWalletAddress: landSaleBeneficiary,
-      authValidator: authValidatorContract.address,
-      expiryTime: deadline,
-      merkleRoot: merkleRootHash,
-      trustedForwarder: sandContract.address,
-      initialSigningWallet: backendReferralWallet,
-      initialMaxCommissionRate: 2000,
-    };
-
+    const newDeployment = await deployments.getOrNull(`LandPreSale_${sector}`);
+    if (newDeployment) return;
     const landSaleDeployment = await deploy(landSaleName, {
       from: deployer,
       linkedData: lands,
       contract: 'EstateSaleWithAuth',
-      args: [args],
+      args: [
+        landContract.address,
+        sandContract.address,
+        sandContract.address,
+        landSaleAdmin,
+        landSaleBeneficiary,
+        merkleRootHash,
+        deadline,
+        backendReferralWallet,
+        2000,
+        '0x0000000000000000000000000000000000000000',
+        assetContract.address,
+        landSaleFeeRecipient,
+        authValidatorContract.address,
+      ],
       skipIfAlreadyDeployed: true,
       log: true,
     });
+    checkAndUpdateExistingDeployments(hre.network.name, sector, landSaleName);
 
     writeProofs(hre, landSaleName, landSale);
 
@@ -106,6 +111,21 @@ const func: DeployFunction = async function (hre) {
     }
   }
 };
+
+function checkAndUpdateExistingDeployments(
+  networkName: string,
+  sector: number,
+  oldCompleteName: string
+) {
+  const oldPath = `./deployments/${networkName}/${oldCompleteName}.json`;
+  const oldExists = readJSONSync(oldPath, {throws: false});
+  if (oldExists) {
+    const newPath = `./deployments/${networkName}/LandPreSale_${sector}.json`;
+    const newExists = readJSONSync(newPath, {throws: false});
+    if (!newExists) writeJSONSync(newPath, oldExists, {spaces: 2});
+    removeSync(oldPath);
+  }
+}
 
 export default func;
 func.tags = ['EstateSaleWithAuth', 'EstateSaleWithAuth_deploy'];

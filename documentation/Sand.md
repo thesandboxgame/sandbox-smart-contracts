@@ -1,6 +1,6 @@
 # Sand, an ERC-20 token implementation that support meta transactions natively
 
-See: [Sand.sol](../old_src/Sand.sol)
+See: [Sand.sol](../src/solc_0.5/Sand.sol)
 
 Sand smart contract is the ERC-20 token that will be used for
 

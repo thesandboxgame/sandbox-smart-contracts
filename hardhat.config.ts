@@ -210,12 +210,22 @@ const config: HardhatUserConfig = {
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
+    raffleSignWallet: {
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      mainnet: '0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB',
+    },
     sandboxAccount: {
       default: 4,
       mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+    },
+    sandboxFoundation: {
+      default: 4,
+      mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
     extraCatalystAndGemMinter: {
       default: null,
@@ -261,6 +271,8 @@ const config: HardhatUserConfig = {
         l1: 'hardhat',
         l2: 'hardhat',
       },
+      blockGasLimit:
+        parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
     },
     localhost: {
       url: 'http://localhost:8545',
@@ -331,7 +343,13 @@ const config: HardhatUserConfig = {
       }
     : undefined,
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || '',
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY_MAINNET || '',
+      rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
+      goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
+      polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
+      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
+    },
   },
 };
 

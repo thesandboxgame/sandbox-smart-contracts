@@ -63,7 +63,7 @@ export const setupEstateSale = withSnapshot(
     );
     const sandContract = await ethers.getContract('Sand');
     const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
-      './secret/estate-sale/hardhat/.proofs_EstateSaleWithAuth_0_0.json'
+      './secret/estate-sale/hardhat/.proofs_0.json'
     );
     await transferSandToDeployer(proofs);
     const approveSandForEstateSale = async (address: string, price: string) => {

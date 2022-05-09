@@ -26,4 +26,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['DAI'];
+func.tags = ['DAI', 'DAIMedianizer', 'DAI_deploy', 'DAIMedianizer_deploy'];

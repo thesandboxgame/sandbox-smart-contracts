@@ -15,11 +15,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   if (!isTrustedForwarder) {
     console.log('Setting TRUSTED_FORWARDER_V2 as trusted forwarder');
-    const admin = await read('PolygonSand', 'getAdmin');
+    const owner = await read('PolygonSand', 'owner');
     await catchUnknownSigner(
       execute(
         'PolygonSand',
-        {from: admin, log: true},
+        {from: owner, log: true},
         'setTrustedForwarder',
         TRUSTED_FORWARDER_V2.address
       )

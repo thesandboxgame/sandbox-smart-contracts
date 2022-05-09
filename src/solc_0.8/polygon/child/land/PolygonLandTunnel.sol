@@ -3,6 +3,7 @@ pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
@@ -10,7 +11,7 @@ import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
 
 /// @title LAND bridge on L2
-contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
+contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
@@ -19,6 +20,8 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
     event SetMaxAllowedQuads(uint256 maxQuads);
+    event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
 
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
@@ -69,7 +72,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes memory data
-    ) external {
+    ) external whenNotPaused() {
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
 
         uint32 gasLimit = 0;
@@ -83,6 +86,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
+            emit Withdraw(to, sizes[i], xs[i], ys[i], data);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
@@ -91,6 +95,16 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    /// @dev Pauses all token transfers across bridge
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    /// @dev Unpauses all token transfers across bridge
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
     function _processMessageFromRoot(
@@ -106,6 +120,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
         if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
+        emit Deposit(to, size, x, y, data);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

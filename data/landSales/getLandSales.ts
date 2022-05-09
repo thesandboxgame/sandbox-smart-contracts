@@ -1,11 +1,16 @@
-import fs from "fs-extra";
-import MerkleTree from "../../lib/merkleTree";
-import addresses from "../addresses.json";
-import helpers, {SaleLandInfo, SaltedProofSaleLandInfo, SaltedSaleLandInfo} from "../../lib/merkleTreeHelper";
+import fs from 'fs-extra';
+import MerkleTree from '../../lib/merkleTree';
+import addresses from '../addresses.json';
+import helpers, {
+  SaleLandInfo,
+  SaltedProofSaleLandInfo,
+  SaltedSaleLandInfo,
+} from '../../lib/merkleTreeHelper';
 import deadlines from './deadlines';
-import {HardhatRuntimeEnvironment} from "hardhat/types/runtime";
-import {isTestnet} from "../../utils/network";
-import prices from "./prices";
+import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
+import {isTestnet} from '../../utils/network';
+import prices from './prices';
+import {ethers} from 'hardhat';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
@@ -17,18 +22,34 @@ export type LandSale = {
   tree: MerkleTree;
 };
 
-export type SectorFiles = {secret: string, sectors: SectorData[], bundles: {[id: string]: string[]}, prices: {[priceId: string]: string}};
-export type SectorLand = {coordinateX: number, coordinateY: number, ownerAddress: string; bundleId?: string};
-export type SectorEstate = {coordinateX: number, coordinateY: number, ownerAddress: string; type: number, lands: {coordinateX: number, coordinateY: number}[]; bundleId?: string};
+export type SectorFiles = {
+  secret: string;
+  sectors: SectorData[];
+  bundles: {[id: string]: string[]};
+  prices: {[priceId: string]: string};
+};
+export type SectorLand = {
+  coordinateX: number;
+  coordinateY: number;
+  ownerAddress: string;
+  bundleId?: string;
+};
+export type SectorEstate = {
+  coordinateX: number;
+  coordinateY: number;
+  ownerAddress: string;
+  type: number;
+  lands: {coordinateX: number; coordinateY: number}[];
+  bundleId?: string;
+};
 
 export type SectorData = {
   sector: number;
   lands: SectorLand[];
-  estates: SectorEstate[]
+  estates: SectorEstate[];
 };
 
-
-const sandboxWallet = addresses["sandbox"];
+const sandboxWallet = addresses['sandbox'];
 
 let errors = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,8 +68,7 @@ type PartnerLandInfo = SaleLandInfo & {
   originalX: number;
   originalY: number;
   name: string;
-
-}
+};
 
 type LandGroup = {
   x: number;
@@ -58,9 +78,14 @@ type LandGroup = {
   originalX: number;
   originalY: number;
   bundleId?: string;
-}
+};
 
-async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id: string]: string[]}, prices: {[priceId: string]: string}, log?: boolean): Promise<{lands: SaleLandInfo[], partnersLands: PartnerLandInfo[]}> {
+async function generateLandsForMerkleTree(
+  sectorData: SectorData,
+  bundles: {[id: string]: string[]},
+  prices: {[priceId: string]: string},
+  log?: boolean
+): Promise<{lands: SaleLandInfo[]; partnersLands: PartnerLandInfo[]}> {
   const partnersLands: PartnerLandInfo[] = [];
   const lands: SaleLandInfo[] = [];
   let numLands = 0;
@@ -79,7 +104,7 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
   function addLandGroup(landGroup: LandGroup) {
     const size = Math.sqrt(landGroup.numLands);
     if (size * size !== landGroup.numLands) {
-      reportError("wrong number of land " + landGroup.numLands);
+      reportError('wrong number of land ' + landGroup.numLands);
     }
     let assetIds: string[] = [];
     if (landGroup.bundleId) {
@@ -87,54 +112,54 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
       numBundles++;
     }
     if (!assetIds) {
-      throw new Error("assetIds cannot be undefined");
+      throw new Error('assetIds cannot be undefined');
     }
 
     const premium = assetIds.length > 0;
     let priceId = '';
     if (size === 1) {
       num1x1Lands++;
-      priceId = (premium ? "premium_" : "") + "1x1";
+      priceId = (premium ? 'premium_' : '') + '1x1';
     } else if (size === 3) {
       num3x3Lands++;
-      priceId = (premium ? "premium_" : "") + "3x3";
+      priceId = (premium ? 'premium_' : '') + '3x3';
     } else if (size === 6) {
       num6x6Lands++;
-      priceId = (premium ? "premium_" : "") + "6x6";
+      priceId = (premium ? 'premium_' : '') + '6x6';
     } else if (size === 12) {
       num12x12Lands++;
-      priceId = (premium ? "premium_" : "") + "12x12";
+      priceId = (premium ? 'premium_' : '') + '12x12';
     } else if (size === 24) {
       num24x24Lands++;
-      priceId = (premium ? "premium_" : "") + "24x24";
+      priceId = (premium ? 'premium_' : '') + '24x24';
     } else {
-      reportError("wrong size : " + size);
+      reportError('wrong size : ' + size);
     }
     const price = prices[priceId];
     if (!price) {
-      reportError("no price for size = " + size);
+      reportError('no price for size = ' + size);
     }
 
     if (!(landGroup.x % size === 0 && landGroup.y % size === 0)) {
       reportError(
-        "invalid coordinates: " +
-        JSON.stringify({
-          x: landGroup.x,
-          originalX: landGroup.originalX,
-          y: landGroup.y,
-          originalY: landGroup.originalY,
-          size,
-        })
+        'invalid coordinates: ' +
+          JSON.stringify({
+            x: landGroup.x,
+            originalX: landGroup.originalX,
+            y: landGroup.y,
+            originalY: landGroup.originalY,
+            size,
+          })
       );
       return;
     }
 
     if (landGroup.x < 0 || landGroup.x >= 408) {
-      reportError("wrong x : " + landGroup.x);
+      reportError('wrong x : ' + landGroup.x);
       return;
     }
     if (landGroup.y < 0 || landGroup.y >= 408) {
-      reportError("wrong y : " + landGroup.y);
+      reportError('wrong y : ' + landGroup.y);
       return;
     }
 
@@ -145,7 +170,7 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
         numSandboxReservedGroups++;
         numSandboxReserved += size * size;
       }
-      const name = "unknown : " + landGroup.reserved;
+      const name = 'unknown : ' + landGroup.reserved;
       // switch (land.reserved) {
       //     case '':
       //     default:
@@ -219,19 +244,29 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
       numReservedGroup,
       numBundles,
     });
-
   }
 
   exitIfError();
   return {lands, partnersLands};
 }
 
-export async function getLandSales(presale: string, networkName: string, expose?: boolean): Promise<LandSale[]> {
-  const {secret, sectors, bundles, prices} = await getLandSaleFiles(presale, networkName)
+export async function getLandSales(
+  presale: string,
+  networkName: string,
+  expose?: boolean
+): Promise<LandSale[]> {
+  const {secret, sectors, bundles, prices} = await getLandSaleFiles(
+    presale,
+    networkName
+  );
 
   const landSales = [];
   for (const sectorData of sectors) {
-    const {lands} = await generateLandsForMerkleTree(sectorData, bundles, prices);
+    const {lands} = await generateLandsForMerkleTree(
+      sectorData,
+      bundles,
+      prices
+    );
 
     const saltedLands = saltLands(lands, secret);
     const tree = new MerkleTree(createDataArray(saltedLands));
@@ -255,30 +290,72 @@ export async function getLandSales(presale: string, networkName: string, expose?
   return landSales;
 }
 
-export async function getLandSaleFiles(presale: string, networkName: string): Promise<SectorFiles> {
+export async function getLandSaleFiles(
+  presale: string,
+  networkName: string
+): Promise<SectorFiles> {
   const networkNameMap: {[name: string]: string} = {
     mainnet: 'mainnet',
     rinkeby: 'testnet',
     goerli: 'testnet',
     hardhat: 'testnet',
-    localhost: 'testnet'
-  }
+    localhost: 'testnet',
+  };
   const name = networkNameMap[networkName];
   const secretPath = `./secret/.${presale}_${name}_secret`;
   const sectorPath = `./${presale}/sectors.${name}.json`;
-  const bundlesPath = `./${presale}/bundles.${name}.json`;
+  const bundlesPaths = [
+    `./${presale}/bundles.${networkName}.json`,
+    `./${presale}/bundles.${name}.json`,
+  ];
   let secret;
   if (networkName === 'hardhat' || networkName === 'localhost') {
-    secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
+    secret =
+      '0x4467363716526536535425451427798982881775318563547751090997863683';
   } else {
-    secret = fs.readFileSync(secretPath).toString();
+    secret = loadSecret(secretPath);
+    if (!secret && networkName === 'mainnet')
+      throw new Error('LandPreSale secret not found');
+    else secret = generateSecret(secretPath);
   }
   const sectors = (await import(sectorPath)).default;
-  const bundles = (await import(bundlesPath)).default;
-  return {secret, sectors, bundles, prices}
+  const bundles = await loadBundles(bundlesPaths);
+  return {secret, sectors, bundles, prices};
 }
 
-export function getDeadline(hre: HardhatRuntimeEnvironment, sector: number): number {
+function loadSecret(path: string) {
+  let secret = null;
+  try {
+    secret = fs.readFileSync(path).toString();
+  } catch {
+    console.log('LandPreSale secret not found.');
+  }
+  return secret;
+}
+
+function generateSecret(path: string) {
+  const secret = ethers.Wallet.createRandom().privateKey.toString();
+  fs.writeFileSync(path, secret);
+  return secret;
+}
+
+async function loadBundles(paths: string[]) {
+  let bundles;
+  for (const path of paths) {
+    try {
+      bundles = (await import(path)).default;
+    } catch {
+      continue;
+    }
+  }
+  if (!bundles) throw new Error('Bundles not found');
+  return bundles;
+}
+
+export function getDeadline(
+  hre: HardhatRuntimeEnvironment,
+  sector: number
+): number {
   let deadline = deadlines[sector];
   if (!deadline) {
     throw new Error(`no deadline for sector ${sector}`);
@@ -290,19 +367,30 @@ export function getDeadline(hre: HardhatRuntimeEnvironment, sector: number): num
   return deadline;
 }
 
-export function writeProofs(hre: HardhatRuntimeEnvironment, landSaleName: string, landSale: LandSale): void {
-  if (hre.network.name !== 'hardhat' || landSaleName === "EstateSaleWithAuth_0_0") {
+export function writeProofs(
+  hre: HardhatRuntimeEnvironment,
+  landSaleName: string,
+  landSale: LandSale
+): void {
+  if (
+    hre.network.name !== 'hardhat' ||
+    landSaleName === 'EstateSaleWithAuth_0_0'
+  ) {
     const landsWithProof: SaltedProofSaleLandInfo[] = [];
     for (const land of landSale.saltedLands) {
       const proof = landSale.tree.getProof(calculateLandHash(land));
       landsWithProof.push({...land, proof});
     }
-    const path = `./secret/estate-sale/${hre.network.name}/.proofs_${landSaleName}.json`
+    const path = `./secret/estate-sale/${hre.network.name}/.proofs_${landSale.sector}.json`;
     fs.outputJsonSync(path, landsWithProof);
   }
 }
 
-export async function setAsLandMinter(hre: HardhatRuntimeEnvironment, address: string, contractName = 'Land'): Promise<void> {
+export async function setAsLandMinter(
+  hre: HardhatRuntimeEnvironment,
+  address: string,
+  contractName = 'Land'
+): Promise<void> {
   const {read, execute, catchUnknownSigner} = hre.deployments;
   const isMinter = await read(contractName, 'isMinter', address);
   if (!isMinter) {

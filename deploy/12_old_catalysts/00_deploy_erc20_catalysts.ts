@@ -7,34 +7,38 @@ const catalysts = [
   {
     name: 'Common',
     symbol: 'COMMON',
-    sandMintingFee: sandWei(1),
-    sandUpdateFee: sandWei(1),
+    sandMintingFee: sandWei(0),
+    sandUpdateFee: sandWei(0),
     maxGems: 1,
-    quantityRange: [4000, 20000],
+    minQuantity: 1,
+    maxQuantity: 65535,
   },
   {
     name: 'Rare',
     symbol: 'RARE',
-    sandMintingFee: sandWei(4),
-    sandUpdateFee: sandWei(4),
+    sandMintingFee: sandWei(0),
+    sandUpdateFee: sandWei(0),
     maxGems: 2,
-    quantityRange: [1500, 4000],
+    minQuantity: 1,
+    maxQuantity: 65535,
   },
   {
     name: 'Epic',
     symbol: 'EPIC',
-    sandMintingFee: sandWei(10),
-    sandUpdateFee: sandWei(10),
+    sandMintingFee: sandWei(0),
+    sandUpdateFee: sandWei(0),
     maxGems: 3,
-    quantityRange: [200, 1500],
+    minQuantity: 1,
+    maxQuantity: 65535,
   },
   {
     name: 'Legendary',
     symbol: 'LEGENDARY',
-    sandMintingFee: sandWei(200),
-    sandUpdateFee: sandWei(200),
+    sandMintingFee: sandWei(0),
+    sandUpdateFee: sandWei(0),
     maxGems: 4,
-    quantityRange: [1, 200],
+    minQuantity: 1,
+    maxQuantity: 65535,
   },
 ];
 
@@ -55,6 +59,7 @@ const func: DeployFunction = async function (hre) {
       deployer,
       deployer,
     ],
+    skipIfAlreadyDeployed: true,
   });
   async function addCatalysts(
     catalystData: {
@@ -62,7 +67,8 @@ const func: DeployFunction = async function (hre) {
       symbol: string;
       sandMintingFee: BigNumber;
       sandUpdateFee: BigNumber;
-      quantityRange: number[];
+      minQuantity: number;
+      maxQuantity: number;
       maxGems: number;
     }[]
   ) {
@@ -82,13 +88,14 @@ const func: DeployFunction = async function (hre) {
           `Sandbox's ${tokenSymbol} Catalysts`,
           tokenSymbol,
         ],
+        skipIfAlreadyDeployed: true,
       });
       erc20s.push(result.address);
       data.push({
         sandMintingFee: catalyst.sandMintingFee,
         sandUpdateFee: catalyst.sandUpdateFee,
-        minQuantity: catalyst.quantityRange[0],
-        maxQuantity: catalyst.quantityRange[1],
+        minQuantity: catalyst.minQuantity,
+        maxQuantity: catalyst.maxQuantity,
         maxGems: catalyst.maxGems,
       });
     }

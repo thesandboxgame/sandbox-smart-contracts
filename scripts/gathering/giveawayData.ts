@@ -1,4 +1,4 @@
-type ERC1155data = {
+export type ERC1155data = {
   ids: string[];
   values: number[];
   contractAddress: string;

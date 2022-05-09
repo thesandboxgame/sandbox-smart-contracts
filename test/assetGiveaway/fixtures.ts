@@ -9,7 +9,12 @@ import MerkleTree from '../../lib/merkleTree';
 import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
 import {default as testAssetData} from '../../data/giveaways/asset_giveaway_1/assets_hardhat.json';
-import {expectReceiptEventWithArgs, waitFor, withSnapshot} from '../utils';
+import {
+  expectReceiptEventWithArgs,
+  sequentially,
+  waitFor,
+  withSnapshot,
+} from '../utils';
 
 const {createDataArrayClaimableAssets} = helpers;
 
@@ -123,20 +128,20 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
   let dataWithIds: any = testAssetData;
 
   async function mintAssetsWithNewIds() {
-    return await Promise.all(
+    return await sequentially(
+      testAssetData,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      testAssetData.map(async (claim: any) => {
+      async (claim: any) => {
         return {
           reservedAddress: claim.reservedAddress,
-          assetIds: await Promise.all(
-            claim.assetIds.map(
-              async (assetPackId: number, index: number) =>
-                await mintTestAssets(assetPackId, claim.assetValues[index])
-            )
+          assetIds: await sequentially(
+            claim.assetIds,
+            async (assetPackId: number, index: number) =>
+              await mintTestAssets(assetPackId, claim.assetValues[index])
           ),
           assetValues: claim.assetValues,
         };
-      })
+      }
     );
   }
 
@@ -149,11 +154,10 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
   async function mintSingleAssetWithId(claim: any) {
     return {
       ...claim,
-      assetIds: await Promise.all(
-        claim.assetIds.map(
-          async (assetPackId: number, index: number) =>
-            await mintTestAssets(assetPackId, claim.assetValues[index])
-        )
+      assetIds: await sequentially(
+        claim.assetIds,
+        async (assetPackId: number, index: number) =>
+          await mintTestAssets(assetPackId, claim.assetValues[index])
       ),
     };
   }

@@ -2,7 +2,7 @@
 
 ASSET is a smart contract token implementation of both [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) (for limited editions tokens) and [EIP-721](https://eips.ethereum.org/EIPS/eip-721) (for non fungible, unique tokens)
 
-See [Asset.sol](../old_src/Asset.sol)
+See [Asset.sol](../src/solc_0.5/Asset.sol)
 
 Each token represents the creations of our players. It is a permission-less implementation of EIP-1155 and EIP-721 where every user can mint their own token represented via metadata.
 
@@ -24,4 +24,4 @@ Note though that moderators are unlikely to need to act often as the fear of los
 
 This solution was inspired by vitalik’s post on https://ethresear.ch/t/prediction-markets-for-content-curation-daos/1312
 
-An Audit was performed by Solidified : see [./audits/asset_solidified_audit.pdf](./audits/asset_solidified_audit.pdf)
+An Audit was performed by Solidified : see [Audit_1](./audits/asset_solidified_audit.pdf) & [Audit_2](./audits/Audit%20Report%20-%20Sandbox%20Asset%20Bug%20Fix%20%5B15.01.2020%5D.pdf)

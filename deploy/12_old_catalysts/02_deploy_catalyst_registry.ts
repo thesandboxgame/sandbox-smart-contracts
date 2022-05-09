@@ -17,6 +17,7 @@ const func: DeployFunction = async function (hre) {
       deployer, // is set to catalystRegistryAdmin later (see 810_set_catalystRegistry_admin.js)
     ],
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
