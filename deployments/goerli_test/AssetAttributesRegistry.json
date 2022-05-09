@@ -1,0 +1,701 @@
+{
+  "address": "0x29B6261A4244d2a7AAB0B3EDaa1159700C9A93Ae",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract GemsCatalystsRegistry",
+          "name": "gemsCatalystsRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "minter",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "upgrader",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldAdmin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "blockNumber",
+          "type": "uint64"
+        }
+      ],
+      "name": "CatalystApplied",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "blockNumber",
+          "type": "uint64"
+        }
+      ],
+      "name": "GemsAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldMinter",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newMinter",
+          "type": "address"
+        }
+      ],
+      "name": "MinterChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldUpgrader",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newUpgrader",
+          "type": "address"
+        }
+      ],
+      "name": "UpgraderChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "addGems",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newMinter",
+          "type": "address"
+        }
+      ],
+      "name": "changeMinter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newUpgrader",
+          "type": "address"
+        }
+      ],
+      "name": "changeUpgrader",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAdmin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint16[]",
+              "name": "gemIds",
+              "type": "uint16[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IAssetAttributesRegistry.GemEvent[]",
+          "name": "events",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "getAttributes",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "values",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getCatalystRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMinter",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRecord",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUpgrader",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "migrationContract",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "overLayerDepositor",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "setCatalyst",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "setCatalystWhenDepositOnOtherLayer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        },
+        {
+          "internalType": "uint64",
+          "name": "blockNumber",
+          "type": "uint64"
+        }
+      ],
+      "name": "setCatalystWithBlockNumber",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_migrationContract",
+          "type": "address"
+        }
+      ],
+      "name": "setMigrationContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "overLayerDepositor_",
+          "type": "address"
+        }
+      ],
+      "name": "setOverLayerDepositor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x1f7d3a544b33ca8056233328ea66b7015fbfefd69acb165cd98c221a6605aae9",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x29B6261A4244d2a7AAB0B3EDaa1159700C9A93Ae",
+    "transactionIndex": 48,
+    "gasUsed": "1717002",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xffa8927cba43a61efeef00823430d93e93fc4efc4c5a0d79188a303251891f37",
+    "transactionHash": "0x1f7d3a544b33ca8056233328ea66b7015fbfefd69acb165cd98c221a6605aae9",
+    "logs": [],
+    "blockNumber": 6343975,
+    "cumulativeGasUsed": "8614586",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x9B1DBB930fd1E60dc1C6A2beec025106a7AFd65E",
+    "0x39D01ecc951C2c1f20ba0549e62212659c4d1e06",
+    "0x39D01ecc951C2c1f20ba0549e62212659c4d1e06",
+    "0x39D01ecc951C2c1f20ba0549e62212659c4d1e06"
+  ],
+  "solcInputHash": "0505d301d083cfaa512ecb9b03150aa2",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract GemsCatalystsRegistry\",\"name\":\"gemsCatalystsRegistry\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"minter\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"upgrader\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"blockNumber\",\"type\":\"uint64\"}],\"name\":\"CatalystApplied\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"blockNumber\",\"type\":\"uint64\"}],\"name\":\"GemsAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldMinter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newMinter\",\"type\":\"address\"}],\"name\":\"MinterChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldUpgrader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newUpgrader\",\"type\":\"address\"}],\"name\":\"UpgraderChanged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"}],\"name\":\"addGems\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newMinter\",\"type\":\"address\"}],\"name\":\"changeMinter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newUpgrader\",\"type\":\"address\"}],\"name\":\"changeUpgrader\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"internalType\":\"bytes32\",\"name\":\"blockHash\",\"type\":\"bytes32\"}],\"internalType\":\"struct IAssetAttributesRegistry.GemEvent[]\",\"name\":\"events\",\"type\":\"tuple[]\"}],\"name\":\"getAttributes\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"values\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getCatalystRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMinter\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"}],\"name\":\"getRecord\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"exists\",\"type\":\"bool\"},{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getUpgrader\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"migrationContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"overLayerDepositor\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"}],\"name\":\"setCatalyst\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"}],\"name\":\"setCatalystWhenDepositOnOtherLayer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"internalType\":\"uint64\",\"name\":\"blockNumber\",\"type\":\"uint64\"}],\"name\":\"setCatalystWithBlockNumber\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_migrationContract\",\"type\":\"address\"}],\"name\":\"setMigrationContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"overLayerDepositor_\",\"type\":\"address\"}],\"name\":\"setOverLayerDepositor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"addGems(uint256,uint16[])\":{\"params\":{\"assetId\":\"id of the asset\",\"gemIds\":\"list of gems ids to set\"}},\"changeAdmin(address)\":{\"details\":\"Change the administrator to be `newAdmin`.\",\"params\":{\"newAdmin\":\"The address of the new administrator.\"}},\"changeMinter(address)\":{\"details\":\"Change the minter to be `newMinter`.\",\"params\":{\"newMinter\":\"The address of the new minter.\"}},\"changeUpgrader(address)\":{\"details\":\"Change the upgrader to be `newUpgrader`.\",\"params\":{\"newUpgrader\":\"The address of the new upgrader.\"}},\"constructor\":{\"params\":{\"admin\":\": for setting the migration contract address\",\"gemsCatalystsRegistry\":\": GemsCatalystsRegistry for fetching attributes\",\"minter\":\": allowed to set gems and catalysts for a given asset\"}},\"getAdmin()\":{\"details\":\"Get the current administrator of this contract.\",\"returns\":{\"_0\":\"The current administrator of this contract.\"}},\"getAttributes(uint256,(uint16[],bytes32)[])\":{\"params\":{\"assetId\":\"id of the asset\"},\"returns\":{\"values\":\"The array of values(256) requested.\"}},\"getMinter()\":{\"details\":\"Get the current minter of this contract.\",\"returns\":{\"_0\":\"The current minter of this contract.\"}},\"getRecord(uint256)\":{\"params\":{\"assetId\":\"id of the asset\"}},\"getUpgrader()\":{\"details\":\"Get the current upgrader of this contract.\",\"returns\":{\"_0\":\"The current upgrader of this contract.\"}},\"setCatalyst(uint256,uint16,uint16[])\":{\"params\":{\"assetId\":\"id of the asset\",\"catalystId\":\"id of the catalyst to set\",\"gemIds\":\"list of gems ids to set\"}},\"setCatalystWhenDepositOnOtherLayer(uint256,uint16,uint16[])\":{\"params\":{\"assetId\":\"id of the asset\",\"catalystId\":\"id of the catalyst to set\",\"gemIds\":\"list of gems ids to set\"}},\"setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)\":{\"params\":{\"assetId\":\"id of the asset\",\"blockNumber\":\"block number\",\"catalystId\":\"id of the catalyst to set\",\"gemIds\":\"list of gems ids to set\"}},\"setMigrationContract(address)\":{\"params\":{\"_migrationContract\":\"address of the migration contract\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"addGems(uint256,uint16[])\":{\"notice\":\"adds gems to an existing list of gems of an asset, upgrader only\"},\"constructor\":{\"notice\":\"AssetAttributesRegistry depends on\"},\"getAttributes(uint256,(uint16[],bytes32)[])\":{\"notice\":\"getAttributes\"},\"getRecord(uint256)\":{\"notice\":\"get the record data (catalyst id, gems ids list) for an asset id\"},\"setCatalyst(uint256,uint16,uint16[])\":{\"notice\":\"sets the catalyst and gems for an asset, minter only\"},\"setCatalystWhenDepositOnOtherLayer(uint256,uint16,uint16[])\":{\"notice\":\"sets the catalyst and gems when an asset goes over layers\"},\"setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)\":{\"notice\":\"sets the catalyst and gems for an asset for a given block number, migration contract only\"},\"setMigrationContract(address)\":{\"notice\":\"set the migration contract address, admin or migration contract only\"}},\"notice\":\"Allows setting the gems and catalysts of an asset\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/asset/AssetAttributesRegistry.sol\":\"AssetAttributesRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.8/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor () {\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x1cae4f85f114ff17b90414f5da67365b1d00337abb5bce9bf944eb78a2c0673c\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in\\n * https://eips.ethereum.org/EIPS/eip-2612[EIP-2612].\\n *\\n * Adds the {permit} method, which can be used to change an account's ERC20 allowance (see {IERC20-allowance}) by\\n * presenting a message signed by the account. By not relying on `{IERC20-approve}`, the token holder account doesn't\\n * need to send a transaction, and thus is not required to hold Ether at all.\\n */\\ninterface IERC20Permit {\\n    /**\\n     * @dev Sets `value` as the allowance of `spender` over `owner`'s tokens,\\n     * given `owner`'s signed approval.\\n     *\\n     * IMPORTANT: The same issues {IERC20-approve} has related to transaction\\n     * ordering also apply here.\\n     *\\n     * Emits an {Approval} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `spender` cannot be the zero address.\\n     * - `deadline` must be a timestamp in the future.\\n     * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`\\n     * over the EIP712-formatted function arguments.\\n     * - the signature must use ``owner``'s current nonce (see {nonces}).\\n     *\\n     * For more information on the signature format, see the\\n     * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP\\n     * section].\\n     */\\n    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;\\n\\n    /**\\n     * @dev Returns the current nonce for `owner`. This value must be\\n     * included whenever a signature is generated for {permit}.\\n     *\\n     * Every successful call to {permit} increases ``owner``'s nonce by one. This\\n     * prevents a signature from being used multiple times.\\n     */\\n    function nonces(address owner) external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the domain separator used in the encoding of the signature for `permit`, as defined by {EIP712}.\\n     */\\n    // solhint-disable-next-line func-name-mixedcase\\n    function DOMAIN_SEPARATOR() external view returns (bytes32);\\n}\\n\",\"keccak256\":\"0x44300341eb97e8790e56e0823e8c3d09695fc2ee80555a83a9585f307381f324\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/Address.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary Address {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize, which returns 0 for contracts in\\n        // construction, since the code is only stored at the end of the\\n        // constructor execution.\\n\\n        uint256 size;\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly { size := extcodesize(account) }\\n        return size > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        // solhint-disable-next-line avoid-low-level-calls, avoid-call-value\\n        (bool success, ) = recipient.call{ value: amount }(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain`call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n      return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, bytes memory returndata) = target.call{ value: value }(data);\\n        return _verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return _verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionDelegateCall(target, data, \\\"Address: low-level delegate call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {\\n        require(isContract(target), \\\"Address: delegate call to non-contract\\\");\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, bytes memory returndata) = target.delegatecall(data);\\n        return _verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n\\n                // solhint-disable-next-line no-inline-assembly\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x069b2631bb5b5193a58ccf7a06266c7361bd2c20095667af4402817605627f45\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\"},\"src/solc_0.8/asset/AssetAttributesRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/utils/Context.sol\\\";\\nimport \\\"../catalyst/GemsCatalystsRegistry.sol\\\";\\nimport \\\"../common/BaseWithStorage/WithAdmin.sol\\\";\\nimport \\\"../common/BaseWithStorage/WithMinter.sol\\\";\\nimport \\\"../common/BaseWithStorage/WithUpgrader.sol\\\";\\n\\n/// @notice Allows setting the gems and catalysts of an asset\\ncontract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry, Context {\\n    uint256 internal constant MAX_NUM_GEMS = 15;\\n    uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;\\n    uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;\\n    uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;\\n\\n    GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;\\n    mapping(uint256 => Record) internal _records;\\n\\n    // used to allow migration to specify blockNumber when setting catalyst/gems\\n    address public migrationContract;\\n    // used to to set catalyst without burning actual ERC20 (cross layer deposit)\\n    address public overLayerDepositor;\\n\\n    struct Record {\\n        uint16 catalystId; // start at 1\\n        uint16[MAX_NUM_GEMS] gemIds;\\n    }\\n\\n    event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);\\n    event GemsAdded(uint256 indexed assetId, uint16[] gemIds, uint64 blockNumber);\\n\\n    /// @notice AssetAttributesRegistry depends on\\n    /// @param gemsCatalystsRegistry: GemsCatalystsRegistry for fetching attributes\\n    /// @param admin: for setting the migration contract address\\n    /// @param minter: allowed to set gems and catalysts for a given asset\\n    constructor(\\n        GemsCatalystsRegistry gemsCatalystsRegistry,\\n        address admin,\\n        address minter,\\n        address upgrader\\n    ) {\\n        _gemsCatalystsRegistry = gemsCatalystsRegistry;\\n        _admin = admin;\\n        _minter = minter;\\n        _upgrader = upgrader;\\n    }\\n\\n    function getCatalystRegistry() external view override returns (address) {\\n        return address(_gemsCatalystsRegistry);\\n    }\\n\\n    /// @notice get the record data (catalyst id, gems ids list) for an asset id\\n    /// @param assetId id of the asset\\n    function getRecord(uint256 assetId)\\n        external\\n        view\\n        override\\n        returns (\\n            bool exists,\\n            uint16 catalystId,\\n            uint16[] memory gemIds\\n        )\\n    {\\n        catalystId = _records[assetId].catalystId;\\n        if (catalystId == 0 && assetId & IS_NFT != 0) {\\n            // fallback on collection catalyst\\n            assetId = _getCollectionId(assetId);\\n            catalystId = _records[assetId].catalystId;\\n        }\\n        uint16[MAX_NUM_GEMS] memory fixedGemIds = _records[assetId].gemIds;\\n        exists = catalystId != 0;\\n        gemIds = new uint16[](MAX_NUM_GEMS);\\n        uint8 i = 0;\\n        while (fixedGemIds[i] != 0) {\\n            gemIds[i] = (fixedGemIds[i]);\\n            i++;\\n        }\\n    }\\n\\n    /// @notice getAttributes\\n    /// @param assetId id of the asset\\n    /// @return values The array of values(256) requested.\\n    function getAttributes(uint256 assetId, GemEvent[] calldata events)\\n        external\\n        view\\n        override\\n        returns (uint32[] memory values)\\n    {\\n        return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);\\n    }\\n\\n    /// @notice sets the catalyst and gems when an asset goes over layers\\n    /// @param assetId id of the asset\\n    /// @param catalystId id of the catalyst to set\\n    /// @param gemIds list of gems ids to set\\n    function setCatalystWhenDepositOnOtherLayer(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external override {\\n        require(\\n            _msgSender() == overLayerDepositor || _msgSender() == _admin,\\n            \\\"AssetAttributesRegistry: not overLayerDepositor\\\"\\n        );\\n        // We have to ignore all 0 gemid in case of L2 to L1 deposit\\n        // In this case we get gems data in a form of an array of MAX_NUM_GEMS padded with 0\\n        if (gemIds.length == MAX_NUM_GEMS) {\\n            uint256 firstZeroIndex;\\n            for (firstZeroIndex = 0; firstZeroIndex < gemIds.length; firstZeroIndex++) {\\n                if (gemIds[firstZeroIndex] == 0) {\\n                    break;\\n                }\\n            }\\n            uint16[] memory gemIdsWithoutZero = new uint16[](firstZeroIndex);\\n            // find first 0\\n            for (uint256 i = 0; i < firstZeroIndex; i++) {\\n                gemIdsWithoutZero[i] = gemIds[i];\\n            }\\n            _setCatalyst(assetId, catalystId, gemIdsWithoutZero, _getBlockNumber(), false);\\n        } else {\\n            _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), false);\\n        }\\n    }\\n\\n    /// @notice sets the catalyst and gems for an asset, minter only\\n    /// @param assetId id of the asset\\n    /// @param catalystId id of the catalyst to set\\n    /// @param gemIds list of gems ids to set\\n    function setCatalyst(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external virtual override {\\n        require(_msgSender() == _minter || _msgSender() == _upgrader, \\\"NOT_AUTHORIZED_MINTER\\\");\\n        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), true);\\n    }\\n\\n    /// @notice sets the catalyst and gems for an asset for a given block number, migration contract only\\n    /// @param assetId id of the asset\\n    /// @param catalystId id of the catalyst to set\\n    /// @param gemIds list of gems ids to set\\n    /// @param blockNumber block number\\n    function setCatalystWithBlockNumber(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds,\\n        uint64 blockNumber\\n    ) external override {\\n        require(_msgSender() == migrationContract, \\\"NOT_AUTHORIZED_MIGRATION\\\");\\n        _setCatalyst(assetId, catalystId, gemIds, blockNumber, true);\\n    }\\n\\n    /// @notice adds gems to an existing list of gems of an asset, upgrader only\\n    /// @param assetId id of the asset\\n    /// @param gemIds list of gems ids to set\\n    function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual override {\\n        require(_msgSender() == _upgrader, \\\"NOT_AUTHORIZED_UPGRADER\\\");\\n        require(assetId & IS_NFT != 0, \\\"INVALID_NOT_NFT\\\");\\n        require(gemIds.length != 0, \\\"INVALID_GEMS_0\\\");\\n\\n        uint16 catalystId = _records[assetId].catalystId;\\n        uint16[MAX_NUM_GEMS] memory gemIdsToStore;\\n        if (catalystId == 0) {\\n            // fallback on collection catalyst\\n            uint256 collectionId = _getCollectionId(assetId);\\n            catalystId = _records[collectionId].catalystId;\\n            if (catalystId != 0) {\\n                _records[assetId].catalystId = catalystId;\\n                gemIdsToStore = _records[collectionId].gemIds;\\n            }\\n        } else {\\n            gemIdsToStore = _records[assetId].gemIds;\\n        }\\n\\n        require(catalystId != 0, \\\"NO_CATALYST_SET\\\");\\n        uint8 j = 0;\\n        uint8 i = 0;\\n        for (i = 0; i < MAX_NUM_GEMS; i++) {\\n            if (j == gemIds.length) {\\n                break;\\n            }\\n            if (gemIdsToStore[i] == 0) {\\n                require(gemIds[j] != 0, \\\"INVALID_GEM_ID\\\");\\n                gemIdsToStore[i] = gemIds[j];\\n                j++;\\n            }\\n        }\\n        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);\\n        require(i <= maxGems, \\\"GEMS_TOO_MANY\\\");\\n        _records[assetId].gemIds = gemIdsToStore;\\n        uint64 blockNumber = _getBlockNumber();\\n        emit GemsAdded(assetId, gemIds, blockNumber);\\n    }\\n\\n    /// @notice set the migration contract address, admin or migration contract only\\n    /// @param _migrationContract address of the migration contract\\n    function setMigrationContract(address _migrationContract) external override {\\n        address currentMigrationContract = migrationContract;\\n        if (currentMigrationContract == address(0)) {\\n            require(_msgSender() == _admin, \\\"NOT_AUTHORIZED\\\");\\n            migrationContract = _migrationContract;\\n        } else {\\n            require(_msgSender() == currentMigrationContract, \\\"NOT_AUTHORIZED_MIGRATION\\\");\\n            migrationContract = _migrationContract;\\n        }\\n    }\\n\\n    function setOverLayerDepositor(address overLayerDepositor_) external {\\n        require(_msgSender() == _admin, \\\"NOT_AUTHORIZED\\\");\\n        overLayerDepositor = overLayerDepositor_;\\n    }\\n\\n    /// @dev Set a catalyst for the given asset.\\n    /// @param assetId The asset to set a catalyst on.\\n    /// @param catalystId The catalyst to set.\\n    /// @param gemIds The gems to embed in the catalyst.\\n    /// @param blockNumber The blocknumber to emit in the event.\\n    /// @param hasToEmitEvent boolean to indicate if we want to emit an event\\n    function _setCatalyst(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] memory gemIds,\\n        uint64 blockNumber,\\n        bool hasToEmitEvent\\n    ) internal virtual {\\n        require(gemIds.length <= MAX_NUM_GEMS, \\\"GEMS_MAX_REACHED\\\");\\n        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);\\n        require(gemIds.length <= maxGems, \\\"GEMS_TOO_MANY\\\");\\n        uint16[MAX_NUM_GEMS] memory gemIdsToStore;\\n        for (uint8 i = 0; i < gemIds.length; i++) {\\n            require(gemIds[i] != 0, \\\"INVALID_GEM_ID\\\");\\n            gemIdsToStore[i] = gemIds[i];\\n        }\\n        _records[assetId] = Record(catalystId, gemIdsToStore);\\n        if (hasToEmitEvent) {\\n            emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);\\n        }\\n    }\\n\\n    /// @dev Get the collection Id for an asset.\\n    /// @param assetId The asset to get the collection id for.\\n    /// @return The id of the collection the asset belongs to.\\n    function _getCollectionId(uint256 assetId) internal pure returns (uint256) {\\n        return assetId & NOT_NFT_INDEX & NOT_IS_NFT; // compute the same as Asset to get collectionId\\n    }\\n\\n    /// @dev Get a blocknumber for use when querying attributes.\\n    /// @return blockNumber The current blocknumber + 1.\\n    function _getBlockNumber() internal view returns (uint64 blockNumber) {\\n        blockNumber = uint64(block.number + 1);\\n    }\\n}\\n\",\"keccak256\":\"0x2d18f6d215e0b23303d1f5cc1e9dbd991c514e8237af1bfc6c78eca624a50b0c\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/Catalyst.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"../common/interfaces/IAssetAttributesRegistry.sol\\\";\\nimport \\\"../common/BaseWithStorage/ERC20/ERC20Token.sol\\\";\\nimport \\\"../common/interfaces/IAttributes.sol\\\";\\n\\ncontract Catalyst is ERC20Token, IAttributes {\\n    uint16 public immutable catalystId;\\n    uint8 internal immutable _maxGems;\\n\\n    IAttributes internal _attributes;\\n\\n    constructor(\\n        string memory name,\\n        string memory symbol,\\n        address admin,\\n        uint8 maxGems,\\n        uint16 _catalystId,\\n        IAttributes attributes,\\n        address operator\\n    ) ERC20Token(name, symbol, admin, operator) {\\n        _maxGems = maxGems;\\n        catalystId = _catalystId;\\n        _attributes = attributes;\\n    }\\n\\n    /// @notice Used by Admin to update the attributes contract.\\n    /// @param attributes The new attributes contract.\\n    function changeAttributes(IAttributes attributes) external onlyAdmin {\\n        _attributes = attributes;\\n    }\\n\\n    /// @notice Get the value of _maxGems(the max number of gems that can be embeded in this type of catalyst).\\n    /// @return The value of _maxGems.\\n    function getMaxGems() external view returns (uint8) {\\n        return _maxGems;\\n    }\\n\\n    /// @notice Get the attributes for each gem in an asset.\\n    /// See DefaultAttributes.getAttributes for more.\\n    /// @return values An array of values representing the \\\"level\\\" of each gem. ie: Power=14, speed=45, etc...\\n    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)\\n        external\\n        view\\n        override\\n        returns (uint32[] memory values)\\n    {\\n        return _attributes.getAttributes(assetId, events);\\n    }\\n}\\n\",\"keccak256\":\"0x4d0519720a7fd25ec0c521fe10d2be1f2a096e4ec20c3b94bbe777b872fe89b8\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/Gem.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../common/BaseWithStorage/ERC20/ERC20Token.sol\\\";\\n\\ncontract Gem is ERC20Token {\\n    uint16 public immutable gemId;\\n\\n    constructor(\\n        string memory name,\\n        string memory symbol,\\n        address admin,\\n        uint16 _gemId,\\n        address operator\\n    ) ERC20Token(name, symbol, admin, operator) {\\n        gemId = _gemId;\\n    }\\n}\\n\",\"keccak256\":\"0xbea6af4978fff25c9d3a0b0398d79752e9bb221353e1f499dfcd861f09acb158\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/GemsCatalystsRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/access/Ownable.sol\\\";\\nimport \\\"./Gem.sol\\\";\\nimport \\\"./Catalyst.sol\\\";\\nimport \\\"./interfaces/IGemsCatalystsRegistry.sol\\\";\\nimport \\\"../common/BaseWithStorage/WithSuperOperators.sol\\\";\\nimport \\\"../common/BaseWithStorage/ERC2771Handler.sol\\\";\\n\\n/// @notice Contract managing the Gems and Catalysts\\n/// Each Gems and Catalyst must be registered here.\\n/// Each new Gem get assigned a new id (starting at 1)\\n/// Each new Catalyst get assigned a new id (starting at 1)\\ncontract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {\\n    uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;\\n    uint256 internal constant MAX_UINT256 = ~uint256(0);\\n\\n    Gem[] internal _gems;\\n    Catalyst[] internal _catalysts;\\n\\n    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);\\n\\n    constructor(address admin, address trustedForwarder) {\\n        _admin = admin;\\n        __ERC2771Handler_initialize(trustedForwarder);\\n    }\\n\\n    /// @notice Returns the values for each gem included in a given asset.\\n    /// @param catalystId The catalyst identifier.\\n    /// @param assetId The asset tokenId.\\n    /// @param events An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.\\n    /// @return values An array of values for each gem present in the asset.\\n    function getAttributes(\\n        uint16 catalystId,\\n        uint256 assetId,\\n        IAssetAttributesRegistry.GemEvent[] calldata events\\n    ) external view override returns (uint32[] memory values) {\\n        Catalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != Catalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        return catalyst.getAttributes(assetId, events);\\n    }\\n\\n    /// @notice Returns the maximum number of gems for a given catalyst\\n    /// @param catalystId catalyst identifier\\n    function getMaxGems(uint16 catalystId) external view override returns (uint8) {\\n        Catalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != Catalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        return catalyst.getMaxGems();\\n    }\\n\\n    /// @notice Burns one gem unit from each gem id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param gemIds list of gems to burn one gem from each\\n    /// @param amount amount units to burn\\n    function burnDifferentGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256 amount\\n    ) external override {\\n        for (uint256 i = 0; i < gemIds.length; i++) {\\n            burnGem(from, gemIds[i], amount);\\n        }\\n    }\\n\\n    /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param catalystIds list of catalysts to burn one catalyst from each\\n    /// @param amount amount to burn\\n    function burnDifferentCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256 amount\\n    ) external override {\\n        for (uint256 i = 0; i < catalystIds.length; i++) {\\n            burnCatalyst(from, catalystIds[i], amount);\\n        }\\n    }\\n\\n    /// @notice Burns few gem units from each gem id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param gemIds list of gems to burn gem units from each\\n    /// @param amounts list of amounts of units to burn\\n    function batchBurnGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256[] calldata amounts\\n    ) public override {\\n        for (uint256 i = 0; i < gemIds.length; i++) {\\n            if (gemIds[i] != 0 && amounts[i] != 0) {\\n                burnGem(from, gemIds[i], amounts[i]);\\n            }\\n        }\\n    }\\n\\n    /// @notice Burns few catalyst units from each catalyst id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param catalystIds list of catalysts to burn catalyst units from each\\n    /// @param amounts list of amounts of units to burn\\n    function batchBurnCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256[] calldata amounts\\n    ) public override {\\n        for (uint256 i = 0; i < catalystIds.length; i++) {\\n            if (catalystIds[i] != 0 && amounts[i] != 0) {\\n                burnCatalyst(from, catalystIds[i], amounts[i]);\\n            }\\n        }\\n    }\\n\\n    /// @notice Adds both arrays of gems and catalysts to registry\\n    /// @param gems array of gems to be added\\n    /// @param catalysts array of catalysts to be added\\n    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {\\n        require(_msgSender() == _admin, \\\"NOT_AUTHORIZED\\\");\\n\\n        require(\\n            uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,\\n            \\\"GemsCatalystsRegistry: Too many gem and catalyst contracts\\\"\\n        );\\n\\n        for (uint256 i = 0; i < gems.length; i++) {\\n            Gem gem = gems[i];\\n            uint16 gemId = gem.gemId();\\n            require(gemId == _gems.length + 1, \\\"GEM_ID_NOT_IN_ORDER\\\");\\n            _gems.push(gem);\\n        }\\n\\n        for (uint256 i = 0; i < catalysts.length; i++) {\\n            Catalyst catalyst = catalysts[i];\\n            uint16 catalystId = catalyst.catalystId();\\n            require(catalystId == _catalysts.length + 1, \\\"CATALYST_ID_NOT_IN_ORDER\\\");\\n            _catalysts.push(catalyst);\\n        }\\n    }\\n\\n    /// @notice Query whether a given gem exists.\\n    /// @param gemId The gem being queried.\\n    /// @return Whether the gem exists.\\n    function doesGemExist(uint16 gemId) external view override returns (bool) {\\n        return getGem(gemId) != Gem(address(0));\\n    }\\n\\n    /// @notice Query whether a giving catalyst exists.\\n    /// @param catalystId The catalyst being queried.\\n    /// @return Whether the catalyst exists.\\n    function doesCatalystExist(uint16 catalystId) external view returns (bool) {\\n        return getCatalyst(catalystId) != Catalyst(address(0));\\n    }\\n\\n    /// @notice Burn a catalyst.\\n    /// @param from The signing address for the tx.\\n    /// @param catalystId The id of the catalyst to burn.\\n    /// @param amount The number of catalyst tokens to burn.\\n    function burnCatalyst(\\n        address from,\\n        uint16 catalystId,\\n        uint256 amount\\n    ) public override {\\n        _checkAuthorization(from);\\n        Catalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != Catalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        catalyst.burnFor(from, amount);\\n    }\\n\\n    /// @notice Burn a gem.\\n    /// @param from The signing address for the tx.\\n    /// @param gemId The id of the gem to burn.\\n    /// @param amount The number of gem tokens to burn.\\n    function burnGem(\\n        address from,\\n        uint16 gemId,\\n        uint256 amount\\n    ) public override {\\n        _checkAuthorization(from);\\n        Gem gem = getGem(gemId);\\n        require(gem != Gem(address(0)), \\\"GEM_DOES_NOT_EXIST\\\");\\n        gem.burnFor(from, amount);\\n    }\\n\\n    function getNumberOfCatalystContracts() external view returns (uint256 number) {\\n        number = _catalysts.length;\\n    }\\n\\n    function getNumberOfGemContracts() external view returns (uint256 number) {\\n        number = _gems.length;\\n    }\\n\\n    function revokeGemsandCatalystsMaxAllowance() external {\\n        _setGemsAndCatalystsAllowance(0);\\n    }\\n\\n    function setGemsandCatalystsMaxAllowance() external {\\n        _setGemsAndCatalystsAllowance(MAX_UINT256);\\n    }\\n\\n    // //////////////////// INTERNALS ////////////////////\\n\\n    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {\\n        for (uint256 i = 0; i < _gems.length; i++) {\\n            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);\\n        }\\n\\n        for (uint256 i = 0; i < _catalysts.length; i++) {\\n            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);\\n        }\\n    }\\n\\n    /// @dev Get the catalyst contract corresponding to the id.\\n    /// @param catalystId The catalyst id to use to retrieve the contract.\\n    /// @return The requested Catalyst contract.\\n    function getCatalyst(uint16 catalystId) internal view returns (Catalyst) {\\n        if (catalystId > 0 && catalystId <= _catalysts.length) {\\n            return _catalysts[catalystId - 1];\\n        } else {\\n            return Catalyst(address(0));\\n        }\\n    }\\n\\n    /// @dev Get the gem contract corresponding to the id.\\n    /// @param gemId The gem id to use to retrieve the contract.\\n    /// @return The requested Gem contract.\\n    function getGem(uint16 gemId) internal view returns (Gem) {\\n        if (gemId > 0 && gemId <= _gems.length) {\\n            return _gems[gemId - 1];\\n        } else {\\n            return Gem(address(0));\\n        }\\n    }\\n\\n    /// @dev verify that the caller is authorized for this function call.\\n    /// @param from The original signer of the transaction.\\n    function _checkAuthorization(address from) internal view {\\n        require(_msgSender() == from || isSuperOperator(_msgSender()), \\\"AUTH_ACCESS_DENIED\\\");\\n    }\\n\\n    /// @dev Change the address of the trusted forwarder for meta-TX\\n    /// @param trustedForwarder The new trustedForwarder\\n    function setTrustedForwarder(address trustedForwarder) external onlyOwner {\\n        _trustedForwarder = trustedForwarder;\\n\\n        emit TrustedForwarderChanged(trustedForwarder);\\n    }\\n\\n    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {\\n        return ERC2771Handler._msgSender();\\n    }\\n\\n    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {\\n        return ERC2771Handler._msgData();\\n    }\\n}\\n\",\"keccak256\":\"0xc4e3fff50d93cb9a0def8f930a36102d17b83f946dd9f248ce3d59b68e483499\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/interfaces/IGemsCatalystsRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"../../common/interfaces/IAssetAttributesRegistry.sol\\\";\\nimport \\\"../Gem.sol\\\";\\nimport \\\"../Catalyst.sol\\\";\\n\\ninterface IGemsCatalystsRegistry {\\n    function getAttributes(\\n        uint16 catalystId,\\n        uint256 assetId,\\n        IAssetAttributesRegistry.GemEvent[] calldata events\\n    ) external view returns (uint32[] memory values);\\n\\n    function getMaxGems(uint16 catalystId) external view returns (uint8);\\n\\n    function burnDifferentGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256 amount\\n    ) external;\\n\\n    function burnDifferentCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256 amount\\n    ) external;\\n\\n    function batchBurnGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256[] calldata amounts\\n    ) external;\\n\\n    function batchBurnCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256[] calldata amounts\\n    ) external;\\n\\n    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external;\\n\\n    function doesGemExist(uint16 gemId) external view returns (bool);\\n\\n    function burnCatalyst(\\n        address from,\\n        uint16 catalystId,\\n        uint256 amount\\n    ) external;\\n\\n    function burnGem(\\n        address from,\\n        uint16 gemId,\\n        uint256 amount\\n    ) external;\\n}\\n\",\"keccak256\":\"0x684a504006c07a3cd1624d837421b1dad38ceed6666c8c8c277c335c41585965\",\"license\":\"MIT\"},\"src/solc_0.8/common/Base/TheSandbox712.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ncontract TheSandbox712 {\\n    bytes32 internal constant EIP712DOMAIN_TYPEHASH =\\n        keccak256(\\\"EIP712Domain(string name,string version,address verifyingContract)\\\");\\n    // solhint-disable-next-line var-name-mixedcase\\n    bytes32 public immutable _DOMAIN_SEPARATOR;\\n\\n    constructor() {\\n        _DOMAIN_SEPARATOR = keccak256(\\n            abi.encode(EIP712DOMAIN_TYPEHASH, keccak256(\\\"The Sandbox\\\"), keccak256(\\\"1\\\"), address(this))\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0x4721edc45cad9d6049e9404b178f4f4e93f5871eb5533a0c48fc353ae178d659\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC20/ERC20BaseToken.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/utils/Context.sol\\\";\\nimport \\\"./extensions/ERC20Internal.sol\\\";\\nimport \\\"../../interfaces/IERC20Extended.sol\\\";\\nimport \\\"../WithSuperOperators.sol\\\";\\n\\nabstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {\\n    string internal _name;\\n    string internal _symbol;\\n    address internal immutable _operator;\\n    uint256 internal _totalSupply;\\n    mapping(address => uint256) internal _balances;\\n    mapping(address => mapping(address => uint256)) internal _allowances;\\n\\n    constructor(\\n        string memory tokenName,\\n        string memory tokenSymbol,\\n        address admin,\\n        address operator\\n    ) {\\n        _name = tokenName;\\n        _symbol = tokenSymbol;\\n        _admin = admin;\\n        _operator = operator;\\n    }\\n\\n    /// @notice Transfer `amount` tokens to `to`.\\n    /// @param to The recipient address of the tokens being transfered.\\n    /// @param amount The number of tokens being transfered.\\n    /// @return success Whether or not the transfer succeeded.\\n    function transfer(address to, uint256 amount) external override returns (bool success) {\\n        _transfer(_msgSender(), to, amount);\\n        return true;\\n    }\\n\\n    /// @notice Transfer `amount` tokens from `from` to `to`.\\n    /// @param from The origin address  of the tokens being transferred.\\n    /// @param to The recipient address of the tokensbeing  transfered.\\n    /// @param amount The number of tokens transfered.\\n    /// @return success Whether or not the transfer succeeded.\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) external override returns (bool success) {\\n        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {\\n            uint256 currentAllowance = _allowances[from][_msgSender()];\\n            if (currentAllowance != ~uint256(0)) {\\n                // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)\\n                require(currentAllowance >= amount, \\\"NOT_AUTHORIZED_ALLOWANCE\\\");\\n                _allowances[from][_msgSender()] = currentAllowance - amount;\\n            }\\n        }\\n        _transfer(from, to, amount);\\n        return true;\\n    }\\n\\n    /// @notice Burn `amount` tokens.\\n    /// @param amount The number of tokens to burn.\\n    function burn(uint256 amount) external override {\\n        _burn(_msgSender(), amount);\\n    }\\n\\n    /// @notice Burn `amount` tokens from `owner`.\\n    /// @param from The address whose token to burn.\\n    /// @param amount The number of tokens to burn.\\n    function burnFor(address from, uint256 amount) external override {\\n        _burn(from, amount);\\n    }\\n\\n    /// @notice Approve `spender` to transfer `amount` tokens.\\n    /// @param spender The address to be given rights to transfer.\\n    /// @param amount The number of tokens allowed.\\n    /// @return success Whether or not the call succeeded.\\n    function approve(address spender, uint256 amount) external override returns (bool success) {\\n        _approveFor(_msgSender(), spender, amount);\\n        return true;\\n    }\\n\\n    /// @notice Get the name of the token collection.\\n    /// @return The name of the token collection.\\n    function name() external view virtual returns (string memory) {\\n        //added virtual\\n        return _name;\\n    }\\n\\n    /// @notice Get the symbol for the token collection.\\n    /// @return The symbol of the token collection.\\n    function symbol() external view virtual returns (string memory) {\\n        //added virtual\\n        return _symbol;\\n    }\\n\\n    /// @notice Get the total number of tokens in existence.\\n    /// @return The total number of tokens in existence.\\n    function totalSupply() external view override returns (uint256) {\\n        return _totalSupply;\\n    }\\n\\n    /// @notice Get the balance of `owner`.\\n    /// @param owner The address to query the balance of.\\n    /// @return The amount owned by `owner`.\\n    function balanceOf(address owner) external view override returns (uint256) {\\n        return _balances[owner];\\n    }\\n\\n    /// @notice Get the allowance of `spender` for `owner`'s tokens.\\n    /// @param owner The address whose token is allowed.\\n    /// @param spender The address allowed to transfer.\\n    /// @return remaining The amount of token `spender` is allowed to transfer on behalf of `owner`.\\n    function allowance(address owner, address spender) external view override returns (uint256 remaining) {\\n        return _allowances[owner][spender];\\n    }\\n\\n    /// @notice Get the number of decimals for the token collection.\\n    /// @return The number of decimals.\\n    function decimals() external pure virtual returns (uint8) {\\n        return uint8(18);\\n    }\\n\\n    /// @notice Approve `spender` to transfer `amount` tokens from `owner`.\\n    /// @param owner The address whose token is allowed.\\n    /// @param spender The address to be given rights to transfer.\\n    /// @param amount The number of tokens allowed.\\n    /// @return success Whether or not the call succeeded.\\n    function approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount\\n    ) public override returns (bool success) {\\n        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, \\\"NOT_AUTHORIZED\\\");\\n        _approveFor(owner, spender, amount);\\n        return true;\\n    }\\n\\n    /// @notice Increase the allowance for the spender if needed\\n    /// @param owner The address of the owner of the tokens\\n    /// @param spender The address wanting to spend tokens\\n    /// @param amountNeeded The amount requested to spend\\n    /// @return success Whether or not the call succeeded.\\n    function addAllowanceIfNeeded(\\n        address owner,\\n        address spender,\\n        uint256 amountNeeded\\n    ) public returns (bool success) {\\n        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, \\\"INVALID_SENDER\\\");\\n        _addAllowanceIfNeeded(owner, spender, amountNeeded);\\n        return true;\\n    }\\n\\n    /// @dev See addAllowanceIfNeeded.\\n    function _addAllowanceIfNeeded(\\n        address owner,\\n        address spender,\\n        uint256 amountNeeded /*(ERC20Internal, ERC20ExecuteExtension, ERC20BasicApproveExtension)*/\\n    ) internal virtual override {\\n        if (amountNeeded > 0 && !isSuperOperator(spender) && spender != _operator) {\\n            uint256 currentAllowance = _allowances[owner][spender];\\n            if (currentAllowance < amountNeeded) {\\n                _approveFor(owner, spender, amountNeeded);\\n            }\\n        }\\n    }\\n\\n    /// @dev See approveFor.\\n    function _approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount /*(ERC20BasicApproveExtension, ERC20Internal)*/\\n    ) internal virtual override {\\n        require(owner != address(0) && spender != address(0), \\\"INVALID_OWNER_||_SPENDER\\\");\\n        _allowances[owner][spender] = amount;\\n        emit Approval(owner, spender, amount);\\n    }\\n\\n    /// @dev See transfer.\\n    function _transfer(\\n        address from,\\n        address to,\\n        uint256 amount /*(ERC20Internal, ERC20ExecuteExtension)*/\\n    ) internal virtual override {\\n        require(to != address(0), \\\"NOT_TO_ZEROADDRESS\\\");\\n        require(to != address(this), \\\"NOT_TO_THIS\\\");\\n        uint256 currentBalance = _balances[from];\\n        require(currentBalance >= amount, \\\"INSUFFICIENT_FUNDS\\\");\\n        _balances[from] = currentBalance - amount;\\n        _balances[to] += amount;\\n        emit Transfer(from, to, amount);\\n    }\\n\\n    /// @dev Mint tokens for a recipient.\\n    /// @param to The recipient address.\\n    /// @param amount The number of token to mint.\\n    function _mint(address to, uint256 amount) internal {\\n        require(to != address(0), \\\"NOT_TO_ZEROADDRESS\\\");\\n        require(amount > 0, \\\"MINT_O_TOKENS\\\");\\n        uint256 currentTotalSupply = _totalSupply;\\n        uint256 newTotalSupply = currentTotalSupply + amount;\\n        require(newTotalSupply > currentTotalSupply, \\\"OVERFLOW\\\");\\n        _totalSupply = newTotalSupply;\\n        _balances[to] += amount;\\n        emit Transfer(address(0), to, amount);\\n    }\\n\\n    /// @dev Burn tokens from an address.\\n    /// @param from The address whose tokens to burn.\\n    /// @param amount The number of token to burn.\\n    function _burn(address from, uint256 amount) internal {\\n        require(amount > 0, \\\"BURN_O_TOKENS\\\");\\n        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {\\n            uint256 currentAllowance = _allowances[from][_msgSender()];\\n            if (currentAllowance != ~uint256(0)) {\\n                // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)\\n                require(currentAllowance >= amount, \\\"INSUFFICIENT_ALLOWANCE\\\");\\n                _allowances[from][_msgSender()] = currentAllowance - amount;\\n            }\\n        }\\n\\n        uint256 currentBalance = _balances[from];\\n        require(currentBalance >= amount, \\\"INSUFFICIENT_FUNDS\\\");\\n        _balances[from] = currentBalance - amount;\\n        _totalSupply -= amount;\\n        emit Transfer(from, address(0), amount);\\n    }\\n}\\n\",\"keccak256\":\"0x21abee15baa9d3ba0016b24e3dce6eb47020edc57cfcc92eb24bc554939eaad9\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC20/ERC20Token.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"./ERC20BaseToken.sol\\\";\\nimport \\\"./extensions/ERC20BasicApproveExtension.sol\\\";\\nimport \\\"../WithPermit.sol\\\";\\nimport \\\"../ERC677/extensions/ERC677Extension.sol\\\";\\nimport \\\"../../interfaces/IERC677Receiver.sol\\\";\\n\\ncontract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, ERC20BaseToken {\\n    // /////////////////// CONSTRUCTOR ////////////////////\\n    constructor(\\n        string memory name,\\n        string memory symbol,\\n        address admin,\\n        address operator\\n    )\\n        ERC20BaseToken(name, symbol, admin, operator) // solhint-disable-next-line no-empty-blocks\\n    {}\\n\\n    function mint(address to, uint256 amount) external onlyAdmin {\\n        _mint(to, amount);\\n    }\\n\\n    /// @notice Function to permit the expenditure of ERC20 token by a nominated spender\\n    /// @param owner The owner of the ERC20 tokens\\n    /// @param spender The nominated spender of the ERC20 tokens\\n    /// @param value The value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend\\n    /// @param deadline The deadline for granting permission to the spender\\n    /// @param v The final 1 byte of signature\\n    /// @param r The first 32 bytes of signature\\n    /// @param s The second 32 bytes of signature\\n    function permit(\\n        address owner,\\n        address spender,\\n        uint256 value,\\n        uint256 deadline,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) public override {\\n        checkApproveFor(owner, spender, value, deadline, v, r, s);\\n        _approveFor(owner, spender, value);\\n    }\\n}\\n\",\"keccak256\":\"0xafef8c26511c0f31c959b85808ea1bb6e9473ffb06c5875635af54823732b657\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/utils/Context.sol\\\";\\nimport \\\"./ERC20Internal.sol\\\";\\nimport \\\"../../../Libraries/BytesUtil.sol\\\";\\n\\nabstract contract ERC20BasicApproveExtension is ERC20Internal, Context {\\n    /// @notice Approve `target` to spend `amount` and call it with data.\\n    /// @param target The address to be given rights to transfer and destination of the call.\\n    /// @param amount The number of tokens allowed.\\n    /// @param data The bytes for the call.\\n    /// @return The data of the call.\\n    function approveAndCall(\\n        address target,\\n        uint256 amount,\\n        bytes calldata data\\n    ) external payable returns (bytes memory) {\\n        require(BytesUtil.doFirstParamEqualsAddress(data, _msgSender()), \\\"FIRST_PARAM_NOT_SENDER\\\");\\n\\n        _approveFor(_msgSender(), target, amount);\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, bytes memory returnData) = target.call{value: msg.value}(data);\\n        require(success, string(returnData));\\n        return returnData;\\n    }\\n\\n    /// @notice Temporarily approve `target` to spend `amount` and call it with data.\\n    /// Previous approvals remains unchanged.\\n    /// @param target The destination of the call, allowed to spend the amount specified\\n    /// @param amount The number of tokens allowed to spend.\\n    /// @param data The bytes for the call.\\n    /// @return The data of the call.\\n    function paidCall(\\n        address target,\\n        uint256 amount,\\n        bytes calldata data\\n    ) external payable returns (bytes memory) {\\n        require(BytesUtil.doFirstParamEqualsAddress(data, _msgSender()), \\\"FIRST_PARAM_NOT_SENDER\\\");\\n\\n        if (amount > 0) {\\n            _addAllowanceIfNeeded(_msgSender(), target, amount);\\n        }\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, bytes memory returnData) = target.call{value: msg.value}(data);\\n        require(success, string(returnData));\\n\\n        return returnData;\\n    }\\n}\\n\",\"keccak256\":\"0x6c61a828b720af37167a9ca7f914a5ba3fd02d6846ac2304f1a844f12032ba2a\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20Internal.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nabstract contract ERC20Internal {\\n    function _approveFor(\\n        address owner,\\n        address target,\\n        uint256 amount\\n    ) internal virtual;\\n\\n    function _addAllowanceIfNeeded(\\n        address owner,\\n        address spender,\\n        uint256 amountNeeded\\n    ) internal virtual;\\n\\n    function _transfer(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) internal virtual;\\n}\\n\",\"keccak256\":\"0x016db35dc3c8fad3cedc08f3152e3b90b7adb4d961c5ac08c03106e18535d10e\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC2771Handler.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity ^0.8.0;\\n\\n/// @dev minimal ERC2771 handler to keep bytecode-size down.\\n/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol\\n\\ncontract ERC2771Handler {\\n    address internal _trustedForwarder;\\n\\n    function __ERC2771Handler_initialize(address forwarder) internal {\\n        _trustedForwarder = forwarder;\\n    }\\n\\n    function isTrustedForwarder(address forwarder) public view returns (bool) {\\n        return forwarder == _trustedForwarder;\\n    }\\n\\n    function getTrustedForwarder() external view returns (address trustedForwarder) {\\n        return _trustedForwarder;\\n    }\\n\\n    function _msgSender() internal view virtual returns (address sender) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            // The assembly code is more direct than the Solidity version using `abi.decode`.\\n            // solhint-disable-next-line no-inline-assembly\\n            assembly {\\n                sender := shr(96, calldataload(sub(calldatasize(), 20)))\\n            }\\n        } else {\\n            return msg.sender;\\n        }\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            return msg.data[:msg.data.length - 20];\\n        } else {\\n            return msg.data;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x9b78a86fc419fc78e618cb6c7892c2c66c4d4a9cac7848d33d91d68aab755caa\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC677/extensions/ERC677Extension.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../../../interfaces/IERC677.sol\\\";\\nimport \\\"../../../interfaces/IERC677Receiver.sol\\\";\\nimport \\\"../../ERC20/extensions/ERC20Internal.sol\\\";\\nimport \\\"@openzeppelin/contracts-0.8/utils/Address.sol\\\";\\n\\nabstract contract ERC677Extension is ERC20Internal, IERC677 {\\n    using Address for address;\\n\\n    /// @notice Transfers tokens to an address with _data if the recipient is a contact.\\n    /// @param _to The address to transfer to.\\n    /// @param _value The amount to be transferred.\\n    /// @param _data The extra data to be passed to the receiving contract.\\n    function transferAndCall(\\n        address _to,\\n        uint256 _value,\\n        bytes calldata _data\\n    ) external override returns (bool success) {\\n        _transfer(msg.sender, _to, _value);\\n        if (_to.isContract()) {\\n            IERC677Receiver receiver = IERC677Receiver(_to);\\n            receiver.onTokenTransfer(msg.sender, _value, _data);\\n        }\\n        return true;\\n    }\\n}\\n\",\"keccak256\":\"0xb3182f6f36b12aaa9c11c862835436c0ebdd6e578f7b73c30a1c52a94be62bad\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/WithAdmin.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\ncontract WithAdmin {\\n    address internal _admin;\\n\\n    /// @dev Emits when the contract administrator is changed.\\n    /// @param oldAdmin The address of the previous administrator.\\n    /// @param newAdmin The address of the new administrator.\\n    event AdminChanged(address oldAdmin, address newAdmin);\\n\\n    modifier onlyAdmin() {\\n        require(msg.sender == _admin, \\\"ADMIN_ONLY\\\");\\n        _;\\n    }\\n\\n    /// @dev Get the current administrator of this contract.\\n    /// @return The current administrator of this contract.\\n    function getAdmin() external view returns (address) {\\n        return _admin;\\n    }\\n\\n    /// @dev Change the administrator to be `newAdmin`.\\n    /// @param newAdmin The address of the new administrator.\\n    function changeAdmin(address newAdmin) external {\\n        require(msg.sender == _admin, \\\"ADMIN_ACCESS_DENIED\\\");\\n        emit AdminChanged(_admin, newAdmin);\\n        _admin = newAdmin;\\n    }\\n}\\n\",\"keccak256\":\"0xf2ce40f1b23052a50a5b2d5ad61fbc04ab6c9fb2e5b1dba17ccddf4507e4649f\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/WithMinter.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport \\\"./WithAdmin.sol\\\";\\n\\ncontract WithMinter is WithAdmin {\\n    address internal _minter;\\n\\n    /// @dev Emits when the Minter address is changed\\n    /// @param oldMinter The previous Minter address\\n    /// @param newMinter The new Minter address\\n    event MinterChanged(address oldMinter, address newMinter);\\n\\n    modifier onlyMinter() {\\n        require(msg.sender == _minter, \\\"MINTER_ACCESS_DENIED\\\");\\n        _;\\n    }\\n\\n    /// @dev Get the current minter of this contract.\\n    /// @return The current minter of this contract.\\n    function getMinter() external view returns (address) {\\n        return _minter;\\n    }\\n\\n    /// @dev Change the minter to be `newMinter`.\\n    /// @param newMinter The address of the new minter.\\n    function changeMinter(address newMinter) external onlyAdmin() {\\n        emit MinterChanged(_minter, newMinter);\\n        _minter = newMinter;\\n    }\\n}\\n\",\"keccak256\":\"0xf9b764b1596ab97154b71ca8b57980695a9787f5f9f7f970976193065bde2206\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/WithPermit.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol\\\";\\nimport \\\"../../common/interfaces/IERC20Extended.sol\\\";\\nimport \\\"../../common/Base/TheSandbox712.sol\\\";\\n\\n/// @title Permit contract\\n/// @notice This contract manages approvals of SAND via signature\\nabstract contract WithPermit is TheSandbox712, IERC20Permit {\\n    mapping(address => uint256) public _nonces;\\n\\n    bytes32 public constant PERMIT_TYPEHASH =\\n        keccak256(\\\"Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)\\\");\\n\\n    /// @notice Function to permit the expenditure of ERC20 token by a nominated spender\\n    /// @param owner The owner of the ERC20 tokens\\n    /// @param spender The nominated spender of the ERC20 tokens\\n    /// @param value The value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend\\n    /// @param deadline The deadline for granting permission to the spender\\n    /// @param v The final 1 byte of signature\\n    /// @param r The first 32 bytes of signature\\n    /// @param s The second 32 bytes of signature\\n    function checkApproveFor(\\n        address owner,\\n        address spender,\\n        uint256 value,\\n        uint256 deadline,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) public {\\n        require(deadline >= block.timestamp, \\\"PAST_DEADLINE\\\");\\n        bytes32 digest =\\n            keccak256(\\n                abi.encodePacked(\\n                    \\\"\\\\x19\\\\x01\\\",\\n                    _DOMAIN_SEPARATOR,\\n                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, _nonces[owner]++, deadline))\\n                )\\n            );\\n        address recoveredAddress = ecrecover(digest, v, r, s);\\n        require(recoveredAddress != address(0) && recoveredAddress == owner, \\\"INVALID_SIGNATURE\\\");\\n    }\\n\\n    function DOMAIN_SEPARATOR() external view override returns (bytes32) {\\n        return _DOMAIN_SEPARATOR;\\n    }\\n\\n    function nonces(address owner) external view override returns (uint256) {\\n        return _nonces[owner];\\n    }\\n}\\n\",\"keccak256\":\"0xae30f1345fee6d0e3bb94859773639068cba0bc2c4bfceb3aa75986150eeb5ba\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/WithSuperOperators.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport \\\"./WithAdmin.sol\\\";\\n\\ncontract WithSuperOperators is WithAdmin {\\n    mapping(address => bool) internal _superOperators;\\n\\n    event SuperOperator(address superOperator, bool enabled);\\n\\n    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).\\n    /// @param superOperator address that will be given/removed superOperator right.\\n    /// @param enabled set whether the superOperator is enabled or disabled.\\n    function setSuperOperator(address superOperator, bool enabled) external {\\n        require(msg.sender == _admin, \\\"only admin is allowed to add super operators\\\");\\n        _superOperators[superOperator] = enabled;\\n        emit SuperOperator(superOperator, enabled);\\n    }\\n\\n    /// @notice check whether address `who` is given superOperator rights.\\n    /// @param who The address to query.\\n    /// @return whether the address has superOperator rights.\\n    function isSuperOperator(address who) public view returns (bool) {\\n        return _superOperators[who];\\n    }\\n}\\n\",\"keccak256\":\"0xa0d9b0e08ccae5e6b1f56e41ef750a68686d8958bc398369ac283aa4440f87ab\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/WithUpgrader.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"./WithAdmin.sol\\\";\\n\\ncontract WithUpgrader is WithAdmin {\\n    address internal _upgrader;\\n\\n    /// @dev Emits when the Upgrader address is changed\\n    /// @param oldUpgrader The previous Upgrader address\\n    /// @param newUpgrader The new Upgrader address\\n    event UpgraderChanged(address oldUpgrader, address newUpgrader);\\n\\n    modifier onlyUpgrader() {\\n        require(msg.sender == _upgrader, \\\"UPGRADER_ACCESS_DENIED\\\");\\n        _;\\n    }\\n\\n    /// @dev Get the current upgrader of this contract.\\n    /// @return The current upgrader of this contract.\\n    function getUpgrader() external view returns (address) {\\n        return _upgrader;\\n    }\\n\\n    /// @dev Change the upgrader to be `newUpgrader`.\\n    /// @param newUpgrader The address of the new upgrader.\\n    function changeUpgrader(address newUpgrader) external onlyAdmin() {\\n        emit UpgraderChanged(_upgrader, newUpgrader);\\n        _upgrader = newUpgrader;\\n    }\\n}\\n\",\"keccak256\":\"0xf019297e512609fbb2ad283e35c7bf5ac42267076de6c2a60b38ef2011ac5af9\",\"license\":\"MIT\"},\"src/solc_0.8/common/Libraries/BytesUtil.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nlibrary BytesUtil {\\n    uint256 private constant DATA_MIN_LENGTH = 68;\\n\\n    /// @dev Check if the data == _address.\\n    /// @param data The bytes passed to the function.\\n    /// @param _address The address to compare to.\\n    /// @return Whether the first param == _address.\\n    function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {\\n        if (data.length < DATA_MIN_LENGTH) {\\n            return false;\\n        }\\n        uint256 value;\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            value := mload(add(data, 36))\\n        }\\n        return value == uint256(uint160(_address));\\n    }\\n}\\n\",\"keccak256\":\"0x3a7bfc1ad1fb8d784691a344ba752ca5591136bec45c63065256a9332ddd5cee\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IAssetAttributesRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\ninterface IAssetAttributesRegistry {\\n    struct GemEvent {\\n        uint16[] gemIds;\\n        bytes32 blockHash;\\n    }\\n\\n    struct AssetGemsCatalystData {\\n        uint256 assetId;\\n        uint16 catalystContractId;\\n        uint16[] gemContractIds;\\n    }\\n\\n    function getRecord(uint256 assetId)\\n        external\\n        view\\n        returns (\\n            bool exists,\\n            uint16 catalystId,\\n            uint16[] memory gemIds\\n        );\\n\\n    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values);\\n\\n    function setCatalyst(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external;\\n\\n    function setCatalystWhenDepositOnOtherLayer(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external;\\n\\n    function setCatalystWithBlockNumber(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds,\\n        uint64 blockNumber\\n    ) external;\\n\\n    function addGems(uint256 assetId, uint16[] calldata gemIds) external;\\n\\n    function setMigrationContract(address _migrationContract) external;\\n\\n    function getCatalystRegistry() external view returns (address);\\n}\\n\",\"keccak256\":\"0x7f12fa565160d7598f702dcae0e511943be9c6eaa4dc338f3439a36f0a6086c9\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IAttributes.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"../interfaces/IAssetAttributesRegistry.sol\\\";\\n\\ninterface IAttributes {\\n    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)\\n        external\\n        view\\n        returns (uint32[] memory values);\\n}\\n\",\"keccak256\":\"0x4cbdba9ad3fae8334fe614ae28fb3136454eada28f13f911ffce9c8c701c56a7\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\n/// @dev see https://eips.ethereum.org/EIPS/eip-20\\ninterface IERC20 {\\n    /// @notice emitted when tokens are transfered from one address to another.\\n    /// @param from address from which the token are transfered from (zero means tokens are minted).\\n    /// @param to destination address which the token are transfered to (zero means tokens are burnt).\\n    /// @param value amount of tokens transferred.\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /// @notice emitted when owner grant transfer rights to another address\\n    /// @param owner address allowing its token to be transferred.\\n    /// @param spender address allowed to spend on behalf of `owner`\\n    /// @param value amount of tokens allowed.\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /// @notice return the current total amount of tokens owned by all holders.\\n    /// @return supply total number of tokens held.\\n    function totalSupply() external view returns (uint256 supply);\\n\\n    /// @notice return the number of tokens held by a particular address.\\n    /// @param who address being queried.\\n    /// @return balance number of token held by that address.\\n    function balanceOf(address who) external view returns (uint256 balance);\\n\\n    /// @notice transfer tokens to a specific address.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transfer(address to, uint256 value) external returns (bool success);\\n\\n    /// @notice transfer tokens from one address to another.\\n    /// @param from address tokens will be sent from.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 value\\n    ) external returns (bool success);\\n\\n    /// @notice approve an address to spend on your behalf.\\n    /// @param spender address entitled to transfer on your behalf.\\n    /// @param value amount allowed to be transfered.\\n    /// @param success whether the approval succeeded.\\n    function approve(address spender, uint256 value) external returns (bool success);\\n\\n    /// @notice return the current allowance for a particular owner/spender pair.\\n    /// @param owner address allowing spender.\\n    /// @param spender address allowed to spend.\\n    /// @return amount number of tokens `spender` can spend on behalf of `owner`.\\n    function allowance(address owner, address spender) external view returns (uint256 amount);\\n}\\n\",\"keccak256\":\"0x9fe745d44fdcd7987682221d68b7a66d0784fbd81ae1d4e43a6c766347733a96\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC20Extended.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\nimport \\\"./IERC20.sol\\\";\\n\\ninterface IERC20Extended is IERC20 {\\n    function burnFor(address from, uint256 amount) external;\\n\\n    function burn(uint256 amount) external;\\n\\n    function approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount\\n    ) external returns (bool success);\\n}\\n\",\"keccak256\":\"0xf02074902aff81db019aac8808c524d2ab77e1cb216f5327992ed7db95fee919\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC677.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface IERC677 {\\n    function transferAndCall(\\n        address to,\\n        uint256 value,\\n        bytes calldata data\\n    ) external returns (bool success);\\n    //TODO: decide whether we use that event, as it collides with ERC20 Transfer event\\n    //event Transfer(address indexed from, address indexed to, uint256 value, bytes data);\\n}\\n\",\"keccak256\":\"0xc262cf7c3df1aa7253e228c53e74c78309fac149f73502b1c75e1f92fccb74ae\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC677Receiver.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface IERC677Receiver {\\n    function onTokenTransfer(\\n        address _sender,\\n        uint256 _value,\\n        bytes calldata _data\\n    ) external;\\n}\\n\",\"keccak256\":\"0xbcb1803cae41333e55f92df0fd392afe073f5ef455ec482df0b6062cecb03720\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a06040523480156200001157600080fd5b5060405162001e2038038062001e2083398101604081905262000034916200008a565b60609390931b6001600160601b031916608052600080546001600160a01b03199081166001600160a01b03948516179091556001805482169284169290921790915560028054909116919092161790556200010a565b60008060008060808587031215620000a0578384fd5b8451620000ad81620000f1565b6020860151909450620000c081620000f1565b6040860151909350620000d381620000f1565b6060860151909250620000e681620000f1565b939692955090935050565b6001600160a01b03811681146200010757600080fd5b50565b60805160601c611ce26200013e600039600081816101b2015281816109460152818161100201526113250152611ce26000f3fe608060405234801561001057600080fd5b506004361061011a5760003560e01c806374903c86116100b2578063de7184db11610081578063e7545d2e11610066578063e7545d2e14610277578063efea879d1461028a578063f36675171461029d5761011a565b8063de7184db14610253578063e4d7437b146102665761011a565b806374903c86146101fa57806388b79cec1461021a5780638f2839701461022d578063d8ae21bd146102405761011a565b80635eb25a94116100ee5780635eb25a941461019d5780636140cc0f146101b0578063676181bf146101d65780636e9960c3146101e95761011a565b806212ceb11461011f57806303e9e609146101345780630fee1a201461015f5780632c4d4d181461018a575b600080fd5b61013261012d366004611887565b6102ae565b005b610147610142366004611811565b610501565b60405161015693929190611a85565b60405180910390f35b600454610172906001600160a01b031681565b6040516001600160a01b039091168152602001610156565b610132610198366004611703565b610699565b6101326101ab366004611703565b610769565b7f0000000000000000000000000000000000000000000000000000000000000000610172565b6101326101e4366004611887565b610839565b6000546001600160a01b0316610172565b61020d610208366004611829565b610903565b6040516101569190611a3b565b610132610228366004611703565b6109e2565b61013261023b366004611703565b610b08565b600554610172906001600160a01b031681565b610132610261366004611873565b610bd8565b6002546001600160a01b0316610172565b6101326102853660046118df565b61114d565b610132610298366004611703565b6111fa565b6001546001600160a01b0316610172565b6005546001600160a01b0316336001600160a01b031614806102e357506000546001600160a01b0316336001600160a01b0316145b61035a5760405162461bcd60e51b815260206004820152602f60248201527f41737365744174747269627574657352656769737472793a206e6f74206f766560448201527f724c617965724465706f7369746f72000000000000000000000000000000000060648201526084015b60405180910390fd5b600f8114156104b95760005b818110156103c25782828281811061038e57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906103a391906117f7565b61ffff166103b0576103c2565b806103ba81611c27565b915050610366565b60008167ffffffffffffffff8111156103eb57634e487b7160e01b600052604160045260246000fd5b604051908082528060200260200182016040528015610414578160200160208202803683370190505b50905060005b8281101561049c5784848281811061044257634e487b7160e01b600052603260045260246000fd5b905060200201602081019061045791906117f7565b82828151811061047757634e487b7160e01b600052603260045260246000fd5b61ffff909216602092830291909101909101528061049481611c27565b91505061041a565b506104b28686836104ab61128c565b600061129e565b50506104fb565b6104fb84848484808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152506104ab925061128c915050565b50505050565b60008181526003602052604081205461ffff1660608115801561053157506b800000000000000000000000841615155b156105585761053f846115a1565b60008181526003602052604090205490945061ffff1691505b60008481526003602052604080822081516101e081019283905291600190910190600f908285855b82829054906101000a900461ffff1661ffff168152602001906002019060208260010104928301926001038202915080841161058057505060408051600f808252610200820190925261ffff8a1615159a50959650935050505081602001602082028036833701905050915060005b818160ff16600f811061061257634e487b7160e01b600052603260045260246000fd5b602002015161ffff161561069057818160ff16600f811061064357634e487b7160e01b600052603260045260246000fd5b6020020151838260ff168151811061066b57634e487b7160e01b600052603260045260246000fd5b61ffff909216602092830291909101909101528061068881611c60565b9150506105ef565b50509193909250565b6000546001600160a01b031633146106f35760405162461bcd60e51b815260206004820152600a60248201527f41444d494e5f4f4e4c59000000000000000000000000000000000000000000006044820152606401610351565b600154604080516001600160a01b03928316815291831660208301527f3b0007eb941cf645526cbb3a4fdaecda9d28ce4843167d9263b536a1f1edc0f6910160405180910390a16001805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000546001600160a01b031633146107c35760405162461bcd60e51b815260206004820152600a60248201527f41444d494e5f4f4e4c59000000000000000000000000000000000000000000006044820152606401610351565b600254604080516001600160a01b03928316815291831660208301527f08f975c558f03273377770550a7ba8d4e34fdf1fe05aa8723a4c2203aa9574a9910160405180910390a16002805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6001546001600160a01b0316336001600160a01b0316148061086e57506002546001600160a01b0316336001600160a01b0316145b6108ba5760405162461bcd60e51b815260206004820152601560248201527f4e4f545f415554484f52495a45445f4d494e54455200000000000000000000006044820152606401610351565b6104fb84848484808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152506108fc925061128c915050565b600161129e565b600083815260036020526040908190205490517f7e8ee42f0000000000000000000000000000000000000000000000000000000081526060916001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001691637e8ee42f916109869161ffff90911690889088908890600401611ab3565b60006040518083038186803b15801561099e57600080fd5b505afa1580156109b2573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526109da9190810190611731565b949350505050565b6004546001600160a01b031680610a83576000546001600160a01b0316336001600160a01b031614610a565760405162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a45440000000000000000000000000000000000006044820152606401610351565b6004805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038416179055610b04565b336001600160a01b03821614610adb5760405162461bcd60e51b815260206004820152601860248201527f4e4f545f415554484f52495a45445f4d4947524154494f4e00000000000000006044820152606401610351565b6004805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0384161790555b5050565b6000546001600160a01b03163314610b625760405162461bcd60e51b815260206004820152601360248201527f41444d494e5f4143434553535f44454e494544000000000000000000000000006044820152606401610351565b600054604080516001600160a01b03928316815291831660208301527f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f910160405180910390a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6002546001600160a01b0316336001600160a01b031614610c3b5760405162461bcd60e51b815260206004820152601760248201527f4e4f545f415554484f52495a45445f55504752414445520000000000000000006044820152606401610351565b6b8000000000000000000000008316610c965760405162461bcd60e51b815260206004820152600f60248201527f494e56414c49445f4e4f545f4e465400000000000000000000000000000000006044820152606401610351565b80610ce35760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d535f300000000000000000000000000000000000006044820152606401610351565b60008381526003602052604090205461ffff16610cfe6115ca565b61ffff8216610db3576000610d12866115a1565b60008181526003602052604090205461ffff16935090508215610dad57600086815260036020526040808220805461ffff191661ffff871617905582825280822081516101e08101928390529260019190910191600f918390855b82829054906101000a900461ffff1661ffff1681526020019060020190602082600101049283019260010382029150808411610d6d579050505050505091505b50610e1b565b60008581526003602052604080822081516101e081019283905292600190910191600f918390855b82829054906101000a900461ffff1661ffff1681526020019060020190602082600101049283019260010382029150808411610ddb579050505050505090505b61ffff8216610e6c5760405162461bcd60e51b815260206004820152600f60248201527f4e4f5f434154414c5953545f53455400000000000000000000000000000000006044820152606401610351565b6000805b600f8160ff161015610fcd5760ff8216851415610e8c57610fcd565b828160ff16600f8110610eaf57634e487b7160e01b600052603260045260246000fd5b602002015161ffff16610fbb5785858360ff16818110610edf57634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610ef491906117f7565b61ffff16610f445760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d5f49440000000000000000000000000000000000006044820152606401610351565b85858360ff16818110610f6757634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610f7c91906117f7565b838260ff16600f8110610f9f57634e487b7160e01b600052603260045260246000fd5b61ffff909216602092909202015281610fb781611c60565b9250505b80610fc581611c60565b915050610e70565b6040517f78bc8a1900000000000000000000000000000000000000000000000000000000815261ffff851660048201526000907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906378bc8a199060240160206040518083038186803b15801561104c57600080fd5b505afa158015611060573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110849190611956565b90508060ff168260ff1611156110dc5760405162461bcd60e51b815260206004820152600d60248201527f47454d535f544f4f5f4d414e59000000000000000000000000000000000000006044820152606401610351565b60008881526003602052604090206110f99060010185600f6115e9565b50600061110461128c565b9050887fc1fa9859caad2b5d312ac342a92b0073b2199b636bae1e96db5346cce5c5b95a89898460405161113a939291906119b5565b60405180910390a2505050505050505050565b6004546001600160a01b0316336001600160a01b0316146111b05760405162461bcd60e51b815260206004820152601860248201527f4e4f545f415554484f52495a45445f4d4947524154494f4e00000000000000006044820152606401610351565b6111f385858585808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152508792506001915061129e9050565b5050505050565b6000546001600160a01b0316336001600160a01b03161461125d5760405162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a45440000000000000000000000000000000000006044820152606401610351565b6005805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000611299436001611c0f565b905090565b600f835111156112f05760405162461bcd60e51b815260206004820152601060248201527f47454d535f4d41585f52454143484544000000000000000000000000000000006044820152606401610351565b6040517f78bc8a1900000000000000000000000000000000000000000000000000000000815261ffff851660048201526000907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906378bc8a199060240160206040518083038186803b15801561136f57600080fd5b505afa158015611383573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906113a79190611956565b90508060ff16845111156113fd5760405162461bcd60e51b815260206004820152600d60248201527f47454d535f544f4f5f4d414e59000000000000000000000000000000000000006044820152606401610351565b6114056115ca565b60005b85518160ff16101561150157858160ff168151811061143757634e487b7160e01b600052603260045260246000fd5b602002602001015161ffff16600014156114935760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d5f49440000000000000000000000000000000000006044820152606401610351565b858160ff16815181106114b657634e487b7160e01b600052603260045260246000fd5b6020026020010151828260ff16600f81106114e157634e487b7160e01b600052603260045260246000fd5b61ffff9092166020929092020152806114f981611c60565b915050611408565b5060408051808201825261ffff8881168252602080830185815260008c815260039092529390208251815461ffff19169216919091178155915190919061154e906001830190600f6115e9565b509050508215611598578561ffff16877f04171f09eda17eeaa4cdcd6bce0edd716626170c188afc0f5c5b3e97a99e225e878760405161158f929190611a0f565b60405180910390a35b50505050505050565b7fffffffffffffffffffffffffffffffffffffffff000000007fffffffffffffff81165b919050565b604051806101e00160405280600f906020820280368337509192915050565b60018301918390821561166f5791602002820160005b8382111561163f57835183826101000a81548161ffff021916908361ffff16021790555092602001926002016020816001010492830192600103026115ff565b801561166d5782816101000a81549061ffff021916905560020160208160010104928301926001030261163f565b505b5061167b92915061167f565b5090565b5b8082111561167b5760008155600101611680565b60008083601f8401126116a5578081fd5b50813567ffffffffffffffff8111156116bc578182fd5b60208301915083602080830285010111156116d657600080fd5b9250929050565b803561ffff811681146115c557600080fd5b805163ffffffff811681146115c557600080fd5b600060208284031215611714578081fd5b81356001600160a01b038116811461172a578182fd5b9392505050565b60006020808385031215611743578182fd5b825167ffffffffffffffff8082111561175a578384fd5b818501915085601f83011261176d578384fd5b81518181111561177f5761177f611c96565b838102604051601f19603f830116810181811085821117156117a3576117a3611c96565b604052828152858101935084860182860187018a10156117c1578788fd5b8795505b838610156117ea576117d6816116ef565b8552600195909501949386019386016117c5565b5098975050505050505050565b600060208284031215611808578081fd5b61172a826116dd565b600060208284031215611822578081fd5b5035919050565b60008060006040848603121561183d578182fd5b83359250602084013567ffffffffffffffff81111561185a578283fd5b61186686828701611694565b9497909650939450505050565b60008060006040848603121561183d578283fd5b6000806000806060858703121561189c578081fd5b843593506118ac602086016116dd565b9250604085013567ffffffffffffffff8111156118c7578182fd5b6118d387828801611694565b95989497509550505050565b6000806000806000608086880312156118f6578081fd5b85359450611906602087016116dd565b9350604086013567ffffffffffffffff80821115611922578283fd5b61192e89838a01611694565b9095509350606088013591508082168214611947578283fd5b50809150509295509295909350565b600060208284031215611967578081fd5b815160ff8116811461172a578182fd5b6000815180845260208085019450808401835b838110156119aa57815161ffff168752958201959082019060010161198a565b509495945050505050565b6040808252810183905260008460608301825b868110156119f15761ffff6119dc846116dd565b168252602092830192909101906001016119c8565b50809250505067ffffffffffffffff83166020830152949350505050565b600060408252611a226040830185611977565b905067ffffffffffffffff831660208301529392505050565b6020808252825182820181905260009190848201906040850190845b81811015611a7957835163ffffffff1683529284019291840191600101611a57565b50909695505050505050565b6000841515825261ffff8416602083015260606040830152611aaa6060830184611977565b95945050505050565b6000606080830161ffff80891685526020888187015260408481880152838885526080880190506080838a02890101945089875b8a811015611bfd577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff808a880301835281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc18d3603018112611b4757898afd5b8c018785018135368390037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1018112611b7e578b8cfd5b8201803567ffffffffffffffff811115611b96578c8dfd5b8881023603841315611ba6578c8dfd5b878b52918290528701908b908b8b015b81831015611bdd578a611bc8856116dd565b16815292890192600192909201918901611bb6565b938901359a89019a909a5250909750509184019190840190600101611ae7565b50949c9b505050505050505050505050565b60008219821115611c2257611c22611c80565b500190565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821415611c5957611c59611c80565b5060010190565b600060ff821660ff811415611c7757611c77611c80565b60010192915050565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212205a1c0b5ec726c7ffbd3321c7fd9f54f29ae5a4e39560bc6e2f3abc472979449164736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061011a5760003560e01c806374903c86116100b2578063de7184db11610081578063e7545d2e11610066578063e7545d2e14610277578063efea879d1461028a578063f36675171461029d5761011a565b8063de7184db14610253578063e4d7437b146102665761011a565b806374903c86146101fa57806388b79cec1461021a5780638f2839701461022d578063d8ae21bd146102405761011a565b80635eb25a94116100ee5780635eb25a941461019d5780636140cc0f146101b0578063676181bf146101d65780636e9960c3146101e95761011a565b806212ceb11461011f57806303e9e609146101345780630fee1a201461015f5780632c4d4d181461018a575b600080fd5b61013261012d366004611887565b6102ae565b005b610147610142366004611811565b610501565b60405161015693929190611a85565b60405180910390f35b600454610172906001600160a01b031681565b6040516001600160a01b039091168152602001610156565b610132610198366004611703565b610699565b6101326101ab366004611703565b610769565b7f0000000000000000000000000000000000000000000000000000000000000000610172565b6101326101e4366004611887565b610839565b6000546001600160a01b0316610172565b61020d610208366004611829565b610903565b6040516101569190611a3b565b610132610228366004611703565b6109e2565b61013261023b366004611703565b610b08565b600554610172906001600160a01b031681565b610132610261366004611873565b610bd8565b6002546001600160a01b0316610172565b6101326102853660046118df565b61114d565b610132610298366004611703565b6111fa565b6001546001600160a01b0316610172565b6005546001600160a01b0316336001600160a01b031614806102e357506000546001600160a01b0316336001600160a01b0316145b61035a5760405162461bcd60e51b815260206004820152602f60248201527f41737365744174747269627574657352656769737472793a206e6f74206f766560448201527f724c617965724465706f7369746f72000000000000000000000000000000000060648201526084015b60405180910390fd5b600f8114156104b95760005b818110156103c25782828281811061038e57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906103a391906117f7565b61ffff166103b0576103c2565b806103ba81611c27565b915050610366565b60008167ffffffffffffffff8111156103eb57634e487b7160e01b600052604160045260246000fd5b604051908082528060200260200182016040528015610414578160200160208202803683370190505b50905060005b8281101561049c5784848281811061044257634e487b7160e01b600052603260045260246000fd5b905060200201602081019061045791906117f7565b82828151811061047757634e487b7160e01b600052603260045260246000fd5b61ffff909216602092830291909101909101528061049481611c27565b91505061041a565b506104b28686836104ab61128c565b600061129e565b50506104fb565b6104fb84848484808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152506104ab925061128c915050565b50505050565b60008181526003602052604081205461ffff1660608115801561053157506b800000000000000000000000841615155b156105585761053f846115a1565b60008181526003602052604090205490945061ffff1691505b60008481526003602052604080822081516101e081019283905291600190910190600f908285855b82829054906101000a900461ffff1661ffff168152602001906002019060208260010104928301926001038202915080841161058057505060408051600f808252610200820190925261ffff8a1615159a50959650935050505081602001602082028036833701905050915060005b818160ff16600f811061061257634e487b7160e01b600052603260045260246000fd5b602002015161ffff161561069057818160ff16600f811061064357634e487b7160e01b600052603260045260246000fd5b6020020151838260ff168151811061066b57634e487b7160e01b600052603260045260246000fd5b61ffff909216602092830291909101909101528061068881611c60565b9150506105ef565b50509193909250565b6000546001600160a01b031633146106f35760405162461bcd60e51b815260206004820152600a60248201527f41444d494e5f4f4e4c59000000000000000000000000000000000000000000006044820152606401610351565b600154604080516001600160a01b03928316815291831660208301527f3b0007eb941cf645526cbb3a4fdaecda9d28ce4843167d9263b536a1f1edc0f6910160405180910390a16001805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000546001600160a01b031633146107c35760405162461bcd60e51b815260206004820152600a60248201527f41444d494e5f4f4e4c59000000000000000000000000000000000000000000006044820152606401610351565b600254604080516001600160a01b03928316815291831660208301527f08f975c558f03273377770550a7ba8d4e34fdf1fe05aa8723a4c2203aa9574a9910160405180910390a16002805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6001546001600160a01b0316336001600160a01b0316148061086e57506002546001600160a01b0316336001600160a01b0316145b6108ba5760405162461bcd60e51b815260206004820152601560248201527f4e4f545f415554484f52495a45445f4d494e54455200000000000000000000006044820152606401610351565b6104fb84848484808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152506108fc925061128c915050565b600161129e565b600083815260036020526040908190205490517f7e8ee42f0000000000000000000000000000000000000000000000000000000081526060916001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001691637e8ee42f916109869161ffff90911690889088908890600401611ab3565b60006040518083038186803b15801561099e57600080fd5b505afa1580156109b2573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526109da9190810190611731565b949350505050565b6004546001600160a01b031680610a83576000546001600160a01b0316336001600160a01b031614610a565760405162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a45440000000000000000000000000000000000006044820152606401610351565b6004805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038416179055610b04565b336001600160a01b03821614610adb5760405162461bcd60e51b815260206004820152601860248201527f4e4f545f415554484f52495a45445f4d4947524154494f4e00000000000000006044820152606401610351565b6004805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0384161790555b5050565b6000546001600160a01b03163314610b625760405162461bcd60e51b815260206004820152601360248201527f41444d494e5f4143434553535f44454e494544000000000000000000000000006044820152606401610351565b600054604080516001600160a01b03928316815291831660208301527f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f910160405180910390a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6002546001600160a01b0316336001600160a01b031614610c3b5760405162461bcd60e51b815260206004820152601760248201527f4e4f545f415554484f52495a45445f55504752414445520000000000000000006044820152606401610351565b6b8000000000000000000000008316610c965760405162461bcd60e51b815260206004820152600f60248201527f494e56414c49445f4e4f545f4e465400000000000000000000000000000000006044820152606401610351565b80610ce35760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d535f300000000000000000000000000000000000006044820152606401610351565b60008381526003602052604090205461ffff16610cfe6115ca565b61ffff8216610db3576000610d12866115a1565b60008181526003602052604090205461ffff16935090508215610dad57600086815260036020526040808220805461ffff191661ffff871617905582825280822081516101e08101928390529260019190910191600f918390855b82829054906101000a900461ffff1661ffff1681526020019060020190602082600101049283019260010382029150808411610d6d579050505050505091505b50610e1b565b60008581526003602052604080822081516101e081019283905292600190910191600f918390855b82829054906101000a900461ffff1661ffff1681526020019060020190602082600101049283019260010382029150808411610ddb579050505050505090505b61ffff8216610e6c5760405162461bcd60e51b815260206004820152600f60248201527f4e4f5f434154414c5953545f53455400000000000000000000000000000000006044820152606401610351565b6000805b600f8160ff161015610fcd5760ff8216851415610e8c57610fcd565b828160ff16600f8110610eaf57634e487b7160e01b600052603260045260246000fd5b602002015161ffff16610fbb5785858360ff16818110610edf57634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610ef491906117f7565b61ffff16610f445760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d5f49440000000000000000000000000000000000006044820152606401610351565b85858360ff16818110610f6757634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610f7c91906117f7565b838260ff16600f8110610f9f57634e487b7160e01b600052603260045260246000fd5b61ffff909216602092909202015281610fb781611c60565b9250505b80610fc581611c60565b915050610e70565b6040517f78bc8a1900000000000000000000000000000000000000000000000000000000815261ffff851660048201526000907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906378bc8a199060240160206040518083038186803b15801561104c57600080fd5b505afa158015611060573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110849190611956565b90508060ff168260ff1611156110dc5760405162461bcd60e51b815260206004820152600d60248201527f47454d535f544f4f5f4d414e59000000000000000000000000000000000000006044820152606401610351565b60008881526003602052604090206110f99060010185600f6115e9565b50600061110461128c565b9050887fc1fa9859caad2b5d312ac342a92b0073b2199b636bae1e96db5346cce5c5b95a89898460405161113a939291906119b5565b60405180910390a2505050505050505050565b6004546001600160a01b0316336001600160a01b0316146111b05760405162461bcd60e51b815260206004820152601860248201527f4e4f545f415554484f52495a45445f4d4947524154494f4e00000000000000006044820152606401610351565b6111f385858585808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152508792506001915061129e9050565b5050505050565b6000546001600160a01b0316336001600160a01b03161461125d5760405162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a45440000000000000000000000000000000000006044820152606401610351565b6005805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000611299436001611c0f565b905090565b600f835111156112f05760405162461bcd60e51b815260206004820152601060248201527f47454d535f4d41585f52454143484544000000000000000000000000000000006044820152606401610351565b6040517f78bc8a1900000000000000000000000000000000000000000000000000000000815261ffff851660048201526000907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906378bc8a199060240160206040518083038186803b15801561136f57600080fd5b505afa158015611383573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906113a79190611956565b90508060ff16845111156113fd5760405162461bcd60e51b815260206004820152600d60248201527f47454d535f544f4f5f4d414e59000000000000000000000000000000000000006044820152606401610351565b6114056115ca565b60005b85518160ff16101561150157858160ff168151811061143757634e487b7160e01b600052603260045260246000fd5b602002602001015161ffff16600014156114935760405162461bcd60e51b815260206004820152600e60248201527f494e56414c49445f47454d5f49440000000000000000000000000000000000006044820152606401610351565b858160ff16815181106114b657634e487b7160e01b600052603260045260246000fd5b6020026020010151828260ff16600f81106114e157634e487b7160e01b600052603260045260246000fd5b61ffff9092166020929092020152806114f981611c60565b915050611408565b5060408051808201825261ffff8881168252602080830185815260008c815260039092529390208251815461ffff19169216919091178155915190919061154e906001830190600f6115e9565b509050508215611598578561ffff16877f04171f09eda17eeaa4cdcd6bce0edd716626170c188afc0f5c5b3e97a99e225e878760405161158f929190611a0f565b60405180910390a35b50505050505050565b7fffffffffffffffffffffffffffffffffffffffff000000007fffffffffffffff81165b919050565b604051806101e00160405280600f906020820280368337509192915050565b60018301918390821561166f5791602002820160005b8382111561163f57835183826101000a81548161ffff021916908361ffff16021790555092602001926002016020816001010492830192600103026115ff565b801561166d5782816101000a81549061ffff021916905560020160208160010104928301926001030261163f565b505b5061167b92915061167f565b5090565b5b8082111561167b5760008155600101611680565b60008083601f8401126116a5578081fd5b50813567ffffffffffffffff8111156116bc578182fd5b60208301915083602080830285010111156116d657600080fd5b9250929050565b803561ffff811681146115c557600080fd5b805163ffffffff811681146115c557600080fd5b600060208284031215611714578081fd5b81356001600160a01b038116811461172a578182fd5b9392505050565b60006020808385031215611743578182fd5b825167ffffffffffffffff8082111561175a578384fd5b818501915085601f83011261176d578384fd5b81518181111561177f5761177f611c96565b838102604051601f19603f830116810181811085821117156117a3576117a3611c96565b604052828152858101935084860182860187018a10156117c1578788fd5b8795505b838610156117ea576117d6816116ef565b8552600195909501949386019386016117c5565b5098975050505050505050565b600060208284031215611808578081fd5b61172a826116dd565b600060208284031215611822578081fd5b5035919050565b60008060006040848603121561183d578182fd5b83359250602084013567ffffffffffffffff81111561185a578283fd5b61186686828701611694565b9497909650939450505050565b60008060006040848603121561183d578283fd5b6000806000806060858703121561189c578081fd5b843593506118ac602086016116dd565b9250604085013567ffffffffffffffff8111156118c7578182fd5b6118d387828801611694565b95989497509550505050565b6000806000806000608086880312156118f6578081fd5b85359450611906602087016116dd565b9350604086013567ffffffffffffffff80821115611922578283fd5b61192e89838a01611694565b9095509350606088013591508082168214611947578283fd5b50809150509295509295909350565b600060208284031215611967578081fd5b815160ff8116811461172a578182fd5b6000815180845260208085019450808401835b838110156119aa57815161ffff168752958201959082019060010161198a565b509495945050505050565b6040808252810183905260008460608301825b868110156119f15761ffff6119dc846116dd565b168252602092830192909101906001016119c8565b50809250505067ffffffffffffffff83166020830152949350505050565b600060408252611a226040830185611977565b905067ffffffffffffffff831660208301529392505050565b6020808252825182820181905260009190848201906040850190845b81811015611a7957835163ffffffff1683529284019291840191600101611a57565b50909695505050505050565b6000841515825261ffff8416602083015260606040830152611aaa6060830184611977565b95945050505050565b6000606080830161ffff80891685526020888187015260408481880152838885526080880190506080838a02890101945089875b8a811015611bfd577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff808a880301835281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc18d3603018112611b4757898afd5b8c018785018135368390037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1018112611b7e578b8cfd5b8201803567ffffffffffffffff811115611b96578c8dfd5b8881023603841315611ba6578c8dfd5b878b52918290528701908b908b8b015b81831015611bdd578a611bc8856116dd565b16815292890192600192909201918901611bb6565b938901359a89019a909a5250909750509184019190840190600101611ae7565b50949c9b505050505050505050505050565b60008219821115611c2257611c22611c80565b500190565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821415611c5957611c59611c80565b5060010190565b600060ff821660ff811415611c7757611c77611c80565b60010192915050565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212205a1c0b5ec726c7ffbd3321c7fd9f54f29ae5a4e39560bc6e2f3abc472979449164736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "addGems(uint256,uint16[])": {
+        "params": {
+          "assetId": "id of the asset",
+          "gemIds": "list of gems ids to set"
+        }
+      },
+      "changeAdmin(address)": {
+        "details": "Change the administrator to be `newAdmin`.",
+        "params": {
+          "newAdmin": "The address of the new administrator."
+        }
+      },
+      "changeMinter(address)": {
+        "details": "Change the minter to be `newMinter`.",
+        "params": {
+          "newMinter": "The address of the new minter."
+        }
+      },
+      "changeUpgrader(address)": {
+        "details": "Change the upgrader to be `newUpgrader`.",
+        "params": {
+          "newUpgrader": "The address of the new upgrader."
+        }
+      },
+      "constructor": {
+        "params": {
+          "admin": ": for setting the migration contract address",
+          "gemsCatalystsRegistry": ": GemsCatalystsRegistry for fetching attributes",
+          "minter": ": allowed to set gems and catalysts for a given asset"
+        }
+      },
+      "getAdmin()": {
+        "details": "Get the current administrator of this contract.",
+        "returns": {
+          "_0": "The current administrator of this contract."
+        }
+      },
+      "getAttributes(uint256,(uint16[],bytes32)[])": {
+        "params": {
+          "assetId": "id of the asset"
+        },
+        "returns": {
+          "values": "The array of values(256) requested."
+        }
+      },
+      "getMinter()": {
+        "details": "Get the current minter of this contract.",
+        "returns": {
+          "_0": "The current minter of this contract."
+        }
+      },
+      "getRecord(uint256)": {
+        "params": {
+          "assetId": "id of the asset"
+        }
+      },
+      "getUpgrader()": {
+        "details": "Get the current upgrader of this contract.",
+        "returns": {
+          "_0": "The current upgrader of this contract."
+        }
+      },
+      "setCatalyst(uint256,uint16,uint16[])": {
+        "params": {
+          "assetId": "id of the asset",
+          "catalystId": "id of the catalyst to set",
+          "gemIds": "list of gems ids to set"
+        }
+      },
+      "setCatalystWhenDepositOnOtherLayer(uint256,uint16,uint16[])": {
+        "params": {
+          "assetId": "id of the asset",
+          "catalystId": "id of the catalyst to set",
+          "gemIds": "list of gems ids to set"
+        }
+      },
+      "setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)": {
+        "params": {
+          "assetId": "id of the asset",
+          "blockNumber": "block number",
+          "catalystId": "id of the catalyst to set",
+          "gemIds": "list of gems ids to set"
+        }
+      },
+      "setMigrationContract(address)": {
+        "params": {
+          "_migrationContract": "address of the migration contract"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "addGems(uint256,uint16[])": {
+        "notice": "adds gems to an existing list of gems of an asset, upgrader only"
+      },
+      "constructor": {
+        "notice": "AssetAttributesRegistry depends on"
+      },
+      "getAttributes(uint256,(uint16[],bytes32)[])": {
+        "notice": "getAttributes"
+      },
+      "getRecord(uint256)": {
+        "notice": "get the record data (catalyst id, gems ids list) for an asset id"
+      },
+      "setCatalyst(uint256,uint16,uint16[])": {
+        "notice": "sets the catalyst and gems for an asset, minter only"
+      },
+      "setCatalystWhenDepositOnOtherLayer(uint256,uint16,uint16[])": {
+        "notice": "sets the catalyst and gems when an asset goes over layers"
+      },
+      "setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)": {
+        "notice": "sets the catalyst and gems for an asset for a given block number, migration contract only"
+      },
+      "setMigrationContract(address)": {
+        "notice": "set the migration contract address, admin or migration contract only"
+      }
+    },
+    "notice": "Allows setting the gems and catalysts of an asset",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 23256,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "_admin",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 23316,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "_minter",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      },
+      {
+        "astId": 23543,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "_upgrader",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 8339,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "_records",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_uint256,t_struct(Record)8350_storage)"
+      },
+      {
+        "astId": 8341,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "migrationContract",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_address"
+      },
+      {
+        "astId": 8343,
+        "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+        "label": "overLayerDepositor",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint16)15_storage": {
+        "base": "t_uint16",
+        "encoding": "inplace",
+        "label": "uint16[15]",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_uint256,t_struct(Record)8350_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => struct AssetAttributesRegistry.Record)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Record)8350_storage"
+      },
+      "t_struct(Record)8350_storage": {
+        "encoding": "inplace",
+        "label": "struct AssetAttributesRegistry.Record",
+        "members": [
+          {
+            "astId": 8345,
+            "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+            "label": "catalystId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 8349,
+            "contract": "src/solc_0.8/asset/AssetAttributesRegistry.sol:AssetAttributesRegistry",
+            "label": "gemIds",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint16)15_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint16": {
+        "encoding": "inplace",
+        "label": "uint16",
+        "numberOfBytes": "2"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
