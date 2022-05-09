@@ -63,10 +63,11 @@ contract AssetERC1155 is AssetBaseERC1155 {
     ) external {
         require(_msgSender() == _predicate, "!PREDICATE");
         require(data.length > 0, "METADATA_MISSING");
+        require(account != address(0), "TO==0");
         uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
         require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
         _metadataHash[uriId] = abi.decode(data, (bytes32));
-        _mint(_msgSender(), account, id, amount, data); // TODO: check add account does not equal 0 ?
+        _mint(_msgSender(), account, id, amount, data);
     }
 
     /// @notice Creates `amounts` tokens of token types `ids`, and assigns them to `account`.
@@ -84,6 +85,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
     ) external {
         require(_msgSender() == _predicate, "!PREDICATE");
         require(data.length > 0, "METADATA_MISSING");
+        require(to != address(0), "TO==0");
         bytes32[] memory hashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
@@ -101,7 +103,26 @@ contract AssetERC1155 is AssetBaseERC1155 {
         emit PredicateSet(predicate);
     }
 
-    // TODO: check and update comments
+    /// @notice Burns `amount` tokens of type `id`.
+    /// @param id token type which will be burnt.
+    /// @param amount amount of token to burn.
+    function burn(uint256 id, uint256 amount) external {
+        _burn(_msgSender(), id, amount);
+    }
+
+    /// @notice Burns `amount` tokens of type `id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id token type which will be burnt.
+    /// @param amount amount of token to burn.
+    function burnFrom(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        _burn(from, id, amount);
+    }
+
     function _generateTokenId(
         address creator,
         uint256 supply,
@@ -113,13 +134,13 @@ contract AssetERC1155 is AssetBaseERC1155 {
         return
             uint256(uint160(creator)) *
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0)
             uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
-            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
+            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack)
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // ERC1155ERC721Helper.URI_ID
-            packIndex; // packIndex (position in the pack) // PACK_INDEX
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack
+            packIndex; // packIndex (position in the pack)
     }
 }
