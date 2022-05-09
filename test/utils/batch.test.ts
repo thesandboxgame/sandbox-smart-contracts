@@ -1,6 +1,6 @@
 import {toWei, withSnapshot} from '../utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
-import {zeroAddress} from '../land-sale/fixtures';
+import {zeroAddress} from '../EstateSale/fixtures';
 import {expect} from 'chai';
 
 const setupBatch = withSnapshot(['DeployerBatch_deploy'], async () => {

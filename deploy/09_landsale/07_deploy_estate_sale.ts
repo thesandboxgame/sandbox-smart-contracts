@@ -54,27 +54,29 @@ const func: DeployFunction = async function (hre) {
     const landSaleName = `${name}_${sector}`;
     const deadline = getDeadline(hre, sector);
 
+    const deployArgs = {
+      asset: assetContract.address,
+      landAddress: landContract.address,
+      sandContractAddress: sandContract.address,
+      admin: landSaleAdmin,
+      estate: '0x0000000000000000000000000000000000000000',
+      feeDistributor: landSaleFeeRecipient,
+      initialWalletAddress: landSaleBeneficiary,
+      authValidator: authValidatorContract.address,
+      expiryTime: deadline,
+      merkleRoot: merkleRootHash,
+      trustedForwarder: sandContract.address,
+      initialSigningWallet: backendReferralWallet,
+      initialMaxCommissionRate: 2000,
+    };
+
     const newDeployment = await deployments.getOrNull(`LandPreSale_${sector}`);
     if (newDeployment) return;
     const landSaleDeployment = await deploy(landSaleName, {
       from: deployer,
       linkedData: lands,
       contract: 'EstateSaleWithAuth',
-      args: [
-        landContract.address,
-        sandContract.address,
-        sandContract.address,
-        landSaleAdmin,
-        landSaleBeneficiary,
-        merkleRootHash,
-        deadline,
-        backendReferralWallet,
-        2000,
-        '0x0000000000000000000000000000000000000000',
-        assetContract.address,
-        landSaleFeeRecipient,
-        authValidatorContract.address,
-      ],
+      args: [deployArgs],
       skipIfAlreadyDeployed: true,
       log: true,
     });
@@ -83,7 +85,11 @@ const func: DeployFunction = async function (hre) {
     writeProofs(hre, landSaleName, landSale);
 
     const args = landSaleDeployment.args || [];
-    const landName = args.includes(landContract.address) ? 'Land' : 'Land_Old';
+    const landName = args.some(
+      (item) => item.landAddress === landContract.address
+    )
+      ? 'Land'
+      : 'Land_Old';
     await setAsLandMinter(hre, landSaleDeployment.address, landName);
   }
 

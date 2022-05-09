@@ -17,7 +17,7 @@ import {
   waitFor,
   withSnapshot,
 } from '../utils';
-import {zeroAddress} from '../land-sale/fixtures';
+import {zeroAddress} from '../EstateSale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
 
