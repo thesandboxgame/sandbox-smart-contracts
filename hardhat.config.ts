@@ -339,6 +339,7 @@ const config: HardhatUserConfig = {
       url: node_url('goerli'),
       accounts: accounts('goerli_test'),
       tags: ['testnet', 'L1'],
+      deploy: ['deploy'],
       // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
         l2: 'mumbai_test',
