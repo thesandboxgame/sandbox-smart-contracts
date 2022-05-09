@@ -36,6 +36,10 @@ interface IAssetMinter {
         uint256 quantity
     ) external returns (uint256 assetId);
 
+    function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
+        external
+        returns (uint256 assetId);
+
     function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external;
 
     function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external;
@@ -43,10 +47,6 @@ interface IAssetMinter {
     function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external;
 
     function setNumberOfCatalystsBurnPerAsset(uint32 newQuantity) external;
-
-    function setGemsFactor(uint256 newQuantity) external;
-
-    function setCatalystsFactor(uint256 newQuantity) external;
 
     function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external;
 }
