@@ -1,0 +1,297 @@
+{
+  "address": "0x00E9e534777fB51aAbA8F5cCb51d5D528C283BA2",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "CREATOR_OFFSET_MULTIPLIER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "IS_NFT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "IS_NFT_OFFSET_MULTIPLIER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_PACK_SIZE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_SUPPLY",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NFT_INDEX",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NFT_INDEX_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NOT_IS_NFT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NOT_NFT_INDEX",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PACK_ID",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PACK_ID_OFFSET_MULTIPLIER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PACK_INDEX",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PACK_NUM_FT_TYPES",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "URI_ID",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "hash2base32",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "_uintAsString",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "toFullURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_i",
+          "type": "uint256"
+        }
+      ],
+      "name": "uint2str",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "_uintAsString",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xe4dda09a4367ed776fe3220623f7f1219f7dc2073f053e799f2a090e2001721d",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x00E9e534777fB51aAbA8F5cCb51d5D528C283BA2",
+    "transactionIndex": 5,
+    "gasUsed": "588015",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x85136206ee6a14ca75eb1bbc29b0e8328298d0abd7c99aea3cfaf98a4d693a54",
+    "transactionHash": "0xe4dda09a4367ed776fe3220623f7f1219f7dc2073f053e799f2a090e2001721d",
+    "logs": [],
+    "blockNumber": 5595339,
+    "cumulativeGasUsed": "1140053",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "08eef2e593d164b299d64dee74acdb02",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"CREATOR_OFFSET_MULTIPLIER\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"IS_NFT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"IS_NFT_OFFSET_MULTIPLIER\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAX_PACK_SIZE\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAX_SUPPLY\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NFT_INDEX\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NFT_INDEX_OFFSET\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NOT_IS_NFT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NOT_NFT_INDEX\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PACK_ID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PACK_ID_OFFSET_MULTIPLIER\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PACK_INDEX\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PACK_NUM_FT_TYPES\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"URI_ID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"hash2base32\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"_uintAsString\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"toFullURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_i\",\"type\":\"uint256\"}],\"name\":\"uint2str\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"_uintAsString\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/asset/libraries/ERC1155ERC721Helper.sol\":\"ERC1155ERC721Helper\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"src/solc_0.8/asset/libraries/ERC1155ERC721Helper.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nlibrary ERC1155ERC721Helper {\\n    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;\\n\\n    uint256 public constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);\\n    uint256 public constant IS_NFT_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1);\\n    uint256 public constant PACK_ID_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32 - 40);\\n    uint256 public constant PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32 - 40 - 12);\\n    uint256 public constant NFT_INDEX_OFFSET = 63;\\n\\n    uint256 public constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;\\n    uint256 public constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;\\n    uint256 public constant NFT_INDEX = 0x00000000000000000000000000000000000000007FFFFFFF8000000000000000;\\n    uint256 public constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;\\n    uint256 public constant URI_ID = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000007FFFFFFFFFFFF800;\\n    uint256 public constant PACK_ID = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000007FFFFFFFFF800000;\\n    uint256 public constant PACK_INDEX = 0x00000000000000000000000000000000000000000000000000000000000007FF;\\n    uint256 public constant PACK_NUM_FT_TYPES = 0x00000000000000000000000000000000000000000000000000000000007FF800;\\n\\n    uint256 public constant MAX_SUPPLY = uint256(2)**32 - 1;\\n    uint256 public constant MAX_PACK_SIZE = uint256(2)**11;\\n\\n    function toFullURI(bytes32 hash, uint256 id) public pure returns (string memory) {\\n        return string(abi.encodePacked(\\\"ipfs://bafybei\\\", hash2base32(hash), \\\"/\\\", uint2str(id & PACK_INDEX), \\\".json\\\"));\\n    }\\n\\n    // solium-disable-next-line security/no-assign-params\\n    function hash2base32(bytes32 hash) public pure returns (string memory _uintAsString) {\\n        uint256 _i = uint256(hash);\\n        uint256 k = 52;\\n        bytes memory bstr = new bytes(k);\\n        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)\\n        _i /= 8;\\n        while (k > 0) {\\n            bstr[--k] = base32Alphabet[_i % 32];\\n            _i /= 32;\\n        }\\n        return string(bstr);\\n    }\\n\\n    // solium-disable-next-line security/no-assign-params\\n    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {\\n        if (_i == 0) {\\n            return \\\"0\\\";\\n        }\\n\\n        uint256 j = _i;\\n        uint256 len;\\n        while (j != 0) {\\n            len++;\\n            j /= 10;\\n        }\\n\\n        bytes memory bstr = new bytes(len);\\n        uint256 k = len;\\n        while (_i != 0) {\\n            bstr[--k] = bytes1(uint8(48 + uint8(_i % 10)));\\n            _i /= 10;\\n        }\\n\\n        return string(bstr);\\n    }\\n}\\n\",\"keccak256\":\"0x3a1ddd78ae5c82d9d6a11fbbaca3d273f0cedc6129a4a056cbb143abb4b1e62e\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6109b261003a600b82828239805160001a60731461002d57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600436106101405760003560e01c8063875adeb8116100bc578063c2c91dec1161008b578063cf5b479a11610070578063cf5b479a14610261578063dd523a4314610288578063f76f950e1461029057610140565b8063c2c91dec1461024f578063c6c871251461025957610140565b8063875adeb81461020d578063a85796eb14610215578063bbb2340d14610205578063c0c001db1461022857610140565b8063532ac7e611610113578063564401e7116100f8578063564401e7146101e95780636e5e91d4146101fc5780637553d0e41461020557610140565b8063532ac7e6146101b657806355f43cd4146101c957610140565b80631c587ea6146101455780631dcdfad81461017f57806332cb6b0c146101875780634b8d94441461018f575b600080fd5b61016c7fffffffffffffffffffffffffffffffffffffffff800000007fffffffffffffff81565b6040519081526020015b60405180910390f35b61016c6102a3565b61016c6102b2565b61016c7fffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffff81565b61016c6b80000000000000000000000081565b6101dc6101d736600461064a565b6102ca565b6040516101769190610716565b61016c6b7fffffff800000000000000081565b61016c6107ff81565b61016c61030a565b61016c610316565b6101dc610223366004610632565b610322565b61016c7fffffffffffffffffffffffffffffffffffffffff000000007fffffffff80000081565b61016c627ff80081565b61016c6104cf565b61016c7fffffffffffffffffffffffffffffffffffffffff000000007ffffffffffff80081565b61016c603f81565b6101dc61029e366004610632565b6104db565b6102af606060026107e6565b81565b60016102c0602060026107e6565b6102af91906108c3565b60606102d583610322565b6102e26107ff84166104db565b6040516020016102f392919061066b565b604051602081830303815290604052905092915050565b6102af600b60026107e6565b6102af601760026107e6565b60408051603480825260608281019093528391600090826020820181803683370190505090507f6162636465666768696a6b6c6d6e6f707172737475767778797a323334353637600261037660088661093c565b901b60ff166020811061039957634e487b7160e01b600052603260045260246000fd5b1a60f81b816103a78461090a565b935083815181106103c857634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535061040260088461078c565b92505b81156104c5577f6162636465666768696a6b6c6d6e6f707172737475767778797a32333435363761043760208561093c565b6020811061045557634e487b7160e01b600052603260045260246000fd5b1a60f81b816104638461090a565b9350838151811061048457634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506104be60208461078c565b9250610405565b925050505b919050565b6102af605f60026107e6565b60608161051c575060408051808201909152600181527f300000000000000000000000000000000000000000000000000000000000000060208201526104ca565b8160005b8115610546578061053081610921565b915061053f9050600a8361078c565b9150610520565b60008167ffffffffffffffff81111561056f57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015610599576020820181803683370190505b509050815b8515610629576105af600a8761093c565b6105ba906030610767565b60f81b826105c78361090a565b925082815181106105e857634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350610622600a8761078c565b955061059e565b50949350505050565b600060208284031215610643578081fd5b5035919050565b6000806040838503121561065c578081fd5b50508035926020909101359150565b60007f697066733a2f2f62616679626569000000000000000000000000000000000000825283516106a381600e8501602088016108da565b7f2f00000000000000000000000000000000000000000000000000000000000000600e9184019182015283516106e081600f8401602088016108da565b7f2e6a736f6e000000000000000000000000000000000000000000000000000000600f9290910191820152601401949350505050565b60006020825282518060208401526107358160408501602087016108da565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b600060ff821660ff84168060ff0382111561078457610784610950565b019392505050565b60008261079b5761079b610966565b500490565b80825b60018086116107b257506107dd565b8187048211156107c4576107c4610950565b808616156107d157918102915b9490941c9380026107a3565b94509492505050565b60006107f860001960ff8516846107ff565b9392505050565b60008261080e575060016107f8565b8161081b575060006107f8565b8160018114610831576002811461083b57610868565b60019150506107f8565b60ff84111561084c5761084c610950565b6001841b91508482111561086257610862610950565b506107f8565b5060208310610133831016604e8410600b841016171561089b575081810a8381111561089657610896610950565b6107f8565b6108a884848460016107a0565b8086048211156108ba576108ba610950565b02949350505050565b6000828210156108d5576108d5610950565b500390565b60005b838110156108f55781810151838201526020016108dd565b83811115610904576000848401525b50505050565b60008161091957610919610950565b506000190190565b600060001982141561093557610935610950565b5060010190565b60008261094b5761094b610966565b500690565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052601260045260246000fdfea26469706673582212204ca74b31b5e4ff3ee0b9f8e450fe2683013d91df4d7ad2632fbec22ecdba257a64736f6c63430008020033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600436106101405760003560e01c8063875adeb8116100bc578063c2c91dec1161008b578063cf5b479a11610070578063cf5b479a14610261578063dd523a4314610288578063f76f950e1461029057610140565b8063c2c91dec1461024f578063c6c871251461025957610140565b8063875adeb81461020d578063a85796eb14610215578063bbb2340d14610205578063c0c001db1461022857610140565b8063532ac7e611610113578063564401e7116100f8578063564401e7146101e95780636e5e91d4146101fc5780637553d0e41461020557610140565b8063532ac7e6146101b657806355f43cd4146101c957610140565b80631c587ea6146101455780631dcdfad81461017f57806332cb6b0c146101875780634b8d94441461018f575b600080fd5b61016c7fffffffffffffffffffffffffffffffffffffffff800000007fffffffffffffff81565b6040519081526020015b60405180910390f35b61016c6102a3565b61016c6102b2565b61016c7fffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffff81565b61016c6b80000000000000000000000081565b6101dc6101d736600461064a565b6102ca565b6040516101769190610716565b61016c6b7fffffff800000000000000081565b61016c6107ff81565b61016c61030a565b61016c610316565b6101dc610223366004610632565b610322565b61016c7fffffffffffffffffffffffffffffffffffffffff000000007fffffffff80000081565b61016c627ff80081565b61016c6104cf565b61016c7fffffffffffffffffffffffffffffffffffffffff000000007ffffffffffff80081565b61016c603f81565b6101dc61029e366004610632565b6104db565b6102af606060026107e6565b81565b60016102c0602060026107e6565b6102af91906108c3565b60606102d583610322565b6102e26107ff84166104db565b6040516020016102f392919061066b565b604051602081830303815290604052905092915050565b6102af600b60026107e6565b6102af601760026107e6565b60408051603480825260608281019093528391600090826020820181803683370190505090507f6162636465666768696a6b6c6d6e6f707172737475767778797a323334353637600261037660088661093c565b901b60ff166020811061039957634e487b7160e01b600052603260045260246000fd5b1a60f81b816103a78461090a565b935083815181106103c857634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535061040260088461078c565b92505b81156104c5577f6162636465666768696a6b6c6d6e6f707172737475767778797a32333435363761043760208561093c565b6020811061045557634e487b7160e01b600052603260045260246000fd5b1a60f81b816104638461090a565b9350838151811061048457634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506104be60208461078c565b9250610405565b925050505b919050565b6102af605f60026107e6565b60608161051c575060408051808201909152600181527f300000000000000000000000000000000000000000000000000000000000000060208201526104ca565b8160005b8115610546578061053081610921565b915061053f9050600a8361078c565b9150610520565b60008167ffffffffffffffff81111561056f57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015610599576020820181803683370190505b509050815b8515610629576105af600a8761093c565b6105ba906030610767565b60f81b826105c78361090a565b925082815181106105e857634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350610622600a8761078c565b955061059e565b50949350505050565b600060208284031215610643578081fd5b5035919050565b6000806040838503121561065c578081fd5b50508035926020909101359150565b60007f697066733a2f2f62616679626569000000000000000000000000000000000000825283516106a381600e8501602088016108da565b7f2f00000000000000000000000000000000000000000000000000000000000000600e9184019182015283516106e081600f8401602088016108da565b7f2e6a736f6e000000000000000000000000000000000000000000000000000000600f9290910191820152601401949350505050565b60006020825282518060208401526107358160408501602087016108da565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b600060ff821660ff84168060ff0382111561078457610784610950565b019392505050565b60008261079b5761079b610966565b500490565b80825b60018086116107b257506107dd565b8187048211156107c4576107c4610950565b808616156107d157918102915b9490941c9380026107a3565b94509492505050565b60006107f860001960ff8516846107ff565b9392505050565b60008261080e575060016107f8565b8161081b575060006107f8565b8160018114610831576002811461083b57610868565b60019150506107f8565b60ff84111561084c5761084c610950565b6001841b91508482111561086257610862610950565b506107f8565b5060208310610133831016604e8410600b841016171561089b575081810a8381111561089657610896610950565b6107f8565b6108a884848460016107a0565b8086048211156108ba576108ba610950565b02949350505050565b6000828210156108d5576108d5610950565b500390565b60005b838110156108f55781810151838201526020016108dd565b83811115610904576000848401525b50505050565b60008161091957610919610950565b506000190190565b600060001982141561093557610935610950565b5060010190565b60008261094b5761094b610966565b500690565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052601260045260246000fdfea26469706673582212204ca74b31b5e4ff3ee0b9f8e450fe2683013d91df4d7ad2632fbec22ecdba257a64736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
