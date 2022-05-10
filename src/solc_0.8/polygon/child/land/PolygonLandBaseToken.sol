@@ -120,7 +120,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
     }
 
     /**
-     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
      * @param to The recipient of the new quad
      * @param size The size of the new quad
      * @param x The top left x coordinate of the new quad
@@ -284,7 +284,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
 
         return false;
     }
-
+<
     function _transferQuad(
         address from,
         address to,
