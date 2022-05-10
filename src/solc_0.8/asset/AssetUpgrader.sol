@@ -206,9 +206,9 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param from The owner of the gems.
     /// @param gemIds The gem types to burn.
     function _burnGems(address from, uint16[] memory gemIds) internal {
-        uint256[] memory gemFactors;
+        uint256[] memory gemFactors = new uint256[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            gemFactors[i] = _gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
+            gemFactors[i] = 10**_gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
         }
         _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
     }
@@ -217,7 +217,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param from The owner of the catalyst.
     /// @param catalystId The catalyst type to burn.
     function _burnCatalyst(address from, uint16 catalystId) internal {
-        uint256 catalystFactor = _gemsCatalystsRegistry.getCatalystDecimals(catalystId);
+        uint256 catalystFactor = 10**_gemsCatalystsRegistry.getCatalystDecimals(catalystId);
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, catalystFactor);
     }
 
