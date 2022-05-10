@@ -33,9 +33,8 @@ export default func;
 func.tags = ['AssetERC1155Tunnel_setup', 'L1'];
 func.runAtTheEnd = true;
 func.dependencies = [
-  'Asset', // Will pick up old 'Asset'
-  'Asset_ERC1155', // Will ensure to pick up 'Asset' upgrade to ERC1155
-  'FXROOT',
+  'Asset',
+  'Asset_ERC1155',
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
