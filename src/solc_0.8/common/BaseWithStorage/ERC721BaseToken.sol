@@ -54,8 +54,10 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         uint256 id
     ) external {
         uint256 ownerData = _owners[_storageId(id)];
+        address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
+        require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
             msgSender == sender || _superOperators[msgSender] || _operatorsForAll[sender][msgSender],
             "UNAUTHORIZED_APPROVAL"

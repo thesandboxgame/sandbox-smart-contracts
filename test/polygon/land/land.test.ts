@@ -500,6 +500,33 @@ describe('MockLandWithMint.sol', function () {
         }
       });
     });
+
+    it('burnt token cannot be approved', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].address,
+        1,
+        0,
+        0,
+        bytes
+      );
+
+      await landOwners[0].MockLandWithMint.burn(0);
+
+      await expect(
+        landOwners[0].MockLandWithMint.approveFor(
+          landOwners[0].address,
+          landOwners[1].address,
+          0
+        )
+      ).to.be.reverted;
+
+      await expect(
+        landOwners[0].MockLandWithMint.approve(landOwners[1].address, 0)
+      ).to.be.reverted;
+    });
   });
 
   describe('mint and check URIs', function () {
