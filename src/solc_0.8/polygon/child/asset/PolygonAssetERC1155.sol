@@ -208,7 +208,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
             uint256(packId) *
             ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack)
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack
-            packIndex; // packIndex (position in the pack)
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, numFTs is 1 if supply > 1, otherwise 0
+            packIndex; // packIndex (position in the pack), is 0 for newly minted token type
     }
 }
