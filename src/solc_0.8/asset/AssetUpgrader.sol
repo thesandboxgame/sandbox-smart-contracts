@@ -85,7 +85,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     // function extractAndAddGems(
     //     address from,
     //     uint256 assetId,
-    //     uint16[] ca_changeCatalystlldata gemIds,
+    //     uint16[] calldata gemIds,
     //     address to
     // ) external override returns (uint256 tokenId) {
     //     require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
