@@ -49,11 +49,17 @@ export const assetUpgraderFixtures = async () => {
     'PolygonAssetUpgraderFeeBurner'
   );
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
-
+  const SUPER_OPERATOR_ROLE = await gemsCatalystsRegistry.SUPER_OPERATOR_ROLE();
   await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
+  );
+
+  await waitFor(
+    gemsCatalystsRegistry
+      .connect(ethers.provider.getSigner(assetAdmin))
+      .grantRole(SUPER_OPERATOR_ROLE, assetUpgraderFeeBurnerContract.address)
   );
 
   const MINTER_ROLE = await assetERC721Contract.MINTER_ROLE();
