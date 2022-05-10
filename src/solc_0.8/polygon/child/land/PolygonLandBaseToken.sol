@@ -476,10 +476,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
     ) internal returns (address) {
         uint256 layer;
         uint256 parentSize = size * 2;
-        if (size == 1) {
-            layer = LAYER_1x1;
-            parentSize = 3;
-        } else if (size == 3) {
+        if (size == 3) {
             layer = LAYER_3x3;
         } else if (size == 6) {
             layer = LAYER_6x6;
