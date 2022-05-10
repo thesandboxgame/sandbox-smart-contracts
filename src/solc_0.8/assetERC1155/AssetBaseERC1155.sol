@@ -284,12 +284,11 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     ) external returns (uint256) {
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(to != address(0), "TO==0");
-        require(id & ERC1155ERC721Helper.IS_NFT == 0, "NOT_ERC1155_TOKEN");
-        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        require(id & ERC1155ERC721Helper.IS_NFT != 0, "!NFT");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id] + 1;
+        _nextCollectionIndex[id] = tokenCollectionIndex;
         string memory metaData = tokenURI(id);
-        uint256 newId =
-            id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
-        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        uint256 newId = id + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
         _burnFT(sender, id, 1);
         _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
         emit Extraction(id, newId);
