@@ -24,3 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Multi_Giveaway_2', 'Multi_Giveaway_2_deploy'];
 func.dependencies = [];
+func.skip = async () => true;

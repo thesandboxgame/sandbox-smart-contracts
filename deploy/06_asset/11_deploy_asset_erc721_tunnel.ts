@@ -34,20 +34,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l2'
   ].getNamedAccounts();
 
-  // if (PolygonAssetERC721Tunnel) {
-  //   await hre.companionNetworks['l2'].deployments.execute(
-  //     'PolygonAssetERC721Tunnel',
-  //     {from: deployerOnL2},
-  //     'setFxRootTunnel',
-  //     AssetERC721Tunnel.address
-  //   );
-  //   await deployments.execute(
-  //     'AssetERC721Tunnel',
-  //     {from: deployer},
-  //     'setFxChildTunnel',
-  //     PolygonAssetERC721Tunnel.address
-  //   );
-  // }
+  if (PolygonAssetERC721Tunnel) {
+    await hre.companionNetworks['l2'].deployments.execute(
+      'PolygonAssetERC721Tunnel',
+      {from: deployerOnL2},
+      'setFxRootTunnel',
+      AssetERC721Tunnel.address
+    );
+    await deployments.execute(
+      'AssetERC721Tunnel',
+      {from: deployer},
+      'setFxChildTunnel',
+      PolygonAssetERC721Tunnel.address
+    );
+  }
 };
 
 export default func;

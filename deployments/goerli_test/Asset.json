@@ -1,5 +1,5 @@
 {
-  "address": "0xf5401219A50E87284fADEAf61fEfDE673908e5D2",
+  "address": "0x9cC34D9554575B01D06679007Ba97ea1C0d50F1B",
   "abi": [
     {
       "anonymous": false,
@@ -141,6 +141,19 @@
       "inputs": [
         {
           "indexed": false,
+          "internalType": "contract IAssetERC721",
+          "name": "assetERC721",
+          "type": "address"
+        }
+      ],
+      "name": "AssetERC721Set",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
           "internalType": "address",
           "name": "bouncer",
           "type": "address"
@@ -172,6 +185,25 @@
         }
       ],
       "name": "BouncerAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "newId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Extraction",
       "type": "event"
     },
     {
@@ -300,6 +332,19 @@
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "_assetERC721",
+      "outputs": [
+        {
+          "internalType": "contract IAssetERC721",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -345,6 +390,47 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -396,6 +482,35 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "extractERC721From",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -455,6 +570,11 @@
           "type": "address"
         },
         {
+          "internalType": "contract IAssetERC721",
+          "name": "assetERC721",
+          "type": "address"
+        },
+        {
           "internalType": "uint8",
           "name": "chainIndex",
           "type": "uint8"
@@ -480,6 +600,11 @@
         {
           "internalType": "address",
           "name": "bouncerAdmin",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IAssetERC721",
+          "name": "assetERC721",
           "type": "address"
         },
         {
@@ -625,6 +750,50 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint40",
+          "name": "packId",
+          "type": "uint40"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "supply",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "to",
           "type": "address"
         },
@@ -644,7 +813,7 @@
           "type": "bytes"
         }
       ],
-      "name": "mintBatch",
+      "name": "mintMultiple",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -660,40 +829,6 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        }
-      ],
-      "name": "prepareForExtract",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "newId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "metaData",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -800,6 +935,25 @@
       ],
       "name": "setApprovalForAllFor",
       "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IAssetERC721",
+          "name": "assetERC721",
+          "type": "address"
+        }
+      ],
+      "name": "setAssetERC721",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -944,37 +1098,37 @@
       "type": "constructor"
     }
   ],
-  "transactionHash": "0xac47e67dbcb293b99564deeee5cddd5f6ae063b06fdc1ffef6c5d4f6e89fd784",
+  "transactionHash": "0x62f383726a9145b1d13c5edef43ae388a9809e6663e9c8bf6688459c8daf09e4",
   "receipt": {
     "to": null,
     "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
-    "contractAddress": "0xf5401219A50E87284fADEAf61fEfDE673908e5D2",
-    "transactionIndex": 25,
+    "contractAddress": "0x9cC34D9554575B01D06679007Ba97ea1C0d50F1B",
+    "transactionIndex": 70,
     "gasUsed": "615244",
-    "logsBloom": "0x00000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000200000000000000000000000000000000",
-    "blockHash": "0x8926f5c39294168fecc078d6e1e373276f479eea59987a786a54d2040c00c928",
-    "transactionHash": "0xac47e67dbcb293b99564deeee5cddd5f6ae063b06fdc1ffef6c5d4f6e89fd784",
+    "logsBloom": "0x00000000000000000800000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000008000000000000000000000000000000000000000000000",
+    "blockHash": "0x23c252dc5e211c98fc9ac4ddcd388d6b80dc3c1e79c9867687736ba4d44b04be",
+    "transactionHash": "0x62f383726a9145b1d13c5edef43ae388a9809e6663e9c8bf6688459c8daf09e4",
     "logs": [
       {
-        "transactionIndex": 25,
-        "blockNumber": 6631720,
-        "transactionHash": "0xac47e67dbcb293b99564deeee5cddd5f6ae063b06fdc1ffef6c5d4f6e89fd784",
-        "address": "0xf5401219A50E87284fADEAf61fEfDE673908e5D2",
+        "transactionIndex": 70,
+        "blockNumber": 6858668,
+        "transactionHash": "0x62f383726a9145b1d13c5edef43ae388a9809e6663e9c8bf6688459c8daf09e4",
+        "address": "0x9cC34D9554575B01D06679007Ba97ea1C0d50F1B",
         "topics": [
           "0xb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb"
         ],
         "data": "0x00000000000000000000000032f3e11d8d9b9dc50e19d41c0ed868283824767b0000000000000000000000000000000000000000000000000000000000000001",
-        "logIndex": 81,
-        "blockHash": "0x8926f5c39294168fecc078d6e1e373276f479eea59987a786a54d2040c00c928"
+        "logIndex": 278,
+        "blockHash": "0x23c252dc5e211c98fc9ac4ddcd388d6b80dc3c1e79c9867687736ba4d44b04be"
       }
     ],
-    "blockNumber": 6631720,
-    "cumulativeGasUsed": "10757803",
+    "blockNumber": 6858668,
+    "cumulativeGasUsed": "20835774",
     "status": 1,
     "byzantium": true
   },
   "args": [
-    "0x696F1939A992978c82665d705C59e7E5B93d84e8",
+    "0xbA0Aad6429dd3bbe76fC1769351835e844f97202",
     "0x0BDA04dF7b7CC63099F99703fE7A67aF4F5BdaA0",
     "0x184b955900000000000000000000000032f3e11d8d9b9dc50e19d41c0ed868283824767b000000000000000000000000a796ae911621e00809e0e7c8f0ad6bf118e5139e000000000000000000000000a796ae911621e00809e0e7c8f0ad6bf118e5139e"
   ],
@@ -989,10 +1143,11 @@
       "0x96E8789B195713B279c163847A7a0A107CDf6FCf",
       "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
       "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+      "0x278F9D4933954617B16A66B6c17dA14E9daFb387",
       0
     ]
   },
-  "implementation": "0x21c9FEE5042C6d3D8dA24f201da256E7ceBEC486",
+  "implementation": "0xae7C80525e26113c4d61FB9D1d68615E86A80885",
   "devdoc": {
     "details": "This contract implements a proxy that is upgradeable by an admin.  To avoid https://medium.com/nomic-labs-blog/malicious-backdoors-in-ethereum-proxies-62629adf3357[proxy selector clashing], which can potentially be used in an attack, this contract uses the https://blog.openzeppelin.com/the-transparent-proxy-pattern/[transparent proxy pattern]. This pattern implies two things that go hand in hand:  1. If any account other than the admin calls the proxy, the call will be forwarded to the implementation, even if that call matches one of the admin functions exposed by the proxy itself. 2. If the admin calls the proxy, it can access the admin functions, but its calls will never be forwarded to the implementation. If the admin tries to call a function on the implementation it will fail with an error that says \"admin cannot fallback to proxy target\".  These properties mean that the admin account can only be used for admin actions like upgrading the proxy or changing the admin, so it's best if it's a dedicated account that is not used for anything else. This will avoid headaches due to sudden errors when trying to call a function from the proxy implementation.  Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way, you should think of the `ProxyAdmin` instance as the real administrative inerface of your proxy.",
     "events": {
