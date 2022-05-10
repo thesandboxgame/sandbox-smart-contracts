@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
@@ -79,14 +78,14 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         tokenId = _assetERC1155.extractERC721From(from, assetId, from);
-        _changeCatalyst(from, tokenId, catalystId, gemIds, to);
+        _changeCatalyst(from, tokenId, catalystId, gemIds, to, false);
     }
 
     // TODO tests
     // function extractAndAddGems(
     //     address from,
     //     uint256 assetId,
-    //     uint16[] calldata gemIds,
+    //     uint16[] ca_changeCatalystlldata gemIds,
     //     address to
     // ) external override returns (uint256 tokenId) {
     //     require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
@@ -111,7 +110,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-        _changeCatalyst(from, assetId, catalystId, gemIds, to);
+        _changeCatalyst(from, assetId, catalystId, gemIds, to, true);
         return assetId;
     }
 
@@ -159,14 +158,15 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         uint256 assetId,
         uint16 catalystId,
         uint16[] memory gemIds,
-        address to
+        address to,
+        bool isERC1155
     ) internal {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
         _burnCatalyst(from, catalystId);
         _burnGems(from, gemIds);
         _chargeSand(from, upgradeFee);
         _registry.setCatalyst(assetId, catalystId, gemIds);
-        _transfer(from, to, assetId);
+        _transfer(from, to, assetId, isERC1155);
     }
 
     /// @dev Add gems to an existing asset.
@@ -184,7 +184,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         _burnGems(from, gemIds);
         _chargeSand(from, gemAdditionFee);
         _registry.addGems(assetId, gemIds);
-        _transfer(from, to, assetId);
+        _transfer(from, to, assetId, true);
     }
 
     /// @dev transfer an asset if from != to.
@@ -194,13 +194,22 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     function _transfer(
         address from,
         address to,
-        uint256 assetId
+        uint256 assetId,
+        bool isERC1155
     ) internal {
         // TODO: ensure always assetERC1155?
-        if (from != to) {
-            _assetERC1155.safeTransferFrom(from, to, assetId, 1, "");
+        if (isERC1155) {
+            if (from != to) {
+                _assetERC1155.safeTransferFrom(from, to, assetId, 1, "");
+            } else {
+                require(_assetERC1155.balanceOf(from, assetId) > 0, "NOT_AUTHORIZED_ASSET_OWNER");
+            }
         } else {
-            require(_assetERC1155.balanceOf(from, assetId) > 0, "NOT_AUTHORIZED_ASSET_OWNER");
+            if (from != to) {
+                _assetERC721.safeTransferFrom(from, to, assetId);
+            } else {
+                require(_assetERC721.ownerOf(assetId) == from, "NOT_AUTHORIZED_ASSET_OWNER");
+            }
         }
     }
 
