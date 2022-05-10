@@ -305,9 +305,9 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint16[] memory gemIds,
         uint32 numTimes
     ) internal {
-        uint256[] memory gemFactors;
+        uint256[] memory gemFactors = new uint256[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            gemFactors[i] = _gemsCatalystsRegistry.getGemDecimals(gemIds[i]) * numTimes;
+            gemFactors[i] = 10**(_gemsCatalystsRegistry.getGemDecimals(gemIds[i])) * numTimes;
         }
         _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
     }
@@ -324,7 +324,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         _gemsCatalystsRegistry.burnCatalyst(
             from,
             catalystId,
-            numTimes * _gemsCatalystsRegistry.getCatalystDecimals(catalystId)
+            numTimes * 10**(_gemsCatalystsRegistry.getCatalystDecimals(catalystId))
         );
     }
 
@@ -338,7 +338,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            uint256 gemFactor = _gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
+            uint256 gemFactor = 10**_gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
             scaledQuantities[i] = quantities[i] * gemFactor * numberOfGemsBurnPerAsset;
         }
     }
@@ -353,7 +353,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            uint256 catalystFactor = _gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
+            uint256 catalystFactor = 10**_gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
             scaledQuantities[i] = quantities[i] * catalystFactor * numberOfCatalystBurnPerAsset;
         }
     }

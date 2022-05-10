@@ -205,12 +205,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = [
-  'PolygonGemsCatalystsRegistry',
-  'PolygonGemsCatalystsRegistry_setup',
-  'L2',
-];
+func.tags = ['PolygonGemsCatalystsRegistry_setup', 'L2'];
 func.dependencies = [
+  'PolygonCatalysts_deploy',
+  'PolygonGems_deploy',
   'PolygonGemsCatalystsRegistry_deploy',
   'PolygonAssetMinter_deploy',
   'PolygonAssetUpgrader_deploy',

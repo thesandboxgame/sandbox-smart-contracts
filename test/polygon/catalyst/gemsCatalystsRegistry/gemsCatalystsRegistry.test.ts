@@ -21,6 +21,18 @@ describe('GemsCatalystsRegistry', function () {
     expect(maxGems).to.equal(catalysts[0].maxGems);
   });
 
+  it('can get decimals', async function () {
+    const {
+      gemsCatalystsRegistry,
+      commonCatalyst,
+    } = await setupGemsAndCatalysts();
+    const catalystId = await commonCatalyst.catalystId();
+    const decimals = await gemsCatalystsRegistry.getCatalystDecimals(
+      catalystId
+    );
+    expect(decimals).to.equal(18);
+  });
+
   it('getMaxGems for non existing catalystId should fail', async function () {
     const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
     await expect(gemsCatalystsRegistry.getMaxGems(10)).to.be.revertedWith(
