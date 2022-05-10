@@ -18,6 +18,18 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
 
+    modifier validQuad(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) {
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        _;
+    }
+
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract
@@ -138,8 +150,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
             quadId = LAYER_12x12 + id;
         } else if (size == 24) {
             quadId = LAYER_24x24 + id;
-        } else {
-            require(false, "Invalid size");
         }
 
         for (uint256 i = 0; i < size * size; i++) {
@@ -231,10 +241,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         uint256 size,
         uint256 x,
         uint256 y
-    ) public view override returns (bool) {
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-
+    ) public view override validQuad(size, x, y) returns (bool) {
         if (_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] != 0) return true;
         uint256 toX = x + size;
         uint256 toY = y + size;
@@ -284,7 +291,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal {
+    ) internal validQuad(size, x, y) {
         if (size == 1) {
             uint256 id1x1 = x + y * GRID_SIZE;
             address owner = _ownerOf(id1x1);
@@ -321,9 +328,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         uint256 x,
         uint256 y
     ) internal {
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-
         if (size == 3) {
             _regroup3x3(from, to, x, y, true);
         } else if (size == 6) {
@@ -332,8 +336,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
             _regroup12x12(from, to, x, y, true);
         } else if (size == 24) {
             _regroup24x24(from, to, x, y, true);
-        } else {
-            require(false, "Invalid size");
         }
     }
 

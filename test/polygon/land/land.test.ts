@@ -2169,5 +2169,34 @@ describe('MockLandWithMint.sol', function () {
         expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
       }
     });
+
+    it('checks if a quad is valid & exists', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      for (const size of sizes) {
+        expect(await landOwners[0].MockLandWithMint.exists(size, 0, 0)).to.be
+          .true;
+      }
+
+      await expect(landOwners[0].MockLandWithMint.exists(4, 0, 0)).to.be
+        .reverted;
+
+      await expect(landOwners[0].MockLandWithMint.exists(1, 500, 0)).to.be
+        .reverted;
+
+      await expect(landOwners[0].MockLandWithMint.exists(1, 0, 500)).to.be
+        .reverted;
+    });
   });
 });
