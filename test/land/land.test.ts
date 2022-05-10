@@ -56,4 +56,26 @@ describe('Land Transfer quad', function () {
       });
     });
   });
+
+  it('Burnt land cannot be minted again', async function () {
+    const {
+      landContract,
+      getNamedAccounts,
+      ethers,
+      mintQuad,
+    } = await setupLand();
+    const {deployer} = await getNamedAccounts();
+    const contract = landContract.connect(ethers.provider.getSigner(deployer));
+    const x = 0;
+    const y = 0;
+    const tokenId = x + y * GRID_SIZE;
+
+    await mintQuad(deployer, 3, x, y);
+
+    await contract.burn(tokenId);
+
+    await expect(mintQuad(deployer, 1, x, y)).to.be.revertedWith(
+      'Already minted as 3x3'
+    );
+  });
 });
