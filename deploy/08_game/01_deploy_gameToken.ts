@@ -38,6 +38,7 @@ func.tags = ['ChildGameToken', 'ChildGameToken_deploy'];
 func.dependencies = [
   'MockERC1155Asset_deploy',
   'MockERC721Asset_deploy',
+  'Sand',
   'TRUSTED_FORWARDER',
 ];
 // TODO: Setup deploy-polygon folder and network.
