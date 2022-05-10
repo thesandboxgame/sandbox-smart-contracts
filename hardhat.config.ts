@@ -78,6 +78,24 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      'src/solc_0.8/polygon/child/asset/PolygonAssetERC1155.sol:PolygonAssetERC1155': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 0,
+          },
+        },
+      },
+      'src/solc_0.8/assetERC1155/AssetERC1155.sol:AssetERC1155': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 0,
+          },
+        },
+      },
     },
   },
   namedAccounts: {
@@ -340,7 +358,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('goerli_test'),
       tags: ['testnet', 'L1'],
       deploy: ['deploy'],
-      // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
+      //gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
         l2: 'mumbai_test',
       },
