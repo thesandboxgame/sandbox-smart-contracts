@@ -40,8 +40,6 @@ describe('PolygonAsset.sol', function () {
         [testMetadataHashArray]
       );
 
-      console.log(MOCK_DATA, 'data');
-
       await waitFor(
         PolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
