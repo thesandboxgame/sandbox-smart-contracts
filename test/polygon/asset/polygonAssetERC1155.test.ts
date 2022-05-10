@@ -257,6 +257,7 @@ describe('PolygonAssetERC1155.sol', function () {
         tokenId
       );
       expect(balance).to.be.equal(1);
+
       await waitFor(
         PolygonAssetERC1155.connect(
           ethers.provider.getSigner(users[0].address)
@@ -355,7 +356,7 @@ describe('PolygonAssetERC1155.sol', function () {
         PolygonAssetERC1155.connect(
           ethers.provider.getSigner(users[0].address)
         ).extractERC721From(users[0].address, tokenId, users[1].address)
-      ).to.be.revertedWith('!NFT');
+      ).to.be.revertedWith("can't substract more than there is");
     });
     it('can extract to destination address if isApprovedForAll(sender, _msgSender())', async function () {
       // require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
@@ -428,7 +429,7 @@ describe('PolygonAssetERC1155.sol', function () {
         PolygonAssetERC1155.connect(
           ethers.provider.getSigner(users[4].address)
         ).extractERC721From(users[4].address, tokenId, users[1].address)
-      ).to.be.revertedWith('!NFT');
+      ).to.be.revertedWith("can't substract more than there is");
     });
     it('cannot extract ERC721 if supply == 1 if sender == _msgSender()', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
