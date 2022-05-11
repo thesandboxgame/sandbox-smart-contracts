@@ -12,7 +12,6 @@ library TileWithCoordLib {
         TileLib.Tile tile;
     }
 
-    uint256 public constant COORD_MASK_POS = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
     uint256 public constant COORD_MASK_NEG = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
     // TileWithCoord x and y always start in multiples of 24
@@ -105,5 +104,12 @@ library TileWithCoordLib {
             self.tile.data[0] & COORD_MASK_NEG == 0 &&
             self.tile.data[1] & COORD_MASK_NEG == 0 &&
             self.tile.data[2] & COORD_MASK_NEG == 0;
+    }
+
+    function isEqual(TileWithCoord memory self, TileWithCoord memory other) internal pure returns (bool) {
+        return
+            self.tile.data[0] == other.tile.data[0] &&
+            self.tile.data[1] == other.tile.data[1] &&
+            self.tile.data[2] == other.tile.data[2];
     }
 }

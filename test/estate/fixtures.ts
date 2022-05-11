@@ -236,8 +236,10 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
       const tx = await setup.estateContract.createEstate(
         setup.other,
         {
-          quadTuple: [sizes, xs, ys],
-          tiles: [],
+          freeLand: {
+            quads: [sizes, xs, ys],
+            tiles: [],
+          },
           uri: ethers.utils.formatBytes32String('uri ???'),
         },
         []
@@ -268,9 +270,11 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
       const tx = await setup.estateContract.updateLandsEstate(
         setup.other,
         {
-          quadsToAdd: [sizesIn, xsIn, ysIn],
-          tilesToAdd: [],
-          quadsToRemove: [sizesOut, xsOut, ysOut],
+          landToAdd: {
+            quads: [sizesIn, xsIn, ysIn],
+            tiles: [],
+          },
+          landToRemove: [sizesOut, xsOut, ysOut],
           estateId: estateId,
           uri: ethers.utils.formatBytes32String('uri ???'),
         },
@@ -468,8 +472,6 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
         gamesToRemove: gameDataToRemove,
         gamesToAdd: gameDataToAdd,
       };
-
-      console.log(JSON.stringify(updateEstateData, null, 4));
       const tx = await setup.estateContract.updateEstate(
         setup.other,
         updateEstateData

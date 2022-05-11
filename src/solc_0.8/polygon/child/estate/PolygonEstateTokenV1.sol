@@ -3,13 +3,11 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../../common/interfaces/ILandToken.sol";
-import "../../../Game/GameBaseToken.sol";
 import "../../../common/Libraries/MapLib.sol";
-import "../../../estate/EstateBaseToken.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
+import "../../../estate/EstateBaseToken.sol";
 import "../../../estate/GamesDataLib.sol";
-import "../../../estate/GamesDataLib.sol";
-import "hardhat/console.sol";
+import "../../../Game/GameBaseToken.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
     using GamesDataLib for GamesDataLib.Games;
@@ -38,7 +36,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     function createEstate(address from, CreateEstateData calldata data) external override returns (uint256) {
         uint256 estateId;
         uint256 storageId;
-        (estateId, storageId) = _createEstate(from, data.freeLandData.tiles, data.freeLandData.quads, data.uri);
+        (estateId, storageId) = _createEstate(from, data.freeLandData, data.uri);
         _addGamesToEstate(from, storageId, data.gameData);
         emit EstateTokenCreated(estateId, data);
         return storageId;
@@ -50,21 +48,18 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         onlyMinter()
         returns (uint256)
     {
-        console.log("herro");
         uint256 newId;
         uint256 storageId;
         (newId, storageId) = _updateLandsEstate(
             from,
             data.estateId,
-            data.freeLandToAdd.tiles,
-            data.freeLandToAdd.quads,
+            data.freeLandToAdd,
             data.freeLandToRemove,
             data.newUri
         );
         for (uint256 i; i < data.gamesToRemove.length; i++) {
             MapLib.Map storage map = games[storageId].getMap(data.gamesToRemove[i].gameId);
-            _removeQuads(map, data.gamesToRemove[i].quadsToTransfer);
-            _land.batchTransferQuad(
+            land.batchTransferQuad(
                 from,
                 address(this),
                 data.gamesToRemove[i].quadsToTransfer[0],
@@ -72,8 +67,8 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
                 data.gamesToRemove[i].quadsToTransfer[2],
                 ""
             );
-            _removeQuadsToFreeLand(map, storageId, data.gamesToRemove[i].quadsToFree);
-
+            map.remove(data.gamesToRemove[i].quadsToTransfer);
+            map.moveTo(freeLands[storageId], data.gamesToRemove[i].quadsToFree);
             require(games[storageId].deleteGame(data.gamesToRemove[i].gameId), "game id already exists");
             gameToken.transferFrom(address(this), from, data.gamesToRemove[i].gameId);
         }
@@ -101,6 +96,15 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return games[storageId].getGameIdAt(idx);
     }
 
+    /// @notice Return the URI of a specific token.
+    /// @param gameId The id of the token.
+    /// @return uri The URI of the token metadata.
+    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
+        uint256 id = _storageId(gameId);
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
+    }
+
     function _addGamesToEstate(
         address from,
         uint256 storageId,
@@ -108,7 +112,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     ) internal {
         for (uint256 i; i < gameData.length; i++) {
             gameToken.transferFrom(from, address(this), gameData[i].gameId);
-            _land.batchTransferQuad(
+            land.batchTransferQuad(
                 from,
                 address(this),
                 gameData[i].transferQuads[0],
@@ -116,61 +120,12 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
                 gameData[i].transferQuads[2],
                 ""
             );
-            require(games[storageId].createGame(gameData[i].gameId), "game id already exists");
+            require(games[storageId].createGame(gameData[i].gameId), "game already exists");
+
             MapLib.Map storage map = games[storageId].getMap(gameData[i].gameId);
-            _addQuads(map, gameData[i].transferQuads);
-            _addQuadsFromFreeLand(map, storageId, gameData[i].freeLandData.quads);
-            _addTilesFromFreeLand(map, storageId, gameData[i].freeLandData.tiles);
-        }
-    }
-
-    function _addQuadsFromFreeLand(
-        MapLib.Map storage map,
-        uint256 storageId,
-        uint256[][3] calldata quads
-    ) internal {
-        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
-        for (uint256 i; i < quads[0].length; i++) {
-            require(freeLands[storageId].containQuad(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
-            freeLands[storageId].clearQuad(quads[1][i], quads[2][i], quads[0][i]);
-            map.setQuad(quads[1][i], quads[2][i], quads[0][i]);
-        }
-    }
-
-    function _removeQuadsToFreeLand(
-        MapLib.Map storage map,
-        uint256 storageId,
-        uint256[][3] calldata quads
-    ) internal {
-        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
-        for (uint256 i; i < quads[0].length; i++) {
-            require(map.containQuad(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
-            map.clearQuad(quads[1][i], quads[2][i], quads[0][i]);
-            freeLands[storageId].setQuad(quads[1][i], quads[2][i], quads[0][i]);
-        }
-    }
-
-    function _addTilesFromFreeLand(
-        MapLib.Map storage map,
-        uint256 storageId,
-        TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) internal {
-        for (uint256 i; i < tiles.length; i++) {
-            require(freeLands[storageId].containTileWithCoord(tiles[i]), "Tile missing");
-            freeLands[storageId].clearTileWithCoord(tiles[i]);
-            map.setTileWithCoord(tiles[i]);
-        }
-    }
-
-    function _removeQuadsToFreeLand(
-        MapLib.Map storage map,
-        uint256 storageId,
-        TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) internal {
-        for (uint256 i; i < tiles.length; i++) {
-            require(map.containTileWithCoord(tiles[i]), "Tile missing");
-            map.clearTileWithCoord(tiles[i]);
-            freeLands[storageId].setTileWithCoord(tiles[i]);
+            // TODO: Check if it is better to add to free land and then to game
+            map.add(gameData[i].transferQuads);
+            freeLands[storageId].moveTo(map, gameData[i].freeLandData);
         }
     }
 }

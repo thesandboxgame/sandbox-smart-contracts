@@ -85,7 +85,7 @@ describe('Estate test with maps on layer 1', function () {
         const {estateId} = await createEstate([size], [48], [96]);
 
         //mint lands for update
-        const newQuadId = await mintQuad(other, size, 144, 144);
+        await mintQuad(other, size, 144, 144);
         const {gasUsed} = await updateEstate(
           [size],
           [144],

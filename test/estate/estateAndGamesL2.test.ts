@@ -153,7 +153,7 @@ describe('Estate test with maps and games on layer 2', function () {
 
           //const quadId2 = await mintQuad(other, 24, 144, 144);
 
-          const gameId2 = 456;
+          // const gameId2 = 456;
           const {updateEstateId, updateGasUsed} = await updateEstate({
             estateId: estateId,
             //freeLandToAdd: getXsYsSizes(0, 0, size),

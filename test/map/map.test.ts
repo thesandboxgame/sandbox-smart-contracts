@@ -38,7 +38,7 @@ describe('MapLib', function () {
         await tester.setQuad(i + 1, t[0], t[1], t[2]);
       }
       await tester.setMap(outIdx, i + 1);
-      expect(await tester.containMap(outIdx, i + 1));
+      expect(await tester.containMap(outIdx, i + 1)).to.be.true;
     }
     expect(await getMap(0)).to.be.eql(await getMap(outIdx));
   });
@@ -59,7 +59,7 @@ describe('MapLib', function () {
     }
     const t = quads[0];
     await tester.setQuad(1, t[0], t[1], t[2]);
-    expect(await tester.containMap(0, 1));
+    expect(await tester.containMap(0, 1)).to.be.true;
   });
 
   it('clear map', async function () {
@@ -105,6 +105,29 @@ describe('MapLib', function () {
       }
     }
     expect(await getMap(0)).to.be.empty;
+  });
+  it('isEqual', async function () {
+    const {tester} = await setupMapTest();
+    // Create Test set
+    const quads = [];
+    quads.push({x: 6, y: 6, size: 3});
+    quads.push({x: 1, y: 1, size: 1});
+    quads.push({x: 3, y: 3, size: 1});
+    for (const t of quads) {
+      await tester.setQuad(0, [t.x], [t.y], [t.size]);
+    }
+    for (let i = 0; i < quads.length; i++) {
+      const t = quads[i];
+      await tester.setQuad(1, [t.x], [t.y], [t.size]);
+      if (i < quads.length - 1) {
+        expect(await tester.isEqual(0, 1)).to.be.false;
+        expect(await tester.isEqual(1, 0)).to.be.false;
+      }
+    }
+    expect(await tester.isEqual(0, 1)).to.be.true;
+    expect(await tester.isEqual(1, 0)).to.be.true;
+    expect(await tester.containMap(0, 1)).to.be.true;
+    expect(await tester.containMap(1, 0)).to.be.true;
   });
 
   // TODO: Add more tests, specially for clear, grid like things, etc...

@@ -30,37 +30,38 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
 
     // @todo Add access-control: minter-only? could inherit WithMinter.sol, the game token creator is minter only
     /// @notice Create a new estate token with lands.
-    /* /// @param from The address of the one creating the estate.
-    /// @param to The address that will own the estate. */
-    /// @param creation The data to use to create the estate.
-    function createEstate(address from, IEstateToken.EstateCRUDData calldata creation)
+    /// @param from The address of the one creating the estate.
+    /// @param data The data to use to create the estate.
+    function createEstate(address from, IEstateToken.EstateCRUDData calldata data)
         external
         override
         onlyMinter()
         returns (uint256)
     {
         uint256 estateId;
-        (estateId, ) = _createEstate(from, creation.tiles, creation.quadTuple, creation.uri);
-        emit EstateTokenCreated(estateId, creation);
+        (estateId, ) = _createEstate(from, data.freeLand, data.uri);
+        emit EstateTokenCreated(estateId, data);
         return estateId;
     }
 
-    function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata update)
+    function updateLandsEstate(address from, IEstateToken.UpdateEstateLands calldata data)
         external
         override
         onlyMinter()
         returns (uint256)
     {
         uint256 newId;
-        (newId, ) = _updateLandsEstate(
-            from,
-            update.estateId,
-            update.tilesToAdd,
-            update.quadsToAdd,
-            update.quadsToRemove,
-            update.uri
-        );
-        emit EstateTokenUpdated(update.estateId, newId, update);
+        (newId, ) = _updateLandsEstate(from, data.estateId, data.landToAdd, data.landToRemove, data.uri);
+        emit EstateTokenUpdated(data.estateId, newId, data);
         return newId;
+    }
+
+    /// @notice Return the URI of a specific token.
+    /// @param gameId The id of the token.
+    /// @return uri The URI of the token metadata.
+    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
+        uint256 id = _storageId(gameId);
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
     }
 }

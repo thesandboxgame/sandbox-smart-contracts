@@ -63,12 +63,6 @@ interface IGameToken {
         address to
     ) external;
 
-    function name() external pure returns (string memory);
-
-    function symbol() external pure returns (string memory);
-
-    function tokenURI(uint256 gameId) external returns (string memory uri);
-
     function onERC1155Received(
         address operator,
         address, /*from*/

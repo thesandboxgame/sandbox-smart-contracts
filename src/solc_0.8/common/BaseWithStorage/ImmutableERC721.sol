@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721MetadataUpgradeable.sol";
 import "../BaseWithStorage/ERC721BaseToken.sol";
 
-contract ImmutableERC721 is ERC721BaseToken {
+abstract contract ImmutableERC721 is ERC721BaseToken, IERC721MetadataUpgradeable {
     uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 internal constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
     uint256 internal constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
@@ -73,13 +74,6 @@ contract ImmutableERC721 is ERC721BaseToken {
         return uint256(id & STORAGE_ID_MASK);
     }
 
-    /// @dev Get the a full URI string for a given hash + gameId.
-    /// @param hash The 32 byte IPFS hash.
-    /// @return The URI string.
-    function _toFullURI(bytes32 hash) internal pure virtual returns (string memory) {
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "token.json"));
-    }
-
     /// @dev Create a new tokenId and associate it with an owner.
     /// This is a packed id, consisting of 4 parts:
     /// the creator's address, a uint64 subId, a uint18 chainIndex and a uint16 version.
@@ -110,7 +104,8 @@ contract ImmutableERC721 is ERC721BaseToken {
         uint256 _i = uint256(hash);
         uint256 k = 52;
         bytes memory bstr = new bytes(k);
-        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
+        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)];
+        // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
         _i /= 8;
         while (k > 0) {
             bstr[--k] = base32Alphabet[_i % 32];

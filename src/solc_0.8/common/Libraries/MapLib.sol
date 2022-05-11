@@ -7,6 +7,11 @@ import {TileWithCoordLib} from "./TileWithCoordLib.sol";
 library MapLib {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
 
+    struct QuadsAndTiles {
+        uint256[][3] quads; //(size, x, y)
+        TileWithCoordLib.TileWithCoord[] tiles;
+    }
+
     // To remove empty tiles we need to store the key (aka coords) inside the value
     // For now we will leave empty tiles in the structure
     struct Map {
@@ -68,7 +73,7 @@ library MapLib {
                 return false;
             }
         }
-        return false;
+        return true;
     }
 
     function setQuad(
@@ -165,6 +170,22 @@ library MapLib {
         return self.values.length == 0;
     }
 
+    function isEqual(Map storage self, TileWithCoordLib.TileWithCoord[] memory other) public view returns (bool) {
+        if (other.length != self.values.length) {
+            return false;
+        }
+        uint256 cant = other.length;
+        // Check that self contains the same set of tiles than other and they are equal
+        for (uint256 i; i < cant; i++) {
+            uint256 key = other[i].getKey();
+            uint256 idx = self.indexes[key];
+            if (idx == 0 || !self.values[idx - 1].isEqual(other[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function length(Map storage self) public view returns (uint256) {
         return self.values.length;
     }
@@ -199,6 +220,79 @@ library MapLib {
         uint256 key = TileWithCoordLib.getKey(x, y);
         uint256 idx = self.indexes[key];
         return (idx != 0);
+    }
+
+    function moveTo(
+        Map storage self,
+        Map storage other,
+        QuadsAndTiles calldata data
+    ) public {
+        moveTo(self, other, data.quads);
+        moveTo(self, other, data.tiles);
+    }
+
+    function add(Map storage self, QuadsAndTiles calldata data) public {
+        add(self, data.quads);
+        add(self, data.tiles);
+    }
+
+    function remove(Map storage self, QuadsAndTiles calldata data) public {
+        remove(self, data.quads);
+        remove(self, data.tiles);
+    }
+
+    function moveTo(
+        Map storage from,
+        Map storage to,
+        TileWithCoordLib.TileWithCoord[] calldata tiles
+    ) public {
+        for (uint256 i; i < tiles.length; i++) {
+            require(containTileWithCoord(from, tiles[i]), "Tile missing");
+            clearTileWithCoord(from, tiles[i]);
+            setTileWithCoord(to, tiles[i]);
+        }
+    }
+
+    function add(Map storage self, TileWithCoordLib.TileWithCoord[] calldata tiles) public {
+        for (uint256 i; i < tiles.length; i++) {
+            setTileWithCoord(self, tiles[i]);
+        }
+    }
+
+    function remove(Map storage self, TileWithCoordLib.TileWithCoord[] calldata tiles) public {
+        for (uint256 i; i < tiles.length; i++) {
+            require(containTileWithCoord(self, tiles[i]), "Tile missing");
+            clearTileWithCoord(self, tiles[i]);
+        }
+    }
+
+    function moveTo(
+        Map storage from,
+        Map storage to,
+        uint256[][3] calldata quads
+    ) public {
+        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
+        for (uint256 i; i < quads[0].length; i++) {
+            require(containQuad(from, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            clearQuad(from, quads[1][i], quads[2][i], quads[0][i]);
+            setQuad(to, quads[1][i], quads[2][i], quads[0][i]);
+        }
+    }
+
+    function add(Map storage self, uint256[][3] calldata quads) public {
+        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
+        for (uint256 i; i < quads[0].length; i++) {
+            setQuad(self, quads[1][i], quads[2][i], quads[0][i]);
+        }
+    }
+
+    function remove(Map storage self, uint256[][3] calldata quads) public {
+        require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
+        for (uint256 i; i < quads[0].length; i++) {
+            // TODO: We can skip this check ?
+            require(containQuad(self, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            clearQuad(self, quads[1][i], quads[2][i], quads[0][i]);
+        }
     }
 
     function remove(

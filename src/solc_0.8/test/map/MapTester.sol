@@ -64,6 +64,10 @@ contract MapTester {
         return maps[idx].containMap(maps[contained]);
     }
 
+    function isEqual(uint256 idx, uint256 other) external view returns (bool) {
+        return maps[idx].isEqual(maps[other].getMap());
+    }
+
     function length(uint256 idx) external view returns (uint256) {
         return maps[idx].length();
     }

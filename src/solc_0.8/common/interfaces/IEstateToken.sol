@@ -3,19 +3,18 @@
 pragma solidity 0.8.2;
 
 import "../Libraries/TileWithCoordLib.sol";
+import "../Libraries/MapLib.sol";
 
 /// @title Interface for the Estate token on L1
 interface IEstateToken {
     struct EstateCRUDData {
-        uint256[][3] quadTuple; //(size, x, y)
-        TileWithCoordLib.TileWithCoord[] tiles;
+        MapLib.QuadsAndTiles freeLand; //(size, x, y)
         bytes32 uri;
     }
 
     struct UpdateEstateLands {
-        uint256[][3] quadsToAdd;
-        TileWithCoordLib.TileWithCoord[] tilesToAdd;
-        uint256[][3] quadsToRemove;
+        MapLib.QuadsAndTiles landToAdd;
+        uint256[][3] landToRemove;
         uint256 estateId;
         bytes32 uri;
     }

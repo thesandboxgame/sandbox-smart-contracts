@@ -4,15 +4,11 @@ pragma solidity 0.8.2;
 
 import "../Libraries/TileWithCoordLib.sol";
 import "./IEstateToken.sol";
+import "../Libraries/MapLib.sol";
 
 /// @title Interface for the Estate token
 
 interface IPolygonEstateToken {
-    struct FreeLandData {
-        uint256[][3] quads; //(size, x, y)
-        TileWithCoordLib.TileWithCoord[] tiles;
-    }
-
     struct RemoveGameData {
         uint256 gameId;
         uint256[][3] quadsToTransfer; //(size, x, y) transfer when adding
@@ -22,11 +18,11 @@ interface IPolygonEstateToken {
     struct AddGameData {
         uint256 gameId;
         uint256[][3] transferQuads; //(size, x, y) transfer when adding
-        FreeLandData freeLandData;
+        MapLib.QuadsAndTiles freeLandData;
     }
 
     struct CreateEstateData {
-        FreeLandData freeLandData;
+        MapLib.QuadsAndTiles freeLandData;
         AddGameData[] gameData;
         bytes32 uri;
     }
@@ -34,7 +30,7 @@ interface IPolygonEstateToken {
     struct UpdateEstateData {
         uint256 estateId;
         bytes32 newUri;
-        FreeLandData freeLandToAdd;
+        MapLib.QuadsAndTiles freeLandToAdd;
         uint256[][3] freeLandToRemove;
         RemoveGameData[] gamesToRemove;
         AddGameData[] gamesToAdd;
