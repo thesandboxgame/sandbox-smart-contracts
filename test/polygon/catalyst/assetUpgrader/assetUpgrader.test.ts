@@ -35,6 +35,7 @@ describe('AssetUpgrader', function () {
       upgradeFee,
       assetAttributesRegistry,
       assetContract,
+      assetERC721Contract,
       sandContract,
       feeRecipient,
       rareCatalyst,
@@ -126,7 +127,7 @@ describe('AssetUpgrader', function () {
     expect(record.catalystId).to.equal(catalystId);
     expect(record.exists).to.equal(true);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(tokenId);
+    const newOwner = await assetERC721Contract.callStatic.ownerOf(tokenId);
     expect(newOwner).to.equal(catalystOwner);
   });
 
@@ -333,8 +334,8 @@ describe('AssetUpgrader', function () {
     expect(record.exists).to.equal(true);
     expect(record.gemIds).to.eql([...gemIds, ...zeroPaddedArray]);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(assetId);
-    expect(newOwner).to.equal(user4);
+    const balance = await assetContract.callStatic.balanceOf(user4, assetId);
+    expect(balance).to.equal(1);
   });
   it('setting a rareCatalyst where ownerOf(assetId)!= msg.sender should fail', async function () {
     const {
