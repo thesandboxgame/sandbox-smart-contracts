@@ -7,9 +7,9 @@ import "../../../Game/GameBaseToken.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../estate/EstateBaseToken.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
-import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/GamesDataLib.sol";
 import "../../../estate/GamesDataLib.sol";
+import "hardhat/console.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
     using GamesDataLib for GamesDataLib.Games;
@@ -50,6 +50,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         onlyMinter()
         returns (uint256)
     {
+        console.log("herro");
         uint256 newId;
         uint256 storageId;
         (newId, storageId) = _updateLandsEstate(

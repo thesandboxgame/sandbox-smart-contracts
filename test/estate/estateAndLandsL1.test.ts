@@ -63,6 +63,45 @@ describe('Estate test with maps on layer 1', function () {
       });
     });
   });
+  describe('create one estate and update it', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    [24, 12, 6, 3, 1].forEach((size) => {
+      it(`create an estate with ${size}x${size} quad and update it with a new quad`, async function () {
+        const {
+          other,
+          landContractAsOther,
+          estateContract,
+          mintQuad,
+          createEstate,
+          updateEstate,
+        } = await setupL1EstateAndLand();
+
+        const quadId = await mintQuad(other, size, 48, 96);
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContract.address,
+          quadId
+        );
+        const {estateId} = await createEstate([size], [48], [96]);
+
+        //mint lands for update
+        const newQuadId = await mintQuad(other, size, 144, 144);
+        const {gasUsed} = await updateEstate(
+          [size],
+          [144],
+          [144],
+          [size],
+          [48],
+          [96],
+          estateId
+        );
+        console.log(
+          `update ${size}x${size} quads, GAS USED: `,
+          gasUsed.toString()
+        );
+      });
+    });
+  });
   it('tunnel message size', async function () {
     const {
       other,

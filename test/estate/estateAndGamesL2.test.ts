@@ -96,6 +96,87 @@ describe('Estate test with maps and games on layer 2', function () {
       });
     });
   });
+  describe('update states', function () {
+    describe('start with 24x24', function () {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      [
+        [576, 1],
+        [4, 12],
+        [16, 6],
+        [256, 3],
+      ].forEach(([cant, size]) => {
+        it(`@slow create ${cant} 1x1 quads then create an ${size}x${size} estate with that then update`, async function () {
+          const {
+            other,
+            landContractAsOther,
+            estateContract,
+            mintQuad,
+            createEstate,
+            updateEstate,
+            gameContractAsOther,
+            getXsYsSizes,
+          } = await setupL2EstateGameAndLand();
+          const gameId = 123;
+          const gameQuad = await mintQuad(other, 24, 24, 24);
+          await landContractAsOther.setApprovalForAllFor(
+            other,
+            estateContract.address,
+            gameQuad
+          );
+          await gameContractAsOther.mint(other, gameId);
+          await gameContractAsOther.approve(estateContract.address, gameId);
+
+          const quadId = await mintQuad(other, 24, 0, 0);
+          await landContractAsOther.setApprovalForAllFor(
+            other,
+            estateContract.address,
+            quadId
+          );
+          const {estateId, gasUsed} = await createEstate({
+            freelandQuads: getXsYsSizes(0, 0, size),
+            games: [
+              {
+                gameId,
+                quadsToAdd: getXsYsSizes(24, 24, 24),
+                quadsToUse: getXsYsSizes(0, 0, 24),
+              },
+            ],
+          });
+          console.log(
+            `create ${cant} quads and ${size}x${size} estate with that, GAS USED: `,
+            gasUsed.toString()
+          );
+          expect(await estateContract.getGamesLength(estateId)).to.be.equal(1);
+          expect(await estateContract.getGamesId(estateId, 0)).to.be.equal(
+            gameId
+          );
+
+          //const quadId2 = await mintQuad(other, 24, 144, 144);
+
+          const gameId2 = 456;
+          const {updateEstateId, updateGasUsed} = await updateEstate({
+            estateId: estateId,
+            //freeLandToAdd: getXsYsSizes(0, 0, size),
+            //freeLandToRemove: getXsYsSizes(0, 0, size),
+            /* gamesToAdd: [
+              {
+                gameId: gameId2,
+                quadsToAdd: getXsYsSizes(24, 144, 144),
+              },
+            ],
+            gamesToRemove: [
+              {
+                gameId: gameId,
+                quadsToTransfer: getXsYsSizes(24, 24, 24),
+              },
+            ], */
+          });
+          console.log(updateEstateId);
+          console.log(updateGasUsed);
+        });
+      });
+    });
+  });
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('@slow one estate 1x1 lands 1 tile zero games', async function () {
     async function justDoIt(cant: number, tileSize: number) {

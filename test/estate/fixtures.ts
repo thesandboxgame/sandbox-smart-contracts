@@ -256,6 +256,40 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
         gasUsed: BigNumber.from(receipt.gasUsed),
       };
     },
+    updateEstate: async (
+      sizesIn: BigNumberish[],
+      xsIn: BigNumberish[],
+      ysIn: BigNumberish[],
+      sizesOut: BigNumberish[],
+      xsOut: BigNumberish[],
+      ysOut: BigNumberish[],
+      estateId: BigNumberish
+    ): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
+      const tx = await setup.estateContract.updateLandsEstate(
+        setup.other,
+        {
+          quadsToAdd: [sizesIn, xsIn, ysIn],
+          tilesToAdd: [],
+          quadsToRemove: [sizesOut, xsOut, ysOut],
+          estateId: estateId,
+          uri: ethers.utils.formatBytes32String('uri ???'),
+        },
+        []
+      );
+      const receipt: ContractReceipt = await tx.wait();
+      const estateCreationEvents = receipt.events?.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      const updateEstateId =
+        estateCreationEvents &&
+        estateCreationEvents.length > 0 &&
+        estateCreationEvents[0].args &&
+        estateCreationEvents[0].args[0];
+      return {
+        estateId: BigNumber.from(updateEstateId),
+        gasUsed: BigNumber.from(receipt.gasUsed),
+      };
+    },
   };
 });
 export const setupL2EstateGameAndLand = withSnapshot([], async () => {
@@ -339,6 +373,119 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
       return {
         estateId: BigNumber.from(estateId),
         gasUsed: BigNumber.from(receipt.gasUsed),
+      };
+    },
+    updateEstate: async (data: {
+      estateId: BigNumberish;
+      freeLandToAdd?: {
+        sizes: BigNumberish[];
+        xs: BigNumberish[];
+        ys: BigNumberish[];
+      };
+      freeLandToRemove?: {
+        sizes: BigNumberish[];
+        xs: BigNumberish[];
+        ys: BigNumberish[];
+      };
+      gamesToRemove?: {
+        gameId: BigNumberish;
+        quadsToTransfer?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+        quadsToFree?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+      }[];
+      gamesToAdd?: {
+        gameId: BigNumberish;
+        quadsToAdd?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+        quadsToUse?: {
+          sizes: BigNumberish[];
+          xs: BigNumberish[];
+          ys: BigNumberish[];
+        };
+      }[];
+    }): Promise<{updateEstateId: BigNumber; updateGasUsed: BigNumber}> => {
+      const gameDataToAdd = data.gamesToAdd
+        ? data.gamesToAdd.map((x) => ({
+            gameId: x.gameId,
+            transferQuads: x.quadsToAdd
+              ? [x.quadsToAdd.sizes, x.quadsToAdd.xs, x.quadsToAdd.ys]
+              : [[], [], []],
+            freeLandData: {
+              quads: x.quadsToUse
+                ? [x.quadsToUse.sizes, x.quadsToUse.xs, x.quadsToUse.ys]
+                : [[], [], []],
+              tiles: [],
+            },
+          }))
+        : [];
+
+      const gameDataToRemove = data.gamesToRemove
+        ? data.gamesToRemove.map((x) => ({
+            gameId: x.gameId,
+            quadsToTransfer: x.quadsToTransfer
+              ? [
+                  x.quadsToTransfer.sizes,
+                  x.quadsToTransfer.xs,
+                  x.quadsToTransfer.ys,
+                ]
+              : [[], [], []],
+            quadsToFree: x.quadsToFree
+              ? [x.quadsToFree.sizes, x.quadsToFree.xs, x.quadsToFree.ys]
+              : [[], [], []],
+          }))
+        : [];
+
+      const updateEstateData = {
+        estateId: data.estateId,
+        newUri: ethers.utils.formatBytes32String('uri ???'),
+        freeLandToAdd: {
+          quads: data.freeLandToAdd
+            ? [
+                data.freeLandToAdd.sizes,
+                data.freeLandToAdd.xs,
+                data.freeLandToAdd.ys,
+              ]
+            : [[], [], []],
+          tiles: [],
+        },
+        freeLandToRemove: data.freeLandToRemove
+          ? [
+              data.freeLandToRemove.sizes,
+              data.freeLandToRemove.xs,
+              data.freeLandToRemove.ys,
+            ]
+          : [[], [], []],
+        gamesToRemove: gameDataToRemove,
+        gamesToAdd: gameDataToAdd,
+      };
+
+      console.log(JSON.stringify(updateEstateData, null, 4));
+      const tx = await setup.estateContract.updateEstate(
+        setup.other,
+        updateEstateData
+      );
+      const receipt: ContractReceipt = await tx.wait();
+      const estateCreationEvents = receipt.events?.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      const estateId =
+        estateCreationEvents &&
+        estateCreationEvents.length > 0 &&
+        estateCreationEvents[0].args &&
+        estateCreationEvents[0].args[0];
+      return {
+        updateEstateId: BigNumber.from(estateId),
+        updateGasUsed: BigNumber.from(receipt.gasUsed),
       };
     },
   };
