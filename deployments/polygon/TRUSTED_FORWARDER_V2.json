@@ -1,14 +1,8 @@
 {
-  "address": "0x86C80a8aa58e0A4fa09A69624c31Ab2a6CAD56b8",
+  "address": "0xf0511f123164602042ab2bCF02111fA5D3Fe97CD",
   "abi": [
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_owner",
-          "type": "address"
-        }
-      ],
+      "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
@@ -37,6 +31,31 @@
         {
           "indexed": true,
           "internalType": "address",
+          "name": "userAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "relayerAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes",
+          "name": "functionSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "MetaTransactionExecuted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "previousOwner",
           "type": "address"
         },
@@ -52,12 +71,38 @@
     },
     {
       "inputs": [],
+      "name": "CUSTOM_FORWARD_REQUEST_TYPEHASH",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "EIP712_DOMAIN_TYPE",
       "outputs": [
         {
           "internalType": "string",
           "name": "",
           "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "FORWARD_REQUEST_TYPEHASH",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         }
       ],
       "stateMutability": "view",
@@ -145,7 +190,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "structERC20ForwardRequestTypes.ERC20ForwardRequest",
+          "internalType": "struct ForwardRequestTypesV2.ERC20ForwardRequest",
           "name": "req",
           "type": "tuple"
         },
@@ -161,6 +206,109 @@
         }
       ],
       "name": "executeEIP712",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "ret",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "warning",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "info",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "action",
+              "type": "string"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "from",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "txGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenGasPrice",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "batchId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "batchNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "deadline",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct ForwardRequestTypesV2.ERC20ForwardRequest",
+              "name": "request",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct ForwardRequestTypesV2.CustomForwardRequest",
+          "name": "req",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "domainSeparator",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "sig",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeEIP712Custom",
       "outputs": [
         {
           "internalType": "bool",
@@ -226,7 +374,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "structERC20ForwardRequestTypes.ERC20ForwardRequest",
+          "internalType": "struct ForwardRequestTypesV2.ERC20ForwardRequest",
           "name": "req",
           "type": "tuple"
         },
@@ -271,19 +419,6 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "isOwner",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -390,7 +525,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "structERC20ForwardRequestTypes.ERC20ForwardRequest",
+          "internalType": "struct ForwardRequestTypesV2.ERC20ForwardRequest",
           "name": "req",
           "type": "tuple"
         },
@@ -460,7 +595,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "structERC20ForwardRequestTypes.ERC20ForwardRequest",
+          "internalType": "struct ForwardRequestTypesV2.ERC20ForwardRequest",
           "name": "req",
           "type": "tuple"
         },
@@ -477,7 +612,7 @@
     }
   ],
   "receipt": {
-    "transactionHash": "0xb86d3ff75acd05e23562e748846b2731ea3a09e0731ad637acce8e7f612581ca",
-    "blockNumber": 12381067
+    "transactionHash": "0xcb03c68d95b2c7e2b769a1e10ac71c3ea86bcee7e7d597f1acafdb0c6431dd4c",
+    "blockNumber": 27363424
   }
 }
