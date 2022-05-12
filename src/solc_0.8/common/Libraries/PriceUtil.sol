@@ -2,7 +2,6 @@
 pragma solidity 0.8.2;
 
 import "./SafeMathWithRequire.sol";
-import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 
 library PriceUtil {
     using SafeMathWithRequire for uint256;
@@ -20,9 +19,9 @@ library PriceUtil {
         if (endingPrice == startingPrice) {
             return endingPrice;
         } else if (endingPrice > startingPrice) {
-            return startingPrice.add((endingPrice.sub(startingPrice)).mul(secondsPassed).div(duration));
+            return startingPrice + ((endingPrice - startingPrice) * secondsPassed) / duration;
         } else {
-            return startingPrice.sub((startingPrice.sub(endingPrice)).mul(secondsPassed).div(duration));
+            return startingPrice - ((startingPrice - endingPrice) * secondsPassed) / duration;
         }
     }
 

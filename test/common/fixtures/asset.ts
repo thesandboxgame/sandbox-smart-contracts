@@ -242,6 +242,7 @@ export const signAuthMessageAs = async (
         'bytes32',
         'address',
         'address',
+        'address',
         'uint256',
         'uint256',
         'uint256',
