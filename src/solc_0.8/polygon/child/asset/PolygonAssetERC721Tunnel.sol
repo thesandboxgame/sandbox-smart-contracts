@@ -49,7 +49,7 @@ contract PolygonAssetERC721Tunnel is
             uint256 id = ids[i];
             bytes memory uniqueUriData = abi.encode(childToken.tokenURI(id));
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
-            _sendMessageToRoot(abi.encode(to, ids, uniqueUriData));
+            _sendMessageToRoot(abi.encode(to, ids[i], uniqueUriData));
             emit Withdraw(to, ids[i], uniqueUriData);
         }
     }

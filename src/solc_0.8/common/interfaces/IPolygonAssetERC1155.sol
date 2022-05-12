@@ -113,4 +113,6 @@ interface IPolygonAssetERC1155 {
     function isTrustedForwarder(address forwarder) external returns (bool);
 
     function getTrustedForwarder() external returns (address);
+
+    function metadataHash(uint256 id) external returns (bytes32);
 }

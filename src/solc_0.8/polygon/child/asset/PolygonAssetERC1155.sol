@@ -151,6 +151,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _burnBatch(_msgSender(), ids, amounts);
     }
 
+    function metadataHash(uint256 id) external view returns (bytes32) {
+        return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
+    }
+
     function _allocateIds(
         address creator,
         uint256[] memory supplies,

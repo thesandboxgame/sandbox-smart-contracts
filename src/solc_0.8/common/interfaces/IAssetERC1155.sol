@@ -110,5 +110,7 @@ interface IAssetERC1155 {
 
     function isTrustedForwarder(address forwarder) external returns (bool);
 
-    function getTrustedForwarder() external returns (address);
+    function getTrustedForwarder() external view returns (address);
+
+    function metadataHash(uint256 id) external view returns (bytes32);
 }
