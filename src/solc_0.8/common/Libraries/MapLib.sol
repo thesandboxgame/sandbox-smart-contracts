@@ -170,6 +170,10 @@ library MapLib {
         return self.values.length == 0;
     }
 
+    function isEqual(Map storage self, Map storage other) public view returns (bool) {
+        return isEqual(self, other.values);
+    }
+
     function isEqual(Map storage self, TileWithCoordLib.TileWithCoord[] memory other) public view returns (bool) {
         if (other.length != self.values.length) {
             return false;

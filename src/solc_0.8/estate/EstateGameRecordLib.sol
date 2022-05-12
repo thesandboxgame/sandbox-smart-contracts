@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 
 import "../common/Libraries/MapLib.sol";
 
-library GamesDataLib {
+library EstateGameRecordLib {
     using MapLib for MapLib.Map;
 
     struct GameEntry {

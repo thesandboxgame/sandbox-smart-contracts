@@ -192,7 +192,7 @@ describe('Estate test with maps and games on layer 2', function () {
       } = await setupL2EstateGameAndLand();
 
       const gameId = 123;
-      const gameQuad = await mintQuad(other, 24, 24, 24);
+      await mintQuad(other, 24, 24, 24);
 
       await landContractAsOther.setApprovalForAllFor(
         other,
@@ -202,7 +202,7 @@ describe('Estate test with maps and games on layer 2', function () {
       await gameContractAsOther.mint(other, gameId);
       await gameContractAsOther.approve(estateContract.address, gameId);
 
-      const quadId = await mintQuad(other, 24, 0, 0);
+      await mintQuad(other, 24, 0, 0);
 
       const {estateId, gasUsed} = await createEstate({
         freeLandData: getXsYsSizes(0, 0, 24),
@@ -218,7 +218,7 @@ describe('Estate test with maps and games on layer 2', function () {
       expect(await estateContract.getGamesLength(estateId)).to.be.equal(1);
       expect(await estateContract.getGamesId(estateId, 0)).to.be.equal(gameId);
 
-      const quadId2 = await mintQuad(other, 24, 144, 144);
+      await mintQuad(other, 24, 144, 144);
       const gameId2 = 456;
       await gameContractAsOther.mint(other, gameId2);
       await gameContractAsOther.approve(estateContract.address, gameId2);

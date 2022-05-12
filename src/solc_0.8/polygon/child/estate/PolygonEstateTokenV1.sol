@@ -6,11 +6,11 @@ import "../../../common/interfaces/ILandToken.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/EstateBaseToken.sol";
-import "../../../estate/GamesDataLib.sol";
+import "../../../estate/EstateGameRecordLib.sol";
 import "../../../Game/GameBaseToken.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
-    using GamesDataLib for GamesDataLib.Games;
+    using EstateGameRecordLib for EstateGameRecordLib.Games;
     using MapLib for MapLib.Map;
 
     event EstateTokenCreated(uint256 indexed estateId, CreateEstateData data);
@@ -18,7 +18,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, UpdateEstateData data);
 
     // Iterable mapping of games
-    mapping(uint256 => GamesDataLib.Games) internal games;
+    mapping(uint256 => EstateGameRecordLib.Games) internal games;
 
     GameBaseToken public gameToken;
 
