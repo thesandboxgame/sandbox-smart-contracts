@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import assetMinterCatalystAmounts from '../../data/assetMinterCatalystAmounts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -18,12 +19,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'getCatalystRegistry'
   );
 
-  const commonQuantity = 1000;
-  const rareQuantity = 100;
-  const epicQuantity = 10;
-  const legendaryQuantity = 1;
-  const artQuantity = 1;
-  const propQuantity = 10000;
+  const commonQuantity = assetMinterCatalystAmounts.commonQuantity;
+  const rareQuantity = assetMinterCatalystAmounts.rareQuantity;
+  const epicQuantity = assetMinterCatalystAmounts.epicQuantity;
+  const legendaryQuantity = assetMinterCatalystAmounts.legendaryQuantity;
+  const artQuantity = assetMinterCatalystAmounts.artQuantity;
+  const propQuantity = assetMinterCatalystAmounts.propQuantity;
 
   const assetQuantitiesByCatalystId = [
     commonQuantity,
