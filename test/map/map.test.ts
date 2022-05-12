@@ -119,7 +119,7 @@ describe('MapLib', function () {
         await tester.setQuad(0, t[0], t[1], t[2]);
       }
     }
-    console.log(await getMap(0));
+    await tester.clear(0);
     // clear
     expect(await getMap(0)).to.be.empty;
   });
