@@ -69,7 +69,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
             );
             map.remove(data.gamesToRemove[i].quadsToTransfer);
             map.moveTo(freeLands[storageId], data.gamesToRemove[i].quadsToFree);
+
             require(games[storageId].deleteGame(data.gamesToRemove[i].gameId), "game id already exists");
+
             gameToken.transferFrom(address(this), from, data.gamesToRemove[i].gameId);
         }
         _addGamesToEstate(from, storageId, data.gamesToAdd);
@@ -121,7 +123,6 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
                 ""
             );
             require(games[storageId].createGame(gameData[i].gameId), "game already exists");
-
             MapLib.Map storage map = games[storageId].getMap(gameData[i].gameId);
             // TODO: Check if it is better to add to free land and then to game
             map.add(gameData[i].transferQuads);

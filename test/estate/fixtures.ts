@@ -314,12 +314,12 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
     gameContractAsOther,
     ...setup,
     createEstate: async (data: {
-      freelandQuads?: {
+      freeLandData?: {
         sizes: BigNumberish[];
         xs: BigNumberish[];
         ys: BigNumberish[];
       };
-      games?: {
+      gameData?: {
         gameId: BigNumberish;
         quadsToAdd?: {
           sizes: BigNumberish[];
@@ -333,8 +333,8 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
         };
       }[];
     }): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
-      const gameData = data.games
-        ? data.games.map((x) => ({
+      const gameData = data.gameData
+        ? data.gameData.map((x) => ({
             gameId: x.gameId,
             transferQuads: x.quadsToAdd
               ? [x.quadsToAdd.sizes, x.quadsToAdd.xs, x.quadsToAdd.ys]
@@ -350,11 +350,11 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
       const createEstateData = {
         gameData,
         freeLandData: {
-          quads: data.freelandQuads
+          quads: data.freeLandData
             ? [
-                data.freelandQuads.sizes,
-                data.freelandQuads.xs,
-                data.freelandQuads.ys,
+                data.freeLandData.sizes,
+                data.freeLandData.xs,
+                data.freeLandData.ys,
               ]
             : [[], [], []],
           tiles: [],

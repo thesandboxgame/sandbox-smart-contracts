@@ -21,7 +21,7 @@ describe('Estate test with maps and games on layer 2', function () {
           quadId
         );
         const {gasUsed} = await createEstate({
-          freelandQuads: {
+          freeLandData: {
             sizes: [size],
             xs: [48],
             ys: [96],
@@ -70,8 +70,8 @@ describe('Estate test with maps and games on layer 2', function () {
             quadId
           );
           const {estateId, gasUsed} = await createEstate({
-            freelandQuads: getXsYsSizes(0, 0, size),
-            games: [
+            freeLandData: getXsYsSizes(0, 0, size),
+            gameData: [
               {
                 gameId,
                 quadsToAdd: getXsYsSizes(24, 24, 24),
@@ -133,8 +133,8 @@ describe('Estate test with maps and games on layer 2', function () {
             quadId
           );
           const {estateId, gasUsed} = await createEstate({
-            freelandQuads: getXsYsSizes(0, 0, size),
-            games: [
+            freeLandData: getXsYsSizes(0, 0, size),
+            gameData: [
               {
                 gameId,
                 quadsToAdd: getXsYsSizes(24, 24, 24),
@@ -177,6 +177,74 @@ describe('Estate test with maps and games on layer 2', function () {
       });
     });
   });
+
+  describe('update states testing', function () {
+    it(`create a estate and update `, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContract,
+        mintQuad,
+        createEstate,
+        updateEstate,
+        gameContractAsOther,
+        getXsYsSizes,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+      const gameQuad = await mintQuad(other, 24, 24, 24);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContract.address,
+        true
+      );
+      await gameContractAsOther.mint(other, gameId);
+      await gameContractAsOther.approve(estateContract.address, gameId);
+
+      const quadId = await mintQuad(other, 24, 0, 0);
+
+      const {estateId, gasUsed} = await createEstate({
+        freeLandData: getXsYsSizes(0, 0, 24),
+        gameData: [
+          {
+            gameId,
+            quadsToAdd: getXsYsSizes(24, 24, 24),
+            //quadsToUse: getXsYsSizes(0, 0, 24),
+          },
+        ],
+      });
+      console.log(`estate, GAS USED: `, gasUsed.toString());
+      expect(await estateContract.getGamesLength(estateId)).to.be.equal(1);
+      expect(await estateContract.getGamesId(estateId, 0)).to.be.equal(gameId);
+
+      const quadId2 = await mintQuad(other, 24, 144, 144);
+      const gameId2 = 456;
+      await gameContractAsOther.mint(other, gameId2);
+      await gameContractAsOther.approve(estateContract.address, gameId2);
+
+      const {updateEstateId, updateGasUsed} = await updateEstate({
+        estateId: estateId,
+        //freeLandToAdd: getXsYsSizes(144, 144, 24),
+        //freeLandToRemove: getXsYsSizes(0, 0, size),
+        gamesToAdd: [
+          {
+            gameId: gameId2,
+            quadsToAdd: getXsYsSizes(144, 144, 24),
+          },
+        ],
+        gamesToRemove: [
+          {
+            gameId: gameId,
+            quadsToFree: getXsYsSizes(24, 24, 24),
+          },
+        ],
+      });
+
+      console.log(updateEstateId);
+      console.log(updateGasUsed);
+    });
+  });
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('@slow one estate 1x1 lands 1 tile zero games', async function () {
     async function justDoIt(cant: number, tileSize: number) {
@@ -203,8 +271,8 @@ describe('Estate test with maps and games on layer 2', function () {
         sizes.push(tileSize);
       }
       const {gasUsed} = await createEstate({
-        freelandQuads: {xs, ys, sizes},
-        games: [],
+        freeLandData: {xs, ys, sizes},
+        gameData: [],
       });
       console.log(`\t${cant * tileSize * tileSize}\t`, gasUsed.toString());
     }
@@ -241,8 +309,8 @@ describe('Estate test with maps and games on layer 2', function () {
         sizes.push(tileSize);
       }
       const {gasUsed} = await createEstate({
-        freelandQuads: {xs, ys, sizes},
-        games: [],
+        freeLandData: {xs, ys, sizes},
+        gameData: [],
       });
       console.log(`\t${cant * tileSize}\t`, gasUsed.toString());
     }
@@ -279,7 +347,7 @@ describe('Estate test with maps and games on layer 2', function () {
       }
 
       const {gasUsed} = await createEstate({
-        games: gameIds.map((gameId) => ({
+        gameData: gameIds.map((gameId) => ({
           gameId,
           ...(noLands
             ? {}

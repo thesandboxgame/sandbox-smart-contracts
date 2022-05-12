@@ -42,6 +42,7 @@ library GamesDataLib {
         if (idx == 0) {
             return false;
         }
+        //this require is breaking the test
         require(self.values[idx].map.isEmpty(), "Map not empty");
         uint256 toDeleteIndex = idx - 1;
         uint256 lastIndex = self.values.length - 1;
@@ -54,6 +55,7 @@ library GamesDataLib {
         }
         self.values.pop();
         delete self.indexes[gameId];
+
         return true;
     }
 
