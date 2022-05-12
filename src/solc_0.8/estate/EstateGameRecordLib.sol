@@ -42,8 +42,7 @@ library EstateGameRecordLib {
         if (idx == 0) {
             return false;
         }
-        //this require is breaking the test
-        require(self.values[idx].map.isEmpty(), "Map not empty");
+        require(self.values[idx - 1].map.isEmpty(), "Map not empty");
         uint256 toDeleteIndex = idx - 1;
         uint256 lastIndex = self.values.length - 1;
         if (lastIndex != toDeleteIndex) {
