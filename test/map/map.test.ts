@@ -106,6 +106,24 @@ describe('MapLib', function () {
     }
     expect(await getMap(0)).to.be.empty;
   });
+
+  it('clear', async function () {
+    const {tester, getMap} = await setupMapTest();
+    const maps = [];
+    for (let i = 0; i < 10; i++) {
+      maps.push(createTestMapQuads(60, 60, 10));
+    }
+    // set
+    for (const map of maps) {
+      for (const t of map) {
+        await tester.setQuad(0, t[0], t[1], t[2]);
+      }
+    }
+    console.log(await getMap(0));
+    // clear
+    expect(await getMap(0)).to.be.empty;
+  });
+
   it('isEqual', async function () {
     const {tester} = await setupMapTest();
     // Create Test set

@@ -43,6 +43,10 @@ contract MapTester {
         maps[idx].clearMap(maps[contained]);
     }
 
+    function clear(uint256 idx) external {
+        maps[idx].clear();
+    }
+
     function containCoord(
         uint256 idx,
         uint256 x,
