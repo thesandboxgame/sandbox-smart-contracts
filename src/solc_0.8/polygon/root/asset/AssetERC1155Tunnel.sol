@@ -35,7 +35,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         address to,
         uint256[] memory ids,
         uint256[] memory values,
-        bytes calldata data
+        bytes calldata data // TODO: remove data param
     ) public whenNotPaused() {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         rootToken.safeBatchTransferFrom(_msgSender(), address(this), ids, values, data);
@@ -68,7 +68,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
             abi.decode(message, (address, uint256[], uint256[], bytes));
         for (uint256 index = 0; index < ids.length; index++) {
             bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-            bytes memory metadata = abi.encode(["bytes"], [metadataHashes[index]]);
+            bytes memory metadata = abi.encode(["bytes32"], [metadataHashes[index]]);
             rootToken.wasEverMinted(ids[index])
                 ? rootToken.safeTransferFrom(address(this), to, ids[index], values[index], metadata)
                 : rootToken.mint(to, ids[index], values[index], metadata);

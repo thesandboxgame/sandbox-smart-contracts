@@ -123,6 +123,10 @@ contract AssetERC1155 is AssetBaseERC1155 {
         _burn(from, id, amount);
     }
 
+    function metadataHash(uint256 id) external view returns (bytes32) {
+        return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
+    }
+
     function _generateTokenId(
         address creator,
         uint256 supply,
