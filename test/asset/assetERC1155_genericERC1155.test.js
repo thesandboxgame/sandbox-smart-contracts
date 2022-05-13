@@ -7,12 +7,7 @@ const {
 const {
   AbiCoder,
 } = require('@ethersproject/contracts/node_modules/@ethersproject/abi');
-const {
-  waitFor,
-  recurseTests,
-  withSnapshot,
-  expectEventWithArgs,
-} = require('../utils');
+const {waitFor, recurseTests, withSnapshot} = require('../utils');
 const generateERC1155Tests = require('../erc1155');
 
 // Generic ERC1155 tests for the AssetERC1155 contract - L1
