@@ -9,14 +9,19 @@ const func: DeployFunction = async function (hre) {
 
   const estateMinter = await deployments.get('EstateMinter');
 
-  const currentMinter = await read('EstateToken', 'getMinter');
-  const isMinter = currentMinter == estateMinter.address;
-
+  const minterRole = await read('EstateToken', 'MINTER_ROLE');
+  const isMinter = await read(
+    'EstateToken',
+    'hasRole',
+    minterRole,
+    estateMinter.address
+  );
   if (!isMinter) {
     await execute(
       'EstateToken',
       {from: estateTokenAdmin, log: true},
-      'changeMinter',
+      'grantRole',
+      minterRole,
       estateMinter.address
     );
   }

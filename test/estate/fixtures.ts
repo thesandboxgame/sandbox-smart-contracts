@@ -149,7 +149,8 @@ async function setupEstateAndLand(gameContract?: Contract) {
     estateTokenAdmin
   );
   const estateContract = await ethers.getContract('Estate', estateMinter);
-  await estateContractAsAdmin.changeMinter(estateMinter);
+  const minterRole = await estateContractAsAdmin.MINTER_ROLE();
+  await estateContractAsAdmin.grantRole(minterRole, estateMinter);
 
   // Estate tunnel
   await deployments.deploy('MockEstateTunnel', {
@@ -237,7 +238,7 @@ export const setupL1EstateAndLand = withSnapshot([], async () => {
       const tx = await setup.estateContract.createEstate(
         setup.other,
         {
-          freeLand: {
+          freeLandData: {
             quads: [sizes, xs, ys],
             tiles: [],
           },
