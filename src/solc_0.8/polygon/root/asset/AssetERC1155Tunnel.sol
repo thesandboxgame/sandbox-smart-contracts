@@ -34,17 +34,19 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
     function batchDepositToChild(
         address to,
         uint256[] memory ids,
-        uint256[] memory values,
-        bytes calldata data // TODO: remove data param
+        uint256[] memory values
     ) public whenNotPaused() {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
-        rootToken.safeBatchTransferFrom(_msgSender(), address(this), ids, values, data);
-        for (uint256 index = 0; index < ids.length; index++) {
-            uint256 id = ids[index];
-            bytes memory message = abi.encode(to, id, values[index], data);
-            _sendMessageToChild(message);
-            emit Deposit(to, id, values[index], data);
+        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        bytes32[] memory metadataHashes = new bytes32[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            bytes32 metadataHash = rootToken.metadataHash(ids[i]);
+            metadataHashes[i] = metadataHash;
+            bytes memory metadata = abi.encode(metadataHash);
+            rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], abi.encode(metadataHash));
+            emit Deposit(to, ids[i], values[i], metadata);
         }
+        _sendMessageToChild(abi.encode(to, ids, values, abi.encode(metadataHashes)));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -69,10 +71,27 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         for (uint256 index = 0; index < ids.length; index++) {
             bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
             bytes memory metadata = abi.encode(["bytes32"], [metadataHashes[index]]);
-            rootToken.wasEverMinted(ids[index])
-                ? rootToken.safeTransferFrom(address(this), to, ids[index], values[index], metadata)
-                : rootToken.mint(to, ids[index], values[index], metadata);
+            if (rootToken.wasEverMinted(id)) {
+                _depositMinted(to, id, value, metadata);
+            } else {
+                rootToken.mint(to, id, value, metadata);
+            }
             emit Withdraw(to, ids[index], values[index], metadata);
+        }
+    }
+
+    function _depositMinted(
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) internal {
+        uint256 balance = rootToken.balanceOf(address(this), id);
+        if (balance >= value) {
+            rootToken.safeTransferFrom(address(this), to, id, value, data);
+        } else {
+            if (balance > 0) rootToken.safeTransferFrom(address(this), to, id, balance, data);
+            rootToken.mintDeficit(to, id, (value - balance));
         }
     }
 
