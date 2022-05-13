@@ -27,6 +27,6 @@ library PriceUtil {
 
     function calculateFee(uint256 price, uint256 fee10000th) internal pure returns (uint256) {
         // _fee < 10000, so the result will be <= price
-        return (price.mul(fee10000th)) / 10000;
+        return (price * fee10000th) / 10000;
     }
 }
