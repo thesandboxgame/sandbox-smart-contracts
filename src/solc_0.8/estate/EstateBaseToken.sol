@@ -71,8 +71,8 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
     function onERC721Received(
         address, /* operator */
         address, /* from */
-        uint256 id,
-        bytes calldata data
+        uint256, /* id */
+        bytes calldata /* data */
     ) external virtual returns (bytes4) {
         return this.onERC721Received.selector;
     }
@@ -80,8 +80,8 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
     function onERC721BatchReceived(
         address, /* operator */
         address, /* from */
-        uint256[] calldata ids,
-        bytes calldata data
+        uint256[] calldata, /* ids */
+        bytes calldata /* data */
     ) external virtual returns (bytes4) {
         return this.onERC721BatchReceived.selector;
     }
