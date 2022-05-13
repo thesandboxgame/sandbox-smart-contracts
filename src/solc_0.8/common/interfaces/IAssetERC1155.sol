@@ -27,6 +27,12 @@ interface IAssetERC1155 {
         bytes calldata data
     ) external;
 
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external;
+
     function mintMultiple(
         address account,
         uint256[] calldata ids,
