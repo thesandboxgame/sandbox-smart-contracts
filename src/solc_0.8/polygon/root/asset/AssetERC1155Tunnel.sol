@@ -66,13 +66,30 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
     function _processMessageFromChild(bytes memory message) internal override {
         (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], bytes));
+        bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
         for (uint256 index = 0; index < ids.length; index++) {
-            bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-            bytes memory metadata = abi.encode(["bytes"], [metadataHashes[index]]);
-            rootToken.wasEverMinted(ids[index])
-                ? rootToken.safeTransferFrom(address(this), to, ids[index], values[index], metadata)
-                : rootToken.mint(to, ids[index], values[index], metadata);
+            bytes memory metadata = abi.encode(metadataHashes[index]);
+            if (rootToken.wasEverMinted(ids[index])) {
+                _depositMinted(to, ids[index], values[index], metadata);
+            } else {
+                rootToken.mint(to, ids[index], values[index], metadata);
+            }
             emit Withdraw(to, ids[index], values[index], metadata);
+        }
+    }
+
+    function _depositMinted(
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) internal {
+        uint256 balance = rootToken.balanceOf(address(this), id);
+        if (balance >= value) {
+            rootToken.safeTransferFrom(address(this), to, id, value, data);
+        } else {
+            if (balance > 0) rootToken.safeTransferFrom(address(this), to, id, balance, data);
+            rootToken.mintDeficit(to, id, (value - balance));
         }
     }
 

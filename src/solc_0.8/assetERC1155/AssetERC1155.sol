@@ -93,6 +93,20 @@ contract AssetERC1155 is AssetBaseERC1155 {
         _mintBatches(to, ids, amounts, data);
     }
 
+    /// @notice function to be called by tunnel to mint deficit of minted tokens
+    /// @dev This mint calls for add instead of replace in packedTokenBalance
+    /// @param account address of the ownerof tokens.
+    /// @param id id of the token to be minted.
+    /// @param amount quantity of the token to be minted.
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(_msgSender() == _predicate, "!PREDICATE");
+        _mintDeficit(account, id, amount);
+    }
+
     /// @notice Set the address that will be able to mint on L1 (limited to custom predicate).
     /// @param predicate address that will be given minting rights for L1.
     function setPredicate(address predicate) external {
