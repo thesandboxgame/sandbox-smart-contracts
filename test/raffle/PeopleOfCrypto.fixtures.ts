@@ -25,7 +25,7 @@ export const setupRaffle = withSnapshot(['RafflePeopleOfCrypto'], async function
     signAuthMessageAs,
     transferSand,
     mint: mintSetup(rafflePeopleOfCryptoContract, sandContract),
-    personalize: personalizeSetup(rafflePeopleOfCryptoContract, sandContract)
+    personalize: personalizeSetup(rafflePeopleOfCryptoContract)
   };
 });
 
@@ -66,6 +66,25 @@ async function setupWave(
     contractAddress.toString()
   );
   assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
+}
+
+async function signPersonalizationMessageAs(
+  wallet: Wallet | SignerWithAddress,
+  signatureId: number,
+  contractAddress: string,
+  chainId: number,
+  tokenId: number,
+  personalizationMask: number
+) {
+  const hashedData = ethers.utils.defaultAbiCoder.encode(
+    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [signatureId, contractAddress, chainId, tokenId, personalizationMask]
+  );
+  return wallet.signMessage(
+    ethers.utils.arrayify(
+      ethers.utils.keccak256(hashedData)
+    )
+  );
 }
 
 async function signAuthMessageAs(
@@ -123,36 +142,31 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
   };
 }
 
-function personalizeSetup(raffleContract: Contract, sandContract: Contract) {
+function personalizeSetup(raffleContract: Contract) {
   return async (
     wallet: Wallet | SignerWithAddress,
     address: string,
     signatureId: number,
-    contractAddress: string,
     chainId: number,
-    price: string | number,
-    amount: number,
     tokenId: number,
     personalizationMask: number
   ) => {
-    const signature = await signAuthMessageAs(
+    const signature = await signPersonalizationMessageAs(
       wallet,
-      address,
       signatureId,
-      contractAddress,
-      chainId
-    );
-    const encodedData = raffleContract.interface.encodeFunctionData('personalize', [
-      address,
-      amount,
-      signatureId,
-      signature,
+      raffleContract.address,
+      chainId,
       tokenId,
       personalizationMask
-    ]);
-    const contract = sandContract.connect(ethers.provider.getSigner(address));
-    return waitFor(
-      contract.approveAndCall(raffleContract.address, price, encodedData)
     );
-  }; 
+
+    return waitFor(
+      raffleContract.personalize(
+        signatureId,
+        signature,
+        tokenId,
+        personalizationMask
+      )
+    );
+  };
 }

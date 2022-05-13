@@ -199,7 +199,7 @@ describe('RafflePeopleOfCrypto', function () {
     assert.equal(tokens.length, 20000);
   });
 
-  it('should be able to personalize with valid signature', async function () {
+  it.only('should be able to personalize with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -209,7 +209,10 @@ describe('RafflePeopleOfCrypto', function () {
       mint,
       personalize,
     } = await setupRaffle();
+
+    let tokenId = 0;
     const {deployer} = await getNamedAccounts();
+
     await transferSand(deployer, '1000');
     await setupWave(
       rafflePeopleOfCryptoContract,
@@ -220,6 +223,7 @@ describe('RafflePeopleOfCrypto', function () {
       zeroAddress,
       0
     );
+
     await mint(
       raffleSignWallet,
       deployer,
@@ -234,17 +238,20 @@ describe('RafflePeopleOfCrypto', function () {
       rafflePeopleOfCryptoContract.filters.Transfer()
     );
 
-    console.log('Transfer events: ', transferEvents);
-    assert.equal(transferEvents.length, 1);
+    for (const transferEvent of transferEvents) {
+      assert.exists(transferEvent.args);
+      if (transferEvent.args) {
+        tokenId = transferEvent.args.tokenId.toString();
+      }
+    }
 
-    // await personalize(
-    //   raffleSignWallet,
-    //   deployer,
-    //   0,
-    //   rafflePeopleOfCryptoContract.address,
-    //   hre.network.config.chainId || 31337,
-    //   '10',
-    //   1
-    // );
+    await personalize(
+      raffleSignWallet,
+      deployer,
+      0,
+      hre.network.config.chainId || 31337,
+      tokenId,
+      32
+    );
   });
 });
