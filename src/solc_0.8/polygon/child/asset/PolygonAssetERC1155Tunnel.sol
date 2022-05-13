@@ -80,15 +80,15 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
             abi.decode(syncData, (address, uint256[], uint256[], bytes));
-        for (uint256 index = 0; index < ids.length; index++) {
+        for (uint256 i = 0; i < ids.length; i++) {
             bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-            bytes memory metadata = abi.encode(["bytes32"], [metadataHashes[index]]);
-            if (childToken.wasEverMinted(id)) {
-                _depositMinted(to, id, value, metadata);
+            bytes memory metadata = abi.encode(["bytes32"], [metadataHashes[i]]);
+            if (childToken.wasEverMinted(ids[i])) {
+                _depositMinted(to, ids[i], values[i], metadata);
             } else {
-                childToken.mint(to, id, value, metadata);
+                childToken.mint(to, ids[i], values[i], metadata);
             }
-            emit Deposit(to, ids[index], values[index], metadata);
+            emit Deposit(to, ids[i], values[i], metadata);
         }
     }
 
