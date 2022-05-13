@@ -490,86 +490,103 @@ describe('PolygonAssetERC721.sol', function () {
         } = await setupAssetERC721Tunnels();
 
         const assetHolder = users[0];
-        const size = 1;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
+        const uri = 'http://myMetadata.io/1';
+        const abiCoder = new AbiCoder();
+        const data = abiCoder.encode(['string'], [uri]);
+        const tokenId =
+          '33366608568049459313928516292686205457042560099065348955409219190664755939328';
 
-        // Mint LAND on L1
-        await assetMinter.AssetERC721.mintQuad(
+        // Mint AssetERC721 on L1
+        await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
           assetHolder.address,
-          size,
-          x,
-          y,
-          bytes
+          tokenId,
+          data
         );
-        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
-          plotCount
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(1);
+
+        expect(await AssetERC721.ownerOf(tokenId)).to.be.equal(
+          assetHolder.address
         );
 
-        // Set Mock PolygonAssetERC721Tunnel in PolygonAssetERC721
-        await deployer.PolygonAssetERC721.setPolygonAssetERC721Tunnel(
-          MockPolygonAssetERC721Tunnel.address
-        );
-        expect(await PolygonAssetERC721.polygonAssetERC721Tunnel()).to.equal(
-          MockPolygonAssetERC721Tunnel.address
-        );
-        // Transfer to L1 Tunnel
+        // Transfer to L1 Tunnel "batchDepositToChild"
         await assetHolder.AssetERC721.setApprovalForAll(
           MockAssetERC721Tunnel.address,
           true
         );
-        await assetHolder.MockAssetERC721Tunnel.batchTransferToL2(
+        await assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
           assetHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
+          [tokenId]
         );
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);
+
         expect(
           await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
-        ).to.be.equal(plotCount);
+        ).to.be.equal(1);
+
+        expect(await AssetERC721.ownerOf(tokenId)).to.be.equal(
+          MockAssetERC721Tunnel.address
+        );
+
+        // Check assetHolder has received asset on L2
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
-        ).to.be.equal(plotCount);
+        ).to.be.equal(1);
 
-        // Transfer to L2 Tunnel
+        expect(await PolygonAssetERC721.ownerOf(tokenId)).to.be.equal(
+          assetHolder.address
+        );
+
+        // Send back to L1
+        // Transfer to L2 Tunnel "batchWithdrawToRoot"
         await assetHolder.PolygonAssetERC721.setApprovalForAll(
           MockPolygonAssetERC721Tunnel.address,
           true
         );
-        const tx = await assetHolder.MockPolygonAssetERC721Tunnel.batchTransferToL1(
+        const tx = await assetHolder.MockPolygonAssetERC721Tunnel.batchWithdrawToRoot(
           assetHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
+          [tokenId]
         );
         await tx.wait();
 
-        console.log('DUMMY CHECKPOINT. moving on...');
-
-        // Release on L1
-        const abiCoder = new AbiCoder();
-
-        await deployer.MockAssetERC721Tunnel.receiveMessage(
-          abiCoder.encode(
-            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
-            [assetHolder.address, [size], [x], [y], bytes]
-          )
-        );
-        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
-          plotCount
-        );
-        expect(
-          await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
-        ).to.be.equal(0);
+        // Check Polygon balances
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
         ).to.be.equal(0);
+
+        expect(
+          await PolygonAssetERC721.balanceOf(
+            MockPolygonAssetERC721Tunnel.address
+          )
+        ).to.be.equal(1);
+
+        expect(await PolygonAssetERC721.ownerOf(tokenId)).to.be.equal(
+          MockPolygonAssetERC721Tunnel.address
+        );
+
+        // Release on L1
+        await deployer.MockAssetERC721Tunnel.receiveMessage(
+          new AbiCoder().encode(
+            ['address', 'uint256', 'bytes'],
+            [assetHolder.address, tokenId, data]
+          )
+        );
+
+        // Confirm L1 balances
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(1);
+
+        expect(await AssetERC721.ownerOf(tokenId)).to.be.equal(
+          assetHolder.address
+        );
+
+        expect(
+          await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
+        ).to.be.equal(0);
+
+        // Make sure ID is the same as it was on L2!
+        // expect(await AssetERC721.ownerOf(tokenId)).to.be.equal(
+        //   assetHolder.address
+        // );
       });
 
       it('should should be able to transfer multiple assets', async function () {
