@@ -273,6 +273,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     }
 
     /// @notice Extracts an EIP-721 Asset from an EIP-1155 Asset.
+    /// @dev Extraction is limited to bouncers.
     /// @param sender address which own the token to be extracted.
     /// @param id the token type to extract from.
     /// @param to address which will receive the token.
@@ -283,6 +284,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         address to
     ) external returns (uint256) {
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        require(isBouncer(_msgSender()), "!BOUNCER");
         require(to != address(0), "TO==0");
         require(id & ERC1155ERC721Helper.IS_NFT != 0, "!NFT");
         uint32 tokenCollectionIndex = _nextCollectionIndex[id] + 1;
