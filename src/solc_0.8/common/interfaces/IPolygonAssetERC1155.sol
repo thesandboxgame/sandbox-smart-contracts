@@ -26,6 +26,12 @@ interface IPolygonAssetERC1155 {
         bytes calldata data
     ) external;
 
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external;
+
     function mintMultiple(
         address creator,
         uint40 packId,

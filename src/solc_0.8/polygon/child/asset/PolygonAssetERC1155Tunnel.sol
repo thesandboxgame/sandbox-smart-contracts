@@ -38,14 +38,21 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
+<<<<<<< HEAD
         uint256[] calldata values
     )
         external
         // bytes calldata data // Must contain encoded bytes32[] of metadata hashes from root contract
         whenNotPaused()
     {
+=======
+        uint256[] calldata values,
+        bytes calldata data // Must contain encoded bytes32[] of metadata hashes from root contract
+    ) external whenNotPaused {
+>>>>>>> TSBBLOC-514-asset-split
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+<<<<<<< HEAD
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             // bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
@@ -54,6 +61,12 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
             metadataHashes[i] = metadataHash;
             bytes memory metadata = abi.encode(metadataHash);
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], abi.encode(metadataHash));
+=======
+        bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
+        for (uint256 i = 0; i < ids.length; i++) {
+            bytes memory metadata = abi.encode(["bytes"], [metadataHashes[i]]);
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], metadata);
+>>>>>>> TSBBLOC-514-asset-split
             emit Withdraw(to, ids[i], values[i], metadata);
         }
         _sendMessageToRoot(abi.encode(to, ids, values, abi.encode(metadataHashes)));
@@ -86,10 +99,28 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 id, uint256 value, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, bytes));
-        childToken.wasEverMinted(id)
-            ? childToken.safeTransferFrom(address(this), to, id, value, data)
-            : childToken.mint(to, id, value, data);
+        if (childToken.wasEverMinted(id)) {
+            _depositMinted(to, id, value, data);
+        } else {
+            childToken.mint(to, id, value, data);
+        }
+
         emit Deposit(to, id, value, data);
+    }
+
+    function _depositMinted(
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) internal {
+        uint256 balance = childToken.balanceOf(address(this), id);
+        if (balance >= value) {
+            childToken.safeTransferFrom(address(this), to, id, value, data);
+        } else {
+            if (balance > 0) childToken.safeTransferFrom(address(this), to, id, balance, data);
+            childToken.mintDeficit(to, id, (value - balance));
+        }
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

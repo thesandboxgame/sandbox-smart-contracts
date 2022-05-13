@@ -132,7 +132,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
 
-        _mintBatch(user, ids, amounts, data);
+        _mintBatches(user, ids, amounts, data);
     }
 
     /// @notice called when user wants to withdraw single token back to root chain.

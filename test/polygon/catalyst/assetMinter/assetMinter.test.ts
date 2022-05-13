@@ -239,18 +239,17 @@ describe('AssetMinter', function () {
         mintOptions.gemIds
       );
 
-      const receipt = tx.wait();
-
+      const receipt = await tx.wait();
       const mintEvent = await expectEventWithArgs(
         assetContract,
         receipt,
-        'Transfer'
+        'TransferSingle'
       );
       const args = mintEvent.args;
 
-      expect(args[0]).to.be.equal(ethers.constants.AddressZero);
-      expect(args[1]).to.be.equal(catalystOwner);
-      expect(args[2]).to.be.equal(assetId);
+      expect(args[2]).to.be.equal(catalystOwner);
+      expect(args[1]).to.be.equal(ethers.constants.AddressZero);
+      expect(args[3]).to.be.equal(assetId);
     });
 
     // TODO: the same with 1155

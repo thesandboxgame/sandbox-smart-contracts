@@ -17,6 +17,7 @@ export const assetAttributesRegistryFixture = async () => {
   const {
     assetAttributesRegistryAdmin,
     sandBeneficiary,
+    sandAdmin,
   } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const user0 = users[0];
@@ -34,6 +35,11 @@ export const assetAttributesRegistryFixture = async () => {
   await depositViaChildChainManager(
     {sand: sandContract, childChainManager},
     sandBeneficiary,
+    sandAmount
+  );
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
     sandAmount
   );
 

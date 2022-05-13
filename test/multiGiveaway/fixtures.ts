@@ -11,7 +11,7 @@ import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getCl
 import helpers from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
-import {depositViaChildChainManager} from '../polygon/sand/fixtures'
+import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {expectReceiptEventWithArgs, waitFor, withSnapshot} from '../utils';
 import {zeroAddress} from '../land-sale/fixtures';
 

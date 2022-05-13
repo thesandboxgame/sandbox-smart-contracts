@@ -284,12 +284,11 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     ) external returns (uint256) {
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(to != address(0), "TO==0");
-        require(id & ERC1155ERC721Helper.IS_NFT == 0, "NOT_ERC1155_TOKEN");
-        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        require(id & ERC1155ERC721Helper.IS_NFT != 0, "!NFT");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id] + 1;
+        _nextCollectionIndex[id] = tokenCollectionIndex;
         string memory metaData = tokenURI(id);
-        uint256 newId =
-            id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
-        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        uint256 newId = id + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
         _burnFT(sender, id, 1);
         _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
         emit Extraction(id, newId);
@@ -533,6 +532,47 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
         emit TransferSingle(operator, address(0), account, id, amount);
         require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
+    }
+
+    function _mintBatches(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal {
+        for (uint256 i = 0; i < amounts.length; i++) {
+            if (amounts[i] > 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(
+                    index,
+                    amounts[i],
+                    ObjectLib32.Operations.REPLACE
+                );
+            }
+        }
+        _completeBatchMint(_msgSender(), to, ids, amounts, data);
+    }
+
+    /// @notice function to be called by tunnel to mint deficit of minted tokens
+    /// @dev This mint calls for add instead of replace in packedTokenBalance
+    /// @param account address of the ownerof tokens.
+    /// @param id id of the token to be minted.
+    /// @param amount quantity of the token to be minted.
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(_msgSender() == _predicate, "!PREDICATE");
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
+            index,
+            amount,
+            ObjectLib32.Operations.ADD
+        );
+
+        emit TransferSingle(msg.sender, address(0), account, id, amount);
+        require(_checkOnERC1155Received(msg.sender, address(0), account, id, amount, ""), "TRANSFER_REJECTED");
     }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
