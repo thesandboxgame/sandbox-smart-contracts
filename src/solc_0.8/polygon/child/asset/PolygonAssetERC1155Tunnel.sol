@@ -38,35 +38,16 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
     function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
-<<<<<<< HEAD
         uint256[] calldata values
-    )
-        external
-        // bytes calldata data // Must contain encoded bytes32[] of metadata hashes from root contract
-        whenNotPaused()
-    {
-=======
-        uint256[] calldata values,
-        bytes calldata data // Must contain encoded bytes32[] of metadata hashes from root contract
     ) external whenNotPaused {
->>>>>>> TSBBLOC-514-asset-split
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
-<<<<<<< HEAD
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
-            // bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-            // bytes memory metadata = abi.encode(["bytes"], [metadataHashes[i]]);
             bytes32 metadataHash = childToken.metadataHash(ids[i]);
             metadataHashes[i] = metadataHash;
             bytes memory metadata = abi.encode(metadataHash);
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], abi.encode(metadataHash));
-=======
-        bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-        for (uint256 i = 0; i < ids.length; i++) {
-            bytes memory metadata = abi.encode(["bytes"], [metadataHashes[i]]);
-            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], values[i], metadata);
->>>>>>> TSBBLOC-514-asset-split
             emit Withdraw(to, ids[i], values[i], metadata);
         }
         _sendMessageToRoot(abi.encode(to, ids, values, abi.encode(metadataHashes)));
