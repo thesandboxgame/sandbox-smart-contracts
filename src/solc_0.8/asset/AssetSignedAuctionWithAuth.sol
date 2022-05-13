@@ -312,7 +312,7 @@ contract AssetSignedAuctionWithAuth is
                 _hashAuction(to, from, token, auctionData, ids, amounts)
             );
         } else {
-            dataToHash = _encodeBasicSignatureHash(to, from, token, auctionData, ids, amounts);
+            dataToHash = _encodeBasicSignatureHash(from, token, auctionData, ids, amounts);
         }
 
         if (signatureType == SignatureType.EIP1271) {
@@ -359,7 +359,6 @@ contract AssetSignedAuctionWithAuth is
     }
 
     function _encodeBasicSignatureHash(
-        address to,
         address from,
         address token,
         uint256[] memory auctionData,
@@ -372,7 +371,6 @@ contract AssetSignedAuctionWithAuth is
                     abi.encodePacked(
                         address(this),
                         AUCTION_TYPEHASH,
-                        to,
                         from,
                         token,
                         auctionData[AuctionData_OfferId],
