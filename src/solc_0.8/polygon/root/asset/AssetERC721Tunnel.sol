@@ -48,14 +48,17 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused() {
+        string[] memory uris = new string[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the root tokens in this contract
             uint256 id = ids[i];
-            bytes memory uniqueUriData = abi.encode(rootToken.tokenURI(id));
+            string memory uniqueUri = rootToken.tokenURI(id);
+            uris[i] = uniqueUri;
+            bytes memory uniqueUriData = abi.encode(uniqueUri);
             rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
-            _sendMessageToChild(abi.encode(to, ids[i], uniqueUriData));
             emit Deposit(to, ids[i], uniqueUriData);
         }
+        _sendMessageToChild(abi.encode(to, ids[i], uris));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -75,10 +78,14 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256 id, bytes memory data) = abi.decode(message, (address, uint256, bytes));
-        if (!rootToken.exists(id)) rootToken.mint(to, id, data);
-        else rootToken.safeTransferFrom(address(this), to, id, data);
-        emit Withdraw(to, id, data);
+        (address to, uint256[] ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
+        for (uint256 i = 0; i < ids.length; i++) {
+            string[] memory uris = abi.decode(data, (string[]));
+            bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
+            if (!rootToken.exists(ids[i])) rootToken.mint(to, ids[i], uniqueUriData);
+            else rootToken.safeTransferFrom(address(this), to, ids[i], uniqueUriData);
+            emit Withdraw(to, ids[i], uniqueUriData);
+        }
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
