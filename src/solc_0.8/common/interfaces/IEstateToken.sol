@@ -8,7 +8,7 @@ import "../Libraries/MapLib.sol";
 /// @title Interface for the Estate token on L1
 interface IEstateToken {
     struct EstateCRUDData {
-        MapLib.QuadsAndTiles freeLand; //(size, x, y)
+        MapLib.QuadsAndTiles freeLandData; //(size, x, y)
         bytes32 uri;
     }
 
@@ -19,7 +19,17 @@ interface IEstateToken {
         bytes32 uri;
     }
 
-    function createEstate(address from, EstateCRUDData calldata creation) external returns (uint256);
+    function createEstate(address from, EstateCRUDData calldata data) external returns (uint256);
 
-    function updateLandsEstate(address from, UpdateEstateLands calldata update) external returns (uint256);
+    function updateLandsEstate(address from, UpdateEstateLands calldata data) external returns (uint256);
+
+    function mintEstate(
+        address from,
+        bytes32 metaData,
+        TileWithCoordLib.TileWithCoord[] calldata freeLand
+    ) external returns (uint256);
+
+    function burnEstate(address from, uint256 estateId) external;
+
+    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory);
 }

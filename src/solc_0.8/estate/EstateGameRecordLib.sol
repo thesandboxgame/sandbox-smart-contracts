@@ -62,6 +62,10 @@ library EstateGameRecordLib {
         return self.values.length;
     }
 
+    function isEmpty(Games storage self) internal view returns (bool) {
+        return self.values.length == 0;
+    }
+
     function getGameIdAt(Games storage self, uint256 idx) internal view returns (uint256) {
         return self.values[idx].gameId;
     }

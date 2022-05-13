@@ -2,11 +2,8 @@
 pragma solidity 0.8.2;
 
 import "../FxTunnelBase.sol";
+import "../../../common/interfaces/IEstateToken.sol";
 import "../../../common/Libraries/TileWithCoordLib.sol";
-
-interface IEstate {
-    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory);
-}
 
 /// @title Estate bridge on L1
 contract EstateTunnel is FxTunnelBase {
@@ -26,19 +23,16 @@ contract EstateTunnel is FxTunnelBase {
     }
 
     function transferEstateToL2(address to, uint256 estateId) external whenNotPaused() {
-        TileWithCoordLib.TileWithCoord[] memory freeLands = IEstate(rootToken).freeLand(estateId);
+        TileWithCoordLib.TileWithCoord[] memory freeLands = IEstateToken(rootToken).freeLand(estateId);
+        IEstateToken(rootToken).burnEstate(_msgSender(), estateId);
         bytes memory message = abi.encode(to, freeLands);
         _sendMessageToChild(message);
         emit Deposit(to, freeLands);
     }
 
-    // solhint-disable-next-line no-empty-blocks
     function _processMessageFromChild(bytes memory message) internal override {
-        //        (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
-        //        abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
-        //        for (uint256 index = 0; index < x.length; index++) {
-        //            LandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
-        //            emit Withdraw(to, size[index], x[index], y[index], data);
-        //        }
+        (address to, bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory freeLand) =
+            abi.decode(message, (address, bytes32, TileWithCoordLib.TileWithCoord[]));
+        IEstateToken(rootToken).mintEstate(to, metadata, freeLand);
     }
 }

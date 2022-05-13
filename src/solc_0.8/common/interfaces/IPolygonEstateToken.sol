@@ -38,5 +38,15 @@ interface IPolygonEstateToken {
 
     function createEstate(address from, CreateEstateData calldata data) external returns (uint256);
 
+    function mintEstate(
+        address from,
+        bytes32 metaData,
+        TileWithCoordLib.TileWithCoord[] calldata freeLand
+    ) external returns (uint256);
+
     function updateEstate(address from, UpdateEstateData calldata data) external returns (uint256);
+
+    function burnEstate(address from, uint256 estateId) external;
+
+    function freeLand(uint256 estateId) external view returns (TileWithCoordLib.TileWithCoord[] memory);
 }

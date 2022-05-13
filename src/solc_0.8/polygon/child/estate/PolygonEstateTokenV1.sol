@@ -28,7 +28,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         ILandToken land,
         GameBaseToken _gameToken,
         uint8 chainIndex
-    ) public initializer {
+    ) external initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
         gameToken = _gameToken;
     }
@@ -42,12 +42,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return storageId;
     }
 
-    function updateEstate(address from, UpdateEstateData calldata data)
-        external
-        override
-        onlyMinter()
-        returns (uint256)
-    {
+    function updateEstate(address from, UpdateEstateData calldata data) external override returns (uint256) {
         uint256 newId;
         uint256 storageId;
         (newId, storageId) = _updateLandsEstate(
@@ -79,6 +74,20 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return newId;
     }
 
+    function mintEstate(
+        address from,
+        bytes32 metaData,
+        TileWithCoordLib.TileWithCoord[] calldata freeLand
+    ) external override returns (uint256) {
+        return _mintEstate(from, metaData, freeLand);
+    }
+
+    function burnEstate(address from, uint256 estateId) external override {
+        uint256 storageId = _storageId(estateId);
+        require(games[storageId].isEmpty(), "still have games");
+        _burnEstate(from, estateId, storageId);
+    }
+
     function getGameMap(uint256 estateId, uint256 gameId)
         external
         view
@@ -101,10 +110,14 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     /// @notice Return the URI of a specific token.
     /// @param gameId The id of the token.
     /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+    function tokenURI(uint256 gameId) external view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 id = _storageId(gameId);
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
+    }
+
+    function freeLand(uint256 estateId) external view override returns (TileWithCoordLib.TileWithCoord[] memory) {
+        return _freeLand(estateId);
     }
 
     function _addGamesToEstate(
