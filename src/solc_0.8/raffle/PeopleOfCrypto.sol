@@ -159,7 +159,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     function checkPersonalizationSignature(
-        address _wallet,
         uint256 _signatureId,
         address _contractAddress,
         uint256 _chainId,
@@ -172,16 +171,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
                 keccak256(
                     abi.encodePacked(
                         "\x19Ethereum Signed Message:\n32",
-                        keccak256(
-                            abi.encode(
-                                _wallet,
-                                _signatureId,
-                                _contractAddress,
-                                _chainId,
-                                _tokenId,
-                                _personalizationMask
-                            )
-                        )
+                        keccak256(abi.encode(_signatureId, _contractAddress, _chainId, _tokenId, _personalizationMask))
                     )
                 ),
                 _signature
@@ -191,8 +181,8 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     // Thx Cyberkongs VX <3
     function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = MAX_SUPPLY - _totalMinted;
-        uint256 rand = uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) %
-            remaining;
+        uint256 rand =
+            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;
 
         if (availableIds[rand] != 0) {
@@ -214,10 +204,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     function personalize(
-        address _wallet,
         uint256 _signatureId,
-        address _contractAddress,
-        uint256 _chainId,
         bytes memory _signature,
         uint256 _tokenId,
         uint256 _personalizationMask
@@ -226,7 +213,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         require(personalizationSignatureIds[_signatureId] == 0, "signatureId already used");
         require(
             checkPersonalizationSignature(
-                _wallet,
                 _signatureId,
                 address(this),
                 block.chainid,
@@ -239,7 +225,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
 
         personalizationSignatureIds[_signatureId] = 1;
 
-        require(ownerOf(_tokenId) == sandOwner, "You must be the owner of the token in order to personalize it");
+        require(ownerOf(_tokenId) == _msgSender(), "You must be the owner of the token in order to personalize it");
 
         personalizationTraits[_tokenId] = _personalizationMask;
         emit Personalized(_tokenId, _personalizationMask);
