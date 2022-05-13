@@ -34,6 +34,13 @@ interface IAssetERC1155 {
         bytes calldata data
     ) external;
 
+    // for bridging, where the ID has already been minted on that layer
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external;
+
     // fails on non-NFT or nft who do not have collection (was a mistake)
     function collectionOf(uint256 id) external view returns (uint256);
 

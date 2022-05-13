@@ -9,8 +9,9 @@ contract MockAssetERC721Tunnel is AssetERC721Tunnel {
         address _checkpointManager,
         address _fxRoot,
         IAssetERC721 _rootToken,
-        address _trustedForwarder
-    ) AssetERC721Tunnel(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder) {
+        address _trustedForwarder,
+        uint256 _maxTransferLimit
+    ) AssetERC721Tunnel(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder, _maxTransferLimit) {
         checkpointManager = ICheckpointManager(_checkpointManager);
         fxRoot = IFxStateSender(_fxRoot);
     }

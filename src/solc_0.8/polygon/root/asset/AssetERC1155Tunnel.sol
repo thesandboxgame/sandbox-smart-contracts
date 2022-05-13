@@ -11,17 +11,26 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 /// @title ASSETERC1155 bridge on L1
 contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC1155 public rootToken;
+    uint256 public maxTransferLimit = 20;
 
+    event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
+    }
 
     constructor(
         address _checkpointManager,
         address _fxRoot,
         IAssetERC1155 _rootToken,
-        address _trustedForwarder
+        address _trustedForwarder,
+        uint256 _maxTransferLimit
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootToken = _rootToken;
+        maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
@@ -71,10 +80,10 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         for (uint256 i = 0; i < ids.length; i++) {
             bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
             bytes memory metadata = abi.encode(["bytes32"], [metadataHashes[i]]);
-            if (rootToken.wasEverMinted(id)) {
-                _depositMinted(to, id, value, metadata);
+            if (rootToken.wasEverMinted(ids[i])) {
+                _depositMinted(to, ids[i], values[i], metadata);
             } else {
-                rootToken.mint(to, id, value, metadata);
+                rootToken.mint(to, ids[i], values[i], metadata);
             }
             emit Withdraw(to, ids[i], values[i], metadata);
         }
