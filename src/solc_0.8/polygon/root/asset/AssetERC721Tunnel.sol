@@ -11,17 +11,26 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 /// @title ASSETERC721 bridge on L1
 contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC721 public rootToken;
+    uint256 public maxTransferLimit = 20;
 
+    event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
+    }
 
     constructor(
         address _checkpointManager,
         address _fxRoot,
         IAssetERC721 _rootToken,
-        address _trustedForwarder
+        address _trustedForwarder,
+        uint256 _maxTransferLimit
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootToken = _rootToken;
+        maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
@@ -58,7 +67,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
             rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
             emit Deposit(to, ids[i], uniqueUriData);
         }
-        _sendMessageToChild(abi.encode(to, ids[i], uris));
+        _sendMessageToChild(abi.encode(to, ids, uris));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -78,7 +87,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
+        (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
         for (uint256 i = 0; i < ids.length; i++) {
             string[] memory uris = abi.decode(data, (string[]));
             bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
