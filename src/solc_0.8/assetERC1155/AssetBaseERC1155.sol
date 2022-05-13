@@ -555,17 +555,11 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _completeBatchMint(_msgSender(), to, ids, amounts, data);
     }
 
-    /// @notice function to be called by tunnel to mint deficit of minted tokens
-    /// @dev This mint calls for add instead of replace in packedTokenBalance
-    /// @param account address of the ownerof tokens.
-    /// @param id id of the token to be minted.
-    /// @param amount quantity of the token to be minted.
-    function mintDeficit(
+    function _mintDeficit(
         address account,
         uint256 id,
         uint256 amount
-    ) external {
-        require(_msgSender() == _predicate, "!PREDICATE");
+    ) internal {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
             index,

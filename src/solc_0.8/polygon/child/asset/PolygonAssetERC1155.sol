@@ -100,6 +100,20 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _mintBatch(owner, ids, supplies, data);
     }
 
+    /// @notice function to be called by tunnel to mint deficit of minted tokens
+    /// @dev This mint calls for add instead of replace in packedTokenBalance
+    /// @param account address of the ownerof tokens.
+    /// @param id id of the token to be minted.
+    /// @param amount quantity of the token to be minted.
+    function mintDeficit(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(isBouncer(_msgSender()), "!BOUNCER");
+        _mintDeficit(account, id, amount);
+    }
+
     /// @notice Burns `amount` tokens of type `id`.
     /// @param id token type which will be burnt.
     /// @param amount amount of token to burn.
