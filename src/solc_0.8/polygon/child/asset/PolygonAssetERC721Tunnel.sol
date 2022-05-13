@@ -44,14 +44,17 @@ contract PolygonAssetERC721Tunnel is
 
     function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused() {
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        string[] memory uris = new string[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the child tokens in this contract
             uint256 id = ids[i];
-            bytes memory uniqueUriData = abi.encode(childToken.tokenURI(id));
+            string memory uniqueUri = childToken.tokenURI(id);
+            uris[i] = uniqueUri;
+            bytes memory uniqueUriData = abi.encode(uniqueUri);
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
-            _sendMessageToRoot(abi.encode(to, ids[i], uniqueUriData));
             emit Withdraw(to, ids[i], uniqueUriData);
         }
+        _sendMessageToRoot(abi.encode(to, ids[i], uris));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -79,10 +82,14 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256 id, bytes memory data) = abi.decode(syncData, (address, uint256, bytes));
-        if (!childToken.exists(id)) childToken.mint(to, id, data);
-        else childToken.safeTransferFrom(address(this), to, id, data);
-        emit Deposit(to, id, data);
+        (address to, uint256[] ids, bytes memory data) = abi.decode(syncData, (address, uint256, bytes));
+        for (uint256 i = 0; i < ids.length; i++) {
+            string[] memory uris = abi.decode(data, (string[]));
+            bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
+            if (!childToken.exists(id)) childToken.mint(to, id, uniqueUriData);
+            else childToken.safeTransferFrom(address(this), to, id, uniqueUriData);
+            emit Deposit(to, id, uniqueUriData);
+        }
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
