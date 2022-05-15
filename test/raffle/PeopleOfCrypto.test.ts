@@ -1,4 +1,5 @@
 // import {expect} from 'chai';
+import {expect} from 'chai';
 import {
   raffleSignWallet,
   setupRaffle,
@@ -210,7 +211,6 @@ describe('RafflePeopleOfCrypto', function () {
       personalize,
     } = await setupRaffle();
 
-    let tokenId = 0;
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
@@ -238,20 +238,170 @@ describe('RafflePeopleOfCrypto', function () {
       rafflePeopleOfCryptoContract.filters.Transfer()
     );
 
-    for (const transferEvent of transferEvents) {
-      assert.exists(transferEvent.args);
-      if (transferEvent.args) {
-        tokenId = transferEvent.args.tokenId.toString();
-      }
-    }
+    assert.equal(transferEvents.length, 1);
+    assert.exists(transferEvents[0].args);
+
+    const tokenId = transferEvents[0]?.args?.tokenId.toString();
+
+    const personalizationMask = 32;
 
     await personalize(
       raffleSignWallet,
-      deployer,
       0,
       hre.network.config.chainId || 31337,
       tokenId,
-      32
+      personalizationMask
+    );
+
+    const personalizeEvents = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Personalized()
+    );
+
+    assert.equal(personalizeEvents.length, 1);
+    assert.exists(personalizeEvents[0].args);
+    assert.equal(
+      personalizeEvents[0]?.args?._personalizationMask,
+      personalizationMask
+    );
+  });
+
+  it.only('should not be able to personalize with invalid signature', async function () {
+    const {
+      rafflePeopleOfCryptoContract,
+      transferSand,
+      setupWave,
+      getNamedAccounts,
+      hre,
+      mint,
+      personalizeInvalidSignature,
+    } = await setupRaffle();
+
+    const {deployer} = await getNamedAccounts();
+
+    await transferSand(deployer, '1000');
+    await setupWave(
+      rafflePeopleOfCryptoContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
+
+    await mint(
+      raffleSignWallet,
+      deployer,
+      0,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      '10',
+      1
+    );
+
+    const transferEvents = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Transfer()
+    );
+
+    assert.equal(transferEvents.length, 1);
+    assert.exists(transferEvents[0].args);
+
+    const tokenId = transferEvents[0]?.args?.tokenId.toString();
+
+    const personalizationMask = 32;
+
+    await expect(
+      personalizeInvalidSignature(
+        raffleSignWallet,
+        0,
+        hre.network.config.chainId || 31337,
+        tokenId,
+        personalizationMask
+      )
+    ).to.be.revertedWith('Signature failed');
+  });
+
+  it.only('should be able to personalize just one of the minted assets', async function () {
+    const {
+      rafflePeopleOfCryptoContract,
+      transferSand,
+      setupWave,
+      getNamedAccounts,
+      hre,
+      mint,
+      personalize,
+    } = await setupRaffle();
+
+    const {deployer} = await getNamedAccounts();
+
+    await transferSand(deployer, '1000');
+    await setupWave(
+      rafflePeopleOfCryptoContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
+
+    const receipt1 = await mint(
+      raffleSignWallet,
+      deployer,
+      0,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      '10',
+      1
+    );
+
+    const transferEvents1 = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Transfer(),
+      receipt1.blockNumber
+    );
+    assert.equal(transferEvents1.length, 1);
+
+    const receipt2 = await mint(
+      raffleSignWallet,
+      deployer,
+      1,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      '10',
+      1
+    );
+
+    const transferEvents2 = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Transfer(),
+      receipt2.blockNumber
+    );
+    assert.equal(transferEvents2.length, 1);
+    const tokenId2 = transferEvents2[0]?.args?.tokenId.toString();
+
+    const personalizationMask = 16;
+
+    const personalizeReceipt2 = await personalize(
+      raffleSignWallet,
+      1,
+      hre.network.config.chainId || 31337,
+      tokenId2,
+      personalizationMask
+    );
+
+    const allPersonalizeEvents = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Personalized()
+    );
+
+    const personalizeEvents2 = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Personalized(),
+      personalizeReceipt2.blockNumber
+    );
+
+    assert.equal(allPersonalizeEvents.length, 1);
+    assert.equal(personalizeEvents2.length, 1);
+    assert.equal(
+      personalizeEvents2[0]?.args?._personalizationMask,
+      personalizationMask
     );
   });
 });

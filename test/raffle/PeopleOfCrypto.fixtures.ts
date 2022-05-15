@@ -11,23 +11,33 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(['RafflePeopleOfCrypto'], async function (
-  hre
-) {
-  const rafflePeopleOfCryptoContract = await ethers.getContract('RafflePeopleOfCrypto');
-  const sandContract = await ethers.getContract('Sand');
-  return {
-    rafflePeopleOfCryptoContract,
-    sandContract,
-    hre,
-    getNamedAccounts,
-    setupWave,
-    signAuthMessageAs,
-    transferSand,
-    mint: mintSetup(rafflePeopleOfCryptoContract, sandContract),
-    personalize: personalizeSetup(rafflePeopleOfCryptoContract)
-  };
-});
+export const setupRaffle = withSnapshot(
+  ['RafflePeopleOfCrypto'],
+  async function (hre) {
+    const rafflePeopleOfCryptoContract = await ethers.getContract(
+      'RafflePeopleOfCrypto'
+    );
+    const sandContract = await ethers.getContract('Sand');
+    return {
+      rafflePeopleOfCryptoContract,
+      sandContract,
+      hre,
+      getNamedAccounts,
+      setupWave,
+      signAuthMessageAs,
+      transferSand,
+      mint: mintSetup(rafflePeopleOfCryptoContract, sandContract),
+      personalize: personalizeSetup(
+        rafflePeopleOfCryptoContract,
+        validPersonalizeSignature
+      ),
+      personalizeInvalidSignature: personalizeSetup(
+        rafflePeopleOfCryptoContract,
+        invalidPersonalizeSignature
+      ),
+    };
+  }
+);
 
 async function setupWave(
   raffle: Contract,
@@ -68,7 +78,7 @@ async function setupWave(
   assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
 }
 
-async function signPersonalizationMessageAs(
+async function validPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   signatureId: number,
   contractAddress: string,
@@ -81,9 +91,24 @@ async function signPersonalizationMessageAs(
     [signatureId, contractAddress, chainId, tokenId, personalizationMask]
   );
   return wallet.signMessage(
-    ethers.utils.arrayify(
-      ethers.utils.keccak256(hashedData)
-    )
+    ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
+  );
+}
+
+async function invalidPersonalizeSignature(
+  wallet: Wallet | SignerWithAddress,
+  signatureId: number,
+  contractAddress: string,
+  chainId: number,
+  tokenId: number,
+  personalizationMask: number
+) {
+  const hashedData = ethers.utils.defaultAbiCoder.encode(
+    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [signatureId, contractAddress, chainId, personalizationMask, tokenId]
+  );
+  return wallet.signMessage(
+    ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
   );
 }
 
@@ -142,16 +167,25 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
   };
 }
 
-function personalizeSetup(raffleContract: Contract) {
+function personalizeSetup(
+  raffleContract: Contract,
+  signatureFunction: (
+    wallet: Wallet | SignerWithAddress,
+    signatureId: number,
+    contractAddress: string,
+    chainId: number,
+    tokenId: number,
+    personalizationMask: number
+  ) => Promise<string>
+) {
   return async (
     wallet: Wallet | SignerWithAddress,
-    address: string,
     signatureId: number,
     chainId: number,
     tokenId: number,
     personalizationMask: number
   ) => {
-    const signature = await signPersonalizationMessageAs(
+    const signature = await signatureFunction(
       wallet,
       signatureId,
       raffleContract.address,
