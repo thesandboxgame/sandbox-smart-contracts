@@ -9,6 +9,9 @@ export {assert};
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
+export const raffleSignWallet2 = new ethers.Wallet(
+  '0x7777777777777777777777777777777777777777777777777777777777777777'
+);
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 export const setupRaffle = withSnapshot(

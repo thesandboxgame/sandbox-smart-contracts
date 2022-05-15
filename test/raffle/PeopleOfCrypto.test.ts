@@ -5,6 +5,7 @@ import {
   setupRaffle,
   zeroAddress,
   assert,
+  raffleSignWallet2,
 } from './PeopleOfCrypto.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
@@ -403,5 +404,59 @@ describe('RafflePeopleOfCrypto', function () {
       personalizeEvents2[0]?.args?._personalizationMask,
       personalizationMask
     );
+  });
+
+  it.only("should not be able to personalize someone else's minted assets", async function () {
+    const {
+      rafflePeopleOfCryptoContract,
+      transferSand,
+      setupWave,
+      getNamedAccounts,
+      hre,
+      mint,
+      personalize,
+    } = await setupRaffle();
+
+    const {deployer} = await getNamedAccounts();
+
+    await transferSand(deployer, '1000');
+    await setupWave(
+      rafflePeopleOfCryptoContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
+
+    await mint(
+      raffleSignWallet,
+      deployer,
+      0,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      '10',
+      1
+    );
+
+    const transferEvents = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Transfer()
+    );
+    assert.equal(transferEvents.length, 1);
+
+    const tokenId = transferEvents[0]?.args?.tokenId.toString();
+
+    const personalizationMask = 64;
+
+    await expect(
+      personalize(
+        raffleSignWallet2,
+        1,
+        hre.network.config.chainId || 31337,
+        tokenId,
+        personalizationMask
+      )
+    ).to.be.revertedWith('Signature failed');
   });
 });
