@@ -210,7 +210,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 _personalizationMask
     ) external {
         require(_msgSender() != allowedToExecutePersonalization, "Not allowed");
-        require(personalizationSignatureIds[_signatureId] == 0, "signatureId already used");
+        require(personalizationSignatureIds[_signatureId] == 0, "SignatureId already used");
         require(
             checkPersonalizationSignature(
                 _signatureId,

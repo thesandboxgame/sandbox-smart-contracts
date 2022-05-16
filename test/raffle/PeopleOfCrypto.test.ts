@@ -1,5 +1,6 @@
 // import {expect} from 'chai';
 import {expect} from 'chai';
+import {waitFor} from '../utils';
 import {
   raffleSignWallet,
   setupRaffle,
@@ -201,7 +202,7 @@ describe('RafflePeopleOfCrypto', function () {
     assert.equal(tokens.length, 20000);
   });
 
-  it.only('should be able to personalize with valid signature', async function () {
+  it('should be able to personalize with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -266,7 +267,7 @@ describe('RafflePeopleOfCrypto', function () {
     );
   });
 
-  it.only('should not be able to personalize with invalid signature', async function () {
+  it('should not be able to personalize with invalid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -322,7 +323,7 @@ describe('RafflePeopleOfCrypto', function () {
     ).to.be.revertedWith('Signature failed');
   });
 
-  it.only('should be able to personalize just one of the minted assets', async function () {
+  it('should be able to differentiate a personalized asset', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -406,7 +407,7 @@ describe('RafflePeopleOfCrypto', function () {
     );
   });
 
-  it.only("should not be able to personalize someone else's minted assets", async function () {
+  it("should not be able to personalize someone else's minted assets", async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -458,5 +459,78 @@ describe('RafflePeopleOfCrypto', function () {
         personalizationMask
       )
     ).to.be.revertedWith('Signature failed');
+  });
+
+  it('should not be able to personalize twice with the same signature', async function () {
+    const {
+      rafflePeopleOfCryptoContract,
+      transferSand,
+      setupWave,
+      getNamedAccounts,
+      hre,
+      mint,
+      personalizeSignature,
+    } = await setupRaffle();
+
+    const {deployer} = await getNamedAccounts();
+
+    await transferSand(deployer, '1000');
+    await setupWave(
+      rafflePeopleOfCryptoContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
+
+    await mint(
+      raffleSignWallet,
+      deployer,
+      0,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      '10',
+      1
+    );
+
+    const transferEvents = await rafflePeopleOfCryptoContract.queryFilter(
+      rafflePeopleOfCryptoContract.filters.Transfer()
+    );
+
+    assert.equal(transferEvents.length, 1);
+    assert.exists(transferEvents[0].args);
+
+    const tokenId = transferEvents[0]?.args?.tokenId.toString();
+
+    const personalizationMask = 4;
+
+    const signature = await personalizeSignature(
+      raffleSignWallet,
+      1,
+      rafflePeopleOfCryptoContract.address,
+      hre.network.config.chainId || 31337,
+      tokenId,
+      personalizationMask
+    );
+
+    await waitFor(
+      rafflePeopleOfCryptoContract.personalize(
+        1,
+        signature,
+        tokenId,
+        personalizationMask
+      )
+    );
+
+    await expect(
+      rafflePeopleOfCryptoContract.personalize(
+        1,
+        signature,
+        tokenId,
+        personalizationMask
+      )
+    ).to.be.revertedWith('SignatureId already used');
   });
 });

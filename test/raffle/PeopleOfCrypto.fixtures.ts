@@ -30,6 +30,7 @@ export const setupRaffle = withSnapshot(
       signAuthMessageAs,
       transferSand,
       mint: mintSetup(rafflePeopleOfCryptoContract, sandContract),
+      personalizeSignature: validPersonalizeSignature,
       personalize: personalizeSetup(
         rafflePeopleOfCryptoContract,
         validPersonalizeSignature
