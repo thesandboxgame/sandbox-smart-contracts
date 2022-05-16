@@ -1539,6 +1539,50 @@ module.exports = (init, extensions) => {
           .then((tx) => tx.wait());
         // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
       });
+
+      it('safe batch transfering to a contract that do not implemented onERC721Received should fail', async function ({
+        deployNonReceivingContract,
+        contract,
+        contractAsOwner,
+        owner,
+        tokenIds,
+      }) {
+        const receiverContract = await deployNonReceivingContract(
+          contract.address
+        );
+        const receiverAddress = receiverContract.address;
+        await expect(
+          contractAsOwner.safeBatchTransferFrom(
+            owner,
+            receiverAddress,
+            tokenIds,
+            '0x'
+          )
+        ).to.be.reverted;
+      });
+
+      it('safe batch transfering to a contract that implements onERC721Received should succeed', async function ({
+        deployERC721TokenReceiver,
+        contract,
+        contractAsOwner,
+        owner,
+        tokenIds,
+      }) {
+        const receiverContract = await deployERC721TokenReceiver(
+          contract.address,
+          true,
+          true
+        );
+        const receiverAddress = receiverContract.address;
+        await expect(
+          contractAsOwner.safeBatchTransferFrom(
+            owner,
+            receiverAddress,
+            tokenIds,
+            '0x'
+          )
+        ).to.not.be.reverted;
+      });
     });
   }
 

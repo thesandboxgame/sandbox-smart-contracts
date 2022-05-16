@@ -2,6 +2,7 @@
 pragma solidity 0.5.9;
 
 import "../../contracts_common/Libraries/AddressUtils.sol";
+import "../../contracts_common/Interfaces/ERC721TokenReceiver.sol";
 import "../../contracts_common/Interfaces/ERC721Events.sol";
 import "../../contracts_common/BaseWithStorage/SuperOperatorsV2.sol";
 import "../../contracts_common/BaseWithStorage/MetaTransactionReceiverV2.sol";
@@ -269,11 +270,20 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
             _numNFTPerAddress[to] += numTokens;
         }
 
-        if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
-            require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
-                "erc721 batch transfer rejected by to"
-            );
+        if (to.isContract()) {
+            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+                require(
+                    _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                    "erc721 batch transfer rejected by to"
+                );
+            } else if (safe) {
+                for (uint256 i = 0; i < numTokens; i ++) {
+                    require(
+                        _checkOnERC721Received(metaTx ? from : msg.sender, from, to, ids[i], ""),
+                        "erc721 transfer rejected by to"
+                    );
+                }
+            }
         }
     }
 
@@ -392,7 +402,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
-        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

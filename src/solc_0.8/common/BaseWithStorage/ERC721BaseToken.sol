@@ -311,8 +311,14 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
             _numNFTPerAddress[to] += numTokens;
         }
 
-        if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
-            require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_TRANSFER_REJECTED");
+        if (to.isContract()) {
+            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
+            } else if (safe) {
+                for (uint256 i = 0; i < numTokens; i++) {
+                    require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
+                }
+            }
         }
     }
 
