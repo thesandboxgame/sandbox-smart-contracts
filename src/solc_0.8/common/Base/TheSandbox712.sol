@@ -10,7 +10,7 @@ contract TheSandbox712 {
     constructor() {
         _DOMAIN_SEPARATOR = keccak256(
             // chainId 137 = Polygon
-            abi.encode(EIP712DOMAIN_TYPEHASH, keccak256("The Sandbox"), keccak256("1"), 137, address(this))
+            abi.encode(EIP712DOMAIN_TYPEHASH, keccak256("The Sandbox"), keccak256("1"), block.chainid, address(this))
         );
     }
 }

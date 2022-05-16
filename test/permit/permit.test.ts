@@ -28,7 +28,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -70,7 +70,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -110,7 +110,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -143,7 +143,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -176,7 +176,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -209,7 +209,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -243,7 +243,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const expectedDomainSeparator = _TypedDataEncoder.hashDomain(
       permitData712.domain
     );
@@ -273,7 +273,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -342,7 +342,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
@@ -405,7 +405,7 @@ describe('Permit', function () {
       deadline: deadline._hex,
     };
 
-    const permitData712 = data712(permitContract, approve);
+    const permitData712 = data712(31337, permitContract, approve);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
