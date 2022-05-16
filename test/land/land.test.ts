@@ -81,6 +81,97 @@ describe('LandV2', function () {
         'Already minted as 3x3'
       );
     });
+
+    it('should not be a minter by default', async function () {
+      const {landContract, getNamedAccounts} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+
+      expect(await landContract.isMinter(deployer)).to.be.false;
+    });
+
+    it('should be an admin to set minter', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const contract = landContract.connect(
+        ethers.provider.getSigner(deployer)
+      );
+
+      await expect(contract.setMinter(deployer, true)).to.be.revertedWith(
+        'only admin is allowed to add minters'
+      );
+
+      expect(await landContract.isMinter(deployer)).to.be.false;
+    });
+
+    it('should enable a minter', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setMinter(deployer, true)).not.to.be.reverted;
+
+      expect(await landContract.isMinter(deployer)).to.be.true;
+    });
+
+    it('should disable a minter', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setMinter(deployer, true)).not.to.be.reverted;
+      await expect(contract.setMinter(deployer, false)).not.to.be.reverted;
+
+      expect(await landContract.isMinter(deployer)).to.be.false;
+    });
+
+    it('should not accept address 0 as minter', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(
+        contract.setMinter(ethers.constants.AddressZero, false)
+      ).to.be.revertedWith('address 0 is not allowed as minter');
+
+      await expect(
+        contract.setMinter(ethers.constants.AddressZero, true)
+      ).to.be.revertedWith('address 0 is not allowed as minter');
+
+      expect(await landContract.isMinter(ethers.constants.AddressZero)).to.be
+        .false;
+    });
+
+    it('should only be able to disable an enabled minter', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setMinter(deployer, true)).not.to.be.reverted;
+
+      expect(await landContract.isMinter(deployer)).to.be.true;
+
+      await expect(contract.setMinter(deployer, true)).to.be.revertedWith(
+        'the status should be different than the current one'
+      );
+      await expect(contract.setMinter(deployer, false)).not.to.be.reverted;
+    });
+
+    it('should only be able to enable a disabled minter', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      expect(await landContract.isMinter(deployer)).to.be.false;
+
+      await expect(contract.setMinter(deployer, false)).to.be.revertedWith(
+        'the status should be different than the current one'
+      );
+      await expect(contract.setMinter(deployer, true)).not.to.be.reverted;
+    });
   });
 
   describe('MetaTransactionReceiverV2', function () {
@@ -169,6 +260,123 @@ describe('LandV2', function () {
       await expect(
         contractAsAdmin.setMetaTransactionProcessor(sandContract.address, true)
       ).not.to.be.reverted;
+    });
+  });
+
+  describe('AdminV2', function () {
+    it('should get the current admin', async function () {
+      const {landContract, getNamedAccounts} = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+
+      expect(await landContract.getAdmin()).to.be.equal(landAdmin);
+    });
+
+    it('should change the admin to a new address', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.changeAdmin(deployer)).not.to.be.reverted;
+
+      expect(await contract.getAdmin()).to.be.equal(deployer);
+    });
+
+    it('should only be changed to a new admin', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.changeAdmin(admin)).to.be.reverted;
+    });
+  });
+
+  describe('SuperOperatorsV2', function () {
+    it('should not be a super operator by default', async function () {
+      const {landContract, getNamedAccounts} = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+
+      expect(await landContract.isSuperOperator(landAdmin)).to.be.false;
+    });
+
+    it('should be an admin to set super operator', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const contract = landContract.connect(
+        ethers.provider.getSigner(deployer)
+      );
+
+      await expect(
+        contract.setSuperOperator(deployer, true)
+      ).to.be.revertedWith('only admin is allowed to add super operators');
+
+      expect(await landContract.isSuperOperator(deployer)).to.be.false;
+    });
+
+    it('should enable a super operator', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
+
+      expect(await landContract.isSuperOperator(admin)).to.be.true;
+    });
+
+    it('should disable a super operator', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
+      await expect(contract.setSuperOperator(admin, false)).not.to.be.reverted;
+
+      expect(await landContract.isSuperOperator(admin)).to.be.false;
+    });
+
+    it('should not accept address 0 as super operator', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(
+        contract.setSuperOperator(ethers.constants.AddressZero, false)
+      ).to.be.revertedWith('address 0 is not allowed as super operator');
+
+      await expect(
+        contract.setSuperOperator(ethers.constants.AddressZero, true)
+      ).to.be.revertedWith('address 0 is not allowed as super operator');
+
+      expect(await landContract.isSuperOperator(ethers.constants.AddressZero))
+        .to.be.false;
+    });
+
+    it('should only be able to disable an enabled super operator', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
+
+      expect(await landContract.isSuperOperator(admin)).to.be.true;
+
+      await expect(contract.setSuperOperator(admin, true)).to.be.revertedWith(
+        'the status should be different than the current one'
+      );
+      await expect(contract.setSuperOperator(admin, false)).not.to.be.reverted;
+    });
+
+    it('should only be able to enable a disabled super operator', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      expect(await landContract.isSuperOperator(admin)).to.be.false;
+
+      await expect(contract.setSuperOperator(admin, false)).to.be.revertedWith(
+        'the status should be different than the current one'
+      );
+      await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
     });
   });
 });

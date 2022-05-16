@@ -25,6 +25,14 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
             msg.sender == _admin,
             "only admin is allowed to add minters"
         );
+        require(
+            minter != address(0),
+            "address 0 is not allowed as minter"
+        );
+        require(
+            enabled != _minters[minter],
+            "the status should be different than the current one"
+        );
         _minters[minter] = enabled;
         emit Minter(minter, enabled);
     }

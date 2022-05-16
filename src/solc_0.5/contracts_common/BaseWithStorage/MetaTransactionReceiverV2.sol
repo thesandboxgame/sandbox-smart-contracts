@@ -1,9 +1,9 @@
 pragma solidity ^0.5.2;
 
-import "./Admin.sol";
+import "./AdminV2.sol";
 import "../../contracts_common/Libraries/AddressUtils.sol";
 
-contract MetaTransactionReceiverV2 is Admin {
+contract MetaTransactionReceiverV2 is AdminV2 {
     using AddressUtils for address;
 
     mapping(address => bool) internal _metaTransactionContracts;

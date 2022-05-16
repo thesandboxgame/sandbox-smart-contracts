@@ -3,11 +3,11 @@ pragma solidity 0.5.9;
 
 import "../../contracts_common/Libraries/AddressUtils.sol";
 import "../../contracts_common/Interfaces/ERC721Events.sol";
-import "../../contracts_common/BaseWithStorage/SuperOperators.sol";
+import "../../contracts_common/BaseWithStorage/SuperOperatorsV2.sol";
 import "../../contracts_common/BaseWithStorage/MetaTransactionReceiverV2.sol";
 import "../../contracts_common/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-contract ERC721BaseTokenV2 is ERC721Events, SuperOperators, MetaTransactionReceiverV2 {
+contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionReceiverV2 {
     using AddressUtils for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
