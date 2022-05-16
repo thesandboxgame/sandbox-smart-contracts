@@ -86,7 +86,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
       polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
-      goerli: '0x82358D81e91bd283de0033f0C84ac8fC6711C72A',
+      goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
@@ -95,7 +95,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
-      goerli: '0x82358D81e91bd283de0033f0C84ac8fC6711C72A',
+      goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
