@@ -1,4 +1,4 @@
-pragma solidity ^0.5.2;
+pragma solidity 0.5.9;
 
 /**
     Note: The ERC-165 identifier for this interface is 0x5e8bf644.
