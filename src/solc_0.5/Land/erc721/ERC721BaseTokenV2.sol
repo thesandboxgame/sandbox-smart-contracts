@@ -2,13 +2,12 @@
 pragma solidity 0.5.9;
 
 import "../../contracts_common/Libraries/AddressUtils.sol";
-import "../../contracts_common/Interfaces/ERC721TokenReceiver.sol";
 import "../../contracts_common/Interfaces/ERC721Events.sol";
 import "../../contracts_common/BaseWithStorage/SuperOperators.sol";
 import "../../contracts_common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../../contracts_common/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
+contract ERC721BaseTokenV2 is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -393,7 +392,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

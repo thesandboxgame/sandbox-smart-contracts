@@ -1,9 +1,9 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.5.9;
 
-import "./ERC721BaseToken.sol";
+import "./ERC721BaseTokenV2.sol";
 
-contract LandBaseToken is ERC721BaseToken {
+contract LandBaseTokenV2 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
 
@@ -65,7 +65,7 @@ contract LandBaseToken is ERC721BaseToken {
     }
 
     /**
-     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
      * @param to The recipient of the new quad
      * @param size The size of the new quad
      * @param x The top left x coordinate of the new quad
@@ -311,10 +311,7 @@ contract LandBaseToken is ERC721BaseToken {
         if(set) {
             if(!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(from) ||
-                    _owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == uint256(from) ||
-                    _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == uint256(from) ||
-                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),
+                    _ownerOfQuad(3, x, y) == from,
                     "not owner of all sub quads nor parent quads"
                 );
             }
@@ -322,6 +319,29 @@ contract LandBaseToken is ERC721BaseToken {
             return true;
         }
         return ownerOfAll;
+    }
+
+    function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal returns (address) {
+        uint256 layer;
+        uint256 parentSize = size * 2;
+        if (size == 3) {
+            layer = LAYER_3x3;
+        } else if (size == 6) {
+            layer = LAYER_6x6;
+        } else if (size == 12) {
+            layer = LAYER_12x12;
+        } else if (size == 24) {
+            layer = LAYER_24x24;
+        } else {
+            require(false, "Invalid size");
+        }
+        address owner = address(_owners[layer + (x/size) * size + ((y/size) * size) * GRID_SIZE]);
+        if (owner != address(0)) {
+            return owner;
+        } else if(size < 24) {
+            return _ownerOfQuad(parentSize, x, y);
+        }
+        return address(0);
     }
     function _regroup6x6(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
@@ -344,9 +364,7 @@ contract LandBaseToken is ERC721BaseToken {
         if(set) {
             if(!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(from) ||
-                    _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == uint256(from) ||
-                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),
+                    _ownerOfQuad(6, x, y) == from,
                     "not owner of all sub quads nor parent quads"
                 );
             }
@@ -376,8 +394,7 @@ contract LandBaseToken is ERC721BaseToken {
         if(set) {
             if(!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(from) ||
-                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),
+                    _ownerOfQuad(12, x, y) == from,
                     "not owner of all sub quads nor parent quads"
                 );
             }
@@ -407,7 +424,7 @@ contract LandBaseToken is ERC721BaseToken {
         if(set) {
             if(!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(from),
+                    _ownerOfQuad(24, x, y) == from,
                     "not owner of all sub quads not parent quad"
                 );
             }
