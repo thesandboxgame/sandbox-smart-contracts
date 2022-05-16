@@ -182,7 +182,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -312,7 +312,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -439,7 +439,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -566,7 +566,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -710,7 +710,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'Wrong domain',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -836,7 +836,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'Wrong domain',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -967,7 +967,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -1116,7 +1116,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -1245,7 +1245,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -1377,7 +1377,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
@@ -1503,7 +1503,7 @@ describe('assetSignedAuctionWithAuth', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          chainId: 137,
+          chainId: 31337,
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
