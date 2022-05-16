@@ -72,6 +72,7 @@ contract AssetSignedAuctionWithAuth is
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
+    event NewFeeLimit(uint256 feeLimit);
 
     constructor(
         IERC1155 asset,
@@ -106,6 +107,13 @@ contract AssetSignedAuctionWithAuth is
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
         emit FeeSetup(feeCollector, fee10000th);
+    }
+
+    function setFeeLimit(uint256 newFeeLimit) external {
+        require(msg.sender == _admin, "only admin can change fee limit");
+        _feeLimit = newFeeLimit;
+
+        emit NewFeeLimit(newFeeLimit);
     }
 
     /// @notice claim offer using EIP712
