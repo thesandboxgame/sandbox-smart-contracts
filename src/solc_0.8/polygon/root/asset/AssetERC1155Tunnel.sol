@@ -104,21 +104,6 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         }
     }
 
-    function _depositMinted(
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data
-    ) internal {
-        uint256 balance = rootToken.balanceOf(address(this), id);
-        if (balance >= value) {
-            rootToken.safeTransferFrom(address(this), to, id, value, data);
-        } else {
-            if (balance > 0) rootToken.safeTransferFrom(address(this), to, id, balance, data);
-            rootToken.mintDeficit(to, id, (value - balance));
-        }
-    }
-
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
