@@ -2,7 +2,7 @@
 import {raffleSignWallet, setupRaffle, zeroAddress, assert} from './fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('RaffleTheDoggies', function () {
+describe.skip('RaffleTheDoggies', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       raffleTheDoggiesContract,
