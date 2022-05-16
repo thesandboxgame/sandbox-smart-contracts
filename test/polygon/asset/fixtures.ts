@@ -23,7 +23,8 @@ const polygonAssetFixtures = async function () {
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
-  otherAccounts.splice(0, 1);
+  const extractor = otherAccounts[1];
+  otherAccounts.splice(0, 2);
 
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
 
@@ -35,11 +36,17 @@ const polygonAssetFixtures = async function () {
   );
   await waitFor(PolygonAssetERC1155.setBouncer(minter, true));
 
+  // Set sender as bouncer (only bouncers can extract)
+  await waitFor(PolygonAssetERC1155.setBouncer(extractor, true));
+
   const assetSignedAuctionAuthContract = await ethers.getContract(
     'AssetSignedAuctionAuth'
   );
 
   await waitFor(Asset.setBouncer(minter, true));
+
+  // Set sender as bouncer (only bouncers can extract)
+  await waitFor(Asset.setBouncer(extractor, true));
 
   const AssetERC1155Tunnel = await ethers.getContract('AssetERC1155Tunnel');
   const PolygonAssetERC1155Tunnel = await ethers.getContract(
@@ -114,8 +121,10 @@ const polygonAssetFixtures = async function () {
     assetSignedAuctionAuthContract,
     users,
     minter,
+    extractor,
     mintAsset,
     trustedForwarder,
+    assetBouncerAdmin,
   };
 };
 
