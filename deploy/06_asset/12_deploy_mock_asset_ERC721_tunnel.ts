@@ -12,6 +12,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
+  const MAX_TRANSFER_LIMIT = 20;
+
   const MockAssetERC721Tunnel = await deploy('MockAssetERC721Tunnel', {
     from: deployer,
     contract: 'MockAssetERC721Tunnel',
@@ -20,6 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       FXROOT.address,
       AssetERC721.address,
       TRUSTED_FORWARDER.address,
+      MAX_TRANSFER_LIMIT,
     ],
     log: true,
     skipIfAlreadyDeployed: true,
