@@ -2,12 +2,14 @@ import {Contract, ContractReceipt} from 'ethers';
 import {waitFor, withSnapshot} from '../utils';
 import {ethers, getNamedAccounts} from 'hardhat';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
-export const setupLand = withSnapshot(['Land'], async function (hre) {
+export const setupLand = withSnapshot(['Land', 'Sand'], async function (hre) {
   const landContract = await ethers.getContract('Land');
+  const sandContract = await ethers.getContract('Land');
   const {landAdmin} = await getNamedAccounts();
   await setMinter(landContract)(landAdmin, true);
   return {
     landContract,
+    sandContract,
     hre,
     ethers,
     getNamedAccounts,
