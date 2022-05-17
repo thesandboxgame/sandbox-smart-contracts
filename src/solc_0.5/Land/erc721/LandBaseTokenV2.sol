@@ -160,7 +160,7 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
 
     function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns(uint256) {
         uint256 row = i / size;
-        if(row % 2 == 0) { // alow ids to follow a path in a quad
+        if(row % 2 == 0) { // allow ids to follow a path in a quad
             return (x + (i%size)) + ((y + row) * GRID_SIZE);
         } else {
             return ((x + size) - (1 + i%size)) + ((y + row) * GRID_SIZE);
@@ -180,8 +180,8 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
             require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
+                _operatorsForAll[from][msg.sender] ||
+                _superOperators[msg.sender],
                 "not authorized to transferQuad"
             );
         }
@@ -234,8 +234,8 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
             require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
+                _operatorsForAll[from][msg.sender] ||
+                _superOperators[msg.sender],
                 "not authorized to transferMultiQuads"
             );
         }

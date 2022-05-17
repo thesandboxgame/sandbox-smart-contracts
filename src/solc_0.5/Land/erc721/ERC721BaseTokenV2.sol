@@ -102,8 +102,8 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         require(
             msg.sender == sender ||
             _metaTransactionContracts[msg.sender] ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[sender][msg.sender],
+            _operatorsForAll[sender][msg.sender] ||
+            _superOperators[msg.sender],
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
@@ -120,8 +120,8 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         require(owner != address(0), "token does not exist");
         require(
             owner == msg.sender ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[owner][msg.sender],
+            _operatorsForAll[owner][msg.sender] ||
+            _superOperators[msg.sender],
             "not authorized to approve"
         );
         _approveFor(owner, operator, id);
@@ -150,9 +150,9 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !isMetaTx) {
             require(
-                _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender] ||
-                (operatorEnabled && _operators[id] == msg.sender),
+                (operatorEnabled && _operators[id] == msg.sender) ||
+                _superOperators[msg.sender],
                 "not approved to transfer"
             );
         }
@@ -250,8 +250,8 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         bool authorized = msg.sender == from ||
             metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+            _operatorsForAll[from][msg.sender] ||
+            _superOperators[msg.sender];
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -392,8 +392,8 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
             msg.sender == from ||
             _metaTransactionContracts[msg.sender] ||
             (operatorEnabled && _operators[id] == msg.sender) ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender],
+            _operatorsForAll[from][msg.sender] ||
+            _superOperators[msg.sender],
             "not authorized to burn"
         );
         _burn(from, owner, id);

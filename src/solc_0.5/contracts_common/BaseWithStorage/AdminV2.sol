@@ -15,9 +15,10 @@ contract AdminV2 {
     /// @notice change the administrator to be `newAdmin`.
     /// @param newAdmin address of the new administrator.
     function changeAdmin(address newAdmin) external {
-        require(msg.sender == _admin, "only admin can change admin");
-        require(newAdmin != _admin, "it can be only changed to a new admin");
-        emit AdminChanged(_admin, newAdmin);
+        address admin = _admin;
+        require(msg.sender == admin, "only admin can change admin");
+        require(newAdmin != admin, "it can be only changed to a new admin");
+        emit AdminChanged(admin, newAdmin);
         _admin = newAdmin;
     }
 
