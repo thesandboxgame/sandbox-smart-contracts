@@ -96,8 +96,8 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
     await assetBouncerAdmin.PolygonAssetERC1155.setBouncer(minter, true);
 
     let id = 0;
-    const ipfsHashString =
-      '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+    const ipfsHashString = ethers.utils.formatBytes32String('metadataHash');
+    // '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
     const data = '0x';
 

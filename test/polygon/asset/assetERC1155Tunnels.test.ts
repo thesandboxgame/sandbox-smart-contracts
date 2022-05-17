@@ -39,11 +39,12 @@ describe('PolygonAsset.sol', function () {
         ['bytes32[]'],
         [testMetadataHashArray]
       );
+      console.log(ethers.utils.formatBytes32String('metadataHash'));
 
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, [tokenId], [10], MOCK_DATA)
+        ).batchWithdrawToRoot(users[0].address, [tokenId], [10])
       );
 
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
@@ -94,7 +95,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, [tokenId], [1], MOCK_DATA)
+        ).batchWithdrawToRoot(users[0].address, [tokenId], [1])
       );
 
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
@@ -131,19 +132,10 @@ describe('PolygonAsset.sol', function () {
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
 
-      const testMetadataHashArray = [];
-      testMetadataHashArray.push(
-        ethers.utils.formatBytes32String('metadataHash')
-      );
-      const MOCK_DATA = new AbiCoder().encode(
-        ['bytes32[]'],
-        [testMetadataHashArray]
-      );
-
       await expect(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, [tokenId], [2], MOCK_DATA)
+        ).batchWithdrawToRoot(users[0].address, [tokenId], [2])
       ).to.be.revertedWith(`can't substract more than there is`);
     });
 
@@ -180,12 +172,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(
-          users[0].address,
-          tokenIds,
-          [10, 10, 10, 10],
-          MOCK_DATA
-        )
+        ).batchWithdrawToRoot(users[0].address, tokenIds, [10, 10, 10, 10])
       );
 
       const abiCoder = new AbiCoder();
@@ -250,7 +237,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(users[0].address, tokenIds, supplies, MOCK_DATA)
+        ).batchDepositToChild(users[0].address, tokenIds, supplies)
       );
 
       const balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
@@ -274,8 +261,6 @@ describe('PolygonAsset.sol', function () {
       expect(balanceL2Tunnel).to.be.equal(0);
     });
 
-    // TODO: metadata is retained across L1 to L2
-
     it('can transfer partial supplies of L1 minted assets: L1 to L2', async function () {
       const {
         AssetERC1155,
@@ -296,17 +281,21 @@ describe('PolygonAsset.sol', function () {
         '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000',
       ];
 
-      const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
-      const MOCK_DATA = new AbiCoder().encode(['bytes32'], [testMetadataHash]);
+      // const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
+      // const MOCK_DATA = new AbiCoder().encode(['bytes32'], [testMetadataHash]);
       const owners = [
         users[0].address,
         users[0].address,
         users[0].address,
         users[0].address,
       ];
+
       for (let i = 0; i < 4; i++) {
         await mintAssetOnL1(users[0].address, tokenIds[i], supplies[i]);
+        const mainnetURI = await AssetERC1155['tokenURI(uint256)'](tokenIds[i]);
+        expect(mainnetURI).to.be.equal('');
       }
+
       await AssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
@@ -317,12 +306,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(
-          users[0].address,
-          tokenIds,
-          supplyBreakdown01,
-          MOCK_DATA
-        )
+        ).batchDepositToChild(users[0].address, tokenIds, supplyBreakdown01)
       );
 
       const balanceUserL1 = await AssetERC1155[
@@ -357,12 +341,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(
-          users[0].address,
-          tokenIds,
-          supplyBreakdown02,
-          MOCK_DATA
-        )
+        ).batchDepositToChild(users[0].address, tokenIds, supplyBreakdown02)
       );
 
       const newbalanceUserL1 = await AssetERC1155[
@@ -394,7 +373,7 @@ describe('PolygonAsset.sol', function () {
         const polygonURI = await PolygonAssetERC1155['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnetURI).to.be.equal(polygonURI);
+        expect(mainnetURI).to.be.equal(polygonURI); // TODO: how to read messages... use receive?
       }
     });
     it('can transfer multiple L2 minted assets: L2 to L1', async function () {
@@ -409,8 +388,7 @@ describe('PolygonAsset.sol', function () {
 
       const abiCoder = new AbiCoder();
       const supplies = [20, 5, 10, 25];
-      const ipfsHashString =
-        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+      const ipfsHashString = ethers.utils.formatBytes32String('metadataHash');
       const owners = [
         users[0].address,
         users[0].address,
@@ -445,7 +423,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, tokenIds, supplies, MOCK_DATA)
+        ).batchWithdrawToRoot(users[0].address, tokenIds, supplies)
       );
       const newbalanceUserL2 = await PolygonAssetERC1155[
         'balanceOfBatch(address[],uint256[])'
@@ -506,8 +484,7 @@ describe('PolygonAsset.sol', function () {
       const supplies = [20, 5, 10, 25];
       const supplyBreakdown01 = [10, 2, 5, 13];
       const supplyBreakdown02 = [10, 3, 5, 12];
-      const ipfsHashString =
-        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+      const ipfsHashString = ethers.utils.formatBytes32String('metadataHash');
       const owners = [
         users[0].address,
         users[0].address,
@@ -534,12 +511,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(
-          users[0].address,
-          tokenIds,
-          supplyBreakdown01,
-          MOCK_DATA
-        )
+        ).batchWithdrawToRoot(users[0].address, tokenIds, supplyBreakdown01)
       );
 
       const balanceUserL2 = await PolygonAssetERC1155[
@@ -582,12 +554,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(
-          users[0].address,
-          tokenIds,
-          supplyBreakdown02,
-          MOCK_DATA
-        )
+        ).batchWithdrawToRoot(users[0].address, tokenIds, supplyBreakdown02)
       );
 
       const newbalanceUserL2 = await PolygonAssetERC1155[
@@ -671,12 +638,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(
-          users[0].address,
-          tokenIdsBatch1,
-          suppliesBatch1,
-          MOCK_DATA
-        )
+        ).batchDepositToChild(users[0].address, tokenIdsBatch1, suppliesBatch1)
       );
 
       const balanceUserL1 = await AssetERC1155[
@@ -725,12 +687,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(
-          users[0].address,
-          tokenIdsBatch2,
-          suppliesBatch2,
-          MOCK_DATA
-        )
+        ).batchDepositToChild(users[0].address, tokenIdsBatch2, suppliesBatch2)
       );
 
       const newbalanceUserL1 = await AssetERC1155[
@@ -792,20 +749,14 @@ describe('PolygonAsset.sol', function () {
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
-      const ipfsHashString =
-        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+      const ipfsHashString = ethers.utils.formatBytes32String('metadataHash');
 
       const testMetadataHashArray = [ipfsHashString, ipfsHashString];
       const MOCK_DATA = abiCoder.encode(['bytes32[]'], [testMetadataHashArray]);
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(
-          users[0].address,
-          tokenIdsBatch1,
-          suppliesBatch1,
-          MOCK_DATA
-        )
+        ).batchWithdrawToRoot(users[0].address, tokenIdsBatch1, suppliesBatch1)
       );
 
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
@@ -841,12 +792,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(
-          users[0].address,
-          tokenIdsBatch2,
-          suppliesBatch2,
-          MOCK_DATA
-        )
+        ).batchWithdrawToRoot(users[0].address, tokenIdsBatch2, suppliesBatch2)
       );
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
         abiCoder.encode(
@@ -902,12 +848,11 @@ describe('PolygonAsset.sol', function () {
       ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
 
       const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
-      const MOCK_DATA = new AbiCoder().encode(['bytes32'], [testMetadataHash]);
 
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(users[0].address, [tokenId], [5], MOCK_DATA)
+        ).batchDepositToChild(users[0].address, [tokenId], [5])
       );
 
       const balancetunnelL1 = await AssetERC1155['balanceOf(address,uint256)'](
@@ -935,7 +880,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, [tokenId], [5], newMockData)
+        ).batchWithdrawToRoot(users[0].address, [tokenId], [5])
       );
 
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
@@ -965,8 +910,7 @@ describe('PolygonAsset.sol', function () {
       const abiCoder = new AbiCoder();
       const tokenId = await mintAssetOnL2(users[0].address, 5);
 
-      const ipfsHashString =
-        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+      const ipfsHashString = ethers.utils.formatBytes32String('metadataHash');
 
       const testMetadataHashArray = [ipfsHashString];
       const MOCK_DATA = abiCoder.encode(['bytes32[]'], [testMetadataHashArray]);
@@ -978,7 +922,7 @@ describe('PolygonAsset.sol', function () {
       await waitFor(
         MockPolygonAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchWithdrawToRoot(users[0].address, [tokenId], [5], MOCK_DATA)
+        ).batchWithdrawToRoot(users[0].address, [tokenId], [5])
       );
 
       await deployer.MockAssetERC1155Tunnel.receiveMessage(
@@ -999,16 +943,10 @@ describe('PolygonAsset.sol', function () {
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
 
-      const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
-      const NEW_MOCK_DATA = new AbiCoder().encode(
-        ['bytes32'],
-        [testMetadataHash]
-      );
-
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
-        ).batchDepositToChild(users[0].address, [tokenId], [5], NEW_MOCK_DATA)
+        ).batchDepositToChild(users[0].address, [tokenId], [5])
       );
 
       const balanceUserL2 = await PolygonAssetERC1155[
@@ -1040,9 +978,7 @@ describe('PolygonAsset.sol', function () {
     //       );
 
     //       // Generate data to be passed to Polygon
-    //       const ipfsHashes = [
-    //         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
-    //       ];
+    //       const ipfsHashes = [ethers.utils.formatBytes32String('metadataHash')];
 
     //       gemsAndCatalystsdata[0] = tokenId;
 
@@ -1170,7 +1106,7 @@ describe('PolygonAsset.sol', function () {
 
     //       // Generate data to be passed to Polygon
     //       const ipfsHashes = [
-    //         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
+    //         ethers.utils.formatBytes32String('metadataHash')
     //       ];
 
     //       const tokenData = abiCoder.encode(
@@ -1240,7 +1176,7 @@ describe('PolygonAsset.sol', function () {
 
     //     // Generate data to be passed to Polygon
     //     const ipfsHashes = [
-    //       '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
+    //       ethers.utils.formatBytes32String('metadataHash')
     //     ];
 
     //     const tokenData = abiCoder.encode(
