@@ -42,7 +42,7 @@ contract PolygonAssetERC721Tunnel is
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused() {
+    function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused {
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         string[] memory uris = new string[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
@@ -82,10 +82,10 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256[] memory ids, string[] memory uris) = abi.decode(syncData, (address, uint256[], string[]));
+        (address to, uint256[] memory ids, bytes memory data) = abi.decode(syncData, (address, uint256[], bytes));
         for (uint256 i = 0; i < ids.length; i++) {
-            // string[] memory uris = abi.decode(data, (string[]));
-            bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
+            string[] memory uris = abi.decode(data, (string[]));
+            bytes memory uniqueUriData = abi.encode(uris[i]);
             if (!childToken.exists(ids[i])) childToken.mint(to, ids[i], uniqueUriData);
             else childToken.safeTransferFrom(address(this), to, ids[i], uniqueUriData);
             emit Deposit(to, ids[i], uniqueUriData);

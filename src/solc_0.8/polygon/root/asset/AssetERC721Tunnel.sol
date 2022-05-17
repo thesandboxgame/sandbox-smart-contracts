@@ -56,7 +56,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
-    function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused() {
+    function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused {
         string[] memory uris = new string[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the root tokens in this contract
@@ -67,7 +67,8 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
             rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
             emit Deposit(to, ids[i], uniqueUriData);
         }
-        _sendMessageToChild(abi.encode(to, ids, uris));
+        bytes memory urisEncoded = abi.encode(uris);
+        _sendMessageToChild(abi.encode(to, ids, urisEncoded));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
