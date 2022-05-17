@@ -97,7 +97,7 @@ describe('LandV2', function () {
       );
 
       await expect(contract.setMinter(deployer, true)).to.be.revertedWith(
-        'only admin is allowed to add minters'
+        'only admin allowed'
       );
 
       expect(await landContract.isMinter(deployer)).to.be.false;
@@ -255,7 +255,7 @@ describe('LandV2', function () {
 
       await expect(
         contract.setMetaTransactionProcessor(sandContract.address, true)
-      ).to.be.revertedWith('only admin can setup metaTransactionProcessors');
+      ).to.be.revertedWith('only admin allowed');
 
       await expect(
         contractAsAdmin.setMetaTransactionProcessor(sandContract.address, true)
@@ -308,7 +308,7 @@ describe('LandV2', function () {
 
       await expect(
         contract.setSuperOperator(deployer, true)
-      ).to.be.revertedWith('only admin is allowed to add super operators');
+      ).to.be.revertedWith('only admin allowed');
 
       expect(await landContract.isSuperOperator(deployer)).to.be.false;
     });

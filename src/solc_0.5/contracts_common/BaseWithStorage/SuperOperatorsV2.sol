@@ -11,11 +11,7 @@ contract SuperOperatorsV2 is AdminV2 {
     /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
-    function setSuperOperator(address superOperator, bool enabled) external {
-        require(
-            msg.sender == _admin,
-            "only admin is allowed to add super operators"
-        );
+    function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
         require(
             superOperator != address(0),
             "address 0 is not allowed as super operator"

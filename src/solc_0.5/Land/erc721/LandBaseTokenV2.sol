@@ -20,11 +20,7 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
     /// @notice Enable or disable the ability of `minter` to mint tokens
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external {
-        require(
-            msg.sender == _admin,
-            "only admin is allowed to add minters"
-        );
+    function setMinter(address minter, bool enabled) external onlyAdmin {
         require(
             minter != address(0),
             "address 0 is not allowed as minter"
