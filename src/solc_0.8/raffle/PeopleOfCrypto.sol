@@ -159,19 +159,29 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     function checkPersonalizationSignature(
+        address _wallet,
         uint256 _signatureId,
         address _contractAddress,
         uint256 _chainId,
-        bytes memory _signature,
         uint256 _tokenId,
-        uint256 _personalizationMask
+        uint256 _personalizationMask,
+        bytes memory _signature
     ) public pure returns (address) {
         return
             ECDSA.recover(
                 keccak256(
                     abi.encodePacked(
                         "\x19Ethereum Signed Message:\n32",
-                        keccak256(abi.encode(_signatureId, _contractAddress, _chainId, _tokenId, _personalizationMask))
+                        keccak256(
+                            abi.encode(
+                                _wallet,
+                                _signatureId,
+                                _contractAddress,
+                                _chainId,
+                                _tokenId,
+                                _personalizationMask
+                            )
+                        )
                     )
                 ),
                 _signature
@@ -209,23 +219,23 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 _tokenId,
         uint256 _personalizationMask
     ) external {
-        require(_msgSender() != allowedToExecutePersonalization, "Not allowed");
+        require(ownerOf(_tokenId) != _msgSender(), "You must be the owner of the token in order to personalize it");
+
         require(personalizationSignatureIds[_signatureId] == 0, "SignatureId already used");
         require(
             checkPersonalizationSignature(
+                _msgSender(),
                 _signatureId,
                 address(this),
                 block.chainid,
-                _signature,
                 _tokenId,
-                _personalizationMask
+                _personalizationMask,
+                _signature
             ) == signAddress,
             "Signature failed"
         );
 
         personalizationSignatureIds[_signatureId] = 1;
-
-        require(ownerOf(_tokenId) != _msgSender(), "You must be the owner of the token in order to personalize it");
 
         personalizationTraits[_tokenId] = _personalizationMask;
         emit Personalized(_tokenId, _personalizationMask);

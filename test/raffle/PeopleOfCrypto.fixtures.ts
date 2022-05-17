@@ -91,8 +91,22 @@ async function validPersonalizeSignature(
   personalizationMask: number
 ) {
   const hashedData = ethers.utils.defaultAbiCoder.encode(
-    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
-    [signatureId, contractAddress, chainId, tokenId, personalizationMask]
+    [
+      'address',
+      'uint256',
+      'address',
+      'uint256',
+      'uint256',
+      'uint256',
+    ],
+    [
+      wallet.address,
+      signatureId,
+      contractAddress,
+      chainId,
+      tokenId,
+      personalizationMask,
+    ]
   );
   return wallet.signMessage(
     ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
@@ -108,8 +122,8 @@ async function invalidPersonalizeSignature(
   personalizationMask: number
 ) {
   const hashedData = ethers.utils.defaultAbiCoder.encode(
-    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
-    [signatureId, contractAddress, chainId, personalizationMask, tokenId]
+    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [wallet.address, signatureId, contractAddress, chainId, personalizationMask, tokenId]
   );
   return wallet.signMessage(
     ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
