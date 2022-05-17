@@ -458,6 +458,7 @@ describe('PolygonAssetERC721.sol', function () {
         const uri = 'http://myMetadata.io/1';
         const abiCoder = new AbiCoder();
         const data = abiCoder.encode(['string'], [uri]);
+        const dataArray =  abiCoder.encode(['string[]'], [[uri]]);
         const tokenId = 123;
 
         // Mint AssetERC721 on L1
@@ -532,8 +533,8 @@ describe('PolygonAssetERC721.sol', function () {
         // Release on L1
         await deployer.MockAssetERC721Tunnel.receiveMessage(
           new AbiCoder().encode(
-            ['address', 'uint256', 'bytes'],
-            [assetHolder.address, tokenId, data]
+            ['address', 'uint256[]', 'bytes'],
+            [assetHolder.address, [tokenId], dataArray]
           )
         );
 
@@ -562,6 +563,7 @@ describe('PolygonAssetERC721.sol', function () {
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
         const data = abiCoder.encode(['string'], [uri]);
+        const dataArray =  abiCoder.encode(['string[]'], [[uri]]);
         const assetHolder = users[0];
 
         const tokenId =
@@ -638,8 +640,8 @@ describe('PolygonAssetERC721.sol', function () {
         // Release on L1
         await deployer.MockAssetERC721Tunnel.receiveMessage(
           new AbiCoder().encode(
-            ['address', 'uint256', 'bytes'],
-            [assetHolder.address, tokenId, data]
+            ['address', 'uint256[]', 'bytes'],
+            [assetHolder.address, [tokenId], dataArray]
           )
         );
 
@@ -678,7 +680,7 @@ describe('PolygonAssetERC721.sol', function () {
         const numberOfAssetERC721s = 15;
         const startId = 10124;
         const ids = [];
-
+       
         // Set up arrays and mint on L2
         for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
           ids.push(i);
@@ -690,7 +692,7 @@ describe('PolygonAssetERC721.sol', function () {
             data
           );
         }
-
+      
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
         ).to.be.equal(numberOfAssetERC721s);
@@ -707,10 +709,10 @@ describe('PolygonAssetERC721.sol', function () {
 
         for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
           const uniqueUri = `${uriBase}/${i}`;
-          const data = abiCoder.encode(['string'], [uniqueUri]);
+          const data = abiCoder.encode(['string[]'], [[uniqueUri]]);
           const rootData = new AbiCoder().encode(
-            ['address', 'uint256', 'bytes'],
-            [assetHolder.address, i, data]
+            ['address', 'uint256[]', 'bytes'],
+            [assetHolder.address, [i], data]
           );
           await deployer.MockAssetERC721Tunnel[`receiveMessage(bytes)`](
             rootData
