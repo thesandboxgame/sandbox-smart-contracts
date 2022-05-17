@@ -78,10 +78,10 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], bytes));
         bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
-        for (uint256 index = 0; index < ids.length; index++) {
-            bytes memory metadata = abi.encode(metadataHashes[index]);
-            if (rootToken.wasEverMinted(ids[index])) {
-                _depositMinted(to, ids[index], values[index], metadata);
+        for (uint256 i = 0; i < ids.length; i++) {
+            bytes memory metadata = abi.encode(metadataHashes[i]);
+            if (rootToken.wasEverMinted(ids[i])) {
+                _depositMinted(to, ids[i], values[i], metadata);
             } else {
                 rootToken.mint(to, ids[index], values[index], metadata);
             }
