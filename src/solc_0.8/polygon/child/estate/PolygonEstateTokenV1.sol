@@ -82,10 +82,14 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return _mintEstate(from, metaData, freeLand);
     }
 
-    function burnEstate(address from, uint256 estateId) external override {
+    function burnEstate(address from, uint256 estateId)
+        external
+        override
+        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
+    {
         uint256 storageId = _storageId(estateId);
         require(games[storageId].isEmpty(), "still have games");
-        _burnEstate(from, estateId, storageId);
+        return _burnEstate(from, estateId, storageId);
     }
 
     function getGameMap(uint256 estateId, uint256 gameId)
@@ -116,8 +120,13 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
     }
 
-    function freeLand(uint256 estateId) external view override returns (TileWithCoordLib.TileWithCoord[] memory) {
-        return _freeLand(estateId);
+    function estateData(uint256 estateId)
+        external
+        view
+        override
+        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory)
+    {
+        return _estateData(estateId);
     }
 
     function _addGamesToEstate(

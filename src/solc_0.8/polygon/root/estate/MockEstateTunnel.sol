@@ -20,8 +20,9 @@ contract MockEstateTunnel is EstateTunnel {
     }
 
     function getMessage(address to, uint256 estateId) public view returns (bytes memory) {
-        TileWithCoordLib.TileWithCoord[] memory freeLands = IEstateToken(rootToken).freeLand(estateId);
-        bytes memory message = abi.encode(to, freeLands);
+        (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory freeLands) =
+            IEstateToken(rootToken).estateData(estateId);
+        bytes memory message = abi.encode(to, metadata, freeLands);
         console.log("MESSAGE SIZE:", message.length);
         return message;
     }

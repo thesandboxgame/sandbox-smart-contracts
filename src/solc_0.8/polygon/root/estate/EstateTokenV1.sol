@@ -58,8 +58,12 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         return _mintEstate(from, metaData, freeLand);
     }
 
-    function burnEstate(address from, uint256 estateId) external override {
-        _burnEstate(from, estateId, _storageId(estateId));
+    function burnEstate(address from, uint256 estateId)
+        external
+        override
+        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
+    {
+        return _burnEstate(from, estateId, _storageId(estateId));
     }
 
     /// @notice Return the URI of a specific token.
@@ -71,7 +75,12 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
     }
 
-    function freeLand(uint256 estateId) external view override returns (TileWithCoordLib.TileWithCoord[] memory) {
-        return _freeLand(estateId);
+    function estateData(uint256 estateId)
+        external
+        view
+        override
+        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory)
+    {
+        return _estateData(estateId);
     }
 }

@@ -23,9 +23,9 @@ contract EstateTunnel is FxTunnelBase {
     }
 
     function transferEstateToL2(address to, uint256 estateId) external whenNotPaused() {
-        TileWithCoordLib.TileWithCoord[] memory freeLands = IEstateToken(rootToken).freeLand(estateId);
-        IEstateToken(rootToken).burnEstate(_msgSender(), estateId);
-        bytes memory message = abi.encode(to, freeLands);
+        (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory freeLands) =
+            IEstateToken(rootToken).burnEstate(_msgSender(), estateId);
+        bytes memory message = abi.encode(to, metaData, freeLands);
         _sendMessageToChild(message);
         emit Deposit(to, freeLands);
     }

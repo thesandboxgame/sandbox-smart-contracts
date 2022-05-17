@@ -202,17 +202,20 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         address from,
         uint256 estateId,
         uint256 storageId
-    ) internal {
+    ) internal returns (bytes32 _metaData, TileWithCoordLib.TileWithCoord[] memory _tiles) {
         require(hasRole(BURNER_ROLE, _msgSender()), "not burner");
+        _metaData = metaData[storageId];
         delete metaData[storageId];
+        _tiles = freeLands[storageId].getMap();
         freeLands[storageId].clear();
         _burn(from, from, storageId);
         emit EstateBurned(estateId);
+        return (_metaData, _tiles);
     }
 
-    function _freeLand(uint256 estateId) internal view returns (TileWithCoordLib.TileWithCoord[] memory) {
+    function _estateData(uint256 estateId) internal view returns (bytes32, TileWithCoordLib.TileWithCoord[] memory) {
         uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].getMap();
+        return (metaData[storageId], freeLands[storageId].getMap());
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
