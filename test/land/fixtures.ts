@@ -4,7 +4,7 @@ import {ethers, getNamedAccounts} from 'hardhat';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const setupLand = withSnapshot(['Land', 'Sand'], async function (hre) {
   const landContract = await ethers.getContract('Land');
-  const sandContract = await ethers.getContract('Land');
+  const sandContract = await ethers.getContract('Sand');
   const {landAdmin} = await getNamedAccounts();
   await setMinter(landContract)(landAdmin, true);
   return {
