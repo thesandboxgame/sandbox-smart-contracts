@@ -92,7 +92,7 @@ export const assetFixtures = async function () {
 
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
-      .batchWithdrawToRoot(to, [tokenId], [value], MOCK_DATA);
+      .batchWithdrawToRoot(to, [tokenId], [value]);
 
     const admin = await Asset.getAdmin();
     await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
