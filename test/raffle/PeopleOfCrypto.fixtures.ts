@@ -91,14 +91,7 @@ async function validPersonalizeSignature(
   personalizationMask: number
 ) {
   const hashedData = ethers.utils.defaultAbiCoder.encode(
-    [
-      'address',
-      'uint256',
-      'address',
-      'uint256',
-      'uint256',
-      'uint256',
-    ],
+    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
     [
       wallet.address,
       signatureId,
@@ -123,7 +116,14 @@ async function invalidPersonalizeSignature(
 ) {
   const hashedData = ethers.utils.defaultAbiCoder.encode(
     ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
-    [wallet.address, signatureId, contractAddress, chainId, personalizationMask, tokenId]
+    [
+      wallet.address,
+      signatureId,
+      contractAddress,
+      chainId,
+      personalizationMask,
+      tokenId,
+    ]
   );
   return wallet.signMessage(
     ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
@@ -203,6 +203,15 @@ function personalizeSetup(
     tokenId: number,
     personalizationMask: number
   ) => {
+    const {deployer} = await getNamedAccounts();
+
+    const tx = {
+      to: wallet.address,
+      value: ethers.utils.parseEther('1'),
+    };
+
+    await ethers.provider.getSigner(deployer).sendTransaction(tx);
+
     const signature = await signatureFunction(
       wallet,
       signatureId,
@@ -212,13 +221,12 @@ function personalizeSetup(
       personalizationMask
     );
 
+    const contract = raffleContract.connect(
+      ethers.provider.getSigner(raffleSignWallet.address)
+    );
+
     return waitFor(
-      raffleContract.personalize(
-        signatureId,
-        signature,
-        tokenId,
-        personalizationMask
-      )
+      contract.personalize(signatureId, signature, tokenId, personalizationMask)
     );
   };
 }

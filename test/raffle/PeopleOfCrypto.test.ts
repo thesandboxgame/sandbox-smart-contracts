@@ -1,5 +1,7 @@
 // import {expect} from 'chai';
 import {expect} from 'chai';
+import {Wallet} from 'ethers';
+import {ethers} from 'hardhat';
 import {waitFor} from '../utils';
 import {
   raffleSignWallet,
@@ -337,6 +339,7 @@ describe('RafflePeopleOfCrypto', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
+
     await setupWave(
       rafflePeopleOfCryptoContract,
       0,
