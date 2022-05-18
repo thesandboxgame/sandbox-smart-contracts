@@ -1,8 +1,8 @@
 // import {expect} from 'chai';
 import {expect} from 'chai';
-import {Wallet} from 'ethers';
-import {ethers} from 'hardhat';
+
 import {waitFor} from '../utils';
+
 import {
   raffleSignWallet,
   setupRaffle,
