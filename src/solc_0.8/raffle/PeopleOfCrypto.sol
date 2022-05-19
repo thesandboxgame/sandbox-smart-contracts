@@ -31,7 +31,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 public paused;
 
     mapping(uint256 => uint256) private signatureIds;
-    mapping(uint256 => uint256) private personalizationSignatureIds;
     mapping(uint256 => uint256) private availableIds;
 
     address public allowedToExecuteMint;
@@ -221,7 +220,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     ) external {
         require(ownerOf(_tokenId) != _msgSender(), "You must be the owner of the token in order to personalize it");
 
-        require(personalizationSignatureIds[_signatureId] == 0, "SignatureId already used");
+        require(signatureIds[_signatureId] == 0, "SignatureId already used");
         require(
             checkPersonalizationSignature(
                 _msgSender(),
@@ -235,7 +234,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
             "Signature failed"
         );
 
-        personalizationSignatureIds[_signatureId] = 1;
+        signatureIds[_signatureId] = 1;
 
         personalizationTraits[_tokenId] = _personalizationMask;
         emit Personalized(_tokenId, _personalizationMask);

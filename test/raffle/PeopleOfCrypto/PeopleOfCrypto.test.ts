@@ -12,7 +12,7 @@ import {
 } from './PeopleOfCrypto.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('RafflePeopleOfCrypto', function () {
+describe.only('RafflePeopleOfCrypto', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
@@ -254,7 +254,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     await personalize(
       raffleSignWallet,
-      0,
+      1,
       hre.network.config.chainId || 31337,
       tokenId,
       personalizationMask
@@ -320,7 +320,7 @@ describe('RafflePeopleOfCrypto', function () {
     await expect(
       personalizeInvalidSignature(
         raffleSignWallet,
-        0,
+        1,
         hre.network.config.chainId || 31337,
         tokenId,
         personalizationMask
@@ -390,7 +390,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     const personalizeReceipt2 = await personalize(
       raffleSignWallet,
-      1,
+      2,
       hre.network.config.chainId || 31337,
       tokenId2,
       personalizationMask
