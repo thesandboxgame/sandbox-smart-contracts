@@ -72,7 +72,6 @@ contract AssetSignedAuctionWithAuth is
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
-    event NewFeeLimit(uint256 feeLimit);
 
     constructor(
         IERC1155 asset,
@@ -109,13 +108,6 @@ contract AssetSignedAuctionWithAuth is
         emit FeeSetup(feeCollector, fee10000th);
     }
 
-    function setFeeLimit(uint256 newFeeLimit) external {
-        require(msg.sender == _admin, "only admin can change fee limit");
-        _feeLimit = newFeeLimit;
-
-        emit NewFeeLimit(newFeeLimit);
-    }
-
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
     function claimSellerOffer(ClaimSellerOfferRequest memory input)
@@ -143,8 +135,7 @@ contract AssetSignedAuctionWithAuth is
             input.ids,
             input.amounts,
             input.signature,
-            SignatureType.DIRECT,
-            true
+            SignatureType.DIRECT
         );
         _executeDeal(
             input.token,
@@ -184,8 +175,7 @@ contract AssetSignedAuctionWithAuth is
             input.ids,
             input.amounts,
             input.signature,
-            SignatureType.EIP1271,
-            true
+            SignatureType.EIP1271
         );
         _executeDeal(
             input.token,
@@ -225,8 +215,7 @@ contract AssetSignedAuctionWithAuth is
             input.ids,
             input.amounts,
             input.signature,
-            SignatureType.EIP1654,
-            true
+            SignatureType.EIP1654
         );
         _executeDeal(
             input.token,
@@ -307,21 +296,16 @@ contract AssetSignedAuctionWithAuth is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory signature,
-        SignatureType signatureType,
-        bool eip712
+        SignatureType signatureType
     ) internal view {
         bytes memory dataToHash;
         address signer;
 
-        if (eip712) {
-            dataToHash = abi.encodePacked(
-                "\x19\x01",
-                _DOMAIN_SEPARATOR,
-                _hashAuction(to, from, token, auctionData, ids, amounts)
-            );
-        } else {
-            dataToHash = _encodeBasicSignatureHash(from, token, auctionData, ids, amounts);
-        }
+        dataToHash = abi.encodePacked(
+            "\x19\x01",
+            _DOMAIN_SEPARATOR,
+            _hashAuction(to, from, token, auctionData, ids, amounts)
+        );
 
         if (signatureType == SignatureType.EIP1271) {
             require(
@@ -364,34 +348,6 @@ contract AssetSignedAuctionWithAuth is
             auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
             "Auction finished"
         );
-    }
-
-    function _encodeBasicSignatureHash(
-        address from,
-        address token,
-        uint256[] memory auctionData,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal view returns (bytes memory) {
-        return
-            SigUtil.prefixed(
-                keccak256(
-                    abi.encodePacked(
-                        address(this),
-                        AUCTION_TYPEHASH,
-                        from,
-                        token,
-                        auctionData[AuctionData_OfferId],
-                        auctionData[AuctionData_StartingPrice],
-                        auctionData[AuctionData_EndingPrice],
-                        auctionData[AuctionData_StartedAt],
-                        auctionData[AuctionData_Duration],
-                        auctionData[AuctionData_Packs],
-                        keccak256(abi.encodePacked(ids)),
-                        keccak256(abi.encodePacked(amounts))
-                    )
-                )
-            );
     }
 
     function _hashAuction(
