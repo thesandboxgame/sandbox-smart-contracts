@@ -300,6 +300,7 @@ export async function getLandSaleFiles(
     goerli: 'testnet',
     hardhat: 'testnet',
     localhost: 'testnet',
+    mumbai: 'testnet',
   };
   const name = networkNameMap[networkName];
   const secretPath = `./secret/.${presale}_${name}_secret`;
