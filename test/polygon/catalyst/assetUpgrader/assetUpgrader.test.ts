@@ -22,6 +22,7 @@ const setupAssetUpgrader = withSnapshot(
     'PolygonAssetUpgraderFeeBurner',
     'PolygonAssetAttributesRegistry',
     'PolygonGemsCatalystsRegistry',
+    'PolygonGemsCatalystsRegistry_setup',
     'PolygonAssetERC1155',
     'PolygonAssetERC721',
   ],
@@ -62,7 +63,7 @@ describe('AssetUpgrader', function () {
 
     const sandBalanceFromBefore = await sandContract.balanceOf(catalystOwner);
     const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
-    const assetSupply = BigNumber.from('1'); // Must be supply == 1 in order for Extraction to be allowed
+    const assetSupply = BigNumber.from('2'); // Must be supply == 1 in order for Extraction to be allowed
     const assetId = await mintAsset(
       catalystOwner,
       BigNumber.from('22'),
@@ -152,6 +153,13 @@ describe('AssetUpgrader', function () {
       user5,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user5))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
+
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
     );
@@ -254,6 +262,13 @@ describe('AssetUpgrader', function () {
       user4,
       BigNumber.from('100').mul(gemAdditionFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user4))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('100').mul(gemAdditionFee)
+      );
+
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
     );
@@ -355,12 +370,24 @@ describe('AssetUpgrader', function () {
       user5,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user5))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
 
     await transferSand(
       sandContract,
       user10,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user10))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
 
     const assetId = await mintAsset(
       user5,

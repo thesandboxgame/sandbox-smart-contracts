@@ -92,6 +92,14 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
   }
 }
 
+function getBigInt(num: Number) {
+  let output: String = '1';
+  for (let i = 0; i < num; i++) {
+    output += '0';
+  }
+  return output;
+}
+
 describe('AssetMinter', function () {
   describe('AssetMinter: Mint', function () {
     it('the assetMinterAdmin is set correctly', async function () {
@@ -167,19 +175,17 @@ describe('AssetMinter', function () {
         data: mintOptions.data,
       };
 
-      // TODO: Why was this duplicated?
-      await assetMinterAsCatalystOwner.mintWithCatalyst(
+      const recipt = await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         legendaryCataId,
         [powerGemId]
       );
-
-      // TODO: is this returning the assetID correctly?
-      const assetId = await assetMinterAsCatalystOwner.callStatic.mintWithCatalyst(
-        mintData,
-        legendaryCataId,
-        [powerGemId]
+      const event = await expectEventWithArgs(
+        assetContract,
+        recipt,
+        'TransferSingle'
       );
+      const assetId = event.args[3];
 
       const balance = await assetContract['balanceOf(address,uint256)'](
         catalystOwner,
@@ -665,18 +671,21 @@ describe('AssetMinter', function () {
         const commonBalanceAfter = await commonCatalyst.balanceOf(
           catalystOwner
         );
+
         const powerBalanceAfter = await powerGem.balanceOf(catalystOwner);
 
         const commonDec = await commonCatalyst.getDecimals();
         // TODO: fix
         // expect(10 ** commonDec).to.be.equal(BigNumber.from(gemsCatalystsUnit));
+
         expect(commonBalanceAfter).to.be.equal(
-          commonBalanceBefore.sub(BigNumber.from(10 ** commonDec))
+          commonBalanceBefore.sub(ethers.BigNumber.from(getBigInt(commonDec)))
         );
 
         const powerDec = await powerGem.getDecimals();
+
         expect(powerBalanceAfter).to.be.equal(
-          powerBalanceBefore.sub(BigNumber.from(10 ** powerDec))
+          powerBalanceBefore.sub(BigNumber.from(getBigInt(powerDec)))
         );
       });
 

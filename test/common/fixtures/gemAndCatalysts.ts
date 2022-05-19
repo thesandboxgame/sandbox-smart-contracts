@@ -42,6 +42,7 @@ export const gemsAndCatalystsFixtures = async () => {
     gemsCatalystsRegistryAdmin,
     upgradeAdmin,
     catalystAdmin,
+    assetAdmin,
   } = await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
@@ -166,7 +167,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const superOperator = await gemsCatalystsRegistry.SUPER_OPERATOR_ROLE();
 
   await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
+    .connect(ethers.provider.getSigner(assetAdmin))
     .grantRole(superOperator, gemsCatalystsRegistrySuperOperator);
 
   const gemsCatalystsRegistryAsCatalystOwner = gemsCatalystsRegistry.connect(

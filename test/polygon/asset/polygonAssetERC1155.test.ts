@@ -284,13 +284,24 @@ describe('PolygonAssetERC1155.sol', function () {
         tokenId
       );
       expect(balance).to.be.equal(100);
-      await PolygonAssetERC1155.connect(
-        ethers.provider.getSigner(extractor)
-      ).extractERC721From(extractor, tokenId, extractor);
+      const result = await waitFor(
+        PolygonAssetERC1155.connect(
+          ethers.provider.getSigner(extractor)
+        ).extractERC721From(extractor, tokenId, extractor)
+      );
+      const event = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        result,
+        'Extraction'
+      );
+
       balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
         tokenId
       );
+      const owner = await PolygonAssetERC721.ownerOf(event.args[1]);
+      expect(owner).to.be.equal(extractor);
+
       expect(balance).to.be.equal(99);
       const nftBal = await PolygonAssetERC721.balanceOf(extractor);
       expect(nftBal).to.be.equal(1);
@@ -497,12 +508,12 @@ describe('PolygonAssetERC1155.sol', function () {
         mintAsset,
         assetBouncerAdmin,
       } = await setupPolygonAsset();
-      const tokenId = await mintAsset(extractor, 10);
+      const tokenId = await mintAsset(extractor, 1);
       const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
         tokenId
       );
-      expect(balance).to.be.equal(10);
+      expect(balance).to.be.equal(1);
 
       // Set up users[2] as a bouncer
       await PolygonAssetERC1155.connect(
@@ -511,11 +522,11 @@ describe('PolygonAssetERC1155.sol', function () {
 
       await expect(
         PolygonAssetERC1155.connect(
-          ethers.provider.getSigner(users[2].address)
+          ethers.provider.getSigner(extractor)
         ).extractERC721From(extractor, tokenId, extractor)
-      ).to.be.revertedWith('!AUTHORIZED');
+      ).to.be.revertedWith('UNIQUE_ERC1155');
     });
-    it('cannot extract ERC721 if supply == 1 if sender is not approved operator', async function () {
+    it('cannot extract ERC721 if supply == 1 if msgSender() is not approved operator', async function () {
       const {
         PolygonAssetERC1155,
         users,
@@ -531,8 +542,8 @@ describe('PolygonAssetERC1155.sol', function () {
 
       await expect(
         PolygonAssetERC1155.connect(
-          ethers.provider.getSigner(extractor)
-        ).extractERC721From(users[1].address, tokenId, extractor)
+          ethers.provider.getSigner(users[1].address)
+        ).extractERC721From(extractor, tokenId, extractor)
       ).to.be.revertedWith('!AUTHORIZED');
     });
     it('can retrieve Extraction event with ERC1155 id and new ERC721 id and they are not the same as each other', async function () {
@@ -617,9 +628,16 @@ describe('PolygonAssetERC1155.sol', function () {
         tokenId
       );
       expect(balance).to.be.equal(10);
-      await PolygonAssetERC1155.connect(
+
+      const receipt1 = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
       ).extractERC721From(extractor, tokenId, extractor);
+      const extractionEvent1 = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt1,
+        'Extraction'
+      );
+      const nftId1 = extractionEvent1.args[1];
       balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
         tokenId
@@ -627,9 +645,16 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(balance).to.be.equal(9);
       let nftBal = await PolygonAssetERC721.balanceOf(extractor);
       expect(nftBal).to.be.equal(1);
-      await PolygonAssetERC1155.connect(
+      const receipt2 = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
       ).extractERC721From(extractor, tokenId, extractor);
+
+      const extractionEvent2 = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt2,
+        'Extraction'
+      );
+      const nftId2 = extractionEvent2.args[1];
       balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
         tokenId
@@ -637,6 +662,7 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(balance).to.be.equal(8);
       nftBal = await PolygonAssetERC721.balanceOf(extractor);
       expect(nftBal).to.be.equal(2);
+      expect(nftId1).to.be.not.equal(nftId2);
     });
     it('can get the new ERC721 ID returned from extraction event', async function () {
       const {
