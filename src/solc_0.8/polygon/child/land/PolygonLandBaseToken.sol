@@ -3,10 +3,10 @@
 
 pragma solidity 0.8.2;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 
-abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721BaseToken {
+abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721BaseTokenV2 {
     using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -248,7 +248,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) public override(LandToken, ERC721BaseToken) {
+    ) public override(LandToken, ERC721BaseTokenV2) {
         super.batchTransferFrom(from, to, ids, data);
     }
 

@@ -85,5 +85,7 @@ export const setupLand = deployments.createFixture(async function () {
     MockLandTunnel,
     MockPolygonLandTunnel,
     trustedForwarder,
+    getNamedAccounts,
+    ethers,
   };
 });

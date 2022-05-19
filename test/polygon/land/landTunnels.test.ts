@@ -5,7 +5,7 @@ import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
 
-describe('PolygonLand.sol', function () {
+describe('PolygonLand', function () {
   describe('Land <> PolygonLand: Transfer', function () {
     describe('L1 to L2', function () {
       it('only owner can pause tunnels', async function () {
