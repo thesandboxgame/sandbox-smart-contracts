@@ -9,9 +9,6 @@ export {assert};
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
-export const raffleSignWallet2 = new ethers.Wallet(
-  '0x7777777777777777777777777777777777777777777777777777777777777777'
-);
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 export const setupRaffle = withSnapshot(
@@ -90,6 +87,15 @@ async function validPersonalizeSignature(
   tokenId: number,
   personalizationMask: number
 ) {
+  const {deployer} = await getNamedAccounts();
+
+  const tx = {
+    to: wallet.address,
+    value: ethers.utils.parseEther('1'),
+  };
+
+  await ethers.provider.getSigner(deployer).sendTransaction(tx);
+
   const hashedData = ethers.utils.defaultAbiCoder.encode(
     ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
     [
@@ -114,16 +120,18 @@ async function invalidPersonalizeSignature(
   tokenId: number,
   personalizationMask: number
 ) {
+  const {deployer} = await getNamedAccounts();
+
+  const tx = {
+    to: wallet.address,
+    value: ethers.utils.parseEther('1'),
+  };
+
+  await ethers.provider.getSigner(deployer).sendTransaction(tx);
+
   const hashedData = ethers.utils.defaultAbiCoder.encode(
-    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
-    [
-      wallet.address,
-      signatureId,
-      contractAddress,
-      chainId,
-      personalizationMask,
-      tokenId,
-    ]
+    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [signatureId, contractAddress, chainId, personalizationMask, tokenId]
   );
   return wallet.signMessage(
     ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
@@ -203,15 +211,6 @@ function personalizeSetup(
     tokenId: number,
     personalizationMask: number
   ) => {
-    const {deployer} = await getNamedAccounts();
-
-    const tx = {
-      to: wallet.address,
-      value: ethers.utils.parseEther('1'),
-    };
-
-    await ethers.provider.getSigner(deployer).sendTransaction(tx);
-
     const signature = await signatureFunction(
       wallet,
       signatureId,
