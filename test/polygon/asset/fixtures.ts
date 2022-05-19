@@ -67,7 +67,10 @@ const polygonAssetFixtures = async function () {
     assetAdmin
   );
   const minterRole = await PolygonAssetERC721.MINTER_ROLE();
+  const burnerRole = await PolygonAssetERC721.BURNER_ROLE();
+
   await PolygonAssetERC721.grantRole(minterRole, PolygonAssetERC1155.address);
+  await PolygonAssetERC721.grantRole(burnerRole, extractor);
 
   const deployerAccount = await setupUser(deployer, {
     PolygonAssetERC1155,
@@ -109,6 +112,34 @@ const polygonAssetFixtures = async function () {
     return tokenId;
   }
 
+  async function mintMultipleAsset(
+    to: string,
+    values: number[],
+    hash = ipfsHashString
+  ) {
+    const creator = to;
+    const packId = ++id;
+    const supplies = values;
+    const owner = to;
+    const data = '0x';
+
+    const receipt = await waitFor(
+      PolygonAssetERC1155.connect(ethers.provider.getSigner(minter))[
+        'mintMultiple(address,uint40,bytes32,uint256[],bytes,address,bytes)'
+      ](creator, packId, hash, supplies, '0x', owner, data)
+    );
+
+    const transferEvent = await expectEventWithArgs(
+      PolygonAssetERC1155,
+      receipt,
+      'TransferBatch'
+    );
+
+    const tokenIds = transferEvent.args[3];
+
+    return tokenIds;
+  }
+
   const users = await setupUsers(otherAccounts, {Asset});
 
   return {
@@ -123,6 +154,7 @@ const polygonAssetFixtures = async function () {
     minter,
     extractor,
     mintAsset,
+    mintMultipleAsset,
     trustedForwarder,
     assetBouncerAdmin,
   };
