@@ -12,7 +12,7 @@ import "./PolygonLandBaseToken.sol";
 
 /// @title LAND bridge on L2
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    IPolygonLand public childToken;
+    IPolygonLand public immutable childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
     bool internal transferringToL1;
@@ -22,8 +22,8 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
     event SetMaxAllowedQuads(uint256 maxQuads);
-    event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
-    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
@@ -103,12 +103,12 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 

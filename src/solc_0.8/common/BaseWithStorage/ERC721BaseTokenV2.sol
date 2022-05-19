@@ -38,7 +38,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
-            owner == msgSender || _superOperators[msgSender] || _operatorsForAll[owner][msgSender],
+            owner == msgSender || _operatorsForAll[owner][msgSender] || _superOperators[msgSender],
             "UNAUTHORIZED_APPROVAL"
         );
         _approveFor(ownerData, operator, id);
@@ -59,7 +59,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
-            msgSender == sender || _superOperators[msgSender] || _operatorsForAll[sender][msgSender],
+            msgSender == sender || _operatorsForAll[sender][msgSender] || _superOperators[msgSender],
             "UNAUTHORIZED_APPROVAL"
         );
         require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
@@ -294,7 +294,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         bool safe
     ) internal {
         address msgSender = _msgSender();
-        bool authorized = msgSender == from || _superOperators[msgSender] || _operatorsForAll[from][msgSender];
+        bool authorized = msgSender == from || _operatorsForAll[from][msgSender] || _superOperators[msgSender];
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");

@@ -3,6 +3,7 @@
 
 pragma solidity 0.8.2;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 
@@ -78,29 +79,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         return id / GRID_SIZE;
     }
 
-    // solium-disable-next-line security/no-assign-params
-    function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
     /**
      * @notice Return the URI of a specific token
      * @param id The id of the token
@@ -108,7 +86,10 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(id), "/metadata.json"));
+        return
+            string(
+                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
+            );
     }
 
     /**
@@ -190,7 +171,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
         if (_msgSender() != from) {
             require(
-                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
+                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
                 "not authorized to transferMultiQuads"
             );
         }
@@ -232,7 +213,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         require(to != address(0), "can't send to zero address");
         if (_msgSender() != from) {
             require(
-                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
+                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
                 "not authorized to transferQuad"
             );
         }

@@ -10,11 +10,11 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title LAND bridge on L1
 contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    address public rootToken;
+    address public immutable rootToken;
     bool internal transferringToL2;
 
-    event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
-    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
     constructor(
         address _checkpointManager,
@@ -75,12 +75,12 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
