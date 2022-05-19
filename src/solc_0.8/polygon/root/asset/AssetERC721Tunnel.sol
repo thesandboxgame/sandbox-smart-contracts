@@ -88,9 +88,9 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory ids, string[] memory uris) = abi.decode(message, (address, uint256[], string[]));
+        (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
+        string[] memory uris = abi.decode(data, (string[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            // string[] memory uris = abi.decode(data, (string[]));
             bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
             if (!rootToken.exists(ids[i])) rootToken.mint(to, ids[i], uniqueUriData);
             else rootToken.safeTransferFrom(address(this), to, ids[i], uniqueUriData);
