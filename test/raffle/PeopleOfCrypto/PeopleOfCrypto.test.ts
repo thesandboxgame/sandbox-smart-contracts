@@ -12,7 +12,7 @@ import {
 } from './PeopleOfCrypto.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('RafflePeopleOfCrypto', function () {
+describe('RafflePeopleOfCrypto', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
