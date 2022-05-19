@@ -2,8 +2,9 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-/// @dev minimal ERC2771 handler to keep bytecode-size down.
-/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
+/// @dev minimal ERC2771 handler to keep bytecode-size down
+/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol
+/// with an initializer for proxies and a mutable forwarder
 
 contract ERC2771Handler {
     address internal _trustedForwarder;

@@ -59,7 +59,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         transferringToL2 = true;
-        LandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
+        ILandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
         transferringToL2 = false;
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
@@ -88,7 +88,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
         for (uint256 index = 0; index < x.length; index++) {
-            LandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
+            ILandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }
