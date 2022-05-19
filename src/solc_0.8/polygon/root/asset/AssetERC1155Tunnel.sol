@@ -75,10 +75,8 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) = abi.decode(
-            message,
-            (address, uint256[], uint256[], bytes)
-        );
+        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
+            abi.decode(message, (address, uint256[], uint256[], bytes));
         bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             bytes memory metadata = abi.encode(metadataHashes[i]);
