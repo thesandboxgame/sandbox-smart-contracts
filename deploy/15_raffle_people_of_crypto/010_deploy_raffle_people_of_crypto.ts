@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     metadataUrl =
       'https://www.sandbox.game/peopleofcrypto/unrevealed.json?tokenId=';
   } else {
-    metadataUrl = 'https://api-demo.sandbox.game/collections/26/metadata/';
+    metadataUrl = 'https://api-demo.sandbox.game/collections/35/metadata/';
   }
 
   await deploy('RafflePeopleOfCrypto', {
