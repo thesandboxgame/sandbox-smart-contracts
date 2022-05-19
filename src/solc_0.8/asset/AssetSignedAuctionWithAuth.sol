@@ -299,7 +299,6 @@ contract AssetSignedAuctionWithAuth is
         SignatureType signatureType
     ) internal view {
         bytes memory dataToHash;
-        address signer;
 
         dataToHash = abi.encodePacked(
             "\x19\x01",
@@ -318,7 +317,7 @@ contract AssetSignedAuctionWithAuth is
                 "invalid 1654 signature"
             );
         } else {
-            signer = SigUtil.recover(keccak256(dataToHash), signature);
+            address signer = SigUtil.recover(keccak256(dataToHash), signature);
             require(signer == from, "signer != from");
         }
     }
