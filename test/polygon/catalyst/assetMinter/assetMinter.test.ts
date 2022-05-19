@@ -92,8 +92,8 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
   }
 }
 
-function getBigInt(num: Number) {
-  let output: String = '1';
+function getBigInt(num: number) {
+  let output = '1';
   for (let i = 0; i < num; i++) {
     output += '0';
   }

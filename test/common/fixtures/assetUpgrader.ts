@@ -56,7 +56,7 @@ export const assetUpgraderFixtures = async () => {
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
   );
-  
+
   await waitFor(
     gemsCatalystsRegistry
       .connect(ethers.provider.getSigner(assetAdmin))
