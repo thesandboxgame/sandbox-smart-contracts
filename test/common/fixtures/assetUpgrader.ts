@@ -7,6 +7,7 @@ import {expect} from '../../chai-setup';
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetUpgraderFixtures = async () => {
   const {
+    deployer,
     assetAttributesRegistryAdmin,
     assetAdmin,
     sandAdmin,
@@ -55,11 +56,16 @@ export const assetUpgraderFixtures = async () => {
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
   );
-
+  
   await waitFor(
     gemsCatalystsRegistry
       .connect(ethers.provider.getSigner(assetAdmin))
       .grantRole(SUPER_OPERATOR_ROLE, assetUpgraderFeeBurnerContract.address)
+  );
+  await waitFor(
+    gemsCatalystsRegistry
+      .connect(ethers.provider.getSigner(assetAdmin))
+      .grantRole(SUPER_OPERATOR_ROLE, assetUpgraderContract.address)
   );
 
   const MINTER_ROLE = await assetERC721Contract.MINTER_ROLE();
@@ -68,13 +74,18 @@ export const assetUpgraderFixtures = async () => {
       .connect(ethers.provider.getSigner(assetAdmin))
       .grantRole(MINTER_ROLE, assetContract.address)
   );
-  const sandAmount = BigNumber.from(1000000).mul('1000000000000000000');
+
+  await waitFor(
+    assetContract
+      .connect(ethers.provider.getSigner(assetAdmin))
+      .setBouncer(assetUpgraderContract.address, true)
+  );
 
   // The only way to deposit PolygonSand in L2 is via the childChainManager
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
-
+  const sandAmount = BigNumber.from(100000).mul('1000000000000000000');
   await depositViaChildChainManager(
     {sand: sandContract, childChainManager},
     sandBeneficiary,
@@ -88,6 +99,10 @@ export const assetUpgraderFixtures = async () => {
     sandAmount
   );
   await sandContractAsAdmin.transfer(catalystOwner, sandAmount);
+
+  await sandContract
+    .connect(ethers.provider.getSigner(catalystOwner))
+    .approve(assetUpgraderContract.address, sandAmount);
 
   expect(await sandContract.balanceOf(catalystOwner)).to.equal(sandAmount);
 

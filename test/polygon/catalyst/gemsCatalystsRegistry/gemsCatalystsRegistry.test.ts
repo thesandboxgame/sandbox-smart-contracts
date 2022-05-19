@@ -6,7 +6,13 @@ import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts
 import {deployments} from 'hardhat';
 
 const setupGemsAndCatalysts = withSnapshot(
-  ['PolygonGemsCatalystsRegistry', 'PolygonCatalysts', 'PolygonSand'],
+  [
+    'PolygonGemsCatalystsRegistry',
+    'PolygonCatalysts',
+    'PolygonSand',
+    'PolygonGems',
+    'PolygonGemsCatalystsRegistry_setup',
+  ],
   gemsAndCatalystsFixtures
 );
 
@@ -538,7 +544,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistryAsGemOwner.burnDifferentGems(
         gemOwner,
         [defenseGemId, powerGemId],
-        burnAmount
+        [burnAmount, burnAmount]
       )
     );
     const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
@@ -585,7 +591,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistryAsCatalystOwner.burnDifferentCatalysts(
         catalystOwner,
         [rareCatalystId, commonCatalystId],
-        burnAmount
+        [burnAmount, burnAmount]
       )
     );
     const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
