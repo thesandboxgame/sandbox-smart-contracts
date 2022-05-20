@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../polygon/child/unused/PolygonAssetV2.sol";
+import "../polygon/child/asset/PolygonAssetERC1155.sol";
 import "../polygon/child/sand/PolygonSand.sol";
 
 /// @dev This is NOT a secure ChildChainManager contract implementation!
@@ -18,7 +18,7 @@ contract FakeChildChainManager {
     }
 
     function callDeposit(address user, bytes calldata depositData) external {
-        PolygonAssetV2(polygonAsset).deposit(user, depositData);
+        PolygonAssetERC1155(polygonAsset).deposit(user, depositData);
     }
 
     function callSandDeposit(
