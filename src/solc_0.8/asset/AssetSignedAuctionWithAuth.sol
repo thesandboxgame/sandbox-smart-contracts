@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/PriceUtil.sol";
+import "../assetERC1155/AssetERC1155.sol";
 import "../common/Base/TheSandbox712.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/interfaces/ERC1271.sol";
@@ -59,14 +60,14 @@ contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSa
     mapping(address => mapping(uint256 => uint256)) public claimed;
 
     IAuthValidator internal _authValidator;
-    IERC1155 public _asset;
+    AssetERC1155 public _asset;
     uint256 public _fee10000th = 0;
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
     constructor(
-        IERC1155 asset,
+        AssetERC1155 asset,
         address admin,
         address initialMetaTx,
         address payable feeCollector,
