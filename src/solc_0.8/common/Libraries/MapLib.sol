@@ -203,7 +203,7 @@ library MapLib {
         uint256 offset,
         uint256 limit
     ) public view returns (TileWithCoordLib.TileWithCoord[] memory) {
-        TileWithCoordLib.TileWithCoord[] memory ret;
+        TileWithCoordLib.TileWithCoord[] memory ret = new TileWithCoordLib.TileWithCoord[](limit);
         for (uint256 i; i < limit; i++) {
             ret[i] = self.values[offset + i];
         }

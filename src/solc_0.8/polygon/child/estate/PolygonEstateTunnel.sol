@@ -13,32 +13,48 @@ import "../../../common/interfaces/IPolygonEstateToken.sol";
 contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IPolygonEstateToken public childToken;
 
-    event Withdraw(uint256 estateId, address from, address to);
-    event Deposit(uint256 estateId, address to, bytes32 metadata, TileWithCoordLib.TileWithCoord[] freeLands);
+    event EstateSentToL1(
+        uint256 estateId,
+        address from,
+        address to,
+        bytes32 metaData,
+        TileWithCoordLib.TileWithCoord[] tiles
+    );
+    event EstateReceivedFromL1(uint256 estateId, address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] tiles);
 
     constructor(
         address _fxChild,
         IPolygonEstateToken _childToken,
-        address _trustedForwarder,
-        uint32 _maxGasLimit,
-        uint256 _maxAllowedQuads,
-        uint32[5] memory limits
+        address _trustedForwarder
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function transferEstateToL1(address to, uint256 estateId) external whenNotPaused() {
-        (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles) =
+    function sendEstateToL1(address to, uint256 estateId) external whenNotPaused() {
+        require(to != address(0), "PolygonEstateTunnel: wrong address");
+        (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
             childToken.burnEstate(_msgSender(), estateId);
-        emit Withdraw(estateId, _msgSender(), to);
-        _sendMessageToRoot(abi.encode(to, metadata, tiles));
+        _sendMessageToRoot(abi.encode(to, metaData, tiles));
+        emit EstateSentToL1(estateId, _msgSender(), to, metaData, tiles);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    function setChildToken(IPolygonEstateToken _childToken) external onlyOwner {
+        childToken = _childToken;
+    }
+
+    function setRootTunnel(address _fxRootTunnel) external onlyOwner {
+        fxRootTunnel = _fxRootTunnel;
+    }
+
+    function setChildTunnel(address _fxChild) external onlyOwner {
+        fxChild = _fxChild;
     }
 
     /// @dev Pauses all token transfers across bridge
@@ -56,10 +72,10 @@ contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver
         address sender,
         bytes memory data
     ) internal override validateSender(sender) {
-        (address to, bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory freeLands) =
+        (address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
             abi.decode(data, (address, bytes32, TileWithCoordLib.TileWithCoord[]));
-        uint256 estateId = childToken.mintEstate(to, metadata, freeLands);
-        emit Deposit(estateId, to, metadata, freeLands);
+        uint256 estateId = childToken.mintEstate(to, metaData, tiles);
+        emit EstateReceivedFromL1(estateId, to, metaData, tiles);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

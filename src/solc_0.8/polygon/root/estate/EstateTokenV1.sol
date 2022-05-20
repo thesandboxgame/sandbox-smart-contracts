@@ -8,6 +8,7 @@ import "../../../common/interfaces/IEstateToken.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
+    using MapLib for MapLib.Map;
     /// @dev Emits when a estate is updated.
     /// @param estateId The id of the newly minted token.
     /// @param data The changes made to the Estate.
@@ -22,7 +23,7 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
     function initV1(
         address trustedForwarder,
         address admin,
-        ILandToken land,
+        address land,
         uint8 chainIndex
     ) public initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
@@ -44,8 +45,16 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         override
         returns (uint256)
     {
-        uint256 newId;
-        (newId, ) = _updateLandsEstate(from, data.estateId, data.landToAdd, data.landToRemove, data.uri);
+        (uint256 newId, uint256 storageId) = _updateLandsEstate(from, data.estateId, data.landToAdd, data.uri);
+        freeLands[storageId].remove(data.landToRemove);
+        ILandToken(land).batchTransferQuad(
+            address(this),
+            from,
+            data.landToRemove[0],
+            data.landToRemove[1],
+            data.landToRemove[2],
+            ""
+        );
         emit EstateTokenUpdated(data.estateId, newId, data);
         return newId;
     }
@@ -73,14 +82,5 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 id = _storageId(gameId);
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
-    }
-
-    function estateData(uint256 estateId)
-        external
-        view
-        override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory)
-    {
-        return _estateData(estateId);
     }
 }

@@ -1,5 +1,6 @@
 import {setupL2EstateGameAndLand} from './fixtures';
 import {expect} from 'chai';
+import {BigNumber} from 'ethers';
 
 describe('Estate test with maps and games on layer 2', function () {
   describe('create one estate', function () {
@@ -374,5 +375,13 @@ describe('Estate test with maps and games on layer 2', function () {
       const {gasUsed} = await createEstate({});
       console.log('gas used', gasUsed.toString());
     }
+  });
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('how much it take to mint a land', async function () {
+    const {other, landContractAsMinter} = await setupL2EstateGameAndLand();
+    const tx = await landContractAsMinter.mintQuad(other, 1, 1, 1, []);
+    const receipt = await tx.wait();
+    const gasUsed = BigNumber.from(receipt.gasUsed);
+    console.log('gas used', gasUsed.toString());
   });
 });

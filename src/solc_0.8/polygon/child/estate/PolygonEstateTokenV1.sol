@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../../../common/interfaces/ILandToken.sol";
+import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/EstateBaseToken.sol";
@@ -25,7 +25,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     function initV1(
         address trustedForwarder,
         address admin,
-        ILandToken land,
+        address land,
         GameBaseToken _gameToken,
         uint8 chainIndex
     ) external initializer {
@@ -45,16 +45,21 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     function updateEstate(address from, UpdateEstateData calldata data) external override returns (uint256) {
         uint256 newId;
         uint256 storageId;
-        (newId, storageId) = _updateLandsEstate(
-            from,
-            data.estateId,
-            data.freeLandToAdd,
-            data.freeLandToRemove,
-            data.newUri
-        );
+        (newId, storageId) = _updateLandsEstate(from, data.estateId, data.freeLandToAdd, data.newUri);
+        freeLands[storageId].remove(data.freeLandToRemove);
+        for (uint256 i; i < data.freeLandToRemove[0].length; i++) {
+            uint256 size = data.freeLandToRemove[0][i];
+            uint256 x = data.freeLandToRemove[1][i];
+            uint256 y = data.freeLandToRemove[2][i];
+            if (!IPolygonLand(land).exists(size, x, y)) {
+                IPolygonLand(land).mint(from, size, x, y, "");
+            } else {
+                IPolygonLand(land).transferQuad(address(this), from, size, x, y, "");
+            }
+        }
         for (uint256 i; i < data.gamesToRemove.length; i++) {
             MapLib.Map storage map = games[storageId].getMap(data.gamesToRemove[i].gameId);
-            land.batchTransferQuad(
+            IPolygonLand(land).batchTransferQuad(
                 from,
                 address(this),
                 data.gamesToRemove[i].quadsToTransfer[0],
@@ -120,15 +125,6 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
     }
 
-    function estateData(uint256 estateId)
-        external
-        view
-        override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory)
-    {
-        return _estateData(estateId);
-    }
-
     function _addGamesToEstate(
         address from,
         uint256 storageId,
@@ -136,7 +132,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     ) internal {
         for (uint256 i; i < gameData.length; i++) {
             gameToken.transferFrom(from, address(this), gameData[i].gameId);
-            land.batchTransferQuad(
+            IPolygonLand(land).batchTransferQuad(
                 from,
                 address(this),
                 gameData[i].transferQuads[0],

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title LAND bridge on L1
-abstract contract FxTunnelBase is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
+abstract contract BaseRootTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     address public rootToken;
 
     constructor(
@@ -48,6 +48,22 @@ abstract contract FxTunnelBase is FxBaseRootTunnel, IERC721MandatoryTokenReceive
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    function setRootToken(address _rootToken) external onlyOwner {
+        rootToken = _rootToken;
+    }
+
+    function setFxRoot(IFxStateSender _fxRoot) external onlyOwner {
+        fxRoot = _fxRoot;
+    }
+
+    function setCheckpointManager(ICheckpointManager _checkpointManager) external onlyOwner {
+        checkpointManager = _checkpointManager;
+    }
+
+    function setChildTunnel(address _fxChildTunnel) external onlyOwner {
+        fxChildTunnel = _fxChildTunnel;
     }
 
     /// @dev Pauses all token transfers across bridge

@@ -22,9 +22,9 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
 
     uint64 public nextId; // max uint64 = 18,446,744,073,709,551,615
 
-    ILandToken public land;
+    address public land;
 
-    mapping(uint256 => bytes32) public metaData;
+    mapping(uint256 => bytes32) internal metaData;
 
     // estate id => free lands
     mapping(uint256 => MapLib.Map) internal freeLands;
@@ -32,7 +32,7 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
     function _unchained_initV1(
         address trustedForwarder,
         address admin,
-        ILandToken _land,
+        address _land,
         uint8 chainIndex
     ) internal {
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
@@ -40,6 +40,11 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _admin = admin;
         land = _land;
+    }
+
+    function getMetadata(uint256 estateId) external view returns (bytes32) {
+        uint256 storageId = _storageId(estateId);
+        return metaData[storageId];
     }
 
     function freeLandLength(uint256 estateId) external view returns (uint256) {
@@ -136,7 +141,14 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         // batchTransferQuad does that for us
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
         if (freeLand.quads[0].length > 0) {
-            land.batchTransferQuad(from, address(this), freeLand.quads[0], freeLand.quads[1], freeLand.quads[2], "");
+            ILandToken(land).batchTransferQuad(
+                from,
+                address(this),
+                freeLand.quads[0],
+                freeLand.quads[1],
+                freeLand.quads[2],
+                ""
+            );
         }
         (estateId, storageId) = _mintToken(from);
         metaData[storageId] = uri;
@@ -174,7 +186,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         address from,
         uint256 estateId,
         MapLib.QuadsAndTiles calldata landToAdd,
-        uint256[][3] calldata landToRemove,
         bytes32 uri
     ) internal returns (uint256 newEstateId, uint256 newStorageId) {
         require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
@@ -188,12 +199,14 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
 
         freeLands[storageId].add(landToAdd);
         if (landToAdd.quads[0].length > 0) {
-            land.batchTransferQuad(from, address(this), landToAdd.quads[0], landToAdd.quads[1], landToAdd.quads[2], "");
-        }
-
-        if (landToRemove[0].length > 0) {
-            freeLands[storageId].remove(landToRemove);
-            land.batchTransferQuad(address(this), from, landToRemove[0], landToRemove[1], landToRemove[2], "");
+            ILandToken(land).batchTransferQuad(
+                from,
+                address(this),
+                landToAdd.quads[0],
+                landToAdd.quads[1],
+                landToAdd.quads[2],
+                ""
+            );
         }
         return _incrementTokenVersion(from, estateId);
     }
@@ -211,11 +224,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         _burn(from, from, storageId);
         emit EstateBurned(estateId);
         return (_metaData, _tiles);
-    }
-
-    function _estateData(uint256 estateId) internal view returns (bytes32, TileWithCoordLib.TileWithCoord[] memory) {
-        uint256 storageId = _storageId(estateId);
-        return (metaData[storageId], freeLands[storageId].getMap());
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

@@ -137,7 +137,7 @@ describe('Estate test with maps on layer 1', function () {
     const {estateId} = await createEstate(sizes, xs, ys);
     const message = await estateTunnel.getMessage(other, estateId);
     // TODO: Check what happen when message.length > 1024.... it fails ?
-    expect(ethers.utils.arrayify(message).length).to.be.equal(480);
+    expect(ethers.utils.arrayify(message).length).to.be.equal(512);
   });
   // describe('update states', function () {
   // });

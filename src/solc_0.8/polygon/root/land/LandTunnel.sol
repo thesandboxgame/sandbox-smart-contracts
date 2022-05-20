@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../FxTunnelBase.sol";
+import "../BaseRootTunnel.sol";
 
 /// @title LAND bridge on L1
-contract LandTunnel is FxTunnelBase {
+contract LandTunnel is BaseRootTunnel {
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
 
@@ -14,7 +14,7 @@ contract LandTunnel is FxTunnelBase {
         address _rootToken,
         address _trustedForwarder
     )
-        FxTunnelBase(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder)
+        BaseRootTunnel(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder)
     // solhint-disable-next-line no-empty-blocks
     {
 
