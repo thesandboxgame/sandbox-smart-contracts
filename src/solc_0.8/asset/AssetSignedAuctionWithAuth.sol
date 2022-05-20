@@ -81,6 +81,7 @@ contract AssetSignedAuctionWithAuth is
         uint256 fee10000th,
         address authValidator
     ) TheSandbox712() {
+        require(fee10000th <= _feeLimit, "Fee above the limit");
         _asset = asset;
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
@@ -102,7 +103,7 @@ contract AssetSignedAuctionWithAuth is
     function setFee(address payable feeCollector, uint256 fee10000th) external {
         require(feeCollector != address(0), "feeCollector cannot be Zero address");
         require(msg.sender == _admin, "only admin can change fee");
-        require(_fee10000th <= _feeLimit, "Fee above the limit");
+        require(fee10000th <= _feeLimit, "Fee above the limit");
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
         emit FeeSetup(feeCollector, fee10000th);
