@@ -36,6 +36,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "Forwarder cannot be the Zero address");
         _trustedForwarder = trustedForwarder;
     }
 
