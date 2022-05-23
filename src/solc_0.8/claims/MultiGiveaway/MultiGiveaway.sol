@@ -55,7 +55,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32[] calldata rootHashes,
         Claim[] memory claims,
         bytes32[][] calldata proofs
-    ) external whenNotPaused() {
+    ) external {
         require(claims.length == rootHashes.length, "MULTIGIVEAWAY_INVALID_INPUT");
         require(claims.length == proofs.length, "MULTIGIVEAWAY_INVALID_INPUT");
         for (uint256 i = 0; i < rootHashes.length; i++) {
