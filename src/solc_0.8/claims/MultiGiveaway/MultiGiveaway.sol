@@ -20,6 +20,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     mapping(bytes32 => uint256) internal _expiryTime;
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
+    event NewTrustedForwarder(address trustedForwarder);
 
     constructor(address admin, address trustedForwarder) {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
@@ -43,6 +44,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "Forwarder cannot be the Zero address");
         _trustedForwarder = trustedForwarder;
+
+        emit NewTrustedForwarder(trustedForwarder);
     }
 
     /// @notice Function to permit the claiming of multiple tokens from multiple giveaways to a reserved address.
