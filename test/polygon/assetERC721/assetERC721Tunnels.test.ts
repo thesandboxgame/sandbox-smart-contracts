@@ -1,9 +1,9 @@
-import {ethers} from 'hardhat';
+// import {ethers} from 'hardhat';
 import {AbiCoder} from 'ethers/lib/utils';
 import {expect} from '../../chai-setup';
-import {mine, waitFor} from '../../utils';
+import {waitFor} from '../../utils';
 import {setupAssetERC721Tunnels} from './fixtures';
-import {sendMetaTx} from '../../sendMetaTx';
+// import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 
 describe('PolygonAssetERC721.sol', function () {
@@ -668,7 +668,6 @@ describe('PolygonAssetERC721.sol', function () {
           AssetERC721,
           assetMinter,
           users,
-          MockAssetERC721Tunnel,
           PolygonAssetERC721,
           MockPolygonAssetERC721Tunnel,
         } = await setupAssetERC721Tunnels();
@@ -738,11 +737,8 @@ describe('PolygonAssetERC721.sol', function () {
 
       it('should not be able to transfer if exceeds limit', async function () {
         const {
-          deployer,
-          AssetERC721,
           assetMinter,
           users,
-          MockAssetERC721Tunnel,
           PolygonAssetERC721,
           MockPolygonAssetERC721Tunnel,
         } = await setupAssetERC721Tunnels();

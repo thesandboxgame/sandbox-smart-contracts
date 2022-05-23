@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const maxTransferLimit = 20;
 
-  const MockPolygonAssetERC1155Tunnel = await deploy(
+  await deploy(
     'MockPolygonAssetERC1155Tunnel',
     {
       from: deployer,

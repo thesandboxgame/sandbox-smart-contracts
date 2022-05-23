@@ -69,6 +69,7 @@ export const setupPolygonSand = withSnapshot(['PolygonSand'], async () => {
 });
 
 // The only way to deposit in L2 is via the childChainManager
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const depositViaChildChainManager = async (
   fixtures: {
     sand: Contract;
@@ -95,6 +96,7 @@ export const depositViaChildChainManager = async (
   expect(await fixtures.sand.balanceOf(user)).to.be.equal(pre.add(amount));
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const sendMeta = async (
   fixtures: {
     sand: Contract;

@@ -716,11 +716,11 @@ describe('AssetMinter', function () {
           {contract: speedGem, amount: 1, recipient: catalystOwner},
         ]);
 
-        const commonBalanceBefore = await commonCatalyst.balanceOf(
-          catalystOwner
-        );
-        const rareBalanceBefore = await rareCatalyst.balanceOf(catalystOwner);
-        const epicBalanceBefore = await epicCatalyst.balanceOf(catalystOwner);
+        // const commonBalanceBefore = await commonCatalyst.balanceOf(
+        //   catalystOwner
+        // );
+        // const rareBalanceBefore = await rareCatalyst.balanceOf(catalystOwner);
+        // const epicBalanceBefore = await epicCatalyst.balanceOf(catalystOwner);
 
         const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultipleWithCatalyst(
           {
@@ -800,11 +800,11 @@ describe('AssetMinter', function () {
           await assetMinterContract.quantitiesByCatalystId(legendaryCataId),
         ]);
 
-        const commonBalanceAfter = await commonCatalyst.balanceOf(
-          catalystOwner
-        );
-        const rareBalanceAfter = await rareCatalyst.balanceOf(catalystOwner);
-        const epicBalanceAfter = await epicCatalyst.balanceOf(catalystOwner);
+        // const commonBalanceAfter = await commonCatalyst.balanceOf(
+        //   catalystOwner
+        // );
+        // const rareBalanceAfter = await rareCatalyst.balanceOf(catalystOwner);
+        // const epicBalanceAfter = await epicCatalyst.balanceOf(catalystOwner);
 
         // TODO: update for decimals()
         // expect(commonBalanceAfter).to.be.equal(
@@ -1025,18 +1025,18 @@ describe('AssetMinter', function () {
           {contract: luckGem, amount: 1, recipient: catalystOwner},
         ]);
 
-        const commonBalanceBefore = await commonCatalyst.balanceOf(
-          catalystOwner
-        );
-        const rareBalanceBefore = await rareCatalyst.balanceOf(catalystOwner);
-        const speedBalanceBefore = await speedGem.balanceOf(catalystOwner);
-        const magicBalanceBefore = await magicGem.balanceOf(catalystOwner);
-        const luckBalanceBefore = await luckGem.balanceOf(catalystOwner);
-        const commonSupplyBefore = await commonCatalyst.totalSupply();
-        const rareSupplyBefore = await rareCatalyst.totalSupply();
-        const speedSupplyBefore = await speedGem.totalSupply();
-        const magicSupplyBefore = await magicGem.totalSupply();
-        const luckSupplyBefore = await luckGem.totalSupply();
+        // const commonBalanceBefore = await commonCatalyst.balanceOf(
+        //   catalystOwner
+        // );
+        // const rareBalanceBefore = await rareCatalyst.balanceOf(catalystOwner);
+        // const speedBalanceBefore = await speedGem.balanceOf(catalystOwner);
+        // const magicBalanceBefore = await magicGem.balanceOf(catalystOwner);
+        // const luckBalanceBefore = await luckGem.balanceOf(catalystOwner);
+        // const commonSupplyBefore = await commonCatalyst.totalSupply();
+        // const rareSupplyBefore = await rareCatalyst.totalSupply();
+        // const speedSupplyBefore = await speedGem.totalSupply();
+        // const magicSupplyBefore = await magicGem.totalSupply();
+        // const luckSupplyBefore = await luckGem.totalSupply();
 
         await assetMinterAsCatalystOwner.mintMultipleWithCatalyst(
           {
@@ -1058,18 +1058,18 @@ describe('AssetMinter', function () {
           ]
         );
 
-        const commonBalanceAfter = await commonCatalyst.balanceOf(
-          catalystOwner
-        );
-        const rareBalanceAfter = await rareCatalyst.balanceOf(catalystOwner);
-        const speedBalanceAfter = await speedGem.balanceOf(catalystOwner);
-        const magicBalanceAfter = await magicGem.balanceOf(catalystOwner);
-        const luckBalanceAfter = await luckGem.balanceOf(catalystOwner);
-        const commonSupplyAfter = await commonCatalyst.totalSupply();
-        const rareSupplyAfter = await rareCatalyst.totalSupply();
-        const speedSupplyAfter = await speedGem.totalSupply();
-        const magicSupplyAfter = await magicGem.totalSupply();
-        const luckSupplyAfter = await luckGem.totalSupply();
+        // const commonBalanceAfter = await commonCatalyst.balanceOf(
+        //   catalystOwner
+        // );
+        // const rareBalanceAfter = await rareCatalyst.balanceOf(catalystOwner);
+        // const speedBalanceAfter = await speedGem.balanceOf(catalystOwner);
+        // const magicBalanceAfter = await magicGem.balanceOf(catalystOwner);
+        // const luckBalanceAfter = await luckGem.balanceOf(catalystOwner);
+        // const commonSupplyAfter = await commonCatalyst.totalSupply();
+        // const rareSupplyAfter = await rareCatalyst.totalSupply();
+        // const speedSupplyAfter = await speedGem.totalSupply();
+        // const magicSupplyAfter = await magicGem.totalSupply();
+        // const luckSupplyAfter = await luckGem.totalSupply();
 
         // TODO: update for decimals()
         // expect(commonBalanceAfter).to.be.equal(

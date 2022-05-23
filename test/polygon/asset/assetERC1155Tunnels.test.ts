@@ -1,11 +1,9 @@
 import {setupAssetERC1155Tunnels} from './fixtures_tunnels';
 
-import {waitFor, getAssetChainIndex, setupUser, setupUsers} from '../../utils';
+import {waitFor} from '../../utils';
 import {expect} from '../../chai-setup';
-import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
-import {Event} from '@ethersproject/contracts';
 
 describe('PolygonAsset.sol', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
@@ -229,11 +227,6 @@ describe('PolygonAsset.sol', function () {
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
 
-      const MOCK_DATA = new AbiCoder().encode(
-        ['bytes32[]'],
-        [testMetadataHashArray]
-      );
-
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
@@ -292,7 +285,7 @@ describe('PolygonAsset.sol', function () {
 
       for (let i = 0; i < 4; i++) {
         await mintAssetOnL1(users[0].address, tokenIds[i], supplies[i]);
-        const mainnetURI = await AssetERC1155['tokenURI(uint256)'](tokenIds[i]);
+        // const mainnetURI = await AssetERC1155['tokenURI(uint256)'](tokenIds[i]);
         // expect(mainnetURI).to.be.equal('');
       }
       await AssetERC1155.connect(
@@ -631,9 +624,6 @@ describe('PolygonAsset.sol', function () {
         ethers.provider.getSigner(users[0].address)
       ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
 
-      const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
-      const MOCK_DATA = new AbiCoder().encode(['bytes32'], [testMetadataHash]);
-
       await waitFor(
         MockAssetERC1155Tunnel.connect(
           ethers.provider.getSigner(users[0].address)
@@ -726,7 +716,6 @@ describe('PolygonAsset.sol', function () {
       const {
         AssetERC1155,
         PolygonAssetERC1155,
-        MockAssetERC1155Tunnel,
         MockPolygonAssetERC1155Tunnel,
         users,
         deployer,
