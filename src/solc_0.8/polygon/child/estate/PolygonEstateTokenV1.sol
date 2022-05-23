@@ -2,6 +2,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-0.8/utils/Strings.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
@@ -11,6 +12,7 @@ import "../../../Game/GameBaseToken.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
     using EstateGameRecordLib for EstateGameRecordLib.Games;
+    using Strings for uint256;
     using MapLib for MapLib.Map;
 
     event EstateTokenCreated(uint256 indexed estateId, CreateEstateData data);
@@ -47,25 +49,27 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         uint256 storageId;
         (newId, storageId) = _updateLandsEstate(from, data.estateId, data.freeLandToAdd, data.newUri);
         freeLands[storageId].remove(data.freeLandToRemove);
-        for (uint256 i; i < data.freeLandToRemove[0].length; i++) {
+        uint256 len = data.freeLandToRemove[0].length;
+        for (uint256 i; i < len; i++) {
             uint256 size = data.freeLandToRemove[0][i];
             uint256 x = data.freeLandToRemove[1][i];
             uint256 y = data.freeLandToRemove[2][i];
+            // TODO: Can we move this to the land contract ??? something like mintOrTransfer so we avoid 3 calls
             if (!IPolygonLand(land).exists(size, x, y)) {
                 IPolygonLand(land).mint(from, size, x, y, "");
             } else {
                 IPolygonLand(land).transferQuad(address(this), from, size, x, y, "");
             }
         }
-        for (uint256 i; i < data.gamesToRemove.length; i++) {
+        len = data.gamesToRemove.length;
+        for (uint256 i; i < len; i++) {
             MapLib.Map storage map = games[storageId].getMap(data.gamesToRemove[i].gameId);
-            IPolygonLand(land).batchTransferQuad(
+            _batchTransferQuad(
                 from,
                 address(this),
                 data.gamesToRemove[i].quadsToTransfer[0],
                 data.gamesToRemove[i].quadsToTransfer[1],
-                data.gamesToRemove[i].quadsToTransfer[2],
-                ""
+                data.gamesToRemove[i].quadsToTransfer[2]
             );
             map.remove(data.gamesToRemove[i].quadsToTransfer);
             map.moveTo(freeLands[storageId], data.gamesToRemove[i].quadsToFree);
@@ -122,7 +126,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
     function tokenURI(uint256 gameId) external view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 id = _storageId(gameId);
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
+        // return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
+        // TODO: We need this to reduce the size, probably we can put hash2base32 in a library
+        return string(abi.encodePacked("ipfs://bafybei", uint256(metaData[id]).toHexString(32), "/", "game.json"));
     }
 
     function _addGamesToEstate(
@@ -130,15 +136,15 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         uint256 storageId,
         AddGameData[] calldata gameData
     ) internal {
-        for (uint256 i; i < gameData.length; i++) {
+        uint256 len = gameData.length;
+        for (uint256 i; i < len; i++) {
             gameToken.transferFrom(from, address(this), gameData[i].gameId);
-            IPolygonLand(land).batchTransferQuad(
+            _batchTransferQuad(
                 from,
                 address(this),
                 gameData[i].transferQuads[0],
                 gameData[i].transferQuads[1],
-                gameData[i].transferQuads[2],
-                ""
+                gameData[i].transferQuads[2]
             );
             require(games[storageId].createGame(gameData[i].gameId), "game already exists");
             MapLib.Map storage map = games[storageId].getMap(gameData[i].gameId);

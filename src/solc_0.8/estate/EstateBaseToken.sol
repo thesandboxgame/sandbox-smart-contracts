@@ -141,14 +141,7 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         // batchTransferQuad does that for us
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
         if (freeLand.quads[0].length > 0) {
-            ILandToken(land).batchTransferQuad(
-                from,
-                address(this),
-                freeLand.quads[0],
-                freeLand.quads[1],
-                freeLand.quads[2],
-                ""
-            );
+            _batchTransferQuad(from, address(this), freeLand.quads[0], freeLand.quads[1], freeLand.quads[2]);
         }
         (estateId, storageId) = _mintToken(from);
         metaData[storageId] = uri;
@@ -171,8 +164,8 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
 
     function _mintToken(address from) internal returns (uint256 estateId, uint256 storageId) {
         uint16 version = 1;
-        uint256 estateId = _generateTokenId(from, nextId++, _chainIndex, version);
-        uint256 storageId = _storageId(estateId);
+        estateId = _generateTokenId(from, nextId++, _chainIndex, version);
+        storageId = _storageId(estateId);
         require(_owners[storageId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
 
         // TODO: Move to base class somehow
@@ -199,14 +192,7 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
 
         freeLands[storageId].add(landToAdd);
         if (landToAdd.quads[0].length > 0) {
-            ILandToken(land).batchTransferQuad(
-                from,
-                address(this),
-                landToAdd.quads[0],
-                landToAdd.quads[1],
-                landToAdd.quads[2],
-                ""
-            );
+            _batchTransferQuad(from, address(this), landToAdd.quads[0], landToAdd.quads[1], landToAdd.quads[2]);
         }
         return _incrementTokenVersion(from, estateId);
     }
@@ -274,5 +260,15 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         if (size == 3) return 12;
         if (size == 4) return 24;
         return 0;
+    }
+
+    function _batchTransferQuad(
+        address from,
+        address to,
+        uint256[] calldata sizes,
+        uint256[] calldata xs,
+        uint256[] calldata ys
+    ) internal {
+        ILandToken(land).batchTransferQuad(from, to, sizes, xs, ys, "");
     }
 }
