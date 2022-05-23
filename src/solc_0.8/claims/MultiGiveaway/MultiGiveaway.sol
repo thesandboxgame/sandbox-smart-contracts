@@ -10,7 +10,7 @@ import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
 /// @notice This contract manages claims for multiple token types
 /// @dev The contract implements ERC2771 to ensure that users do not pay gas
-contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler {
+contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler, Pausable {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
