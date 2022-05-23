@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {ClaimERC1155ERC721ERC20} from "./ClaimERC1155ERC721ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
@@ -28,7 +29,11 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        whenNotPaused()
+    {
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -47,7 +52,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32[] calldata rootHashes,
         Claim[] memory claims,
         bytes32[][] calldata proofs
-    ) external {
+    ) external whenNotPaused() {
         require(claims.length == rootHashes.length, "MULTIGIVEAWAY_INVALID_INPUT");
         require(claims.length == proofs.length, "MULTIGIVEAWAY_INVALID_INPUT");
         for (uint256 i = 0; i < rootHashes.length; i++) {
@@ -75,7 +80,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof
-    ) public {
+    ) public whenNotPaused() {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
