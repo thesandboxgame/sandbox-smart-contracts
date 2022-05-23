@@ -16,6 +16,7 @@ library Verify {
         bytes32[] memory proof,
         bytes32 leaf
     ) internal pure returns (bool) {
+        require(proof.length > 0, "Proof array cannot be empty");
         bytes32 computedHash = leaf;
         for (uint256 i = 0; i < proof.length; i++) {
             bytes32 proofElement = proof[i];
