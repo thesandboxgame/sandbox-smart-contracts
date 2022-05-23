@@ -12,22 +12,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const maxTransferLimit = 20;
 
-  await deploy(
-    'MockPolygonAssetERC1155Tunnel',
-    {
-      from: deployer,
-      contract: 'MockPolygonAssetERC1155Tunnel',
-      args: [
-        FXCHILD.address,
-        PolygonAssetERC1155.address,
-        TRUSTED_FORWARDER.address,
-        maxTransferLimit,
-      ],
-      log: true,
-      skipIfAlreadyDeployed: true,
-      // gasLimit: 600000000000,
-    }
-  );
+  await deploy('MockPolygonAssetERC1155Tunnel', {
+    from: deployer,
+    contract: 'MockPolygonAssetERC1155Tunnel',
+    args: [
+      FXCHILD.address,
+      PolygonAssetERC1155.address,
+      TRUSTED_FORWARDER.address,
+      maxTransferLimit,
+    ],
+    log: true,
+    skipIfAlreadyDeployed: true,
+    // gasLimit: 600000000000,
+  });
 };
 
 export default func;
