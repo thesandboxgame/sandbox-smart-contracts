@@ -89,6 +89,9 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
         require(giveawayExpiryTime != 0, "MULTIGIVEAWAY_DOES_NOT_EXIST");
         require(block.timestamp < giveawayExpiryTime, "MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER");
+        bytes32 merkleLeaf = keccak256(abi.encode(claim));
+        require(claimed[claim.to][merkleLeaf] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
+        claimed[claim.to][merkleLeaf] = true;
         require(claimed[claim.to][merkleRoot] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
