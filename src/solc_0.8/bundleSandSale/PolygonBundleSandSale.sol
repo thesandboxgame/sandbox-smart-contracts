@@ -5,7 +5,7 @@ import "../common/interfaces/IERC20.sol";
 import "../common/interfaces/Medianizer.sol";
 import "../common/interfaces/IERC1155TokenReceiver.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
-import "../assetERC1155/AssetERC1155.sol";
+import "../common/interfaces/IPolygonAssetERC1155.sol";
 
 /// @title PolygonBundleSandSale contract.
 /// @notice This contract receives bundles of: Assets (ERC1155) + Sand.
@@ -34,7 +34,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     Medianizer public medianizer;
     IERC20 public dai;
     IERC20 public sand;
-    AssetERC1155 public asset;
+    IPolygonAssetERC1155 public asset;
     address payable public receivingWallet;
 
     /*
@@ -53,7 +53,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
 
     constructor(
         IERC20 sandTokenContractAddress,
-        AssetERC1155 assetTokenContractAddress,
+        IPolygonAssetERC1155 assetTokenContractAddress,
         Medianizer medianizerContractAddress,
         IERC20 daiTokenContractAddress,
         address admin,

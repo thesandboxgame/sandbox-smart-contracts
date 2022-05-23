@@ -4,8 +4,8 @@ import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, execute, read} = deployments;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deploy} = deployments;
+  const {deployer} = await getNamedAccounts();
 
   const AssetERC1155 = await deployments.get('Asset');
   const FXROOT = await deployments.get('FXROOT');

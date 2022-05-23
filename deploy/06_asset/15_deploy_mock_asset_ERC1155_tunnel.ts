@@ -4,7 +4,7 @@ import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, read} = deployments;
+  const {deploy} = deployments;
   const {deployer, assetAdmin} = await getNamedAccounts();
 
   const AssetERC1155 = await deployments.get('Asset');
@@ -51,14 +51,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'setFxChildTunnel',
       MockPolygonAssetERC1155Tunnel.address
     );
-  }
-
-  // setting up predicate on L1
-  let currentAdmin;
-  try {
-    currentAdmin = await read('Asset', 'getAdmin');
-  } catch (e) {
-    // no admin
   }
 
   await deployments.execute(

@@ -7,7 +7,6 @@ import {expect} from '../../chai-setup';
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetUpgraderFixtures = async () => {
   const {
-    deployer,
     assetAttributesRegistryAdmin,
     assetAdmin,
     sandAdmin,
