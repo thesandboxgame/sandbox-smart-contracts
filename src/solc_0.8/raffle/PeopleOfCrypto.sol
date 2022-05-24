@@ -34,7 +34,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     mapping(uint256 => uint256) private availableIds;
 
     address public allowedToExecuteMint;
-    address public allowedToExecutePersonalization;
     address public sandOwner;
     address public signAddress;
     string public baseTokenURI;
@@ -242,10 +241,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function setAllowedExecuteMint(address _address) external onlyOwner {
         allowedToExecuteMint = _address;
-    }
-
-    function setAllowedExecutePersonalization(address _address) external onlyOwner {
-        allowedToExecutePersonalization = _address;
     }
 
     function setSandOwnerAddress(address _owner) external onlyOwner {
