@@ -85,7 +85,7 @@ contract ClaimERC1155ERC721ERC20 {
         require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "CLAIM_INVALID");
     }
 
-    /// @dev Private function used to generate a hash from an encoded claim.
+    /// @dev Internal function used to generate a hash from an encoded claim.
     /// @param claim The claim struct.
     function _generateClaimHash(Claim memory claim) internal pure returns (bytes32) {
         return keccak256(abi.encode(claim));

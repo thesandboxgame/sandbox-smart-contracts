@@ -65,7 +65,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
 
     /// @notice Function to check which giveaways have been claimed by a particular user.
     /// @param user The user (intended token destination) address.
-    /// @param claims The array of giveaway root hashes to check.
+    /// @param claims The claim struct containing the destination address, all items to be claimed and optional salt param.
     /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
     function getClaimedStatus(address user, Claim[] memory claims) external view returns (bool[] memory) {
         bool[] memory claimedGiveaways = new bool[](claims.length);
