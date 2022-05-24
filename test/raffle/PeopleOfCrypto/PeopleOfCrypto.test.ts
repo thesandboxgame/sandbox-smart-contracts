@@ -254,6 +254,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     await personalize(
       raffleSignWallet,
+      deployer,
       1,
       hre.network.config.chainId || 31337,
       tokenId,
@@ -320,6 +321,7 @@ describe('RafflePeopleOfCrypto', function () {
     await expect(
       personalizeInvalidSignature(
         raffleSignWallet,
+        deployer,
         1,
         hre.network.config.chainId || 31337,
         tokenId,
@@ -390,6 +392,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     const personalizeReceipt2 = await personalize(
       raffleSignWallet,
+      deployer,
       2,
       hre.network.config.chainId || 31337,
       tokenId2,
@@ -468,7 +471,7 @@ describe('RafflePeopleOfCrypto', function () {
     );
 
     const contract = rafflePeopleOfCryptoContract.connect(
-      ethers.provider.getSigner(raffleSignWallet.address)
+      ethers.provider.getSigner(deployer)
     );
 
     await waitFor(

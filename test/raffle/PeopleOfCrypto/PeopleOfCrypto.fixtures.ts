@@ -99,7 +99,7 @@ async function validPersonalizeSignature(
   const hashedData = ethers.utils.defaultAbiCoder.encode(
     ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
     [
-      wallet.address,
+      deployer,
       signatureId,
       contractAddress,
       chainId,
@@ -206,6 +206,7 @@ function personalizeSetup(
 ) {
   return async (
     wallet: Wallet | SignerWithAddress,
+    address: string,
     signatureId: number,
     chainId: number,
     tokenId: number,
@@ -220,9 +221,7 @@ function personalizeSetup(
       personalizationMask
     );
 
-    const contract = raffleContract.connect(
-      ethers.provider.getSigner(raffleSignWallet.address)
-    );
+    const contract = raffleContract.connect(ethers.provider.getSigner(address));
 
     return waitFor(
       contract.personalize(signatureId, signature, tokenId, personalizationMask)
