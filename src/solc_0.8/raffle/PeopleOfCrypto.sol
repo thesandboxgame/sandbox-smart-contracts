@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
 /* solhint-disable max-states-count */
 contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
-    uint256 public constant MAX_SUPPLY = 25_000;
+    uint256 public constant MAX_SUPPLY = 8_430;
 
     event TogglePaused(bool _pause);
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);

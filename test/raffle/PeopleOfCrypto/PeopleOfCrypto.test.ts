@@ -472,7 +472,7 @@ describe('RafflePeopleOfCrypto', function () {
     );
 
     const contract = rafflePeopleOfCryptoContract.connect(
-      ethers.provider.getSigner(raffleSignWallet.address)
+      ethers.provider.getSigner(deployer)
     );
 
     await waitFor(
