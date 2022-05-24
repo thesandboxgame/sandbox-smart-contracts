@@ -46,6 +46,7 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         address _signAddress
     ) ERC721(_name, _symbol) {
         setBaseURI(baseURI);
+        require(_sandOwner != address(0), "Sand owner is zero address");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
     }
