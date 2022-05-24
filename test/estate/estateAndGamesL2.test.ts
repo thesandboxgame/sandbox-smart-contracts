@@ -2,7 +2,7 @@ import {setupL2EstateGameAndLand} from './fixtures';
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
 
-describe('Estate test with maps and games on layer 2', function () {
+describe('L2 Estate test with maps and games', function () {
   describe('create one estate', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {

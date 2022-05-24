@@ -2,7 +2,7 @@ import {setupL1EstateAndLand} from './fixtures';
 import {ethers} from 'ethers';
 import {expect} from '../chai-setup';
 
-describe('Estate test with maps on layer 1', function () {
+describe('L1 Estate test with maps', function () {
   describe('create one estate', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -66,7 +66,7 @@ describe('Estate test with maps on layer 1', function () {
   describe('create one estate and update it', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
-      it(`create an estate with ${size}x${size} quad and update it with a new quad`, async function () {
+      it(`Update estate with swapping quads`, async function () {
         const {
           other,
           landContractAsOther,
