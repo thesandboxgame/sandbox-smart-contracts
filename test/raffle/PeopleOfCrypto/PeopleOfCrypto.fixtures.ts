@@ -209,9 +209,7 @@ function personalizeSetup(
       personalizationMask
     );
 
-    const contract = raffleContract.connect(
-      ethers.provider.getSigner(address)
-    );
+    const contract = raffleContract.connect(ethers.provider.getSigner(address));
 
     return waitFor(
       contract.personalize(signatureId, signature, tokenId, personalizationMask)
