@@ -207,7 +207,7 @@ describe('RafflePeopleOfCrypto', function () {
     assert.equal(tokens.length, 20000);
   });
 
-  it('should be able to personalize with valid signature', async function () {
+  it.only('should be able to personalize with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
@@ -254,6 +254,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     await personalize(
       raffleSignWallet,
+      deployer,
       1,
       hre.network.config.chainId || 31337,
       tokenId,
@@ -320,6 +321,7 @@ describe('RafflePeopleOfCrypto', function () {
     await expect(
       personalizeInvalidSignature(
         raffleSignWallet,
+        deployer,
         1,
         hre.network.config.chainId || 31337,
         tokenId,
@@ -390,6 +392,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     const personalizeReceipt2 = await personalize(
       raffleSignWallet,
+      deployer,
       2,
       hre.network.config.chainId || 31337,
       tokenId2,
@@ -460,6 +463,7 @@ describe('RafflePeopleOfCrypto', function () {
 
     const signature = await personalizeSignature(
       raffleSignWallet,
+      deployer,
       1,
       rafflePeopleOfCryptoContract.address,
       hre.network.config.chainId || 31337,
