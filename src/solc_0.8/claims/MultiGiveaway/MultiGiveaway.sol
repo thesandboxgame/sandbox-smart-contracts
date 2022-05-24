@@ -65,12 +65,13 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
 
     /// @notice Function to check which giveaways have been claimed by a particular user.
     /// @param user The user (intended token destination) address.
-    /// @param rootHashes The array of giveaway root hashes to check.
+    /// @param claims The array of giveaway root hashes to check.
     /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
-    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external view returns (bool[] memory) {
-        bool[] memory claimedGiveaways = new bool[](rootHashes.length);
-        for (uint256 i = 0; i < rootHashes.length; i++) {
-            claimedGiveaways[i] = claimed[user][rootHashes[i]];
+    function getClaimedStatus(address user, Claim[] memory claims) external view returns (bool[] memory) {
+        bool[] memory claimedGiveaways = new bool[](claims.length);
+        for (uint256 i = 0; i < claims.length; i++) {
+            bytes32 merkleLeaf = keccak256(abi.encode(claims[i]));
+            claimedGiveaways[i] = claimed[user][merkleLeaf];
         }
         return claimedGiveaways;
     }
@@ -92,8 +93,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32 merkleLeaf = keccak256(abi.encode(claim));
         require(claimed[claim.to][merkleLeaf] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleLeaf] = true;
-        require(claimed[claim.to][merkleRoot] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
-        claimed[claim.to][merkleRoot] = true;
+
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }
 
