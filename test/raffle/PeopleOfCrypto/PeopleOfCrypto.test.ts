@@ -207,7 +207,7 @@ describe('RafflePeopleOfCrypto', function () {
     assert.equal(tokens.length, 20000);
   });
 
-  it.only('should be able to personalize with valid signature', async function () {
+  it('should be able to personalize with valid signature', async function () {
     const {
       rafflePeopleOfCryptoContract,
       transferSand,
