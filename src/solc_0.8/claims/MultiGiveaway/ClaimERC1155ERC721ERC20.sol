@@ -87,7 +87,7 @@ contract ClaimERC1155ERC721ERC20 {
 
     /// @dev Private function used to generate a hash from an encoded claim.
     /// @param claim The claim struct.
-    function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
+    function _generateClaimHash(Claim memory claim) internal pure returns (bytes32) {
         return keccak256(abi.encode(claim));
     }
 

@@ -70,7 +70,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     function getClaimedStatus(address user, Claim[] memory claims) external view returns (bool[] memory) {
         bool[] memory claimedGiveaways = new bool[](claims.length);
         for (uint256 i = 0; i < claims.length; i++) {
-            bytes32 merkleLeaf = keccak256(abi.encode(claims[i]));
+            bytes32 merkleLeaf = _generateClaimHash(claims[i]);
             claimedGiveaways[i] = claimed[user][merkleLeaf];
         }
         return claimedGiveaways;
@@ -90,7 +90,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
         require(giveawayExpiryTime != 0, "MULTIGIVEAWAY_DOES_NOT_EXIST");
         require(block.timestamp < giveawayExpiryTime, "MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER");
-        bytes32 merkleLeaf = keccak256(abi.encode(claim));
+        bytes32 merkleLeaf = _generateClaimHash(claim);
         require(claimed[claim.to][merkleLeaf] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleLeaf] = true;
 
