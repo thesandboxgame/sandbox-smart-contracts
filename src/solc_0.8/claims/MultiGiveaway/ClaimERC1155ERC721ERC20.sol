@@ -4,8 +4,8 @@ pragma solidity 0.8.2;
 import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+import {MerkleProof} from "@openzeppelin/contracts-0.8/utils/cryptography/MerkleProof.sol";
 import {IERC721Extended} from "../../common/interfaces/IERC721Extended.sol";
-import {Verify} from "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
     using SafeERC20 for IERC20;
@@ -82,7 +82,7 @@ contract ClaimERC1155ERC721ERC20 {
         bytes32[] memory proof
     ) private pure {
         bytes32 leaf = _generateClaimHash(claim);
-        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "CLAIM_INVALID");
+        require(MerkleProof.verify(proof, merkleRoot, leaf), "CLAIM_INVALID");
     }
 
     /// @dev Internal function used to generate a hash from an encoded claim.
