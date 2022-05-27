@@ -272,11 +272,11 @@ describe('RafflePeopleOfCrypto', function () {
       personalizationMask
     );
 
-    const personalizationTraits = await rafflePeopleOfCryptoContract.getPersonalizationTraits(
+    const personalizationOf = await rafflePeopleOfCryptoContract.personalizationOf(
       tokenId
     );
 
-    assert.equal(personalizationTraits, personalizationMask);
+    assert.equal(personalizationOf, personalizationMask);
   });
 
   it('should not be able to personalize with invalid signature', async function () {
