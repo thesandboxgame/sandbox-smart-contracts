@@ -207,6 +207,10 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         return value;
     }
 
+    function getPersonalizationTraits(uint256 _tokenId) external view returns (uint256) {
+        return personalizationTraits[_tokenId];
+    }
+
     function toggleSale() external onlyOwner {
         paused = paused == 0 ? 1 : 0;
         emit TogglePaused(paused == 1);
