@@ -5,9 +5,26 @@ pragma solidity 0.8.2;
 // TODO: Check if a pure function is better than a mapping for the masks
 // A square of 24x24 bits
 library TileLib {
+    struct CornerLine {
+        uint256 left;
+        uint256 center;
+        uint256 right;
+    }
+    struct Corner {
+        Tile left;
+        Tile right;
+        CornerLine up;
+        CornerLine down;
+    }
+
     struct Tile {
         uint256[3] data;
     }
+
+    uint256 private constant DATA_LEN = 3;
+
+    // 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 public constant COORD_MASK_NEG = (2**(24 * 8) - 1);
 
     function initTile() internal pure returns (Tile memory) {
         Tile memory ret;
@@ -89,7 +106,10 @@ library TileLib {
     }
 
     function isEmpty(Tile memory self) internal pure returns (bool) {
-        return self.data[0] == 0 && self.data[1] == 0 && self.data[2] == 0;
+        return
+            self.data[0] & COORD_MASK_NEG == 0 &&
+            self.data[1] & COORD_MASK_NEG == 0 &&
+            self.data[2] & COORD_MASK_NEG == 0;
     }
 
     function isEqual(Tile memory self, Tile memory b) internal pure returns (bool) {
@@ -110,15 +130,111 @@ library TileLib {
         return self;
     }
 
-    function subtractWitMask(
-        Tile memory self,
-        Tile memory value,
-        uint256 ignoreMask
-    ) internal pure returns (Tile memory) {
-        self.data[0] &= ~(value.data[0] & ignoreMask);
-        self.data[1] &= ~(value.data[1] & ignoreMask);
-        self.data[2] &= ~(value.data[2] & ignoreMask);
+    function subtractWitMask(Tile memory self, Tile memory value) internal pure returns (Tile memory) {
+        self.data[0] &= ~(value.data[0] & COORD_MASK_NEG);
+        self.data[1] &= ~(value.data[1] & COORD_MASK_NEG);
+        self.data[2] &= ~(value.data[2] & COORD_MASK_NEG);
         return self;
+    }
+
+    uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
+    uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;
+    uint256 private constant UP_LEFT_MASK = 0x000000000000000000000000000000000000000000000001;
+    uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
+    uint256 private constant UP_RIGHT_MASK = 0x000000000000000000000000000000000000000000800000;
+    uint256 private constant DOWN_LEFT_MASK = 0x000001000000000000000000000000000000000000000000;
+    uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
+    uint256 private constant DOWN_RIGHT_MASK = 0x800000000000000000000000000000000000000000000000;
+
+    function grow(Tile memory self) internal pure returns (Tile memory, Corner memory corners) {
+        // up-left -> down-right
+        corners.up.left = (self.data[0] & UP_LEFT_MASK) << (24 * 7 + 23);
+        // up -> down
+        corners.up.center = (self.data[0] & UP_MASK) << (24 * 7);
+        // up-right -> down-left
+        corners.up.right = (self.data[0] & UP_RIGHT_MASK) << (24 * 7 - 23);
+        // down-left -> up-right
+        corners.down.left = (self.data[2] & DOWN_LEFT_MASK) >> (24 * 7 - 23);
+        // down -> up
+        corners.down.center = (self.data[2] & DOWN_MASK) >> (24 * 7);
+        // down-right -> up-left
+        corners.down.right = (self.data[2] & DOWN_RIGHT_MASK) >> (24 * 7 + 23);
+        self.data[0] = grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));
+        self.data[1] =
+            grow(self.data[1]) |
+            ((self.data[2] & UP_MASK) << (24 * 7)) |
+            ((self.data[0] & DOWN_MASK) >> (24 * 7));
+        self.data[2] = grow(self.data[2]) | ((self.data[1] & DOWN_MASK) >> (24 * 7));
+        uint256 i;
+        for (; i < DATA_LEN; i++) {
+            corners.left.data[i] = (self.data[i] & LEFT_MASK) << 23;
+            corners.right.data[i] = (self.data[i] & RIGHT_MASK) >> 23;
+        }
+        // TODO: if neighbour and corners don't have coordinates then coordinates are not destroyed ?
+        return (self, corners);
+    }
+
+    function addDown(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
+        self.data[0] = self.data[0] | toAdd;
+        return self;
+    }
+
+    function addUp(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
+        self.data[2] = self.data[2] | toAdd;
+        return self;
+    }
+
+    function addTile(Tile memory self, Tile memory tile) internal pure returns (Tile memory) {
+        uint256 i;
+        for (; i < DATA_LEN; i++) {
+            self.data[i] = self.data[i] | tile.data[i];
+        }
+        return self;
+    }
+
+    function grow(uint256 x) private pure returns (uint256) {
+        // TODO: declare constant, optimize?
+        x = x | ((x & (~RIGHT_MASK)) << 1) | ((x & (~LEFT_MASK)) >> 1);
+        // TODO: we can remove & COORD_MASK_NEG, and leave some garbage.
+        return (x | (x << 24) | (x >> 24)) & COORD_MASK_NEG;
+    }
+
+    function findAPixel(Tile memory self) internal pure returns (Tile memory ret) {
+        uint256 i;
+        for (; i < DATA_LEN; i++) {
+            uint256 target = self.data[i] & COORD_MASK_NEG;
+            if (target == 0) {
+                continue;
+            }
+            uint256 shift = findAPixel(target);
+            ret.data[i] = ret.data[i] | (1 << shift);
+            return ret;
+        }
+        return ret;
+    }
+
+    function findAPixel(uint256 target) private pure returns (uint256 shift) {
+        uint256 mask = (2**64 - 1);
+        // divide in 3 parts, then do a binary search
+        if ((target & mask) == 0) {
+            target = target >> 64;
+            shift = 64;
+            if ((target & mask) == 0) {
+                target = target >> 64;
+                shift = 128;
+            }
+        }
+        target = target & mask;
+        for (uint256 i = 32; i > 0; i = i / 2) {
+            mask = mask >> i;
+            if ((target & mask) == 0) {
+                target = target >> i;
+                shift += i;
+            } else {
+                target = target & mask;
+            }
+        }
+        return shift;
     }
 
     uint256 private constant QUAD_MASK_1 = 1;

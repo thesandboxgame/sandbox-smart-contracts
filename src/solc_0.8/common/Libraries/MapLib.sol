@@ -1,11 +1,16 @@
 //SPDX-License-Identifier: MIT
+/* solhint-disable code-complexity */
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import {TileWithCoordLib} from "./TileWithCoordLib.sol";
+// TODO: Moveit to a intermediate library
+import {TileLib} from "./TileLib.sol";
 
 library MapLib {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
+    // TODO: Moveit to a intermediate library
+    using TileLib for TileLib.Tile;
 
     struct QuadsAndTiles {
         uint256[][3] quads; //(size, x, y)
@@ -129,7 +134,7 @@ library MapLib {
         }
         TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size);
         if (t.isEmpty()) {
-            remove(self, idx, key);
+            _remove(self, idx, key);
         } else {
             self.values[idx - 1] = t;
         }
@@ -145,7 +150,7 @@ library MapLib {
         }
         TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].subtract(tile);
         if (t.isEmpty()) {
-            remove(self, idx, key);
+            _remove(self, idx, key);
         } else {
             self.values[idx - 1] = t;
         }
@@ -226,6 +231,98 @@ library MapLib {
         return (idx != 0);
     }
 
+    function isAdjacent(Map storage self) public view returns (bool ret) {
+        TileLib.Tile[] memory spot;
+        spot[0] = self.values[0].tile.findAPixel();
+        bool done;
+        while (!done) {
+            (spot, done) = growAndMask(self, spot);
+        }
+        uint256 len = self.values.length;
+        uint256 i;
+        for (; i < len; i++) {
+            ret = ret || spot[i].isEqual(self.values[i].tile);
+        }
+        return ret;
+    }
+
+    // TODO: this is terrible, test it then improve is (a lot!!!)
+    function growAndMask(Map storage self, TileLib.Tile[] memory spot)
+        public
+        view
+        returns (TileLib.Tile[] memory ret, bool done)
+    {
+        uint256 len = self.values.length;
+        uint256 i;
+        uint256 x;
+        uint256 y;
+        uint256 idx;
+        TileLib.Corner[] memory corners = new TileLib.Corner[](len);
+        ret = new TileLib.Tile[](len);
+        for (i; i < len; i++) {
+            if (spot[i].isEmpty()) {
+                continue;
+            }
+            (ret[i], corners[i]) = spot[i].grow();
+        }
+        for (i = 0; i < len; i++) {
+            x = self.values[i].getX();
+            y = self.values[i].getY();
+            if (x >= 24) {
+                // left
+                idx = _getIdx(self, x - 24, y);
+                if (idx != 0) {
+                    ret[idx - 1] = ret[idx - 1].addTile(corners[i].left);
+                }
+                // left-up
+                if (y >= 24) {
+                    idx = _getIdx(self, x - 24, y - 24);
+                    if (idx != 0) {
+                        ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.left);
+                    }
+                }
+                // left-down
+                idx = _getIdx(self, x - 24, y + 24);
+                if (idx != 0) {
+                    ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.left);
+                }
+            }
+            if (y >= 24) {
+                // center-up
+                idx = _getIdx(self, x, y - 24);
+                if (idx != 0) {
+                    ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.center);
+                }
+                // right-up
+                idx = _getIdx(self, x + 24, y - 24);
+                if (idx != 0) {
+                    ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.right);
+                }
+            }
+            // right
+            idx = _getIdx(self, x + 24, y);
+            if (idx != 0) {
+                ret[idx - 1] = ret[idx - 1].addTile(corners[i].right);
+            }
+            // center-down
+            idx = _getIdx(self, x, y + 24);
+            if (idx != 0) {
+                ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.center);
+            }
+            // right-down
+            idx = _getIdx(self, x + 24, y + 24);
+            if (idx != 0) {
+                ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.right);
+            }
+        }
+        // Mask it.
+        for (i = 0; i < len; i++) {
+            ret[i] = ret[i].and(self.values[i].tile);
+            done = done || ret[i].isEqual(spot[i]);
+        }
+        return (ret, done);
+    }
+
     function moveTo(
         Map storage self,
         Map storage other,
@@ -299,7 +396,7 @@ library MapLib {
         }
     }
 
-    function remove(
+    function _remove(
         Map storage self,
         uint256 idx,
         uint256 key
@@ -314,5 +411,14 @@ library MapLib {
         }
         self.values.pop();
         delete self.indexes[key];
+    }
+
+    function _getIdx(
+        Map storage self,
+        uint256 x,
+        uint256 y
+    ) private view returns (uint256) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        return self.indexes[key];
     }
 }

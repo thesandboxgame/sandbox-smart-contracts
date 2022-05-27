@@ -57,6 +57,16 @@ export function tileToArray(data: BigNumberish[]): boolean[][] {
   return ret;
 }
 
+export function resultToArray(strs: string[]): boolean[][] {
+  return strs.map((x) =>
+    x
+      .split(' ')
+      .map((x) => x.trim())
+      .filter((x) => x.trim() != '')
+      .map((x) => x != 'O')
+  );
+}
+
 export function tileWithCoordToJS(coord: {
   tile: {data: BigNumberish[]};
 }): {tile: boolean[][]; x: BigNumber; y: BigNumber} {
@@ -71,7 +81,27 @@ export function getEmptyTile(): boolean[][] {
   return Array.from({length: 24}, () => Array.from({length: 24}, () => false));
 }
 
-export function printTile(jsTile: boolean[][]): void {
+export function addHorizontalLine(tile: boolean[][], l: number): boolean[][] {
+  for (let i = 0; i < 24; i++) {
+    tile[l][i] = true;
+  }
+  return tile;
+}
+
+export function addVerticaLine(tile: boolean[][], l: number): boolean[][] {
+  for (let i = 0; i < 24; i++) {
+    tile[i][l] = true;
+  }
+  return tile;
+}
+
+export function printTile(jsTile: boolean[][], compact = false): void {
+  if (compact) {
+    console.log(
+      jsTile.map((x) => x.reduce((acc, val) => acc + (val ? ' X ' : ' O '), ''))
+    );
+    return;
+  }
   console.log(
     '     ',
     [...Array(jsTile.length).keys()].reduce(
@@ -80,10 +110,9 @@ export function printTile(jsTile: boolean[][]): void {
     )
   );
   for (let i = 0; i < jsTile.length; i++) {
-    const line = jsTile[i];
     console.log(
       i.toString().padEnd(5),
-      line.reduce((acc, val) => acc + (val ? ' X ' : ' O '), '')
+      jsTile[i].reduce((acc, val) => acc + (val ? ' X ' : ' O '), '')
     );
   }
 }

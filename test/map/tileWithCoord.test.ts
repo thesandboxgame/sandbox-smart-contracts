@@ -31,7 +31,7 @@ describe('TileWithCoordLib', function () {
     expect(x).to.be.equal(123);
     const y = BigNumber.from(await tester.getY(0));
     expect(y).to.be.equal(321);
-    expect(await tester.getKey(0)).to.be.equal(x.or(y.shl(32)));
+    expect(await tester.getKey(0)).to.be.equal(x.or(y.shl(16)));
   });
 
   it('merge', async function () {

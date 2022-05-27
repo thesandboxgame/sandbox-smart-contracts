@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 
 import {MapLib} from "../../common/Libraries/MapLib.sol";
 import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol";
+import {TileLib} from "../../common/Libraries/TileLib.sol";
 
 contract MapTester {
     using MapLib for MapLib.Map;
@@ -62,6 +63,18 @@ contract MapTester {
         uint256 size
     ) external view returns (bool) {
         return maps[idx].containQuad(x, y, size);
+    }
+
+    function isAdjacent(uint256 idx) external view returns (bool) {
+        return maps[idx].isAdjacent();
+    }
+
+    function growAndMask(uint256 idx, TileLib.Tile[] memory prevSpot)
+        external
+        view
+        returns (TileLib.Tile[] memory, bool)
+    {
+        return maps[idx].growAndMask(prevSpot);
     }
 
     function containMap(uint256 idx, uint256 contained) external view returns (bool) {

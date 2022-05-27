@@ -12,13 +12,12 @@ library TileWithCoordLib {
         TileLib.Tile tile;
     }
 
-    uint256 public constant COORD_MASK_NEG = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-
     // TileWithCoord x and y always start in multiples of 24
     function initTileWithCoord(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
-        ret.tile.data[1] = (x / 24) << 192;
-        ret.tile.data[2] = (y / 24) << 192;
+        ret.tile.data[0] = (getKey(x, y)) << 224;
+        ret.tile.data[1] = (x / 24) << 224;
+        ret.tile.data[2] = (y / 24) << 224;
         return ret;
     }
 
@@ -56,7 +55,7 @@ library TileWithCoordLib {
         returns (TileWithCoord memory)
     {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
-        self.tile = self.tile.subtractWitMask(value.tile, COORD_MASK_NEG);
+        self.tile = self.tile.subtractWitMask(value.tile);
         return self;
     }
 
@@ -83,27 +82,24 @@ library TileWithCoordLib {
         return contained.tile.isEqual(contained.tile.clone().and(self.tile));
     }
 
+    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
+        return self.tile.data[0] >> 224;
+    }
+
     function getX(TileWithCoord memory self) internal pure returns (uint256) {
-        return self.tile.data[1] >> 192;
+        return self.tile.data[1] >> 224;
     }
 
     function getY(TileWithCoord memory self) internal pure returns (uint256) {
-        return self.tile.data[2] >> 192;
+        return self.tile.data[2] >> 224;
     }
 
     function getKey(uint256 x, uint256 y) internal pure returns (uint256) {
-        return (x / 24) | ((y / 24) << 32);
-    }
-
-    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
-        return getX(self) | (getY(self) << 32);
+        return (x / 24) | ((y / 24) << 16);
     }
 
     function isEmpty(TileWithCoord memory self) internal pure returns (bool) {
-        return
-            self.tile.data[0] & COORD_MASK_NEG == 0 &&
-            self.tile.data[1] & COORD_MASK_NEG == 0 &&
-            self.tile.data[2] & COORD_MASK_NEG == 0;
+        return self.tile.isEmpty();
     }
 
     function isEqual(TileWithCoord memory self, TileWithCoord memory other) internal pure returns (bool) {

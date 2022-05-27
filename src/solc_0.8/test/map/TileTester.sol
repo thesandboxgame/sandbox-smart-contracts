@@ -7,6 +7,7 @@ import {TileLib} from "../../common/Libraries/TileLib.sol"; // TODO: Separate th
 contract TileTester {
     using TileLib for TileLib.Tile;
     TileLib.Tile[30] internal tiles;
+    TileLib.Corner[10] internal neighbours;
 
     function setQuad(
         uint256 idx,
@@ -28,6 +29,51 @@ contract TileTester {
 
     function getTile(uint256 idx) external view returns (TileLib.Tile memory) {
         return tiles[idx];
+    }
+
+    function findAPixel(uint256 idx) external view returns (TileLib.Tile memory) {
+        return tiles[idx].findAPixel();
+    }
+
+    function setFindAPixel(uint256 idx, uint256 out) external {
+        tiles[out] = tiles[idx].findAPixel();
+    }
+
+    function grow(uint256 idx)
+        external
+        view
+        returns (
+            TileLib.Tile memory tile,
+            TileLib.Tile memory left,
+            TileLib.Tile memory right,
+            TileLib.CornerLine memory up,
+            TileLib.CornerLine memory down
+        )
+    {
+        TileLib.Corner memory corners;
+        (tile, corners) = tiles[idx].grow();
+        return (tile, corners.left, corners.right, corners.up, corners.down);
+    }
+
+    function growNeighbours(uint256 idx, uint256 out) external {
+        (tiles[out], neighbours[out]) = tiles[idx].grow();
+    }
+
+    function getCorner(uint256 idx)
+        external
+        view
+        returns (
+            TileLib.Tile memory left,
+            TileLib.Tile memory right,
+            TileLib.CornerLine memory up,
+            TileLib.CornerLine memory down
+        )
+    {
+        return (neighbours[idx].left, neighbours[idx].right, neighbours[idx].up, neighbours[idx].down);
+    }
+
+    function setGrow(uint256 idx, uint256 out) external {
+        (tiles[out], neighbours[out]) = tiles[idx].grow();
     }
 
     function union(uint256[] calldata idxs, uint256 idxOut) external {
