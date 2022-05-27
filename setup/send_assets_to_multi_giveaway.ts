@@ -55,7 +55,11 @@ const func: DeployFunction = async function () {
   const json: Array<MultiClaim> = fs.readJSONSync(path);
   const assetIdsCount = getAssets(json);
   const MultiGiveaway = await deployments.get(multiGiveawayName);
-  const {sandboxAccount, sandboxFoundation} = await getNamedAccounts();
+  const {
+    sandboxAccount,
+    sandboxFoundation, // ToDo: check which is the correct account to use
+    sandSaleBeneficiary,
+  } = await getNamedAccounts();
   const owner = assetHolder || sandboxAccount;
   // Send ERC1155
   const ids = [];
@@ -83,23 +87,26 @@ const func: DeployFunction = async function () {
     );
   }
   const erc20Hash = getERC20(json);
-  const sandContract = await (hre.network.tags.L1
-    ? deployments.get('Sand')
-    : deployments.get('PolygonSand'));
+  const sandContractName = hre.network.tags.L1 ? 'Sand' : 'PolygonSand';
+  const sandContract = await deployments.get(sandContractName);
+
   for (const address in erc20Hash) {
     if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
       continue;
     const amount = erc20Hash[address];
+    console.log(sandContract.address);
     console.log('sand rewards');
     console.log(amount.toString());
     console.log('foundation balance');
     console.log(
-      (await read('Sand', {}, 'balanceOf', sandboxFoundation)).toString()
+      (
+        await read(sandContractName, {}, 'balanceOf', sandSaleBeneficiary)
+      ).toString()
     );
     await catchUnknownSigner(
       execute(
-        'Sand',
-        {from: sandboxFoundation, log: true},
+        sandContractName,
+        {from: sandSaleBeneficiary, log: true},
         'transfer',
         MultiGiveaway.address,
         amount
