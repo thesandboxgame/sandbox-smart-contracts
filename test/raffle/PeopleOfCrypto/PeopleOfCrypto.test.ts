@@ -271,6 +271,12 @@ describe('RafflePeopleOfCrypto', function () {
       personalizeEvents[0]?.args?._personalizationMask,
       personalizationMask
     );
+
+    const personalizationOf = await rafflePeopleOfCryptoContract.personalizationOf(
+      tokenId
+    );
+
+    assert.equal(personalizationOf, personalizationMask);
   });
 
   it('should not be able to personalize with invalid signature', async function () {
