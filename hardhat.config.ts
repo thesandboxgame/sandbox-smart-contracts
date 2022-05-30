@@ -245,6 +245,10 @@ const config: HardhatUserConfig = {
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
     gemsCatalystsRegistryAdmin: 'sandAdmin',
+    ozdRelayer: {
+      default: 1,
+      polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
+    },
   },
   networks: {
     /**
