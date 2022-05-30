@@ -37,6 +37,29 @@ export const setupMapTest = withSnapshot([], async () => {
   };
 });
 
+type ExtendedTileLine = {
+  up: BigNumberish;
+  middle: {data: BigNumberish[]};
+  down: BigNumberish;
+};
+
+export function extendedTileToArray(data: {
+  left: ExtendedTileLine;
+  center: ExtendedTileLine;
+  right: ExtendedTileLine;
+}): boolean[][] {
+  const lineToArray = (line: ExtendedTileLine) =>
+    tileToArray([line.up, ...line.middle.data, line.down]);
+  const left = lineToArray(data.left);
+  const center = lineToArray(data.center);
+  const right = lineToArray(data.right);
+  const ret = [];
+  for (let i = 0; i < left.length; i++) {
+    ret.push([...left[i], ...center[i], ...right[i]]);
+  }
+  return ret;
+}
+
 export function tileToArray(data: BigNumberish[]): boolean[][] {
   const ret = [];
   for (let r = 0; r < data.length; r++) {
@@ -77,42 +100,71 @@ export function tileWithCoordToJS(coord: {
   };
 }
 
-export function getEmptyTile(): boolean[][] {
-  return Array.from({length: 24}, () => Array.from({length: 24}, () => false));
+export function getEmptyTile(height = 24, width = 24): boolean[][] {
+  return Array.from({length: height}, () =>
+    Array.from({length: width}, () => false)
+  );
 }
 
-export function addHorizontalLine(tile: boolean[][], l: number): boolean[][] {
-  for (let i = 0; i < 24; i++) {
-    tile[l][i] = true;
+export function getEmptyExtendedTile(): boolean[][] {
+  return getEmptyTile(8 + 24 + 8, 24 * 3);
+}
+
+export function setRectangle(
+  tile: boolean[][],
+  x0: number,
+  y0: number,
+  dx: number,
+  dy: number,
+  val = true
+): boolean[][] {
+  for (let i = 0; i < dx; i++) {
+    for (let j = 0; j < dy; j++) {
+      tile[y0 + j][x0 + i] = val;
+    }
   }
   return tile;
 }
 
-export function addVerticaLine(tile: boolean[][], l: number): boolean[][] {
-  for (let i = 0; i < 24; i++) {
-    tile[i][l] = true;
-  }
-  return tile;
+export function drawTile(
+  rectangles: number[][],
+  initFunc: () => boolean[][]
+): boolean[][] {
+  return rectangles.reduce(
+    (acc, val) => setRectangle(acc, val[0], val[1], val[2], val[3]),
+    initFunc()
+  );
+}
+
+export function drawExtendedTile(rectangles: number[][]): boolean[][] {
+  return drawTile(rectangles, getEmptyExtendedTile);
 }
 
 export function printTile(jsTile: boolean[][], compact = false): void {
   if (compact) {
     console.log(
-      jsTile.map((x) => x.reduce((acc, val) => acc + (val ? ' X ' : ' O '), ''))
+      jsTile.map((x) => x.reduce((acc, val) => acc + (val ? 'X ' : 'O '), ''))
     );
     return;
   }
   console.log(
     '     ',
-    [...Array(jsTile.length).keys()].reduce(
-      (acc, val) => acc + val.toString().padEnd(3),
+    [...Array(jsTile[0].length).keys()].reduce(
+      (acc, val) => acc + val.toString().substring(0, 1).padEnd(2),
+      ''
+    )
+  );
+  console.log(
+    '     ',
+    [...Array(jsTile[0].length).keys()].reduce(
+      (acc, val) => acc + val.toString().substring(1, 2).padEnd(2),
       ''
     )
   );
   for (let i = 0; i < jsTile.length; i++) {
     console.log(
       i.toString().padEnd(5),
-      jsTile[i].reduce((acc, val) => acc + (val ? ' X ' : ' O '), '')
+      jsTile[i].reduce((acc, val) => acc + (val ? 'X ' : 'O '), '')
     );
   }
 }
@@ -139,8 +191,8 @@ export function printMap(
   }
 }
 
-export function roundedTo(x: number, size: number): number {
-  return Math.floor(x / size) * size;
+export function roundedTo(n: number, size: number): number {
+  return Math.floor(n / size) * size;
 }
 
 export function createTestMapQuads(

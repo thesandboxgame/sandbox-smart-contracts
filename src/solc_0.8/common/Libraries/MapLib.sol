@@ -232,11 +232,12 @@ library MapLib {
     }
 
     function isAdjacent(Map storage self) public view returns (bool ret) {
-        TileLib.Tile[] memory spot;
+        TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);
+        // We assume that all self.values[] are non empty (we remove them if they are empty).
         spot[0] = self.values[0].tile.findAPixel();
         bool done;
         while (!done) {
-            (spot, done) = growAndMask(self, spot);
+            (spot, done) = floodStep(self, spot);
         }
         uint256 len = self.values.length;
         uint256 i;
@@ -246,81 +247,59 @@ library MapLib {
         return ret;
     }
 
-    // TODO: this is terrible, test it then improve is (a lot!!!)
-    function growAndMask(Map storage self, TileLib.Tile[] memory spot)
+    // TODO: this is terrible, test it then improve it (a lot!!!)
+    function floodStep(Map storage self, TileLib.Tile[] memory current)
         public
         view
-        returns (TileLib.Tile[] memory ret, bool done)
+        returns (TileLib.Tile[] memory next, bool done)
     {
         uint256 len = self.values.length;
         uint256 i;
         uint256 x;
         uint256 y;
         uint256 idx;
-        TileLib.Corner[] memory corners = new TileLib.Corner[](len);
-        ret = new TileLib.Tile[](len);
+        TileLib.ExtendedTile[] memory corners = new TileLib.ExtendedTile[](len);
+        next = new TileLib.Tile[](len);
         for (i; i < len; i++) {
-            if (spot[i].isEmpty()) {
+            if (current[i].isEmpty()) {
                 continue;
             }
-            (ret[i], corners[i]) = spot[i].grow();
+            corners[i] = current[i].grow();
         }
         for (i = 0; i < len; i++) {
             x = self.values[i].getX();
             y = self.values[i].getY();
-            if (x >= 24) {
-                // left
-                idx = _getIdx(self, x - 24, y);
-                if (idx != 0) {
-                    ret[idx - 1] = ret[idx - 1].addTile(corners[i].left);
-                }
-                // left-up
+            // TODO: this is bad?? maybe is better to just copy the code...
+            TileLib.ExtendedTileLine[3] memory e = [corners[i].left, corners[i].center, corners[i].right];
+            // -24, 0 , 24
+            uint256 j = (x < 24) ? 1 : 0;
+            for (; j < 3; j++) {
+                uint256 xx = x + (j - 1) * 24;
+                // up
                 if (y >= 24) {
-                    idx = _getIdx(self, x - 24, y - 24);
+                    idx = _getIdx(self, xx, y - 24);
                     if (idx != 0) {
-                        ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.left);
+                        next[idx - 1] = next[idx - 1].addUp(e[j].up);
                     }
                 }
-                // left-down
-                idx = _getIdx(self, x - 24, y + 24);
+                // center
+                idx = _getIdx(self, xx, y);
                 if (idx != 0) {
-                    ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.left);
+                    next[idx - 1] = next[idx - 1].addTile(e[j].middle);
                 }
-            }
-            if (y >= 24) {
-                // center-up
-                idx = _getIdx(self, x, y - 24);
+                // down
+                idx = _getIdx(self, xx, y + 24);
                 if (idx != 0) {
-                    ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.center);
+                    next[idx - 1] = next[idx - 1].addDown(e[j].down);
                 }
-                // right-up
-                idx = _getIdx(self, x + 24, y - 24);
-                if (idx != 0) {
-                    ret[idx - 1] = ret[idx - 1].addUp(corners[i].up.right);
-                }
-            }
-            // right
-            idx = _getIdx(self, x + 24, y);
-            if (idx != 0) {
-                ret[idx - 1] = ret[idx - 1].addTile(corners[i].right);
-            }
-            // center-down
-            idx = _getIdx(self, x, y + 24);
-            if (idx != 0) {
-                ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.center);
-            }
-            // right-down
-            idx = _getIdx(self, x + 24, y + 24);
-            if (idx != 0) {
-                ret[idx - 1] = ret[idx - 1].addDown(corners[i].down.right);
             }
         }
         // Mask it.
         for (i = 0; i < len; i++) {
-            ret[i] = ret[i].and(self.values[i].tile);
-            done = done || ret[i].isEqual(spot[i]);
+            next[i] = next[i].and(self.values[i].tile);
+            done = done || next[i].isEqual(current[i]);
         }
-        return (ret, done);
+        return (next, done);
     }
 
     function moveTo(

@@ -1,52 +1,20 @@
 import {expect} from '../chai-setup';
 import {
-  addHorizontalLine,
-  addVerticaLine,
-  getEmptyTile,
-  resultToArray,
+  drawExtendedTile,
+  extendedTileToArray,
+  getEmptyExtendedTile,
+  printTile,
+  setRectangle,
   setupTileLibTest,
-  tileToArray,
 } from './fixtures';
-import {BigNumber} from 'ethers';
 
-describe('TileLib grow', function () {
+describe('TileLib grow and flood', function () {
   it('some square in the center', async function () {
     const tester = await setupTileLibTest();
     await tester.setQuad(0, 12, 12, 6);
-    const {tile, left, right, up, down} = await tester.grow(0);
-    const emptyTile = getEmptyTile();
-    expect(tileToArray(left.data)).to.be.eql(emptyTile);
-    expect(tileToArray(right.data)).to.be.eql(emptyTile);
-    expect(up).to.be.equal(BigNumber.from(0));
-    expect(down).to.be.equal(BigNumber.from(0));
-    expect(
-      resultToArray([
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  X  X  X  X  X  X  X  X  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O',
-        ' O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O ',
-      ])
-    ).to.be.eql(tileToArray(tile.data));
+    const tile = await tester.grow(0);
+    const result = setRectangle(getEmptyExtendedTile(), 24 + 11, 8 + 11, 8, 8);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
   });
   it('square border', async function () {
     const tester = await setupTileLibTest();
@@ -56,51 +24,14 @@ describe('TileLib grow', function () {
       await tester.setQuad(0, i, 23, 1);
       await tester.setQuad(0, 23, i, 1);
     }
-    const {tile, left, right, up, down} = await tester.grow(0);
-    expect(up.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000').shl(24 * 7),
-      BigNumber.from('0xffffff').shl(24 * 7),
-      BigNumber.from(1).shl(24 * 7),
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([
+      [24 - 1, 8 - 1, 3, 26],
+      [24 - 1, 8 - 1, 26, 3],
+      [48 - 2, 8 - 1, 3, 26],
+      [24 - 1, 24 + 8 - 2, 26, 3],
     ]);
-    expect(down.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000'),
-      BigNumber.from('0xffffff'),
-      BigNumber.from(1),
-    ]);
-    expect(
-      resultToArray([
-        ' X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X ',
-        ' X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  X  X ',
-        ' X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X ',
-        ' X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X ',
-      ])
-    ).to.be.eql(tileToArray(tile.data));
-    expect(tileToArray(left.data)).to.be.eql(
-      addVerticaLine(getEmptyTile(), 23)
-    );
-    expect(tileToArray(right.data)).to.be.eql(
-      addVerticaLine(getEmptyTile(), 0)
-    );
+    expect(extendedTileToArray(tile)).to.be.eql(result);
   });
 
   it('top border', async function () {
@@ -108,28 +39,9 @@ describe('TileLib grow', function () {
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, i, 0, 1);
     }
-    const {tile, left, right, up, down} = await tester.grow(0);
-    expect(up.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000').shl(24 * 7),
-      BigNumber.from('0xffffff').shl(24 * 7),
-      BigNumber.from(1).shl(24 * 7),
-    ]);
-    expect(down.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from(0),
-      BigNumber.from(0),
-      BigNumber.from(0),
-    ]);
-    expect(tileToArray(tile.data)).to.be.eql(
-      addHorizontalLine(addHorizontalLine(getEmptyTile(), 0), 1)
-    );
-    const leftResult = getEmptyTile();
-    leftResult[0][23] = true;
-    leftResult[1][23] = true;
-    expect(leftResult).to.be.eql(tileToArray(left.data));
-    const rightResult = getEmptyTile();
-    rightResult[0][0] = true;
-    rightResult[1][0] = true;
-    expect(rightResult).to.be.eql(tileToArray(right.data));
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([[24 - 1, 8 - 1, 26, 3]]);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
   });
 
   it('down border', async function () {
@@ -137,28 +49,9 @@ describe('TileLib grow', function () {
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, i, 23, 1);
     }
-    const {tile, left, right, up, down} = await tester.grow(0);
-    expect(up.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from(0),
-      BigNumber.from(0),
-      BigNumber.from(0),
-    ]);
-    expect(down.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000'),
-      BigNumber.from('0xffffff'),
-      BigNumber.from(1),
-    ]);
-    expect(tileToArray(tile.data)).to.be.eql(
-      addHorizontalLine(addHorizontalLine(getEmptyTile(), 22), 23)
-    );
-    const leftResult = getEmptyTile();
-    leftResult[23][23] = true;
-    leftResult[22][23] = true;
-    expect(leftResult).to.be.eql(tileToArray(left.data));
-    const rightResult = getEmptyTile();
-    rightResult[23][0] = true;
-    rightResult[22][0] = true;
-    expect(rightResult).to.be.eql(tileToArray(right.data));
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([[24 - 1, 24 + 8 - 2, 26, 3]]);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
   });
 
   it('left border', async function () {
@@ -166,24 +59,9 @@ describe('TileLib grow', function () {
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, 0, i, 1);
     }
-    const {tile, left, right, up, down} = await tester.grow(0);
-    expect(up.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000').shl(24 * 7),
-      BigNumber.from(1).shl(24 * 7),
-      BigNumber.from(0).shl(24 * 7),
-    ]);
-    expect(down.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from('0x800000'),
-      BigNumber.from(1),
-      BigNumber.from(0),
-    ]);
-    expect(tileToArray(tile.data)).to.be.eql(
-      addVerticaLine(addVerticaLine(getEmptyTile(), 0), 1)
-    );
-    expect(tileToArray(left.data)).to.be.eql(
-      addVerticaLine(getEmptyTile(), 23)
-    );
-    expect(tileToArray(right.data)).to.be.eql(getEmptyTile());
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([[24 - 1, 8 - 1, 3, 26]]);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
   });
 
   it('right border', async function () {
@@ -191,23 +69,40 @@ describe('TileLib grow', function () {
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, 23, i, 1);
     }
-    const {tile, left, right, up, down} = await tester.grow(0);
-    expect(up.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from(0).shl(24 * 7),
-      BigNumber.from('0x800000').shl(24 * 7),
-      BigNumber.from(1).shl(24 * 7),
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([[48 - 2, 8 - 1, 3, 26]]);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
+  });
+
+  it('a full square', async function () {
+    const tester = await setupTileLibTest();
+    await tester.setQuad(0, 0, 0, 24);
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([[24 - 1, 8 - 1, 26, 26]]);
+    expect(extendedTileToArray(tile)).to.be.eql(result);
+  });
+
+  it('two dots in the division if the tile', async function () {
+    const tester = await setupTileLibTest();
+    await tester.setQuad(0, 12, 8, 1);
+    await tester.setQuad(0, 12, 15, 1);
+    const tile = await tester.grow(0);
+    const result = drawExtendedTile([
+      [24 + 11, 8 + 8 - 1, 3, 3],
+      [24 + 11, 15 + 8 - 1, 3, 3],
     ]);
-    expect(down.map((x: string) => BigNumber.from(x))).to.be.eql([
-      BigNumber.from(0),
-      BigNumber.from('0x800000'),
-      BigNumber.from(1),
-    ]);
-    expect(tileToArray(tile.data)).to.be.eql(
-      addVerticaLine(addVerticaLine(getEmptyTile(), 22), 23)
-    );
-    expect(tileToArray(left.data)).to.be.eql(getEmptyTile());
-    expect(tileToArray(right.data)).to.be.eql(
-      addVerticaLine(getEmptyTile(), 0)
-    );
+    expect(extendedTileToArray(tile)).to.be.eql(result);
+  });
+
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('flood test', async function () {
+    const tester = await setupTileLibTest();
+    await tester.setQuad(0, 12, 12, 1);
+    let spot = await tester.findAPixel(0);
+    for (let i = 0; i < 14; i++) {
+      printTile(extendedTileToArray(spot.next));
+      console.log('--------------------------->', i, 2 * i + 1);
+      spot = await tester.floodStep(spot.next.center.middle);
+    }
   });
 });

@@ -5,16 +5,20 @@ pragma solidity 0.8.2;
 // TODO: Check if a pure function is better than a mapping for the masks
 // A square of 24x24 bits
 library TileLib {
-    struct CornerLine {
-        uint256 left;
-        uint256 center;
-        uint256 right;
+    struct ExtendedTileLine {
+        uint256 up;
+        Tile middle;
+        uint256 down;
     }
-    struct Corner {
-        Tile left;
-        Tile right;
-        CornerLine up;
-        CornerLine down;
+
+    struct ExtendedTile {
+        ExtendedTileLine left;
+        ExtendedTileLine center;
+        ExtendedTileLine right;
+    }
+
+    struct ExtendedTileLMR {
+        ExtendedTileLine[3] lmr;
     }
 
     struct Tile {
@@ -146,32 +150,44 @@ library TileLib {
     uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
     uint256 private constant DOWN_RIGHT_MASK = 0x800000000000000000000000000000000000000000000000;
 
-    function grow(Tile memory self) internal pure returns (Tile memory, Corner memory corners) {
+    function grow(Tile memory self) internal pure returns (ExtendedTile memory e) {
+        // grow sideways
+        e.center.middle.data[0] = grow(self.data[0]);
+        e.center.middle.data[1] = grow(self.data[1]);
+        e.center.middle.data[2] = grow(self.data[2]);
+        // grow up and down
+        e.center.middle.data[0] |= ((e.center.middle.data[1] & UP_MASK) << (24 * 7));
+        e.center.middle.data[1] |=
+            ((e.center.middle.data[2] & UP_MASK) << (24 * 7)) |
+            ((e.center.middle.data[0] & DOWN_MASK) >> (24 * 7));
+        e.center.middle.data[2] |= ((e.center.middle.data[1] & DOWN_MASK) >> (24 * 7));
+
         // up-left -> down-right
-        corners.up.left = (self.data[0] & UP_LEFT_MASK) << (24 * 7 + 23);
+        e.left.up = (e.center.middle.data[0] & UP_LEFT_MASK) << (24 * 7 + 23);
         // up -> down
-        corners.up.center = (self.data[0] & UP_MASK) << (24 * 7);
+        e.center.up = (e.center.middle.data[0] & UP_MASK) << (24 * 7);
         // up-right -> down-left
-        corners.up.right = (self.data[0] & UP_RIGHT_MASK) << (24 * 7 - 23);
+        e.right.up = (e.center.middle.data[0] & UP_RIGHT_MASK) << (24 * 7 - 23);
         // down-left -> up-right
-        corners.down.left = (self.data[2] & DOWN_LEFT_MASK) >> (24 * 7 - 23);
+        e.left.down = (e.center.middle.data[2] & DOWN_LEFT_MASK) >> (24 * 7 - 23);
         // down -> up
-        corners.down.center = (self.data[2] & DOWN_MASK) >> (24 * 7);
+        e.center.down = (e.center.middle.data[2] & DOWN_MASK) >> (24 * 7);
         // down-right -> up-left
-        corners.down.right = (self.data[2] & DOWN_RIGHT_MASK) >> (24 * 7 + 23);
-        self.data[0] = grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));
-        self.data[1] =
-            grow(self.data[1]) |
-            ((self.data[2] & UP_MASK) << (24 * 7)) |
-            ((self.data[0] & DOWN_MASK) >> (24 * 7));
-        self.data[2] = grow(self.data[2]) | ((self.data[1] & DOWN_MASK) >> (24 * 7));
+        e.right.down = (e.center.middle.data[2] & DOWN_RIGHT_MASK) >> (24 * 7 + 23);
         uint256 i;
         for (; i < DATA_LEN; i++) {
-            corners.left.data[i] = (self.data[i] & LEFT_MASK) << 23;
-            corners.right.data[i] = (self.data[i] & RIGHT_MASK) >> 23;
+            e.left.middle.data[i] = (e.center.middle.data[i] & LEFT_MASK) << 23;
+            e.right.middle.data[i] = (e.center.middle.data[i] & RIGHT_MASK) >> 23;
         }
         // TODO: if neighbour and corners don't have coordinates then coordinates are not destroyed ?
-        return (self, corners);
+        return e;
+    }
+
+    function grow(uint256 x) private pure returns (uint256) {
+        // TODO: declare constant, optimize?
+        x |= ((x & (~RIGHT_MASK)) << 1) | ((x & (~LEFT_MASK)) >> 1);
+        // TODO: we can remove & COORD_MASK_NEG, and leave some garbage.
+        return (x | (x << 24) | (x >> 24)) & COORD_MASK_NEG;
     }
 
     function addDown(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
@@ -190,13 +206,6 @@ library TileLib {
             self.data[i] = self.data[i] | tile.data[i];
         }
         return self;
-    }
-
-    function grow(uint256 x) private pure returns (uint256) {
-        // TODO: declare constant, optimize?
-        x = x | ((x & (~RIGHT_MASK)) << 1) | ((x & (~LEFT_MASK)) >> 1);
-        // TODO: we can remove & COORD_MASK_NEG, and leave some garbage.
-        return (x | (x << 24) | (x >> 24)) & COORD_MASK_NEG;
     }
 
     function findAPixel(Tile memory self) internal pure returns (Tile memory ret) {

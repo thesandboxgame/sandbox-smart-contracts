@@ -8,6 +8,7 @@ import {TileLib} from "../../common/Libraries/TileLib.sol";
 
 contract MapTester {
     using MapLib for MapLib.Map;
+    using TileLib for TileLib.Tile;
     MapLib.Map[30] internal maps;
 
     function setQuad(
@@ -69,12 +70,36 @@ contract MapTester {
         return maps[idx].isAdjacent();
     }
 
-    function growAndMask(uint256 idx, TileLib.Tile[] memory prevSpot)
+    function floodStep(uint256 idx, TileLib.Tile[] memory data)
         external
         view
-        returns (TileLib.Tile[] memory, bool)
+        returns (
+            TileLib.Tile[] memory current,
+            TileLib.Tile[] memory next,
+            bool done
+        )
     {
-        return maps[idx].growAndMask(prevSpot);
+        (next, done) = maps[idx].floodStep(data);
+        return (data, next, done);
+    }
+
+    function floodStepWithSpot(uint256 idx)
+        external
+        view
+        returns (
+            TileWithCoordLib.TileWithCoord[] memory current,
+            TileLib.Tile[] memory next,
+            bool done
+        )
+    {
+        current = maps[idx].values;
+        next = new TileLib.Tile[](current.length);
+        next[0] = current[0].tile.findAPixel();
+        return (current, next, done);
+    }
+
+    function findAPixel(uint256 idx) external view returns (TileLib.Tile memory tile) {
+        return maps[idx].values[0].tile.findAPixel();
     }
 
     function containMap(uint256 idx, uint256 contained) external view returns (bool) {
