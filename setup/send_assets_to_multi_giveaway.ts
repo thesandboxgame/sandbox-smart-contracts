@@ -55,11 +55,7 @@ const func: DeployFunction = async function () {
   const json: Array<MultiClaim> = fs.readJSONSync(path);
   const assetIdsCount = getAssets(json);
   const MultiGiveaway = await deployments.get(multiGiveawayName);
-  const {
-    sandboxAccount,
-    sandboxFoundation, // ToDo: check which is the correct account to use
-    sandSaleBeneficiary,
-  } = await getNamedAccounts();
+  const {sandboxAccount, sandboxFoundation} = await getNamedAccounts();
   const owner = assetHolder || sandboxAccount;
   // Send ERC1155
   const ids = [];
@@ -100,13 +96,13 @@ const func: DeployFunction = async function () {
     console.log('foundation balance');
     console.log(
       (
-        await read(sandContractName, {}, 'balanceOf', sandSaleBeneficiary)
+        await read(sandContractName, {}, 'balanceOf', sandboxFoundation)
       ).toString()
     );
     await catchUnknownSigner(
       execute(
         sandContractName,
-        {from: sandSaleBeneficiary, log: true},
+        {from: sandboxFoundation, log: true},
         'transfer',
         MultiGiveaway.address,
         amount
