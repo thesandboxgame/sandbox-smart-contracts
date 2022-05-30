@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -23,4 +22,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Land', 'LandV2', 'LandV2_deploy'];
 func.dependencies = ['Land_deploy', 'Land_Old_deploy'];
-func.skip = skipUnlessTestnet;

@@ -1,5 +1,6 @@
+import {deployments, ethers} from 'hardhat';
 import {expect} from '../chai-setup';
-import {setupLand} from './fixtures';
+import {setupLand, setupLandV1} from './fixtures';
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
@@ -377,6 +378,50 @@ describe('LandV2', function () {
         'the status should be different than the current one'
       );
       await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
+    });
+  });
+
+  describe('UpgradeV2', function () {
+    it('should upgrade to V2 and keep storage intact', async function () {
+      const {landContract, getNamedAccounts, mintQuad} = await setupLandV1();
+      const {landAdmin, deployer, upgradeAdmin} = await getNamedAccounts();
+      const {deploy} = deployments;
+
+      await mintQuad(landAdmin, 24, 0, 0);
+
+      expect(await landContract.balanceOf(landAdmin)).to.be.equal(576);
+      expect(await landContract.isMinter(landAdmin)).to.be.true;
+      expect(await landContract.getAdmin()).to.be.equal(landAdmin);
+      expect(await landContract.ownerOf(0)).to.be.equal(landAdmin);
+
+      await deploy('Land', {
+        from: deployer,
+        contract: 'LandV2',
+        proxy: {
+          owner: upgradeAdmin,
+          proxyContract: 'OpenZeppelinTransparentProxy',
+          upgradeIndex: 1,
+        },
+        log: true,
+      });
+
+      const landV2Contract = await ethers.getContract('Land');
+
+      expect(await landV2Contract.balanceOf(landAdmin)).to.be.equal(576);
+      expect(await landV2Contract.isMinter(landAdmin)).to.be.true;
+      expect(await landV2Contract.getAdmin()).to.be.equal(landAdmin);
+      expect(await landV2Contract.ownerOf(0)).to.be.equal(landAdmin);
+
+      const contract = landV2Contract.connect(
+        ethers.provider.getSigner(landAdmin)
+      );
+
+      await expect(contract.setMinter(ethers.constants.AddressZero, true)).to.be
+        .reverted;
+
+      await mintQuad(landAdmin, 24, 24, 0);
+
+      expect(await landV2Contract.balanceOf(landAdmin)).to.be.equal(576 * 2);
     });
   });
 });

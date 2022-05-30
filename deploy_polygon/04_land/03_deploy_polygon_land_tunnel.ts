@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -61,19 +60,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  const isMinter = await deployments.read(
+  const isMinter = await read(
     'PolygonLand',
     'isMinter',
     PolygonLandTunnel.address
   );
 
   if (!isMinter) {
-    await deployments.execute(
-      'PolygonLand',
-      {from: deployer},
-      'setMinter',
-      PolygonLandTunnel.address,
-      true
+    const admin = await read('PolygonLand', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'PolygonLand',
+        {from: admin, log: true},
+        'setMinter',
+        PolygonLandTunnel.address,
+        true
+      )
     );
   }
 };
@@ -81,4 +83,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['PolygonLandTunnel', 'PolygonLandTunnel_deploy', 'L2'];
 func.dependencies = ['PolygonLand', 'FXCHILD'];
-func.skip = skipUnlessTestnet;
