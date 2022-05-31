@@ -37,10 +37,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       multiGiveawayAdmin
     );
   }
-  if (!ozdRelayerIsAdmin && deployerIsAdmin) {
+  if (!ozdRelayerIsAdmin && (deployerIsAdmin || multiGiveawayAdminIsAdmin)) {
     await execute(
       'PolygonMulti_Giveaway_1',
-      {from: deployer, log: true},
+      {from: deployerIsAdmin ? deployer : multiGiveawayAdmin, log: true},
       'grantRole',
       DEFAULT_ADMIN_ROLE,
       ozdRelayer
