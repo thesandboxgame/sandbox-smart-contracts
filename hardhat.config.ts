@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import {HardhatUserConfig} from 'hardhat/types';
-import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
-import 'hardhat-gas-reporter';
-import '@openzeppelin/hardhat-upgrades';
-import 'solidity-coverage';
-import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
+import '@openzeppelin/hardhat-upgrades';
+import 'dotenv/config';
+import 'hardhat-contract-sizer';
+import 'hardhat-deploy';
+import 'hardhat-gas-reporter';
+import {HardhatUserConfig} from 'hardhat/types';
+import 'solidity-coverage';
 import {accounts, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -248,6 +248,7 @@ const config: HardhatUserConfig = {
     ozdRelayer: {
       default: 1,
       polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
+      mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
   },
   networks: {
