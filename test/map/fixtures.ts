@@ -42,17 +42,21 @@ type ExtendedTileLine = {
   middle: {data: BigNumberish[]};
   down: BigNumberish;
 };
+type Tile = {data: BigNumberish[]};
+type ExtendedTile = {
+  left: Tile;
+  up: BigNumberish;
+  middle: Tile;
+  down: BigNumberish;
+  right: Tile;
+};
 
-export function extendedTileToArray(data: {
-  left: ExtendedTileLine;
-  center: ExtendedTileLine;
-  right: ExtendedTileLine;
-}): boolean[][] {
+export function extendedTileToArray(data: ExtendedTile): boolean[][] {
   const lineToArray = (line: ExtendedTileLine) =>
     tileToArray([line.up, ...line.middle.data, line.down]);
-  const left = lineToArray(data.left);
-  const center = lineToArray(data.center);
-  const right = lineToArray(data.right);
+  const left = lineToArray({up: 0, middle: data.left, down: 0});
+  const center = lineToArray(data);
+  const right = lineToArray({up: 0, middle: data.right, down: 0});
   const ret = [];
   for (let i = 0; i < left.length; i++) {
     ret.push([...left[i], ...center[i], ...right[i]]);
@@ -76,6 +80,24 @@ export function tileToArray(data: BigNumberish[]): boolean[][] {
       }
       ret.push(line);
     }
+  }
+  return ret;
+}
+
+export function lineToArray(data: BigNumberish): boolean[][] {
+  const ret = [];
+  const bn = BigNumber.from(data);
+  for (let s = 0; s < 8; s++) {
+    const line = [];
+    for (let t = 0; t < 24; t++) {
+      line.push(
+        bn
+          .shr(s * 24 + t)
+          .and(1)
+          .eq(1)
+      );
+    }
+    ret.push(line);
   }
   return ret;
 }

@@ -6,7 +6,7 @@ import {
   setRectangle,
   setupTileLibTest,
 } from './fixtures';
-import {BigNumber, Contract} from 'ethers';
+import {Contract} from 'ethers';
 
 async function setTileQuads(tester: Contract, tile: boolean[][]) {
   for (let y = 0; y < tile.length; y++) {
@@ -18,6 +18,14 @@ async function setTileQuads(tester: Contract, tile: boolean[][]) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function printGasEstimate(tester: Contract) {
+  // console.log(
+  //   'Gas estimate:',
+  //   BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
+  // );
+}
+
 describe('TileLib tester flood', function () {
   describe('adjacent', function () {
     it('a line', async function () {
@@ -27,20 +35,14 @@ describe('TileLib tester flood', function () {
         resultToArray(['O X X O', 'O X X O', 'O X X O'])
       );
       expect(await tester.isAdjacent(0)).to.be.true;
-      console.log(
-        'Gas estimate:',
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
-      );
+      await printGasEstimate(tester);
     });
     it('a square', async function () {
       const tester = await setupTileLibTest();
       const tile = drawTile([[3, 3, 10, 10]], getEmptyTile);
       await setTileQuads(tester, tile);
       expect(await tester.isAdjacent(0)).to.be.true;
-      console.log(
-        'Gas estimate:',
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
-      );
+      await printGasEstimate(tester);
     });
     it('a square with a hole', async function () {
       const tester = await setupTileLibTest();
@@ -54,10 +56,20 @@ describe('TileLib tester flood', function () {
       );
       await setTileQuads(tester, tile);
       expect(await tester.isAdjacent(0)).to.be.true;
-      console.log(
-        'Gas estimate:',
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
+      await printGasEstimate(tester);
+    });
+    it('two squares on a 4-connected component', async function () {
+      const tester = await setupTileLibTest();
+      const tile = drawTile(
+        [
+          [3, 3, 2, 2],
+          [4, 5, 2, 2],
+        ],
+        getEmptyTile
       );
+      await setTileQuads(tester, tile);
+      expect(await tester.isAdjacent(0)).to.be.true;
+      await printGasEstimate(tester);
     });
   });
   describe('not adjacent', function () {
@@ -68,11 +80,9 @@ describe('TileLib tester flood', function () {
         resultToArray(['O X X O', 'O O O O', 'O X X O', 'O X X O'])
       );
       expect(await tester.isAdjacent(0)).to.be.false;
-      console.log(
-        'Gas estimate:',
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
-      );
+      await printGasEstimate(tester);
     });
+
     it('two squares', async function () {
       const tester = await setupTileLibTest();
       const tile = drawTile(
@@ -84,10 +94,20 @@ describe('TileLib tester flood', function () {
       );
       await setTileQuads(tester, tile);
       expect(await tester.isAdjacent(0)).to.be.false;
-      console.log(
-        'Gas estimate:',
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
+      await printGasEstimate(tester);
+    });
+    it('two squares on a 8-connected component', async function () {
+      const tester = await setupTileLibTest();
+      const tile = drawTile(
+        [
+          [3, 3, 2, 2],
+          [5, 5, 2, 2],
+        ],
+        getEmptyTile
       );
+      await setTileQuads(tester, tile);
+      expect(await tester.isAdjacent(0)).to.be.false;
+      await printGasEstimate(tester);
     });
   });
 });

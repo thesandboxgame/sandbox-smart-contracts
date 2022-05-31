@@ -49,7 +49,7 @@ contract TileTester {
         returns (TileLib.Tile memory current, TileLib.ExtendedTile memory next)
     {
         TileLib.ExtendedTile memory ret;
-        ret.center.middle = tiles[idx].findAPixel();
+        ret.middle = tiles[idx].findAPixel();
         return (tiles[idx], ret);
     }
 
@@ -69,9 +69,9 @@ contract TileTester {
         while (!done) {
             current = next.grow();
             // Ignore overflow area
-            current.center.middle = current.center.middle.and(tiles[idx]);
-            done = next.isEqual(current.center.middle);
-            next = current.center.middle;
+            current.middle = current.middle.and(tiles[idx]);
+            done = next.isEqual(current.middle);
+            next = current.middle;
         }
         return next.isEqual(tiles[idx]);
     }

@@ -242,9 +242,11 @@ library MapLib {
         uint256 len = self.values.length;
         uint256 i;
         for (; i < len; i++) {
-            ret = ret || spot[i].isEqual(self.values[i].tile);
+            if (!spot[i].isEqualIgnoreCoords(self.values[i].tile)) {
+                return false;
+            }
         }
-        return ret;
+        return true;
     }
 
     // TODO: this is terrible, test it then improve it (a lot!!!)
@@ -266,38 +268,49 @@ library MapLib {
             }
             corners[i] = current[i].grow();
         }
+        done = true;
         for (i = 0; i < len; i++) {
-            x = self.values[i].getX();
-            y = self.values[i].getY();
-            // TODO: this is bad?? maybe is better to just copy the code...
-            TileLib.ExtendedTileLine[3] memory e = [corners[i].left, corners[i].center, corners[i].right];
-            // -24, 0 , 24
-            uint256 j = (x < 24) ? 1 : 0;
-            for (; j < 3; j++) {
-                uint256 xx = x + (j - 1) * 24;
-                // up
-                if (y >= 24) {
-                    idx = _getIdx(self, xx, y - 24);
-                    if (idx != 0) {
-                        next[idx - 1] = next[idx - 1].addUp(e[j].up);
-                    }
-                }
-                // center
-                idx = _getIdx(self, xx, y);
+            if (current[i].isEmpty()) {
+                continue;
+            }
+            x = self.values[i].getX() * 24;
+            y = self.values[i].getY() * 24;
+
+            // left
+            if (x >= 24) {
+                idx = _getIdx(self, x - 24, y);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].addTile(e[j].middle);
+                    next[idx - 1] = next[idx - 1].or(corners[i].left);
                 }
-                // down
-                idx = _getIdx(self, xx, y + 24);
+            }
+            // up
+            if (y >= 24) {
+                idx = _getIdx(self, x, y - 24);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].addDown(e[j].down);
+                    next[idx - 1] = next[idx - 1].addUp(corners[i].up);
                 }
+            }
+            // middle
+            idx = _getIdx(self, x, y);
+            if (idx != 0) {
+                next[idx - 1] = next[idx - 1].or(corners[i].middle);
+            }
+            // down
+            idx = _getIdx(self, x, y + 24);
+            if (idx != 0) {
+                next[idx - 1] = next[idx - 1].addDown(corners[i].down);
+            }
+            // right
+            idx = _getIdx(self, x + 24, y);
+            if (idx != 0) {
+                next[idx - 1] = next[idx - 1].or(corners[i].right);
             }
         }
         // Mask it.
+        done = true;
         for (i = 0; i < len; i++) {
             next[i] = next[i].and(self.values[i].tile);
-            done = done || next[i].isEqual(current[i]);
+            done = done && next[i].isEqual(current[i]);
         }
         return (next, done);
     }
