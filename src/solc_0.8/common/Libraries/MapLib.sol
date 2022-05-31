@@ -260,19 +260,12 @@ library MapLib {
         uint256 x;
         uint256 y;
         uint256 idx;
-        TileLib.ExtendedTile[] memory corners = new TileLib.ExtendedTile[](len);
         next = new TileLib.Tile[](len);
         for (i; i < len; i++) {
             if (current[i].isEmpty()) {
                 continue;
             }
-            corners[i] = current[i].grow();
-        }
-        done = true;
-        for (i = 0; i < len; i++) {
-            if (current[i].isEmpty()) {
-                continue;
-            }
+            TileLib.ExtendedTile memory corners = current[i].grow();
             x = self.values[i].getX() * 24;
             y = self.values[i].getY() * 24;
 
@@ -280,30 +273,30 @@ library MapLib {
             if (x >= 24) {
                 idx = _getIdx(self, x - 24, y);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].or(corners[i].left);
+                    next[idx - 1] = next[idx - 1].or(corners.left);
                 }
             }
             // up
             if (y >= 24) {
                 idx = _getIdx(self, x, y - 24);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].addUp(corners[i].up);
+                    next[idx - 1] = next[idx - 1].addUp(corners.up);
                 }
             }
             // middle
             idx = _getIdx(self, x, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners[i].middle);
+                next[idx - 1] = next[idx - 1].or(corners.middle);
             }
             // down
             idx = _getIdx(self, x, y + 24);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].addDown(corners[i].down);
+                next[idx - 1] = next[idx - 1].addDown(corners.down);
             }
             // right
             idx = _getIdx(self, x + 24, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners[i].right);
+                next[idx - 1] = next[idx - 1].or(corners.right);
             }
         }
         // Mask it.

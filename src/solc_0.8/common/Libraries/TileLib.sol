@@ -102,17 +102,13 @@ library TileLib {
     }
 
     function isEmpty(Tile memory self) internal pure returns (bool) {
-        return
-            self.data[0] & COORD_MASK_NEG == 0 &&
-            self.data[1] & COORD_MASK_NEG == 0 &&
-            self.data[2] & COORD_MASK_NEG == 0;
+        return (self.data[0] | self.data[1] | self.data[2]) & COORD_MASK_NEG == 0;
     }
 
     function isEqualIgnoreCoords(Tile memory self, Tile memory b) internal pure returns (bool) {
         return
-            self.data[0] & COORD_MASK_NEG == b.data[0] & COORD_MASK_NEG &&
-            self.data[1] & COORD_MASK_NEG == b.data[1] & COORD_MASK_NEG &&
-            self.data[2] & COORD_MASK_NEG == b.data[2] & COORD_MASK_NEG;
+            ((self.data[0] ^ b.data[0]) | (self.data[1] ^ b.data[1]) | (self.data[2] ^ b.data[2])) & COORD_MASK_NEG ==
+            0;
     }
 
     function isEqual(Tile memory self, Tile memory b) internal pure returns (bool) {
@@ -141,13 +137,11 @@ library TileLib {
     }
 
     uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
+    uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;
     uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;
-    uint256 private constant UP_LEFT_MASK = 0x000000000000000000000000000000000000000000000001;
+    uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;
     uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
-    uint256 private constant UP_RIGHT_MASK = 0x000000000000000000000000000000000000000000800000;
-    uint256 private constant DOWN_LEFT_MASK = 0x000001000000000000000000000000000000000000000000;
     uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
-    uint256 private constant DOWN_RIGHT_MASK = 0x800000000000000000000000000000000000000000000000;
 
     function grow(Tile memory self) internal pure returns (ExtendedTile memory e) {
         e.middle.data[0] = grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));
@@ -159,19 +153,18 @@ library TileLib {
 
         e.up = (self.data[0] & UP_MASK) << (24 * 7);
         e.down = (self.data[2] & DOWN_MASK) >> (24 * 7);
-        uint256 i;
-        for (; i < DATA_LEN; i++) {
-            e.left.data[i] = (self.data[i] & LEFT_MASK) << 23;
-            e.right.data[i] = (self.data[i] & RIGHT_MASK) >> 23;
-        }
-        // TODO: if neighbour and corners don't have coordinates then coordinates are not destroyed ?
+        // for loop removed to save some gas.
+        e.left.data[0] = (self.data[0] & LEFT_MASK) << 23;
+        e.right.data[0] = (self.data[0] & RIGHT_MASK) >> 23;
+        e.left.data[1] = (self.data[1] & LEFT_MASK) << 23;
+        e.right.data[1] = (self.data[1] & RIGHT_MASK) >> 23;
+        e.left.data[2] = (self.data[2] & LEFT_MASK) << 23;
+        e.right.data[2] = (self.data[2] & RIGHT_MASK) >> 23;
         return e;
     }
 
     function grow(uint256 x) private pure returns (uint256) {
-        // TODO: declare constant, optimize?
-        // TODO: we can remove & COORD_MASK_NEG, and leave some garbage.
-        return (x | ((x & (~RIGHT_MASK)) << 1) | ((x & (~LEFT_MASK)) >> 1) | (x << 24) | (x >> 24)) & COORD_MASK_NEG;
+        return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));
     }
 
     function addDown(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
@@ -185,15 +178,27 @@ library TileLib {
     }
 
     function findAPixel(Tile memory self) internal pure returns (Tile memory ret) {
-        uint256 i;
-        for (; i < DATA_LEN; i++) {
-            uint256 target = self.data[i] & COORD_MASK_NEG;
-            if (target == 0) {
-                continue;
-            }
-            uint256 shift = findAPixel(target);
-            ret.data[i] = ret.data[i] | (1 << shift);
+        uint256 target;
+        uint256 shift;
+
+        target = self.data[2] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = findAPixel(target);
+            ret.data[2] = ret.data[2] | (1 << shift);
             return ret;
+        }
+
+        target = self.data[1] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = findAPixel(target);
+            ret.data[1] = ret.data[1] | (1 << shift);
+            return ret;
+        }
+
+        target = self.data[0] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = findAPixel(target);
+            ret.data[0] = ret.data[0] | (1 << shift);
         }
         return ret;
     }

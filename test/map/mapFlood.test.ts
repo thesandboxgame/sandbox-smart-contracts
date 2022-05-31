@@ -67,6 +67,14 @@ describe('MapLib flood', function () {
       await tester.setQuad(0, 24, 24, 12);
       await adjacentTest(tester);
     });
+    it('four full tiles', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(0, 0, 0, 24);
+      await tester.setQuad(0, 0, 24, 24);
+      await tester.setQuad(0, 24, 0, 24);
+      await tester.setQuad(0, 24, 24, 24);
+      await adjacentTest(tester);
+    });
   });
   describe('not adjacent', function () {
     it('two squares in the same tile', async function () {
