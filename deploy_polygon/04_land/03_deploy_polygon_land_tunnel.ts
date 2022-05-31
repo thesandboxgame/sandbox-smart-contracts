@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy, execute, read, catchUnknownSigner} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonLand = await deployments.get('PolygonLand');
   const maxGasLimit = 500;
