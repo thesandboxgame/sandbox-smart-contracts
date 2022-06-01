@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import CheckAndSetTrustedForwarder from '../../deploy_utils/CheckAndSetTrustedForwarder';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -55,6 +56,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployer
     );
   }
+
+  await CheckAndSetTrustedForwarder(
+    hre,
+    'PolygonMulti_Giveaway_1',
+    deployerIsAdmin ? deployer : multiGiveawayAdmin
+  );
 };
 export default func;
 func.tags = ['PolygonMulti_Giveaway_1', 'PolygonMulti_Giveaway_1_setup', 'L2'];
