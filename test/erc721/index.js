@@ -952,6 +952,7 @@ module.exports = (init, extensions) => {
         erc721ABI,
         ethers.provider
       );
+
       const owner = users[0];
       const user0 = users[1];
       const user1 = users[2];
