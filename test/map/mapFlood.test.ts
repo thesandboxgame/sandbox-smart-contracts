@@ -32,10 +32,10 @@ async function floodTest(
   }
   isAdjacentTest(adj);
   isAdjacentTest(await tester.isAdjacent(0));
-  // console.log(
-  //   'Gas estimate:',
-  //   BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
-  // );
+  console.log(
+    'Gas estimate:',
+    BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
+  );
 }
 
 async function adjacentTest(tester: Contract) {

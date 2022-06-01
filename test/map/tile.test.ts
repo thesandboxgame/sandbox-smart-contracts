@@ -6,7 +6,7 @@ import {
   tileToArray,
 } from './fixtures';
 
-describe('TileLib', function () {
+describe('TileLib main', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Tile', async function () {
     const tester = await setupTileLibTest();

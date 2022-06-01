@@ -1,7 +1,7 @@
 import {expect} from '../chai-setup';
 import {createTestMapQuads, printMap, setupMapTest} from './fixtures';
 
-describe('MapLib', function () {
+describe('MapLib main', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Map With Coords', async function () {
     const {tester, getMap} = await setupMapTest();

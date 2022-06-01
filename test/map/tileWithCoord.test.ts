@@ -6,7 +6,7 @@ import {
 } from './fixtures';
 import {BigNumber} from 'ethers';
 
-describe('TileWithCoordLib', function () {
+describe('TileWithCoordLib main', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Some Tile With Coords', async function () {
     const tester = await setupTileWithCoordsLibTest();

@@ -214,14 +214,11 @@ library TileLib {
                 shift = 128;
             }
         }
-        target = target & mask;
         for (uint256 i = 32; i > 0; i = i / 2) {
             mask = mask >> i;
             if ((target & mask) == 0) {
                 target = target >> i;
                 shift += i;
-            } else {
-                target = target & mask;
             }
         }
         return shift;
