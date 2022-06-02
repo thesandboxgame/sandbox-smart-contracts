@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
 /// @dev minimal ERC2771 handler to keep bytecode-size down.
 /// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
