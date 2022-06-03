@@ -31,7 +31,7 @@ contract LockRules is Context, Ownable {
     event TimeLockWithdrawSet(uint256 newTimeWithdraw);
     event AmountLockClaimSet(uint256 newAmountLockClaim, bool isEnabled);
 
-    // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
+    // This is used to implement a time buffer for reward retrieval, so the user cannot re-stake the rewards too fast.
     TimeLockClaim public timeLockClaim;
     AmountLockClaim public amountLockClaim;
     TimeLockWithdraw public lockWithdraw;
