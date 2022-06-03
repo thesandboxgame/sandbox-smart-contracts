@@ -4,9 +4,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployments, ethers} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
-  const {deployer, sandAdmin} = await getNamedAccounts();
   const rewardsCalculator = await deployments.get('ERC20RewardCalculator');
 
   const rewardsCalculatorAddress = await deployments.read(
@@ -15,15 +14,9 @@ const func: DeployFunction = async function (
   );
 
   const sandPool = await ethers.getContract('ERC20RewardPool');
-  const ADMIN_ROLE = await sandPool.DEFAULT_ADMIN_ROLE();
 
   // check who has Admin role: deployer or sandAdmin
-  const currentAdmin = (await sandPool.hasRole(ADMIN_ROLE, deployer))
-    ? deployer
-    : (await sandPool.hasRole(ADMIN_ROLE, sandAdmin))
-    ? sandAdmin
-    : deployer;
-
+  const currentAdmin = await sandPool.owner();
   if (
     rewardsCalculatorAddress.toLowerCase() !==
     rewardsCalculator.address.toLowerCase()
