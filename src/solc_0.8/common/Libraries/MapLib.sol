@@ -251,6 +251,17 @@ library MapLib {
         return true;
     }
 
+    uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
+    uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;
+    uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;
+    uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;
+    uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
+    uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
+
+    function grow(uint256 x) private pure returns (uint256) {
+        return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));
+    }
+
     // TODO: this is terrible, test it then improve it (a lot!!!)
     function floodStep(Map storage self, TileLib.Tile[] memory current)
         public
@@ -262,12 +273,15 @@ library MapLib {
         uint256 x;
         uint256 y;
         uint256 idx;
+        TileLib.Tile memory ci;
         next = new TileLib.Tile[](len);
+        // grow
         for (i; i < len; i++) {
-            if (current[i].isEmpty()) {
+            ci = current[i];
+            // isEmpty
+            if ((ci.data[0] | ci.data[1] | ci.data[2]) == 0) {
                 continue;
             }
-            TileLib.ExtendedTile memory corners = current[i].grow();
             x = self.values[i].getX() * 24;
             y = self.values[i].getY() * 24;
 
@@ -275,30 +289,39 @@ library MapLib {
             if (x >= 24) {
                 idx = _getIdx(self, x - 24, y);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].or(corners.left);
+                    next[idx - 1].data[0] |= (ci.data[0] & LEFT_MASK) << 23;
+                    next[idx - 1].data[1] |= (ci.data[1] & LEFT_MASK) << 23;
+                    next[idx - 1].data[2] |= (ci.data[2] & LEFT_MASK) << 23;
                 }
             }
             // up
             if (y >= 24) {
                 idx = _getIdx(self, x, y - 24);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].orUp(corners.up);
+                    next[idx - 1].data[2] |= (ci.data[0] & UP_MASK) << (24 * 7);
                 }
             }
             // middle
             idx = _getIdx(self, x, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners.middle);
+                next[idx - 1].data[0] |= grow(ci.data[0]) | ((ci.data[1] & UP_MASK) << (24 * 7));
+                next[idx - 1].data[1] |=
+                    grow(ci.data[1]) |
+                    ((ci.data[2] & UP_MASK) << (24 * 7)) |
+                    ((ci.data[0] & DOWN_MASK) >> (24 * 7));
+                next[idx - 1].data[2] |= grow(ci.data[2]) | ((ci.data[1] & DOWN_MASK) >> (24 * 7));
             }
             // down
             idx = _getIdx(self, x, y + 24);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].orDown(corners.down);
+                next[idx - 1].data[0] |= (ci.data[2] & DOWN_MASK) >> (24 * 7);
             }
             // right
             idx = _getIdx(self, x + 24, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners.right);
+                next[idx - 1].data[0] |= (ci.data[0] & RIGHT_MASK) >> 23;
+                next[idx - 1].data[1] |= (ci.data[1] & RIGHT_MASK) >> 23;
+                next[idx - 1].data[2] |= (ci.data[2] & RIGHT_MASK) >> 23;
             }
         }
         // Mask it.
