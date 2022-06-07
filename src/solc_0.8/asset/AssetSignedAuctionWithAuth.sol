@@ -129,7 +129,7 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            input.buyer,
+            address(0),
             input.seller,
             input.token,
             input.auctionData,
@@ -169,7 +169,7 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            input.buyer,
+            address(0),
             input.seller,
             input.token,
             input.auctionData,
@@ -209,7 +209,7 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            input.buyer,
+            address(0),
             input.seller,
             input.token,
             input.auctionData,
