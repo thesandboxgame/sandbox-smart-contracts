@@ -70,6 +70,15 @@ contract MapTester {
         return maps[idx].isAdjacent();
     }
 
+    function isQuadAdjacent(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
+        return maps[idx].isAdjacent(x, y, size);
+    }
+
     function floodStep(uint256 idx, TileLib.Tile[] memory data)
         external
         view

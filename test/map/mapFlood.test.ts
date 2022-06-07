@@ -2,6 +2,9 @@ import {expect} from '../chai-setup';
 import {setupMapTest, tileToArray} from './fixtures';
 import {BigNumber, Contract} from 'ethers';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
+const log = (...ignore: unknown[]) => {}; // console.log;
+
 const eqTiles = (arr1: boolean[][], arr2: boolean[][]) =>
   arr1.length == arr2.length &&
   arr1.every(
@@ -32,7 +35,7 @@ async function floodTest(
   }
   isAdjacentTest(adj);
   isAdjacentTest(await tester.isAdjacent(0));
-  console.log(
+  log(
     'Gas estimate:',
     BigNumber.from(await tester.estimateGas.isAdjacent(0)).toString()
   );
@@ -88,6 +91,71 @@ describe('MapLib flood', function () {
       await tester.setQuad(0, 12, 12, 6);
       await tester.setQuad(0, 36, 36, 6);
       await notAdjacentTest(tester);
+    });
+  });
+
+  describe('isQuadAdjacent', function () {
+    it('four full tiles', async function () {
+      const {tester} = await setupMapTest();
+      const gasEstimates: BigNumber[] = [];
+
+      async function pushAndSet(x: number, y: number, size: number) {
+        gasEstimates.push(
+          BigNumber.from(await tester.estimateGas.isQuadAdjacent(0, x, y, size))
+        );
+        expect(await tester.isQuadAdjacent(0, x, y, size)).to.be.true;
+        await tester.setQuad(0, x, y, size);
+      }
+
+      await pushAndSet(0, 0, 24);
+      await pushAndSet(0, 24, 24);
+      await pushAndSet(24, 0, 24);
+      await pushAndSet(24, 24, 24);
+      log(
+        'Gas estimates',
+        gasEstimates.map((x) => x.toString())
+      );
+    });
+    it('add 24x24 one by one', async function () {
+      const {tester} = await setupMapTest();
+      const gasEstimates: BigNumber[] = [];
+      for (let x = 0; x < 24; x++) {
+        for (let y = 0; y < 24; y++) {
+          gasEstimates.push(
+            BigNumber.from(await tester.estimateGas.isQuadAdjacent(0, x, y, 1))
+          );
+          expect(await tester.isQuadAdjacent(0, x, y, 1)).to.be.true;
+          await tester.setQuad(0, x, y, 1);
+        }
+      }
+      log(
+        'Gas estimates',
+        gasEstimates.map((x) => x.toString()),
+        'total',
+        gasEstimates
+          .reduce((acc, val) => acc.add(val), BigNumber.from(0))
+          .toString()
+      );
+    });
+    it('adjacent pixels', async function () {
+      const {tester} = await setupMapTest();
+      expect(await tester.isQuadAdjacent(0, 123, 123, 1)).to.be.true;
+      await tester.setQuad(0, 123, 123, 1);
+
+      // left
+      expect(await tester.isQuadAdjacent(0, 122, 123, 1)).to.be.true;
+      // up
+      expect(await tester.isQuadAdjacent(0, 123, 122, 1)).to.be.true;
+      // right
+      expect(await tester.isQuadAdjacent(0, 124, 123, 1)).to.be.true;
+      // down
+      expect(await tester.isQuadAdjacent(0, 123, 124, 1)).to.be.true;
+
+      expect(await tester.isQuadAdjacent(0, 0, 0, 1)).to.be.false;
+      expect(await tester.isQuadAdjacent(0, 122, 122, 1)).to.be.false;
+      expect(await tester.isQuadAdjacent(0, 124, 124, 1)).to.be.false;
+      expect(await tester.isQuadAdjacent(0, 122, 124, 1)).to.be.false;
+      expect(await tester.isQuadAdjacent(0, 124, 122, 1)).to.be.false;
     });
   });
 });
