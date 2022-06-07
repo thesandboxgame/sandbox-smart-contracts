@@ -150,7 +150,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -280,7 +280,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -534,7 +534,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -678,7 +678,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -804,7 +804,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -935,7 +935,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: Sand.address,
           offerId,
@@ -1084,7 +1084,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -1213,7 +1213,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: Sand.address,
           offerId,
@@ -1345,7 +1345,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -1471,7 +1471,7 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: buyer,
+          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
