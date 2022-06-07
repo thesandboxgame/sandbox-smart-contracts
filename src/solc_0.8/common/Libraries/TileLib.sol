@@ -167,14 +167,22 @@ library TileLib {
         return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));
     }
 
-    function addDown(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
+    function orDown(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
         self.data[0] = self.data[0] | toAdd;
         return self;
     }
 
-    function addUp(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
+    function orUp(Tile memory self, uint256 toAdd) internal pure returns (Tile memory) {
         self.data[2] = self.data[2] | toAdd;
         return self;
+    }
+
+    function isAdjacentDown(Tile memory self, uint256 toAdd) internal pure returns (bool) {
+        return (self.data[0] & toAdd) != 0;
+    }
+
+    function isAdjacentUp(Tile memory self, uint256 toAdd) internal pure returns (bool) {
+        return (self.data[2] & toAdd) != 0;
     }
 
     function findAPixel(Tile memory self) internal pure returns (Tile memory ret) {

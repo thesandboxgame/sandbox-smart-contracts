@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: MIT
 /* solhint-disable code-complexity */
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
@@ -231,6 +232,7 @@ library MapLib {
         return (idx != 0);
     }
 
+    /// @dev Checks the full map to see if all the pixels are adjacent
     function isAdjacent(Map storage self) public view returns (bool ret) {
         TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);
         // We assume that all self.values[] are non empty (we remove them if they are empty).
@@ -280,7 +282,7 @@ library MapLib {
             if (y >= 24) {
                 idx = _getIdx(self, x, y - 24);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].addUp(corners.up);
+                    next[idx - 1] = next[idx - 1].orUp(corners.up);
                 }
             }
             // middle
@@ -291,7 +293,7 @@ library MapLib {
             // down
             idx = _getIdx(self, x, y + 24);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].addDown(corners.down);
+                next[idx - 1] = next[idx - 1].orDown(corners.down);
             }
             // right
             idx = _getIdx(self, x + 24, y);
@@ -306,6 +308,51 @@ library MapLib {
             done = done && next[i].isEqual(current[i]);
         }
         return (next, done);
+    }
+
+    /// @dev check if a quad is adjacent to the current map (used to add a quad to a map). Cheaper than isAdjacent(map)
+    function isAdjacent(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) public view returns (bool) {
+        uint256 idx;
+        //        TileWithCoordLib.TileWithCoord memory spot = TileWithCoordLib.initTileWithCoord(x, y);
+        //        TileLib.ExtendedTile memory corners = spot.setQuad(x, y, size).grow();
+        TileLib.Tile memory spot;
+        TileLib.ExtendedTile memory corners = spot.setQuad(x % 24, y % 24, size).grow();
+
+        // left
+        if (x >= 24) {
+            idx = _getIdx(self, x - 24, y);
+            if (idx != 0 && !spot.and(corners.left).isEmpty()) {
+                return true;
+            }
+        }
+        // up
+        if (y >= 24) {
+            idx = _getIdx(self, x, y - 24);
+            if (idx != 0 && spot.isAdjacentUp(corners.up)) {
+                return true;
+            }
+        }
+        // middle
+        idx = _getIdx(self, x, y);
+        if (idx != 0 && !spot.and(corners.middle).isEmpty()) {
+            return true;
+        }
+        // down
+        idx = _getIdx(self, x, y + 24);
+        if (idx != 0 && spot.isAdjacentDown(corners.down)) {
+            return true;
+        }
+        // right
+        idx = _getIdx(self, x + 24, y);
+        if (idx != 0 && !spot.and(corners.right).isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
     function moveTo(
