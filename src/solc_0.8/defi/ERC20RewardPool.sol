@@ -384,6 +384,20 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
+    // @dev Triggers stopped state.
+    // The contract must not be paused.
+    function pause() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+        _pause();
+    }
+
+    // @dev Returns to normal state.
+    // The contract must be paused.
+    function unpause() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+        _unpause();
+    }
+
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
