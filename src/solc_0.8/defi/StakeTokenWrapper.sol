@@ -13,19 +13,19 @@ abstract contract StakeTokenWrapper is Context {
     mapping(address => uint256) internal _balances;
 
     constructor(IERC20 stakeToken) {
-        require(stakeToken != address(0), "StakeTokenWrapper: zero address");
+        require(address(stakeToken) != address(0), "StakeTokenWrapper: zero address");
         _stakeToken = stakeToken;
     }
 
     function _stake(uint256 amount) internal virtual {
-        require(amount > 0; "StakeTokenWrapper: amount > 0");
+        require(amount > 0, "StakeTokenWrapper: amount > 0");
         _totalSupply = _totalSupply + amount;
         _balances[_msgSender()] = _balances[_msgSender()] + amount;
         _stakeToken.safeTransferFrom(_msgSender(), address(this), amount);
     }
 
     function _withdraw(uint256 amount) internal virtual {
-        require(amount > 0; "StakeTokenWrapper: amount > 0");
+        require(amount > 0, "StakeTokenWrapper: amount > 0");
         _totalSupply = _totalSupply - amount;
         _balances[_msgSender()] = _balances[_msgSender()] - amount;
         _stakeToken.safeTransfer(_msgSender(), amount);
