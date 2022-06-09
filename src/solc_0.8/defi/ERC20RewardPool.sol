@@ -69,6 +69,7 @@ contract ERC20RewardPool is
         IERC20 rewardToken_,
         address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
+        require(rewardToken_ != address(0), "ERC20RewardPool: zero address");
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         __ERC2771Handler_initialize(trustedForwarder);
@@ -88,13 +89,21 @@ contract ERC20RewardPool is
 
     /// @notice set the reward token
     /// @param contractAddress address token used to pay rewards
-    function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setRewardToken(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         rewardToken = IERC20(contractAddress);
     }
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
-    function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setStakeToken(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         _stakeToken = IERC20(contractAddress);
     }
 
