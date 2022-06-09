@@ -8,7 +8,7 @@ import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
+import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionCalculator} from "./interfaces/IContributionCalculator.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
@@ -23,7 +23,7 @@ import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
 /// @dev This way we can build different types of pools by mixing in the plugins we want with this contract.
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
 /// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are giving
-contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771Handler {
+contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771HandlerV2 {
     using SafeERC20 for IERC20;
     using Address for address;
 
@@ -377,11 +377,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
