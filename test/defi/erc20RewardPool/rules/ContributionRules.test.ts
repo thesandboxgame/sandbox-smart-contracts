@@ -103,7 +103,7 @@ describe('ContributionRules', function () {
       const MAX_INT =
         '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
-      expect(await contract.multiplierLimitERC271()).to.be.equal(MAX_INT);
+      expect(await contract.multiplierLimitERC721()).to.be.equal(MAX_INT);
 
       await expect(contract.setERC721MultiplierLimit(30)).to.be.revertedWith(
         'Ownable: caller is not the owner'
@@ -112,7 +112,7 @@ describe('ContributionRules', function () {
       await expect(contractAsAdmin.setERC721MultiplierLimit(30)).not.to.be
         .reverted;
 
-      expect(await contract.multiplierLimitERC271()).to.be.equal(30);
+      expect(await contract.multiplierLimitERC721()).to.be.equal(30);
     });
     it('admin should be able to call setERC1155MultiplierLimit', async function () {
       const {contractAsAdmin, contract} = await ContributionRulesSetup();
