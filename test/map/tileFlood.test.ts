@@ -4,7 +4,7 @@ import {
   getEmptyTile,
   resultToArray,
   setRectangle,
-  setupTileLibTest,
+  setupTileWithCoordsLibTest,
 } from './fixtures';
 import {Contract} from 'ethers';
 
@@ -26,10 +26,10 @@ async function printGasEstimate(tester: Contract) {
   // );
 }
 
-describe('TileLib tester flood', function () {
+describe('TileLibWithCoord tester flood', function () {
   describe('adjacent', function () {
     it('a line', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       await setTileQuads(
         tester,
         resultToArray(['O X X O', 'O X X O', 'O X X O'])
@@ -38,14 +38,14 @@ describe('TileLib tester flood', function () {
       await printGasEstimate(tester);
     });
     it('a square', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       const tile = drawTile([[3, 3, 10, 10]], getEmptyTile);
       await setTileQuads(tester, tile);
       expect(await tester.isAdjacent(0)).to.be.true;
       await printGasEstimate(tester);
     });
     it('a square with a hole', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       const tile = setRectangle(
         drawTile([[3, 3, 10, 10]], getEmptyTile),
         5,
@@ -59,7 +59,7 @@ describe('TileLib tester flood', function () {
       await printGasEstimate(tester);
     });
     it('two squares on a 4-connected component', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       const tile = drawTile(
         [
           [3, 3, 2, 2],
@@ -74,7 +74,7 @@ describe('TileLib tester flood', function () {
   });
   describe('not adjacent', function () {
     it('truncated line', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       await setTileQuads(
         tester,
         resultToArray(['O X X O', 'O O O O', 'O X X O', 'O X X O'])
@@ -84,7 +84,7 @@ describe('TileLib tester flood', function () {
     });
 
     it('two squares', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       const tile = drawTile(
         [
           [3, 3, 2, 2],
@@ -97,7 +97,7 @@ describe('TileLib tester flood', function () {
       await printGasEstimate(tester);
     });
     it('two squares on a 8-connected component', async function () {
-      const tester = await setupTileLibTest();
+      const tester = await setupTileWithCoordsLibTest();
       const tile = drawTile(
         [
           [3, 3, 2, 2],

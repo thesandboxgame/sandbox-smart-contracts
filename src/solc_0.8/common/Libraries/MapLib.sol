@@ -1,5 +1,4 @@
 //SPDX-License-Identifier: MIT
-//SPDX-License-Identifier: MIT
 /* solhint-disable code-complexity */
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
@@ -12,6 +11,13 @@ library MapLib {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
     // TODO: Moveit to a intermediate library
     using TileLib for TileLib.Tile;
+
+    uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
+    uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;
+    uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;
+    uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;
+    uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
+    uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
 
     struct QuadsAndTiles {
         uint256[][3] quads; //(size, x, y)
@@ -236,7 +242,7 @@ library MapLib {
     function isAdjacent(Map storage self) public view returns (bool ret) {
         TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);
         // We assume that all self.values[] are non empty (we remove them if they are empty).
-        spot[0] = self.values[0].tile.findAPixel();
+        spot[0] = self.values[0].findAPixel();
         bool done;
         while (!done) {
             (spot, done) = floodStep(self, spot);
@@ -244,14 +250,13 @@ library MapLib {
         uint256 len = self.values.length;
         uint256 i;
         for (; i < len; i++) {
-            if (!spot[i].isEqualIgnoreCoords(self.values[i].tile)) {
+            if (!self.values[i].isEqualIgnoreCoords(spot[i])) {
                 return false;
             }
         }
         return true;
     }
 
-    // TODO: this is terrible, test it then improve it (a lot!!!)
     function floodStep(Map storage self, TileLib.Tile[] memory current)
         public
         view
@@ -262,12 +267,15 @@ library MapLib {
         uint256 x;
         uint256 y;
         uint256 idx;
+        TileLib.Tile memory ci;
         next = new TileLib.Tile[](len);
+        // grow
         for (i; i < len; i++) {
-            if (current[i].isEmpty()) {
+            ci = current[i];
+            // isEmpty
+            if ((ci.data[0] | ci.data[1] | ci.data[2]) == 0) {
                 continue;
             }
-            TileLib.ExtendedTile memory corners = current[i].grow();
             x = self.values[i].getX() * 24;
             y = self.values[i].getY() * 24;
 
@@ -275,37 +283,54 @@ library MapLib {
             if (x >= 24) {
                 idx = _getIdx(self, x - 24, y);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].or(corners.left);
+                    next[idx - 1].data[0] |= (ci.data[0] & LEFT_MASK) << 23;
+                    next[idx - 1].data[1] |= (ci.data[1] & LEFT_MASK) << 23;
+                    next[idx - 1].data[2] |= (ci.data[2] & LEFT_MASK) << 23;
                 }
             }
             // up
             if (y >= 24) {
                 idx = _getIdx(self, x, y - 24);
                 if (idx != 0) {
-                    next[idx - 1] = next[idx - 1].orUp(corners.up);
+                    next[idx - 1].data[2] |= (ci.data[0] & UP_MASK) << (24 * 7);
                 }
             }
             // middle
             idx = _getIdx(self, x, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners.middle);
+                next[idx - 1].data[0] |= _grow(ci.data[0]) | ((ci.data[1] & UP_MASK) << (24 * 7));
+                next[idx - 1].data[1] |=
+                    _grow(ci.data[1]) |
+                    ((ci.data[2] & UP_MASK) << (24 * 7)) |
+                    ((ci.data[0] & DOWN_MASK) >> (24 * 7));
+                next[idx - 1].data[2] |= _grow(ci.data[2]) | ((ci.data[1] & DOWN_MASK) >> (24 * 7));
             }
             // down
             idx = _getIdx(self, x, y + 24);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].orDown(corners.down);
+                next[idx - 1].data[0] |= (ci.data[2] & DOWN_MASK) >> (24 * 7);
             }
             // right
             idx = _getIdx(self, x + 24, y);
             if (idx != 0) {
-                next[idx - 1] = next[idx - 1].or(corners.right);
+                next[idx - 1].data[0] |= (ci.data[0] & RIGHT_MASK) >> 23;
+                next[idx - 1].data[1] |= (ci.data[1] & RIGHT_MASK) >> 23;
+                next[idx - 1].data[2] |= (ci.data[2] & RIGHT_MASK) >> 23;
             }
         }
         // Mask it.
         done = true;
         for (i = 0; i < len; i++) {
-            next[i] = next[i].and(self.values[i].tile);
-            done = done && next[i].isEqual(current[i]);
+            // next[i] = next[i].and(self.values[i].tile);
+            // done = done && next[i].isEqual(current[i]);
+            next[i].data[0] &= self.values[i].tile.data[0];
+            next[i].data[1] &= self.values[i].tile.data[1];
+            next[i].data[2] &= self.values[i].tile.data[2];
+            done =
+                done &&
+                next[i].data[0] == current[i].data[0] &&
+                next[i].data[1] == current[i].data[1] &&
+                next[i].data[2] == current[i].data[2];
         }
         return (next, done);
     }
@@ -325,34 +350,34 @@ library MapLib {
         //        TileWithCoordLib.TileWithCoord memory spot = TileWithCoordLib.initTileWithCoord(x, y);
         //        TileLib.ExtendedTile memory corners = spot.setQuad(x, y, size).grow();
         TileLib.Tile memory spot;
-        TileLib.ExtendedTile memory corners = spot.setQuad(x % 24, y % 24, size).grow();
+        spot = spot.setQuad(x % 24, y % 24, size);
         // left
         if (x >= 24) {
             idx = _getIdx(self, x - 24, y);
-            if (idx != 0 && !self.values[idx - 1].tile.and(corners.left).isEmpty()) {
+            if (idx != 0 && !self.values[idx - 1].tile.and(_growLeft(spot)).isEmpty()) {
                 return true;
             }
         }
         // up
         if (y >= 24) {
             idx = _getIdx(self, x, y - 24);
-            if (idx != 0 && self.values[idx - 1].tile.isAdjacentUp(corners.up)) {
+            if (idx != 0 && (self.values[idx - 1].tile.data[0] & ((spot.data[0] & UP_MASK) << (24 * 7))) != 0) {
                 return true;
             }
         }
         // middle
         idx = _getIdx(self, x, y);
-        if (idx != 0 && !self.values[idx - 1].tile.and(corners.middle).isEmpty()) {
+        if (idx != 0 && !self.values[idx - 1].tile.and(_growMiddle(spot)).isEmpty()) {
             return true;
         }
         // down
         idx = _getIdx(self, x, y + 24);
-        if (idx != 0 && self.values[idx - 1].tile.isAdjacentDown(corners.down)) {
+        if (idx != 0 && (self.values[idx - 1].tile.data[2] & ((spot.data[2] & DOWN_MASK) >> (24 * 7))) != 0) {
             return true;
         }
         // right
         idx = _getIdx(self, x + 24, y);
-        if (idx != 0 && !self.values[idx - 1].tile.and(corners.right).isEmpty()) {
+        if (idx != 0 && !self.values[idx - 1].tile.and(_growRight(spot)).isEmpty()) {
             return true;
         }
         return false;
@@ -455,5 +480,34 @@ library MapLib {
     ) private view returns (uint256) {
         uint256 key = TileWithCoordLib.getKey(x, y);
         return self.indexes[key];
+    }
+
+    function _grow(uint256 x) private pure returns (uint256) {
+        return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));
+    }
+
+    function _growMiddle(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {
+        e.data[0] = _grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));
+        e.data[1] =
+            _grow(self.data[1]) |
+            ((self.data[2] & UP_MASK) << (24 * 7)) |
+            ((self.data[0] & DOWN_MASK) >> (24 * 7));
+        e.data[2] = _grow(self.data[2]) | ((self.data[1] & DOWN_MASK) >> (24 * 7));
+        return e;
+    }
+
+    function _growRight(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {
+        // for loop removed to save some gas.
+        e.data[0] = (self.data[0] & RIGHT_MASK) >> 23;
+        e.data[1] = (self.data[1] & RIGHT_MASK) >> 23;
+        e.data[2] = (self.data[2] & RIGHT_MASK) >> 23;
+        return e;
+    }
+
+    function _growLeft(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {
+        e.data[0] = (self.data[0] & LEFT_MASK) << 23;
+        e.data[1] = (self.data[1] & LEFT_MASK) << 23;
+        e.data[2] = (self.data[2] & LEFT_MASK) << 23;
+        return e;
     }
 }

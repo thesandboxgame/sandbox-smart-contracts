@@ -3,12 +3,12 @@ import {
   drawExtendedTile,
   extendedTileToArray,
   printTile,
-  setupTileLibTest,
+  setupTileWithCoordsLibTest,
 } from './fixtures';
 
-describe('TileLib grow and flood', function () {
+describe('TileLibWithCoord grow and flood', function () {
   it('a dot', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 12, 12, 1);
     const tile = await tester.grow(0);
 
@@ -19,7 +19,7 @@ describe('TileLib grow and flood', function () {
     expect(extendedTileToArray(tile)).to.be.eql(result);
   });
   it('some square in the center', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 12, 12, 6);
     const tile = await tester.grow(0);
     const result = drawExtendedTile([
@@ -29,7 +29,7 @@ describe('TileLib grow and flood', function () {
     expect(extendedTileToArray(tile)).to.be.eql(result);
   });
   it('square border', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, i, 0, 1);
       await tester.setQuad(0, 0, i, 1);
@@ -47,7 +47,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('top border', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, i, 0, 1);
     }
@@ -59,7 +59,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('down border', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, i, 23, 1);
     }
@@ -71,7 +71,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('left border', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, 0, i, 1);
     }
@@ -83,7 +83,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('right border', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     for (let i = 0; i < 24; i++) {
       await tester.setQuad(0, 23, i, 1);
     }
@@ -95,7 +95,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('a full square', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 0, 0, 24);
     const tile = await tester.grow(0);
     const result = drawExtendedTile([
@@ -106,7 +106,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('two dots in the division of the tile', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 12, 0, 1);
     await tester.setQuad(0, 12, 23, 1);
     const tile = await tester.grow(0);
@@ -120,7 +120,7 @@ describe('TileLib grow and flood', function () {
   });
 
   it('four corners', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 0, 0, 1);
     await tester.setQuad(0, 0, 23, 1);
     await tester.setQuad(0, 23, 0, 1);
@@ -140,7 +140,7 @@ describe('TileLib grow and flood', function () {
   });
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('flood test', async function () {
-    const tester = await setupTileLibTest();
+    const tester = await setupTileWithCoordsLibTest();
     await tester.setQuad(0, 12, 12, 1);
     let spot = await tester.findAPixel(0);
     for (let i = 0; i < 14; i++) {

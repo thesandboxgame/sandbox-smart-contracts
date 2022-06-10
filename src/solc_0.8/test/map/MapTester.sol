@@ -8,8 +8,11 @@ import {TileLib} from "../../common/Libraries/TileLib.sol";
 
 contract MapTester {
     using MapLib for MapLib.Map;
+    using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
     using TileLib for TileLib.Tile;
     MapLib.Map[30] internal maps;
+
+    // TileLib.ExtendedTile[10] internal neighbours;
 
     function setQuad(
         uint256 idx,
@@ -103,12 +106,12 @@ contract MapTester {
     {
         current = maps[idx].values;
         next = new TileLib.Tile[](current.length);
-        next[0] = current[0].tile.findAPixel();
+        next[0] = current[0].findAPixel();
         return (current, next, done);
     }
 
     function findAPixel(uint256 idx) external view returns (TileLib.Tile memory tile) {
-        return maps[idx].values[0].tile.findAPixel();
+        return maps[idx].values[0].findAPixel();
     }
 
     function containMap(uint256 idx, uint256 contained) external view returns (bool) {

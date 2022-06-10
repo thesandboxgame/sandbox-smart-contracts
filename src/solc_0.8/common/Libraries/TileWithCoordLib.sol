@@ -8,6 +8,9 @@ import {TileLib} from "./TileLib.sol";
 library TileWithCoordLib {
     using TileLib for TileLib.Tile;
 
+    // 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 public constant COORD_MASK_NEG = (2**(24 * 8) - 1);
+
     struct TileWithCoord {
         TileLib.Tile tile;
     }
@@ -55,7 +58,9 @@ library TileWithCoordLib {
         returns (TileWithCoord memory)
     {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
-        self.tile = self.tile.subtractWitMask(value.tile);
+        self.tile.data[0] &= ~(value.tile.data[0] & COORD_MASK_NEG);
+        self.tile.data[1] &= ~(value.tile.data[1] & COORD_MASK_NEG);
+        self.tile.data[2] &= ~(value.tile.data[2] & COORD_MASK_NEG);
         return self;
     }
 
@@ -99,7 +104,7 @@ library TileWithCoordLib {
     }
 
     function isEmpty(TileWithCoord memory self) internal pure returns (bool) {
-        return self.tile.isEmpty();
+        return (self.tile.data[0] | self.tile.data[1] | self.tile.data[2]) & COORD_MASK_NEG == 0;
     }
 
     function isEqual(TileWithCoord memory self, TileWithCoord memory other) internal pure returns (bool) {
@@ -107,5 +112,59 @@ library TileWithCoordLib {
             self.tile.data[0] == other.tile.data[0] &&
             self.tile.data[1] == other.tile.data[1] &&
             self.tile.data[2] == other.tile.data[2];
+    }
+
+    function isEqualIgnoreCoords(TileWithCoord memory self, TileLib.Tile memory b) internal pure returns (bool) {
+        return
+            ((self.tile.data[0] ^ b.data[0]) | (self.tile.data[1] ^ b.data[1]) | (self.tile.data[2] ^ b.data[2])) &
+                COORD_MASK_NEG ==
+            0;
+    }
+
+    function findAPixel(TileWithCoord memory self) internal pure returns (TileLib.Tile memory ret) {
+        uint256 target;
+        uint256 shift;
+
+        target = self.tile.data[2] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = _findAPixel(target);
+            ret.data[2] = (1 << shift);
+            return ret;
+        }
+
+        target = self.tile.data[1] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = _findAPixel(target);
+            ret.data[1] = (1 << shift);
+            return ret;
+        }
+
+        target = self.tile.data[0] & COORD_MASK_NEG;
+        if (target != 0) {
+            shift = _findAPixel(target);
+            ret.data[0] = (1 << shift);
+        }
+        return ret;
+    }
+
+    function _findAPixel(uint256 target) private pure returns (uint256 shift) {
+        uint256 mask = (2**64 - 1);
+        // divide in 3 parts, then do a binary search
+        if ((target & mask) == 0) {
+            target = target >> 64;
+            shift = 64;
+            if ((target & mask) == 0) {
+                target = target >> 64;
+                shift = 128;
+            }
+        }
+        for (uint256 i = 32; i > 0; i = i / 2) {
+            mask = mask >> i;
+            if ((target & mask) == 0) {
+                target = target >> i;
+                shift += i;
+            }
+        }
+        return shift;
     }
 }

@@ -2,10 +2,12 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol"; // TODO: Separate this code into a library + something to store the masks
+import {TileWithCoordLib} from "../../common/Libraries/TileWithCoordLib.sol";
+import {TileLib} from "../../common/Libraries/TileLib.sol";
 
 contract TileWithCoordTester {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
+    using TileLib for TileLib.Tile;
     TileWithCoordLib.TileWithCoord[30] public tiles;
 
     function initTileWithCoord(
@@ -69,5 +71,70 @@ contract TileWithCoordTester {
 
     function isEmpty(uint256 idx) external view returns (bool) {
         return tiles[idx].isEmpty();
+    }
+
+    function isEqual(uint256 idx1, uint256 idx2) external view returns (bool) {
+        return tiles[idx1].isEqual(tiles[idx2]);
+    }
+
+    function setFindAPixel(uint256 idx, uint256 out) external {
+        tiles[out].tile = tiles[idx].findAPixel();
+    }
+
+    struct ExtendedTile {
+        TileLib.Tile left;
+        uint256 up;
+        TileLib.Tile middle;
+        uint256 down;
+        TileLib.Tile right;
+    }
+
+    function isAdjacent(uint256 idx) external view returns (bool ret) {
+        TileLib.Tile memory next = tiles[idx].findAPixel();
+        ExtendedTile memory current;
+        bool done;
+        while (!done) {
+            current = _grow(next);
+            // Ignore overflow area
+            current.middle = current.middle.and(tiles[idx].tile);
+            done = next.isEqual(current.middle);
+            next = current.middle;
+        }
+        return next.isEqual(tiles[idx].tile);
+    }
+
+    function grow(uint256 idx) external view returns (ExtendedTile memory e) {
+        return _grow(tiles[idx].tile);
+    }
+
+    uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
+    uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;
+    uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;
+    uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;
+    uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
+    uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
+
+    function _grow(TileLib.Tile memory self) internal pure returns (ExtendedTile memory e) {
+        e.middle.data[0] = _grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));
+        e.middle.data[1] =
+            _grow(self.data[1]) |
+            ((self.data[2] & UP_MASK) << (24 * 7)) |
+            ((self.data[0] & DOWN_MASK) >> (24 * 7));
+        e.middle.data[2] = _grow(self.data[2]) | ((self.data[1] & DOWN_MASK) >> (24 * 7));
+
+        e.up = (self.data[0] & UP_MASK) << (24 * 7);
+        e.down = (self.data[2] & DOWN_MASK) >> (24 * 7);
+        // for loop removed to save some gas.
+        e.left.data[0] = (self.data[0] & LEFT_MASK) << 23;
+        e.right.data[0] = (self.data[0] & RIGHT_MASK) >> 23;
+        e.left.data[1] = (self.data[1] & LEFT_MASK) << 23;
+        e.right.data[1] = (self.data[1] & RIGHT_MASK) >> 23;
+        e.left.data[2] = (self.data[2] & LEFT_MASK) << 23;
+        e.right.data[2] = (self.data[2] & RIGHT_MASK) >> 23;
+        return e;
+    }
+
+    function _grow(uint256 x) private pure returns (uint256) {
+        return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));
     }
 }

@@ -142,5 +142,16 @@ describe('TileWithCoordLib main', function () {
     expect(await tester.isEmpty(0)).to.be.true;
   });
 
+  it('findAPixel', async function () {
+    const tester = await setupTileWithCoordsLibTest();
+    for (let x = 0; x < 24; x++) {
+      for (let y = 0; y < 24; y++) {
+        await tester.clearQuad(0, 0, 0, 24);
+        await tester.setQuad(0, x, y, 1);
+        await tester.setFindAPixel(0, 1);
+        expect(await tester.isEqual(0, 1)).to.be.true;
+      }
+    }
+  });
   // TODO: Add more tests, specially for clear, grid like things, etc...
 });
