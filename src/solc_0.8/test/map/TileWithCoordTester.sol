@@ -107,6 +107,14 @@ contract TileWithCoordTester {
         return _grow(tiles[idx].tile);
     }
 
+    function shift(
+        TileLib.Tile calldata t,
+        uint256 x,
+        uint256 y
+    ) external pure returns (TileWithCoordLib.ShiftResult memory) {
+        return TileWithCoordLib.translateTile(t, x, y);
+    }
+
     uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
     uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;
     uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;

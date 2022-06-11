@@ -155,7 +155,8 @@ describe('L2 Estate test with maps and games', function () {
           //const quadId2 = await mintQuad(other, 24, 144, 144);
 
           // const gameId2 = 456;
-          const {updateEstateId, updateGasUsed} = await updateEstate({
+          //const {updateEstateId, updateGasUsed} = await updateEstate({
+          await updateEstate({
             estateId: estateId,
             //freeLandToAdd: getXsYsSizes(0, 0, size),
             //freeLandToRemove: getXsYsSizes(0, 0, size),
@@ -172,8 +173,8 @@ describe('L2 Estate test with maps and games', function () {
               },
             ], */
           });
-          console.log(updateEstateId);
-          console.log(updateGasUsed);
+          // console.log(updateEstateId);
+          // console.log(updateGasUsed);
         });
       });
     });
@@ -224,7 +225,8 @@ describe('L2 Estate test with maps and games', function () {
       await gameContractAsOther.mint(other, gameId2);
       await gameContractAsOther.approve(estateContract.address, gameId2);
 
-      const {updateEstateId, updateGasUsed} = await updateEstate({
+      //const {updateEstateId, updateGasUsed} = await updateEstate({
+      await updateEstate({
         estateId: estateId,
         //freeLandToAdd: getXsYsSizes(144, 144, 24),
         //freeLandToRemove: getXsYsSizes(0, 0, size),
@@ -242,8 +244,8 @@ describe('L2 Estate test with maps and games', function () {
         ],
       });
 
-      console.log(updateEstateId);
-      console.log(updateGasUsed);
+      // console.log(updateEstateId);
+      // console.log(updateGasUsed);
     });
   });
   // eslint-disable-next-line mocha/no-skipped-tests

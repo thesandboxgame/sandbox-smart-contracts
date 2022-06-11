@@ -1,6 +1,6 @@
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {withSnapshot} from '../utils';
-import {BigNumber, BigNumberish} from 'ethers';
+import {BigNumber, BigNumberish, Contract} from 'ethers';
 
 export const setupTileLibTest = withSnapshot([], async () => {
   const {deployer} = await getNamedAccounts();
@@ -64,6 +64,32 @@ export function extendedTileToArray(data: ExtendedTile): boolean[][] {
   return ret;
 }
 
+type ShiftResult = {
+  topLeft: {tile: Tile};
+  topRight: {tile: Tile};
+  bottomLeft: {tile: Tile};
+  bottomRight: {tile: Tile};
+};
+
+export function shiftResultToArray(data: ShiftResult): boolean[][] {
+  const ret = [];
+  const topLeft = tileToArray(data.topLeft.tile.data);
+  const topRight = tileToArray(data.topRight.tile.data);
+  for (let i = 0; i < topLeft.length; i++) {
+    ret.push([...topLeft[i], ...topRight[i]]);
+  }
+  const bottomLeft = tileToArray(data.bottomLeft.tile.data);
+  const bottomRight = tileToArray(data.bottomRight.tile.data);
+  for (let i = 0; i < bottomLeft.length; i++) {
+    ret.push([...bottomLeft[i], ...bottomRight[i]]);
+  }
+  return ret;
+}
+
+export function getEmptyShiftResult(): boolean[][] {
+  return getEmptyTile(48, 48);
+}
+
 export function tileToArray(data: BigNumberish[]): boolean[][] {
   const ret = [];
   for (let r = 0; r < data.length; r++) {
@@ -84,24 +110,6 @@ export function tileToArray(data: BigNumberish[]): boolean[][] {
   return ret;
 }
 
-export function lineToArray(data: BigNumberish): boolean[][] {
-  const ret = [];
-  const bn = BigNumber.from(data);
-  for (let s = 0; s < 8; s++) {
-    const line = [];
-    for (let t = 0; t < 24; t++) {
-      line.push(
-        bn
-          .shr(s * 24 + t)
-          .and(1)
-          .eq(1)
-      );
-    }
-    ret.push(line);
-  }
-  return ret;
-}
-
 export function resultToArray(strs: string[]): boolean[][] {
   return strs.map((x) =>
     x
@@ -117,8 +125,8 @@ export function tileWithCoordToJS(coord: {
 }): {tile: boolean[][]; x: BigNumber; y: BigNumber} {
   return {
     tile: tileToArray(coord.tile.data),
-    x: BigNumber.from(coord.tile.data[1]).shr(192),
-    y: BigNumber.from(coord.tile.data[2]).shr(192),
+    x: BigNumber.from(coord.tile.data[1]).shr(224),
+    y: BigNumber.from(coord.tile.data[2]).shr(224),
   };
 }
 
@@ -232,4 +240,17 @@ export function createTestMapQuads(
     quads.push([roundedTo(x, size), roundedTo(y, size), size]);
   }
   return quads;
+}
+
+export async function setTileQuads(
+  tester: Contract,
+  tile: boolean[][]
+): Promise<void> {
+  for (let y = 0; y < tile.length; y++) {
+    for (let x = 0; x < tile[0].length; x++) {
+      if (tile[y][x]) {
+        await tester.setQuad(0, x, y, 1);
+      }
+    }
+  }
 }

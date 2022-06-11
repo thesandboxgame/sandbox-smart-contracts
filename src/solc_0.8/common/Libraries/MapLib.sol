@@ -77,6 +77,20 @@ library MapLib {
         return self.values[idx - 1].containTile(tile);
     }
 
+    function containTileWithOffset(
+        Map storage self,
+        TileLib.Tile memory tile,
+        uint256 x,
+        uint256 y
+    ) public view returns (bool) {
+        TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(tile, x, y);
+        return
+            (s.topLeft.isEmpty() || containTileWithCoord(self, s.topLeft)) &&
+            (s.topRight.isEmpty() || containTileWithCoord(self, s.topRight)) &&
+            (s.bottomLeft.isEmpty() || containTileWithCoord(self, s.bottomLeft)) &&
+            (s.bottomRight.isEmpty() || containTileWithCoord(self, s.bottomRight));
+    }
+
     // TODO: Check gas consumption!!!
     // OBS: self can be huge, but contained must be small, we iterate over contained values.
     function containMap(Map storage self, Map storage contained) public view returns (bool) {

@@ -11,6 +11,13 @@ library TileWithCoordLib {
     // 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     uint256 public constant COORD_MASK_NEG = (2**(24 * 8) - 1);
 
+    struct ShiftResult {
+        TileWithCoordLib.TileWithCoord topLeft;
+        TileWithCoordLib.TileWithCoord topRight;
+        TileWithCoordLib.TileWithCoord bottomLeft;
+        TileWithCoordLib.TileWithCoord bottomRight;
+    }
+
     struct TileWithCoord {
         TileLib.Tile tile;
     }
@@ -21,6 +28,20 @@ library TileWithCoordLib {
         ret.tile.data[0] = (getKey(x, y)) << 224;
         ret.tile.data[1] = (x / 24) << 224;
         ret.tile.data[2] = (y / 24) << 224;
+        return ret;
+    }
+
+    function initTileWithCoord(
+        uint256 x,
+        uint256 y,
+        uint256 pixelData1,
+        uint256 pixelData2,
+        uint256 pixelData3
+    ) internal pure returns (TileWithCoord memory) {
+        TileWithCoord memory ret;
+        ret.tile.data[0] = (pixelData1 & COORD_MASK_NEG) | ((getKey(x, y)) << 224);
+        ret.tile.data[1] = (pixelData2 & COORD_MASK_NEG) | ((x / 24) << 224);
+        ret.tile.data[2] = (pixelData3 & COORD_MASK_NEG) | ((y / 24) << 224);
         return ret;
     }
 
@@ -166,5 +187,67 @@ library TileWithCoordLib {
             }
         }
         return shift;
+    }
+
+    uint256 private constant DOWN_CARRY_MASK = 0xFFFFFF000000000000000000000000000000000000000000000000;
+
+    function translateTile(
+        TileLib.Tile memory tile,
+        uint256 deltaX,
+        uint256 deltaY
+    ) internal pure returns (ShiftResult memory) {
+        (uint256[6] memory col1, uint256[6] memory col2) = _translateTile(tile, deltaX % 24, deltaY % 24);
+        return
+            ShiftResult({
+                topLeft: TileWithCoordLib.initTileWithCoord(deltaX, deltaY, col1[0], col1[1], col1[2]),
+                bottomLeft: TileWithCoordLib.initTileWithCoord(deltaX, deltaY + 24, col1[3], col1[4], col1[5]),
+                topRight: TileWithCoordLib.initTileWithCoord(deltaX + 24, deltaY, col2[0], col2[1], col2[2]),
+                bottomRight: TileWithCoordLib.initTileWithCoord(deltaX + 24, deltaY + 24, col2[3], col2[4], col2[5])
+            });
+    }
+
+    function _translateTile(
+        TileLib.Tile memory tile,
+        uint256 x,
+        uint256 y
+    ) private pure returns (uint256[6] memory col1, uint256[6] memory col2) {
+        // Move right
+        uint256 mask = _getXMask(x);
+        col1[0] = (tile.data[0] & mask) << x;
+        col1[1] = (tile.data[1] & mask) << x;
+        col1[2] = (tile.data[2] & mask) << x;
+        if (x > 0) {
+            mask = COORD_MASK_NEG - mask;
+            col2[0] = (tile.data[0] & mask) >> (24 - x);
+            col2[1] = (tile.data[1] & mask) >> (24 - x);
+            col2[2] = (tile.data[2] & mask) >> (24 - x);
+        }
+        // Move down
+        uint256 rem = 24 * (y % 8);
+        uint256 div = y / 8;
+        mask = COORD_MASK_NEG - (2**(24 * 8 - rem) - 1);
+        for (uint256 i = 5; i > div; i--) {
+            col1[i] = (col1[i - div] << rem) | ((col1[i - div - 1] & mask) >> (24 * 8 - rem));
+            col2[i] = (col2[i - div] << rem) | ((col2[i - div - 1] & mask) >> (24 * 8 - rem));
+        }
+        col1[div] = col1[0] << rem;
+        col2[div] = col2[0] << rem;
+        if (div > 0) {
+            col1[0] = 0;
+            col2[0] = 0;
+            if (div > 1) {
+                col1[1] = 0;
+                col2[1] = 0;
+            }
+        }
+        return (col1, col2);
+    }
+
+    function _getXMask(uint256 x) private pure returns (uint256) {
+        uint256 mask = (2**24 - 1) >> x;
+        mask |= mask << 24;
+        mask |= mask << (24 * 2);
+        mask |= mask << (24 * 4);
+        return mask;
     }
 }

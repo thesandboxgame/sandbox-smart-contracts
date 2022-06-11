@@ -4,19 +4,10 @@ import {
   getEmptyTile,
   resultToArray,
   setRectangle,
+  setTileQuads,
   setupTileWithCoordsLibTest,
 } from './fixtures';
 import {Contract} from 'ethers';
-
-async function setTileQuads(tester: Contract, tile: boolean[][]) {
-  for (let y = 0; y < tile.length; y++) {
-    for (let x = 0; x < tile[0].length; x++) {
-      if (tile[y][x]) {
-        await tester.setQuad(0, x, y, 1);
-      }
-    }
-  }
-}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function printGasEstimate(tester: Contract) {

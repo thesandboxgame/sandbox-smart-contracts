@@ -137,4 +137,21 @@ contract MapTester {
     ) external view returns (bool) {
         return maps[idx].containTileAtCoord(x, y);
     }
+
+    function containTileWithOffset(
+        uint256 idx,
+        TileLib.Tile calldata tile,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        return maps[idx].containTileWithOffset(tile, x, y);
+    }
+
+    function shift(
+        TileLib.Tile calldata t,
+        uint256 x,
+        uint256 y
+    ) external pure returns (TileWithCoordLib.ShiftResult memory) {
+        return TileWithCoordLib.translateTile(t, x, y);
+    }
 }

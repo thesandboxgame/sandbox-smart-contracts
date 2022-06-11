@@ -1,7 +1,13 @@
 import {expect} from '../chai-setup';
 import {
+  drawTile,
+  getEmptyShiftResult,
+  getEmptyTile,
   printTileWithCoord,
+  setRectangle,
+  setTileQuads,
   setupTileWithCoordsLibTest,
+  shiftResultToArray,
   tileWithCoordToJS,
 } from './fixtures';
 import {BigNumber} from 'ethers';
@@ -153,5 +159,67 @@ describe('TileWithCoordLib main', function () {
       }
     }
   });
+
+  describe('shift', function () {
+    it('shift 1 pixel all over the place', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.setQuad(0, 0, 0, 1);
+      const t = await tester.getTile(0);
+      const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+      for (const x of tests) {
+        for (const y of tests) {
+          const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
+          const result = getEmptyShiftResult();
+          result[y][x] = true;
+          expect(ret).to.be.eql(result);
+        }
+      }
+    });
+    it('shift a full tile all over the place y first', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.setQuad(0, 0, 0, 24);
+      const t = await tester.getTile(0);
+      const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+      for (const x of tests) {
+        for (const y of tests) {
+          const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
+          const result = setRectangle(getEmptyShiftResult(), x, y, 24, 24);
+          expect(ret).to.be.eql(result);
+        }
+      }
+    });
+    it('shift a full tile all over the place x first', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.setQuad(0, 0, 0, 24);
+      const t = await tester.getTile(0);
+      const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+      for (const x of tests) {
+        for (const y of tests) {
+          const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
+          const result = setRectangle(getEmptyShiftResult(), x, y, 24, 24);
+          expect(ret).to.be.eql(result);
+        }
+      }
+    });
+    it('shift a figure', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      const tile = drawTile(
+        [
+          [3, 3, 2, 2],
+          [4, 5, 2, 2],
+        ],
+        getEmptyTile
+      );
+      await setTileQuads(tester, tile);
+      const t = await tester.getTile(0);
+      console.log(
+        'tileWithCoord shift gas used',
+        BigNumber.from(
+          await tester.estimateGas.shift(t.tile, 23, 23)
+        ).toString()
+      );
+    });
+  });
+
   // TODO: Add more tests, specially for clear, grid like things, etc...
 });

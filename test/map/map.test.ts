@@ -148,5 +148,52 @@ describe('MapLib main', function () {
     expect(await tester.containMap(1, 0)).to.be.true;
   });
 
+  describe('containTileWithOffset', function () {
+    it('1 pixel all over the place', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(10, 0, 0, 1);
+      const t = await tester.at(10, 0);
+      const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+      for (const x of tests) {
+        for (const y of tests) {
+          await tester.setQuad(0, 240 + x, 240 + y, 1);
+          expect(
+            await tester.containTileWithOffset(0, t.tile, 240 + x, 240 + y)
+          ).to.be.true;
+          expect(await tester.containTileWithOffset(0, t.tile, 241 + x, y)).to
+            .be.false;
+        }
+      }
+    });
+    it('shift a figure', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(10, 0, 0, 1);
+      await tester.setQuad(10, 0, 6, 1);
+      await tester.setQuad(10, 6, 0, 1);
+      await tester.setQuad(10, 6, 6, 1);
+      const t = await tester.at(10, 0);
+      const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+      const bases = [240, 123];
+      for (const b of bases) {
+        for (const x of tests) {
+          for (const y of tests) {
+            // figure
+            await tester.setQuad(0, b + x, b + y, 1);
+            await tester.setQuad(0, b + x, b + y + 6, 1);
+            await tester.setQuad(0, b + x + 6, b + y, 1);
+            await tester.setQuad(0, b + x + 6, b + y + 6, 1);
+            // some extra
+            await tester.setQuad(0, b + x + 1, b + y, 1);
+            await tester.setQuad(0, b + x, b + y + 1, 1);
+            expect(await tester.containTileWithOffset(0, t.tile, b + x, b + y))
+              .to.be.true;
+            expect(await tester.containTileWithOffset(0, t.tile, b + 1 + x, y))
+              .to.be.false;
+          }
+        }
+      }
+    });
+  });
+
   // TODO: Add more tests, specially for clear, grid like things, etc...
 });
