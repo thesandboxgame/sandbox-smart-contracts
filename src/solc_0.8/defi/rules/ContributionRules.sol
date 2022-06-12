@@ -205,12 +205,12 @@ contract ContributionRules is Ownable {
 
             if (_listERC721[reqContract].balanceOf == true) {
                 _multiplier = _multiplier + multiplierLogarithm(account, reqContract);
-            }
-
-            for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
-                address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
-                if (owner == account) {
-                    _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
+            } else {
+                for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
+                    address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
+                    if (owner == account) {
+                        _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
+                    }
                 }
             }
         }
