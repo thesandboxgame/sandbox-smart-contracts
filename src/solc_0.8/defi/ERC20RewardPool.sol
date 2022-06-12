@@ -70,13 +70,13 @@ contract ERC20RewardPool is
         address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
     modifier isContractAndAdmin(address contractAddress) {
         require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "ERC20RewardPool: not admin");
         _;
     }
 
