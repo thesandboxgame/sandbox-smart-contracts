@@ -386,15 +386,15 @@ contract ERC20RewardPool is
 
     // @dev Triggers stopped state.
     // The contract must not be paused.
-    function pause() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+    // ToDo: replace modifier to onlyOwner after merge
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _pause();
     }
 
     // @dev Returns to normal state.
     // The contract must be paused.
-    function unpause() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+    // ToDo: replace modifier to onlyOwner after merge
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
 
