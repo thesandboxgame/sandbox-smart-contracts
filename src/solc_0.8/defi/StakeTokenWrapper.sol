@@ -4,8 +4,10 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Context.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
 abstract contract StakeTokenWrapper is Context {
+    using Address for address;
     using SafeERC20 for IERC20;
     IERC20 internal _stakeToken;
 
@@ -13,7 +15,7 @@ abstract contract StakeTokenWrapper is Context {
     mapping(address => uint256) internal _balances;
 
     constructor(IERC20 stakeToken) {
-        require(address(stakeToken) != address(0), "StakeTokenWrapper: zero address");
+        require(address(stakeToken).isContract(), "StakeTokenWrapper: is not a contract");
         _stakeToken = stakeToken;
     }
 

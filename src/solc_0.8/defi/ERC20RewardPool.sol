@@ -69,7 +69,7 @@ contract ERC20RewardPool is
         IERC20 rewardToken_,
         address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
-        require(address(rewardToken_) != address(0), "ERC20RewardPool: zero address");
+        require(address(rewardToken_).isContract(), "ERC20RewardPool: is not a contract");
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         __ERC2771Handler_initialize(trustedForwarder);
