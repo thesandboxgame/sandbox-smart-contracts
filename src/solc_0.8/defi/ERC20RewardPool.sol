@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGu
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
+import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
@@ -32,7 +32,7 @@ contract ERC20RewardPool is
     RequirementsRules,
     AccessControl,
     ReentrancyGuard,
-    ERC2771Handler,
+    ERC2771HandlerV2,
     Pausable
 {
     using SafeERC20 for IERC20;
@@ -71,7 +71,7 @@ contract ERC20RewardPool is
     ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        __ERC2771Handler_initialize(trustedForwarder);
+        __ERC2771HandlerV2_initialize(trustedForwarder);
     }
 
     modifier isContractAndAdmin(address contractAddress) {
@@ -384,11 +384,11 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
