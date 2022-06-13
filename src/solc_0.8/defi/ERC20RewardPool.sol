@@ -109,12 +109,16 @@ contract ERC20RewardPool is
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTrustedForwarder(address trustedForwarder) external isContractAndAdmin(trustedForwarder) {
         _trustedForwarder = trustedForwarder;
     }
 
     /// @notice set contract that contains all the contribution rules
-    function setContributionRules(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setContributionRules(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         contributionRules = IContributionRules(contractAddress);
     }
 
@@ -124,6 +128,7 @@ contract ERC20RewardPool is
     function setRewardCalculator(address contractAddress, bool restartRewards_)
         external
         isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
     {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards_) {
