@@ -229,7 +229,7 @@ contract ERC20RewardPool is
 
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
-    /// @dev the user must approve in the stack token before calling this function
+    /// @dev the user must approve in the stake token before calling this function
     function stake(uint256 amount)
         external
         nonReentrant

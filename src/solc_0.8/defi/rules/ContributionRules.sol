@@ -15,8 +15,8 @@ contract ContributionRules is Ownable, IContributionRules {
     uint256 public multiplierLimitERC271 = type(uint256).max;
     uint256 public multiplierLimitERC1155 = type(uint256).max;
 
-    uint256 internal constant DECIMALS_7 = 10000000;
-    uint256 internal constant MIDPOINT_9 = 500000000;
+    uint256 internal constant DECIMALS_7 = 10_000_000;
+    uint256 internal constant MIDPOINT_9 = 500_000_000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
     uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
