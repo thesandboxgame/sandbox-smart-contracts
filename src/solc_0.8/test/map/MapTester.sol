@@ -154,4 +154,8 @@ contract MapTester {
     ) external pure returns (TileWithCoordLib.ShiftResult memory) {
         return TileWithCoordLib.translateTile(t, x, y);
     }
+
+    function getLandCount(uint256 idx) external view returns (uint256) {
+        return maps[idx].getLandCount();
+    }
 }

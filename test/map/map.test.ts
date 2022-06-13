@@ -1,5 +1,6 @@
 import {expect} from '../chai-setup';
 import {createTestMapQuads, printMap, setupMapTest} from './fixtures';
+import {BigNumber} from 'ethers';
 
 describe('MapLib main', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
@@ -193,6 +194,17 @@ describe('MapLib main', function () {
         }
       }
     });
+  });
+  it('land count', async function () {
+    const {tester} = await setupMapTest();
+    for (let i = 0; i < 10; i++) {
+      await tester.setQuad(0, i * 24, 0, 1);
+    }
+    expect(await tester.getLandCount(0)).to.be.equal(10);
+    console.log(
+      'Gas used',
+      BigNumber.from(await tester.estimateGas.getLandCount(0)).toString()
+    );
   });
 
   // TODO: Add more tests, specially for clear, grid like things, etc...

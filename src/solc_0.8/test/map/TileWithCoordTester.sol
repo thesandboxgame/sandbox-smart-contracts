@@ -69,6 +69,21 @@ contract TileWithCoordTester {
         return tiles[idx].getKey();
     }
 
+    function getLandCount(uint256 idx) external view returns (uint256) {
+        return tiles[idx].getLandCount();
+    }
+
+    function countBits(uint256 x) external pure returns (uint256) {
+        x = x - ((x >> 1) & 0x0000000000000000555555555555555555555555555555555555555555555555);
+        x =
+            (x & 0x0000000000000000333333333333333333333333333333333333333333333333) +
+            ((x >> 2) & 0x0000000000000000333333333333333333333333333333333333333333333333);
+        x = (x + (x >> 4)) & 0x00000000000000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F;
+        return
+            ((((x >> 96) * 0x010101010101010101010101) +
+                ((x & 0x0F0F0F0F0F0F0F0F0F0F0F0F) * 0x010101010101010101010101)) >> (11 * 8)) & 0xFF;
+    }
+
     function isEmpty(uint256 idx) external view returns (bool) {
         return tiles[idx].isEmpty();
     }

@@ -221,5 +221,57 @@ describe('TileWithCoordLib main', function () {
     });
   });
 
+  describe('bit count', function () {
+    it('some numbers', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      expect(
+        await tester.countBits(
+          '0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+        )
+      ).to.be.equal(8 * 24);
+      expect(
+        await tester.countBits(
+          '0x0000000000000000555555555555555555555555555555555555555555555555'
+        )
+      ).to.be.equal(4 * 24);
+      expect(
+        await tester.countBits(
+          '0x0000000000000000333333333333333333333333333333333333333333333333'
+        )
+      ).to.be.equal(4 * 24);
+      expect(
+        await tester.countBits(
+          '0xFFFFFFFFFFFFFFFF333333333333333333333333333333333333333333333333'
+        )
+      ).to.be.equal(4 * 24);
+    });
+    it('some quads', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.setQuad(0, 0, 0, 1);
+      expect(await tester.getLandCount(0)).to.be.equal(1);
+      await tester.setQuad(0, 0, 0, 3);
+      expect(await tester.getLandCount(0)).to.be.equal(3 * 3);
+      await tester.setQuad(0, 0, 0, 6);
+      expect(await tester.getLandCount(0)).to.be.equal(6 * 6);
+      await tester.setQuad(0, 0, 0, 12);
+      expect(await tester.getLandCount(0)).to.be.equal(12 * 12);
+
+      await tester.setQuad(0, 12, 12, 1);
+      expect(await tester.getLandCount(0)).to.be.equal(12 * 12 + 1);
+      await tester.setQuad(0, 12, 12, 3);
+      expect(await tester.getLandCount(0)).to.be.equal(12 * 12 + 3 * 3);
+      await tester.setQuad(0, 12, 12, 6);
+      expect(await tester.getLandCount(0)).to.be.equal(12 * 12 + 6 * 6);
+      await tester.setQuad(0, 12, 12, 12);
+      expect(await tester.getLandCount(0)).to.be.equal(12 * 12 + 12 * 12);
+
+      await tester.setQuad(0, 0, 0, 24);
+      expect(await tester.getLandCount(0)).to.be.equal(24 * 24);
+      // console.log(
+      //   'Gas used in one tile',
+      //   BigNumber.from(await tester.estimateGas.getLandCount(0)).toString()
+      // );
+    });
+  });
   // TODO: Add more tests, specially for clear, grid like things, etc...
 });

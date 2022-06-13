@@ -241,6 +241,15 @@ library MapLib {
         return self.values;
     }
 
+    // This can be problematic if it grows too much !!!
+    function getLandCount(Map storage self) public view returns (uint256) {
+        uint256 ret;
+        for (uint256 i; i < self.values.length; i++) {
+            ret += self.values[i].getLandCount();
+        }
+        return ret;
+    }
+
     // Just for testing
     function containTileAtCoord(
         Map storage self,
