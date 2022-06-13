@@ -333,7 +333,7 @@ const config: HardhatUserConfig = {
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       companionNetworks: {
-        l2: 'mainnet',
+        l1: 'mainnet',
       },
     },
   },
