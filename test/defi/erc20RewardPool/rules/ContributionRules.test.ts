@@ -21,6 +21,79 @@ describe('ContributionRules', function () {
         )
       ).not.to.be.reverted;
     });
+    it('setERC721MultiplierList above the limits should fail', async function () {
+      const {
+        ERC721Token,
+        ERC721Token2,
+        ERC721Token3,
+        ERC721Token4,
+        ERC721Token5,
+        contractAsAdmin,
+      } = await ContributionRulesSetup();
+
+      const ids = [];
+
+      for (let i = 0; i < 65; i++) {
+        const id = '0x123456';
+        ids.push(id + i);
+      }
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token.address,
+          ids,
+          [],
+          true
+        )
+      ).to.be.revertedWith('ContributionRules: invalid array of ids');
+
+      ids.pop();
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token.address,
+          ids,
+          [],
+          true
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token2.address,
+          ids,
+          [],
+          true
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token3.address,
+          ids,
+          [],
+          true
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token4.address,
+          ids,
+          [],
+          true
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierList(
+          ERC721Token5.address,
+          ids,
+          [],
+          true
+        )
+      ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
+    });
     it('admin should be able to call setERC1155MultiplierList', async function () {
       const {
         ERC1155Token,
@@ -37,6 +110,76 @@ describe('ContributionRules', function () {
           [0]
         )
       ).not.to.be.reverted;
+    });
+    it('setERC1155MultiplierList above the limits should fail', async function () {
+      const {
+        ERC1155Token,
+        ERC1155Token2,
+        ERC1155Token3,
+        ERC1155Token4,
+        ERC1155Token5,
+        contractAsAdmin,
+      } = await ContributionRulesSetup();
+
+      const ids = [];
+      const multipliers = [];
+
+      for (let i = 0; i < 65; i++) {
+        const id = '0x123456';
+        ids.push(id + i);
+        multipliers.push(5);
+      }
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token.address,
+          ids,
+          multipliers
+        )
+      ).to.be.revertedWith('ContributionRules: invalid array of ids');
+
+      ids.pop();
+      multipliers.pop();
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token.address,
+          ids,
+          multipliers
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token2.address,
+          ids,
+          multipliers
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token3.address,
+          ids,
+          multipliers
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token4.address,
+          ids,
+          multipliers
+        )
+      ).not.to.be.reverted;
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierList(
+          ERC1155Token5.address,
+          ids,
+          multipliers
+        )
+      ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
     });
     it('admin should be able to call deleteERC721MultiplierList', async function () {
       const {

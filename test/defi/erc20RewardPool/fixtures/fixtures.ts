@@ -17,6 +17,38 @@ export const ContributionRulesSetup = withSnapshot([], async function (hre) {
 
   const ERC721Token = await ethers.getContract('ERC721Token', deployer);
 
+  await deployments.deploy('ERC721Token2', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ERC721Token', 'LTK'],
+  });
+
+  const ERC721Token2 = await ethers.getContract('ERC721Token2', deployer);
+
+  await deployments.deploy('ERC721Token3', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ERC721Token', 'LTK'],
+  });
+
+  const ERC721Token3 = await ethers.getContract('ERC721Token3', deployer);
+
+  await deployments.deploy('ERC721Token4', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ERC721Token', 'LTK'],
+  });
+
+  const ERC721Token4 = await ethers.getContract('ERC721Token4', deployer);
+
+  await deployments.deploy('ERC721Token5', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ERC721Token', 'LTK'],
+  });
+
+  const ERC721Token5 = await ethers.getContract('ERC721Token5', deployer);
+
   await deployments.deploy('ERC1155Token', {
     from: deployer,
     contract: 'ERC1155Mintable',
@@ -24,6 +56,38 @@ export const ContributionRulesSetup = withSnapshot([], async function (hre) {
   });
 
   const ERC1155Token = await ethers.getContract('ERC1155Token', deployer);
+
+  await deployments.deploy('ERC1155Token2', {
+    from: deployer,
+    contract: 'ERC1155Mintable',
+    args: ['asset.sandbox.game'],
+  });
+
+  const ERC1155Token2 = await ethers.getContract('ERC1155Token2', deployer);
+
+  await deployments.deploy('ERC1155Token3', {
+    from: deployer,
+    contract: 'ERC1155Mintable',
+    args: ['asset.sandbox.game'],
+  });
+
+  const ERC1155Token3 = await ethers.getContract('ERC1155Token3', deployer);
+
+  await deployments.deploy('ERC1155Token4', {
+    from: deployer,
+    contract: 'ERC1155Mintable',
+    args: ['asset.sandbox.game'],
+  });
+
+  const ERC1155Token4 = await ethers.getContract('ERC1155Token4', deployer);
+
+  await deployments.deploy('ERC1155Token5', {
+    from: deployer,
+    contract: 'ERC1155Mintable',
+    args: ['asset.sandbox.game'],
+  });
+
+  const ERC1155Token5 = await ethers.getContract('ERC1155Token5', deployer);
 
   await deployments.deploy(contractName, {
     from: deployer,
@@ -37,7 +101,15 @@ export const ContributionRulesSetup = withSnapshot([], async function (hre) {
     contractAsAdmin,
     contractAsOther,
     ERC721Token,
+    ERC721Token2,
+    ERC721Token3,
+    ERC721Token4,
+    ERC721Token5,
     ERC1155Token,
+    ERC1155Token2,
+    ERC1155Token3,
+    ERC1155Token4,
+    ERC1155Token5,
     deployer,
     admin,
     other,
