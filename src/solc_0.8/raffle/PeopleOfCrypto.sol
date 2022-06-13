@@ -3,14 +3,16 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-0.8/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+
 /* solhint-disable max-states-count */
-contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
+contract PeopleOfCrypto is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard {
     uint256 public constant MAX_SUPPLY = 8_430;
 
     event TogglePaused(bool _pause);
@@ -38,13 +40,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     address public signAddress;
     string public baseTokenURI;
 
-    bool internal _initialized;
-
-    modifier initializer() {
-        require(!_initialized, "PeopleOfCrypto: Contract already initialized");
-        _;
-    }
-
     function initialize (
         string memory baseURI,
         string memory _name,
@@ -57,7 +52,6 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
         require(_sandOwner != address(0), "Sand owner is zero address");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
-        _initialized = true;
     }
 
     function setupWave(
