@@ -129,9 +129,13 @@ contract ERC20RewardPool is
     /// @dev Calling it is risky specially when rewardToken == stakeToken
     function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) isValidAddress(receiver) {
         require(paused(), "ERC20RewardPool: contract not paused");
-        uint256 recoverAmount = rewardToken.balanceOf(address(this));
+
+        uint256 recoverAmount;
+
         if (rewardToken == _stakeToken) {
             recoverAmount = rewardToken.balanceOf(address(this)) - _totalSupply;
+        } else {
+            recoverAmount = rewardToken.balanceOf(address(this));
         }
 
         rewardToken.safeTransfer(receiver, recoverAmount);
