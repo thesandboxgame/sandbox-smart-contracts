@@ -190,11 +190,6 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
-
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
@@ -320,11 +315,6 @@ describe('assetSignedAuctionWithAuth', function () {
       wrongAmount
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
-
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
@@ -444,11 +434,6 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[5],
       [tokenId],
       [amounts]
-    );
-
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
     );
 
     await expect(
@@ -572,11 +557,6 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[5],
       [tokenId],
       [amounts]
-    );
-
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
     );
 
     const prevSellerEtherBalance = await ethers.provider.getBalance(seller);
@@ -717,11 +697,6 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
-
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
@@ -844,11 +819,6 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[5],
       [tokenId],
       [amounts]
-    );
-
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
     );
 
     await expect(
@@ -976,10 +946,6 @@ describe('assetSignedAuctionWithAuth', function () {
 
     await transferSand(Sand, buyer, BigNumber.from('5000000000000000000'));
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
     await sandAsUser.approve(
       assetSignedAuctionAuthContract.address,
       '5000000000000000000'
@@ -1124,11 +1090,6 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
-
     expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
@@ -1252,10 +1213,6 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
     await sandAsUser.approve(
       assetSignedAuctionAuthContract.address,
       '5000000000000000000'
@@ -1384,11 +1341,6 @@ describe('assetSignedAuctionWithAuth', function () {
       [amounts]
     );
 
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
-    );
-
     await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
@@ -1508,11 +1460,6 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[5],
       [tokenId],
       [amounts]
-    );
-
-    await users[0].Asset.setApprovalForAll(
-      assetSignedAuctionAuthContract.address,
-      true
     );
 
     await expect(
