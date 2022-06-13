@@ -21,9 +21,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,
     contract: 'PeopleOfCrypto',
-    args: [metadataUrl, 'People Of Crypto', 'POC', treasury, raffleSignWallet],
-    log: true,
-    skipIfAlreadyDeployed: true,
+    proxy: {
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      execute: {
+        methodName: 'initialize',
+        args: [metadataUrl, 'People Of Crypto', 'POC', treasury, raffleSignWallet],
+      },
+      upgradeIndex: 0
+    },
+    log: true
   });
 };
 export default func;

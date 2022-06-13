@@ -38,17 +38,26 @@ contract PeopleOfCrypto is ERC721Enumerable, Ownable, ReentrancyGuard {
     address public signAddress;
     string public baseTokenURI;
 
-    constructor(
+    bool internal _initialized;
+
+    modifier initializer() {
+        require(!_initialized, "PeopleOfCrypto: Contract already initialized");
+        _;
+    }
+
+    function initialize (
         string memory baseURI,
         string memory _name,
         string memory _symbol,
         address payable _sandOwner,
         address _signAddress
-    ) ERC721(_name, _symbol) {
+    ) public initializer {
+        __ERC721_init(_name, _symbol);
         setBaseURI(baseURI);
         require(_sandOwner != address(0), "Sand owner is zero address");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
+        _initialized = true;
     }
 
     function setupWave(
