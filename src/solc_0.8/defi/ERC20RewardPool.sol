@@ -8,6 +8,7 @@ import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
@@ -25,7 +26,15 @@ import {RequirementsRules} from "./rules/RequirementsRules.sol";
 /// @dev This way we can build different types of pools by mixing in the plugins we want with this contract.
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
 /// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are giving
-contract ERC20RewardPool is StakeTokenWrapper, LockRules, RequirementsRules, ReentrancyGuard, ERC2771Handler, Pausable {
+contract ERC20RewardPool is
+    Ownable,
+    StakeTokenWrapper,
+    LockRules,
+    RequirementsRules,
+    ReentrancyGuard,
+    ERC2771Handler,
+    Pausable
+{
     using SafeERC20 for IERC20;
     using Address for address;
 
