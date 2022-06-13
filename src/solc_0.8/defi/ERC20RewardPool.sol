@@ -92,7 +92,7 @@ contract ERC20RewardPool is
         IERC20 _newRewardToken = IERC20(contractAddress);
         require(
             rewardToken.balanceOf(address(this)) <= _newRewardToken.balanceOf(address(this)),
-            "ERC20RewardPool: insuficient balance"
+            "ERC20RewardPool: insufficient balance"
         );
         rewardToken = _newRewardToken;
     }
@@ -103,7 +103,7 @@ contract ERC20RewardPool is
         IERC20 _newStakeToken = IERC20(contractAddress);
         require(
             _stakeToken.balanceOf(address(this)) <= _newStakeToken.balanceOf(address(this)),
-            "ERC20RewardPool: insuficient balance"
+            "ERC20RewardPool: insufficient balance"
         );
         _stakeToken = _newStakeToken;
     }
