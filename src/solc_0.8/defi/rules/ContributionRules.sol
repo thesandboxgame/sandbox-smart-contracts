@@ -12,8 +12,12 @@ import {IContributionRules} from "../interfaces/IContributionRules.sol";
 contract ContributionRules is Ownable, IContributionRules {
     using Address for address;
 
-    uint256 public multiplierLimitERC271 = type(uint256).max;
-    uint256 public multiplierLimitERC1155 = type(uint256).max;
+    // limits
+    uint256 public idsLimit = 64;
+    uint256 public contractsLimit = 4;
+    uint256 public maxMultiplier = 1000;
+    uint256 public multiplierLimitERC721 = 1000;
+    uint256 public multiplierLimitERC1155 = 1000;
 
     uint256 internal constant DECIMALS_7 = 10_000_000;
     uint256 internal constant MIDPOINT_9 = 500_000_000;
@@ -67,8 +71,8 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 
         // check if the calculated multipliers exceeds the limit
-        if (multiplierLimitERC271 < multiplierERC721) {
-            multiplierERC721 = multiplierLimitERC271;
+        if (multiplierLimitERC721 < multiplierERC721) {
+            multiplierERC721 = multiplierLimitERC721;
         }
 
         if (multiplierLimitERC1155 < multiplierERC1155) {
@@ -79,12 +83,16 @@ contract ContributionRules is Ownable, IContributionRules {
     }
 
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
-        multiplierLimitERC271 = _newLimit;
+        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+
+        multiplierLimitERC721 = _newLimit;
 
         emit ERC721MultiplierLimitSet(_newLimit);
     }
 
     function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+
         multiplierLimitERC1155 = _newLimit;
 
         emit ERC1155MultiplierLimitSet(_newLimit);
@@ -95,20 +103,21 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256[] memory ids,
         uint256[] memory multipliers
     ) external onlyOwner isContract(contractERC1155) {
-        require(ids.length > 0, "ContributionRules: invalid array of ids");
+        require(ids.length > 0 && ids.length <= idsLimit, "ContributionRules: invalid array of ids");
         require(multipliers.length > 0, "ContributionRules: invalid array of multipliers");
 
         IERC1155 multContract = IERC1155(contractERC1155);
 
-        _listERC1155[multContract].ids = ids;
-        _listERC1155[multContract].multipliers = multipliers;
-        _listERC1155[multContract].balanceOf = false;
-
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberMultiplierList(multContract) == false) {
+            require(contractsLimit > _listERC1155Index.length, "ContributionRules: contractsLimit exceeded");
             _listERC1155Index.push(multContract);
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
         }
+
+        _listERC1155[multContract].ids = ids;
+        _listERC1155[multContract].multipliers = multipliers;
+        _listERC1155[multContract].balanceOf = false;
 
         emit ERC1155MultiplierListSet(contractERC1155, multipliers, ids);
     }
@@ -119,17 +128,20 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256[] memory multipliers,
         bool balanceOf
     ) external onlyOwner isContract(contractERC721) {
+        require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
+
         IERC721 multContract = IERC721(contractERC721);
+
+        // if it's a new member create a new registry, instead, only update
+        if (isERC721MemberMultiplierList(multContract) == false) {
+            require(contractsLimit > _listERC721Index.length, "ContributionRules: contractsLimit exceeded");
+            _listERC721Index.push(multContract);
+            _listERC721[multContract].index = _listERC721Index.length - 1;
+        }
 
         _listERC721[multContract].multipliers = multipliers;
         _listERC721[multContract].balanceOf = balanceOf;
         _listERC721[multContract].ids = ids;
-
-        // if it's a new member create a new registry, instead, only update
-        if (isERC721MemberMultiplierList(multContract) == false) {
-            _listERC721Index.push(multContract);
-            _listERC721[multContract].index = _listERC721Index.length - 1;
-        }
 
         emit ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
     }
@@ -206,12 +218,12 @@ contract ContributionRules is Ownable, IContributionRules {
 
             if (_listERC721[reqContract].balanceOf == true) {
                 _multiplier = _multiplier + multiplierLogarithm(account, reqContract);
-            }
-
-            for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
-                address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
-                if (owner == account) {
-                    _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
+            } else {
+                for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
+                    address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
+                    if (owner == account) {
+                        _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
+                    }
                 }
             }
         }

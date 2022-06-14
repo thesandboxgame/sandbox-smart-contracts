@@ -49,7 +49,7 @@ describe('ERC20RewardPool main contract tests', function () {
     defaultAdminRoleTest('setRewardCalculator', (c, rewardToken) =>
       c.setRewardCalculator(rewardToken, false)
     );
-    it('admin should be able to call recoverFunds', async function () {
+    it('recoverFunds should fail if contract is not paused', async function () {
       const {
         contract,
         rewardToken,
@@ -57,6 +57,22 @@ describe('ERC20RewardPool main contract tests', function () {
         getUser,
       } = await setupERC20RewardPoolTest();
       const user = await getUser();
+      expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
+        totalRewardMinted
+      );
+      await expect(contract.recoverFunds(user.address)).to.be.revertedWith(
+        'Pausable: not paused'
+      );
+    });
+    it('admin should be able to call recoverFunds if contract is paused', async function () {
+      const {
+        contract,
+        rewardToken,
+        totalRewardMinted,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+      const user = await getUser();
+      await contract.pause();
       expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
         totalRewardMinted
       );
@@ -71,14 +87,46 @@ describe('ERC20RewardPool main contract tests', function () {
       const {getUser} = await setupERC20RewardPoolTest();
       const user = await getUser();
       await expect(user.pool.recoverFunds(user.address)).to.be.revertedWith(
-        'AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        'caller is not the owner'
       );
     });
     it('recoverFunds must fail with address zero', async function () {
       const {contract} = await setupERC20RewardPoolTest();
+      await contract.pause();
       await expect(contract.recoverFunds(AddressZero)).to.be.revertedWith(
         'ERC20RewardPool: zero address'
       );
+    });
+    it('contract should have enough funds to replace the stakeToken', async function () {
+      const {
+        contract,
+        replaceToken,
+        rewardToken,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const user = await getUser();
+
+      await user.pool.stake(1000);
+
+      await expect(
+        contract.setStakeToken(replaceToken.address)
+      ).to.be.revertedWith('ERC20RewardPool: insufficient balance');
+
+      await expect(contract.setStakeToken(rewardToken.address)).not.to.be
+        .reverted;
+    });
+    it('contract should have enough funds to replace the rewardToken', async function () {
+      const {contract, stakeToken} = await setupERC20RewardPoolTest();
+
+      await expect(
+        contract.setRewardToken(stakeToken.address)
+      ).to.be.revertedWith('ERC20RewardPool: insufficient balance');
+
+      await stakeToken.mint(contract.address, '10000000000000000000000');
+
+      await expect(contract.setRewardToken(stakeToken.address)).not.to.be
+        .reverted;
     });
   });
   describe('reward distribution', function () {
@@ -739,9 +787,7 @@ describe('ERC20RewardPool main contract tests', function () {
 
       expect(
         contractAsOther.setTrustedForwarder(user.address)
-      ).to.be.revertedWith(
-        'AccessControl: account 0x14dc79964da2c08b23698b3d3cc7ca32193d9955 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
-      );
+      ).to.be.revertedWith('caller is not the owner');
     });
     it('should success to set the trusted forwarder if admin', async function () {
       const {getUser, contract} = await setupERC20RewardPoolTest();

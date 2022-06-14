@@ -6,6 +6,10 @@ import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 contract LockRules is Context, Ownable {
+    // limits
+    uint256 public timeLockLimit = 180 days;
+    uint256 public amountLockLimit = 1000 ether;
+
     struct TimeLockClaim {
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastClaim;
@@ -76,24 +80,28 @@ contract LockRules is Context, Ownable {
     /// @notice set the _lockPeriodInSecs for the anti-compound buffer
     /// @param _lockPeriodInSecs amount of time the user must wait between reward withdrawal
     function setTimelockClaim(uint256 _lockPeriodInSecs) external onlyOwner {
+        require(_lockPeriodInSecs <= timeLockLimit, "LockRules: invalid lockPeriodInSecs");
         timeLockClaim.lockPeriodInSecs = _lockPeriodInSecs;
 
         emit TimelockClaimSet(_lockPeriodInSecs);
     }
 
     function setTimelockDeposit(uint256 _newTimeDeposit) external onlyOwner {
+        require(_newTimeDeposit <= timeLockLimit, "LockRules: invalid lockPeriodInSecs");
         lockDeposit.lockPeriodInSecs = _newTimeDeposit;
 
         emit TimelockDepositSet(_newTimeDeposit);
     }
 
     function setTimeLockWithdraw(uint256 _newTimeWithdraw) external onlyOwner {
+        require(_newTimeWithdraw <= timeLockLimit, "LockRules: invalid lockPeriodInSecs");
         lockWithdraw.lockPeriodInSecs = _newTimeWithdraw;
 
         emit TimeLockWithdrawSet(_newTimeWithdraw);
     }
 
     function setAmountLockClaim(uint256 _newAmountLockClaim, bool _isEnabled) external onlyOwner {
+        require(_newAmountLockClaim <= amountLockLimit, "LockRules: invalid newAmountLockClaim");
         amountLockClaim.amount = _newAmountLockClaim;
         amountLockClaim.claimLockEnabled = _isEnabled;
 

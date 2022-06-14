@@ -9,21 +9,26 @@ export const ContributionRulesSetup = withSnapshot([], async function (hre) {
   const {deployer} = await getNamedAccounts();
   const [admin, other] = await getUnnamedAccounts();
 
-  await deployments.deploy('ERC721Token', {
-    from: deployer,
-    contract: 'ERC721Mintable',
-    args: ['ERC721Token', 'LTK'],
-  });
+  const ERC721Token = [];
+  const ERC1155Token = [];
 
-  const ERC721Token = await ethers.getContract('ERC721Token', deployer);
+  for (let i = 0; i < 5; i++) {
+    await deployments.deploy('ERC721Token' + [i], {
+      from: deployer,
+      contract: 'ERC721Mintable',
+      args: ['ERC721Token', 'LTK'],
+    });
 
-  await deployments.deploy('ERC1155Token', {
-    from: deployer,
-    contract: 'ERC1155Mintable',
-    args: ['asset.sandbox.game'],
-  });
+    ERC721Token[i] = await ethers.getContract('ERC721Token' + [i], deployer);
 
-  const ERC1155Token = await ethers.getContract('ERC1155Token', deployer);
+    await deployments.deploy('ERC1155Token' + [i], {
+      from: deployer,
+      contract: 'ERC1155Mintable',
+      args: ['asset.sandbox.game'],
+    });
+
+    ERC1155Token[i] = await ethers.getContract('ERC1155Token' + [i], deployer);
+  }
 
   await deployments.deploy(contractName, {
     from: deployer,
@@ -69,6 +74,14 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
     args: ['StakeToken', 'STK'],
   });
   const stakeToken = await ethers.getContract('StakeToken', deployer);
+
+  await deployments.deploy('ReplaceToken', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ReplaceToken', 'RPK'],
+  });
+
+  const replaceToken = await ethers.getContract('ReplaceToken', deployer);
 
   await deployments.deploy('TestMetaTxForwarder', {
     from: deployer,
@@ -133,6 +146,7 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
     contract,
     stakeToken,
     rewardToken,
+    replaceToken,
     ERC721Token,
     ERC1155Token,
     rewardCalculatorMock,

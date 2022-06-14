@@ -222,13 +222,14 @@ contract RequirementsRules is Ownable {
         uint256 _maxStake = 0;
         for (uint256 i = 0; i < _listERC721Index.length; i++) {
             uint256 balanceOf = 0;
+            uint256 balanceOfId = 0;
             IERC721 reqContract = _listERC721Index[i];
 
             if (_listERC721[reqContract].balanceOf == true) {
                 balanceOf = reqContract.balanceOf(account);
+            } else {
+                balanceOfId = getERC721BalanceId(reqContract, account);
             }
-
-            uint256 balanceOfId = getERC721BalanceId(reqContract, account);
 
             _maxStake =
                 _maxStake +
