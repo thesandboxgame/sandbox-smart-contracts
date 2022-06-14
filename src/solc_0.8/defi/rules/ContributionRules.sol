@@ -254,4 +254,8 @@ contract ContributionRules is Ownable {
 
         return _multiplierERC721 / DECIMALS_7;
     }
+
+    function renounceOwnership() public override onlyOwner {
+        revert("ContributionRules: can't renounceOwnership");
+    }
 }

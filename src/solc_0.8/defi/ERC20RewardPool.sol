@@ -303,6 +303,10 @@ contract ERC20RewardPool is
         _updateContribution(_msgSender());
     }
 
+    function renounceOwnership() public override onlyOwner {
+        revert("ERC20RewardPool: can't renounceOwnership");
+    }
+
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
         super._withdraw(amount);
