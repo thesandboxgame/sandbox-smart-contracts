@@ -93,7 +93,12 @@ contract ERC20RewardPool is
         isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
     {
-        rewardToken = IERC20(contractAddress);
+        IERC20 _newRewardToken = IERC20(contractAddress);
+        require(
+            rewardToken.balanceOf(address(this)) <= _newRewardToken.balanceOf(address(this)),
+            "ERC20RewardPool: insufficient balance"
+        );
+        rewardToken = _newRewardToken;
     }
 
     /// @notice set the stake token
@@ -103,7 +108,12 @@ contract ERC20RewardPool is
         isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
     {
-        _stakeToken = IERC20(contractAddress);
+        IERC20 _newStakeToken = IERC20(contractAddress);
+        require(
+            _stakeToken.balanceOf(address(this)) <= _newStakeToken.balanceOf(address(this)),
+            "ERC20RewardPool: insufficient balance"
+        );
+        _stakeToken = _newStakeToken;
     }
 
     /// @notice set the trusted forwarder
