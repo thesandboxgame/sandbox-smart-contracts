@@ -70,6 +70,14 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
   });
   const stakeToken = await ethers.getContract('StakeToken', deployer);
 
+  await deployments.deploy('ReplaceToken', {
+    from: deployer,
+    contract: 'ERC721Mintable',
+    args: ['ReplaceToken', 'RPK'],
+  });
+
+  const replaceToken = await ethers.getContract('ReplaceToken', deployer);
+
   await deployments.deploy('TestMetaTxForwarder', {
     from: deployer,
   });
@@ -133,6 +141,7 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
     contract,
     stakeToken,
     rewardToken,
+    replaceToken,
     ERC721Token,
     ERC1155Token,
     rewardCalculatorMock,

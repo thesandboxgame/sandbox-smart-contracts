@@ -7,9 +7,9 @@ import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
-import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
@@ -27,12 +27,12 @@ import {RequirementsRules} from "./rules/RequirementsRules.sol";
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
 /// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are giving
 contract ERC20RewardPool is
+    Ownable,
     StakeTokenWrapper,
     LockRules,
     RequirementsRules,
-    AccessControl,
     ReentrancyGuard,
-    ERC2771Handler,
+    ERC2771HandlerV2,
     Pausable
 {
     using SafeERC20 for IERC20;
@@ -71,13 +71,12 @@ contract ERC20RewardPool is
     ) StakeTokenWrapper(stakeToken_) {
         require(address(rewardToken_).isContract(), "ERC20RewardPool: is not a contract");
         rewardToken = rewardToken_;
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        __ERC2771Handler_initialize(trustedForwarder);
+        __ERC2771HandlerV2_initialize(trustedForwarder);
     }
 
     modifier isContractAndAdmin(address contractAddress) {
         require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+        require(owner() == _msgSender(), "ERC20RewardPool: not admin");
         _;
     }
 
@@ -141,7 +140,7 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) isValidAddress(receiver) {
+    function recoverFunds(address receiver) external onlyOwner isValidAddress(receiver) {
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
@@ -402,11 +401,11 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }

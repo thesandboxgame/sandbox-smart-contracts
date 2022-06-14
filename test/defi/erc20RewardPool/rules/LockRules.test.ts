@@ -1,6 +1,6 @@
 import {expect} from '../../../chai-setup';
 import {setupERC20RewardPoolTest} from '../fixtures/fixtures';
-import {increaseTime} from '../../../utils';
+import {increaseTime, toWei} from '../../../utils';
 import {doOnNextBlock} from '../../sandRewardPool/utils';
 
 describe('ERC20RewardPool Lock Rules', function () {
@@ -16,6 +16,13 @@ describe('ERC20RewardPool Lock Rules', function () {
     const user = await getUser();
     await expect(user.pool.setTimelockClaim(1000)).to.be.revertedWith(
       'Ownable: caller is not the owner'
+    );
+  });
+  it('should fail to setTimelockClaim above the limit', async function () {
+    const {contract} = await setupERC20RewardPoolTest();
+    // 181 days
+    await expect(contract.setTimelockClaim(15638400)).to.be.revertedWith(
+      'LockRules: invalid lockPeriodInSecs'
     );
   });
   it('user can only get his rewards after lockTimeMS', async function () {
@@ -103,6 +110,13 @@ describe('ERC20RewardPool Lock Rules', function () {
       'Ownable: caller is not the owner'
     );
   });
+  it('should fail to setTimelockDeposit above the limit', async function () {
+    const {contract} = await setupERC20RewardPoolTest();
+    // 181 days
+    await expect(contract.setTimelockDeposit(15638400)).to.be.revertedWith(
+      'LockRules: invalid lockPeriodInSecs'
+    );
+  });
   it('user should wait to deposit(stake) again', async function () {
     const {contract, getUser} = await setupERC20RewardPoolTest();
 
@@ -130,6 +144,13 @@ describe('ERC20RewardPool Lock Rules', function () {
       'Ownable: caller is not the owner'
     );
   });
+  it('should fail to setTimeLockWithdraw above the limit', async function () {
+    const {contract} = await setupERC20RewardPoolTest();
+    // 181 days
+    await expect(contract.setTimeLockWithdraw(15638400)).to.be.revertedWith(
+      'LockRules: invalid lockPeriodInSecs'
+    );
+  });
   it('user should wait to withdraw again and exit', async function () {
     const {
       contract,
@@ -155,6 +176,13 @@ describe('ERC20RewardPool Lock Rules', function () {
     await expect(user.pool.exit()).to.revertedWith(
       'LockRules: Withdraw must wait'
     );
+  });
+  it('should fail to setAmountLockClaim above the limit', async function () {
+    const {contract} = await setupERC20RewardPoolTest();
+
+    await expect(
+      contract.setAmountLockClaim(toWei(1001), true)
+    ).to.be.revertedWith('LockRules: invalid newAmountLockClaim');
   });
   it('should be able to claim only amount allowed or if check is disabled', async function () {
     const {
