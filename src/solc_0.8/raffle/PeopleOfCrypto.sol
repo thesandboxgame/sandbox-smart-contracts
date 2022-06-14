@@ -48,6 +48,7 @@ contract PeopleOfCrypto is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reen
         address _signAddress
     ) public initializer {
         __ERC721_init(_name, _symbol);
+        __Ownable_init();
         setBaseURI(baseURI);
         require(_sandOwner != address(0), "Sand owner is zero address");
         sandOwner = _sandOwner;
