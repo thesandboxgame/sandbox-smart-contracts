@@ -19,9 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     metadataUrl = 'https://contracts-demo.sandbox.game/poc-unrevealed/';
   }
 
-  console.log([metadataUrl, 'People Of Crypto', 'POC', treasury, raffleSignWallet])
-
-  const result = await deploy('RafflePeopleOfCrypto', {
+  await deploy('RafflePeopleOfCrypto', {
     from: deployer,
     contract: 'PeopleOfCrypto',
     // skipIfAlreadyDeployed: false,
@@ -37,5 +35,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true
   });
 };
+
 export default func;
 func.tags = ['RafflePeopleOfCrypto', 'RafflePeopleOfCrypto_deploy'];
