@@ -128,6 +128,10 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256[] memory multipliers,
         bool balanceOf
     ) external onlyOwner isContract(contractERC721) {
+        require(
+            balanceOf == true || (ids.length > 0 && multipliers.length == ids.length),
+            "ContributionRules: invalid list"
+        );
         require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
 
         IERC721 multContract = IERC721(contractERC721);

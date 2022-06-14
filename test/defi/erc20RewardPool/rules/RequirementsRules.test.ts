@@ -403,7 +403,8 @@ describe('Requirementsules', function () {
         12 // 12
       );
 
-      await ERC721Token.mint(user.address, id);
+      // mint the token, but not for the user
+      await ERC721Token.mint(contract.address, id);
 
       await contract.setERC721RequirementList(
         ERC721Token.address,
@@ -412,7 +413,7 @@ describe('Requirementsules', function () {
         0,
         0,
         5,
-        0 // 0
+        10 // 0
       );
 
       const maxStake = await contract.maxStakeAllowedCalculator(user.address);

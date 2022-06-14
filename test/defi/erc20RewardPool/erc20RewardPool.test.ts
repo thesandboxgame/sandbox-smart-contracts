@@ -30,6 +30,9 @@ describe('ERC20RewardPool main contract tests', function () {
         await expect(
           method(poolAsOther, rewardToken.address)
         ).to.be.revertedWith('not admin');
+        await expect(method(poolAsOther, AddressZero)).to.be.revertedWith(
+          'ERC20RewardPool: is not a contract'
+        );
       });
     }
 
@@ -782,21 +785,27 @@ describe('ERC20RewardPool main contract tests', function () {
   });
   describe('trusted forwarder and meta-tx', function () {
     it('should fail to set the trusted forwarder if not admin', async function () {
-      const {getUser, contractAsOther} = await setupERC20RewardPoolTest();
-      const user = await getUser();
+      const {rewardToken, contractAsOther} = await setupERC20RewardPoolTest();
 
       expect(
-        contractAsOther.setTrustedForwarder(user.address)
-      ).to.be.revertedWith('caller is not the owner');
+        contractAsOther.setTrustedForwarder(rewardToken.address)
+      ).to.be.revertedWith('ERC20RewardPool: not admin');
     });
-    it('should success to set the trusted forwarder if admin', async function () {
-      const {getUser, contract} = await setupERC20RewardPoolTest();
+    it('should success to set the trusted forwarder if a valid contract and admin', async function () {
+      const {getUser, contract, rewardToken} = await setupERC20RewardPoolTest();
 
       const user = await getUser();
 
-      expect(contract.setTrustedForwarder(user.address)).to.be.not.reverted;
+      expect(contract.setTrustedForwarder(user.address)).to.be.revertedWith(
+        'ERC20RewardPool: is not a contract'
+      );
 
-      expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
+      expect(contract.setTrustedForwarder(rewardToken.address)).not.to.be
+        .reverted;
+
+      expect(await contract.getTrustedForwarder()).to.be.equal(
+        rewardToken.address
+      );
     });
     it('setReward with meta-tx', async function () {
       const {

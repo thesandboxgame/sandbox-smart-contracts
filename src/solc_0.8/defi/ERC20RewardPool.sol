@@ -69,6 +69,7 @@ contract ERC20RewardPool is
         IERC20 rewardToken_,
         address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
+        require(address(rewardToken_).isContract(), "ERC20RewardPool: is not a contract");
         rewardToken = rewardToken_;
         __ERC2771HandlerV2_initialize(trustedForwarder);
     }
@@ -87,7 +88,11 @@ contract ERC20RewardPool is
 
     /// @notice set the reward token
     /// @param contractAddress address token used to pay rewards
-    function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setRewardToken(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         IERC20 _newRewardToken = IERC20(contractAddress);
         require(
             rewardToken.balanceOf(address(this)) <= _newRewardToken.balanceOf(address(this)),
@@ -98,7 +103,11 @@ contract ERC20RewardPool is
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
-    function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setStakeToken(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         IERC20 _newStakeToken = IERC20(contractAddress);
         require(
             _stakeToken.balanceOf(address(this)) <= _newStakeToken.balanceOf(address(this)),
@@ -109,12 +118,16 @@ contract ERC20RewardPool is
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+    function setTrustedForwarder(address trustedForwarder) external isContractAndAdmin(trustedForwarder) {
         _trustedForwarder = trustedForwarder;
     }
 
     /// @notice set contract that contains all the contribution rules
-    function setContributionRules(address contractAddress) external isContractAndAdmin(contractAddress) {
+    function setContributionRules(address contractAddress)
+        external
+        isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
+    {
         contributionRules = IContributionRules(contractAddress);
     }
 
@@ -124,6 +137,7 @@ contract ERC20RewardPool is
     function setRewardCalculator(address contractAddress, bool restartRewards_)
         external
         isContractAndAdmin(contractAddress)
+        isValidAddress(contractAddress)
     {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards_) {

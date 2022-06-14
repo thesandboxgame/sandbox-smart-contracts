@@ -110,6 +110,11 @@ contract RequirementsRules is Ownable {
         uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC721) {
+        require(
+            (balanceOf == true && minAmountBalanceOf > 0 && maxAmountBalanceOf > 0) ||
+                (balanceOf == false && ids.length > 0 && minAmountId > 0 && maxAmountId > 0),
+            "RequirementRules: invalid list"
+        );
         IERC721 newContract = IERC721(contractERC721);
 
         if (ids.length != 0) {
@@ -144,6 +149,7 @@ contract RequirementsRules is Ownable {
         uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC1155) {
+        require(ids.length > 0 && minAmountId > 0 && maxAmountId > 0, "RequirementRules: invalid list");
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
         _listERC1155[newContract].minAmountId = minAmountId;
