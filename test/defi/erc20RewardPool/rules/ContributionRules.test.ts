@@ -181,10 +181,9 @@ describe('ContributionRules', function () {
     it('admin should be able to call setERC721MultiplierLimit', async function () {
       const {contractAsAdmin, contract} = await ContributionRulesSetup();
 
-      const MAX_INT =
-        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const maxMultiplier = 1000;
 
-      expect(await contract.multiplierLimitERC721()).to.be.equal(MAX_INT);
+      expect(await contract.multiplierLimitERC721()).to.be.equal(maxMultiplier);
 
       await expect(contract.setERC721MultiplierLimit(30)).to.be.revertedWith(
         'Ownable: caller is not the owner'
@@ -198,10 +197,11 @@ describe('ContributionRules', function () {
     it('admin should be able to call setERC1155MultiplierLimit', async function () {
       const {contractAsAdmin, contract} = await ContributionRulesSetup();
 
-      const MAX_INT =
-        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const maxMultiplier = 1000;
 
-      expect(await contract.multiplierLimitERC1155()).to.be.equal(MAX_INT);
+      expect(await contract.multiplierLimitERC1155()).to.be.equal(
+        maxMultiplier
+      );
 
       await expect(contract.setERC1155MultiplierLimit(30)).to.be.revertedWith(
         'Ownable: caller is not the owner'
@@ -547,6 +547,20 @@ describe('ContributionRules', function () {
       );
 
       expect(await contract.getMaxGlobalMultiplier(other)).to.be.equal(30);
+    });
+    it('should not be able to set setERC721MultiplierLimit > 1000', async function () {
+      const {contractAsAdmin} = await ContributionRulesSetup();
+
+      await expect(
+        contractAsAdmin.setERC721MultiplierLimit(1500)
+      ).to.be.revertedWith('ContributionRules: invalid newLimit');
+    });
+    it('should not be able to set setERC1155MultiplierLimit > 1000', async function () {
+      const {contractAsAdmin} = await ContributionRulesSetup();
+
+      await expect(
+        contractAsAdmin.setERC1155MultiplierLimit(1500)
+      ).to.be.revertedWith('ContributionRules: invalid newLimit');
     });
   });
 });

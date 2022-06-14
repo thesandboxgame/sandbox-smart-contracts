@@ -12,10 +12,11 @@ contract ContributionRules is Ownable {
     using Address for address;
 
     // limits
-    uint256 public multiplierLimitERC721 = type(uint256).max;
-    uint256 public multiplierLimitERC1155 = type(uint256).max;
     uint256 public idsLimit = 64;
     uint256 public contractsLimit = 4;
+    uint256 public maxMultiplier = 1000;
+    uint256 public multiplierLimitERC721 = 1000;
+    uint256 public multiplierLimitERC1155 = 1000;
 
     uint256 internal constant DECIMALS_7 = 10000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
@@ -81,12 +82,16 @@ contract ContributionRules is Ownable {
     }
 
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+
         multiplierLimitERC721 = _newLimit;
 
         emit ERC721MultiplierLimitSet(_newLimit);
     }
 
     function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
+        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+
         multiplierLimitERC1155 = _newLimit;
 
         emit ERC1155MultiplierLimitSet(_newLimit);
@@ -256,5 +261,9 @@ contract ContributionRules is Ownable {
         }
 
         return _multiplierERC721 / DECIMALS_7;
+    }
+
+    function renounceOwnership() public override onlyOwner {
+        revert("ContributionRules: can't renounceOwnership");
     }
 }
