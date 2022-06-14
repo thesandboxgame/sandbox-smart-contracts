@@ -228,9 +228,9 @@ contract RequirementsRules is Ownable {
 
             if (_listERC721[reqContract].balanceOf == true) {
                 balanceOf = reqContract.balanceOf(account);
+            } else {
+                balanceOfId = getERC721BalanceId(reqContract, account);
             }
-
-            balanceOfId = getERC721BalanceId(reqContract, account);
 
             _maxStake =
                 _maxStake +
