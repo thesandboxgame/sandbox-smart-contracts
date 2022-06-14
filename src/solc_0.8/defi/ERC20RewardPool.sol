@@ -385,15 +385,13 @@ contract ERC20RewardPool is
 
     // @dev Triggers stopped state.
     // The contract must not be paused.
-    // ToDo: replace modifier to onlyOwner after merge
-    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function pause() external onlyOwner {
         _pause();
     }
 
     // @dev Returns to normal state.
     // The contract must be paused.
-    // ToDo: replace modifier to onlyOwner after merge
-    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
