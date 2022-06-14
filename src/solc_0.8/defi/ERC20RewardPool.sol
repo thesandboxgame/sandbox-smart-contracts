@@ -44,7 +44,7 @@ contract ERC20RewardPool is
     event RewardPaid(address indexed account, uint256 rewardAmount);
     event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
-    uint256 internal constant DECIMALS_18 = 1000000000000000000;
+    uint256 internal constant DECIMALS_18 = 1 ether;
 
     // This value multiplied by the user contribution is the share of accumulated rewards (from the start of time
     // until the last call to restartRewards) for the user taking into account the value of totalContributions.
@@ -150,8 +150,16 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyOwner isValidAddress(receiver) {
-        rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
+    function recoverFunds(address receiver) external onlyOwner whenPaused() isValidAddress(receiver) {
+        uint256 recoverAmount;
+
+        if (rewardToken == _stakeToken) {
+            recoverAmount = rewardToken.balanceOf(address(this)) - _totalSupply;
+        } else {
+            recoverAmount = rewardToken.balanceOf(address(this));
+        }
+
+        rewardToken.safeTransfer(receiver, recoverAmount);
     }
 
     /// @notice return the total supply of staked tokens
@@ -227,7 +235,7 @@ contract ERC20RewardPool is
     /// @param account the address of the account
     /// @dev if the user change his holdings (or any other parameter that affect the contribution calculation),
     /// @dev he can the reward distribution to his favor. This function must be called by an external agent ASAP to
-    /// @dev update the contribution for the user. We understand the risk but the rewards are distributes slowly so
+    /// @dev update the contribution for the user. We understand the risk but the rewards are distributed slowly so
     /// @dev the user cannot affect the reward distribution heavily.
     function computeContribution(address account) external isValidAddress(account) {
         // We decide to give the user the accumulated rewards even if he cheated a little bit.
@@ -252,7 +260,7 @@ contract ERC20RewardPool is
 
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
-    /// @dev the user must approve in the stack token before calling this function
+    /// @dev the user must approve in the stake token before calling this function
     function stake(uint256 amount)
         external
         nonReentrant
@@ -318,8 +326,8 @@ contract ERC20RewardPool is
 
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
-        super._withdraw(amount);
         lockWithdraw.lastWithdraw[_msgSender()] = block.timestamp;
+        super._withdraw(amount);
         emit Withdrawn(account, amount);
     }
 
@@ -409,6 +417,18 @@ contract ERC20RewardPool is
             return 0;
         }
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
+    }
+
+    // @dev Triggers stopped state.
+    // The contract must not be paused.
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    // @dev Returns to normal state.
+    // The contract must be paused.
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {

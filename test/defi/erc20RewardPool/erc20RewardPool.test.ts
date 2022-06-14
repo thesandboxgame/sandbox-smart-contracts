@@ -52,7 +52,7 @@ describe('ERC20RewardPool main contract tests', function () {
     defaultAdminRoleTest('setRewardCalculator', (c, rewardToken) =>
       c.setRewardCalculator(rewardToken, false)
     );
-    it('admin should be able to call recoverFunds', async function () {
+    it('recoverFunds should fail if contract is not paused', async function () {
       const {
         contract,
         rewardToken,
@@ -60,6 +60,22 @@ describe('ERC20RewardPool main contract tests', function () {
         getUser,
       } = await setupERC20RewardPoolTest();
       const user = await getUser();
+      expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
+        totalRewardMinted
+      );
+      await expect(contract.recoverFunds(user.address)).to.be.revertedWith(
+        'Pausable: not paused'
+      );
+    });
+    it('admin should be able to call recoverFunds if contract is paused', async function () {
+      const {
+        contract,
+        rewardToken,
+        totalRewardMinted,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+      const user = await getUser();
+      await contract.pause();
       expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
         totalRewardMinted
       );
@@ -79,6 +95,7 @@ describe('ERC20RewardPool main contract tests', function () {
     });
     it('recoverFunds must fail with address zero', async function () {
       const {contract} = await setupERC20RewardPoolTest();
+      await contract.pause();
       await expect(contract.recoverFunds(AddressZero)).to.be.revertedWith(
         'ERC20RewardPool: zero address'
       );

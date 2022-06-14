@@ -1,7 +1,7 @@
 import {expect} from '../../../chai-setup';
 import {setupERC20RewardPoolTest} from '../fixtures/fixtures';
 
-describe('Requirementsules', function () {
+describe.only('Requirementsules', function () {
   describe('roles', function () {
     it('admin should be able to call setMaxStakeOverall', async function () {
       const {contract, contractAsOther} = await setupERC20RewardPoolTest();
@@ -183,8 +183,40 @@ describe('Requirementsules', function () {
 
       expect(maxStake).to.be.equal(8);
     });
-    it('checkERC721MinStake should fail - balanceOf', async function () {
+    it('getERC721MaxStake should return correct values - id & balanceOf', async function () {
       const {ERC721Token, contract, getUser} = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC721 = 1;
+
+      const user = await getUser();
+
+      await ERC721Token.mint(user.address, id);
+      await ERC721Token.setFakeBalance(user.address, numERC721);
+
+      contract.setMaxStakeOverall(100);
+
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [id],
+        true,
+        1,
+        5,
+        5,
+        8 // should disconsider id as balanceOf = true
+      );
+
+      const maxStake = await contract.getERC721MaxStake(user.address);
+
+      expect(maxStake).to.be.equal(5);
+    });
+    it('checkERC721MinStake should fail - balanceOf', async function () {
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
 
       const numERC721 = 1;
 
@@ -202,137 +234,8 @@ describe('Requirementsules', function () {
         0
       );
 
-      await expect(
-        contract.checkERC721MinStake(user.address)
-      ).to.be.revertedWith('RequirementsRules: balanceOf');
-    });
-    it('checkERC721MinStake should fail - id', async function () {
-      const {ERC721Token, contract, getUser} = await setupERC20RewardPoolTest();
-
-      const user = await getUser();
-
-      const id = '0x123456';
-
-      await ERC721Token.mint(user.address, id);
-
-      await contract.setERC721RequirementList(
-        ERC721Token.address,
-        [id],
-        false,
-        0,
-        0,
-        5,
-        10
-      );
-
-      await expect(
-        contract.checkERC721MinStake(user.address)
-      ).to.be.revertedWith('RequirementsRules: balanceId');
-    });
-    it('checkERC721MinStake should work - id', async function () {
-      const {ERC721Token, contract, getUser} = await setupERC20RewardPoolTest();
-
-      const user = await getUser();
-
-      const id = '0x123456';
-
-      await ERC721Token.mint(user.address, id);
-
-      await contract.setERC721RequirementList(
-        ERC721Token.address,
-        [id],
-        false,
-        0,
-        0,
-        1,
-        10
-      );
-
-      await expect(contract.checkERC721MinStake(user.address)).not.to.be
-        .reverted;
-    });
-    it('checkERC721MinStake should work - balanceOf', async function () {
-      const {ERC721Token, contract, getUser} = await setupERC20RewardPoolTest();
-
-      const numERC721 = 6;
-
-      const user = await getUser();
-
-      await ERC721Token.setFakeBalance(user.address, numERC721);
-
-      await contract.setERC721RequirementList(
-        ERC721Token.address,
-        [],
-        true,
-        5,
-        10,
-        0,
-        0
-      );
-
-      await expect(contract.checkERC721MinStake(user.address)).not.to.be
-        .reverted;
-    });
-    it('checkERC1155MinStake should fail', async function () {
-      const {
-        ERC1155Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
-
       const id = '0x123456';
       const numERC1155 = 1;
-
-      const user = await getUser();
-
-      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
-
-      await contract.setERC1155RequirementList(
-        ERC1155Token.address,
-        [id],
-        5,
-        12
-      );
-
-      await expect(
-        contract.checkERC1155MinStake(user.address)
-      ).to.be.revertedWith('RequirementsRules: balanceId');
-    });
-    it('checkERC1155MinStake should work', async function () {
-      const {
-        ERC1155Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
-
-      const id = '0x123456';
-      const numERC1155 = 1;
-
-      const user = await getUser();
-
-      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
-
-      await contract.setERC1155RequirementList(
-        ERC1155Token.address,
-        [id],
-        1,
-        12
-      );
-
-      await expect(contract.checkERC1155MinStake(user.address)).not.to.be
-        .reverted;
-    });
-    it('getERC1155MaxStake should return correct values', async function () {
-      const {
-        ERC1155Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
-
-      const id = '0x123456';
-      const numERC1155 = 1;
-
-      const user = await getUser();
 
       await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
 
@@ -503,7 +406,6 @@ describe('Requirementsules', function () {
       // mint the token, but not for the user
       await ERC721Token.mint(contract.address, id);
 
-      // don't have the min required
       await contract.setERC721RequirementList(
         ERC721Token.address,
         [id],
@@ -544,7 +446,6 @@ describe('Requirementsules', function () {
 
       await ERC721Token.mint(user.address, id);
 
-      // don't have the min required
       await contract.setERC721RequirementList(
         ERC721Token.address,
         [id],
@@ -558,6 +459,209 @@ describe('Requirementsules', function () {
       const maxStake = await contract.maxStakeAllowedCalculator(user.address);
 
       expect(maxStake).to.be.equal(20); // 30 + 12 > 20 (maxStakeOverall)
+    });
+  });
+  describe('Stake', function () {
+    it('user should be able to stake', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      const user = await getUser();
+
+      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
+
+      contract.setMaxStakeOverall(100);
+
+      await contract.setERC1155RequirementList(
+        ERC1155Token.address,
+        [id],
+        1,
+        12 // 12
+      );
+
+      await ERC721Token.mint(user.address, id);
+
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [id],
+        false,
+        0,
+        0,
+        1,
+        30 // 30
+      );
+
+      await expect(user.pool.stake(20)).not.to.be.reverted;
+    });
+    it('stake should fail - ERC721 balanceId ', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      const user = await getUser();
+
+      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
+
+      contract.setMaxStakeOverall(100);
+
+      await contract.setERC1155RequirementList(
+        ERC1155Token.address,
+        [id],
+        1,
+        12 // 12
+      );
+
+      await ERC721Token.mint(user.address, id);
+
+      // don't have the min required
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [id],
+        false,
+        0,
+        0,
+        5,
+        30 // 30
+      );
+
+      await expect(user.pool.stake(20)).to.be.revertedWith(
+        'RequirementsRules: balanceId'
+      );
+    });
+    it('stake should fail - ERC721 balanceOf ', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      const user = await getUser();
+
+      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
+
+      contract.setMaxStakeOverall(100);
+
+      await contract.setERC1155RequirementList(
+        ERC1155Token.address,
+        [id],
+        1,
+        12 // 12
+      );
+      const numERC721 = 1;
+      await ERC721Token.setFakeBalance(user.address, numERC721);
+
+      // don't have the min required
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [],
+        true,
+        5,
+        10,
+        0,
+        0 // 30
+      );
+
+      await expect(user.pool.stake(20)).to.be.revertedWith(
+        'RequirementsRules: balanceOf'
+      );
+    });
+    it('stake should fail - ERC1155 balanceId ', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      const user = await getUser();
+
+      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
+
+      contract.setMaxStakeOverall(100);
+
+      // don't have the min required
+      await contract.setERC1155RequirementList(
+        ERC1155Token.address,
+        [id],
+        4,
+        12 // 12
+      );
+      const numERC721 = 6;
+      await ERC721Token.setFakeBalance(user.address, numERC721);
+
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [],
+        true,
+        1,
+        10,
+        0,
+        0 // 30
+      );
+
+      await expect(user.pool.stake(20)).to.be.revertedWith(
+        'RequirementsRules: balanceId'
+      );
+    });
+    it('stake should fail - maxAllowed ', async function () {
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      const user = await getUser();
+
+      await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
+
+      contract.setMaxStakeOverall(100);
+
+      await contract.setERC1155RequirementList(
+        ERC1155Token.address,
+        [id],
+        1,
+        12 // 12
+      );
+      const numERC721 = 6;
+      await ERC721Token.setFakeBalance(user.address, numERC721);
+
+      await contract.setERC721RequirementList(
+        ERC721Token.address,
+        [],
+        true,
+        1,
+        10,
+        0,
+        0 // 30
+      );
+
+      await expect(user.pool.stake(200)).to.be.revertedWith(
+        'RequirementsRules: maxAllowed'
+      );
     });
   });
 });
