@@ -10,11 +10,11 @@ describe('ContributionRules', function () {
         contract,
       } = await ContributionRulesSetup();
       await expect(
-        contract.setERC721MultiplierList(ERC721Token.address, [10], [], true)
+        contract.setERC721MultiplierList(ERC721Token[0].address, [10], [], true)
       ).to.be.revertedWith('Ownable: caller is not the owner');
       await expect(
         contractAsAdmin.setERC721MultiplierList(
-          ERC721Token.address,
+          ERC721Token[0].address,
           [10],
           [],
           true
@@ -22,14 +22,7 @@ describe('ContributionRules', function () {
       ).not.to.be.reverted;
     });
     it('setERC721MultiplierList above the limits should fail', async function () {
-      const {
-        ERC721Token,
-        ERC721Token2,
-        ERC721Token3,
-        ERC721Token4,
-        ERC721Token5,
-        contractAsAdmin,
-      } = await ContributionRulesSetup();
+      const {ERC721Token, contractAsAdmin} = await ContributionRulesSetup();
 
       const ids = [];
 
@@ -40,7 +33,7 @@ describe('ContributionRules', function () {
 
       await expect(
         contractAsAdmin.setERC721MultiplierList(
-          ERC721Token.address,
+          ERC721Token[0].address,
           ids,
           [],
           true
@@ -48,46 +41,20 @@ describe('ContributionRules', function () {
       ).to.be.revertedWith('ContributionRules: invalid array of ids');
 
       ids.pop();
+      for (let i = 0; i < 4; i++) {
+        await expect(
+          contractAsAdmin.setERC721MultiplierList(
+            ERC721Token[i].address,
+            ids,
+            [],
+            true
+          )
+        ).not.to.be.reverted;
+      }
 
       await expect(
         contractAsAdmin.setERC721MultiplierList(
-          ERC721Token.address,
-          ids,
-          [],
-          true
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC721MultiplierList(
-          ERC721Token2.address,
-          ids,
-          [],
-          true
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC721MultiplierList(
-          ERC721Token3.address,
-          ids,
-          [],
-          true
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC721MultiplierList(
-          ERC721Token4.address,
-          ids,
-          [],
-          true
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC721MultiplierList(
-          ERC721Token5.address,
+          ERC721Token[4].address,
           ids,
           [],
           true
@@ -101,25 +68,18 @@ describe('ContributionRules', function () {
         contract,
       } = await ContributionRulesSetup();
       await expect(
-        contract.setERC1155MultiplierList(ERC1155Token.address, [10], [0])
+        contract.setERC1155MultiplierList(ERC1155Token[0].address, [10], [0])
       ).to.be.revertedWith('Ownable: caller is not the owner');
       await expect(
         contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token.address,
+          ERC1155Token[0].address,
           [10],
           [0]
         )
       ).not.to.be.reverted;
     });
     it('setERC1155MultiplierList above the limits should fail', async function () {
-      const {
-        ERC1155Token,
-        ERC1155Token2,
-        ERC1155Token3,
-        ERC1155Token4,
-        ERC1155Token5,
-        contractAsAdmin,
-      } = await ContributionRulesSetup();
+      const {ERC1155Token, contractAsAdmin} = await ContributionRulesSetup();
 
       const ids = [];
       const multipliers = [];
@@ -132,7 +92,7 @@ describe('ContributionRules', function () {
 
       await expect(
         contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token.address,
+          ERC1155Token[0].address,
           ids,
           multipliers
         )
@@ -141,41 +101,19 @@ describe('ContributionRules', function () {
       ids.pop();
       multipliers.pop();
 
-      await expect(
-        contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token.address,
-          ids,
-          multipliers
-        )
-      ).not.to.be.reverted;
+      for (let i = 0; i < 4; i++) {
+        await expect(
+          contractAsAdmin.setERC1155MultiplierList(
+            ERC1155Token[i].address,
+            ids,
+            multipliers
+          )
+        ).not.to.be.reverted;
+      }
 
       await expect(
         contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token2.address,
-          ids,
-          multipliers
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token3.address,
-          ids,
-          multipliers
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token4.address,
-          ids,
-          multipliers
-        )
-      ).not.to.be.reverted;
-
-      await expect(
-        contractAsAdmin.setERC1155MultiplierList(
-          ERC1155Token5.address,
+          ERC1155Token[4].address,
           ids,
           multipliers
         )
@@ -189,26 +127,26 @@ describe('ContributionRules', function () {
       } = await ContributionRulesSetup();
 
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [10],
         [],
         true
       );
 
       expect(
-        await contract.isERC721MemberMultiplierList(ERC721Token.address)
+        await contract.isERC721MemberMultiplierList(ERC721Token[0].address)
       ).to.be.equal(true);
 
       await expect(
-        contract.deleteERC721MultiplierList(ERC721Token.address)
+        contract.deleteERC721MultiplierList(ERC721Token[0].address)
       ).to.be.revertedWith('Ownable: caller is not the owner');
 
       await expect(
-        contractAsAdmin.deleteERC721MultiplierList(ERC721Token.address)
+        contractAsAdmin.deleteERC721MultiplierList(ERC721Token[0].address)
       ).not.to.be.reverted;
 
       expect(
-        await contract.isERC721MemberMultiplierList(ERC721Token.address)
+        await contract.isERC721MemberMultiplierList(ERC721Token[0].address)
       ).to.be.equal(false);
     });
     it('admin should be able to call deleteERC1155MultiplierList', async function () {
@@ -219,25 +157,25 @@ describe('ContributionRules', function () {
       } = await ContributionRulesSetup();
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [10],
         [1]
       );
 
       expect(
-        await contract.isERC1155MemberMultiplierList(ERC1155Token.address)
+        await contract.isERC1155MemberMultiplierList(ERC1155Token[0].address)
       ).to.be.equal(true);
 
       await expect(
-        contract.deleteERC1155MultiplierList(ERC1155Token.address)
+        contract.deleteERC1155MultiplierList(ERC1155Token[0].address)
       ).to.be.revertedWith('Ownable: caller is not the owner');
 
       await expect(
-        contractAsAdmin.deleteERC1155MultiplierList(ERC1155Token.address)
+        contractAsAdmin.deleteERC1155MultiplierList(ERC1155Token[0].address)
       ).not.to.be.reverted;
 
       expect(
-        await contract.isERC1155MemberMultiplierList(ERC1155Token.address)
+        await contract.isERC1155MemberMultiplierList(ERC1155Token[0].address)
       ).to.be.equal(false);
     });
     it('admin should be able to call setERC721MultiplierLimit', async function () {
@@ -283,8 +221,8 @@ describe('ContributionRules', function () {
         ERC1155Token,
         other,
       } = await ContributionRulesSetup();
-      expect(await ERC721Token.balanceOf(other)).to.be.equal(0);
-      expect(await ERC1155Token.balanceOf(other, 0)).to.be.equal(0);
+      expect(await ERC721Token[0].balanceOf(other)).to.be.equal(0);
+      expect(await ERC1155Token[0].balanceOf(other, 0)).to.be.equal(0);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1000);
     });
     it('1 ERC721 balanceOf - 0 ERC1155', async function () {
@@ -298,18 +236,18 @@ describe('ContributionRules', function () {
 
       const numERC721 = 1;
 
-      await ERC721Token.setFakeBalance(other, numERC721);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
 
       //no id and no multiplier - only multiplierLogarithm
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
       );
 
-      expect(await ERC721Token.balanceOf(other)).to.be.equal(numERC721);
-      expect(await ERC1155Token.balanceOf(other, 0)).to.be.equal(0);
+      expect(await ERC721Token[0].balanceOf(other)).to.be.equal(numERC721);
+      expect(await ERC1155Token[0].balanceOf(other, 0)).to.be.equal(0);
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1100);
     });
@@ -324,18 +262,18 @@ describe('ContributionRules', function () {
 
       const numERC721 = 4;
 
-      await ERC721Token.setFakeBalance(other, numERC721);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
 
       //no id and no multiplier - only multiplierLogarithm
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
       );
 
-      expect(await ERC721Token.balanceOf(other)).to.be.equal(numERC721);
-      expect(await ERC1155Token.balanceOf(other, 0)).to.be.equal(0);
+      expect(await ERC721Token[0].balanceOf(other)).to.be.equal(numERC721);
+      expect(await ERC1155Token[0].balanceOf(other, 0)).to.be.equal(0);
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(21);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1210);
     });
@@ -353,25 +291,27 @@ describe('ContributionRules', function () {
       const numERC721 = 1;
       const numERC1155 = 1;
 
-      await ERC721Token.setFakeBalance(other, numERC721);
-      await ERC1155Token.setFakeBalance(other, id, numERC1155);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
+      await ERC1155Token[0].setFakeBalance(other, id, numERC1155);
 
       //no id and no multiplier - only multiplierLogarithm
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
       );
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id],
         [10] // 10%
       );
 
-      expect(await ERC721Token.balanceOf(other)).to.be.equal(numERC721);
-      expect(await ERC1155Token.balanceOf(other, id)).to.be.equal(numERC1155);
+      expect(await ERC721Token[0].balanceOf(other)).to.be.equal(numERC721);
+      expect(await ERC1155Token[0].balanceOf(other, id)).to.be.equal(
+        numERC1155
+      );
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(10);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1200);
@@ -391,27 +331,31 @@ describe('ContributionRules', function () {
       const numERC721 = 1;
       const numERC1155 = 1;
 
-      await ERC721Token.setFakeBalance(other, numERC721);
-      await ERC1155Token.setFakeBalance(other, id1, numERC1155);
-      await ERC1155Token.setFakeBalance(other, id2, numERC1155);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
+      await ERC1155Token[0].setFakeBalance(other, id1, numERC1155);
+      await ERC1155Token[0].setFakeBalance(other, id2, numERC1155);
 
       //no id and no multiplier - only multiplierLogarithm
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
       );
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id1, id2],
         [10, 5] // 10%, 5%
       );
 
-      expect(await ERC721Token.balanceOf(other)).to.be.equal(numERC721);
-      expect(await ERC1155Token.balanceOf(other, id1)).to.be.equal(numERC1155);
-      expect(await ERC1155Token.balanceOf(other, id2)).to.be.equal(numERC1155);
+      expect(await ERC721Token[0].balanceOf(other)).to.be.equal(numERC721);
+      expect(await ERC1155Token[0].balanceOf(other, id1)).to.be.equal(
+        numERC1155
+      );
+      expect(await ERC1155Token[0].balanceOf(other, id2)).to.be.equal(
+        numERC1155
+      );
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(15);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1250);
@@ -430,26 +374,30 @@ describe('ContributionRules', function () {
 
       const numERC1155 = 1;
 
-      await ERC721Token.mint(other, id1);
-      await ERC1155Token.setFakeBalance(other, id1, numERC1155);
-      await ERC1155Token.setFakeBalance(other, id2, numERC1155);
+      await ERC721Token[0].mint(other, id1);
+      await ERC1155Token[0].setFakeBalance(other, id1, numERC1155);
+      await ERC1155Token[0].setFakeBalance(other, id2, numERC1155);
 
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [id1],
         [5], // 5%
         false
       );
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id1, id2],
         [10, 5] // 10%, 5%
       );
 
-      expect(await ERC721Token.ownerOf(id1)).to.be.equal(other);
-      expect(await ERC1155Token.balanceOf(other, id1)).to.be.equal(numERC1155);
-      expect(await ERC1155Token.balanceOf(other, id2)).to.be.equal(numERC1155);
+      expect(await ERC721Token[0].ownerOf(id1)).to.be.equal(other);
+      expect(await ERC1155Token[0].balanceOf(other, id1)).to.be.equal(
+        numERC1155
+      );
+      expect(await ERC1155Token[0].balanceOf(other, id2)).to.be.equal(
+        numERC1155
+      );
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(5);
       expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(15);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1200);
@@ -468,28 +416,32 @@ describe('ContributionRules', function () {
 
       const numERC1155 = 1;
 
-      await ERC721Token.mint(other, id1);
-      await ERC721Token.mint(other, id2);
-      await ERC1155Token.setFakeBalance(other, id1, numERC1155);
-      await ERC1155Token.setFakeBalance(other, id2, numERC1155);
+      await ERC721Token[0].mint(other, id1);
+      await ERC721Token[0].mint(other, id2);
+      await ERC1155Token[0].setFakeBalance(other, id1, numERC1155);
+      await ERC1155Token[0].setFakeBalance(other, id2, numERC1155);
 
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [id1, id2],
         [7, 3], // 7%, 3%
         false
       );
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id1, id2],
         [10, 5] // 10%, 5%
       );
 
-      expect(await ERC721Token.ownerOf(id1)).to.be.equal(other);
-      expect(await ERC721Token.ownerOf(id2)).to.be.equal(other);
-      expect(await ERC1155Token.balanceOf(other, id1)).to.be.equal(numERC1155);
-      expect(await ERC1155Token.balanceOf(other, id2)).to.be.equal(numERC1155);
+      expect(await ERC721Token[0].ownerOf(id1)).to.be.equal(other);
+      expect(await ERC721Token[0].ownerOf(id2)).to.be.equal(other);
+      expect(await ERC1155Token[0].balanceOf(other, id1)).to.be.equal(
+        numERC1155
+      );
+      expect(await ERC1155Token[0].balanceOf(other, id2)).to.be.equal(
+        numERC1155
+      );
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       expect(await contract.multiplierBalanceOfERC1155(other)).to.be.equal(15);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1250);
@@ -506,13 +458,13 @@ describe('ContributionRules', function () {
 
       const numERC721 = 2; // 17%
 
-      await ERC721Token.setFakeBalance(other, numERC721);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
 
       contractAsAdmin.setERC721MultiplierLimit(15);
 
       //no id and no multiplier - only multiplierLogarithm
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
@@ -522,7 +474,7 @@ describe('ContributionRules', function () {
       // multiplier should be capped at 15% - and not 17%
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1150);
 
-      await ERC721Token.setFakeBalance(other, 1); //10%
+      await ERC721Token[0].setFakeBalance(other, 1); //10%
       // user should have multiplier of 10%
       expect(await contract.multiplierBalanceOfERC721(other)).to.be.equal(10);
       // as 10 <= 15, multiplier of 10% should be applied
@@ -540,12 +492,12 @@ describe('ContributionRules', function () {
 
       const id = '0x123456';
 
-      await ERC1155Token.setFakeBalance(other, id, numERC1155);
+      await ERC1155Token[0].setFakeBalance(other, id, numERC1155);
 
       contractAsAdmin.setERC1155MultiplierLimit(15);
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id],
         [20] // 20%
       );
@@ -555,7 +507,7 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1150);
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id],
         [14] // 14%
       );
@@ -578,18 +530,18 @@ describe('ContributionRules', function () {
 
       const id = '0x123456';
 
-      await ERC721Token.setFakeBalance(other, numERC721);
-      await ERC1155Token.setFakeBalance(other, id, numERC1155);
+      await ERC721Token[0].setFakeBalance(other, numERC721);
+      await ERC1155Token[0].setFakeBalance(other, id, numERC1155);
 
       await contractAsAdmin.setERC721MultiplierList(
-        ERC721Token.address,
+        ERC721Token[0].address,
         [],
         [],
         true
       );
 
       await contractAsAdmin.setERC1155MultiplierList(
-        ERC1155Token.address,
+        ERC1155Token[0].address,
         [id],
         [20] // 20%
       );
