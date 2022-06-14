@@ -136,8 +136,16 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyOwner isValidAddress(receiver) {
-        rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
+    function recoverFunds(address receiver) external onlyOwner whenPaused() isValidAddress(receiver) {
+        uint256 recoverAmount;
+
+        if (rewardToken == _stakeToken) {
+            recoverAmount = rewardToken.balanceOf(address(this)) - _totalSupply;
+        } else {
+            recoverAmount = rewardToken.balanceOf(address(this));
+        }
+
+        rewardToken.safeTransfer(receiver, recoverAmount);
     }
 
     /// @notice return the total supply of staked tokens
@@ -395,6 +403,18 @@ contract ERC20RewardPool is
             return 0;
         }
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
+    }
+
+    // @dev Triggers stopped state.
+    // The contract must not be paused.
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    // @dev Returns to normal state.
+    // The contract must be paused.
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
