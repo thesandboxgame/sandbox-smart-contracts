@@ -127,9 +127,12 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) isValidAddress(receiver) {
-        require(paused(), "ERC20RewardPool: contract not paused");
-
+    function recoverFunds(address receiver)
+        external
+        whenNotPaused()
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        isValidAddress(receiver)
+    {
         uint256 recoverAmount;
 
         if (rewardToken == _stakeToken) {
