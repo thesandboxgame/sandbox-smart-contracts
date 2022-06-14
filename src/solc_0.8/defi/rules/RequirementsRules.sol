@@ -212,11 +212,11 @@ contract RequirementsRules is Ownable {
     }
 
     function isERC721MemberRequirementList(IERC721 reqContract) public view returns (bool) {
-        return (_listERC721Index.length == 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
+        return (_listERC721Index.length != 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
     function isERC1155MemberRequirementList(IERC1155 reqContract) public view returns (bool) {
-        return (_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
+        return (_listERC1155Index.length != 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
     function getERC721MaxStake(address account) public view returns (uint256) {
