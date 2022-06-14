@@ -5,11 +5,9 @@ import {BigNumber} from 'ethers';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deployer, sandAdmin} = await getNamedAccounts();
+  const {deployments, ethers} = hre;
 
   const sandPool = await ethers.getContract('ERC20RewardPool');
-  const ADMIN_ROLE = await sandPool.DEFAULT_ADMIN_ROLE();
 
   const antiCompound = await deployments.read(
     'ERC20RewardPool',
@@ -17,11 +15,7 @@ const func: DeployFunction = async function (
   );
 
   // check who has Admin role: deployer or sandAdmin
-  const currentAdmin = (await sandPool.hasRole(ADMIN_ROLE, deployer))
-    ? deployer
-    : (await sandPool.hasRole(ADMIN_ROLE, sandAdmin))
-    ? sandAdmin
-    : deployer;
+  const currentAdmin = await sandPool.owner();
 
   const lockPeriodInSecs = BigNumber.from(604800); // 7 days
 
