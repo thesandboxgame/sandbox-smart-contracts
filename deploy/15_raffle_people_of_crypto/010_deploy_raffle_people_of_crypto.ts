@@ -13,8 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
-    metadataUrl =
-      'https://contracts.sandbox.game/poc-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/poc-unrevealed/';
   } else {
     metadataUrl = 'https://contracts-demo.sandbox.game/poc-unrevealed/';
   }
@@ -22,17 +21,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,
     contract: 'PeopleOfCrypto',
-    // skipIfAlreadyDeployed: false,
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [metadataUrl, 'People Of Crypto', 'POC', treasury, raffleSignWallet],
+        args: [
+          metadataUrl,
+          'People Of Crypto',
+          'POC',
+          treasury,
+          raffleSignWallet,
+        ],
       },
-      upgradeIndex: 0
+      upgradeIndex: 0,
     },
-    log: true
+    log: true,
   });
 };
 

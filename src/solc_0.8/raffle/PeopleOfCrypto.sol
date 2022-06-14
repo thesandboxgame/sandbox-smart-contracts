@@ -40,7 +40,7 @@ contract PeopleOfCrypto is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reen
     address public signAddress;
     string public baseTokenURI;
 
-    function initialize (
+    function initialize(
         string memory baseURI,
         string memory _name,
         string memory _symbol,
