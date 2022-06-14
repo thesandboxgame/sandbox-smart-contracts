@@ -1,7 +1,7 @@
 import {expect} from '../../../chai-setup';
 import {setupERC20RewardPoolTest} from '../fixtures/fixtures';
 
-describe.only('Requirementsules', function () {
+describe('Requirementsules', function () {
   describe('roles', function () {
     it('admin should be able to call setMaxStakeOverall', async function () {
       const {contract, contractAsOther} = await setupERC20RewardPoolTest();
