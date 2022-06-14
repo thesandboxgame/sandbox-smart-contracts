@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGu
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
+import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
@@ -32,7 +32,7 @@ contract ERC20RewardPool is
     LockRules,
     RequirementsRules,
     ReentrancyGuard,
-    ERC2771Handler,
+    ERC2771HandlerV2,
     Pausable
 {
     using SafeERC20 for IERC20;
@@ -70,7 +70,7 @@ contract ERC20RewardPool is
         address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
-        __ERC2771Handler_initialize(trustedForwarder);
+        __ERC2771HandlerV2_initialize(trustedForwarder);
     }
 
     modifier isContractAndAdmin(address contractAddress) {
@@ -288,6 +288,10 @@ contract ERC20RewardPool is
         _updateContribution(_msgSender());
     }
 
+    function renounceOwnership() public override onlyOwner {
+        revert("ERC20RewardPool: can't renounceOwnership");
+    }
+
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
         super._withdraw(amount);
@@ -383,11 +387,11 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
