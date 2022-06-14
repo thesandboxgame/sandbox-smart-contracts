@@ -48,7 +48,6 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         return newId;
     }
 
-    // TODO: Rules for this one. Used from the tunnel
     function mintEstate(
         address from,
         bytes32 metaData,
@@ -57,7 +56,6 @@ contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
         return _mintEstate(from, metaData, tiles);
     }
 
-    // TODO: Rules for this one. Used from the tunnel
     function burnEstate(address from, uint256 estateId)
         external
         override

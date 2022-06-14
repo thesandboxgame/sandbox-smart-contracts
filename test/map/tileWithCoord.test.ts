@@ -150,8 +150,9 @@ describe('TileWithCoordLib main', function () {
 
   it('findAPixel', async function () {
     const tester = await setupTileWithCoordsLibTest();
-    for (let x = 0; x < 24; x++) {
-      for (let y = 0; y < 24; y++) {
+    const tests = [0, 1, 7, 8, 9, 12, 16, 23];
+    for (const x of tests) {
+      for (const y of tests) {
         await tester.clearQuad(0, 0, 0, 24);
         await tester.setQuad(0, x, y, 1);
         await tester.setFindAPixel(0, 1);

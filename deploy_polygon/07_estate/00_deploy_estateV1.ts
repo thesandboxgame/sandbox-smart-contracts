@@ -11,7 +11,6 @@ const func: DeployFunction = async function (
 
   //const landContract = await deployments.get('PolygonLand');
   //const landContract = await deployments.get('MockLandWithMint');
-  const gameToken = await deployments.get('ChildGameToken');
   let landContract;
   if (hre.network.name === 'hardhat') {
     // workaround for tests
@@ -43,7 +42,6 @@ const func: DeployFunction = async function (
           TRUSTED_FORWARDER.address,
           estateTokenAdmin,
           landContract.address, //'0xFeD17c5b2B5A59D3c8690a2cc666D41255376062',
-          gameToken.address,
           chainIndex,
         ],
       },

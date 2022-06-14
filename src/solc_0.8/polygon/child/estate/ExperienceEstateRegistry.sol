@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-pragma experimental ABIEncoderV2;
 
 import "../../../common/BaseWithStorage/WithSuperOperators.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
@@ -64,8 +63,11 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         uint256 expId,
         uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
     ) external {
+        // solhint-disable-next-line no-unused-vars
         uint256 expStorageId = estateToken.getStorageId(expId);
+        // solhint-disable-next-line no-unused-vars
         uint256 estStorageId = estateToken.getStorageId(estId);
+        // solhint-disable-next-line no-unused-vars
         uint256 key = TileWithCoordLib.getKey(x, y);
         //TODO
     }

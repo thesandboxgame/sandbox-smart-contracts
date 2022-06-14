@@ -2,7 +2,7 @@ import {setupL1EstateAndLand} from './fixtures';
 import {ethers} from 'ethers';
 import {expect} from '../chai-setup';
 
-describe('L1 Estate test with maps', function () {
+describe('L1 Estate test', function () {
   describe('create one estate', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -10,7 +10,7 @@ describe('L1 Estate test with maps', function () {
         const {
           other,
           landContractAsOther,
-          estateContract,
+          estateContractAsOther,
           mintQuad,
           createEstate,
         } = await setupL1EstateAndLand();
@@ -18,10 +18,14 @@ describe('L1 Estate test with maps', function () {
         const quadId = await mintQuad(other, size, 48, 96);
         await landContractAsOther.setApprovalForAllFor(
           other,
-          estateContract.address,
+          estateContractAsOther.address,
           quadId
         );
-        const {gasUsed} = await createEstate([size], [48], [96]);
+        const {gasUsed} = await createEstate({
+          sizes: [size],
+          xs: [48],
+          ys: [96],
+        });
         console.log(
           `create one ${size}x${size} quads and create an estate with that, GAS USED: `,
           gasUsed.toString()
@@ -42,7 +46,7 @@ describe('L1 Estate test with maps', function () {
           const {
             other,
             landContractAsOther,
-            estateContract,
+            estateContractAsOther,
             mintQuad,
             createEstate,
             getXsYsSizes,
@@ -50,11 +54,11 @@ describe('L1 Estate test with maps', function () {
           const quadId = await mintQuad(other, 24, 0, 0);
           await landContractAsOther.setApprovalForAllFor(
             other,
-            estateContract.address,
+            estateContractAsOther.address,
             quadId
           );
           const {xs, ys, sizes} = getXsYsSizes(0, 0, size);
-          const {gasUsed} = await createEstate(sizes, xs, ys);
+          const {gasUsed} = await createEstate({sizes, xs, ys});
           console.log(
             `create ${cant} quads and ${size}x${size} estate with that, GAS USED: `,
             gasUsed.toString()
@@ -70,7 +74,7 @@ describe('L1 Estate test with maps', function () {
         const {
           other,
           landContractAsOther,
-          estateContract,
+          estateContractAsOther,
           mintQuad,
           createEstate,
           updateEstate,
@@ -79,21 +83,21 @@ describe('L1 Estate test with maps', function () {
         const quadId = await mintQuad(other, size, 48, 96);
         await landContractAsOther.setApprovalForAllFor(
           other,
-          estateContract.address,
+          estateContractAsOther.address,
           quadId
         );
-        const {estateId} = await createEstate([size], [48], [96]);
+        const {estateId} = await createEstate({
+          sizes: [size],
+          xs: [48],
+          ys: [96],
+        });
 
         //mint lands for update
         await mintQuad(other, size, 144, 144);
         const {gasUsed} = await updateEstate(
-          [size],
-          [144],
-          [144],
-          [size],
-          [48],
-          [96],
-          estateId
+          estateId,
+          {sizes: [size], xs: [144], ys: [144]},
+          {sizes: [size], xs: [48], ys: [96]}
         );
         console.log(
           `update ${size}x${size} quads, GAS USED: `,
@@ -106,7 +110,7 @@ describe('L1 Estate test with maps', function () {
     const {
       other,
       landContractAsOther,
-      estateContract,
+      estateContractAsOther,
       estateTunnel,
       mintQuad,
       createEstate,
@@ -127,14 +131,14 @@ describe('L1 Estate test with maps', function () {
       const quadId = await mintQuad(other, size, x, y);
       await landContractAsOther.setApprovalForAllFor(
         other,
-        estateContract.address,
+        estateContractAsOther.address,
         quadId
       );
       sizes.push(size);
       xs.push(x);
       ys.push(y);
     }
-    const {estateId} = await createEstate(sizes, xs, ys);
+    const {estateId} = await createEstate({sizes, xs, ys});
     const message = await estateTunnel.getMessage(other, estateId);
     // TODO: Check what happen when message.length > 1024.... it fails ?
     expect(ethers.utils.arrayify(message).length).to.be.equal(512);
