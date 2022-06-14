@@ -71,7 +71,7 @@ describe('ERC20RewardPool main contract tests', function () {
       const {getUser} = await setupERC20RewardPoolTest();
       const user = await getUser();
       await expect(user.pool.recoverFunds(user.address)).to.be.revertedWith(
-        'AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        'caller is not the owner'
       );
     });
     it('recoverFunds must fail with address zero', async function () {
@@ -770,9 +770,7 @@ describe('ERC20RewardPool main contract tests', function () {
 
       expect(
         contractAsOther.setTrustedForwarder(user.address)
-      ).to.be.revertedWith(
-        'AccessControl: account 0x14dc79964da2c08b23698b3d3cc7ca32193d9955 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
-      );
+      ).to.be.revertedWith('caller is not the owner');
     });
     it('should success to set the trusted forwarder if admin', async function () {
       const {getUser, contract} = await setupERC20RewardPoolTest();
