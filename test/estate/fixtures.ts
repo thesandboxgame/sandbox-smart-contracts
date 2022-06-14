@@ -159,6 +159,23 @@ async function setupEstateAndLand(gameContract?: Contract) {
   });
   const estateTunnel = await ethers.getContract('MockEstateTunnel', deployer);
 
+  //Registry
+  if (gameContract) {
+    await deployments.deploy('ExperienceEstateRegistry', {
+      from: deployer,
+      contract: 'ExperienceEstateRegistry',
+      args: [
+        estateContract.address,
+        gameContract.address,
+        landContract.address,
+      ],
+    });
+  }
+  const experienceEstateRegistryContract = await ethers.getContract(
+    'ExperienceEstateRegistry',
+    deployer
+  );
+
   const GRID_SIZE = 408;
   const sizeToLayer: {[k: number]: BigNumber} = {
     1: BigNumber.from(0),
@@ -196,6 +213,7 @@ async function setupEstateAndLand(gameContract?: Contract) {
     estateTokenAdmin,
     estateMinter,
     estateTunnel,
+    experienceEstateRegistryContract,
     other,
     GRID_SIZE,
     getId,
