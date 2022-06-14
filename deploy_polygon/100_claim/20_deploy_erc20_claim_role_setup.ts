@@ -9,7 +9,14 @@ const func: DeployFunction = async function (
   const {sandAdmin, backendCashbackWallet} = await getNamedAccounts();
 
   const signerRole = await read('ERC20SignedClaim', 'SIGNER_ROLE');
-  if (!await read('ERC20SignedClaim', 'hasRole', signerRole, backendCashbackWallet)) {
+  if (
+    !(await read(
+      'ERC20SignedClaim',
+      'hasRole',
+      signerRole,
+      backendCashbackWallet
+    ))
+  ) {
     await catchUnknownSigner(
       execute(
         'ERC20SignedClaim',
