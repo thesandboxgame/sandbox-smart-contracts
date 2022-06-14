@@ -104,10 +104,6 @@ library TileWithCoordLib {
         return self.tile.containQuad(xi % 24, yi % 24, size);
     }
 
-    function containTile(TileWithCoord memory self, TileWithCoord memory contained) internal pure returns (bool) {
-        return contained.tile.isEqual(contained.tile.clone().and(self.tile));
-    }
-
     function getKey(TileWithCoord memory self) internal pure returns (uint256) {
         return self.tile.data[0] >> 224;
     }
@@ -200,6 +196,7 @@ library TileWithCoordLib {
         uint256 deltaX,
         uint256 deltaY
     ) internal pure returns (ShiftResult memory) {
+        // TODO: optimization, move the tiles directly to _translateTile, check gas consumption.
         (uint256[6] memory col1, uint256[6] memory col2) = _translateTile(tile, deltaX % 24, deltaY % 24);
         return
             ShiftResult({
@@ -230,6 +227,7 @@ library TileWithCoordLib {
         uint256 rem = 24 * (y % 8);
         uint256 div = y / 8;
         mask = COORD_MASK_NEG - (2**(24 * 8 - rem) - 1);
+        // TODO: optimization, remove the loop, check gas consumption
         for (uint256 i = 5; i > div; i--) {
             col1[i] = (col1[i - div] << rem) | ((col1[i - div - 1] & mask) >> (24 * 8 - rem));
             col2[i] = (col2[i - div] << rem) | ((col2[i - div - 1] & mask) >> (24 * 8 - rem));

@@ -4,61 +4,124 @@ pragma solidity 0.8.2;
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IAccessControl} from "@openzeppelin/contracts-0.8/access/IAccessControl.sol";
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
-import "../common/BaseWithStorage/ImmutableERC721.sol";
-import "../common/interfaces/ILandToken.sol";
-import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "../common/Libraries/MapLib.sol";
+import {ImmutableERC721} from "../common/BaseWithStorage/ImmutableERC721.sol";
+import {ILandToken} from "../common/interfaces/ILandToken.sol";
+import {IERC721MandatoryTokenReceiver} from "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import {ERC721BaseToken} from "../common/BaseWithStorage/ERC721BaseToken.sol";
+import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
+import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
+import {MapLib} from "../common/Libraries/MapLib.sol";
+import {EstateBaseTokenStorage} from "./EstateBaseTokenStorage.sol";
 
-/// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
-abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
+/// @dev Base contract for estate contract on L1 and L2, it uses tile maps to save the landTileSet
+abstract contract EstateBaseToken is EstateBaseTokenStorage, ImmutableERC721, AccessControl {
     using MapLib for MapLib.Map;
-    event EstateTokenMinted(uint256 indexed estateId, bytes32 _metaData, TileWithCoordLib.TileWithCoord[] data);
+    /// @dev Emitted when an estate is updated.
+    /// @param estateId The id of the newly minted token.
+    /// @param lands initial quads of lands to add
+    /// @param metadata initial metadata to set
+    event EstateTokenCreated(uint256 indexed estateId, uint256[][3] lands, bytes32 metadata);
+
+    /// @dev Emitted when lands are added to the estate.
+    /// @param estateId The id of the previous erc721 ESTATE token.
+    /// @param newId The id of the newly minted token.
+    /// @param lands The quads of lands added to the estate.
+    event EstateTokenLandsAdded(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
+
+    event EstateTokenMinted(uint256 indexed estateId, bytes32 metaData, TileWithCoordLib.TileWithCoord[] data);
     event EstateBurned(uint256 indexed estateId);
-
-    // TODO: Taken from Land Token, we must add  (x,y,size) = land.idToQuadSomething()
-    uint256 public constant GRID_SIZE = 408;
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-
-    uint64 public nextId; // max uint64 = 18,446,744,073,709,551,615
-
-    address public land;
-
-    mapping(uint256 => bytes32) internal metaData;
-
-    // estate id => free lands
-    mapping(uint256 => MapLib.Map) internal freeLands;
+    event MetadataSet(uint256 indexed estateId, bytes32 metaData);
 
     function _unchained_initV1(
         address trustedForwarder,
         address admin,
-        address _land,
+        address _landToken,
         uint8 chainIndex
     ) internal {
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _admin = admin;
-        land = _land;
+        _s().landToken = _landToken;
+    }
+
+    function setMetadata(uint256 estateId, bytes32 metadata) external {
+        require(_ownerOf(estateId) == _msgSender(), "not owner");
+        uint256 storageId = _storageId(estateId);
+        _s().metaData[storageId] = metadata;
+        emit MetadataSet(estateId, metadata);
+    }
+
+    /// @notice Create a new estate token with lands.
+    /// @param lands The set of quads to add.
+    /// @param metadata The metadata hash to use
+    function create(uint256[][3] calldata lands, bytes32 metadata) external returns (uint256) {
+        (uint256 estateId, uint256 storageId) = _createEstate(_msgSender(), lands, metadata);
+        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        emit EstateTokenCreated(estateId, lands, metadata);
+        return estateId;
+    }
+
+    function addLand(uint256 estateId, uint256[][3] calldata landToAdd) external returns (uint256) {
+        // we can optimize when adding only one quad
+        uint256 storageId = _storageId(estateId);
+        uint256 newId;
+        // The risk with this optimizations is that you keep adding lands but then you cannot remove because
+        // the removal check is the expensive one.
+        if (landToAdd[0].length == 1) {
+            // check that the quad is adjacent before adding
+            require(
+                _landTileSet(storageId).isAdjacent(landToAdd[1][0], landToAdd[2][0], landToAdd[0][0]),
+                "not adjacent"
+            );
+            (newId, ) = _updateLandsEstate(_msgSender(), estateId, storageId, landToAdd);
+        } else {
+            // add everything then make the heavier check of the result
+            (newId, ) = _updateLandsEstate(_msgSender(), estateId, storageId, landToAdd);
+            require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        }
+        emit EstateTokenLandsAdded(estateId, newId, landToAdd);
+        return newId;
     }
 
     function getMetadata(uint256 estateId) external view returns (bytes32) {
-        uint256 storageId = _storageId(estateId);
-        return metaData[storageId];
+        return _s().metaData[_storageId(estateId)];
     }
 
-    function freeLandLength(uint256 estateId) external view returns (uint256) {
-        uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].length();
+    function getNextId() external view returns (uint64) {
+        return _s().nextId;
     }
 
-    function freeLandAt(
+    function getLandToken() external view returns (address) {
+        return _s().landToken;
+    }
+
+    function getLandLength(uint256 estateId) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return _landTileSet(storageId).length();
+    }
+
+    function getLandAt(
         uint256 estateId,
         uint256 offset,
         uint256 limit
     ) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
         uint256 storageId = _storageId(estateId);
-        return freeLands[storageId].at(offset, limit);
+        return _landTileSet(storageId).at(offset, limit);
+    }
+
+    function containsShiftResult(uint256 estateId, TileWithCoordLib.ShiftResult memory shiftResult)
+        external
+        view
+        returns (bool)
+    {
+        uint256 storageId = _storageId(estateId);
+        return _landTileSet(storageId).containsShiftResult(shiftResult);
+    }
+
+    function getLandCount(uint256 estateId) external view returns (uint256) {
+        uint256 storageId = _storageId(estateId);
+        return _landTileSet(storageId).getLandCount();
     }
 
     /// @notice Return the name of the token contract.
@@ -91,40 +154,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         return this.onERC721BatchReceived.selector;
     }
 
-    //
-    //    // TODO: Is is ok to throw here ? Do we get only 10000 gas ? What about reentrancy attacks to Land or us ?
-    //    function onERC721Received(
-    //        address, /* operator */
-    //        address, /* from */
-    //        uint256 id,
-    //        bytes calldata data
-    //    ) external virtual returns (bytes4) {
-    //        if (msg.sender == address(land)) {
-    //            uint256 estateId = abi.decode(data, (uint256));
-    //            uint256 storageId = _storageId(estateId);
-    //            freeLands[storageId].setQuad(id % GRID_SIZE, id / GRID_SIZE, _quadSize(id));
-    //        }
-    //        return this.onERC721Received.selector;
-    //    }
-    //
-    //    // TODO: Is is ok to throw here ? Do we get only 10000 gas ? What about reentrancy attacks to Land or us?
-    //    function onERC721BatchReceived(
-    //        address, /* operator */
-    //        address, /* from */
-    //        uint256[] calldata ids,
-    //        bytes calldata data
-    //    ) external virtual returns (bytes4) {
-    //        if (msg.sender == address(land)) {
-    //            // TODO: Maybe we can support just one estate id
-    //            uint256[] memory estateIds = abi.decode(data, (uint256[]));
-    //            for (uint256 i; i < ids.length; i++) {
-    //                uint256 storageId = _storageId(estateIds[i]);
-    //                freeLands[storageId].setQuad(ids[i] % GRID_SIZE, ids[i] / GRID_SIZE, _quadSize(ids[i]));
-    //            }
-    //        }
-    //        return this.onERC721BatchReceived.selector;
-    //    }
-
     function supportsInterface(bytes4 interfaceId) public pure override(AccessControl, ERC721BaseToken) returns (bool) {
         return
             ERC721BaseToken.supportsInterface(interfaceId) ||
@@ -133,38 +162,45 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
     }
 
     function _createEstate(
-        address from,
-        MapLib.QuadsAndTiles calldata freeLand,
-        bytes32 uri
+        address from, // msg sender
+        uint256[][3] calldata landToAdd,
+        bytes32 _metaData
     ) internal returns (uint256 estateId, uint256 storageId) {
-        require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         // batchTransferQuad does that for us
         // require(quadTuple[0].length == quadTuple[1].length && quadTuple[0].length == quadTuple[2].length, "Invalid data");
-        if (freeLand.quads[0].length > 0) {
-            _batchTransferQuad(from, address(this), freeLand.quads[0], freeLand.quads[1], freeLand.quads[2]);
+        if (landToAdd[0].length > 0) {
+            ILandToken(_s().landToken).batchTransferQuad(
+                from,
+                address(this),
+                landToAdd[0],
+                landToAdd[1],
+                landToAdd[2],
+                ""
+            );
         }
         (estateId, storageId) = _mintToken(from);
-        metaData[storageId] = uri;
-        freeLands[storageId].add(freeLand);
+        _s().metaData[storageId] = _metaData;
+        _landTileSet(storageId).add(landToAdd);
         return (estateId, storageId);
     }
 
+    // Used from the estate tunnel
     function _mintEstate(
         address from,
         bytes32 _metaData,
-        TileWithCoordLib.TileWithCoord[] calldata freeLand
+        TileWithCoordLib.TileWithCoord[] calldata lands
     ) internal returns (uint256) {
         require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         (uint256 estateId, uint256 storageId) = _mintToken(from);
-        metaData[storageId] = _metaData;
-        freeLands[storageId].add(freeLand);
-        emit EstateTokenMinted(estateId, _metaData, freeLand);
+        _s().metaData[storageId] = _metaData;
+        _landTileSet(storageId).add(lands);
+        emit EstateTokenMinted(estateId, _metaData, lands);
         return estateId;
     }
 
     function _mintToken(address from) internal returns (uint256 estateId, uint256 storageId) {
         uint16 version = 1;
-        estateId = _generateTokenId(from, nextId++, _chainIndex, version);
+        estateId = _generateTokenId(from, _s().nextId++, _chainIndex, version);
         storageId = _storageId(estateId);
         require(_owners[storageId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
 
@@ -178,21 +214,23 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
     function _updateLandsEstate(
         address from,
         uint256 estateId,
-        MapLib.QuadsAndTiles calldata landToAdd,
-        bytes32 uri
+        uint256 storageId,
+        uint256[][3] calldata landToAdd
     ) internal returns (uint256 newEstateId, uint256 newStorageId) {
-        require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         require(_ownerOf(estateId) == from, "Invalid Owner");
         // batchTransferQuad does that for us
         // require(quadsToAdd[0].length == quadsToAdd[1].length && quadsToAdd[0].length == quadsToAdd[2].length, "Invalid data");
         // require(quadsToRemove[0].length == quadsToRemove[1].length && quadsToRemove[0].length == quadsToRemove[2].length, "Invalid data");
-
-        uint256 storageId = _storageId(estateId);
-        metaData[storageId] = uri;
-
-        freeLands[storageId].add(landToAdd);
-        if (landToAdd.quads[0].length > 0) {
-            _batchTransferQuad(from, address(this), landToAdd.quads[0], landToAdd.quads[1], landToAdd.quads[2]);
+        _landTileSet(storageId).add(landToAdd);
+        if (landToAdd[0].length > 0) {
+            ILandToken(_s().landToken).batchTransferQuad(
+                from,
+                address(this),
+                landToAdd[0],
+                landToAdd[1],
+                landToAdd[2],
+                ""
+            );
         }
         return _incrementTokenVersion(from, estateId);
     }
@@ -203,10 +241,10 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         uint256 storageId
     ) internal returns (bytes32 _metaData, TileWithCoordLib.TileWithCoord[] memory _tiles) {
         require(hasRole(BURNER_ROLE, _msgSender()), "not burner");
-        _metaData = metaData[storageId];
-        delete metaData[storageId];
-        _tiles = freeLands[storageId].getMap();
-        freeLands[storageId].clear();
+        _metaData = _s().metaData[storageId];
+        delete _s().metaData[storageId];
+        _tiles = _landTileSet(storageId).getMap();
+        _landTileSet(storageId).clear();
         _burn(from, from, storageId);
         emit EstateBurned(estateId);
         return (_metaData, _tiles);
@@ -230,8 +268,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         internal
         returns (uint256 newEstateId, uint256 newStorageId)
     {
-        // address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
-
         uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
         uint16 version = uint16(estateId);
         version++;
@@ -249,26 +285,5 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl {
         // TODO: this checks something that is already true ?
         address newOwner = _ownerOf(newEstateId);
         require(owner == newOwner, "NOT_OWNER");
-    }
-
-    // TODO: This really belong to the land contract!!!
-    function _quadSize(uint256 id) private pure returns (uint256) {
-        uint256 size = id >> 254;
-        if (size == 0) return 1;
-        if (size == 1) return 3;
-        if (size == 2) return 6;
-        if (size == 3) return 12;
-        if (size == 4) return 24;
-        return 0;
-    }
-
-    function _batchTransferQuad(
-        address from,
-        address to,
-        uint256[] calldata sizes,
-        uint256[] calldata xs,
-        uint256[] calldata ys
-    ) internal {
-        ILandToken(land).batchTransferQuad(from, to, sizes, xs, ys, "");
     }
 }

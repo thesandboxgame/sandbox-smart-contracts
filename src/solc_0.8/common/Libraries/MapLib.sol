@@ -19,11 +19,6 @@ library MapLib {
     uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
     uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
 
-    struct QuadsAndTiles {
-        uint256[][3] quads; //(size, x, y)
-        TileWithCoordLib.TileWithCoord[] tiles;
-    }
-
     // To remove empty tiles we need to store the key (aka coords) inside the value
     // For now we will leave empty tiles in the structure
     struct Map {
@@ -68,13 +63,33 @@ library MapLib {
         view
         returns (bool)
     {
+        if (tile.isEmpty()) {
+            return true;
+        }
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
         if (idx == 0) {
             // !contains
             return false;
         }
-        return self.values[idx - 1].containTile(tile);
+        return self.values[idx - 1].tile.containTile(tile.tile);
+    }
+
+    function intersectTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile)
+        public
+        view
+        returns (bool)
+    {
+        if (tile.isEmpty()) {
+            return true;
+        }
+        uint256 key = tile.getKey();
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !contains
+            return false;
+        }
+        return self.values[idx - 1].tile.intersectTile(tile.tile);
     }
 
     function containTileWithOffset(
@@ -84,11 +99,15 @@ library MapLib {
         uint256 y
     ) public view returns (bool) {
         TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(tile, x, y);
+        return containsShiftResult(self, s);
+    }
+
+    function containsShiftResult(Map storage self, TileWithCoordLib.ShiftResult memory s) public view returns (bool) {
         return
-            (s.topLeft.isEmpty() || containTileWithCoord(self, s.topLeft)) &&
-            (s.topRight.isEmpty() || containTileWithCoord(self, s.topRight)) &&
-            (s.bottomLeft.isEmpty() || containTileWithCoord(self, s.bottomLeft)) &&
-            (s.bottomRight.isEmpty() || containTileWithCoord(self, s.bottomRight));
+            containTileWithCoord(self, s.topLeft) &&
+            containTileWithCoord(self, s.topRight) &&
+            containTileWithCoord(self, s.bottomLeft) &&
+            containTileWithCoord(self, s.bottomRight);
     }
 
     // TODO: Check gas consumption!!!
@@ -236,12 +255,11 @@ library MapLib {
         return ret;
     }
 
-    // This can be problematic if it grows too much !!!
+    // TODO: This can be problematic if it grows too much !!!
     function getMap(Map storage self) public view returns (TileWithCoordLib.TileWithCoord[] memory) {
         return self.values;
     }
 
-    // This can be problematic if it grows too much !!!
     function getLandCount(Map storage self) public view returns (uint256) {
         uint256 ret;
         for (uint256 i; i < self.values.length; i++) {
@@ -250,7 +268,6 @@ library MapLib {
         return ret;
     }
 
-    // Just for testing
     function containTileAtCoord(
         Map storage self,
         uint256 x,
@@ -407,25 +424,6 @@ library MapLib {
     }
 
     function moveTo(
-        Map storage self,
-        Map storage other,
-        QuadsAndTiles calldata data
-    ) public {
-        moveTo(self, other, data.quads);
-        moveTo(self, other, data.tiles);
-    }
-
-    function add(Map storage self, QuadsAndTiles calldata data) public {
-        add(self, data.quads);
-        add(self, data.tiles);
-    }
-
-    function remove(Map storage self, QuadsAndTiles calldata data) public {
-        remove(self, data.quads);
-        remove(self, data.tiles);
-    }
-
-    function moveTo(
         Map storage from,
         Map storage to,
         TileWithCoordLib.TileWithCoord[] calldata tiles
@@ -501,8 +499,7 @@ library MapLib {
         uint256 x,
         uint256 y
     ) private view returns (uint256) {
-        uint256 key = TileWithCoordLib.getKey(x, y);
-        return self.indexes[key];
+        return self.indexes[TileWithCoordLib.getKey(x, y)];
     }
 
     function _grow(uint256 x) private pure returns (uint256) {

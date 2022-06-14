@@ -7,88 +7,58 @@ import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/Libraries/MapLib.sol";
 import "../../../common/interfaces/IPolygonEstateToken.sol";
 import "../../../estate/EstateBaseToken.sol";
-import "../../../estate/EstateGameRecordLib.sol";
-import "../../../Game/GameBaseToken.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
-    using EstateGameRecordLib for EstateGameRecordLib.Games;
-    using Strings for uint256;
     using MapLib for MapLib.Map;
 
-    event EstateTokenCreated(uint256 indexed estateId, CreateEstateData data);
-
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, UpdateEstateData data);
-
-    // Iterable mapping of games
-    mapping(uint256 => EstateGameRecordLib.Games) internal games;
-
-    GameBaseToken public gameToken;
+    event EstateTokenUpdated(
+        uint256 indexed estateId,
+        uint256 indexed newId,
+        uint256[][3] landToAdd, //(size, x, y)
+        uint256[][3] landToRemove //(size, x, y)
+    );
+    // Removal of land must be done via the registry!!! aka REMOVER_ROLE
+    bytes32 public constant REMOVER_ROLE = keccak256("REMOVER_ROLE");
 
     function initV1(
         address trustedForwarder,
         address admin,
         address land,
-        GameBaseToken _gameToken,
         uint8 chainIndex
     ) external initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
-        gameToken = _gameToken;
     }
 
-    function createEstate(address from, CreateEstateData calldata data) external override returns (uint256) {
-        uint256 estateId;
-        uint256 storageId;
-        (estateId, storageId) = _createEstate(from, data.freeLandData, data.uri);
-        _addGamesToEstate(from, storageId, data.gameData);
-        emit EstateTokenCreated(estateId, data);
-        return storageId;
-    }
-
-    function updateEstate(address from, UpdateEstateData calldata data) external override returns (uint256) {
-        uint256 newId;
-        uint256 storageId;
-        (newId, storageId) = _updateLandsEstate(from, data.estateId, data.freeLandToAdd, data.newUri);
-        freeLands[storageId].remove(data.freeLandToRemove);
-        uint256 len = data.freeLandToRemove[0].length;
+    function update(
+        uint256 estateId,
+        uint256[][3] calldata landToAdd, //(size, x, y)
+        uint256[][3] calldata landToRemove //(size, x, y)
+    ) external returns (uint256) {
+        require(hasRole(REMOVER_ROLE, _msgSender()), "not remover");
+        (uint256 newId, uint256 newStorageId) =
+            _updateLandsEstate(_msgSender(), estateId, _storageId(estateId), landToAdd);
+        _landTileSet(newStorageId).remove(landToRemove);
+        uint256 len = landToRemove[0].length;
         for (uint256 i; i < len; i++) {
-            uint256 size = data.freeLandToRemove[0][i];
-            uint256 x = data.freeLandToRemove[1][i];
-            uint256 y = data.freeLandToRemove[2][i];
-            // TODO: Can we move this to the land contract ??? something like mintOrTransfer so we avoid 3 calls
-            if (!IPolygonLand(land).exists(size, x, y)) {
-                IPolygonLand(land).mint(from, size, x, y, "");
+            uint256 size = landToRemove[0][i];
+            uint256 x = landToRemove[1][i];
+            uint256 y = landToRemove[2][i];
+            if (!IPolygonLand(_s().landToken).exists(size, x, y)) {
+                IPolygonLand(_s().landToken).mint(_msgSender(), size, x, y, "");
             } else {
-                IPolygonLand(land).transferQuad(address(this), from, size, x, y, "");
+                IPolygonLand(_s().landToken).transferQuad(address(this), _msgSender(), size, x, y, "");
             }
         }
-        len = data.gamesToRemove.length;
-        for (uint256 i; i < len; i++) {
-            MapLib.Map storage map = games[storageId].getMap(data.gamesToRemove[i].gameId);
-            _batchTransferQuad(
-                from,
-                address(this),
-                data.gamesToRemove[i].quadsToTransfer[0],
-                data.gamesToRemove[i].quadsToTransfer[1],
-                data.gamesToRemove[i].quadsToTransfer[2]
-            );
-            map.remove(data.gamesToRemove[i].quadsToTransfer);
-            map.moveTo(freeLands[storageId], data.gamesToRemove[i].quadsToFree);
-
-            require(games[storageId].deleteGame(data.gamesToRemove[i].gameId), "game id already exists");
-
-            gameToken.transferFrom(address(this), from, data.gamesToRemove[i].gameId);
-        }
-        _addGamesToEstate(from, storageId, data.gamesToAdd);
-        emit EstateTokenUpdated(data.estateId, newId, data);
+        emit EstateTokenUpdated(estateId, newId, landToAdd, landToRemove);
         return newId;
     }
 
     function mintEstate(
         address from,
         bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] calldata freeLand
+        TileWithCoordLib.TileWithCoord[] calldata tiles
     ) external override returns (uint256) {
-        return _mintEstate(from, metaData, freeLand);
+        return _mintEstate(from, metaData, tiles);
     }
 
     function burnEstate(address from, uint256 estateId)
@@ -97,60 +67,23 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateT
         returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
     {
         uint256 storageId = _storageId(estateId);
-        require(games[storageId].isEmpty(), "still have games");
         return _burnEstate(from, estateId, storageId);
     }
 
-    function getGameMap(uint256 estateId, uint256 gameId)
-        external
-        view
-        returns (TileWithCoordLib.TileWithCoord[] memory)
-    {
-        uint256 storageId = _storageId(estateId);
-        return games[storageId].getMap(gameId).getMap();
-    }
-
-    function getGamesLength(uint256 estateId) external view returns (uint256) {
-        uint256 storageId = _storageId(estateId);
-        return games[storageId].length();
-    }
-
-    function getGamesId(uint256 estateId, uint256 idx) external view returns (uint256) {
-        uint256 storageId = _storageId(estateId);
-        return games[storageId].getGameIdAt(idx);
-    }
-
     /// @notice Return the URI of a specific token.
-    /// @param gameId The id of the token.
+    /// @param estateId The id of the token.
     /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 gameId) external view override returns (string memory uri) {
-        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 id = _storageId(gameId);
-        // return string(abi.encodePacked("ipfs://bafybei", hash2base32(metaData[id]), "/", "game.json"));
-        // TODO: We need this to reduce the size, probably we can put hash2base32 in a library
-        return string(abi.encodePacked("ipfs://bafybei", uint256(metaData[id]).toHexString(32), "/", "game.json"));
-    }
-
-    function _addGamesToEstate(
-        address from,
-        uint256 storageId,
-        AddGameData[] calldata gameData
-    ) internal {
-        uint256 len = gameData.length;
-        for (uint256 i; i < len; i++) {
-            gameToken.transferFrom(from, address(this), gameData[i].gameId);
-            _batchTransferQuad(
-                from,
-                address(this),
-                gameData[i].transferQuads[0],
-                gameData[i].transferQuads[1],
-                gameData[i].transferQuads[2]
+    function tokenURI(uint256 estateId) external view override returns (string memory uri) {
+        require(_ownerOf(estateId) != address(0), "BURNED_OR_NEVER_MINTED");
+        uint256 storageId = _storageId(estateId);
+        return
+            string(
+                abi.encodePacked(
+                    "ipfs://bafybei",
+                    Strings.toHexString(uint256(_s().metaData[storageId]), 32),
+                    "/",
+                    "PolygonEstateTokenV1.json"
+                )
             );
-            require(games[storageId].createGame(gameData[i].gameId), "game already exists");
-            MapLib.Map storage map = games[storageId].getMap(gameData[i].gameId);
-            // TODO: Check if it is better to add to free land and then to game
-            map.add(gameData[i].transferQuads);
-            freeLands[storageId].moveTo(map, gameData[i].freeLandData);
-        }
     }
 }

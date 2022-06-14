@@ -2,8 +2,9 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-// TODO: Check if a pure function is better than a mapping for the masks
-// A square of 24x24 bits
+/// @title An optimized set of 24x24 bits (used to represent maps)
+/// @notice see:
+/// @dev All function calls are currently implemented without side effects
 library TileLib {
     struct Tile {
         uint256[3] data;
@@ -86,6 +87,14 @@ library TileLib {
             }
         }
         return true;
+    }
+
+    function containTile(Tile memory self, Tile memory contained) internal pure returns (bool) {
+        return isEqual(contained, and(clone(contained), self));
+    }
+
+    function intersectTile(Tile memory self, Tile memory contained) internal pure returns (bool) {
+        return !isEmpty(and(self, contained));
     }
 
     function isEqual(Tile memory self, Tile memory b) internal pure returns (bool) {
