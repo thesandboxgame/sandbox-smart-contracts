@@ -80,6 +80,37 @@ describe('ERC20RewardPool main contract tests', function () {
         'ERC20RewardPool: zero address'
       );
     });
+    it('contract should have enough funds to replace the stakeToken', async function () {
+      const {
+        contract,
+        replaceToken,
+        rewardToken,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const user = await getUser();
+
+      await user.pool.stake(1000);
+
+      await expect(
+        contract.setStakeToken(replaceToken.address)
+      ).to.be.revertedWith('ERC20RewardPool: insufficient balance');
+
+      await expect(contract.setStakeToken(rewardToken.address)).not.to.be
+        .reverted;
+    });
+    it('contract should have enough funds to replace the rewardToken', async function () {
+      const {contract, stakeToken} = await setupERC20RewardPoolTest();
+
+      await expect(
+        contract.setRewardToken(stakeToken.address)
+      ).to.be.revertedWith('ERC20RewardPool: insufficient balance');
+
+      await stakeToken.mint(contract.address, '10000000000000000000000');
+
+      await expect(contract.setRewardToken(stakeToken.address)).not.to.be
+        .reverted;
+    });
   });
   describe('reward distribution', function () {
     describe('only one user', function () {

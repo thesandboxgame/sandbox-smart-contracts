@@ -88,13 +88,23 @@ contract ERC20RewardPool is
     /// @notice set the reward token
     /// @param contractAddress address token used to pay rewards
     function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
-        rewardToken = IERC20(contractAddress);
+        IERC20 _newRewardToken = IERC20(contractAddress);
+        require(
+            rewardToken.balanceOf(address(this)) <= _newRewardToken.balanceOf(address(this)),
+            "ERC20RewardPool: insufficient balance"
+        );
+        rewardToken = _newRewardToken;
     }
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
     function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
-        _stakeToken = IERC20(contractAddress);
+        IERC20 _newStakeToken = IERC20(contractAddress);
+        require(
+            _stakeToken.balanceOf(address(this)) <= _newStakeToken.balanceOf(address(this)),
+            "ERC20RewardPool: insufficient balance"
+        );
+        _stakeToken = _newStakeToken;
     }
 
     /// @notice set the trusted forwarder
