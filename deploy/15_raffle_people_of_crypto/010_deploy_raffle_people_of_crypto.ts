@@ -6,22 +6,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {
     deployer,
-    /* upgradeAdmin, */ treasury,
+    upgradeAdmin,
+    treasury,
     raffleSignWallet,
   } = await getNamedAccounts();
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
     metadataUrl =
-      'https://www.sandbox.game/peopleofcrypto/unrevealed.json?tokenId=';
+      'https://contracts.sandbox.game/poc-unrevealed/';
   } else {
-    metadataUrl = 'https://api-demo.sandbox.game/collections/35/metadata/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/poc-unrevealed/';
   }
 
-  await deploy('RafflePeopleOfCrypto', {
+  console.log([metadataUrl, 'People Of Crypto', 'POC', treasury, raffleSignWallet])
+
+  const result = await deploy('RafflePeopleOfCrypto', {
     from: deployer,
     contract: 'PeopleOfCrypto',
+    // skipIfAlreadyDeployed: false,
     proxy: {
+      owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
