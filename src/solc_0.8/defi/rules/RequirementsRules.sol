@@ -66,10 +66,9 @@ contract RequirementsRules is Ownable {
         uint256 amount,
         uint256 balanceOf
     ) {
-        checkERC1155MinStake(account);
-        checkERC721MinStake(account);
-
-        uint256 maxAllowed = maxStakeAllowedCalculator(account);
+        uint256 maxStakeERC721 = _checkAndGetERC721Stake(account);
+        uint256 maxStakeERC1155 = _checkAndGetERC1155Stake(account);
+        uint256 maxAllowed = _maxStakeAllowedCalculator(maxStakeERC721, maxStakeERC1155);
 
         if (maxAllowed != 0) {
             require(amount + balanceOf <= maxAllowed, "RequirementsRules: maxAllowed");
@@ -260,56 +259,10 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    function checkERC1155MinStake(address account) public view {
-        uint256 balanceId = 0;
-
-        for (uint256 i = 0; i < _listERC1155Index.length; i++) {
-            IERC1155 reqContract = _listERC1155Index[i];
-
-            if (_listERC1155[reqContract].ids.length > 0) {
-                balanceId = getERC1155BalanceId(reqContract, account);
-
-                require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
-            }
-        }
-    }
-
-    function checkERC721MinStake(address account) public view {
-        for (uint256 i = 0; i < _listERC721Index.length; i++) {
-            IERC721 reqContract = _listERC721Index[i];
-
-            if (_listERC721[reqContract].ids.length > 0) {
-                require(
-                    getERC721BalanceId(reqContract, account) >= _listERC721[reqContract].minAmountId,
-                    "RequirementsRules: balanceId"
-                );
-            }
-
-            if (_listERC721[reqContract].balanceOf == true) {
-                require(
-                    reqContract.balanceOf(account) >= _listERC721[reqContract].minAmountBalanceOf,
-                    "RequirementsRules: balanceOf"
-                );
-            }
-        }
-    }
-
-    function maxStakeAllowedCalculator(address account) public view returns (uint256) {
-        uint256 maxAllowed = maxStakeOverall;
+    function maxStakeAllowedCalculator(address account) external view returns (uint256) {
         uint256 maxStakeERC721 = getERC721MaxStake(account);
         uint256 maxStakeERC1155 = getERC1155MaxStake(account);
-
-        if (maxStakeERC721 + maxStakeERC1155 > 0) {
-            if (maxStakeOverall > 0) {
-                maxAllowed = Math.min(maxAllowed, maxStakeERC721 + maxStakeERC1155);
-            } else {
-                maxAllowed = maxStakeERC721 + maxStakeERC1155;
-            }
-        } else {
-            maxAllowed = maxStakeOverall;
-        }
-
-        return maxAllowed;
+        return _maxStakeAllowedCalculator(maxStakeERC721, maxStakeERC1155);
     }
 
     function getERC721BalanceId(IERC721 reqContract, address account) public view returns (uint256) {
@@ -335,5 +288,71 @@ contract RequirementsRules is Ownable {
         }
 
         return balanceOfId;
+    }
+
+    function _maxStakeAllowedCalculator(uint256 maxStakeERC721, uint256 maxStakeERC1155)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 maxAllowed = maxStakeOverall;
+
+        if (maxStakeERC721 + maxStakeERC1155 > 0) {
+            if (maxStakeOverall > 0) {
+                maxAllowed = Math.min(maxAllowed, maxStakeERC721 + maxStakeERC1155);
+            } else {
+                maxAllowed = maxStakeERC721 + maxStakeERC1155;
+            }
+        } else {
+            maxAllowed = maxStakeOverall;
+        }
+
+        return maxAllowed;
+    }
+
+    function _checkAndGetERC1155Stake(address account) internal view returns (uint256) {
+        uint256 _maxStake = 0;
+        for (uint256 i = 0; i < _listERC1155Index.length; i++) {
+            uint256 _totalBal = 0;
+            IERC1155 reqContract = _listERC1155Index[i];
+
+            uint256 balanceId = getERC1155BalanceId(reqContract, account);
+            if (_listERC1155[reqContract].ids.length > 0) {
+                require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
+            }
+
+            _totalBal = _totalBal + balanceId;
+            _maxStake = _totalBal * _listERC1155[reqContract].maxAmountId;
+        }
+        return _maxStake;
+    }
+
+    function _checkAndGetERC721Stake(address account) internal view returns (uint256) {
+        uint256 _maxStake = 0;
+        for (uint256 i = 0; i < _listERC721Index.length; i++) {
+            uint256 balanceOf = 0;
+            IERC721 reqContract = _listERC721Index[i];
+
+            uint256 balanceOfId = getERC721BalanceId(reqContract, account);
+            if (_listERC721[reqContract].ids.length > 0) {
+                require(balanceOfId >= _listERC721[reqContract].minAmountId, "RequirementsRules: balanceId");
+            }
+
+            if (_listERC721[reqContract].balanceOf == true) {
+                require(
+                    reqContract.balanceOf(account) >= _listERC721[reqContract].minAmountBalanceOf,
+                    "RequirementsRules: balanceOf"
+                );
+                balanceOf = reqContract.balanceOf(account);
+            }
+
+            _maxStake =
+                _maxStake +
+                (balanceOf *
+                    _listERC721[reqContract].maxAmountBalanceOf +
+                    balanceOfId *
+                    _listERC721[reqContract].maxAmountId);
+        }
+        return _maxStake;
     }
 }

@@ -7,8 +7,9 @@ import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {SafeMathWithRequire} from "../../common/Libraries/SafeMathWithRequire.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
+import {IContributionRules} from "../interfaces/IContributionRules.sol";
 
-contract ContributionRules is Ownable {
+contract ContributionRules is Ownable, IContributionRules {
     using Address for address;
 
     // limits
@@ -18,8 +19,8 @@ contract ContributionRules is Ownable {
     uint256 public multiplierLimitERC721 = 1000;
     uint256 public multiplierLimitERC1155 = 1000;
 
-    uint256 internal constant DECIMALS_7 = 10000000;
-    uint256 internal constant MIDPOINT_9 = 500000000;
+    uint256 internal constant DECIMALS_7 = 10_000_000;
+    uint256 internal constant MIDPOINT_9 = 500_000_000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
     uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
@@ -65,7 +66,7 @@ contract ContributionRules is Ownable {
         _;
     }
 
-    function computeMultiplier(address account, uint256 amountStaked) external view returns (uint256) {
+    function computeMultiplier(address account, uint256 amountStaked) external view override returns (uint256) {
         uint256 multiplierERC721 = multiplierBalanceOfERC721(account);
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 

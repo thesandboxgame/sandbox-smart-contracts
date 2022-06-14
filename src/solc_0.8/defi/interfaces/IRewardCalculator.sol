@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.2;
 
-/// @title Plugins for the SandRewardPool that calculate the rewards must implement this interface
+/// @title Plugins for Reward Pools that calculate the rewards must implement this interface
 interface IRewardCalculator {
     /// @dev At any point in time this function must return the accumulated rewards from the last call to restartRewards
     function getRewards() external view returns (uint256);
