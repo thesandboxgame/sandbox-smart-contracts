@@ -288,6 +288,11 @@ library MapLib {
 
     /// @dev Checks the full map to see if all the pixels are adjacent
     function isAdjacent(Map storage self) public view returns (bool ret) {
+        if (isEmpty(self)) {
+            // everything is adjacent to an empty map
+            return true;
+        }
+
         TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);
         // We assume that all self.values[] are non empty (we remove them if they are empty).
         spot[0] = self.values[0].findAPixel();
