@@ -7,14 +7,13 @@ import "../../../estate/EstateGameRecordLib.sol";
 import "./PolygonEstateTokenV1.sol";
 import "../../../Game/GameBaseToken.sol";
 import "../../../common/interfaces/ILandToken.sol";
-import "hardhat/console.sol";
-import "@openzeppelin/contracts-0.8/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 
 /// @notice Contract managing tExperiences and Estates
 contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     using EstateGameRecordLib for EstateGameRecordLib.Games;
-    using EnumerableMap for EnumerableMap.Map;
     using MapLib for MapLib.Map;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     GameBaseToken public gameToken;
     PolygonEstateTokenV1 public estateToken;
@@ -31,19 +30,18 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     }
 
     //should be storageId instead of estateId and expId
+    //map[expId]=(estateId,[landids (array or tileset?)])
     mapping(uint256 => EstateAndLands) internal links;
 
     //PLAN A
     //map[landid]=(expId, estateId?)
-    mapping(uint256 => ExpAndEstate) internal estatesA;
+    mapping(uint256 => ExpAndEstate) internal estateA;
     //linkend lands tileset
     MapLib.Map internal linkedLands;
 
     //PLAN B
-    //map[expId]=(estateId,[landids (array or tileset?)])
-    mapping(uint256 => EnumerableMap.Map) internal estatesB;
-
     //Map[ (x %24 , y % 24) ] => (iterable map(landId) => experienceId)
+    mapping(uint256 => mapping(uint256 => EnumerableSet.UintSet)) internal estatesB;
 
     constructor(
         //address trustedForwarder,
@@ -57,12 +55,47 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         landToken = _land;
     }
 
+    //I'll merge both fucntions
+    function CreateExperienceLandLink(
+        uint256 expId,
+        uint256 landId,
+        bool typeA // 1:A 0:B
+    ) external {
+        //check exist land
+        //check exist expId
+
+        //uint256 expStorageId = estateToken.getStorageId(expId);
+        require(links[expId].lands.length == 0, "Exp already in use");
+
+        if (typeA) {
+            //A
+            require(estateA[landId].expId == 0, "Land already in use");
+
+            /* uint256 x = landToken.getX(landId);
+            uint256 y = landToken.getY(landId); */
+
+            links[expId].estateId = 0;
+            links[expId].lands = [landId];
+            estateA[landId].expId = expId;
+            estateA[landId].estateId = 0;
+            //linkedLands.setQuad(x, y, 1);
+        } else {
+            //B
+            uint256 x = landToken.getX(landId);
+            uint256 y = landToken.getY(landId);
+            // solhint-disable-next-line no-unused-vars
+            uint256 key = TileWithCoordLib.getKey(x, y);
+            //require(estatesB[key][0].length == 0, "land already in use");
+        } //maybe we can set estateId = 0 for single lands
+    }
+
     function CreateExperienceEstateLink(
         uint256 x,
         uint256 y,
         uint256 expId,
-        uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external {
+        uint256 estId
+    ) external //TileWithCoordLib.TileWithCoord[] calldata tiles
+    {
         // solhint-disable-next-line no-unused-vars
         uint256 expStorageId = estateToken.getStorageId(expId);
         // solhint-disable-next-line no-unused-vars

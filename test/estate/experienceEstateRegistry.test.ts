@@ -1,6 +1,97 @@
 import {setupL2EstateGameAndLand} from './fixtures';
+import {expect} from '../chai-setup';
 
 describe('experience estate registry test', function () {
+  describe('single land links type A storage', function () {
+    it(`create a link between a single land and an experience`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const landId = await mintQuad(other, 1, 0, 0);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        landId
+      );
+
+      await experienceEstateRegistryContract.CreateExperienceLandLink(
+        gameId,
+        landId,
+        1
+      );
+    });
+    it(`trying to create a link with an experience already in use should revert`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const quadId = await mintQuad(other, 3, 0, 0);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+
+      await experienceEstateRegistryContract.CreateExperienceLandLink(
+        gameId,
+        0,
+        1
+      );
+
+      await expect(
+        experienceEstateRegistryContract.CreateExperienceLandLink(gameId, 1, 1)
+      ).to.be.revertedWith('Exp already in use');
+    });
+    it(`trying to create a link with a land already in use should revert`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+      const gameId2 = 456;
+
+      const landId = await mintQuad(other, 1, 0, 0);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        landId
+      );
+
+      await experienceEstateRegistryContract.CreateExperienceLandLink(
+        gameId,
+        landId,
+        1
+      );
+
+      await expect(
+        experienceEstateRegistryContract.CreateExperienceLandLink(
+          gameId2,
+          landId,
+          1
+        )
+      ).to.be.revertedWith('Land already in use');
+    });
+  });
   describe('create a link', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     it(`create a link between an estate and an experience`, async function () {

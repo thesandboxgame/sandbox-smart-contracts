@@ -26,4 +26,8 @@ interface ILandToken {
         uint256[] calldata ids,
         bytes calldata data
     ) external;
+
+    function getX(uint256 id) external returns (uint256);
+
+    function getY(uint256 id) external returns (uint256);
 }

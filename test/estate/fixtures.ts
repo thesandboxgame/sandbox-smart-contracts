@@ -87,6 +87,7 @@ async function setupEstateAndLand(estateContractName: string) {
   ] = await getUnnamedAccounts();
   // Land
   await deployments.deploy('Land', {
+    //why land instead of MockLandWithMint?
     from: deployer,
     proxy: {
       owner: upgradeAdmin,
