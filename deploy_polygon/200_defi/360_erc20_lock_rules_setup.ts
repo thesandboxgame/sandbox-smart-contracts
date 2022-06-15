@@ -18,8 +18,11 @@ const func: DeployFunction = async function (
   const currentAdmin = await sandPool.owner();
 
   const lockPeriodInSecs = BigNumber.from(604800); // 7 days
-
   const lockPeriodInSecsTest = BigNumber.from(86400); // 1 days
+
+  // initialize setAmountLockClaim disabled
+  const amountLockClaim = 0;
+  const isEnabled = false;
 
   if (!antiCompound.eq(lockPeriodInSecs)) {
     await deployments.catchUnknownSigner(
@@ -32,7 +35,6 @@ const func: DeployFunction = async function (
     );
   }
 
-  //TODO: add missing locks
   await deployments.catchUnknownSigner(
     deployments.execute(
       'ERC20RewardPool',
@@ -48,6 +50,16 @@ const func: DeployFunction = async function (
       {from: currentAdmin, log: true},
       'setTimeLockWithdraw',
       lockPeriodInSecsTest
+    )
+  );
+
+  await deployments.catchUnknownSigner(
+    deployments.execute(
+      'ERC20RewardPool',
+      {from: currentAdmin, log: true},
+      'setAmountLockClaim',
+      amountLockClaim,
+      isEnabled
     )
   );
 };
