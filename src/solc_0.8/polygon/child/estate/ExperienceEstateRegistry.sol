@@ -71,14 +71,14 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
             //A
             require(estateA[landId].expId == 0, "Land already in use");
 
-            /* uint256 x = landToken.getX(landId);
-            uint256 y = landToken.getY(landId); */
+            uint256 x = landToken.getX(landId);
+            uint256 y = landToken.getY(landId);
 
             links[expId].estateId = 0;
             links[expId].lands = [landId];
             estateA[landId].expId = expId;
             estateA[landId].estateId = 0;
-            //linkedLands.setQuad(x, y, 1);
+            linkedLands.setQuad(x, y, 1);
         } else {
             //B
             uint256 x = landToken.getX(landId);
@@ -86,16 +86,16 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
             // solhint-disable-next-line no-unused-vars
             uint256 key = TileWithCoordLib.getKey(x, y);
             //require(estatesB[key][0].length == 0, "land already in use");
-        } //maybe we can set estateId = 0 for single lands
+        }
+        //maybe we can set estateId = 0 for single lands
     }
 
     function CreateExperienceEstateLink(
         uint256 x,
         uint256 y,
         uint256 expId,
-        uint256 estId
-    ) external //TileWithCoordLib.TileWithCoord[] calldata tiles
-    {
+        uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
+    ) external {
         // solhint-disable-next-line no-unused-vars
         uint256 expStorageId = estateToken.getStorageId(expId);
         // solhint-disable-next-line no-unused-vars

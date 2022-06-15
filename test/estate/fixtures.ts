@@ -72,7 +72,7 @@ export const setupEstate = withSnapshot(
   }
 );
 
-async function setupEstateAndLand(estateContractName: string) {
+async function setupEstateAndLand(isLayer1: boolean) {
   const {deployer} = await getNamedAccounts();
   const [
     upgradeAdmin,
@@ -87,20 +87,25 @@ async function setupEstateAndLand(estateContractName: string) {
   ] = await getUnnamedAccounts();
   // Land
   await deployments.deploy('Land', {
+    contract: isLayer1 ? 'Land' : 'PolygonLandV1',
     //why land instead of MockLandWithMint?
     from: deployer,
     proxy: {
       owner: upgradeAdmin,
       execute: {
         methodName: 'initialize',
-        args: [trustedForwarder, landAdmin],
+        args: isLayer1 ? [trustedForwarder, landAdmin] : [trustedForwarder],
       },
     },
   });
   const landContract = await ethers.getContract('Land', deployer);
   const landContractAsAdmin = await ethers.getContract('Land', landAdmin);
   const landContractAsMinter = await ethers.getContract('Land', landMinter);
-  await landContractAsAdmin.setMinter(landMinter, true);
+  if (isLayer1) {
+    await landContractAsAdmin.setMinter(landMinter, true);
+  } else {
+    await landContract.setPolygonLandTunnel(landMinter);
+  }
   const landContractAsOther = await ethers.getContract('Land', other);
 
   // Estate
@@ -108,7 +113,7 @@ async function setupEstateAndLand(estateContractName: string) {
   const mapLib = await deployments.deploy('MapLib', {from: deployer});
   await deployments.deploy('Estate', {
     from: deployer,
-    contract: estateContractName,
+    contract: isLayer1 ? 'EstateTokenV1' : 'PolygonEstateTokenV1',
     libraries: {
       MapLib: mapLib.address,
     },
@@ -194,6 +199,7 @@ async function setupEstateAndLand(estateContractName: string) {
     estateTunnel,
     other,
     GRID_SIZE,
+    mapLib,
     getId,
     getXsYsSizes: (x0: number, y0: number, size: number) => {
       const xs = [];
@@ -214,9 +220,18 @@ async function setupEstateAndLand(estateContractName: string) {
       x: BigNumberish,
       y: BigNumberish
     ): Promise<BigNumber> => {
-      await landContractAsMinter.mintQuad(to, size, x, y, []);
+      if (isLayer1) {
+        await landContractAsMinter.mintQuad(to, size, x, y, []);
+      } else {
+        await landContractAsMinter.mint(to, size, x, y, []);
+      }
       const quadId = getId(size, x, y);
-      expect(await landContractAsMinter._owners(quadId)).to.be.equal(other);
+      if (isLayer1) {
+        expect(await landContractAsMinter._owners(quadId)).to.be.equal(other);
+      } else {
+        // don't work on L2 anymore
+        // expect(await landContractAsMinter.ownerOf(quadId)).to.be.equal(other);
+      }
       return quadId;
     },
     createEstate: async (data?: {
@@ -282,14 +297,15 @@ async function setupEstateAndLand(estateContractName: string) {
 }
 
 export const setupL1EstateAndLand = withSnapshot([], async () => {
-  return await setupEstateAndLand('EstateTokenV1');
+  return await setupEstateAndLand(true);
 });
 
 export const setupL2EstateAndLand = withSnapshot([], async () => {
-  return await setupEstateAndLand('PolygonEstateTokenV1');
+  return await setupEstateAndLand(false);
 });
 
 export const setupL2EstateGameAndLand = withSnapshot([], async () => {
+  const setup = await setupEstateAndLand(false);
   const {deployer} = await getNamedAccounts();
   // Fake Game
   await deployments.deploy('ERC721Mintable', {
@@ -297,7 +313,6 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
     args: ['FAKEGAME', 'FAKEGAME'],
   });
   const gameContract = await ethers.getContract('ERC721Mintable', deployer);
-  const setup = await setupEstateAndLand('PolygonEstateTokenV1');
   const gameContractAsOther = await ethers.getContract(
     'ERC721Mintable',
     setup.other
@@ -307,6 +322,9 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
   await deployments.deploy('ExperienceEstateRegistry', {
     from: deployer,
     contract: 'ExperienceEstateRegistry',
+    libraries: {
+      MapLib: setup.mapLib.address,
+    },
     args: [
       setup.estateContractAsMinter.address,
       gameContract.address,
