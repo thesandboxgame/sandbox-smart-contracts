@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../BaseRootTunnel.sol";
-import "../../../common/interfaces/IEstateToken.sol";
-import "../../../common/Libraries/TileWithCoordLib.sol";
+import {BaseRootTunnel} from "../BaseRootTunnel.sol";
+import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
 /// @title Estate bridge on L1
 contract EstateTunnel is BaseRootTunnel {

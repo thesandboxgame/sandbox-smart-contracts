@@ -1,14 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-0.8/utils/Strings.sol";
-import "../../../common/interfaces/ILandToken.sol";
-import "../../../estate/EstateBaseToken.sol";
-import "../../../common/interfaces/IEstateToken.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Strings} from "@openzeppelin/contracts-0.8/utils/Strings.sol";
+import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
+import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
+import {MapLib} from "../../../common/Libraries/MapLib.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract EstateTokenV1 is EstateBaseToken, Initializable, IEstateToken {
+contract EstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
 
     event EstateTokenUpdated(

@@ -1,13 +1,19 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/BaseWithStorage/WithSuperOperators.sol";
-import "../../../common/BaseWithStorage/ERC2771Handler.sol";
-import "../../../estate/EstateGameRecordLib.sol";
-import "./PolygonEstateTokenV1.sol";
-import "../../../Game/GameBaseToken.sol";
-import "../../../common/interfaces/ILandToken.sol";
-import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
+import {WithSuperOperators} from "../../../common/BaseWithStorage/WithSuperOperators.sol";
+import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import {EstateGameRecordLib} from "../../../estate/EstateGameRecordLib.sol";
+import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
+import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
+import {TileLib} from "../../../common/Libraries/TileLib.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
+import {MapLib} from "../../../common/Libraries/MapLib.sol";
+
+interface ExperienceTokenInterface {
+    function getTemplate() external view returns (TileLib.Tile calldata);
+}
 
 /// @notice Contract managing tExperiences and Estates
 contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
@@ -15,12 +21,13 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     using MapLib for MapLib.Map;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    GameBaseToken public gameToken;
-    PolygonEstateTokenV1 public estateToken;
+    ExperienceTokenInterface public experienceToken;
+    IEstateToken public estateToken;
     ILandToken public landToken;
 
     struct EstateAndLands {
         uint256 estateId;
+        // TODO: is better to have a tile here ?
         uint256[] lands;
     }
 
@@ -45,14 +52,14 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
 
     constructor(
         //address trustedForwarder,
-        PolygonEstateTokenV1 _estateToken,
-        GameBaseToken _gameToken,
+        IEstateToken _estateToken,
+        ExperienceTokenInterface _experienceToken,
         //uint8 chainIndex,
-        ILandToken _land
+        ILandToken _landToken
     ) {
-        gameToken = _gameToken;
+        experienceToken = _experienceToken;
         estateToken = _estateToken;
-        landToken = _land;
+        landToken = _landToken;
     }
 
     //I'll merge both fucntions
@@ -96,6 +103,11 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         uint256 expId,
         uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
     ) external {
+        TileLib.Tile memory template = experienceToken.getTemplate();
+        TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
+        require(!linkedLands.intersectShiftResult(s), "already linked");
+        require(estateToken.containsShiftResult(estId, s), "not enough land");
+
         // solhint-disable-next-line no-unused-vars
         uint256 expStorageId = estateToken.getStorageId(expId);
         // solhint-disable-next-line no-unused-vars

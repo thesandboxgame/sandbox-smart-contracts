@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/security/Pausable.sol";
-
-import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "../../../common/BaseWithStorage/ERC2771Handler.sol";
-import "../../../common/interfaces/IPolygonEstateToken.sol";
+import {FxBaseChildTunnel} from "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
 /// @title Estate bridge on L2
 contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    IPolygonEstateToken public childToken;
+    IEstateToken public childToken;
 
     event EstateSentToL1(
         uint256 estateId,
@@ -24,7 +25,7 @@ contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver
 
     constructor(
         address _fxChild,
-        IPolygonEstateToken _childToken,
+        IEstateToken _childToken,
         address _trustedForwarder
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
@@ -45,7 +46,7 @@ contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver
         _trustedForwarder = trustedForwarder;
     }
 
-    function setChildToken(IPolygonEstateToken _childToken) external onlyOwner {
+    function setChildToken(IEstateToken _childToken) external onlyOwner {
         childToken = _childToken;
     }
 

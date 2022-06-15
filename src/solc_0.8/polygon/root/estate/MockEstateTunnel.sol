@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./EstateTunnel.sol";
-import "./EstateTokenV1.sol";
+import {IFxStateSender} from "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
+import {ICheckpointManager} from "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
+import {EstateTunnel} from "./EstateTunnel.sol";
+import {EstateTokenV1} from "./EstateTokenV1.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import "hardhat/console.sol";
 
 contract MockEstateTunnel is EstateTunnel {

@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-0.8/utils/Strings.sol";
-import "../../../common/interfaces/IPolygonLand.sol";
-import "../../../common/Libraries/MapLib.sol";
-import "../../../common/interfaces/IPolygonEstateToken.sol";
-import "../../../estate/EstateBaseToken.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Strings} from "@openzeppelin/contracts-0.8/utils/Strings.sol";
+import {IPolygonLand} from "../../../common/interfaces/IPolygonLand.sol";
+import {MapLib} from "../../../common/Libraries/MapLib.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
+import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
 
-contract PolygonEstateTokenV1 is EstateBaseToken, Initializable, IPolygonEstateToken {
+contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
 
     event EstateTokenUpdated(

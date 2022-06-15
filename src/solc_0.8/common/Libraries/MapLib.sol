@@ -110,6 +110,14 @@ library MapLib {
             containTileWithCoord(self, s.bottomRight);
     }
 
+    function intersectShiftResult(Map storage self, TileWithCoordLib.ShiftResult memory s) public view returns (bool) {
+        return
+            intersectTileWithCoord(self, s.topLeft) &&
+            intersectTileWithCoord(self, s.topRight) &&
+            intersectTileWithCoord(self, s.bottomLeft) &&
+            intersectTileWithCoord(self, s.bottomRight);
+    }
+
     // TODO: Check gas consumption!!!
     // OBS: self can be huge, but contained must be small, we iterate over contained values.
     function containMap(Map storage self, Map storage contained) public view returns (bool) {

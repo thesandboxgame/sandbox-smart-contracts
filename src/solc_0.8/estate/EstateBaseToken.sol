@@ -12,9 +12,10 @@ import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../common/Libraries/MapLib.sol";
 import {EstateBaseTokenStorage} from "./EstateBaseTokenStorage.sol";
+import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
 
 /// @dev Base contract for estate contract on L1 and L2, it uses tile maps to save the landTileSet
-abstract contract EstateBaseToken is EstateBaseTokenStorage, ImmutableERC721, AccessControl {
+abstract contract EstateBaseToken is EstateBaseTokenStorage, ImmutableERC721, AccessControl, IEstateToken {
     using MapLib for MapLib.Map;
     /// @dev Emitted when an estate is updated.
     /// @param estateId The id of the newly minted token.
@@ -113,6 +114,7 @@ abstract contract EstateBaseToken is EstateBaseTokenStorage, ImmutableERC721, Ac
     function containsShiftResult(uint256 estateId, TileWithCoordLib.ShiftResult memory shiftResult)
         external
         view
+        override
         returns (bool)
     {
         uint256 storageId = _storageId(estateId);
@@ -159,6 +161,10 @@ abstract contract EstateBaseToken is EstateBaseTokenStorage, ImmutableERC721, Ac
             ERC721BaseToken.supportsInterface(interfaceId) ||
             // AccessControl.supportsInterface(interfaceId);
             interfaceId == type(IAccessControl).interfaceId;
+    }
+
+    function getStorageId(uint256 tokenId) external pure override(ImmutableERC721, IEstateToken) returns (uint256) {
+        return _storageId(tokenId);
     }
 
     function _createEstate(

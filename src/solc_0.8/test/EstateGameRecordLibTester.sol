@@ -2,7 +2,9 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "../estate/EstateGameRecordLib.sol";
+import {EstateGameRecordLib} from "../estate/EstateGameRecordLib.sol";
+import {MapLib} from "../common/Libraries/MapLib.sol";
+import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
 
 contract EstateGameRecordLibTester {
     using EstateGameRecordLib for EstateGameRecordLib.Games;

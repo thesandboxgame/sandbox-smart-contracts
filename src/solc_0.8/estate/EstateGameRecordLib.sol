@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "../common/Libraries/MapLib.sol";
+import {MapLib} from "../common/Libraries/MapLib.sol";
 
 library EstateGameRecordLib {
     using MapLib for MapLib.Map;
