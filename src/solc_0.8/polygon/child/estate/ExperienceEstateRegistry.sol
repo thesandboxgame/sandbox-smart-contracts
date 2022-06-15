@@ -103,10 +103,12 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         uint256 expId,
         uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
     ) external {
+        // TODO....
         TileLib.Tile memory template = experienceToken.getTemplate();
         TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
         require(!linkedLands.intersectShiftResult(s), "already linked");
         require(estateToken.containsShiftResult(estId, s), "not enough land");
+        // TODO....
 
         // solhint-disable-next-line no-unused-vars
         uint256 expStorageId = estateToken.getStorageId(expId);
@@ -115,5 +117,12 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         // solhint-disable-next-line no-unused-vars
         uint256 key = TileWithCoordLib.getKey(x, y);
         //TODO
+
+        // TODO....
+        linkedLands.setTileWithCoord(s.topLeft);
+        linkedLands.setTileWithCoord(s.topRight);
+        linkedLands.setTileWithCoord(s.bottomLeft);
+        linkedLands.setTileWithCoord(s.bottomRight);
+        // TODO....
     }
 }
