@@ -101,12 +101,12 @@ async function setupEstateAndLand(isLayer1: boolean) {
   const landContract = await ethers.getContract('Land', deployer);
   const landContractAsAdmin = await ethers.getContract('Land', landAdmin);
   const landContractAsMinter = await ethers.getContract('Land', landMinter);
+  const landContractAsOther = await ethers.getContract('Land', other);
   if (isLayer1) {
     await landContractAsAdmin.setMinter(landMinter, true);
   } else {
     await landContract.setPolygonLandTunnel(landMinter);
   }
-  const landContractAsOther = await ethers.getContract('Land', other);
 
   // Estate
   const chainIndex = 100;

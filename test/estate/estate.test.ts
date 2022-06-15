@@ -1,6 +1,4 @@
 import {setupL1EstateAndLand} from './fixtures';
-import {ethers} from 'ethers';
-import {expect} from '../chai-setup';
 
 describe('Estate test that are the same for L1 and L2', function () {
   describe('create one estate', function () {
@@ -106,53 +104,11 @@ describe('Estate test that are the same for L1 and L2', function () {
       });
     });
   });
-  it('tunnel message size', async function () {
-    const {
-      other,
-      landContractAsOther,
-      estateContractAsOther,
-      estateTunnel,
-      mintQuad,
-      createEstate,
-    } = await setupL1EstateAndLand();
-    const quads = [
-      [24, 0, 0],
-      [24, 24, 0],
-      [24, 0, 24],
-      [6, 24, 24],
-      [6, 30, 24],
-      [6, 24, 30],
-      [6, 30, 30],
-    ];
-    const sizes = [];
-    const xs = [];
-    const ys = [];
-    for (const [size, x, y] of quads) {
-      const quadId = await mintQuad(other, size, x, y);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
-        estateContractAsOther.address,
-        quadId
-      );
-      sizes.push(size);
-      xs.push(x);
-      ys.push(y);
-    }
-    const {estateId} = await createEstate({sizes, xs, ys});
-    const message = await estateTunnel.getMessage(other, estateId);
-    // TODO: Check what happen when message.length > 1024.... it fails ?
-    expect(ethers.utils.arrayify(message).length).to.be.equal(512);
-  });
   describe('update states', function () {
     describe('start with 24x24', function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
-      [
-        [576, 1],
-        [4, 12],
-        [16, 6],
-        [256, 3],
-      ].forEach(([cant, size]) => {
-        it(`@slow create ${cant} 1x1 quads then create an ${size}x${size} estate with that then update`, async function () {
+      [[1], [12], [6], [3]].forEach(([size]) => {
+        it(`@slow create ${size}x${size} quads and estate with that then update`, async function () {
           const {
             other,
             landContractAsOther,
@@ -168,27 +124,27 @@ describe('Estate test that are the same for L1 and L2', function () {
             estateContractAsOther.address,
             quadId
           );
-          const {estateId, gasUsed} = await createEstate(
-            getXsYsSizes(0, 0, size)
-          );
-          console.log(
-            `create ${cant} quads and ${size}x${size} estate with that, GAS USED: `,
-            gasUsed.toString()
-          );
-
           const quadId2 = await mintQuad(other, 24, 144, 144);
           await landContractAsOther.setApprovalForAllFor(
             other,
             estateContractAsOther.address,
             quadId2
           );
+
+          const {estateId} = await createEstate({
+            xs: [0],
+            ys: [0],
+            sizes: [24],
+          });
+          // we don't have enough gas to add and remove 576 1x1 pixels
+          // so we just remove one by and add one big quad
           const {gasUsed: updateGasUsed} = await updateEstate(
             estateId,
-            getXsYsSizes(144, 144, size),
+            {xs: [144], ys: [144], sizes: [24]},
             getXsYsSizes(0, 0, size)
           );
           console.log(
-            `updateEstate ${cant} quads and ${size}x${size} estate with that, GAS USED: `,
+            `updateEstate ${size}x${size} estate, GAS USED: `,
             updateGasUsed.toString()
           );
         });

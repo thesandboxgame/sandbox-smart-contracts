@@ -1,5 +1,6 @@
 import {setupL1EstateAndLand} from './fixtures';
-import {BigNumber} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
+import {expect} from '../chai-setup';
 
 // eslint-disable-next-line mocha/no-skipped-tests
 describe.skip('@slow Estate gas usage', function () {
@@ -90,5 +91,42 @@ describe.skip('@slow Estate gas usage', function () {
     const receipt = await tx.wait();
     const gasUsed = BigNumber.from(receipt.gasUsed);
     console.log('gas used', gasUsed.toString());
+  });
+  it('tunnel message size', async function () {
+    const {
+      other,
+      landContractAsOther,
+      estateContractAsOther,
+      estateTunnel,
+      mintQuad,
+      createEstate,
+    } = await setupL1EstateAndLand();
+    const quads = [
+      [24, 0, 0],
+      [24, 24, 0],
+      [24, 0, 24],
+      [6, 24, 24],
+      [6, 30, 24],
+      [6, 24, 30],
+      [6, 30, 30],
+    ];
+    const sizes = [];
+    const xs = [];
+    const ys = [];
+    for (const [size, x, y] of quads) {
+      const quadId = await mintQuad(other, size, x, y);
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      sizes.push(size);
+      xs.push(x);
+      ys.push(y);
+    }
+    const {estateId} = await createEstate({sizes, xs, ys});
+    const message = await estateTunnel.getMessage(other, estateId);
+    // TODO: Check what happen when message.length > 1024.... it fails ?
+    expect(ethers.utils.arrayify(message).length).to.be.equal(512);
   });
 });
