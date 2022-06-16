@@ -10,6 +10,7 @@ import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
+import "hardhat/console.sol";
 
 interface ExperienceTokenInterface {
     function getTemplate() external view returns (TileLib.Tile calldata);
@@ -21,6 +22,8 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     using MapLib for MapLib.Map;
     using EnumerableSet for EnumerableSet.UintSet;
 
+    uint256 internal constant MAXLANDID = 166463;
+
     ExperienceTokenInterface public experienceToken;
     IEstateToken public estateToken;
     ILandToken public landToken;
@@ -28,6 +31,7 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     struct EstateAndLands {
         uint256 estateId;
         // TODO: is better to have a tile here ?
+        // I agree, will work on it
         uint256[] lands;
     }
 
@@ -37,17 +41,13 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     }
 
     //should be storageId instead of estateId and expId
-    //map[expId]=(estateId,[landids (array or tileset?)])
     mapping(uint256 => EstateAndLands) internal links;
 
     //PLAN A
-    //map[landid]=(expId, estateId?)
     mapping(uint256 => ExpAndEstate) internal estateA;
-    //linkend lands tileset
     MapLib.Map internal linkedLands;
 
     //PLAN B
-    //Map[ (x %24 , y % 24) ] => (iterable map(landId) => experienceId)
     mapping(uint256 => mapping(uint256 => EnumerableSet.UintSet)) internal estatesB;
 
     constructor(
@@ -62,67 +62,57 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         landToken = _landToken;
     }
 
-    //I'll merge both fucntions
-    function CreateExperienceLandLink(
+    //I'm going to split this again
+    function CreateExperienceLink(
+        uint256 x,
+        uint256 y,
         uint256 expId,
-        uint256 landId,
+        uint256 landOrEstateId,
         bool typeA // 1:A 0:B
     ) external {
         //check exist land
         //check exist expId
 
-        //uint256 expStorageId = estateToken.getStorageId(expId);
-        require(links[expId].lands.length == 0, "Exp already in use");
+        if (landOrEstateId < MAXLANDID) {
+            require(links[expId].lands.length == 0, "Exp already in use");
 
-        if (typeA) {
-            //A
-            require(estateA[landId].expId == 0, "Land already in use");
-
-            uint256 x = landToken.getX(landId);
-            uint256 y = landToken.getY(landId);
-
-            links[expId].estateId = 0;
-            links[expId].lands = [landId];
-            estateA[landId].expId = expId;
-            estateA[landId].estateId = 0;
-            linkedLands.setQuad(x, y, 1);
+            if (typeA) {
+                //A
+                require(estateA[landOrEstateId].expId == 0, "Land already in use");
+                links[expId].estateId = 0;
+                links[expId].lands = [landOrEstateId];
+                estateA[landOrEstateId].expId = expId;
+                estateA[landOrEstateId].estateId = 0;
+                linkedLands.setQuad(x, y, 1);
+            } else {
+                //B
+                // solhint-disable-next-line no-unused-vars
+                uint256 key = TileWithCoordLib.getKey(x, y);
+                //require(estatesB[key][0].length == 0, "land already in use");
+            }
+            //maybe we can set estateId = 0 for single lands
         } else {
-            //B
-            uint256 x = landToken.getX(landId);
-            uint256 y = landToken.getY(landId);
-            // solhint-disable-next-line no-unused-vars
-            uint256 key = TileWithCoordLib.getKey(x, y);
-            //require(estatesB[key][0].length == 0, "land already in use");
+            if (typeA) {
+                //estate
+
+                TileLib.Tile memory template = experienceToken.getTemplate();
+                TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
+                require(!linkedLands.intersectShiftResult(s), "already linked");
+                require(estateToken.containsShiftResult(landOrEstateId, s), "not enough land");
+
+                uint256 estStorageId = estateToken.getStorageId(landOrEstateId);
+                uint256 key = TileWithCoordLib.getKey(x, y);
+
+                links[expId].estateId = estStorageId;
+                links[expId].lands = [landOrEstateId]; //humm
+                estateA[estStorageId].expId = expId;
+                estateA[estStorageId].estateId = estStorageId;
+
+                linkedLands.setTileWithCoord(s.topLeft);
+                linkedLands.setTileWithCoord(s.topRight);
+                linkedLands.setTileWithCoord(s.bottomLeft);
+                linkedLands.setTileWithCoord(s.bottomRight);
+            }
         }
-        //maybe we can set estateId = 0 for single lands
-    }
-
-    function CreateExperienceEstateLink(
-        uint256 x,
-        uint256 y,
-        uint256 expId,
-        uint256 estId //TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external {
-        // TODO....
-        TileLib.Tile memory template = experienceToken.getTemplate();
-        TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
-        require(!linkedLands.intersectShiftResult(s), "already linked");
-        require(estateToken.containsShiftResult(estId, s), "not enough land");
-        // TODO....
-
-        // solhint-disable-next-line no-unused-vars
-        uint256 expStorageId = estateToken.getStorageId(expId);
-        // solhint-disable-next-line no-unused-vars
-        uint256 estStorageId = estateToken.getStorageId(estId);
-        // solhint-disable-next-line no-unused-vars
-        uint256 key = TileWithCoordLib.getKey(x, y);
-        //TODO
-
-        // TODO....
-        linkedLands.setTileWithCoord(s.topLeft);
-        linkedLands.setTileWithCoord(s.topRight);
-        linkedLands.setTileWithCoord(s.bottomLeft);
-        linkedLands.setTileWithCoord(s.bottomRight);
-        // TODO....
     }
 }
