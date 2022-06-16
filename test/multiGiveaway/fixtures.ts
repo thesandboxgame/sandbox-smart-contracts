@@ -11,13 +11,13 @@ import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getCl
 import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
+import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {
   expectReceiptEventWithArgs,
   sequentially,
   waitFor,
   withSnapshot,
 } from '../utils';
-import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
@@ -69,6 +69,7 @@ export const setupTestGiveaway = withSnapshot(
       from: deployer,
     });
     const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
     await deployments.deploy('MockLand', {
       from: deployer,
@@ -81,6 +82,12 @@ export const setupTestGiveaway = withSnapshot(
     );
 
     const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
+
+    await depositViaChildChainManager(
+      {sand: sandContract, childChainManager},
+      sandAdmin,
+      SAND_AMOUNT
+    );
 
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
