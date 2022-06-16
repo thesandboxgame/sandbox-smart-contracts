@@ -13,10 +13,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   } = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 
-  const authValidatorContract = await deployments.get('AuthValidator');
+  const authValidatorContract = await deployments.get('PolygonAuthValidator');
   const assetContract = await deployments.get('PolygonAssetERC1155');
 
-  await deploy('AssetSignedAuctionWithAuth', {
+  await deploy('PolygonAssetSignedAuctionWithAuth', {
     from: deployer,
     contract: 'AssetSignedAuctionWithAuth',
     args: [
@@ -33,10 +33,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
-  'AssetSignedAuctionAuth',
-  'AssetSignedAuctionAuth_deploy',
+  'PolygonAssetSignedAuctionWithAuth',
+  'PolygonAssetSignedAuctionWithAuth_deploy',
   'PolygonAsset',
   'L2',
 ];
-func.dependencies = ['PolygonAssetERC1155_deploy'];
+func.dependencies = [
+  'PolygonAssetERC1155_deploy',
+  'PolygonAuthValidator_deploy',
+];
 func.skip = skipUnlessTestnet;

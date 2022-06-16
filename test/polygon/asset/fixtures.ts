@@ -175,7 +175,7 @@ export const setupPolygonAsset = withSnapshot(
     'Asset',
     'AssetERC1155Tunnel',
     'PolygonAssetERC1155Tunnel',
-    'AssetSignedAuctionAuth',
+    'PolygonAssetSignedAuctionWithAuth',
     'SandBaseToken',
   ],
   polygonAssetFixtures
