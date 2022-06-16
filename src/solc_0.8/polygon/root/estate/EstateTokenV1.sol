@@ -12,13 +12,6 @@ import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 contract EstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
 
-    event EstateTokenUpdated(
-        uint256 indexed oldId,
-        uint256 indexed newId,
-        uint256[][3] landToAdd,
-        uint256[][3] landToRemove
-    );
-
     function initV1(
         address trustedForwarder,
         address admin,
@@ -26,43 +19,6 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
         uint8 chainIndex
     ) public initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
-    }
-
-    function update(
-        uint256 estateId,
-        uint256[][3] calldata landToAdd,
-        uint256[][3] calldata landToRemove
-    ) external returns (uint256) {
-        uint256 storageId = _storageId(estateId);
-        (uint256 newId, ) = _updateLandsEstate(_msgSender(), estateId, storageId, landToAdd);
-        _landTileSet(storageId).remove(landToRemove);
-        ILandToken(_s().landToken).batchTransferQuad(
-            address(this),
-            _msgSender(),
-            landToRemove[0],
-            landToRemove[1],
-            landToRemove[2],
-            ""
-        );
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        emit EstateTokenUpdated(estateId, newId, landToAdd, landToRemove);
-        return newId;
-    }
-
-    function mintEstate(
-        address from,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external override returns (uint256) {
-        return _mintEstate(from, metaData, tiles);
-    }
-
-    function burnEstate(address from, uint256 estateId)
-        external
-        override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        return _burnEstate(from, estateId, _storageId(estateId));
     }
 
     /// @notice Return the URI of a specific token.

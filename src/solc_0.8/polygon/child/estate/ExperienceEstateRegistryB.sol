@@ -13,13 +13,14 @@ import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import "hardhat/console.sol";
 
 interface ExperienceTokenInterface {
-    function getTemplate() external view returns (TileLib.Tile calldata);
+    function getTemplate() external view returns (TileLib.Tile calldata, uint256[] calldata landCoords);
 }
 
 /// @notice Contract managing tExperiences and Estates
 contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     using EstateGameRecordLib for EstateGameRecordLib.Games;
     using MapLib for MapLib.Map;
+    using TileLib for TileLib.Tile;
     using EnumerableSet for EnumerableSet.UintSet;
 
     uint256 internal constant MAXLANDID = 166463;
@@ -43,12 +44,8 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
     //should be storageId instead of estateId and expId
     mapping(uint256 => EstateAndLands) internal links;
 
-    //PLAN A
-    mapping(uint256 => ExpAndEstate) internal estateA;
-    MapLib.Map internal linkedLands;
-
-    //PLAN B
-    mapping(uint256 => mapping(uint256 => EnumerableSet.UintSet)) internal estatesB;
+    // Land Id %24 (aka tile coords) => Land Id
+    mapping(uint256 => EnumerableSet.UintSet) internal estates;
 
     constructor(
         //address trustedForwarder,
@@ -67,52 +64,17 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
         uint256 x,
         uint256 y,
         uint256 expId,
-        uint256 landOrEstateId,
-        bool typeA // 1:A 0:B
+        uint256 landOrEstateId
     ) external {
         //check exist land
         //check exist expId
 
         if (landOrEstateId < MAXLANDID) {
             require(links[expId].lands.length == 0, "Exp already in use");
-
-            if (typeA) {
-                //A
-                require(estateA[landOrEstateId].expId == 0, "Land already in use");
-                links[expId].estateId = 0;
-                links[expId].lands = [landOrEstateId];
-                estateA[landOrEstateId].expId = expId;
-                estateA[landOrEstateId].estateId = 0;
-                linkedLands.setQuad(x, y, 1);
-            } else {
-                //B
-                // solhint-disable-next-line no-unused-vars
-                uint256 key = TileWithCoordLib.getKey(x, y);
-                //require(estatesB[key][0].length == 0, "land already in use");
-            }
+            // solhint-disable-next-line no-unused-vars
+            uint256 key = TileWithCoordLib.getKey(x, y);
+            //require(estatesB[key][0].length == 0, "land already in use");
             //maybe we can set estateId = 0 for single lands
-        } else {
-            if (typeA) {
-                //estate
-
-                TileLib.Tile memory template = experienceToken.getTemplate();
-                TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
-                require(!linkedLands.intersectShiftResult(s), "already linked");
-                require(estateToken.containsShiftResult(landOrEstateId, s), "not enough land");
-
-                uint256 estStorageId = estateToken.getStorageId(landOrEstateId);
-                uint256 key = TileWithCoordLib.getKey(x, y);
-
-                links[expId].estateId = estStorageId;
-                links[expId].lands = [landOrEstateId]; //humm
-                estateA[estStorageId].expId = expId;
-                estateA[estStorageId].estateId = estStorageId;
-
-                linkedLands.setTileWithCoord(s.topLeft);
-                linkedLands.setTileWithCoord(s.topRight);
-                linkedLands.setTileWithCoord(s.bottomLeft);
-                linkedLands.setTileWithCoord(s.bottomRight);
-            }
         }
     }
 }

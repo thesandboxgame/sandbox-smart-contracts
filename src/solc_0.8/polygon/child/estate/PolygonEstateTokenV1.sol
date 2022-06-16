@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Strings} from "@openzeppelin/contracts-0.8/utils/Strings.sol";
 import {IPolygonLand} from "../../../common/interfaces/IPolygonLand.sol";
+import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
@@ -11,14 +12,9 @@ import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
 
-    event EstateTokenUpdated(
-        uint256 indexed estateId,
-        uint256 indexed newId,
-        uint256[][3] landToAdd, //(size, x, y)
-        uint256[][3] landToRemove //(size, x, y)
-    );
-    // Removal of land must be done via the registry!!! aka REMOVER_ROLE
-    bytes32 public constant REMOVER_ROLE = keccak256("REMOVER_ROLE");
+    struct PolygonEstateTokenStorage {
+        IEstateExperienceRegistry registryToken;
+    }
 
     function initV1(
         address trustedForwarder,
@@ -29,45 +25,31 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
     }
 
-    function update(
+    function setRegistry(IEstateExperienceRegistry registry) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        _ps().registryToken = registry;
+    }
+
+    /// @dev estateId = 0 => 1x1 experiences
+    function link(
         uint256 estateId,
-        uint256[][3] calldata landToAdd, //(size, x, y)
-        uint256[][3] calldata landToRemove //(size, x, y)
-    ) external returns (uint256) {
-        require(hasRole(REMOVER_ROLE, _msgSender()), "not remover");
-        (uint256 newId, uint256 newStorageId) =
-            _updateLandsEstate(_msgSender(), estateId, _storageId(estateId), landToAdd);
-        _landTileSet(newStorageId).remove(landToRemove);
-        uint256 len = landToRemove[0].length;
-        for (uint256 i; i < len; i++) {
-            uint256 size = landToRemove[0][i];
-            uint256 x = landToRemove[1][i];
-            uint256 y = landToRemove[2][i];
-            if (!IPolygonLand(_s().landToken).exists(size, x, y)) {
-                IPolygonLand(_s().landToken).mint(_msgSender(), size, x, y, "");
-            } else {
-                IPolygonLand(_s().landToken).transferQuad(address(this), _msgSender(), size, x, y, "");
-            }
-        }
-        emit EstateTokenUpdated(estateId, newId, landToAdd, landToRemove);
-        return newId;
+        uint256 expId,
+        uint256 x,
+        uint256 y
+    ) external {
+        _ps().registryToken.link(estateId, expId, x, y);
     }
 
-    function mintEstate(
-        address from,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external override returns (uint256) {
-        return _mintEstate(from, metaData, tiles);
+    function unLinkByLandId(uint256 landId) external {
+        _ps().registryToken.unLinkByLandId(landId);
     }
 
-    function burnEstate(address from, uint256 estateId)
-        external
-        override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        uint256 storageId = _storageId(estateId);
-        return _burnEstate(from, estateId, storageId);
+    function unLinkByExperienceId(uint256 expId) external {
+        _ps().registryToken.unLinkByExperienceId(expId);
+    }
+
+    function getRegistry() external view returns (IEstateExperienceRegistry) {
+        return _ps().registryToken;
     }
 
     /// @notice Return the URI of a specific token.
@@ -85,5 +67,35 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
                     "PolygonEstateTokenV1.json"
                 )
             );
+    }
+
+    // Complete the removal process.
+    function _removeLand(
+        address to,
+        uint256,
+        uint256,
+        uint256[][3] calldata landToRemove
+    ) internal override {
+        if (address(_ps().registryToken) != address(0)) {
+            _ps().registryToken.unLinkExperience(landToRemove);
+        }
+        uint256 len = landToRemove.length;
+        for (uint256 i; i < len; i++) {
+            uint256 size = landToRemove[0][i];
+            uint256 x = landToRemove[1][i];
+            uint256 y = landToRemove[2][i];
+            if (!IPolygonLand(_s().landToken).exists(size, x, y)) {
+                IPolygonLand(_s().landToken).mint(to, size, x, y, "");
+            } else {
+                IPolygonLand(_s().landToken).transferQuad(address(this), to, size, x, y, "");
+            }
+        }
+    }
+
+    function _ps() internal pure returns (PolygonEstateTokenStorage storage ds) {
+        bytes32 storagePosition = keccak256("PolygonEstateToken.PolygonEstateTokenStorage");
+        assembly {
+            ds.slot := storagePosition
+        }
     }
 }
