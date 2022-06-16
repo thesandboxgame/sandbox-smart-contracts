@@ -17,7 +17,7 @@ interface ExperienceTokenInterface {
 }
 
 /// @notice Contract managing tExperiences and Estates
-contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler {
+contract ExperienceEstateRegistryB is WithSuperOperators, ERC2771Handler {
     using EstateGameRecordLib for EstateGameRecordLib.Games;
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;

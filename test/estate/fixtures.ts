@@ -321,7 +321,7 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
   //Registry
   await deployments.deploy('ExperienceEstateRegistry', {
     from: deployer,
-    contract: 'ExperienceEstateRegistry',
+    contract: 'ExperienceEstateRegistryA',
     libraries: {
       MapLib: setup.mapLib.address,
     },

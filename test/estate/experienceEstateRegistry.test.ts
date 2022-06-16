@@ -26,8 +26,7 @@ describe('experience estate registry test', function () {
         0,
         0,
         gameId,
-        landId,
-        1
+        landId
       );
     });
     it(`trying to create a link with an experience already in use should revert`, async function () {
@@ -53,18 +52,11 @@ describe('experience estate registry test', function () {
         0,
         0,
         gameId,
-        0,
-        1
+        0
       );
 
       await expect(
-        experienceEstateRegistryContract.CreateExperienceLink(
-          1,
-          0,
-          gameId,
-          1,
-          1
-        )
+        experienceEstateRegistryContract.CreateExperienceLink(1, 0, gameId, 1)
       ).to.be.revertedWith('Exp already in use');
     });
     it(`trying to create a link with a land already in use should revert`, async function () {
@@ -91,8 +83,7 @@ describe('experience estate registry test', function () {
         0,
         0,
         gameId,
-        landId,
-        1
+        landId
       );
 
       await expect(
@@ -100,8 +91,7 @@ describe('experience estate registry test', function () {
           0,
           0,
           gameId2,
-          landId,
-          1
+          landId
         )
       ).to.be.revertedWith('Land already in use');
     });
@@ -142,8 +132,7 @@ describe('experience estate registry test', function () {
         48,
         96,
         gameId,
-        estateId,
-        0
+        estateId
       );
     });
   });

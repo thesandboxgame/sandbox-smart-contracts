@@ -18,7 +18,7 @@ interface ExperienceTokenInterface {
 }
 
 /// @notice Contract managing tExperiences and Estates
-contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstateExperienceRegistry {
+contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstateExperienceRegistry {
     using EstateGameRecordLib for EstateGameRecordLib.Games;
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;
@@ -31,9 +31,12 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstate
     ILandToken public landToken;
 
     struct EstateAndLands {
+        // I lost track of why we use estate Id... I did something wrong....
         uint256 estateId;
         // TODO: is better to have a tile here (or both???) ?
         // I agree, will work on it
+        // The huge loops are to keep this in-sync what if we leave broken links and check the linkedLands first
+        // If it is now linked we don't use this array
         uint256[] lands;
     }
 
@@ -42,6 +45,7 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstate
     }
 
     // should be storageId instead of estateId and expId
+    // Experience Id => EstateAndLands
     mapping(uint256 => EstateAndLands) internal links;
 
     // Land Id => ExpAndEstate
