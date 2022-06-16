@@ -10,10 +10,11 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title LAND bridge on L1
 contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    address public rootToken;
+    address public immutable rootToken;
+    bool internal transferringToL2;
 
-    event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
-    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
     constructor(
         address _checkpointManager,
@@ -30,7 +31,8 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         address, /* from */
         uint256, /* tokenId */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(transferringToL2, "LandTunnel: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -39,7 +41,8 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(transferringToL2, "LandTunnel: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 
@@ -55,8 +58,9 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         bytes memory data
     ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
-        LandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
-
+        transferringToL2 = true;
+        ILandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
+        transferringToL2 = false;
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
             _sendMessageToChild(message);
@@ -71,12 +75,12 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
@@ -84,7 +88,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
         for (uint256 index = 0; index < x.length; index++) {
-            LandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
+            ILandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }

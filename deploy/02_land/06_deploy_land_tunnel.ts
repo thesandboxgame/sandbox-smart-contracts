@@ -1,6 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -25,44 +24,51 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  const PolygonLandTunnel = await hre.companionNetworks[
-    'l2'
-  ].deployments.getOrNull('PolygonLandTunnel');
+  const hreL2 = hre.companionNetworks.l2;
+  const deploymentsL2 = hreL2.deployments;
+  const PolygonLandTunnel = await deploymentsL2.getOrNull('PolygonLandTunnel');
 
   // get deployer on l2
-  const {deployer: deployerOnL2} = await hre.companionNetworks[
-    'l2'
-  ].getNamedAccounts();
+  const {deployer: deployerOnL2} = await hreL2.getNamedAccounts();
 
   if (PolygonLandTunnel) {
-    await hre.companionNetworks['l2'].deployments.execute(
+    const fxRootTunnel = await deploymentsL2.read(
       'PolygonLandTunnel',
-      {from: deployerOnL2},
-      'setFxRootTunnel',
-      LandTunnel.address
+      'fxRootTunnel'
     );
-    await deployments.execute(
-      'LandTunnel',
-      {from: deployer},
-      'setFxChildTunnel',
-      PolygonLandTunnel.address
-    );
+    if (fxRootTunnel !== LandTunnel.address) {
+      await deploymentsL2.execute(
+        'PolygonLandTunnel',
+        {from: deployerOnL2},
+        'setFxRootTunnel',
+        LandTunnel.address
+      );
+    }
+    const fxChildTunnel = await deployments.read('LandTunnel', 'fxChildTunnel');
+    if (fxChildTunnel !== PolygonLandTunnel.address) {
+      await deployments.execute(
+        'LandTunnel',
+        {from: deployer},
+        'setFxChildTunnel',
+        PolygonLandTunnel.address
+      );
+    }
 
-    const PolygonLand = await hre.companionNetworks['l2'].deployments.getOrNull(
-      'PolygonLand'
-    );
+    const PolygonLand = await deploymentsL2.getOrNull('PolygonLand');
     if (PolygonLand) {
-      const polygonLandTunnel = await deployments.read(
+      const isMinter = await deploymentsL2.read(
         'PolygonLand',
-        'polygonLandTunnel'
+        'isMinter',
+        PolygonLandTunnel.address
       );
 
-      if (polygonLandTunnel !== PolygonLandTunnel.address) {
-        await deployments.execute(
+      if (!isMinter) {
+        await deploymentsL2.execute(
           'PolygonLand',
           {from: deployerOnL2},
-          'setPolygonLandTunnel',
-          PolygonLandTunnel.address
+          'setMinter',
+          PolygonLandTunnel.address,
+          true
         );
       }
     }
@@ -77,4 +83,3 @@ func.dependencies = [
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
-func.skip = skipUnlessTestnet;

@@ -250,6 +250,12 @@ const config: HardhatUserConfig = {
       polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
+    // OZ Defender relay
+    landMigrationBatchExecutor: {
+      default: 1,
+      mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
+      goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
+    },
   },
   networks: {
     /**
@@ -327,7 +333,7 @@ const config: HardhatUserConfig = {
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       companionNetworks: {
-        l2: 'mainnet',
+        l1: 'mainnet',
       },
     },
   },
