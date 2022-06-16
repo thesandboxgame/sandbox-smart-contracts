@@ -44,3 +44,5 @@ giveaway.json
 .openzeppelin/unknown-*.json
 
 .idea/
+
+.DS_Store
