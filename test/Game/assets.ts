@@ -53,7 +53,7 @@ export async function supplyAssets(
 
   // ------------ ERC1155 -------------
   const asset1155Contract = await ethers.getContract(
-    'Asset', // 'MockERC1155Asset',
+    'Asset',
     assetBouncerAdmin
   );
 
@@ -94,20 +94,19 @@ export async function supplyAssets721(
 
   // ------------ ERC721 -------------
 
-  const asset721Contract = await ethers.getContract(
-    'AssetERC721', // 'MockERC721Asset',
-    assetAdmin
-  );
+  const asset721Contract = await ethers.getContract('AssetERC721', assetAdmin);
   const assetReceipts721: Receipt[] = [];
 
   const asset721AsAdmin = await asset721Contract.connect(
     ethers.provider.getSigner(assetAdmin)
   );
+  const MINTER_ROLE = await asset721Contract.MINTER_ROLE();
+  await asset721AsAdmin.grantRole(MINTER_ROLE, assetAdmin);
 
-  packId = 0;
   for (let i = 0; i < nbAssets; i++) {
-    assetReceipts721.push(await asset721AsAdmin.mint(creator));
-    packId++;
+    assetReceipts721.push(
+      await asset721AsAdmin['mint(address,uint256)'](creator, i)
+    );
   }
 
   const assetsFromReceipts = await getAssets721FromReceipts(
