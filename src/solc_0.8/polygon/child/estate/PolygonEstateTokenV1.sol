@@ -73,9 +73,10 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
     function _removeLand(
         address to,
         uint256,
-        uint256,
+        uint256 storageId,
         uint256[][3] calldata landToRemove
     ) internal override {
+        _landTileSet(storageId).remove(landToRemove);
         if (address(_ps().registryToken) != address(0)) {
             _ps().registryToken.unLinkExperience(landToRemove);
         }

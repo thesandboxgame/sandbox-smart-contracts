@@ -35,8 +35,8 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
         uint256 estateId;
         // TODO: is better to have a tile here (or both???) ?
         // I agree, will work on it
-        // The huge loops are to keep this in-sync what if we leave broken links and check the linkedLands first
-        // If it is now linked we don't use this array
+        // The huge loops are to keep this in-sync. What if we leave broken links and check the linkedLands first
+        // If it is not linked we don't use this array
         uint256[] lands;
     }
 
