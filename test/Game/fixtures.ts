@@ -68,6 +68,13 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
     ethers.provider.getSigner(gameTokenAdmin)
   );
 
+  // Asset versions -----------------------------
+
+  const assetERC1155 = await ethers.getContract('Asset');
+  const assetERC721 = await ethers.getContract('AssetERC721');
+
+  // --------------------------------------------
+
   const users = [];
   for (const other of others) {
     users.push({
@@ -92,13 +99,13 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
   };
 
   setApprovalForAll(
-    'MockERC1155Asset',
+    assetERC1155.address,
     gameTokenAsAdmin.address,
     users[0].address
   );
 
   setApprovalForAll(
-    'MockERC721Asset',
+    assetERC721.address,
     gameTokenAsAdmin.address,
     users[0].address
   );
@@ -134,8 +141,8 @@ export const setupTestWithAdminGameMinter = withSnapshot(
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
   const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  await changeAssetMinter('MockERC1155Asset', assetAdmin, GameOwner.address);
-  await changeAssetMinter('MockERC721Asset', assetAdmin, GameOwner.address);
+  await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
+  await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
 
   const {gameTokenAdmin} = await getNamedAccounts();
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -144,6 +151,6 @@ const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
 };
 
 export const setupTestWithGameOwnerMinter = withSnapshot(
-  ['MockERC1155Asset', 'MockERC721Asset', 'ChildGameToken'],
+  ['Asset', 'AssetERC721', 'ChildGameToken'],
   gameFixturesWithGameOwnerMinter
 );
