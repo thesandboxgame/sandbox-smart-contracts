@@ -49,13 +49,16 @@ export async function supplyAssets(
   creator: Address,
   supplies: number[]
 ): Promise<BigNumber[]> {
-  const {assetAdmin} = await getNamedAccounts();
+  const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
 
   // ------------ ERC1155 -------------
   const asset1155Contract = await ethers.getContract(
-    'MockERC1155Asset',
-    assetAdmin
+    'Asset', // 'MockERC1155Asset',
+    assetBouncerAdmin
   );
+
+  await asset1155Contract.setBouncer(assetAdmin, true);
+
   const assetReceipts: Receipt[] = [];
 
   const assetAsAdmin = await asset1155Contract.connect(
@@ -92,7 +95,7 @@ export async function supplyAssets721(
   // ------------ ERC721 -------------
 
   const asset721Contract = await ethers.getContract(
-    'MockERC721Asset',
+    'AssetERC721', // 'MockERC721Asset',
     assetAdmin
   );
   const assetReceipts721: Receipt[] = [];
