@@ -35,7 +35,7 @@ const changeAssetMinter = async (
     assetConstractName,
     assetAdminAddress
   );
-  await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+  await assetContractAsAdmin.transferOwnership(assetMinterAddress); // TODO: Function does not exist on The Sandbox's Asset ERC1155 contracts
 };
 
 export interface GameFixturesData {
@@ -68,13 +68,6 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
     ethers.provider.getSigner(gameTokenAdmin)
   );
 
-  // Asset versions -----------------------------
-
-  const assetERC1155 = await ethers.getContract('Asset');
-  const assetERC721 = await ethers.getContract('AssetERC721');
-
-  // --------------------------------------------
-
   const users = [];
   for (const other of others) {
     users.push({
@@ -98,17 +91,9 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
     Game: gameToken.connect(ethers.provider.getSigner(users[2].address)),
   };
 
-  setApprovalForAll(
-    assetERC1155.address,
-    gameTokenAsAdmin.address,
-    users[0].address
-  );
+  setApprovalForAll('Asset', gameTokenAsAdmin.address, users[0].address);
 
-  setApprovalForAll(
-    assetERC721.address,
-    gameTokenAsAdmin.address,
-    users[0].address
-  );
+  setApprovalForAll('AssetERC721', gameTokenAsAdmin.address, users[0].address);
 
   return {
     gameToken,
@@ -141,8 +126,8 @@ export const setupTestWithAdminGameMinter = withSnapshot(
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
   const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
-  await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
+  // await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
+  // await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
 
   const {gameTokenAdmin} = await getNamedAccounts();
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);

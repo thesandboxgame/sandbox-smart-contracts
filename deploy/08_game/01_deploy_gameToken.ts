@@ -36,12 +36,10 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['ChildGameToken', 'ChildGameToken_deploy'];
 func.dependencies = [
-  // 'MockERC1155Asset_deploy',
-  // 'MockERC721Asset_deploy',
   'Asset_deploy',
   'AssetERC721_deploy',
   'Sand',
   'TRUSTED_FORWARDER',
 ];
-// TODO: Setup deploy-polygon folder and network. Review mocks.
+// TODO: Setup deploy-polygon folder and network. Delete MockAsset contracts
 func.skip = skipUnlessTest; // TODO: enable
