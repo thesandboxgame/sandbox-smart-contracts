@@ -35,7 +35,7 @@ const changeAssetMinter = async (
     assetConstractName,
     assetAdminAddress
   );
-  await assetContractAsAdmin.transferOwnership(assetMinterAddress); // TODO: Function does not exist on The Sandbox's Asset ERC1155 contracts
+  // await assetContractAsAdmin.transferOwnership(assetMinterAddress); // TODO: Function does not exist on The Sandbox's Asset ERC1155 contracts
 };
 
 export interface GameFixturesData {
@@ -135,6 +135,7 @@ const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   return gameFixturesData;
 };
 
+// Remove - use setupadmingameminter
 export const setupTestWithGameOwnerMinter = withSnapshot(
   ['Asset', 'AssetERC721', 'ChildGameToken'],
   gameFixturesWithGameOwnerMinter
