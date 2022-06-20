@@ -18,6 +18,8 @@ const func: DeployFunction = async function (
   });
 };
 
+// ToDo: change owner from deployer to another account??
+
 export default func;
 func.tags = ['ERC20RewardPool', 'ERC20RewardPool_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER_V2', 'PolygonSand_deploy'];

@@ -18,7 +18,6 @@ const func: DeployFunction = async function (
   const currentAdmin = await sandPool.owner();
 
   const lockPeriodInSecs = BigNumber.from(604800); // 7 days
-  const lockPeriodInSecsTest = BigNumber.from(86400); // 1 days
 
   // initialize setAmountLockClaim disabled
   const amountLockClaim = 0;
@@ -40,7 +39,7 @@ const func: DeployFunction = async function (
       'ERC20RewardPool',
       {from: currentAdmin, log: true},
       'setTimelockDeposit',
-      lockPeriodInSecsTest
+      lockPeriodInSecs
     )
   );
 
@@ -49,7 +48,7 @@ const func: DeployFunction = async function (
       'ERC20RewardPool',
       {from: currentAdmin, log: true},
       'setTimeLockWithdraw',
-      lockPeriodInSecsTest
+      lockPeriodInSecs
     )
   );
 
