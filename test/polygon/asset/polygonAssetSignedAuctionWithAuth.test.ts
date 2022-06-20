@@ -11,8 +11,8 @@ import {expect} from '../../chai-setup';
 const zeroAddress = constants.AddressZero;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('assetSignedAuctionAuth', function () {
-  const startingPrice = new BN('1000000000000000000');
+describe('PolygonAssetSignedAuctionAuth', function () {
+  const startingPrice = new BN('1000000000000000000'); // TODO: use BigNumber.from throughout
   const endingPrice = new BN('5000000000000000000');
   const duration = 1000;
   const packs = 1;

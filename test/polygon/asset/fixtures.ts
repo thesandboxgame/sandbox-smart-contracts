@@ -40,7 +40,7 @@ const polygonAssetFixtures = async function () {
   await waitFor(PolygonAssetERC1155.setBouncer(extractor, true));
 
   const assetSignedAuctionAuthContract = await ethers.getContract(
-    'AssetSignedAuctionAuth'
+    'PolygonAssetSignedAuctionWithAuth'
   );
 
   await waitFor(Asset.setBouncer(minter, true));
