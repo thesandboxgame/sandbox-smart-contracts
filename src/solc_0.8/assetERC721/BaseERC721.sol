@@ -61,7 +61,7 @@ abstract contract BaseERC721 is
         address from,
         address operator,
         uint256 id
-    ) external override(IERC721ExtendedToken) {
+    ) external virtual override(IERC721ExtendedToken) {
         require(from != address(0), "ZERO_ADDRESS");
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         approve(operator, id);
@@ -75,7 +75,7 @@ abstract contract BaseERC721 is
         address from,
         address operator,
         bool approved
-    ) external override(IERC721ExtendedToken) {
+    ) external virtual override(IERC721ExtendedToken) {
         require(from != address(0), "ZERO_ADDRESS");
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _setApprovalForAll(from, operator, approved);
@@ -84,7 +84,7 @@ abstract contract BaseERC721 is
     /// @notice Burns token with given `id`.
     /// @param from Address whose token is to be burned.
     /// @param id Token id which will be burned.
-    function burnFrom(address from, uint256 id) external override(IERC721ExtendedToken, IERC721Token) {
+    function burnFrom(address from, uint256 id) external virtual override(IERC721ExtendedToken, IERC721Token) {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         require(from == ERC721Upgradeable.ownerOf(id), "NOT_OWNER");
         _burn(id);
@@ -93,7 +93,7 @@ abstract contract BaseERC721 is
     /// @notice Burns token with given `id`.
     /// @dev Used by default fx-portal tunnel which burns rather than locks.
     /// @param id The id of the token to be burned.
-    function burn(uint256 id) external override(IERC721ExtendedToken) onlyRole(BURNER_ROLE) {
+    function burn(uint256 id) external virtual override(IERC721ExtendedToken) onlyRole(BURNER_ROLE) {
         _burn(id);
     }
 
@@ -105,7 +105,7 @@ abstract contract BaseERC721 is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IMintableERC721, IERC721Token) {
+    ) public virtual override(ERC721Upgradeable, IMintableERC721, IERC721Token) {
         ERC721Upgradeable.safeTransferFrom(from, to, tokenId);
     }
 
@@ -116,7 +116,7 @@ abstract contract BaseERC721 is
         address from,
         address to,
         uint256[] calldata ids
-    ) external override(IERC721ExtendedToken) {
+    ) external virtual override(IERC721ExtendedToken) {
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 id = ids[i];
@@ -134,7 +134,7 @@ abstract contract BaseERC721 is
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external override(IERC721ExtendedToken) {
+    ) external virtual override(IERC721ExtendedToken) {
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 id = ids[i];
@@ -144,7 +144,7 @@ abstract contract BaseERC721 is
 
     /// @notice Query if a token id exists.
     /// @param tokenId Token id to be queried.
-    function exists(uint256 tokenId) external view override(IMintableERC721, IERC721Token) returns (bool) {
+    function exists(uint256 tokenId) external view virtual override(IMintableERC721, IERC721Token) returns (bool) {
         return _exists(tokenId);
     }
 
@@ -154,6 +154,7 @@ abstract contract BaseERC721 is
     function supportsInterface(bytes4 id)
         public
         view
+        virtual
         override(AccessControlUpgradeable, ERC721Upgradeable)
         returns (bool)
     {
@@ -162,15 +163,15 @@ abstract contract BaseERC721 is
 
     /// @notice Change the address of the trusted forwarder for meta-transactions
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTrustedForwarder(address trustedForwarder) external virtual onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = trustedForwarder;
     }
 
-    function isTrustedForwarder(address forwarder) public view returns (bool) {
+    function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
+    function getTrustedForwarder() external view virtual returns (address trustedForwarder) {
         return _trustedForwarder;
     }
 
@@ -198,7 +199,11 @@ abstract contract BaseERC721 is
         }
     }
 
-    function _baseURI() internal view override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        super.tokenURI(tokenId);
+    }
+
+    function _baseURI() internal view override(ERC721Upgradeable) returns (string memory) {
         return baseTokenURI;
     }
 
