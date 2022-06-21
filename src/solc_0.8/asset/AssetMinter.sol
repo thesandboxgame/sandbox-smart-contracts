@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
