@@ -106,12 +106,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
+        gameContract,
       } = await setupL2EstateGameAndLand();
 
       const gameId = 123;
-      await mintQuad(other, 24, 24, 24);
 
       const quadId = await mintQuad(other, 24, 48, 96);
+
+      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -122,11 +124,6 @@ describe('experience estate registry test', function () {
         xs: [48],
         ys: [96],
       });
-      console.log(
-        `create one ${24}x${24} quads and create an estate with that, GAS USED: `,
-        gasUsed.toString()
-      );
-      console.log(experienceEstateRegistryContract.address);
 
       await experienceEstateRegistryContract.CreateExperienceLink(
         48,
@@ -134,6 +131,175 @@ describe('experience estate registry test', function () {
         gameId,
         estateId
       );
+    });
+  });
+  describe('Link and unlink', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    it(`create a link between an estate and an experience and unlink it by exp id`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        gameContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const quadId = await mintQuad(other, 24, 48, 96);
+
+      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      const {estateId} = await createEstate({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await experienceEstateRegistryContract.CreateExperienceLink(
+        48,
+        96,
+        gameId,
+        estateId
+      );
+
+      await experienceEstateRegistryContract.unLinkByExperienceId(gameId);
+    });
+
+    it(`trying to unlink an unknow exp should revert`, async function () {
+      const {
+        experienceEstateRegistryContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      await expect(
+        experienceEstateRegistryContract.unLinkByExperienceId(gameId)
+      ).to.be.revertedWith('unkown experience');
+    });
+
+    it(`create a link between an estate and an experience and unlink it by lan id`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        gameContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const quadId = await mintQuad(other, 24, 48, 96);
+
+      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      const {estateId} = await createEstate({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await experienceEstateRegistryContract.CreateExperienceLink(
+        48,
+        96,
+        gameId,
+        estateId
+      );
+
+      //await experienceEstateRegistryContract.unLinkByLandId(39120);
+      //this shouldn't revert
+      await expect(
+        experienceEstateRegistryContract.unLinkByLandId(39120)
+      ).to.be.revertedWith('unkown land');
+    });
+    it(`trying to unlink an inexistent land id should revert`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        gameContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const quadId = await mintQuad(other, 24, 48, 96);
+
+      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      const {estateId} = await createEstate({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await experienceEstateRegistryContract.CreateExperienceLink(
+        48,
+        96,
+        gameId,
+        estateId
+      );
+
+      await expect(
+        experienceEstateRegistryContract.unLinkByLandId(123)
+      ).to.be.revertedWith('unkown land');
+    });
+  });
+  describe('testing unLinkExperience', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    it(`testing it out`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        gameContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      const quadId = await mintQuad(other, 24, 0, 0);
+
+      await gameContract.setQuad(0, 0, 24); //is this really how it works?
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      const {estateId} = await createEstate({
+        sizes: [24],
+        xs: [0],
+        ys: [0],
+      });
+
+      await experienceEstateRegistryContract.CreateExperienceLink(
+        0,
+        0,
+        gameId,
+        estateId
+      );
+
+      await experienceEstateRegistryContract.unLinkExperience([[24], [0], [0]]);
     });
   });
 });

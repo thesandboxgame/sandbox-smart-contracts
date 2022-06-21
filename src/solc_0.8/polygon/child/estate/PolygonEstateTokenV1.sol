@@ -31,6 +31,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
     }
 
     /// @dev estateId = 0 => 1x1 experiences
+    // TODO: maybe we can use sizes[], xs[], ys[]
     function link(
         uint256 estateId,
         uint256 expId,

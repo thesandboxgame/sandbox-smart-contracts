@@ -32,6 +32,9 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
 
     struct EstateAndLands {
         // I lost track of why we use estate Id... I did something wrong....
+        // what I can think of is deleting all links after a burn
+        // but we will need a better way to get links from estateId
+        //maybe not, if we have the user unlink/retreive the lands before burning
         uint256 estateId;
         // TODO: is better to have a tile here (or both???) ?
         // I agree, will work on it
@@ -41,6 +44,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
     }
 
     struct ExpAndEstate {
+        //do we need this struct?
         uint256 expId;
     }
 
@@ -96,29 +100,36 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
     }
 
     function unLinkByExperienceId(uint256 expId) external override {
+        require(links[expId].lands.length != 0, "unkown experience");
         _unLinkExperience(links[expId].lands);
         delete links[expId];
     }
 
     function unLinkByLandId(uint256 landId) external override {
         uint256 expId = expXLand[landId].expId;
+        require(expId != 0, "unkown land");
+        //if we try to access data from an nonexisting land we'll get 0
+        //we can use an EnumerableSet with tryget, or set another estateId for single lands
         _unLinkExperience(links[expId].lands);
         delete links[expId];
     }
 
     // TODO: REVIEW !!!!
     function unLinkExperience(uint256[][3] calldata landToRemove) external override {
-        require(_msgSender() == address(estateToken), "invalid address");
+        //require(_msgSender() == address(estateToken), "invalid address");
         uint256[] calldata sizes = landToRemove[0];
         uint256[] calldata xs = landToRemove[1];
         uint256[] calldata ys = landToRemove[2];
         for (uint256 i; i < sizes.length; i++) {
+            console.log("here here");
             for (uint256 x; x < sizes[i]; x++) {
                 for (uint256 y; y < sizes[i]; y++) {
                     // calculate all the land Ids of the quad.
                     uint256 landId = (x + xs[i]) + (y + ys[i]) * 408;
                     // For each land Id get the experienceId and then related lands
                     uint256 expId = expXLand[landId].expId;
+                    console.log("expId");
+                    console.log(expId);
                     // TODO: 1. this is valid ?
                     // TODO: 2. when we call _unLinkExperience we delete the same data we access here but it seems ok
                     if (expId > 0) {
@@ -137,11 +148,13 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             uint256 x = landId % 408;
             uint256 y = landId / 408;
             linkedLands.clearQuad(x, y, 1);
+            console.log("unlinking");
+            console.log(landId);
+            console.log("expXLand[landId].expId");
             delete expXLand[landId];
         }
     }
 
-    //I'm going to split this again
     function CreateExperienceLink(
         uint256 x,
         uint256 y,
@@ -153,8 +166,6 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
 
         if (landOrEstateId < MAXLANDID) {
             require(links[expId].lands.length == 0, "Exp already in use");
-
-            //A
             require(expXLand[landOrEstateId].expId == 0, "Land already in use");
             links[expId].estateId = 0;
             links[expId].lands = [landOrEstateId];

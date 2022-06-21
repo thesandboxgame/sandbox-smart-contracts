@@ -308,13 +308,13 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
   const setup = await setupEstateAndLand(false);
   const {deployer} = await getNamedAccounts();
   // Fake Game
-  await deployments.deploy('ERC721Mintable', {
+  await deployments.deploy('MockExperience', {
     from: deployer,
-    args: ['FAKEGAME', 'FAKEGAME'],
+    args: [],
   });
-  const gameContract = await ethers.getContract('ERC721Mintable', deployer);
+  const gameContract = await ethers.getContract('MockExperience', deployer);
   const gameContractAsOther = await ethers.getContract(
-    'ERC721Mintable',
+    'MockExperience',
     setup.other
   );
 
