@@ -170,13 +170,12 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     function mintWithoutCatalyst(
         MintData calldata mintData,
         uint16 typeAsset1Based,
-        uint256 quantities
+        uint256 quantity
     ) external override returns (uint256 assetId) {
         require(
-            quantities == quantitiesByAssetTypeId[typeAsset1Based],
+            quantity == quantitiesByAssetTypeId[typeAsset1Based],
             "AssetMinter: Invalid quantitiesByAssetType value "
         );
-        uint256 quantity = quantitiesByAssetTypeId[typeAsset1Based];
 
         _mintRequirements(mintData.from, quantity, mintData.to);
         assetId = _assetERC1155.mint(
@@ -202,11 +201,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantities,
+        uint256 quantity,
         uint256 _numberOfCatalystBurnPerAsset,
         uint256 _numberOfGemsBurnPerAsset
     ) external override returns (uint256 assetId) {
-        require(quantities == quantitiesByCatalystId[catalystId], "AssetMinter : Invalid quantitiesByCatalyst value ");
+        require(quantity == quantitiesByCatalystId[catalystId], "AssetMinter : Invalid quantitiesByCatalyst value ");
         require(
             _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
             "AssetMinter: invalid numberOfCatalystBurnPerAsset value "
@@ -215,7 +214,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
             _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
             "AssetMinter: invalid numberOfGemsBurnPerAsset value "
         );
-        uint256 quantity = quantitiesByCatalystId[catalystId];
 
         assetId = _burnAndMint(mintData, catalystId, gemIds, quantity);
     }
