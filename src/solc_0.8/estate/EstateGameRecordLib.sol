@@ -49,7 +49,7 @@ library EstateGameRecordLib {
             GameEntry storage lastValue = self.values[lastIndex];
             self.values[toDeleteIndex].gameId = lastValue.gameId;
             self.values[toDeleteIndex].map.clear();
-            self.values[toDeleteIndex].map.setMap(lastValue.map);
+            self.values[toDeleteIndex].map.set(lastValue.map);
             self.indexes[lastValue.gameId] = idx;
         }
         self.values.pop();

@@ -4,12 +4,10 @@
 pragma solidity 0.8.2;
 
 import {TileWithCoordLib} from "./TileWithCoordLib.sol";
-// TODO: Moveit to a intermediate library
 import {TileLib} from "./TileLib.sol";
 
 library MapLib {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
-    // TODO: Moveit to a intermediate library
     using TileLib for TileLib.Tile;
 
     uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;
@@ -18,6 +16,13 @@ library MapLib {
     uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;
     uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;
     uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;
+
+    struct TranslateResult {
+        TileWithCoordLib.TileWithCoord topLeft;
+        TileWithCoordLib.TileWithCoord topRight;
+        TileWithCoordLib.TileWithCoord bottomLeft;
+        TileWithCoordLib.TileWithCoord bottomRight;
+    }
 
     // To remove empty tiles we need to store the key (aka coords) inside the value
     // For now we will leave empty tiles in the structure
@@ -28,108 +33,7 @@ library MapLib {
         mapping(uint256 => uint256) indexes;
     }
 
-    function containCoord(
-        Map storage self,
-        uint256 x,
-        uint256 y
-    ) public view returns (bool) {
-        uint256 key = TileWithCoordLib.getKey(x, y);
-        uint256 idx = self.indexes[key];
-        if (idx == 0) {
-            // !contains
-            return false;
-        }
-        return self.values[idx - 1].containCoord(x, y);
-    }
-
-    function containQuad(
-        Map storage self,
-        uint256 x,
-        uint256 y,
-        uint256 size
-    ) public view returns (bool) {
-        uint256 key = TileWithCoordLib.getKey(x, y);
-        uint256 idx = self.indexes[key];
-        if (idx == 0) {
-            // !contains
-            return false;
-        }
-        // TODO: We can call TileLib directly to use less gas ?
-        return self.values[idx - 1].containQuad(x, y, size);
-    }
-
-    function containTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile)
-        public
-        view
-        returns (bool)
-    {
-        if (tile.isEmpty()) {
-            return true;
-        }
-        uint256 key = tile.getKey();
-        uint256 idx = self.indexes[key];
-        if (idx == 0) {
-            // !contains
-            return false;
-        }
-        return self.values[idx - 1].tile.containTile(tile.tile);
-    }
-
-    function intersectTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile)
-        public
-        view
-        returns (bool)
-    {
-        if (tile.isEmpty()) {
-            return true;
-        }
-        uint256 key = tile.getKey();
-        uint256 idx = self.indexes[key];
-        if (idx == 0) {
-            // !contains
-            return false;
-        }
-        return self.values[idx - 1].tile.intersectTile(tile.tile);
-    }
-
-    function containTileWithOffset(
-        Map storage self,
-        TileLib.Tile memory tile,
-        uint256 x,
-        uint256 y
-    ) public view returns (bool) {
-        TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(tile, x, y);
-        return containsShiftResult(self, s);
-    }
-
-    function containsShiftResult(Map storage self, TileWithCoordLib.ShiftResult memory s) public view returns (bool) {
-        return
-            containTileWithCoord(self, s.topLeft) &&
-            containTileWithCoord(self, s.topRight) &&
-            containTileWithCoord(self, s.bottomLeft) &&
-            containTileWithCoord(self, s.bottomRight);
-    }
-
-    function intersectShiftResult(Map storage self, TileWithCoordLib.ShiftResult memory s) public view returns (bool) {
-        return
-            intersectTileWithCoord(self, s.topLeft) &&
-            intersectTileWithCoord(self, s.topRight) &&
-            intersectTileWithCoord(self, s.bottomLeft) &&
-            intersectTileWithCoord(self, s.bottomRight);
-    }
-
-    // TODO: Check gas consumption!!!
-    // OBS: self can be huge, but contained must be small, we iterate over contained values.
-    function containMap(Map storage self, Map storage contained) public view returns (bool) {
-        for (uint256 i; i < contained.values.length; i++) {
-            if (!containTileWithCoord(self, contained.values[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function setQuad(
+    function set(
         Map storage self,
         uint256 x,
         uint256 y,
@@ -140,16 +44,26 @@ library MapLib {
         if (idx == 0) {
             // !contains
             // Add a new tile
-            TileWithCoordLib.TileWithCoord memory t = TileWithCoordLib.initTileWithCoord(x, y);
-            self.values.push(t.setQuad(x, y, size));
+            TileWithCoordLib.TileWithCoord memory t = TileWithCoordLib.init(x, y);
+            self.values.push(t.set(x, y, size));
             self.indexes[key] = self.values.length;
         } else {
             // contains
-            self.values[idx - 1] = self.values[idx - 1].setQuad(x, y, size);
+            self.values[idx - 1] = self.values[idx - 1].set(x, y, size);
         }
     }
 
-    function setTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {
+    function set(Map storage self, TranslateResult memory s) public {
+        set(self, s.topLeft);
+        set(self, s.topRight);
+        set(self, s.bottomLeft);
+        set(self, s.bottomRight);
+    }
+
+    function set(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {
+        if (tile.isEmpty()) {
+            return;
+        }
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -162,13 +76,13 @@ library MapLib {
         }
     }
 
-    function setMap(Map storage self, Map storage contained) public {
+    function set(Map storage self, Map storage contained) public {
         for (uint256 i; i < contained.values.length; i++) {
-            setTileWithCoord(self, contained.values[i]);
+            set(self, contained.values[i]);
         }
     }
 
-    function clearQuad(
+    function clear(
         Map storage self,
         uint256 x,
         uint256 y,
@@ -180,7 +94,7 @@ library MapLib {
             // !contains, nothing to clear
             return false;
         }
-        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clearQuad(x, y, size);
+        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clear(x, y, size);
         if (t.isEmpty()) {
             _remove(self, idx, key);
         } else {
@@ -189,7 +103,7 @@ library MapLib {
         return true;
     }
 
-    function clearTileWithCoord(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public returns (bool) {
+    function clear(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public returns (bool) {
         uint256 key = tile.getKey();
         uint256 idx = self.indexes[key];
         if (idx == 0) {
@@ -205,9 +119,9 @@ library MapLib {
         return true;
     }
 
-    function clearMap(Map storage self, Map storage contained) public {
+    function clear(Map storage self, Map storage contained) public {
         for (uint256 i; i < contained.values.length; i++) {
-            clearTileWithCoord(self, contained.values[i]);
+            clear(self, contained.values[i]);
         }
     }
 
@@ -216,6 +130,106 @@ library MapLib {
             delete self.indexes[self.values[i].getKey()];
         }
         delete self.values;
+    }
+
+    /// @notice given a tile, translate all the bits in the x and y direction
+    /// @param deltaX the x distance to translate
+    /// @param deltaY the y distance to translate
+    /// @return four tiles with coords that are the result of the translation
+    function translate(
+        TileLib.Tile memory tile,
+        uint256 deltaX,
+        uint256 deltaY
+    ) internal pure returns (TranslateResult memory) {
+        (uint256[6] memory col1, uint256[6] memory col2) = tile.translate(deltaX % 24, deltaY % 24);
+        return
+            TranslateResult({
+                topLeft: TileWithCoordLib.init(deltaX, deltaY, col1[0], col1[1], col1[2]),
+                bottomLeft: TileWithCoordLib.init(deltaX, deltaY + 24, col1[3], col1[4], col1[5]),
+                topRight: TileWithCoordLib.init(deltaX + 24, deltaY, col2[0], col2[1], col2[2]),
+                bottomRight: TileWithCoordLib.init(deltaX + 24, deltaY + 24, col2[3], col2[4], col2[5])
+            });
+    }
+
+    function contain(
+        Map storage self,
+        uint256 x,
+        uint256 y
+    ) public view returns (bool) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !contains
+            return false;
+        }
+        return self.values[idx - 1].contain(x, y);
+    }
+
+    function contain(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) public view returns (bool) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !contains
+            return false;
+        }
+        return self.values[idx - 1].contain(x, y, size);
+    }
+
+    function contain(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (bool) {
+        if (tile.isEmpty()) {
+            return true;
+        }
+        uint256 key = tile.getKey();
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !contains
+            return false;
+        }
+        return self.values[idx - 1].tile.contain(tile.tile);
+    }
+
+    function contain(Map storage self, TranslateResult memory s) public view returns (bool) {
+        return
+            contain(self, s.topLeft) &&
+            contain(self, s.topRight) &&
+            contain(self, s.bottomLeft) &&
+            contain(self, s.bottomRight);
+    }
+
+    // self can be huge, but contained must be small, we iterate over contained values.
+    function contain(Map storage self, Map storage contained) public view returns (bool) {
+        for (uint256 i; i < contained.values.length; i++) {
+            if (!contain(self, contained.values[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function intersect(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (bool) {
+        if (tile.isEmpty()) {
+            return false;
+        }
+        uint256 key = tile.getKey();
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !contains
+            return false;
+        }
+        return self.values[idx - 1].tile.intersect(tile.tile);
+    }
+
+    function intersect(Map storage self, TranslateResult memory s) public view returns (bool) {
+        return
+            intersect(self, s.topLeft) &&
+            intersect(self, s.topRight) &&
+            intersect(self, s.bottomLeft) &&
+            intersect(self, s.bottomRight);
     }
 
     function isEmpty(Map storage self) public view returns (bool) {
@@ -263,7 +277,10 @@ library MapLib {
         return ret;
     }
 
-    // TODO: This can be problematic if it grows too much !!!
+    /// @notice return the internal array of tiles
+    /// @dev Use only for testing. This can be problematic if it grows too much !!!
+    /// @param self the map
+    /// @return the array of internal tiles
     function getMap(Map storage self) public view returns (TileWithCoordLib.TileWithCoord[] memory) {
         return self.values;
     }
@@ -271,19 +288,9 @@ library MapLib {
     function getLandCount(Map storage self) public view returns (uint256) {
         uint256 ret;
         for (uint256 i; i < self.values.length; i++) {
-            ret += self.values[i].getLandCount();
+            ret += self.values[i].countBits();
         }
         return ret;
-    }
-
-    function containTileAtCoord(
-        Map storage self,
-        uint256 x,
-        uint256 y
-    ) public view returns (bool) {
-        uint256 key = TileWithCoordLib.getKey(x, y);
-        uint256 idx = self.indexes[key];
-        return (idx != 0);
     }
 
     /// @dev Checks the full map to see if all the pixels are adjacent
@@ -295,7 +302,7 @@ library MapLib {
 
         TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);
         // We assume that all self.values[] are non empty (we remove them if they are empty).
-        spot[0] = self.values[0].findAPixel();
+        spot[0] = self.values[0].tile.findAPixel();
         bool done;
         while (!done) {
             (spot, done) = floodStep(self, spot);
@@ -303,7 +310,8 @@ library MapLib {
         uint256 len = self.values.length;
         uint256 i;
         for (; i < len; i++) {
-            if (!self.values[i].isEqualIgnoreCoords(spot[i])) {
+            // Check the tile ignoring coordinates
+            if (!self.values[i].tile.isEqual(spot[i])) {
                 return false;
             }
         }
@@ -403,7 +411,7 @@ library MapLib {
         //        TileWithCoordLib.TileWithCoord memory spot = TileWithCoordLib.initTileWithCoord(x, y);
         //        TileLib.ExtendedTile memory corners = spot.setQuad(x, y, size).grow();
         TileLib.Tile memory spot;
-        spot = spot.setQuad(x % 24, y % 24, size);
+        spot = spot.set(x % 24, y % 24, size);
         // left
         if (x >= 24) {
             idx = _getIdx(self, x - 24, y);
@@ -442,22 +450,22 @@ library MapLib {
         TileWithCoordLib.TileWithCoord[] calldata tiles
     ) public {
         for (uint256 i; i < tiles.length; i++) {
-            require(containTileWithCoord(from, tiles[i]), "Tile missing");
-            clearTileWithCoord(from, tiles[i]);
-            setTileWithCoord(to, tiles[i]);
+            require(contain(from, tiles[i]), "Tile missing");
+            clear(from, tiles[i]);
+            set(to, tiles[i]);
         }
     }
 
     function add(Map storage self, TileWithCoordLib.TileWithCoord[] calldata tiles) public {
         for (uint256 i; i < tiles.length; i++) {
-            setTileWithCoord(self, tiles[i]);
+            set(self, tiles[i]);
         }
     }
 
     function remove(Map storage self, TileWithCoordLib.TileWithCoord[] calldata tiles) public {
         for (uint256 i; i < tiles.length; i++) {
-            require(containTileWithCoord(self, tiles[i]), "Tile missing");
-            clearTileWithCoord(self, tiles[i]);
+            require(contain(self, tiles[i]), "Tile missing");
+            clear(self, tiles[i]);
         }
     }
 
@@ -468,16 +476,16 @@ library MapLib {
     ) public {
         require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
         for (uint256 i; i < quads[0].length; i++) {
-            require(containQuad(from, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
-            clearQuad(from, quads[1][i], quads[2][i], quads[0][i]);
-            setQuad(to, quads[1][i], quads[2][i], quads[0][i]);
+            require(contain(from, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            clear(from, quads[1][i], quads[2][i], quads[0][i]);
+            set(to, quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
     function add(Map storage self, uint256[][3] calldata quads) public {
         require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
         for (uint256 i; i < quads[0].length; i++) {
-            setQuad(self, quads[1][i], quads[2][i], quads[0][i]);
+            set(self, quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 
@@ -485,8 +493,8 @@ library MapLib {
         require(quads[0].length == quads[1].length && quads[0].length == quads[2].length, "Invalid data");
         for (uint256 i; i < quads[0].length; i++) {
             // TODO: We can skip this check ?
-            require(containQuad(self, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
-            clearQuad(self, quads[1][i], quads[2][i], quads[0][i]);
+            require(contain(self, quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            clear(self, quads[1][i], quads[2][i], quads[0][i]);
         }
     }
 

@@ -55,16 +55,18 @@ describe('MapLib flood', function () {
       const {tester} = await setupMapTest();
       await tester.setQuad(0, 12, 12, 6);
       await adjacentTest(tester);
-      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(118497))
-        .to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        118522
+      );
     });
     it('a square over two tiles', async function () {
       const {tester} = await setupMapTest();
       await tester.setQuad(0, 0, 12, 12);
       await tester.setQuad(0, 0, 24, 12);
       await adjacentTest(tester);
-      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(481577))
-        .to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        481577
+      );
     });
     it('a square over four tiles', async function () {
       const {tester} = await setupMapTest();
@@ -73,9 +75,9 @@ describe('MapLib flood', function () {
       await tester.setQuad(0, 24, 12, 12);
       await tester.setQuad(0, 24, 24, 12);
       await adjacentTest(tester);
-      expect(
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(1247425)
-      ).to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        1247425
+      );
     });
     it('four full tiles', async function () {
       const {tester} = await setupMapTest();
@@ -84,9 +86,9 @@ describe('MapLib flood', function () {
       await tester.setQuad(0, 24, 0, 24);
       await tester.setQuad(0, 24, 24, 24);
       await adjacentTest(tester);
-      expect(
-        BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(2298357)
-      ).to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        2298357
+      );
     });
   });
   describe('not adjacent', function () {
@@ -95,16 +97,18 @@ describe('MapLib flood', function () {
       await tester.setQuad(0, 6, 6, 6);
       await tester.setQuad(0, 18, 18, 6);
       await notAdjacentTest(tester);
-      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(127487))
-        .to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        127511
+      );
     });
     it('two squares in two different tiles', async function () {
       const {tester} = await setupMapTest();
       await tester.setQuad(0, 12, 12, 6);
       await tester.setQuad(0, 36, 36, 6);
       await notAdjacentTest(tester);
-      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0)).lte(145435))
-        .to.be.true;
+      expect(BigNumber.from(await tester.estimateGas.isAdjacent(0))).to.be.lte(
+        145443
+      );
     });
   });
 
@@ -123,7 +127,7 @@ describe('MapLib flood', function () {
       await pushAndSet(0, 24, 24);
       await pushAndSet(24, 0, 24);
       await pushAndSet(24, 24, 24);
-      expect(totalGas.lte(185883)).to.be.true;
+      expect(totalGas).to.be.lte(185883);
     });
     it('add 24x24 one by one', async function () {
       const {tester} = await setupMapTest();
@@ -135,7 +139,7 @@ describe('MapLib flood', function () {
           await tester.setQuad(0, x, y, 1);
         }
       }
-      expect(totalGas.lte(23019530)).to.be.true;
+      expect(totalGas).to.be.lte(23019530);
     });
     it('adjacent pixels', async function () {
       const {tester} = await setupMapTest();

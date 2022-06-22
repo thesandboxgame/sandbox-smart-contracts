@@ -14,7 +14,7 @@ contract TileTester {
         uint256 y,
         uint256 size
     ) external {
-        tiles[idx] = tiles[idx].setQuad(x, y, size);
+        tiles[idx] = tiles[idx].set(x, y, size);
     }
 
     function clearQuad(
@@ -23,7 +23,7 @@ contract TileTester {
         uint256 y,
         uint256 size
     ) external {
-        tiles[idx] = tiles[idx].clearQuad(x, y, size);
+        tiles[idx] = tiles[idx].clear(x, y, size);
     }
 
     function getTile(uint256 idx) external view returns (TileLib.Tile memory) {
@@ -56,6 +56,6 @@ contract TileTester {
         uint256 y,
         uint256 size
     ) external view returns (bool) {
-        return tiles[idx].containQuad(x, y, size);
+        return tiles[idx].contain(x, y, size);
     }
 }

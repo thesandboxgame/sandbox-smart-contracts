@@ -17,7 +17,7 @@ contract MockExperience is ERC721Mintable {
         uint256 y,
         uint256 size
     ) external {
-        tile = tile.setQuad(x, y, size);
+        tile = tile.set(x, y, size);
         landCoords = [x, y]; //? this will have to be top last always
     }
 

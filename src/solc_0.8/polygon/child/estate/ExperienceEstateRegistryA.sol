@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {EnumerableSet} from "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import {WithSuperOperators} from "../../../common/BaseWithStorage/WithSuperOperators.sol";
 import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import {EstateGameRecordLib} from "../../../estate/EstateGameRecordLib.sol";
@@ -9,7 +8,6 @@ import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
-import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import "hardhat/console.sol";
 
@@ -22,7 +20,6 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
     using EstateGameRecordLib for EstateGameRecordLib.Games;
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;
-    using EnumerableSet for EnumerableSet.UintSet;
 
     uint256 internal constant MAXLANDID = 166463;
 
@@ -78,14 +75,11 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
         if (landCoords.length == 1) {
             require(estateId == 0, "Invalid estate Id");
         } else {
-            TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
-            require(!linkedLands.intersectShiftResult(s), "already linked");
+            MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
+            require(!linkedLands.intersect(s), "already linked");
             // TODO: Maybe this one must take storageId directly
-            require(estateToken.containsShiftResult(estateId, s), "not enough land");
-            linkedLands.setTileWithCoord(s.topLeft);
-            linkedLands.setTileWithCoord(s.topRight);
-            linkedLands.setTileWithCoord(s.bottomLeft);
-            linkedLands.setTileWithCoord(s.bottomRight);
+            require(estateToken.contain(estateId, s), "not enough land");
+            linkedLands.set(s);
         }
 
         uint256 estStorageId = estateToken.getStorageId(estateId);
@@ -147,7 +141,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             uint256 landId = lands[i];
             uint256 x = landId % 408;
             uint256 y = landId / 408;
-            linkedLands.clearQuad(x, y, 1);
+            linkedLands.clear(x, y, 1);
             console.log("unlinking");
             console.log(landId);
             console.log("expXLand[landId].expId");
@@ -171,15 +165,15 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             links[expId].lands = [landOrEstateId];
             expXLand[landOrEstateId].expId = expId;
             // expXLand[landOrEstateId].estateId = 0;
-            linkedLands.setQuad(x, y, 1);
+            linkedLands.set(x, y, 1);
             //maybe we can set estateId = 0 for single lands
         } else {
             //estate
 
             (TileLib.Tile memory template, ) = experienceToken.getTemplate();
-            TileWithCoordLib.ShiftResult memory s = TileWithCoordLib.translateTile(template, x, y);
-            require(!linkedLands.intersectShiftResult(s), "already linked");
-            require(estateToken.containsShiftResult(landOrEstateId, s), "not enough land");
+            MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
+            require(!linkedLands.intersect(s), "already linked");
+            require(estateToken.contain(landOrEstateId, s), "not enough land");
 
             uint256 estStorageId = estateToken.getStorageId(landOrEstateId);
 
@@ -187,11 +181,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             links[expId].lands = [landOrEstateId];
             //humm
             expXLand[estStorageId].expId = expId;
-
-            linkedLands.setTileWithCoord(s.topLeft);
-            linkedLands.setTileWithCoord(s.topRight);
-            linkedLands.setTileWithCoord(s.bottomLeft);
-            linkedLands.setTileWithCoord(s.bottomRight);
+            linkedLands.set(s);
         }
     }
 }

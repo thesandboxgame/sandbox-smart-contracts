@@ -199,14 +199,9 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         return _landTileSet(storageId).at(offset, limit);
     }
 
-    function containsShiftResult(uint256 estateId, TileWithCoordLib.ShiftResult memory shiftResult)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function contain(uint256 estateId, MapLib.TranslateResult memory s) external view override returns (bool) {
         uint256 storageId = _storageId(estateId);
-        return _landTileSet(storageId).containsShiftResult(shiftResult);
+        return _landTileSet(storageId).contain(s);
     }
 
     function getLandCount(uint256 estateId) external view returns (uint256) {

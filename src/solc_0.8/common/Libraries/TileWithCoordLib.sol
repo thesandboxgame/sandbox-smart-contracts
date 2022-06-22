@@ -4,26 +4,18 @@ pragma solidity 0.8.2;
 
 import {TileLib} from "./TileLib.sol";
 
-// A square of 24x24 bits with coordinates
+/// @title A Tile (24x24 map piece) that also stores x,y coordinates and a combination of the two called key
+/// @dev Using a sparse array of TileWithCoords we build a bigger map covered with Tiles
 library TileWithCoordLib {
     using TileLib for TileLib.Tile;
-
-    // 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-    uint256 public constant COORD_MASK_NEG = (2**(24 * 8) - 1);
-
-    struct ShiftResult {
-        TileWithCoordLib.TileWithCoord topLeft;
-        TileWithCoordLib.TileWithCoord topRight;
-        TileWithCoordLib.TileWithCoord bottomLeft;
-        TileWithCoordLib.TileWithCoord bottomRight;
-    }
 
     struct TileWithCoord {
         TileLib.Tile tile;
     }
 
-    // TileWithCoord x and y always start in multiples of 24
-    function initTileWithCoord(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
+    /// @notice initialize the TileWithCoord structure
+    /// @return An empty Tile that has the x,y and corresponding key value set
+    function init(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
         ret.tile.data[0] = (getKey(x, y)) << 224;
         ret.tile.data[1] = (x / 24) << 224;
@@ -31,7 +23,9 @@ library TileWithCoordLib {
         return ret;
     }
 
-    function initTileWithCoord(
+    /// @notice initialize the TileWithCoord structure
+    /// @return An TileWithCoord that has the x,y, key and the Tile bit data set
+    function init(
         uint256 x,
         uint256 y,
         uint256 pixelData1,
@@ -39,229 +33,154 @@ library TileWithCoordLib {
         uint256 pixelData3
     ) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
-        ret.tile.data[0] = (pixelData1 & COORD_MASK_NEG) | ((getKey(x, y)) << 224);
-        ret.tile.data[1] = (pixelData2 & COORD_MASK_NEG) | ((x / 24) << 224);
-        ret.tile.data[2] = (pixelData3 & COORD_MASK_NEG) | ((y / 24) << 224);
+        ret.tile = ret.tile.init(pixelData1, pixelData2, pixelData3);
+        ret.tile.data[0] |= (getKey(x, y)) << 224;
+        ret.tile.data[1] |= (x / 24) << 224;
+        ret.tile.data[2] |= (y / 24) << 224;
         return ret;
     }
 
-    function setQuad(
+    /// @notice Set the bits inside a square that has size x size in the x,y coordinates
+    /// @param self the TileWithCoord in which the bits are set
+    /// @param xi the x coordinate of the square
+    /// @param yi the y coordinate of the square
+    /// @param size the size of the square
+    /// @return self with the corresponding bits set
+    function set(
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
         uint256 size
     ) internal pure returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        self.tile = self.tile.setQuad(xi % 24, yi % 24, size);
+        self.tile = self.tile.set(xi % 24, yi % 24, size);
         return self;
     }
 
-    function clearQuad(
+    /// @notice Clear the bits inside a square that has size x size in the x,y coordinates
+    /// @param self the TileWithCoord, in which the bits will be cleared
+    /// @param xi the x coordinate of the square
+    /// @param yi the y coordinate of the square
+    /// @param size the size of the square
+    /// @return self with the corresponding cleared bits
+    function clear(
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
         uint256 size
     ) internal pure returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        self.tile = self.tile.clearQuad(xi % 24, yi % 24, size);
+        self.tile = self.tile.clear(xi % 24, yi % 24, size);
         return self;
     }
 
+    /// @notice Calculates the union/addition of two TileWithCoord
+    /// @dev to be able to merge the two TileWithCoord must have the same coordinates
+    /// @param self one of the TileWithCoord to merge
+    /// @param value the second TileWithCoord to merge
+    /// @return the merge of the two TileWithCoord
     function merge(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
         self.tile = self.tile.or(value.tile);
         return self;
     }
 
+    /// @notice Calculates the subtraction of two TileWithCoord
+    /// @dev to be able to subtract them the two TileWithCoord must have the same coordinates
+    /// @param self the TileWithCoord to subtract from
+    /// @param value the TileWithCoord subtracted
+    /// @return the self with all the bits set in value cleared
     function subtract(TileWithCoord memory self, TileWithCoord memory value)
         internal
         pure
         returns (TileWithCoord memory)
     {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
-        self.tile.data[0] &= ~(value.tile.data[0] & COORD_MASK_NEG);
-        self.tile.data[1] &= ~(value.tile.data[1] & COORD_MASK_NEG);
-        self.tile.data[2] &= ~(value.tile.data[2] & COORD_MASK_NEG);
+        self.tile = self.tile.subtract(value.tile);
         return self;
     }
 
-    function containCoord(
+    /// @notice Check if the bit in certain coordinate is set or not
+    /// @param self the TileWithCoord where the check is done
+    /// @param xi the x coordinate
+    /// @param yi the  coordinate
+    /// @return true if the x,y coordinate bit is set or false if it is cleared
+    function contain(
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi
     ) internal pure returns (bool) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        return self.tile.containCoord(xi % 24, yi % 24);
+        return self.tile.contain(xi % 24, yi % 24);
     }
 
-    function containQuad(
+    /// @notice Check if the all the bits of a square inside the TileWithCoord are set or not
+    /// @param self the TileWithCoord where the check is done
+    /// @param xi the x coordinate of the square
+    /// @param yi the y coordinate of the square
+    /// @param size the size of the square
+    /// @return true if al the bits are set or false if at least one bit is cleared
+    function contain(
         TileWithCoord memory self,
         uint256 xi,
         uint256 yi,
         uint256 size
     ) internal pure returns (bool) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
-        return self.tile.containQuad(xi % 24, yi % 24, size);
+        return self.tile.contain(xi % 24, yi % 24, size);
     }
 
+    /// @notice return the key value stored in the TileWithCoord
+    /// @param self the TileWithCoord to get the key from
+    /// @return the key value
     function getKey(TileWithCoord memory self) internal pure returns (uint256) {
         return self.tile.data[0] >> 224;
     }
 
+    /// @notice return the x coordinate value stored in the TileWithCoord
+    /// @param self the TileWithCoord to get the x coordinate from
+    /// @return the x value
     function getX(TileWithCoord memory self) internal pure returns (uint256) {
         return self.tile.data[1] >> 224;
     }
 
+    /// @notice return the y coordinate value stored in the TileWithCoord
+    /// @param self the TileWithCoord to get the y coordinate from
+    /// @return the y value
     function getY(TileWithCoord memory self) internal pure returns (uint256) {
         return self.tile.data[2] >> 224;
     }
 
+    /// @notice helper to calculate the key value given the x,y coordinates
+    /// @param x the x coordinate
+    /// @param y the y coordinate
+    /// @return the key value
     function getKey(uint256 x, uint256 y) internal pure returns (uint256) {
         return (x / 24) | ((y / 24) << 16);
     }
 
-    function getLandCount(TileWithCoord memory self) internal pure returns (uint256) {
-        return _countBits(self.tile.data[0]) + _countBits(self.tile.data[1]) + _countBits(self.tile.data[2]);
+    /// @notice count the amount of bits set inside the TileWithCoord
+    /// @param self the TileWithCoord in which the bits are counted
+    /// @return the count of bits that are set
+    function countBits(TileWithCoord memory self) internal pure returns (uint256) {
+        return self.tile.countBits();
     }
 
+    /// @notice check if a TileWithCoord is empty, none of the bits are set
+    /// @param self the TileWithCoord to check
+    /// @return true if none of the bits are set
     function isEmpty(TileWithCoord memory self) internal pure returns (bool) {
-        return (self.tile.data[0] | self.tile.data[1] | self.tile.data[2]) & COORD_MASK_NEG == 0;
+        return self.tile.isEmpty();
     }
 
+    /// @notice Check if two TileWithCoord has exactly the same coordinates and bits set
+    /// @param self first TileWithCoord to compare
+    /// @param other second TileWithCoord to compare
+    /// @return true if the two TileWithCoord has the same coordinates and bits set
     function isEqual(TileWithCoord memory self, TileWithCoord memory other) internal pure returns (bool) {
         return
             self.tile.data[0] == other.tile.data[0] &&
             self.tile.data[1] == other.tile.data[1] &&
             self.tile.data[2] == other.tile.data[2];
-    }
-
-    function isEqualIgnoreCoords(TileWithCoord memory self, TileLib.Tile memory b) internal pure returns (bool) {
-        return
-            ((self.tile.data[0] ^ b.data[0]) | (self.tile.data[1] ^ b.data[1]) | (self.tile.data[2] ^ b.data[2])) &
-                COORD_MASK_NEG ==
-            0;
-    }
-
-    function findAPixel(TileWithCoord memory self) internal pure returns (TileLib.Tile memory ret) {
-        uint256 target;
-        uint256 shift;
-
-        target = self.tile.data[2] & COORD_MASK_NEG;
-        if (target != 0) {
-            shift = _findAPixel(target);
-            ret.data[2] = (1 << shift);
-            return ret;
-        }
-
-        target = self.tile.data[1] & COORD_MASK_NEG;
-        if (target != 0) {
-            shift = _findAPixel(target);
-            ret.data[1] = (1 << shift);
-            return ret;
-        }
-
-        target = self.tile.data[0] & COORD_MASK_NEG;
-        if (target != 0) {
-            shift = _findAPixel(target);
-            ret.data[0] = (1 << shift);
-        }
-        return ret;
-    }
-
-    function _findAPixel(uint256 target) private pure returns (uint256 shift) {
-        uint256 mask = (2**64 - 1);
-        // divide in 3 parts, then do a binary search
-        if ((target & mask) == 0) {
-            target = target >> 64;
-            shift = 64;
-            if ((target & mask) == 0) {
-                target = target >> 64;
-                shift = 128;
-            }
-        }
-        for (uint256 i = 32; i > 0; i = i / 2) {
-            mask = mask >> i;
-            if ((target & mask) == 0) {
-                target = target >> i;
-                shift += i;
-            }
-        }
-        return shift;
-    }
-
-    uint256 private constant DOWN_CARRY_MASK = 0xFFFFFF000000000000000000000000000000000000000000000000;
-
-    function translateTile(
-        TileLib.Tile memory tile,
-        uint256 deltaX,
-        uint256 deltaY
-    ) internal pure returns (ShiftResult memory) {
-        // TODO: optimization, move the tiles directly to _translateTile, check gas consumption.
-        (uint256[6] memory col1, uint256[6] memory col2) = _translateTile(tile, deltaX % 24, deltaY % 24);
-        return
-            ShiftResult({
-                topLeft: TileWithCoordLib.initTileWithCoord(deltaX, deltaY, col1[0], col1[1], col1[2]),
-                bottomLeft: TileWithCoordLib.initTileWithCoord(deltaX, deltaY + 24, col1[3], col1[4], col1[5]),
-                topRight: TileWithCoordLib.initTileWithCoord(deltaX + 24, deltaY, col2[0], col2[1], col2[2]),
-                bottomRight: TileWithCoordLib.initTileWithCoord(deltaX + 24, deltaY + 24, col2[3], col2[4], col2[5])
-            });
-    }
-
-    function _translateTile(
-        TileLib.Tile memory tile,
-        uint256 x,
-        uint256 y
-    ) private pure returns (uint256[6] memory col1, uint256[6] memory col2) {
-        // Move right
-        uint256 mask = _getXMask(x);
-        col1[0] = (tile.data[0] & mask) << x;
-        col1[1] = (tile.data[1] & mask) << x;
-        col1[2] = (tile.data[2] & mask) << x;
-        if (x > 0) {
-            mask = COORD_MASK_NEG - mask;
-            col2[0] = (tile.data[0] & mask) >> (24 - x);
-            col2[1] = (tile.data[1] & mask) >> (24 - x);
-            col2[2] = (tile.data[2] & mask) >> (24 - x);
-        }
-        // Move down
-        uint256 rem = 24 * (y % 8);
-        uint256 div = y / 8;
-        mask = COORD_MASK_NEG - (2**(24 * 8 - rem) - 1);
-        // TODO: optimization, remove the loop, check gas consumption
-        for (uint256 i = 5; i > div; i--) {
-            col1[i] = (col1[i - div] << rem) | ((col1[i - div - 1] & mask) >> (24 * 8 - rem));
-            col2[i] = (col2[i - div] << rem) | ((col2[i - div - 1] & mask) >> (24 * 8 - rem));
-        }
-        col1[div] = col1[0] << rem;
-        col2[div] = col2[0] << rem;
-        if (div > 0) {
-            col1[0] = 0;
-            col2[0] = 0;
-            if (div > 1) {
-                col1[1] = 0;
-                col2[1] = 0;
-            }
-        }
-        return (col1, col2);
-    }
-
-    function _getXMask(uint256 x) private pure returns (uint256) {
-        uint256 mask = (2**24 - 1) >> x;
-        mask |= mask << 24;
-        mask |= mask << (24 * 2);
-        mask |= mask << (24 * 4);
-        return mask;
-    }
-
-    // see: https://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
-    function _countBits(uint256 x) private pure returns (uint256) {
-        x = x - ((x >> 1) & 0x0000000000000000555555555555555555555555555555555555555555555555);
-        x =
-            (x & 0x0000000000000000333333333333333333333333333333333333333333333333) +
-            ((x >> 2) & 0x0000000000000000333333333333333333333333333333333333333333333333);
-        x = (x + (x >> 4)) & 0x00000000000000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F;
-        return
-            ((((x >> 96) * 0x010101010101010101010101) +
-                ((x & 0x0F0F0F0F0F0F0F0F0F0F0F0F) * 0x010101010101010101010101)) >> (11 * 8)) & 0xFF;
     }
 }

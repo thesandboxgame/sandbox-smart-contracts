@@ -38,7 +38,7 @@ describe('gas consumption of', function () {
           sizes.push(size);
         }
         const {gasUsed} = await createEstate({xs, ys, sizes});
-        expect(BigNumber.from(gasUsed).lte(gasPerSize[tileSize])).to.be.true;
+        expect(BigNumber.from(gasUsed)).to.be.lte(gasPerSize[tileSize]);
         // console.log(`\t${cant * tileSize * tileSize}\t`, gasUsed.toString());
       });
     }
@@ -80,7 +80,7 @@ describe('gas consumption of', function () {
         sizes.push(24);
       }
       const {gasUsed} = await createEstate({xs, ys, sizes});
-      expect(BigNumber.from(gasUsed).lte(gasPerCant[cant])).to.be.true;
+      expect(BigNumber.from(gasUsed)).to.be.lte(gasPerCant[cant]);
       // console.log(
       //   `\t ${cant} tiles == ${cant * 24} lands \t gas used`,
       //   gasUsed.toString()

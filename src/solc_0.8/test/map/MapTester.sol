@@ -12,23 +12,21 @@ contract MapTester {
     using TileLib for TileLib.Tile;
     MapLib.Map[30] internal maps;
 
-    // TileLib.ExtendedTile[10] internal neighbours;
-
     function setQuad(
         uint256 idx,
         uint256 x,
         uint256 y,
         uint256 size
     ) external {
-        maps[idx].setQuad(x, y, size);
+        maps[idx].set(x, y, size);
     }
 
     function setTileWithCoord(uint256 idx, TileWithCoordLib.TileWithCoord calldata tile) external {
-        maps[idx].setTileWithCoord(tile);
+        maps[idx].set(tile);
     }
 
     function setMap(uint256 idx, uint256 contained) external {
-        maps[idx].setMap(maps[contained]);
+        maps[idx].set(maps[contained]);
     }
 
     function clearQuad(
@@ -37,15 +35,15 @@ contract MapTester {
         uint256 y,
         uint256 size
     ) external {
-        maps[idx].clearQuad(x, y, size);
+        maps[idx].clear(x, y, size);
     }
 
     function clearTileWithCoord(uint256 idx, TileWithCoordLib.TileWithCoord calldata tile) external {
-        maps[idx].clearTileWithCoord(tile);
+        maps[idx].clear(tile);
     }
 
     function clearMap(uint256 idx, uint256 contained) external {
-        maps[idx].clearMap(maps[contained]);
+        maps[idx].clear(maps[contained]);
     }
 
     function clear(uint256 idx) external {
@@ -57,7 +55,7 @@ contract MapTester {
         uint256 x,
         uint256 y
     ) external view returns (bool) {
-        return maps[idx].containCoord(x, y);
+        return maps[idx].contain(x, y);
     }
 
     function containQuad(
@@ -66,7 +64,21 @@ contract MapTester {
         uint256 y,
         uint256 size
     ) external view returns (bool) {
-        return maps[idx].containQuad(x, y, size);
+        return maps[idx].contain(x, y, size);
+    }
+
+    function containMap(uint256 idx, uint256 contained) external view returns (bool) {
+        return maps[idx].contain(maps[contained]);
+    }
+
+    function containTileWithOffset(
+        uint256 idx,
+        TileLib.Tile calldata tile,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        MapLib.TranslateResult memory s = MapLib.translate(tile, x, y);
+        return maps[idx].contain(s);
     }
 
     function isAdjacent(uint256 idx) external view returns (bool) {
@@ -106,20 +118,16 @@ contract MapTester {
     {
         current = maps[idx].values;
         next = new TileLib.Tile[](current.length);
-        next[0] = current[0].findAPixel();
+        next[0] = current[0].tile.findAPixel();
         return (current, next, done);
     }
 
     function findAPixel(uint256 idx) external view returns (TileLib.Tile memory tile) {
-        return maps[idx].values[0].findAPixel();
-    }
-
-    function containMap(uint256 idx, uint256 contained) external view returns (bool) {
-        return maps[idx].containMap(maps[contained]);
+        return maps[idx].values[0].tile.findAPixel();
     }
 
     function isEqual(uint256 idx, uint256 other) external view returns (bool) {
-        return maps[idx].isEqual(maps[other].getMap());
+        return maps[idx].isEqual(maps[other]);
     }
 
     function length(uint256 idx) external view returns (uint256) {
@@ -130,29 +138,16 @@ contract MapTester {
         return maps[idx].at(index);
     }
 
-    function containTileAtCoord(
-        uint256 idx,
-        uint256 x,
-        uint256 y
-    ) external view returns (bool) {
-        return maps[idx].containTileAtCoord(x, y);
-    }
-
-    function containTileWithOffset(
-        uint256 idx,
-        TileLib.Tile calldata tile,
-        uint256 x,
-        uint256 y
-    ) external view returns (bool) {
-        return maps[idx].containTileWithOffset(tile, x, y);
+    function getMap(uint256 idx) external view returns (TileWithCoordLib.TileWithCoord[] memory) {
+        return maps[idx].getMap();
     }
 
     function shift(
         TileLib.Tile calldata t,
         uint256 x,
         uint256 y
-    ) external pure returns (TileWithCoordLib.ShiftResult memory) {
-        return TileWithCoordLib.translateTile(t, x, y);
+    ) external pure returns (MapLib.TranslateResult memory) {
+        return MapLib.translate(t, x, y);
     }
 
     function getLandCount(uint256 idx) external view returns (uint256) {

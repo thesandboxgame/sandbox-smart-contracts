@@ -15,7 +15,7 @@ contract TileWithCoordTester {
         uint256 x,
         uint256 y
     ) external {
-        tiles[idx] = TileWithCoordLib.initTileWithCoord(x, y);
+        tiles[idx] = TileWithCoordLib.init(x, y);
     }
 
     function setQuad(
@@ -24,7 +24,7 @@ contract TileWithCoordTester {
         uint256 y,
         uint256 size
     ) external {
-        tiles[idx] = tiles[idx].setQuad(x, y, size);
+        tiles[idx] = tiles[idx].set(x, y, size);
     }
 
     function clearQuad(
@@ -33,7 +33,7 @@ contract TileWithCoordTester {
         uint256 y,
         uint256 size
     ) external {
-        tiles[idx] = tiles[idx].clearQuad(x, y, size);
+        tiles[idx] = tiles[idx].clear(x, y, size);
     }
 
     function merge(uint256 src, uint256 value) external {
@@ -50,7 +50,7 @@ contract TileWithCoordTester {
         uint256 y,
         uint256 size
     ) external view returns (bool) {
-        return tiles[idx].containQuad(x, y, size);
+        return tiles[idx].contain(x, y, size);
     }
 
     function getTile(uint256 idx) external view returns (TileWithCoordLib.TileWithCoord memory) {
@@ -70,7 +70,7 @@ contract TileWithCoordTester {
     }
 
     function getLandCount(uint256 idx) external view returns (uint256) {
-        return tiles[idx].getLandCount();
+        return tiles[idx].countBits();
     }
 
     function countBits(uint256 x) external pure returns (uint256) {
@@ -93,7 +93,7 @@ contract TileWithCoordTester {
     }
 
     function setFindAPixel(uint256 idx, uint256 out) external {
-        tiles[out].tile = tiles[idx].findAPixel();
+        tiles[out].tile = tiles[idx].tile.findAPixel();
     }
 
     struct ExtendedTile {
@@ -105,7 +105,7 @@ contract TileWithCoordTester {
     }
 
     function isAdjacent(uint256 idx) external view returns (bool ret) {
-        TileLib.Tile memory next = tiles[idx].findAPixel();
+        TileLib.Tile memory next = tiles[idx].tile.findAPixel();
         ExtendedTile memory current;
         bool done;
         while (!done) {
@@ -120,14 +120,6 @@ contract TileWithCoordTester {
 
     function grow(uint256 idx) external view returns (ExtendedTile memory e) {
         return _grow(tiles[idx].tile);
-    }
-
-    function shift(
-        TileLib.Tile calldata t,
-        uint256 x,
-        uint256 y
-    ) external pure returns (TileWithCoordLib.ShiftResult memory) {
-        return TileWithCoordLib.translateTile(t, x, y);
     }
 
     uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;

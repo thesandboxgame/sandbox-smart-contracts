@@ -26,7 +26,7 @@ contract EstateGameRecordLibTester {
         uint256 y,
         uint256 size
     ) external {
-        games[idx].getMap(gameId).setQuad(x, y, size);
+        games[idx].getMap(gameId).set(x, y, size);
     }
 
     function setTileWithCoord(
@@ -34,7 +34,7 @@ contract EstateGameRecordLibTester {
         uint256 gameId,
         TileWithCoordLib.TileWithCoord calldata tile
     ) external {
-        games[idx].getMap(gameId).setTileWithCoord(tile);
+        games[idx].getMap(gameId).set(tile);
     }
 
     function setMap(
@@ -42,7 +42,7 @@ contract EstateGameRecordLibTester {
         uint256 gameId,
         uint256 contained
     ) external {
-        games[idx].getMap(gameId).setMap(games[idx].getMap(contained));
+        games[idx].getMap(gameId).set(games[idx].getMap(contained));
     }
 
     function clearQuad(
@@ -52,7 +52,7 @@ contract EstateGameRecordLibTester {
         uint256 y,
         uint256 size
     ) external {
-        games[idx].getMap(gameId).clearQuad(x, y, size);
+        games[idx].getMap(gameId).clear(x, y, size);
     }
 
     function clearTileWithCoord(
@@ -60,7 +60,7 @@ contract EstateGameRecordLibTester {
         uint256 gameId,
         TileWithCoordLib.TileWithCoord calldata tile
     ) external {
-        games[idx].getMap(gameId).clearTileWithCoord(tile);
+        games[idx].getMap(gameId).clear(tile);
     }
 
     function clearMap(
@@ -68,7 +68,7 @@ contract EstateGameRecordLibTester {
         uint256 gameId,
         uint256 contained
     ) external {
-        games[idx].getMap(gameId).clearMap(games[idx].getMap(contained));
+        games[idx].getMap(gameId).clear(games[idx].getMap(contained));
     }
 
     function clear(uint256 idx, uint256 gameId) external {
@@ -121,7 +121,7 @@ contract EstateGameRecordLibTester {
         uint256 x,
         uint256 y
     ) external view returns (bool) {
-        return games[idx].getMap(gameId).containCoord(x, y);
+        return games[idx].getMap(gameId).contain(x, y);
     }
 
     function containQuad(
@@ -131,7 +131,7 @@ contract EstateGameRecordLibTester {
         uint256 y,
         uint256 size
     ) external view returns (bool) {
-        return games[idx].getMap(gameId).containQuad(x, y, size);
+        return games[idx].getMap(gameId).contain(x, y, size);
     }
 
     function containMap(
@@ -139,7 +139,7 @@ contract EstateGameRecordLibTester {
         uint256 gameId,
         uint256 contained
     ) external view returns (bool) {
-        return games[idx].getMap(gameId).containMap(games[idx].getMap(contained));
+        return games[idx].getMap(gameId).contain(games[idx].getMap(contained));
     }
 
     function isEqual(
@@ -148,14 +148,5 @@ contract EstateGameRecordLibTester {
         uint256 other
     ) external view returns (bool) {
         return games[idx].getMap(gameId).isEqual(games[idx].getMap(other));
-    }
-
-    function containTileAtCoord(
-        uint256 idx,
-        uint256 gameId,
-        uint256 x,
-        uint256 y
-    ) external view returns (bool) {
-        return games[idx].getMap(gameId).containTileAtCoord(x, y);
     }
 }
