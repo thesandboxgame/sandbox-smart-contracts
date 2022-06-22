@@ -12,8 +12,6 @@ import "../common/interfaces/IERC721Token.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
-    uint256 private constant NFT_SUPPLY = 1;
-
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
 
