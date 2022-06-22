@@ -7,7 +7,7 @@ import {TileLib} from "../common/Libraries/TileLib.sol";
 contract MockExperience is ERC721Mintable {
     using TileLib for TileLib.Tile;
     TileLib.Tile internal tile;
-    uint256[] landCoords;
+    uint256[] public landCoords;
 
     // solhint-disable-next-line no-empty-blocks
     constructor() ERC721Mintable("Experience", "Exp") {}

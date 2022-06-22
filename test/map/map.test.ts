@@ -195,16 +195,14 @@ describe('MapLib main', function () {
       }
     });
   });
-  it('land count', async function () {
+  it('gas usage of land count', async function () {
     const {tester} = await setupMapTest();
     for (let i = 0; i < 10; i++) {
       await tester.setQuad(0, i * 24, 0, 1);
     }
     expect(await tester.getLandCount(0)).to.be.equal(10);
-    console.log(
-      'Gas used',
-      BigNumber.from(await tester.estimateGas.getLandCount(0)).toString()
-    );
+    expect(BigNumber.from(await tester.estimateGas.getLandCount(0)).lte(120925))
+      .to.be.true;
   });
 
   // TODO: Add more tests, specially for clear, grid like things, etc...

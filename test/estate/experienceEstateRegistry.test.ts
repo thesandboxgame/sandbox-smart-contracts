@@ -119,7 +119,7 @@ describe('experience estate registry test', function () {
         estateContractAsOther.address,
         quadId
       );
-      const {estateId, gasUsed} = await createEstate({
+      const {estateId} = await createEstate({
         sizes: [24],
         xs: [48],
         ys: [96],

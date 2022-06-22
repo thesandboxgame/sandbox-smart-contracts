@@ -6,7 +6,6 @@ import {ICheckpointManager} from "fx-portal/contracts/tunnel/FxBaseRootTunnel.so
 import {EstateTunnel} from "./EstateTunnel.sol";
 import {EstateTokenV1} from "./EstateTokenV1.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
-import "hardhat/console.sol";
 
 contract MockEstateTunnel is EstateTunnel {
     constructor(
@@ -28,7 +27,7 @@ contract MockEstateTunnel is EstateTunnel {
         uint256 len = EstateTokenV1(rootToken).getLandLength(estateId);
         TileWithCoordLib.TileWithCoord[] memory freeLands = EstateTokenV1(rootToken).getLandAt(estateId, 0, len);
         bytes memory message = abi.encode(to, metadata, freeLands);
-        console.log("MESSAGE SIZE:", message.length);
+        // console.log("MESSAGE SIZE:", message.length);
         return message;
     }
 }

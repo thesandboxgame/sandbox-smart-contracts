@@ -202,7 +202,7 @@ describe('TileWithCoordLib main', function () {
         }
       }
     });
-    it('shift a figure', async function () {
+    it('gas usage for figure translation', async function () {
       const tester = await setupTileWithCoordsLibTest();
       const tile = drawTile(
         [
@@ -213,12 +213,11 @@ describe('TileWithCoordLib main', function () {
       );
       await setTileQuads(tester, tile);
       const t = await tester.getTile(0);
-      console.log(
-        'tileWithCoord shift gas used',
-        BigNumber.from(
-          await tester.estimateGas.shift(t.tile, 23, 23)
-        ).toString()
-      );
+      expect(
+        BigNumber.from(await tester.estimateGas.shift(t.tile, 23, 23)).lte(
+          35544
+        )
+      ).to.be.true;
     });
   });
 
@@ -268,11 +267,14 @@ describe('TileWithCoordLib main', function () {
 
       await tester.setQuad(0, 0, 0, 24);
       expect(await tester.getLandCount(0)).to.be.equal(24 * 24);
-      // console.log(
-      //   'Gas used in one tile',
-      //   BigNumber.from(await tester.estimateGas.getLandCount(0)).toString()
-      // );
+    });
+    it('Gas used in one tile', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+
+      await tester.setQuad(0, 0, 0, 24);
+      expect(
+        BigNumber.from(await tester.estimateGas.getLandCount(0)).lte(30268)
+      ).to.be.true;
     });
   });
-  // TODO: Add more tests, specially for clear, grid like things, etc...
 });
