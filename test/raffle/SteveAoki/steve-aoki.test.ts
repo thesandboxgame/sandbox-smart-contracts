@@ -30,7 +30,7 @@ describe('RaffleSteveAoki', function () {
     assert.equal(transferEvents.length, 1);
   });
 
-  it('should be able to mint 10_000 different tokens', async function () {
+  it.skip('should be able to mint 10_000 different tokens', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
@@ -77,7 +77,7 @@ describe('RaffleSteveAoki', function () {
     }
   });
 
-  it('should be able to mint 10_000 different tokens in 3 waves', async function () {
+  it.skip('should be able to mint 10_000 different tokens in 3 waves', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
@@ -130,7 +130,7 @@ describe('RaffleSteveAoki', function () {
     assert.equal(tokens.length, 10000);
   });
 
-  it('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
