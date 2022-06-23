@@ -1,13 +1,7 @@
-// import {expect} from 'chai';
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
-import {waitFor} from '../../utils';
-
 import {raffleSignWallet, setupRaffle, zeroAddress, assert} from './fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('RaffleSteveAoki', function () {
+describe('RaffleSteveAoki', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       raffleSteveAokiContract,
