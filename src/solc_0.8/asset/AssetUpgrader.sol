@@ -79,19 +79,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         _changeCatalyst(from, tokenId, catalystId, gemIds, to, false);
     }
 
-    // TODO tests
-    // function extractAndAddGems(
-    //     address from,
-    //     uint256 assetId,
-    //     uint16[] calldata gemIds,
-    //     address to
-    // ) external override returns (uint256 tokenId) {
-    //     require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-    //     require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-    //     tokenId = _asset.extractERC721From(from, assetId, from);
-    //     _addGems(from, assetId, gemIds, to);
-    // }
-
     /// @notice associate a new catalyst to a non-fungible Asset token.
     /// @param from address from which the Asset token belongs to.
     /// @param assetId tokenId of the Asset being updated.
@@ -195,7 +182,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         uint256 assetId,
         bool isERC1155
     ) internal {
-        // TODO: ensure always assetERC1155?
         if (isERC1155) {
             if (from != to) {
                 _assetERC1155.safeTransferFrom(from, to, assetId, 1, "");
