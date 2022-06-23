@@ -133,7 +133,7 @@ describe.only('RaffleSteveAoki', function () {
         }
       }
     }
-    assert.equal(tokens.length, 10000);
+    assert.equal(tokens.length, 3333);
   });
 
   it('should be able to mint 3_333 different tokens in 3 waves in 3 txs', async function () {
@@ -187,6 +187,6 @@ describe.only('RaffleSteveAoki', function () {
         }
       }
     }
-    assert.equal(tokens.length, 10000);
+    assert.equal(tokens.length, 3333);
   });
 });
