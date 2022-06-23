@@ -1,5 +1,12 @@
 import {setupL2EstateGameAndLand} from './fixtures';
 import {expect} from '../chai-setup';
+import {
+  printMap,
+  printTile,
+  printTileWithCoord,
+  tileToArray,
+  tileWithCoordToJS,
+} from '../map/fixtures';
 
 describe('experience estate registry test', function () {
   describe('single land links type A storage', function () {
@@ -131,6 +138,59 @@ describe('experience estate registry test', function () {
         gameId,
         estateId
       );
+    });
+    it(`create a link between an estate and an experience with a more complex shape`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        gameContract,
+      } = await setupL2EstateGameAndLand();
+
+      const gameId = 123;
+
+      await mintQuad(other, 1, 0, 2);
+      await mintQuad(other, 1, 1, 2);
+      await mintQuad(other, 1, 2, 2);
+      await mintQuad(other, 1, 1, 1);
+      await mintQuad(other, 1, 1, 3);
+
+      await gameContract.setQuad(0, 2, 1);
+      await gameContract.setQuad(1, 2, 1);
+      await gameContract.setQuad(2, 2, 1);
+      await gameContract.setQuad(1, 1, 1);
+      await gameContract.setQuad(1, 3, 1);
+
+      const template = await gameContract.getTemplate();
+      const tta = tileToArray(template[0].data);
+      printTile(tta);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        true
+      );
+
+      const {estateId} = await createEstate({
+        sizes: [1, 1, 1, 1, 1],
+        xs: [0, 1, 2, 1, 1],
+        ys: [2, 2, 2, 1, 3],
+      });
+
+      const landInEstate = await estateContractAsOther.getLandAt(
+        estateId,
+        0,
+        1
+      );
+
+      const map1 = landInEstate[0];
+      const twjs = tileWithCoordToJS(map1);
+      printTileWithCoord(twjs);
+
+      await experienceEstateRegistryContract.link(gameId, estateId, 0, 0);
     });
   });
   describe('Link and unlink', function () {

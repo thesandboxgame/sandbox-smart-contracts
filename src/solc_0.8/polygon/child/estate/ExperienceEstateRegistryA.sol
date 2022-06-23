@@ -50,7 +50,8 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
     mapping(uint256 => EstateAndLands) internal links;
 
     // Land Id => ExpAndEstate
-    mapping(uint256 => ExpAndEstate) internal expXLand;
+    //changed from ExpAndEstate to uint256 just for expId
+    mapping(uint256 => uint256) internal expXLand;
     MapLib.Map internal linkedLands;
 
     constructor(
@@ -89,7 +90,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             // TODO: Check that the template + deltas don't make a mess....
             uint256 landId = landCoords[i] + x + (y * 408);
             links[expId].lands.push(landId);
-            expXLand[landId].expId = expId;
+            expXLand[landId] = expId;
         }
     }
 
@@ -100,7 +101,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
     }
 
     function unLinkByLandId(uint256 landId) external override {
-        uint256 expId = expXLand[landId].expId;
+        uint256 expId = expXLand[landId];
         require(expId != 0, "unkown land");
         //if we try to access data from an nonexisting land we'll get 0
         //we can use an EnumerableSet with tryget, or set another estateId for single lands
@@ -121,7 +122,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
                     // calculate all the land Ids of the quad.
                     uint256 landId = (x + xs[i]) + (y + ys[i]) * 408;
                     // For each land Id get the experienceId and then related lands
-                    uint256 expId = expXLand[landId].expId;
+                    uint256 expId = expXLand[landId];
                     console.log("expId");
                     console.log(expId);
                     // TODO: 1. this is valid ?
@@ -144,7 +145,6 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             linkedLands.clear(x, y, 1);
             console.log("unlinking");
             console.log(landId);
-            console.log("expXLand[landId].expId");
             delete expXLand[landId];
         }
     }
@@ -160,10 +160,10 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
 
         if (landOrEstateId < MAXLANDID) {
             require(links[expId].lands.length == 0, "Exp already in use");
-            require(expXLand[landOrEstateId].expId == 0, "Land already in use");
+            require(expXLand[landOrEstateId] == 0, "Land already in use");
             links[expId].estateId = 0;
             links[expId].lands = [landOrEstateId];
-            expXLand[landOrEstateId].expId = expId;
+            expXLand[landOrEstateId] = expId;
             // expXLand[landOrEstateId].estateId = 0;
             linkedLands.set(x, y, 1);
             //maybe we can set estateId = 0 for single lands
@@ -180,7 +180,7 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             links[expId].estateId = estStorageId;
             links[expId].lands = [landOrEstateId];
             //humm
-            expXLand[estStorageId].expId = expId;
+            expXLand[estStorageId] = expId;
             linkedLands.set(s);
         }
     }
