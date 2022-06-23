@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
@@ -82,7 +82,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         (estateId, storageId) = _mintToken(_msgSender());
         _s().metaData[storageId] = metaData;
         _addLand(_msgSender(), estateId, storageId, landToAdd);
-        _landTileSet(storageId).add(landToAdd);
         require(_landTileSet(storageId).isAdjacent(), "not adjacent");
         emit EstateTokenCreated(estateId, landToAdd, metaData);
         return (estateId, storageId);
@@ -151,7 +150,11 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         (uint256 estateId, uint256 storageId) = _mintToken(from);
         _s().metaData[storageId] = metaData;
-        _landTileSet(storageId).add(tiles);
+        uint256 len = tiles.length;
+        MapLib.Map storage map = _landTileSet(storageId);
+        for (uint256 i; i < len; i++) {
+            map.set(tiles[i]);
+        }
         emit EstateTokenMinted(estateId, metaData, tiles);
         return estateId;
     }
@@ -254,21 +257,16 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         address from,
         uint256,
         uint256 storageId,
-        uint256[][3] calldata landToAdd
+        uint256[][3] calldata quads
     ) internal {
-        // batchTransferQuad does that for us
-        // require(quadsToAdd[0].length == quadsToAdd[1].length && quadsToAdd[0].length == quadsToAdd[2].length, "Invalid data");
-        // require(quadsToRemove[0].length == quadsToRemove[1].length && quadsToRemove[0].length == quadsToRemove[2].length, "Invalid data");
-        if (landToAdd[0].length > 0) {
-            _landTileSet(storageId).add(landToAdd);
-            ILandToken(_s().landToken).batchTransferQuad(
-                from,
-                address(this),
-                landToAdd[0],
-                landToAdd[1],
-                landToAdd[2],
-                ""
-            );
+        uint256 len = quads[0].length;
+        if (len > 0) {
+            require(len == quads[1].length && len == quads[2].length, "Invalid data");
+            MapLib.Map storage map = _landTileSet(storageId);
+            for (uint256 i; i < len; i++) {
+                map.set(quads[1][i], quads[2][i], quads[0][i]);
+            }
+            ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
         }
     }
 
@@ -276,17 +274,16 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         address to,
         uint256,
         uint256 storageId,
-        uint256[][3] calldata landToRemove
+        uint256[][3] calldata quads
     ) internal virtual {
-        _landTileSet(storageId).remove(landToRemove);
-        ILandToken(_s().landToken).batchTransferQuad(
-            address(this),
-            to,
-            landToRemove[0],
-            landToRemove[1],
-            landToRemove[2],
-            ""
-        );
+        uint256 len = quads[0].length;
+        require(len == quads[1].length && len == quads[2].length, "Invalid data");
+        MapLib.Map storage map = _landTileSet(storageId);
+        for (uint256 i; i < len; i++) {
+            require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            map.clear(quads[1][i], quads[2][i], quads[0][i]);
+        }
+        ILandToken(_s().landToken).batchTransferQuad(address(this), to, quads[0], quads[1], quads[2], "");
     }
 
     function _mintToken(address from) internal returns (uint256 estateId, uint256 storageId) {

@@ -40,8 +40,8 @@ contract TileWithCoordTester {
         tiles[src] = tiles[src].merge(tiles[value]);
     }
 
-    function subtract(uint256 src, uint256 value) external {
-        tiles[src] = tiles[src].subtract(tiles[value]);
+    function clear(uint256 src, uint256 value) external {
+        tiles[src] = tiles[src].clear(tiles[value]);
     }
 
     function containQuad(

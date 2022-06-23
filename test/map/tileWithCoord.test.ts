@@ -95,7 +95,7 @@ describe('TileWithCoordLib main', function () {
     await tester.initTileWithCoord(outIdx, right, top);
     await tester.setQuad(outIdx, right, top, 24); // all ones
     for (let idx = 0; idx < tests.length; idx++) {
-      await tester.subtract(outIdx, idx + 1);
+      await tester.clear(outIdx, idx + 1);
     }
     const result = tileWithCoordToJS(await tester.getTile(outIdx));
     expect(result).to.be.eql(tile);

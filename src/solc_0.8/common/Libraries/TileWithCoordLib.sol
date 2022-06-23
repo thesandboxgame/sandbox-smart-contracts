@@ -90,17 +90,13 @@ library TileWithCoordLib {
     /// @param self the TileWithCoord to subtract from
     /// @param value the TileWithCoord subtracted
     /// @return the self with all the bits set in value cleared
-    function subtract(TileWithCoord memory self, TileWithCoord memory value)
-        internal
-        pure
-        returns (TileWithCoord memory)
-    {
+    function clear(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
         require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
         self.tile = self.tile.subtract(value.tile);
         return self;
     }
 
-    /// @notice Check if the bit in certain coordinate is set or not
+    /// @notice Check if the bit in certain coordinate are set or not in the TileWithCoord
     /// @param self the TileWithCoord where the check is done
     /// @param xi the x coordinate
     /// @param yi the  coordinate

@@ -75,22 +75,25 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
         address to,
         uint256,
         uint256 storageId,
-        uint256[][3] calldata landToRemove
+        uint256[][3] calldata quads
     ) internal override {
-        _landTileSet(storageId).remove(landToRemove);
-        if (address(_ps().registryToken) != address(0)) {
-            _ps().registryToken.unLinkExperience(landToRemove);
-        }
-        uint256 len = landToRemove.length;
+        uint256 len = quads[0].length;
+        require(len == quads[1].length && len == quads[2].length, "Invalid data");
+        MapLib.Map storage map = _landTileSet(storageId);
         for (uint256 i; i < len; i++) {
-            uint256 size = landToRemove[0][i];
-            uint256 x = landToRemove[1][i];
-            uint256 y = landToRemove[2][i];
+            require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            map.clear(quads[1][i], quads[2][i], quads[0][i]);
+            uint256 size = quads[0][i];
+            uint256 x = quads[1][i];
+            uint256 y = quads[2][i];
             if (!IPolygonLand(_s().landToken).exists(size, x, y)) {
                 IPolygonLand(_s().landToken).mint(to, size, x, y, "");
             } else {
                 IPolygonLand(_s().landToken).transferQuad(address(this), to, size, x, y, "");
             }
+        }
+        if (address(_ps().registryToken) != address(0)) {
+            _ps().registryToken.unLinkExperience(quads);
         }
     }
 
