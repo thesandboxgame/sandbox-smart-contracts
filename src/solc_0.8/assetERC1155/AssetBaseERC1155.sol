@@ -243,7 +243,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @return the index/order at which the token `id` was minted in a collection.
     function collectionIndexOf(uint256 id) public view returns (uint256) {
         collectionOf(id); // this check if id and collection indeed was ever minted
-        return uint32((id & ERC1155ERC721Helper.NFT_INDEX) >> ERC1155ERC721Helper.NFT_INDEX_OFFSET);
+        return uint32(id & ERC1155ERC721Helper.PACK_INDEX);
     }
 
     function wasEverMinted(uint256 id) public view returns (bool) {
