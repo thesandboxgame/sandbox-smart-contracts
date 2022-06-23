@@ -2,7 +2,7 @@ import {setupL1EstateAndLand} from './fixtures';
 import {BigNumber, ethers} from 'ethers';
 import {expect} from '../chai-setup';
 
-describe('gas consumption of', function () {
+describe('@skip-on-coverage gas consumption of', function () {
   describe('createEstate for a completely filled tile with a lot of lands', function () {
     const gasPerSize: {[key: string]: number} = {
       1: 23068226,

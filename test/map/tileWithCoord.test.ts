@@ -202,7 +202,7 @@ describe('TileWithCoordLib main', function () {
       await tester.setQuad(0, 0, 0, 24);
       expect(await tester.getLandCount(0)).to.be.equal(24 * 24);
     });
-    it('Gas used in one tile', async function () {
+    it('@skip-on-coverage Gas used in one tile', async function () {
       const tester = await setupTileWithCoordsLibTest();
 
       await tester.setQuad(0, 0, 0, 24);

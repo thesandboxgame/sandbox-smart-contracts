@@ -64,14 +64,14 @@ export function extendedTileToArray(data: ExtendedTile): boolean[][] {
   return ret;
 }
 
-type ShiftResult = {
+type TranslateResult = {
   topLeft: {tile: Tile};
   topRight: {tile: Tile};
   bottomLeft: {tile: Tile};
   bottomRight: {tile: Tile};
 };
 
-export function shiftResultToArray(data: ShiftResult): boolean[][] {
+export function translateResultToArray(data: TranslateResult): boolean[][] {
   const ret = [];
   const topLeft = tileToArray(data.topLeft.tile.data);
   const topRight = tileToArray(data.topRight.tile.data);
@@ -86,7 +86,7 @@ export function shiftResultToArray(data: ShiftResult): boolean[][] {
   return ret;
 }
 
-export function getEmptyShiftResult(): boolean[][] {
+export function getEmptyTranslateResult(): boolean[][] {
   return getEmptyTile(48, 48);
 }
 

@@ -2,13 +2,13 @@ import {expect} from '../chai-setup';
 import {
   createTestMapQuads,
   drawTile,
-  getEmptyShiftResult,
   getEmptyTile,
+  getEmptyTranslateResult,
   printMap,
   setRectangle,
   setTileQuads,
   setupMapTest,
-  shiftResultToArray,
+  translateResultToArray,
 } from './fixtures';
 import {BigNumber} from 'ethers';
 
@@ -175,7 +175,7 @@ describe('MapLib main', function () {
         }
       }
     });
-    it('gas usage of land count', async function () {
+    it('@skip-on-coverage gas usage of land count', async function () {
       const {tester} = await setupMapTest();
       for (let i = 0; i < 10; i++) {
         await tester.setQuad(0, i * 24, 0, 1);
@@ -194,8 +194,10 @@ describe('MapLib main', function () {
         const tests = [0, 1, 7, 8, 9, 12, 16, 23];
         for (const x of tests) {
           for (const y of tests) {
-            const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
-            const result = getEmptyShiftResult();
+            const ret = translateResultToArray(
+              await tester.shift(t.tile, x, y)
+            );
+            const result = getEmptyTranslateResult();
             result[y][x] = true;
             expect(ret).to.be.eql(result);
           }
@@ -208,8 +210,16 @@ describe('MapLib main', function () {
         const tests = [0, 1, 7, 8, 9, 12, 16, 23];
         for (const x of tests) {
           for (const y of tests) {
-            const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
-            const result = setRectangle(getEmptyShiftResult(), x, y, 24, 24);
+            const ret = translateResultToArray(
+              await tester.shift(t.tile, x, y)
+            );
+            const result = setRectangle(
+              getEmptyTranslateResult(),
+              x,
+              y,
+              24,
+              24
+            );
             expect(ret).to.be.eql(result);
           }
         }
@@ -221,13 +231,21 @@ describe('MapLib main', function () {
         const tests = [0, 1, 7, 8, 9, 12, 16, 23];
         for (const x of tests) {
           for (const y of tests) {
-            const ret = shiftResultToArray(await tester.shift(t.tile, x, y));
-            const result = setRectangle(getEmptyShiftResult(), x, y, 24, 24);
+            const ret = translateResultToArray(
+              await tester.shift(t.tile, x, y)
+            );
+            const result = setRectangle(
+              getEmptyTranslateResult(),
+              x,
+              y,
+              24,
+              24
+            );
             expect(ret).to.be.eql(result);
           }
         }
       });
-      it('gas usage for figure translation', async function () {
+      it('@skip-on-coverage gas usage for figure translation', async function () {
         const {tester} = await setupMapTest();
         const tile = drawTile(
           [

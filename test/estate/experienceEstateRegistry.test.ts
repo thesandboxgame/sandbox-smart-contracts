@@ -1,7 +1,6 @@
 import {setupL2EstateGameAndLand} from './fixtures';
 import {expect} from '../chai-setup';
 import {
-  printMap,
   printTile,
   printTileWithCoord,
   tileToArray,
@@ -190,7 +189,7 @@ describe('experience estate registry test', function () {
       const twjs = tileWithCoordToJS(map1);
       printTileWithCoord(twjs);
 
-      await experienceEstateRegistryContract.link(gameId, estateId, 0, 0);
+      await experienceEstateRegistryContract.link(estateId, gameId, 0, 0);
     });
   });
   describe('Link and unlink', function () {

@@ -21,7 +21,7 @@ contract MockExperience is ERC721Mintable {
         landCoords = [x, y]; //? this will have to be top last always
     }
 
-    function getTemplate() external view returns (TileLib.Tile memory internalTile, uint256[] memory landCoords) {
+    function getTemplate() external view returns (TileLib.Tile memory template, uint256[] memory landList) {
         return (tile, landCoords);
     }
 }
