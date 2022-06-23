@@ -37,6 +37,11 @@ contract AssetSignedAuctionWithAuth is
 
     enum SignatureType {DIRECT, EIP1654, EIP1271}
 
+    bytes32 public constant BACKEND_TYPEHASH =
+        keccak256(
+            "Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts,bytes purchase)"
+        );
+
     bytes32 public constant AUCTION_TYPEHASH =
         keccak256(
             "Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
@@ -116,7 +121,15 @@ contract AssetSignedAuctionWithAuth is
         payable
         isAuthValid(
             input.backendSignature,
-            _hashAuction(input.buyer, input.seller, input.token, input.auctionData, input.ids, input.amounts)
+            _hashBackendSig(
+                input.buyer,
+                input.seller,
+                input.token,
+                input.auctionData,
+                input.ids,
+                input.amounts,
+                input.purchase
+            )
         )
     {
         _verifyParameters(
@@ -156,7 +169,15 @@ contract AssetSignedAuctionWithAuth is
         payable
         isAuthValid(
             input.backendSignature,
-            _hashAuction(input.buyer, input.seller, input.token, input.auctionData, input.ids, input.amounts)
+            _hashBackendSig(
+                input.buyer,
+                input.seller,
+                input.token,
+                input.auctionData,
+                input.ids,
+                input.amounts,
+                input.purchase
+            )
         )
     {
         _verifyParameters(
@@ -196,7 +217,15 @@ contract AssetSignedAuctionWithAuth is
         payable
         isAuthValid(
             input.backendSignature,
-            _hashAuction(input.buyer, input.seller, input.token, input.auctionData, input.ids, input.amounts)
+            _hashBackendSig(
+                input.buyer,
+                input.seller,
+                input.token,
+                input.auctionData,
+                input.ids,
+                input.amounts,
+                input.purchase
+            )
         )
     {
         _verifyParameters(
@@ -373,6 +402,35 @@ contract AssetSignedAuctionWithAuth is
                     auctionData[AuctionData_Packs],
                     keccak256(abi.encodePacked(ids)),
                     keccak256(abi.encodePacked(amounts))
+                )
+            );
+    }
+
+    function _hashBackendSig(
+        address to,
+        address from,
+        address token,
+        uint256[] memory auctionData,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        uint256[] memory purchase
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    BACKEND_TYPEHASH,
+                    to,
+                    from,
+                    token,
+                    auctionData[AuctionData_OfferId],
+                    auctionData[AuctionData_StartingPrice],
+                    auctionData[AuctionData_EndingPrice],
+                    auctionData[AuctionData_StartedAt],
+                    auctionData[AuctionData_Duration],
+                    auctionData[AuctionData_Packs],
+                    keccak256(abi.encodePacked(ids)),
+                    keccak256(abi.encodePacked(amounts)),
+                    keccak256(abi.encodePacked(purchase))
                 )
             );
     }

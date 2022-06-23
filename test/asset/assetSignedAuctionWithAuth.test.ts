@@ -20,7 +20,7 @@ const backendAuthWallet = new ethers.Wallet(
 const AUCTION_TYPEHASH = ethers.utils.solidityKeccak256(
   ['string'],
   [
-    'Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
+    'Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts,bytes purchase)',
   ]
 );
 
@@ -187,7 +187,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(
@@ -312,7 +313,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      wrongAmount
+      wrongAmount,
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(
@@ -433,7 +435,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [30, '5000000000000000000']
     );
 
     await expect(
@@ -556,7 +559,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     const prevSellerEtherBalance = await ethers.provider.getBalance(seller);
@@ -694,7 +698,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(
@@ -818,7 +823,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(
@@ -941,7 +947,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await transferSand(Sand, buyer, BigNumber.from('5000000000000000000'));
@@ -1087,7 +1094,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     expect(
@@ -1210,7 +1218,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await sandAsUser.approve(
@@ -1338,7 +1347,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(
@@ -1459,7 +1469,8 @@ describe('assetSignedAuctionWithAuth', function () {
       auctionData[4],
       auctionData[5],
       [tokenId],
-      [amounts]
+      [amounts],
+      [buyAmount, '5000000000000000000']
     );
 
     await expect(

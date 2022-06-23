@@ -251,9 +251,14 @@ export const signAuthMessageAs = async (
         'uint256',
         'bytes32',
         'bytes32',
+        'bytes32',
       ],
       [
-        ...args.slice(0, args.length - 2),
+        ...args.slice(0, args.length - 3),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 3]])]
+        ),
         ethers.utils.solidityKeccak256(
           ['bytes'],
           [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 2]])]
