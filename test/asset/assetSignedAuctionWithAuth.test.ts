@@ -129,7 +129,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -150,7 +149,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -255,7 +253,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -276,7 +273,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -501,7 +497,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -522,7 +517,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -641,7 +635,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -662,7 +655,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -763,7 +755,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -784,7 +775,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -890,7 +880,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -911,7 +900,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: Sand.address,
           offerId,
@@ -1036,7 +1024,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -1057,7 +1044,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -1161,7 +1147,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -1182,7 +1167,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: Sand.address,
           offerId,
@@ -1290,7 +1274,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -1311,7 +1294,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,
@@ -1412,7 +1394,6 @@ describe('assetSignedAuctionWithAuth', function () {
             },
           ],
           Auction: [
-            {name: 'to', type: 'address'},
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
@@ -1433,7 +1414,6 @@ describe('assetSignedAuctionWithAuth', function () {
           verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
-          to: zeroAddress,
           from: seller,
           token: zeroAddress,
           offerId,

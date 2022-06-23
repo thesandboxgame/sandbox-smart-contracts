@@ -44,7 +44,7 @@ contract AssetSignedAuctionWithAuth is
 
     bytes32 public constant AUCTION_TYPEHASH =
         keccak256(
-            "Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
+            "Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
         );
 
     event OfferClaimed(
@@ -142,7 +142,6 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            address(0),
             input.seller,
             input.token,
             input.auctionData,
@@ -190,7 +189,6 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            address(0),
             input.seller,
             input.token,
             input.auctionData,
@@ -238,7 +236,6 @@ contract AssetSignedAuctionWithAuth is
             input.amounts
         );
         _ensureCorrectSigner(
-            address(0),
             input.seller,
             input.token,
             input.auctionData,
@@ -319,7 +316,6 @@ contract AssetSignedAuctionWithAuth is
     }
 
     function _ensureCorrectSigner(
-        address to,
         address from,
         address token,
         uint256[] memory auctionData,
@@ -333,7 +329,7 @@ contract AssetSignedAuctionWithAuth is
         dataToHash = abi.encodePacked(
             "\x19\x01",
             _DOMAIN_SEPARATOR,
-            _hashAuction(to, from, token, auctionData, ids, amounts)
+            _hashAuction(from, token, auctionData, ids, amounts)
         );
 
         if (signatureType == SignatureType.EIP1271) {
@@ -380,7 +376,6 @@ contract AssetSignedAuctionWithAuth is
     }
 
     function _hashAuction(
-        address to,
         address from,
         address token,
         uint256[] memory auctionData,
@@ -391,7 +386,6 @@ contract AssetSignedAuctionWithAuth is
             keccak256(
                 abi.encode(
                     AUCTION_TYPEHASH,
-                    to,
                     from,
                     token,
                     auctionData[AuctionData_OfferId],
