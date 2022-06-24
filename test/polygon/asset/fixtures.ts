@@ -5,6 +5,8 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
+import {BigNumber} from 'ethers';
+
 import {
   setupUsers,
   waitFor,
@@ -18,8 +20,10 @@ import {
   gemsAndCatalystsFixture,
 } from '../../common/fixtures/asset';
 
+import {depositViaChildChainManager} from '../sand/fixtures';
+
 const polygonAssetFixtures = async function () {
-  const {deployer} = await getNamedAccounts();
+  const {deployer, sandAdmin} = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
@@ -28,7 +32,27 @@ const polygonAssetFixtures = async function () {
 
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
 
-  const Sand = await ethers.getContract('SandBaseToken');
+  const Sand = await ethers.getContract('PolygonSand');
+
+  // Set up PolygonSand
+  const SAND_AMOUNT = BigNumber.from(100000).mul(`1000000000000000000`);
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  await depositViaChildChainManager(
+    {sand: Sand, childChainManager},
+    sandAdmin,
+    SAND_AMOUNT
+  );
+
+  const sandContractAsAdmin = await Sand.connect(
+    ethers.provider.getSigner(sandAdmin)
+  );
+
+  async function provideSand(to: string, amount: BigNumber) {
+    await sandContractAsAdmin.transfer(to, amount);
+  }
+
+  // Set up Asset contracts
+
   const Asset = await ethers.getContract('Asset', assetBouncerAdmin);
   const PolygonAssetERC1155 = await ethers.getContract(
     'PolygonAssetERC1155',
@@ -141,6 +165,14 @@ const polygonAssetFixtures = async function () {
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
+  const backendAuthWallet = new ethers.Wallet(
+    '0x4242424242424242424242424242424242424242424242424242424242424242',
+    ethers.provider
+  );
+  const authValidatorContract = await ethers.getContract(
+    'PolygonAuthValidator',
+    backendAuthWallet
+  );
 
   return {
     Sand,
@@ -155,8 +187,11 @@ const polygonAssetFixtures = async function () {
     extractor,
     mintAsset,
     mintMultipleAsset,
+    provideSand,
     trustedForwarder,
     assetBouncerAdmin,
+    backendAuthWallet,
+    authValidatorContract,
   };
 };
 
@@ -177,6 +212,8 @@ export const setupPolygonAsset = withSnapshot(
     'PolygonAssetERC1155Tunnel',
     'PolygonAssetSignedAuctionWithAuth',
     'SandBaseToken',
+    'PolygonSand',
+    'PolygonAuthValidator',
   ],
   polygonAssetFixtures
 );
@@ -184,6 +221,7 @@ export const setupPolygonAsset = withSnapshot(
 export const setupMainnetAndPolygonAsset = withSnapshot(
   [
     'SandBaseToken',
+    'PolygonSand',
     'PolygonAssetERC1155',
     'PolygonAssetERC721',
     'Asset',
