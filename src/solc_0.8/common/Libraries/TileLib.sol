@@ -13,13 +13,6 @@ library TileLib {
         uint256[3] data;
     }
 
-    /// @notice makes a copy of a Tile
-    /// @param self the Tile to copy
-    /// @return A new instance of the Tile copied from self
-    function clone(Tile memory self) internal pure returns (Tile memory) {
-        return Tile([self.data[0], self.data[1], self.data[2]]);
-    }
-
     /// @notice init the tile with the internal data directly
     /// @return A Tile that has the bit data set
     function init(

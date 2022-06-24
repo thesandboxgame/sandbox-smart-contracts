@@ -159,6 +159,9 @@ describe('TileLib main', function () {
       await expect(tester.containQuad(0, 24, 24, 1)).to.revertedWith(
         'Invalid tile coordinates'
       );
+      await expect(tester.intersectQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
       await expect(tester.containCoord(0, 24, 24)).to.revertedWith(
         'Invalid coordinates'
       );
@@ -177,6 +180,9 @@ describe('TileLib main', function () {
       await expect(tester.containQuad(0, 2, 2, 3)).to.revertedWith(
         'Invalid coordinates'
       );
+      await expect(tester.intersectQuad(0, 2, 2, 3)).to.revertedWith(
+        'Invalid coordinates'
+      );
     });
     it('mask size must be 1,3,6,12 or 24', async function () {
       const tester = await setupTileLibTest();
@@ -192,6 +198,9 @@ describe('TileLib main', function () {
         'invalid size'
       );
       await expect(tester.containQuad(0, 0, 0, 25)).to.revertedWith(
+        'invalid size'
+      );
+      await expect(tester.intersectQuad(0, 0, 0, 25)).to.revertedWith(
         'invalid size'
       );
     });
