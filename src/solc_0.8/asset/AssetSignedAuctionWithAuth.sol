@@ -39,7 +39,7 @@ contract AssetSignedAuctionWithAuth is
 
     bytes32 public constant BACKEND_TYPEHASH =
         keccak256(
-            "Auction(address to,address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts,bytes purchase)"
+            "Auction(address to,address from,address token,bytes auctionData,bytes ids,bytes amounts,bytes purchase)"
         );
 
     bytes32 public constant AUCTION_TYPEHASH =
@@ -416,12 +416,7 @@ contract AssetSignedAuctionWithAuth is
                     to,
                     from,
                     token,
-                    auctionData[AuctionData_OfferId],
-                    auctionData[AuctionData_StartingPrice],
-                    auctionData[AuctionData_EndingPrice],
-                    auctionData[AuctionData_StartedAt],
-                    auctionData[AuctionData_Duration],
-                    auctionData[AuctionData_Packs],
+                    keccak256(abi.encodePacked(auctionData)),
                     keccak256(abi.encodePacked(ids)),
                     keccak256(abi.encodePacked(amounts)),
                     keccak256(abi.encodePacked(purchase))
