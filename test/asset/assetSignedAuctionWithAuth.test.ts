@@ -65,6 +65,56 @@ describe('assetSignedAuctionWithAuth', function () {
 
     expect(fee).to.be.equal(newFee);
   });
+  it('should be able to set feeLimit', async function () {
+    const {assetSignedAuctionFixture} = await setupAssetSignedAuction();
+    const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
+
+    const AssetSignedAuctionAuthContractAsAdmin = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(Admin)
+    );
+
+    const newFeeLimit = 400;
+
+    await waitFor(
+      AssetSignedAuctionAuthContractAsAdmin.setFeeLimit(newFeeLimit)
+    );
+
+    const fee = await assetSignedAuctionAuthContract._feeLimit();
+
+    expect(fee).to.be.equal(newFeeLimit);
+  });
+  it('should fail setting feeLimit - no admin', async function () {
+    const {
+      assetSignedAuctionFixture,
+      assetFixture,
+    } = await setupAssetSignedAuction();
+    const {users} = assetFixture;
+    const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(users[0].address)
+    );
+
+    const newFeeLimit = 1000;
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.setFeeLimit(newFeeLimit)
+    ).to.be.revertedWith('only admin can change fee limit');
+  });
+  it('should fail setting feeLimit - above max limit', async function () {
+    const {assetSignedAuctionFixture} = await setupAssetSignedAuction();
+    const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
+
+    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(Admin)
+    );
+
+    const newFeeLimit = 1000;
+
+    await expect(
+      AssetSignedAuctionAuthContractAsUser.setFeeLimit(newFeeLimit)
+    ).to.be.revertedWith('new limit above max limit');
+  });
 
   it('should fail setting fee - no admin', async function () {
     const {

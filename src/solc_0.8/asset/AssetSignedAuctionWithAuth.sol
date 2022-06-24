@@ -56,6 +56,7 @@ contract AssetSignedAuctionWithAuth is
         uint256 feePaid
     );
     event OfferCancelled(address indexed seller, uint256 indexed offerId);
+    event NewFeeLimit(uint256 feeLimit);
 
     uint256 public constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
@@ -73,7 +74,8 @@ contract AssetSignedAuctionWithAuth is
     IAuthValidator internal _authValidator;
     IERC1155 public _asset;
     uint256 public _fee10000th = 0;
-    uint256 public _feeLimit = 500; // 5%
+    uint256 public _feeLimit = 500;
+    uint256 public _maxfeeLimit = 500; // 5%
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
@@ -112,6 +114,17 @@ contract AssetSignedAuctionWithAuth is
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
         emit FeeSetup(feeCollector, fee10000th);
+    }
+
+    /// @notice setFeeLimit parameters
+    /// @param newFeeLimit new fee limit
+    function setFeeLimit(uint256 newFeeLimit) external {
+        require(msg.sender == _admin, "only admin can change fee limit");
+        require(newFeeLimit <= _maxfeeLimit, "new limit above max limit");
+
+        _feeLimit = newFeeLimit;
+
+        emit NewFeeLimit(newFeeLimit);
     }
 
     /// @notice claim offer using EIP712
