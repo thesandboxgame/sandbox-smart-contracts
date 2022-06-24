@@ -17,5 +17,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonAuthValidator', 'PolygonAuthValidator_deploy'];
+func.tags = ['PolygonAuthValidator', 'PolygonAuthValidator_deploy', 'L2'];
 func.skip = skipUnlessTest;
