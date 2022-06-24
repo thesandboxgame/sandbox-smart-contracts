@@ -155,6 +155,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(buyer)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -181,12 +190,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -201,26 +205,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -274,6 +264,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -300,12 +299,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -320,26 +314,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [wrongAmount]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -391,6 +371,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -417,12 +406,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -437,26 +421,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -508,6 +478,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(buyer)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -534,12 +513,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -554,26 +528,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -641,6 +601,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -667,12 +636,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -687,25 +651,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -756,6 +707,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -782,12 +742,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -802,26 +757,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const wrongBackendSig = new ethers.Wallet(users[0].address);
 
@@ -876,6 +817,15 @@ describe('assetSignedAuctionWithAuth', function () {
 
     const sandAsUser = Sand.connect(ethers.provider.getSigner(buyer));
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -902,12 +852,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -922,25 +867,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: Sand.address,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -1015,6 +947,15 @@ describe('assetSignedAuctionWithAuth', function () {
 
     await assetSignedAuctionAuthContract.cancelSellerOffer(offerId);
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -1041,12 +982,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -1061,26 +997,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -1133,6 +1055,15 @@ describe('assetSignedAuctionWithAuth', function () {
 
     const sandAsUser = Sand.connect(ethers.provider.getSigner(buyer));
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -1159,12 +1090,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -1179,25 +1105,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: Sand.address,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -1255,6 +1168,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -1281,12 +1203,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -1301,25 +1218,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,
@@ -1370,6 +1274,15 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(buyer)
     );
 
+    const auctionData = [
+      offerId,
+      startingPrice.toString(),
+      endingPrice.toString(),
+      startedAt,
+      duration,
+      packs,
+    ];
+
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
@@ -1396,12 +1309,7 @@ describe('assetSignedAuctionWithAuth', function () {
           Auction: [
             {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
-            {name: 'offerId', type: 'uint256'},
-            {name: 'startingPrice', type: 'uint256'},
-            {name: 'endingPrice', type: 'uint256'},
-            {name: 'startedAt', type: 'uint256'},
-            {name: 'duration', type: 'uint256'},
-            {name: 'packs', type: 'uint256'},
+            {name: 'auctionData', type: 'bytes'},
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
           ],
@@ -1416,25 +1324,12 @@ describe('assetSignedAuctionWithAuth', function () {
         message: {
           from: seller,
           token: zeroAddress,
-          offerId,
-          startingPrice: startingPrice.toString(),
-          endingPrice: endingPrice.toString(),
-          startedAt,
-          duration,
-          packs,
+          auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
           ids: ethers.utils.solidityPack(['uint[]'], [[tokenId.toString()]]),
           amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
         },
       },
     ]);
-    const auctionData = [
-      offerId,
-      startingPrice.toString(),
-      endingPrice.toString(),
-      startedAt,
-      duration,
-      packs,
-    ];
 
     const backendSignature = await signAuthMessageAs(
       backendAuthWallet,

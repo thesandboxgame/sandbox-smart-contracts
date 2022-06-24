@@ -43,9 +43,7 @@ contract AssetSignedAuctionWithAuth is
         );
 
     bytes32 public constant AUCTION_TYPEHASH =
-        keccak256(
-            "Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
-        );
+        keccak256("Auction(address from,address token,bytes auctionData,bytes ids,bytes amounts)");
 
     event OfferClaimed(
         address indexed seller,
@@ -401,12 +399,7 @@ contract AssetSignedAuctionWithAuth is
                     AUCTION_TYPEHASH,
                     from,
                     token,
-                    auctionData[AuctionData_OfferId],
-                    auctionData[AuctionData_StartingPrice],
-                    auctionData[AuctionData_EndingPrice],
-                    auctionData[AuctionData_StartedAt],
-                    auctionData[AuctionData_Duration],
-                    auctionData[AuctionData_Packs],
+                    keccak256(abi.encodePacked(auctionData)),
                     keccak256(abi.encodePacked(ids)),
                     keccak256(abi.encodePacked(amounts))
                 )
