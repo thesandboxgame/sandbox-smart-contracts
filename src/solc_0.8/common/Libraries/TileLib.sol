@@ -84,6 +84,27 @@ library TileLib {
         return self;
     }
 
+    /// @notice Check if the bit in certain coordinate inside the Tile is set or not, if not set it.
+    /// @dev this routine is a combination of contains and set, used to save some gas
+    /// @param self the Tile where the check is done
+    /// @param x the x coordinate
+    /// @param y the  coordinate
+    /// @return true if the x,y coordinate bit is set or false if it is cleared
+    function addIfNotContain(
+        Tile memory self,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (bool, Tile memory) {
+        require(x < 24 && y < 24, "Invalid coordinates");
+        uint256 idx = y / 8;
+        uint256 bitMask = 1 << (x + 24 * (y % 8));
+        if (self.data[idx] & bitMask == bitMask) {
+            return (false, self);
+        }
+        self.data[idx] |= bitMask;
+        return (true, self);
+    }
+
     /// @notice Check if the bit in certain coordinate inside the Tile is set or not
     /// @param self the Tile where the check is done
     /// @param x the x coordinate
@@ -132,7 +153,37 @@ library TileLib {
     /// @param contained the Tile that must be included
     /// @return true if self contain contained Tile
     function contain(Tile memory self, Tile memory contained) internal pure returns (bool) {
-        return isEqual(contained, and(clone(contained), self));
+        uint256 d0 = contained.data[0] & PIXEL_MASK;
+        uint256 d1 = contained.data[1] & PIXEL_MASK;
+        uint256 d2 = contained.data[2] & PIXEL_MASK;
+        return (self.data[0] & d0 == d0) && (self.data[1] & d1 == d1) && (self.data[2] & d2 == d2);
+    }
+
+    /// @notice Check if the Tile has any bit in common with a square
+    /// @param self the Tile where the check is done
+    /// @param x the x coordinate of the square
+    /// @param y the y coordinate of the square
+    /// @param size the size of the square
+    /// @return true if there is at least one bit set in both Tiles
+    function intersect(
+        Tile memory self,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) internal pure returns (bool) {
+        require(x < 24 && y < 24, "Invalid tile coordinates");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        uint256 mask = _quadMask(size);
+        require(mask != 0, "invalid size");
+        uint256 i;
+        for (; i < size; i++) {
+            uint256 idx = (y + i) / 8;
+            uint256 bitMask = mask << (x + 24 * ((y + i) % 8));
+            if (self.data[idx] & bitMask != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// @notice Check if two Tiles has any bit in common
@@ -140,7 +191,10 @@ library TileLib {
     /// @param other second tile to compare
     /// @return true if there is at least one bit set in both Tiles
     function intersect(Tile memory self, Tile memory other) internal pure returns (bool) {
-        return !isEmpty(and(self, other));
+        return
+            ((self.data[0] & other.data[0]) | (self.data[1] & other.data[1]) | (self.data[2] & other.data[2])) &
+                PIXEL_MASK !=
+            0;
     }
 
     /// @notice Check if two Tiles has exactly the same bits set

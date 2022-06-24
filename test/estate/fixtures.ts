@@ -7,7 +7,6 @@ import {
 import {withSnapshot} from '../utils';
 import {BigNumber, BigNumberish, ContractReceipt} from 'ethers';
 import {expect} from '../chai-setup';
-import {tileWithCoordToJS} from '../map/fixtures';
 
 export const setupEstate = withSnapshot(
   [
@@ -324,7 +323,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   //Registry
   await deployments.deploy('ExperienceEstateRegistry', {
     from: deployer,
-    contract: 'ExperienceEstateRegistryA',
+    contract: 'ExperienceEstateRegistry',
     libraries: {
       MapLib: setup.mapLib.address,
     },
@@ -404,32 +403,6 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
         updateEstateId: BigNumber.from(estateId),
         updateGasUsed: BigNumber.from(receipt.gasUsed),
       };
-    },
-  };
-});
-
-export const setupEstateExperienceRecordLibTest = withSnapshot([], async () => {
-  const {deployer} = await getNamedAccounts();
-  const mapLib = await deployments.deploy('MapLib', {from: deployer});
-  await deployments.deploy('EstateGameRecordLibTester', {
-    from: deployer,
-    libraries: {
-      MapLib: mapLib.address,
-    },
-  });
-  const tester = await ethers.getContract(
-    'EstateGameRecordLibTester',
-    deployer
-  );
-  return {
-    tester,
-    getMap: async function (idx: BigNumberish) {
-      const length = BigNumber.from(await tester.length(idx));
-      const ret = [];
-      for (let i = BigNumber.from(0); i.lt(length); i = i.add(1)) {
-        ret.push(tileWithCoordToJS(await tester.at(idx, i)));
-      }
-      return ret;
     },
   };
 });

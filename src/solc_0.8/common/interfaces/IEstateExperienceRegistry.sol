@@ -14,5 +14,5 @@ interface IEstateExperienceRegistry {
 
     function unLinkByLandId(uint256 expId) external;
 
-    function unLinkExperience(uint256[][3] calldata landToRemove) external;
+    function isLinked(uint256[][3] calldata quads) external view returns (bool);
 }

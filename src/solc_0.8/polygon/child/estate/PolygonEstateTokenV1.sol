@@ -93,7 +93,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
             }
         }
         if (address(_ps().registryToken) != address(0)) {
-            _ps().registryToken.unLinkExperience(quads);
+            require(!_ps().registryToken.isLinked(quads), "must unlink first");
         }
     }
 

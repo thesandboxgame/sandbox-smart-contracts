@@ -1,47 +1,48 @@
-//SPDX-License-Identifier: MIT
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
+
 import "../test/ERC721Mintable.sol";
 import {TileLib} from "../common/Libraries/TileLib.sol";
-import {EnumerableSet} from "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
-import "hardhat/console.sol";
 
 contract MockExperience is ERC721Mintable {
     using TileLib for TileLib.Tile;
-    using EnumerableSet for EnumerableSet.UintSet;
-    TileLib.Tile internal tile;
-    uint256[] public landCoords;
-    EnumerableSet.UintSet internal landIds;
+
+    uint256 internal constant GRID_SIZE = 408;
+
+    struct Experience {
+        TileLib.Tile tile;
+        uint256[] landCoords;
+    }
+
+    mapping(uint256 => Experience) internal experiences;
 
     // solhint-disable-next-line no-empty-blocks
     constructor() ERC721Mintable("Experience", "Exp") {}
 
-    function setQuad(
-        uint256 x,
-        uint256 y,
-        uint256 size
-    ) external {
-        tile = tile.set(x, y, size);
-        landCoords = [x, y];
-    }
+    function setTemplate(uint256 expId, uint256[2][] memory coords) external {
+        Experience storage exp = experiences[expId];
+        TileLib.Tile memory newTile;
+        bool success;
 
-    function setLands(uint256[] memory newLands) external {
-        for (uint256 i = 0; i < newLands.length; i++) {
-            if (!landIds.contains(newLands[i])) {
-                landIds.add(newLands[i]);
-                console.log("okok");
-                console.log(newLands[i]);
-            } else {
-                console.log("why aren't you saving");
-            }
+        delete exp.landCoords;
+        uint256 len = coords.length;
+        for (uint256 i; i < len; i++) {
+            uint256 x = coords[i][0];
+            uint256 y = coords[i][1];
+            uint256 id = x + y * GRID_SIZE;
+            exp.landCoords.push(id);
+            (success, newTile) = newTile.addIfNotContain(x, y);
+            require(success, "repeated lands");
         }
+        exp.tile = newTile;
     }
 
-    function getTemplate() external view returns (TileLib.Tile memory template, uint256[] memory landList) {
-        return (tile, landIds.values());
-    }
-
-    function getLandIds() external view returns (uint256[] memory landList) {
-        return landIds.values();
+    function getTemplate(uint256 expId)
+        external
+        view
+        returns (TileLib.Tile memory template, uint256[] memory landList)
+    {
+        Experience storage exp = experiences[expId];
+        return (exp.tile, exp.landCoords);
     }
 }

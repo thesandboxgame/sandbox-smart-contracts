@@ -50,6 +50,15 @@ contract TileTester {
         return tiles[idx].intersect(tiles[otherIdx]);
     }
 
+    function intersectQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
+        return tiles[idx].intersect(x, y, size);
+    }
+
     function findAPixel(uint256 idx) external view returns (TileLib.Tile memory) {
         return tiles[idx].findAPixel();
     }
@@ -65,6 +74,14 @@ contract TileTester {
         uint256 size
     ) external view returns (bool) {
         return tiles[idx].contain(x, y, size);
+    }
+
+    function addIfNotContain(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool, TileLib.Tile memory) {
+        return tiles[idx].addIfNotContain(x, y);
     }
 
     function containCoord(

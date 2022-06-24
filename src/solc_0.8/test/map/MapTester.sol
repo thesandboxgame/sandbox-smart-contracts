@@ -131,6 +131,15 @@ contract MapTester {
         return maps[idx].intersect(tiles[tileIdx]);
     }
 
+    function intersectQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (bool) {
+        return maps[idx].intersect(x, y, size);
+    }
+
     function isEqual(uint256 idx, uint256 other) external view returns (bool) {
         return maps[idx].isEqual(maps[other]);
     }

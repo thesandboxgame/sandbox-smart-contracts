@@ -60,6 +60,7 @@ describe('TileLib main', function () {
     for (let idx = 0; idx < tests.length; idx++) {
       const t = tests[idx];
       await tester.setQuad(idx, t[0], t[1], t[2]);
+      expect(await tester.intersectQuad(idx, t[0], t[1], t[2])).to.be.true;
       idxs.push(idx);
     }
     const outIdx = 29;
@@ -72,7 +73,22 @@ describe('TileLib main', function () {
     tile[12][12] = true;
     expect(intersection).to.be.eql(tile);
   });
+  it('addIfNotContain', async function () {
+    const tester = await setupTileLibTest();
+    await tester.setQuad(0, 3, 3, 3);
+    const tile = tileToArray((await tester.getTile(0)).data);
 
+    // Failure
+    const [error, retError] = await tester.addIfNotContain(0, 4, 4);
+    expect(error).to.be.false;
+    expect(tile).to.be.eql(tileToArray(retError.data));
+
+    // Success
+    const [success, retSuccess] = await tester.addIfNotContain(0, 1, 1);
+    expect(success).to.be.true;
+    tile[1][1] = true;
+    expect(tile).to.be.eql(tileToArray(retSuccess.data));
+  });
   it('contains', async function () {
     const tester = await setupTileLibTest();
     const tests = [
@@ -146,6 +162,9 @@ describe('TileLib main', function () {
       await expect(tester.containCoord(0, 24, 24)).to.revertedWith(
         'Invalid coordinates'
       );
+      await expect(tester.addIfNotContain(0, 24, 24)).to.revertedWith(
+        'Invalid coordinates'
+      );
     });
     it('coords must be module size', async function () {
       const tester = await setupTileLibTest();
@@ -163,14 +182,12 @@ describe('TileLib main', function () {
       const tester = await setupTileLibTest();
       await expect(tester.setQuad(0, 0, 0, 5)).to.revertedWith('invalid size');
       await expect(tester.setQuad(0, 0, 0, 25)).to.revertedWith('invalid size');
-
       await expect(tester.clearQuad(0, 0, 0, 5)).to.revertedWith(
         'invalid size'
       );
       await expect(tester.clearQuad(0, 0, 0, 25)).to.revertedWith(
         'invalid size'
       );
-
       await expect(tester.containQuad(0, 0, 0, 5)).to.revertedWith(
         'invalid size'
       );

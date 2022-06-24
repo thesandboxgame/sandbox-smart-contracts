@@ -336,6 +336,17 @@ describe('MapLib main', function () {
       await tester.setTileQuad(0, 120, 120, 6);
       expect(await tester.intersect(0, 0)).to.be.true;
     });
+    it('intersect quads', async function () {
+      const {tester} = await setupMapTest();
+
+      // empty map
+      expect(await tester.intersectQuad(0, 0, 0, 10)).to.be.false;
+
+      // non empty map
+      await tester.setQuad(0, 0, 0, 6);
+      expect(await tester.intersectQuad(0, 12, 12, 3)).to.be.false;
+      expect(await tester.intersectQuad(0, 0, 0, 3)).to.be.true;
+    });
   });
 
   describe('exceptions', function () {

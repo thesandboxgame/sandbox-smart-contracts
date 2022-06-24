@@ -206,7 +206,7 @@ library MapLib {
 
     /// @notice Check if the all the bits of a square inside the Map are set or not
     /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract
-    /// @param self the TileWithCoord where the check is done
+    /// @param self the Map where the check is done
     /// @param x the x coordinate of the square
     /// @param y the y coordinate of the square
     /// @param size the size of the square
@@ -268,6 +268,28 @@ library MapLib {
             }
         }
         return true;
+    }
+
+    /// @notice Check if a map has at least one bit in common with a square (x,y,size)
+    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract
+    /// @param self the Map where the check is done
+    /// @param x the x coordinate of the square
+    /// @param y the y coordinate of the square
+    /// @param size the size of the square
+    /// @return true if there is at least one bit set in both the Map and the square
+    function intersect(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) public view returns (bool) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            // !intersect
+            return false;
+        }
+        return self.values[idx - 1].tile.intersect(x, y, size);
     }
 
     /// @notice Check if a map has at least one bit in common with some TileWithCoord
