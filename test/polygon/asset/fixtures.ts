@@ -6,6 +6,8 @@ import {
 } from 'hardhat';
 
 import {BigNumber} from 'ethers';
+import {Wallet} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
 import {
   setupUsers,
@@ -165,13 +167,9 @@ const polygonAssetFixtures = async function () {
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
-  const backendAuthWallet = new ethers.Wallet(
-    '0x4242424242424242424242424242424242424242424242424242424242424242',
-    ethers.provider
-  );
+
   const authValidatorContract = await ethers.getContract(
-    'PolygonAuthValidator',
-    backendAuthWallet
+    'PolygonAuthValidator'
   );
 
   return {
@@ -190,7 +188,6 @@ const polygonAssetFixtures = async function () {
     provideSand,
     trustedForwarder,
     assetBouncerAdmin,
-    backendAuthWallet,
     authValidatorContract,
   };
 };
@@ -240,3 +237,32 @@ export const setupMainnetAndPolygonAsset = withSnapshot(
     };
   }
 );
+
+export const signAuthMessageAs = async (
+  wallet: Wallet | SignerWithAddress,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...args: any[]
+): Promise<string> => {
+  const hashedData = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'address', 'address', 'bytes32', 'bytes32', 'bytes32'],
+      [
+        ...args.slice(0, args.length - 3),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 3]])]
+        ),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 2]])]
+        ),
+        ethers.utils.solidityKeccak256(
+          ['bytes'],
+          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 1]])]
+        ),
+      ]
+    )
+  );
+
+  return wallet.signMessage(ethers.utils.arrayify(hashedData));
+};

@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {setupPolygonAsset} from './fixtures';
+import {setupPolygonAsset, signAuthMessageAs} from './fixtures';
 import {waitFor} from '../../utils';
 import {transferSand} from '../catalyst/utils';
 import BN from 'bn.js';
@@ -7,9 +7,7 @@ import crypto from 'crypto';
 import {BigNumber, constants} from 'ethers';
 import {assert} from 'chai';
 import {expect} from '../../chai-setup';
-import {AbiCoder} from 'ethers/lib/utils';
-
-import {auction712Data, messageTypes} from './fixtures_auction712Data';
+import {auction712Data} from './fixtures_auction712Data';
 
 const zeroAddress = constants.AddressZero;
 const startingPrice = new BN('1000000000000000000');
@@ -21,6 +19,17 @@ const amounts = [1];
 const name = 'The Sandbox';
 const version = '1';
 
+const AUCTION_TYPEHASH = ethers.utils.solidityKeccak256(
+  ['string'],
+  [
+    'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)',
+  ]
+);
+
+const backendAuthWallet = new ethers.Wallet(
+  '0x4242424242424242424242424242424242424242424242424242424242424242'
+);
+
 // eslint-disable-next-line mocha/no-skipped-tests
 describe.only('PolygonAssetSignedAuctionAuth', function () {
   it('should be able to claim seller offer in ETH', async function () {
@@ -29,7 +38,6 @@ describe.only('PolygonAssetSignedAuctionAuth', function () {
       users,
       mintAsset,
       assetSignedAuctionAuthContract,
-      backendAuthWallet,
       authValidatorContract,
     } = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
@@ -43,53 +51,8 @@ describe.only('PolygonAssetSignedAuctionAuth', function () {
 
     const verifyingContract = AssetSignedAuctionAuthContractAsUser;
 
-    const registeredAuthValidatorContractAddress = await assetSignedAuctionAuthContract._authValidator();
-    const authValidatorWallet = await authValidatorContract._signingAuthWallet(); // read the backendAuthWallet address, 0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025
-
-    const abiCoder = new AbiCoder();
-
-    const message = {
-      from: seller,
-      token: zeroAddress,
-      offerId,
-      startingPrice: startingPrice,
-      endingPrice: endingPrice,
-      startedAt,
-      duration,
-      packs,
-      ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
-      amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
-    };
-
-    const signature = await ethers.provider.send('eth_signTypedData_v4', [
-      seller,
-      auction712Data(name, version, verifyingContract, message),
-    ]);
-
-    const typeHash = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(
-        'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)'
-      )
-    );
-
-    const hashedData = ethers.utils.solidityKeccak256(messageTypes, [
-      typeHash,
-      seller,
-      zeroAddress,
-      offerId,
-      startingPrice,
-      endingPrice,
-      startedAt,
-      duration,
-      packs,
-      ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
-      ethers.utils.solidityPack(['uint[]'], [amounts]),
-    ]);
-
-    // isAuthValid(
-    //   input.backendSignature,
-    //   _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
-    // )
+    // const registeredAuthValidatorContractAddress = await assetSignedAuctionAuthContract._authValidator();
+    // const authValidatorWallet = await authValidatorContract._signingAuthWallet(); // read the backendAuthWallet address, 0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025
 
     const auctionData = [
       offerId,
@@ -100,17 +63,27 @@ describe.only('PolygonAssetSignedAuctionAuth', function () {
       packs,
     ];
 
-    // const auctionDataTypes = [
-    //   'uint256',
-    //   'uint256',
-    //   'uint256',
-    //   'uint256',
-    //   'uint256',
-    //   'uint256',
-    // ];
+    const message = {
+      from: seller,
+      token: zeroAddress,
+      auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
+      ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
+      amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
+    };
 
-    const backendSignature = backendAuthWallet.signMessage(
-      ethers.utils.arrayify(hashedData)
+    const signature = await ethers.provider.send('eth_signTypedData_v4', [
+      seller,
+      auction712Data(name, version, 31337, verifyingContract, message),
+    ]);
+
+    const backendSignature = await signAuthMessageAs(
+      backendAuthWallet,
+      AUCTION_TYPEHASH,
+      seller,
+      zeroAddress,
+      auctionData,
+      [tokenId],
+      [amounts]
     );
 
     await PolygonAssetERC1155.connect(
@@ -135,11 +108,11 @@ describe.only('PolygonAssetSignedAuctionAuth', function () {
 
     const claimParams = {
       buyer: users[1].address,
-      seller: users[0].address,
+      seller,
       token: zeroAddress,
       purchase: [buyAmount, '5000000000000000000'], // buy amount,  amount to spend
       auctionData,
-      ids: [tokenId],
+      ids: [tokenId.toString()],
       amounts,
       signature,
       backendSignature,
