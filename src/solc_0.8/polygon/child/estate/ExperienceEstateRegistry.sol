@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {WithSuperOperators} from "../../../common/BaseWithStorage/WithSuperOperators.sol";
-import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol";
-import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
+import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
@@ -15,29 +14,23 @@ interface ExperienceTokenInterface {
 }
 
 /// @notice Contract managing tExperiences and Estates
-contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstateExperienceRegistry {
+contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;
 
-    uint256 internal constant MAXLANDID = 166463;
-
     ExperienceTokenInterface public experienceToken;
     IEstateToken public estateToken;
-    ILandToken public landToken;
+    IERC721 public landToken;
 
     struct EstateAndLands {
-        // I lost track of why we use estate Id... I did something wrong....
-        // what I can think of is deleting all links after a burn
-        // but we will need a better way to get links from estateId
-        // maybe not, if we have the user unlink/retreive the lands before burning
         uint256 estateId;
         uint256[] lands;
     }
 
-    // should be storageId instead of estateId and expId
     // Experience Id => EstateAndLands
     mapping(uint256 => EstateAndLands) internal links;
 
+    // TODO: Used only by unlink by landId (this is necessary ?)
     // Land Id => experienceId
     mapping(uint256 => uint256) internal expXLand;
     MapLib.Map internal linkedLands;
@@ -47,7 +40,7 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstate
         IEstateToken _estateToken,
         ExperienceTokenInterface _experienceToken,
         //uint8 chainIndex,
-        ILandToken _landToken
+        IERC721 _landToken
     ) {
         experienceToken = _experienceToken;
         estateToken = _estateToken;
@@ -60,37 +53,44 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstate
         uint256 x,
         uint256 y
     ) external override {
-        // TODO: This is ok ?
+        // TODO: This is what we want ?
         _unLinkExperience(expId);
 
         // Link
         (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(expId);
         MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
+        require(!linkedLands.intersect(s), "already linked");
+        linkedLands.set(s);
+        EstateAndLands storage est = links[expId];
         // TODO: Maybe this one must take storageId directly
         if (estateId == 0) {
             require(landCoords.length == 1, "must be done inside estate");
         } else {
+            // TODO: storageId or estateId ?
             require(estateToken.contain(estateId, s), "not enough land");
-            links[expId].estateId = estateToken.getStorageId(estateId);
+            est.estateId = estateToken.getStorageId(estateId);
         }
-        require(!linkedLands.intersect(s), "already linked");
-        linkedLands.set(s);
 
         for (uint256 i; i < landCoords.length; i++) {
             // TODO: Check that the template + deltas don't make a mess....
             uint256 landId = landCoords[i] + x + (y * 408);
-            links[expId].lands.push(landId);
+            est.lands.push(landId);
             expXLand[landId] = expId;
         }
+        require(_isValidUser(est), "invalid user");
     }
 
     function unLinkByExperienceId(uint256 expId) external override {
-        require(links[expId].lands.length != 0, "unknown experience");
+        EstateAndLands storage est = links[expId];
+        require(est.lands.length != 0, "unknown experience");
+        require(_isValidUser(est), "Invalid user");
         _unLinkExperience(expId);
     }
 
     function unLinkByLandId(uint256 landId) external override {
         uint256 expId = expXLand[landId];
+        EstateAndLands storage est = links[expId];
+        require(_isValidUser(est), "Invalid user");
         require(expId != 0, "unknown land");
         // if we try to access data from an nonexisting land we'll get 0
         // we can use an EnumerableSet with try get, or set another estateId for single lands
@@ -122,7 +122,17 @@ contract ExperienceEstateRegistry is WithSuperOperators, ERC2771Handler, IEstate
         delete links[expId];
     }
 
+    function _isValidUser(EstateAndLands storage est) internal returns (bool) {
+        if (est.estateId == 0) {
+            assert(est.lands.length == 1);
+            return landToken.ownerOf(est.lands[0]) == _msgSender();
+        }
+        return IERC721(address(estateToken)).ownerOf(est.estateId) == _msgSender();
+    }
+
     // TODO: Remove and fix the tests (or remove them).
+    uint256 internal constant MAXLANDID = 166463;
+
     function CreateExperienceLink(
         uint256 x,
         uint256 y,

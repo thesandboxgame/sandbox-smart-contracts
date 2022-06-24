@@ -10,9 +10,9 @@ interface IEstateExperienceRegistry {
         uint256 y
     ) external;
 
-    function unLinkByExperienceId(uint256 landId) external;
+    function unLinkByExperienceId(uint256 expId) external;
 
-    function unLinkByLandId(uint256 expId) external;
+    function unLinkByLandId(uint256 landId) external;
 
     function isLinked(uint256[][3] calldata quads) external view returns (bool);
 }
