@@ -497,6 +497,13 @@ library MapLib {
             x = self.values[i].getX() * 24;
             y = self.values[i].getY() * 24;
 
+            // middle, always included
+            next[i].data[0] |= _grow(ci.data[0]) | ((ci.data[1] & UP_MASK) << (24 * 7));
+            next[i].data[1] |=
+                _grow(ci.data[1]) |
+                ((ci.data[2] & UP_MASK) << (24 * 7)) |
+                ((ci.data[0] & DOWN_MASK) >> (24 * 7));
+            next[i].data[2] |= _grow(ci.data[2]) | ((ci.data[1] & DOWN_MASK) >> (24 * 7));
             // left
             if (x >= 24) {
                 idx = _getIdx(self, x - 24, y);
@@ -512,16 +519,6 @@ library MapLib {
                 if (idx != 0) {
                     next[idx - 1].data[2] |= (ci.data[0] & UP_MASK) << (24 * 7);
                 }
-            }
-            // middle
-            idx = _getIdx(self, x, y);
-            if (idx != 0) {
-                next[idx - 1].data[0] |= _grow(ci.data[0]) | ((ci.data[1] & UP_MASK) << (24 * 7));
-                next[idx - 1].data[1] |=
-                    _grow(ci.data[1]) |
-                    ((ci.data[2] & UP_MASK) << (24 * 7)) |
-                    ((ci.data[0] & DOWN_MASK) >> (24 * 7));
-                next[idx - 1].data[2] |= _grow(ci.data[2]) | ((ci.data[1] & DOWN_MASK) >> (24 * 7));
             }
             // down
             idx = _getIdx(self, x, y + 24);

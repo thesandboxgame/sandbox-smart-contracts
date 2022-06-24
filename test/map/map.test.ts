@@ -133,7 +133,6 @@ describe('MapLib main', function () {
     // clear
     expect(await getMap(0)).to.be.empty;
   });
-
   it('isEqual', async function () {
     const {tester} = await setupMapTest();
     // Create Test set
@@ -175,12 +174,20 @@ describe('MapLib main', function () {
         }
       }
     });
+    it('land count', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(0, 0, 0, 1);
+      await tester.setQuad(0, 60, 60, 1);
+      await tester.setQuad(0, 0, 60, 1);
+      await tester.setQuad(0, 60, 0, 1);
+      expect(await tester.getLandCount(0)).to.be.equal(4);
+    });
+
     it('@skip-on-coverage gas usage of land count', async function () {
       const {tester} = await setupMapTest();
       for (let i = 0; i < 10; i++) {
         await tester.setQuad(0, i * 24, 0, 1);
       }
-      expect(await tester.getLandCount(0)).to.be.equal(10);
       expect(
         BigNumber.from(await tester.estimateGas.getLandCount(0))
       ).to.be.lte(121264);
@@ -214,11 +221,11 @@ describe('MapLib main', function () {
               await tester.shift(t.tile, x, y)
             );
             const result = setRectangle(
-              getEmptyTranslateResult(),
               x,
               y,
               24,
-              24
+              24,
+              getEmptyTranslateResult()
             );
             expect(ret).to.be.eql(result);
           }
@@ -235,11 +242,11 @@ describe('MapLib main', function () {
               await tester.shift(t.tile, x, y)
             );
             const result = setRectangle(
-              getEmptyTranslateResult(),
               x,
               y,
               24,
-              24
+              24,
+              getEmptyTranslateResult()
             );
             expect(ret).to.be.eql(result);
           }
@@ -292,6 +299,63 @@ describe('MapLib main', function () {
       });
     });
   });
+  describe('intersect', function () {
+    it('intersect start with empty map', async function () {
+      const {tester} = await setupMapTest();
+      // empty tile, empty map
+      expect(await tester.intersect(0, 0)).to.be.false;
 
-  // TODO: Add more tests, specially for clear, grid like things, etc...
+      // empty tile with some coords, empty map
+      await tester.initTile(0, 120, 120);
+      expect(await tester.intersect(0, 0)).to.be.false;
+
+      // non empty tile, empty map
+      await tester.setTileQuad(0, 123, 123, 3);
+      expect(await tester.intersect(0, 0)).to.be.false;
+
+      // non empty map that don't intersect
+      await tester.setQuad(0, 0, 0, 24);
+      expect(await tester.intersect(0, 0)).to.be.false;
+
+      // intersect
+      await tester.setQuad(0, 120, 120, 24);
+      expect(await tester.intersect(0, 0)).to.be.true;
+    });
+
+    it('intersect start with empty tile', async function () {
+      const {tester} = await setupMapTest();
+      // empty tile, non empty map
+      await tester.setQuad(0, 123, 123, 3);
+      expect(await tester.intersect(0, 0)).to.be.false;
+
+      // empty tile with some coords, non empty map
+      await tester.initTile(0, 120, 120);
+      expect(await tester.intersect(0, 0)).to.be.false;
+
+      // intersect
+      await tester.setTileQuad(0, 120, 120, 6);
+      expect(await tester.intersect(0, 0)).to.be.true;
+    });
+  });
+
+  describe('exceptions', function () {
+    it("a map that don't contain", async function () {
+      const {tester} = await setupMapTest();
+      expect(await tester.containCoord(0, 24, 24)).to.be.false;
+      expect(await tester.containQuad(0, 24, 24, 1)).to.be.false;
+      await tester.setQuad(1, 24, 24, 1);
+      expect(await tester.containMap(0, 1)).to.be.false;
+    });
+    it('is not Equal', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(0, 0, 0, 1);
+      await tester.setQuad(0, 120, 120, 1);
+      await tester.setQuad(1, 0, 0, 1);
+      expect(await tester.isEqual(0, 1)).to.be.false;
+    });
+  });
+  it('for coverage', async function () {
+    const {tester} = await setupMapTest();
+    await tester.getMap(0);
+  });
 });

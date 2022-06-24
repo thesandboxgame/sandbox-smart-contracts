@@ -57,6 +57,17 @@ library TileWithCoordLib {
         return self;
     }
 
+    /// @notice Calculates the union/addition of two TileWithCoord
+    /// @dev to be able to merge the two TileWithCoord must have the same coordinates
+    /// @param self one of the TileWithCoord to merge
+    /// @param value the second TileWithCoord to merge
+    /// @return the merge of the two TileWithCoord
+    function merge(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
+        require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
+        self.tile = self.tile.or(value.tile);
+        return self;
+    }
+
     /// @notice Clear the bits inside a square that has size x size in the x,y coordinates
     /// @param self the TileWithCoord, in which the bits will be cleared
     /// @param xi the x coordinate of the square
@@ -71,17 +82,6 @@ library TileWithCoordLib {
     ) internal pure returns (TileWithCoord memory) {
         require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
         self.tile = self.tile.clear(xi % 24, yi % 24, size);
-        return self;
-    }
-
-    /// @notice Calculates the union/addition of two TileWithCoord
-    /// @dev to be able to merge the two TileWithCoord must have the same coordinates
-    /// @param self one of the TileWithCoord to merge
-    /// @param value the second TileWithCoord to merge
-    /// @return the merge of the two TileWithCoord
-    function merge(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {
-        require(getX(self) == getX(value) && getY(self) == getY(value), "Invalid tile coordinates");
-        self.tile = self.tile.or(value.tile);
         return self;
     }
 
@@ -106,7 +106,7 @@ library TileWithCoordLib {
         uint256 xi,
         uint256 yi
     ) internal pure returns (bool) {
-        require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
+        require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid coordinates");
         return self.tile.contain(xi % 24, yi % 24);
     }
 

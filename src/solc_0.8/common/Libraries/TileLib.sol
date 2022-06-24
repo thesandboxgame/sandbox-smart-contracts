@@ -94,7 +94,7 @@ library TileLib {
         uint256 x,
         uint256 y
     ) internal pure returns (bool) {
-        require(x < 24 && y < 24, "Invalid tile coordinates");
+        require(x < 24 && y < 24, "Invalid coordinates");
         uint256 idx = y / 8;
         uint256 bitMask = 1 << (x + 24 * (y % 8));
         return (self.data[idx] & bitMask == bitMask);

@@ -141,16 +141,16 @@ export function getEmptyExtendedTile(): boolean[][] {
 }
 
 export function setRectangle(
-  tile: boolean[][],
-  x0: number,
-  y0: number,
+  x: number,
+  y: number,
   dx: number,
   dy: number,
+  tile: boolean[][] = getEmptyTile(),
   val = true
 ): boolean[][] {
   for (let i = 0; i < dx; i++) {
     for (let j = 0; j < dy; j++) {
-      tile[y0 + j][x0 + i] = val;
+      tile[y + j][x + i] = val;
     }
   }
   return tile;
@@ -158,10 +158,10 @@ export function setRectangle(
 
 export function drawTile(
   rectangles: number[][],
-  initFunc: () => boolean[][]
+  initFunc: () => boolean[][] = getEmptyTile
 ): boolean[][] {
   return rectangles.reduce(
-    (acc, val) => setRectangle(acc, val[0], val[1], val[2], val[3]),
+    (acc, val) => setRectangle(val[0], val[1], val[2], val[3], acc),
     initFunc()
   );
 }

@@ -11,6 +11,7 @@ contract MapTester {
     using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
     using TileLib for TileLib.Tile;
     MapLib.Map[30] internal maps;
+    TileWithCoordLib.TileWithCoord[10] public tiles;
 
     function setQuad(
         uint256 idx,
@@ -126,6 +127,10 @@ contract MapTester {
         return maps[idx].values[0].tile.findAPixel();
     }
 
+    function intersect(uint256 idx, uint256 tileIdx) external view returns (bool) {
+        return maps[idx].intersect(tiles[tileIdx]);
+    }
+
     function isEqual(uint256 idx, uint256 other) external view returns (bool) {
         return maps[idx].isEqual(maps[other]);
     }
@@ -152,5 +157,26 @@ contract MapTester {
 
     function getLandCount(uint256 idx) external view returns (uint256) {
         return maps[idx].getLandCount();
+    }
+
+    function setTileQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external {
+        tiles[idx] = tiles[idx].set(x, y, size);
+    }
+
+    function initTile(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external {
+        tiles[idx] = TileWithCoordLib.init(x, y);
+    }
+
+    function getTile(uint256 idx) external view returns (TileWithCoordLib.TileWithCoord memory) {
+        return tiles[idx];
     }
 }

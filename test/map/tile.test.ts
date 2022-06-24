@@ -2,6 +2,7 @@ import {expect} from '../chai-setup';
 import {
   getEmptyTile,
   printTile,
+  setRectangle,
   setupTileLibTest,
   tileToArray,
 } from './fixtures';
@@ -63,6 +64,9 @@ describe('TileLib main', function () {
     }
     const outIdx = 29;
     await tester.intersection(idxs, outIdx);
+    for (let idx = 0; idx < tests.length; idx++) {
+      expect(await tester.intersect(idx, outIdx)).to.be.true;
+    }
     const intersection = tileToArray((await tester.getTile(outIdx)).data);
     const tile = getEmptyTile();
     tile[12][12] = true;
@@ -98,6 +102,81 @@ describe('TileLib main', function () {
       expect(await tester.containQuad(1, 21, 21, 3)).to.be.false;
     }
   });
+  describe('find a pixel', function () {
+    it('line 0-7', async function () {
+      const tester = await setupTileLibTest();
+      await tester.setQuad(0, 3, 3, 3);
+      const tile = setRectangle(3, 3, 1, 1);
+      const ret = tileToArray((await tester.findAPixel(0)).data);
+      expect(ret).to.be.eql(tile);
+    });
+    it('line 8-15', async function () {
+      const tester = await setupTileLibTest();
+      await tester.setQuad(0, 9, 9, 3);
+      const tile = setRectangle(9, 9, 1, 1);
+      const ret = tileToArray((await tester.findAPixel(0)).data);
+      expect(ret).to.be.eql(tile);
+    });
+    it('line 16-23', async function () {
+      const tester = await setupTileLibTest();
+      await tester.setQuad(0, 18, 18, 3);
+      const tile = setRectangle(18, 18, 1, 1);
+      const ret = tileToArray((await tester.findAPixel(0)).data);
+      expect(ret).to.be.eql(tile);
+    });
+    it('empty tile', async function () {
+      const tester = await setupTileLibTest();
+      const ret = tileToArray((await tester.findAPixel(0)).data);
+      expect(ret).to.be.eql(getEmptyTile());
+    });
+  });
 
-  // TODO: Add more tests, specially for clear, grid like things, etc...
+  describe('exceptions', function () {
+    it('tile size must be limited to 24x24', async function () {
+      const tester = await setupTileLibTest();
+      await expect(tester.setQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.clearQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.containQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.containCoord(0, 24, 24)).to.revertedWith(
+        'Invalid coordinates'
+      );
+    });
+    it('coords must be module size', async function () {
+      const tester = await setupTileLibTest();
+      await expect(tester.setQuad(0, 2, 2, 3)).to.revertedWith(
+        'Invalid coordinates'
+      );
+      await expect(tester.clearQuad(0, 2, 2, 3)).to.revertedWith(
+        'Invalid coordinates'
+      );
+      await expect(tester.containQuad(0, 2, 2, 3)).to.revertedWith(
+        'Invalid coordinates'
+      );
+    });
+    it('mask size must be 1,3,6,12 or 24', async function () {
+      const tester = await setupTileLibTest();
+      await expect(tester.setQuad(0, 0, 0, 5)).to.revertedWith('invalid size');
+      await expect(tester.setQuad(0, 0, 0, 25)).to.revertedWith('invalid size');
+
+      await expect(tester.clearQuad(0, 0, 0, 5)).to.revertedWith(
+        'invalid size'
+      );
+      await expect(tester.clearQuad(0, 0, 0, 25)).to.revertedWith(
+        'invalid size'
+      );
+
+      await expect(tester.containQuad(0, 0, 0, 5)).to.revertedWith(
+        'invalid size'
+      );
+      await expect(tester.containQuad(0, 0, 0, 25)).to.revertedWith(
+        'invalid size'
+      );
+    });
+  });
 });

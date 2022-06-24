@@ -37,14 +37,7 @@ describe('TileLibWithCoord tester flood', function () {
     });
     it('a square with a hole', async function () {
       const tester = await setupTileWithCoordsLibTest();
-      const tile = setRectangle(
-        drawTile([[3, 3, 10, 10]], getEmptyTile),
-        5,
-        5,
-        3,
-        3,
-        false
-      );
+      const tile = setRectangle(5, 5, 3, 3, drawTile([[3, 3, 10, 10]]), false);
       await setTileQuads(tester, tile);
       expect(await tester.isAdjacent(0)).to.be.true;
       await printGasEstimate(tester);

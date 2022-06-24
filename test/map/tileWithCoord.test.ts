@@ -211,4 +211,34 @@ describe('TileWithCoordLib main', function () {
       ).to.be.lte(30312);
     });
   });
+
+  describe('exceptions', function () {
+    it('coordinates must be inside the tile', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.initTileWithCoord(0, 120, 120);
+      await expect(tester.setQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.clearQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.containQuad(0, 24, 24, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.containCoord(0, 24, 24)).to.revertedWith(
+        'Invalid coordinates'
+      );
+    });
+    it('coordinates must be the same', async function () {
+      const tester = await setupTileWithCoordsLibTest();
+      await tester.initTileWithCoord(0, 120, 120);
+      await tester.initTileWithCoord(1, 24, 24);
+      await expect(tester.clear(0, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+      await expect(tester.merge(0, 1)).to.revertedWith(
+        'Invalid tile coordinates'
+      );
+    });
+  });
 });

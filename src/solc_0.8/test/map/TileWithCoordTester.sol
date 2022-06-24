@@ -53,6 +53,14 @@ contract TileWithCoordTester {
         return tiles[idx].contain(x, y, size);
     }
 
+    function containCoord(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        return tiles[idx].contain(x, y);
+    }
+
     function getTile(uint256 idx) external view returns (TileWithCoordLib.TileWithCoord memory) {
         return tiles[idx];
     }
