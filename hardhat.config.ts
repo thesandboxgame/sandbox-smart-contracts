@@ -221,7 +221,7 @@ const config: HardhatUserConfig = {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      mainnet: '0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB',
+      mainnet: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
       default: 4,
