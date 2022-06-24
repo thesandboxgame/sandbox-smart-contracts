@@ -1,9 +1,9 @@
 import {expect} from '../chai-setup';
-import {setupEstateGameRecordLibTest} from './fixtures';
+import {setupEstateExperienceRecordLibTest} from './fixtures';
 
 describe('Estate Game Records Test', function () {
   it('createGame', async function () {
-    const {tester} = await setupEstateGameRecordLibTest();
+    const {tester} = await setupEstateExperienceRecordLibTest();
     const gameIdBase = 12;
     for (let i = 0; i < 10; i++) {
       const gameId = gameIdBase + i;
@@ -20,7 +20,7 @@ describe('Estate Game Records Test', function () {
   });
 
   it('deleteGame', async function () {
-    const {tester} = await setupEstateGameRecordLibTest();
+    const {tester} = await setupEstateExperienceRecordLibTest();
     const gameId = 123;
     await tester.createGame(0, gameId);
     expect(await tester.getGameIdAt(0, 0)).to.be.equal(gameId);
@@ -33,7 +33,7 @@ describe('Estate Game Records Test', function () {
   });
 
   it('delete one game from a list', async function () {
-    const {tester} = await setupEstateGameRecordLibTest();
+    const {tester} = await setupEstateExperienceRecordLibTest();
     const cant = 10;
     const gameIdBase = 12;
 

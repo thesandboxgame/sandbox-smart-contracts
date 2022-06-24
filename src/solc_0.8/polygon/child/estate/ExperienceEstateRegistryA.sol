@@ -90,6 +90,8 @@ contract ExperienceEstateRegistryA is WithSuperOperators, ERC2771Handler, IEstat
             // TODO: Check that the template + deltas don't make a mess....
             uint256 landId = landCoords[i] + x + (y * 408);
             links[expId].lands.push(landId);
+            console.log("adding these lands");
+            console.log(landId);
             expXLand[landId] = expId;
         }
     }

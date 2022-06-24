@@ -22,7 +22,7 @@ export const setupEstate = withSnapshot(
     const {
       estateTokenFeeBeneficiary,
       sandBeneficiary,
-      gameTokenFeeBeneficiary,
+      experienceTokenFeeBeneficiary,
     } = await getNamedAccounts();
 
     // Game minter use Sand and we need Polygon Sand!!!
@@ -31,8 +31,8 @@ export const setupEstate = withSnapshot(
     const user0 = others[0];
     const user1 = others[1];
 
-    const gameToken = await ethers.getContract('ChildGameToken');
-    const gameMinter = await ethers.getContract('GameMinter');
+    const experienceToken = await ethers.getContract('ChildGameToken');
+    const experienceMinter = await ethers.getContract('GameMinter');
     const estateContract = await ethers.getContract('EstateToken');
     const landContract = await ethers.getContract('MockLandWithMint');
     const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -61,12 +61,12 @@ export const setupEstate = withSnapshot(
       landContract,
       landContractAsMinter,
       landContractAsUser0,
-      gameTokenFeeBeneficiary,
+      experienceTokenFeeBeneficiary,
       minter,
       user0,
       user1,
-      gameToken,
-      gameMinter,
+      experienceToken,
+      experienceMinter,
       estateTokenFeeBeneficiary,
     };
   }
@@ -304,7 +304,7 @@ export const setupL2EstateAndLand = withSnapshot([], async () => {
   return await setupEstateAndLand(false);
 });
 
-export const setupL2EstateGameAndLand = withSnapshot([], async () => {
+export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   const setup = await setupEstateAndLand(false);
   const {deployer} = await getNamedAccounts();
   // Fake Game
@@ -312,8 +312,11 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
     from: deployer,
     args: [],
   });
-  const gameContract = await ethers.getContract('MockExperience', deployer);
-  const gameContractAsOther = await ethers.getContract(
+  const experienceContract = await ethers.getContract(
+    'MockExperience',
+    deployer
+  );
+  const experienceContractAsOther = await ethers.getContract(
     'MockExperience',
     setup.other
   );
@@ -327,7 +330,7 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
     },
     args: [
       setup.estateContractAsMinter.address,
-      gameContract.address,
+      experienceContract.address,
       setup.landContract.address,
     ],
   });
@@ -337,8 +340,8 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
   );
   return {
     experienceEstateRegistryContract,
-    gameContract,
-    gameContractAsOther,
+    experienceContract,
+    experienceContractAsOther,
     ...setup,
     createEstate: async (data?: {
       sizes: BigNumberish[];
@@ -405,7 +408,7 @@ export const setupL2EstateGameAndLand = withSnapshot([], async () => {
   };
 });
 
-export const setupEstateGameRecordLibTest = withSnapshot([], async () => {
+export const setupEstateExperienceRecordLibTest = withSnapshot([], async () => {
   const {deployer} = await getNamedAccounts();
   const mapLib = await deployments.deploy('MapLib', {from: deployer});
   await deployments.deploy('EstateGameRecordLibTester', {

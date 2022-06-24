@@ -1,4 +1,4 @@
-import {setupL2EstateGameAndLand} from './fixtures';
+import {setupL2EstateExperienceAndLand} from './fixtures';
 import {expect} from '../chai-setup';
 import {
   printTile,
@@ -16,9 +16,9 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         experienceEstateRegistryContract,
         mintQuad,
-      } = await setupL2EstateGameAndLand();
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const landId = await mintQuad(other, 1, 0, 0);
 
@@ -31,7 +31,7 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         0,
         0,
-        gameId,
+        experienceId,
         landId
       );
     });
@@ -42,9 +42,9 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         experienceEstateRegistryContract,
         mintQuad,
-      } = await setupL2EstateGameAndLand();
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 3, 0, 0);
 
@@ -57,12 +57,17 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         0,
         0,
-        gameId,
+        experienceId,
         0
       );
 
       await expect(
-        experienceEstateRegistryContract.CreateExperienceLink(1, 0, gameId, 1)
+        experienceEstateRegistryContract.CreateExperienceLink(
+          1,
+          0,
+          experienceId,
+          1
+        )
       ).to.be.revertedWith('Exp already in use');
     });
     it(`trying to create a link with a land already in use should revert`, async function () {
@@ -72,10 +77,10 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         experienceEstateRegistryContract,
         mintQuad,
-      } = await setupL2EstateGameAndLand();
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
-      const gameId2 = 456;
+      const experienceId = 123;
+      const experienceId2 = 456;
 
       const landId = await mintQuad(other, 1, 0, 0);
 
@@ -88,7 +93,7 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         0,
         0,
-        gameId,
+        experienceId,
         landId
       );
 
@@ -96,7 +101,7 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract.CreateExperienceLink(
           0,
           0,
-          gameId2,
+          experienceId2,
           landId
         )
       ).to.be.revertedWith('Land already in use');
@@ -112,14 +117,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 24, 48, 96);
 
-      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await experienceContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -134,7 +139,7 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         48,
         96,
-        gameId,
+        experienceId,
         estateId
       );
     });
@@ -146,10 +151,10 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       await mintQuad(other, 1, 0, 2);
       await mintQuad(other, 1, 1, 2);
@@ -157,13 +162,13 @@ describe('experience estate registry test', function () {
       await mintQuad(other, 1, 1, 1);
       await mintQuad(other, 1, 1, 3);
 
-      await gameContract.setQuad(0, 2, 1);
-      await gameContract.setQuad(1, 2, 1);
-      await gameContract.setQuad(2, 2, 1);
-      await gameContract.setQuad(1, 1, 1);
-      await gameContract.setQuad(1, 3, 1);
+      await experienceContract.setQuad(0, 2, 1);
+      await experienceContract.setQuad(1, 2, 1);
+      await experienceContract.setQuad(2, 2, 1);
+      await experienceContract.setQuad(1, 1, 1);
+      await experienceContract.setQuad(1, 3, 1);
 
-      const template = await gameContract.getTemplate();
+      const template = await experienceContract.getTemplate();
       const tta = tileToArray(template[0].data);
       printTile(tta);
 
@@ -189,7 +194,7 @@ describe('experience estate registry test', function () {
       const twjs = tileWithCoordToJS(map1);
       printTileWithCoord(twjs);
 
-      await experienceEstateRegistryContract.link(estateId, gameId, 0, 0);
+      await experienceEstateRegistryContract.link(estateId, experienceId, 0, 0);
     });
   });
   describe('Link and unlink', function () {
@@ -202,14 +207,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 24, 48, 96);
 
-      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await experienceContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -224,22 +229,22 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         48,
         96,
-        gameId,
+        experienceId,
         estateId
       );
 
-      await experienceEstateRegistryContract.unLinkByExperienceId(gameId);
+      await experienceEstateRegistryContract.unLinkByExperienceId(experienceId);
     });
 
     it(`trying to unlink an unknow exp should revert`, async function () {
       const {
         experienceEstateRegistryContract,
-      } = await setupL2EstateGameAndLand();
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       await expect(
-        experienceEstateRegistryContract.unLinkByExperienceId(gameId)
+        experienceEstateRegistryContract.unLinkByExperienceId(experienceId)
       ).to.be.revertedWith('unkown experience');
     });
 
@@ -251,14 +256,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 24, 48, 96);
 
-      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await experienceContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -273,7 +278,7 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         48,
         96,
-        gameId,
+        experienceId,
         estateId
       );
 
@@ -291,14 +296,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 24, 48, 96);
 
-      await gameContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
+      await experienceContract.setQuad(48 % 24, 96 % 24, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -313,13 +318,72 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         48,
         96,
-        gameId,
+        experienceId,
         estateId
       );
 
       await expect(
         experienceEstateRegistryContract.unLinkByLandId(123)
       ).to.be.revertedWith('unkown land');
+    });
+    it(`create a link with a cross shape and then remove one land`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceEstateRegistryContract,
+        mintQuad,
+        createEstate,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await mintQuad(other, 1, 0, 2);
+      await mintQuad(other, 1, 1, 2);
+      await mintQuad(other, 1, 2, 2);
+      await mintQuad(other, 1, 1, 1);
+      await mintQuad(other, 1, 1, 3);
+
+      await experienceContract.setQuad(0, 2, 1);
+      await experienceContract.setQuad(1, 2, 1);
+      await experienceContract.setQuad(2, 2, 1);
+      await experienceContract.setQuad(1, 1, 1);
+      await experienceContract.setQuad(1, 3, 1);
+
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        true
+      );
+
+      const landIds: number[] = [];
+
+      const {estateId} = await createEstate({
+        sizes: [1, 1, 1, 1, 1],
+        xs: [0, 1, 2, 1, 1],
+        ys: [2, 2, 2, 1, 3],
+      });
+
+      [
+        [0, 2],
+        [1, 2],
+        [2, 2],
+        [1, 1],
+        [1, 3],
+      ].forEach((coords) => {
+        landIds.push(coords[0] + coords[0] * 408);
+      });
+
+      console.log(landIds);
+      await experienceContract.setLands(landIds);
+
+      await estateContractAsOther.getLandAt(estateId, 0, 1);
+
+      await experienceEstateRegistryContract.link(estateId, experienceId, 0, 0);
+
+      //(0, 2) => x + (y * 408) = 816
+      await experienceEstateRegistryContract.unLinkByLandId(816);
     });
   });
   describe('testing unLinkExperience', function () {
@@ -332,14 +396,14 @@ describe('experience estate registry test', function () {
         experienceEstateRegistryContract,
         mintQuad,
         createEstate,
-        gameContract,
-      } = await setupL2EstateGameAndLand();
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
 
-      const gameId = 123;
+      const experienceId = 123;
 
       const quadId = await mintQuad(other, 24, 0, 0);
 
-      await gameContract.setQuad(0, 0, 24); //is this really how it works?
+      await experienceContract.setQuad(0, 0, 24); //is this really how it works?
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
@@ -354,7 +418,7 @@ describe('experience estate registry test', function () {
       await experienceEstateRegistryContract.CreateExperienceLink(
         0,
         0,
-        gameId,
+        experienceId,
         estateId
       );
 
