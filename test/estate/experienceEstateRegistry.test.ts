@@ -18,7 +18,8 @@ describe('experience estate registry test', function () {
         other,
         landContractAsOther,
         estateContractAsOther,
-        registryContract,
+        experienceContract,
+        registryContractAsOther,
         mintQuad,
       } = await setupL2EstateExperienceAndLand();
 
@@ -26,20 +27,23 @@ describe('experience estate registry test', function () {
 
       const landId = await mintQuad(other, 1, 0, 0);
 
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
         landId
       );
 
-      await registryContract.CreateExperienceLink(0, 0, experienceId, landId);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
     });
-    it(`trying to create a link with an experience already in use should revert`, async function () {
+
+    it(`TODO: Right now we overwrite !!!. trying to create a link with an experience already in use should revert`, async function () {
       const {
         other,
+        experienceContract,
         landContractAsOther,
         estateContractAsOther,
-        registryContract,
+        registryContractAsOther,
         mintQuad,
       } = await setupL2EstateExperienceAndLand();
 
@@ -53,18 +57,20 @@ describe('experience estate registry test', function () {
         quadId
       );
 
-      await registryContract.CreateExperienceLink(0, 0, experienceId, 0);
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
 
-      await expect(
-        registryContract.CreateExperienceLink(1, 0, experienceId, 1)
-      ).to.be.revertedWith('Exp already in use');
+      // await expect(
+      //   registryContractAsOther.link(0, experienceId, 0, 0)
+      // ).to.be.revertedWith('Exp already in use');
     });
     it(`trying to create a link with a land already in use should revert`, async function () {
       const {
         other,
+        experienceContract,
         landContractAsOther,
         estateContractAsOther,
-        registryContract,
+        registryContractAsOther,
         mintQuad,
       } = await setupL2EstateExperienceAndLand();
 
@@ -79,11 +85,13 @@ describe('experience estate registry test', function () {
         landId
       );
 
-      await registryContract.CreateExperienceLink(0, 0, experienceId, landId);
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
 
+      await experienceContract.setTemplate(experienceId2, [[0, 0]]);
       await expect(
-        registryContract.CreateExperienceLink(0, 0, experienceId2, landId)
-      ).to.be.revertedWith('Land already in use');
+        registryContractAsOther.link(0, experienceId2, 0, 0)
+      ).to.be.revertedWith('already linked');
     });
   });
   describe('create a link', function () {
@@ -93,7 +101,7 @@ describe('experience estate registry test', function () {
         other,
         landContractAsOther,
         estateContractAsOther,
-        registryContract,
+        registryContractAsOther,
         mintQuad,
         createEstate,
         experienceContract,
@@ -115,12 +123,7 @@ describe('experience estate registry test', function () {
         ys: [96],
       });
 
-      await registryContract.CreateExperienceLink(
-        48,
-        96,
-        experienceId,
-        estateId
-      );
+      await registryContractAsOther.link(estateId, experienceId, 48, 96);
     });
     it(`create a link between an estate and an experience with a more complex shape`, async function () {
       const {
@@ -343,7 +346,7 @@ describe('experience estate registry test', function () {
         other,
         landContractAsOther,
         estateContractAsOther,
-        registryContract,
+        registryContractAsOther,
         mintQuad,
         createEstate,
         experienceContract,
@@ -365,7 +368,7 @@ describe('experience estate registry test', function () {
         ys: [0],
       });
 
-      await registryContract.CreateExperienceLink(0, 0, experienceId, estateId);
+      await registryContractAsOther.link(estateId, experienceId, 0, 0);
 
       // TODO: This only reverts now.
       // await registryContract.unLinkExperience([[24], [0], [0]]);

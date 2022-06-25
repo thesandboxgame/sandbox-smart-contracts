@@ -169,11 +169,27 @@ describe('MapLib main', function () {
           expect(
             await tester.containTileWithOffset(0, t.tile, 240 + x, 240 + y)
           ).to.be.true;
+          expect(
+            await tester.intersectTileWithOffset(0, t.tile, 240 + x, 240 + y)
+          ).to.be.true;
           expect(await tester.containTileWithOffset(0, t.tile, 241 + x, y)).to
             .be.false;
+          expect(
+            await tester.intersectTileWithOffset(0, t.tile, 241 + x, 240 + y)
+          ).to.be.true;
         }
       }
     });
+    it('translate 1 pixel in 0,0 by 0,0', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(10, 0, 0, 1);
+      const t = await tester.at(10, 0);
+
+      await tester.setQuad(0, 0, 0, 1);
+      expect(await tester.containTileWithOffset(0, t.tile, 0, 0)).to.be.true;
+      expect(await tester.intersectTileWithOffset(0, t.tile, 0, 0)).to.be.true;
+    });
+
     it('land count', async function () {
       const {tester} = await setupMapTest();
       await tester.setQuad(0, 0, 0, 1);
@@ -193,8 +209,8 @@ describe('MapLib main', function () {
       ).to.be.lte(121264);
     });
 
-    describe('shift', function () {
-      it('shift 1 pixel all over the place', async function () {
+    describe('translate', function () {
+      it('translate 1 pixel all over the place', async function () {
         const {tester} = await setupMapTest();
         await tester.setQuad(0, 0, 0, 1);
         const t = await tester.at(0, 0);
@@ -202,7 +218,7 @@ describe('MapLib main', function () {
         for (const x of tests) {
           for (const y of tests) {
             const ret = translateResultToArray(
-              await tester.shift(t.tile, x, y)
+              await tester.translate(t.tile, x, y)
             );
             const result = getEmptyTranslateResult();
             result[y][x] = true;
@@ -210,7 +226,7 @@ describe('MapLib main', function () {
           }
         }
       });
-      it('shift a full tile all over the place y first', async function () {
+      it('translate a full tile all over the place y first', async function () {
         const {tester} = await setupMapTest();
         await tester.setQuad(0, 0, 0, 24);
         const t = await tester.at(0, 0);
@@ -218,7 +234,7 @@ describe('MapLib main', function () {
         for (const x of tests) {
           for (const y of tests) {
             const ret = translateResultToArray(
-              await tester.shift(t.tile, x, y)
+              await tester.translate(t.tile, x, y)
             );
             const result = setRectangle(
               x,
@@ -231,7 +247,7 @@ describe('MapLib main', function () {
           }
         }
       });
-      it('shift a full tile all over the place x first', async function () {
+      it('translate a full tile all over the place x first', async function () {
         const {tester} = await setupMapTest();
         await tester.setQuad(0, 0, 0, 24);
         const t = await tester.at(0, 0);
@@ -239,7 +255,7 @@ describe('MapLib main', function () {
         for (const x of tests) {
           for (const y of tests) {
             const ret = translateResultToArray(
-              await tester.shift(t.tile, x, y)
+              await tester.translate(t.tile, x, y)
             );
             const result = setRectangle(
               x,
@@ -264,10 +280,10 @@ describe('MapLib main', function () {
         await setTileQuads(tester, tile);
         const t = await tester.at(0, 0);
         expect(
-          BigNumber.from(await tester.estimateGas.shift(t.tile, 23, 23))
+          BigNumber.from(await tester.estimateGas.translate(t.tile, 23, 23))
         ).to.be.lte(37885);
       });
-      it('shift a figure', async function () {
+      it('translate a figure', async function () {
         const {tester} = await setupMapTest();
         await tester.setQuad(10, 0, 0, 1);
         await tester.setQuad(10, 0, 6, 1);

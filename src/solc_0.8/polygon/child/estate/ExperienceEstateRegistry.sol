@@ -61,6 +61,8 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
 
         // Link
         (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(expId);
+        require(landCoords.length > 0, "empty template");
+
         MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
         require(!linkedLands.intersect(s), "already linked");
         linkedLands.set(s);
@@ -77,6 +79,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         for (uint256 i; i < landCoords.length; i++) {
             // TODO: Check that the template + deltas don't make a mess....
             uint256 landId = landCoords[i] + x + (y * 408);
+            console.log("linked land", landCoords[i], landId);
             est.lands.push(landId);
             expXLand[landId] = expId;
         }

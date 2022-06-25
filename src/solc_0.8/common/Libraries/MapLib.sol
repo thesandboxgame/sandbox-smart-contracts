@@ -315,9 +315,9 @@ library MapLib {
     /// @return true if there is at least one bit set in both the Map and the TranslationResult
     function intersect(Map storage self, TranslateResult memory s) public view returns (bool) {
         return
-            intersect(self, s.topLeft) &&
-            intersect(self, s.topRight) &&
-            intersect(self, s.bottomLeft) &&
+            intersect(self, s.topLeft) ||
+            intersect(self, s.topRight) ||
+            intersect(self, s.bottomLeft) ||
             intersect(self, s.bottomRight);
     }
 

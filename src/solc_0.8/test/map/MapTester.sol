@@ -82,6 +82,16 @@ contract MapTester {
         return maps[idx].contain(s);
     }
 
+    function intersectTileWithOffset(
+        uint256 idx,
+        TileLib.Tile calldata tile,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        MapLib.TranslateResult memory s = MapLib.translate(tile, x, y);
+        return maps[idx].intersect(s);
+    }
+
     function isAdjacent(uint256 idx) external view returns (bool) {
         return maps[idx].isAdjacent();
     }
@@ -156,7 +166,7 @@ contract MapTester {
         return maps[idx].getMap();
     }
 
-    function shift(
+    function translate(
         TileLib.Tile calldata t,
         uint256 x,
         uint256 y
