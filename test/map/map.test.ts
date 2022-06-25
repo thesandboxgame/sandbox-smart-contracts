@@ -176,7 +176,7 @@ describe('MapLib main', function () {
             .be.false;
           expect(
             await tester.intersectTileWithOffset(0, t.tile, 241 + x, 240 + y)
-          ).to.be.true;
+          ).to.be.false;
         }
       }
     });
