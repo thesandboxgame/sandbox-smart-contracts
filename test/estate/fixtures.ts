@@ -333,12 +333,17 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
       setup.landContract.address,
     ],
   });
-  const experienceEstateRegistryContract = await ethers.getContract(
+  const registryContract = await ethers.getContract(
     'ExperienceEstateRegistry',
     deployer
   );
+  const registryContractAsOther = await ethers.getContract(
+    'ExperienceEstateRegistry',
+    setup.other
+  );
   return {
-    experienceEstateRegistryContract,
+    registryContract,
+    registryContractAsOther,
     experienceContract,
     experienceContractAsOther,
     ...setup,

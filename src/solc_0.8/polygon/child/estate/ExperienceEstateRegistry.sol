@@ -53,6 +53,9 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         uint256 x,
         uint256 y
     ) external override {
+        console.log("link estateId", estateId);
+        console.log("link expId", expId);
+        console.log("link coord", x, y);
         // TODO: This is what we want ?
         _unLinkExperience(expId);
 
@@ -68,7 +71,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         } else {
             // TODO: storageId or estateId ?
             require(estateToken.contain(estateId, s), "not enough land");
-            est.estateId = estateToken.getStorageId(estateId);
+            est.estateId = estateId;
         }
 
         for (uint256 i; i < landCoords.length; i++) {
@@ -89,9 +92,9 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
 
     function unLinkByLandId(uint256 landId) external override {
         uint256 expId = expXLand[landId];
+        require(expId != 0, "unknown land");
         EstateAndLands storage est = links[expId];
         require(_isValidUser(est), "Invalid user");
-        require(expId != 0, "unknown land");
         // if we try to access data from an nonexisting land we'll get 0
         // we can use an EnumerableSet with try get, or set another estateId for single lands
         _unLinkExperience(expId);
@@ -125,46 +128,10 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     function _isValidUser(EstateAndLands storage est) internal returns (bool) {
         if (est.estateId == 0) {
             assert(est.lands.length == 1);
+            console.log("Check ownerOf land", est.lands[0]);
             return landToken.ownerOf(est.lands[0]) == _msgSender();
         }
+        console.log("Check ownerOf estate", est.estateId);
         return IERC721(address(estateToken)).ownerOf(est.estateId) == _msgSender();
-    }
-
-    // TODO: Remove and fix the tests (or remove them).
-    uint256 internal constant MAXLANDID = 166463;
-
-    function CreateExperienceLink(
-        uint256 x,
-        uint256 y,
-        uint256 expId,
-        uint256 landOrEstateId
-    ) external {
-        //check exist land
-        //check exist expId
-
-        if (landOrEstateId < MAXLANDID) {
-            require(links[expId].lands.length == 0, "Exp already in use");
-            require(expXLand[landOrEstateId] == 0, "Land already in use");
-            links[expId].estateId = 0;
-            links[expId].lands = [landOrEstateId];
-            expXLand[landOrEstateId] = expId;
-            // expXLand[landOrEstateId].estateId = 0;
-            linkedLands.set(x, y, 1);
-            //maybe we can set estateId = 0 for single lands
-        } else {
-            //estate
-            (TileLib.Tile memory template, ) = experienceToken.getTemplate(expId);
-            MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
-            require(!linkedLands.intersect(s), "already linked");
-            require(estateToken.contain(landOrEstateId, s), "not enough land");
-
-            uint256 estStorageId = estateToken.getStorageId(landOrEstateId);
-
-            links[expId].estateId = estStorageId;
-            links[expId].lands = [landOrEstateId];
-            //humm
-            expXLand[estStorageId] = expId;
-            linkedLands.set(s);
-        }
     }
 }
