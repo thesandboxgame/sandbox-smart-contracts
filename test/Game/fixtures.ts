@@ -26,6 +26,18 @@ const setApprovalForAll = async (
   await assetContractAsGameOwner.setApprovalForAll(gameContractAddress, true);
 };
 
+const changeAssetMinter = async (
+  assetConstractName: string,
+  assetAdminAddress: string,
+  assetMinterAddress: string
+) => {
+  const assetContractAsAdmin = await ethers.getContract(
+    assetConstractName,
+    assetAdminAddress
+  );
+  // await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+};
+
 export interface GameFixturesData {
   gameToken: Contract;
   gameTokenAsAdmin: Contract;
@@ -113,12 +125,12 @@ export const setupTestWithAdminGameMinter = withSnapshot(
 
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
-  // const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  // await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
-  // await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
+  const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
+  await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
+  await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
 
-  // const {gameTokenAdmin} = await getNamedAccounts();
-  // await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+  const {gameTokenAdmin} = await getNamedAccounts();
+  await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
   return gameFixturesData;
 };

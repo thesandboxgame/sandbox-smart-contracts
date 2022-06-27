@@ -526,13 +526,13 @@ describe('GameToken', function () {
       });
 
       // TODO: fix
-      it('can mint Games with many Assets', async function () {
+      it.only('can mint Games with many Assets', async function () {
         ({
           gameToken,
           users,
           GameOwner,
           gameTokenAsAdmin,
-        } = await setupTestWithGameOwnerMinter()); // This setup is only used here
+        } = await setupTestWithAdminGameMinter());
         const assetContract1155 = await ethers.getContract('Asset');
         const assetContract721 = await ethers.getContract('AssetERC721');
 
@@ -560,10 +560,10 @@ describe('GameToken', function () {
 
         const balanceBefore1155 = await assetContract1155[
           'balanceOf(address,uint256)'
-        ](gameToken.address, asset721Id);
+        ](gameToken.address, assetId);
         const balanceBefore1155_2 = await assetContract1155[
           'balanceOf(address,uint256)'
-        ](gameToken.address, asset721Id2);
+        ](gameToken.address, assetId2);
 
         // ---- ERC721
 
