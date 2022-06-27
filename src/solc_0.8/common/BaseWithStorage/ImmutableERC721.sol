@@ -113,4 +113,32 @@ abstract contract ImmutableERC721 is ERC721BaseToken, IERC721MetadataUpgradeable
         }
         return string(bstr);
     }
+
+    /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
+    /// @param from The address of the token owner.
+    /// @param estateId The tokenId to increment.
+    /// @return newEstateId the version-incremented tokenId.
+    /// @return newStorageId the version-incremented storageId.
+    function _incrementTokenVersion(address from, uint256 estateId)
+        internal
+        returns (uint256 newEstateId, uint256 newStorageId)
+    {
+        uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+        uint16 version = uint16(estateId);
+        version++;
+        address owner = _ownerOf(estateId);
+
+        if (from == owner) {
+            _burn(from, owner, estateId);
+        }
+        newEstateId = _generateTokenId(from, subId, _chainIndex, version);
+        newStorageId = _storageId(estateId);
+        // TODO: Move to base class somehow
+        _owners[newStorageId] = (uint256(version) << 200) + uint256(uint160(from));
+        _numNFTPerAddress[from]++;
+        emit Transfer(address(0), from, newEstateId);
+        // TODO: this checks something that is already true ?
+        address newOwner = _ownerOf(newEstateId);
+        require(owner == newOwner, "NOT_OWNER");
+    }
 }
