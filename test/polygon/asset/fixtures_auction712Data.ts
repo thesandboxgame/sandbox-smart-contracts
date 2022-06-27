@@ -1,11 +1,9 @@
-import BN from 'bn.js';
-
 type Message = {
   from: string;
   token: string;
   offerId: string;
-  startingPrice: BN;
-  endingPrice: BN;
+  startingPrice: string;
+  endingPrice: string;
   startedAt: number;
   duration: number;
   packs: number;
@@ -28,10 +26,6 @@ type AuctionData = {
         name: 'version';
         type: 'string';
       },
-      // {
-      //   name: 'chainId';
-      //   type: 'uint256';
-      // },
       {
         name: 'verifyingContract';
         type: 'address';
@@ -54,7 +48,6 @@ type AuctionData = {
   domain: {
     name: string;
     version: string;
-    // chainId: number;
     verifyingContract: string;
   };
   message: Message;
@@ -63,7 +56,6 @@ type AuctionData = {
 export const auction712Data = function (
   name: string,
   version: string,
-  // chainId: number,
   verifyingContract: Contract,
   message: Message
 ): AuctionData {
@@ -78,10 +70,6 @@ export const auction712Data = function (
           name: 'version',
           type: 'string',
         },
-        // {
-        //   name: 'chainId',
-        //   type: 'uint256',
-        // },
         {
           name: 'verifyingContract',
           type: 'address',
@@ -104,7 +92,6 @@ export const auction712Data = function (
     domain: {
       name: name,
       version: version,
-      // chainId: chainId,
       verifyingContract: verifyingContract.address,
     },
     message: message,
