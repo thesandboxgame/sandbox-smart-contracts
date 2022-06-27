@@ -41,12 +41,8 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
         _ps().registryToken.link(estateId, expId, x, y);
     }
 
-    function unLinkByLandId(uint256 landId) external {
-        _ps().registryToken.unLinkByLandId(landId);
-    }
-
-    function unLinkByExperienceId(uint256 expId) external {
-        _ps().registryToken.unLinkByExperienceId(expId);
+    function unLink(uint256 expId) external {
+        _ps().registryToken.unLink(expId);
     }
 
     function getRegistry() external view returns (IEstateExperienceRegistry) {

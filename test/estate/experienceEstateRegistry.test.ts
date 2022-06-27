@@ -94,6 +94,40 @@ describe('experience estate registry test', function () {
         registryContractAsOther.link(0, experienceId2, 0, 0)
       ).to.be.revertedWith('already linked');
     });
+    it(`trying to create a multi land link with a land already in use should revert`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        registryContractAsOther,
+        mintQuad,
+        createEstate,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+      const experienceId2 = 234;
+
+      const quadId = await mintQuad(other, 24, 48, 96);
+
+      await experienceContract.setTemplate(experienceId, fullQuad24);
+      await landContractAsOther.setApprovalForAllFor(
+        other,
+        estateContractAsOther.address,
+        quadId
+      );
+      const {estateId} = await createEstate({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await registryContractAsOther.link(estateId, experienceId, 48, 96);
+      await experienceContract.setTemplate(experienceId2, fullQuad24);
+      await expect(
+        registryContractAsOther.link(estateId, experienceId2, 48, 96)
+      ).to.be.revertedWith('already linked');
+    });
   });
   describe('create a link', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -212,7 +246,7 @@ describe('experience estate registry test', function () {
       });
 
       await registryContractAsOther.link(estateId, experienceId, 48, 96);
-      await registryContractAsOther.unLinkByExperienceId(experienceId);
+      await registryContractAsOther.unLink(experienceId);
     });
 
     it(`trying to unlink an unknown exp should revert`, async function () {
@@ -220,124 +254,9 @@ describe('experience estate registry test', function () {
 
       const experienceId = 123;
 
-      await expect(
-        registryContract.unLinkByExperienceId(experienceId)
-      ).to.be.revertedWith('unknown experience');
-    });
-
-    it(`create a link between an estate and an experience and unlink it by lan id`, async function () {
-      const {
-        other,
-        landContractAsOther,
-        estateContractAsOther,
-        registryContractAsOther,
-        mintQuad,
-        createEstate,
-        experienceContract,
-      } = await setupL2EstateExperienceAndLand();
-
-      const experienceId = 123;
-
-      const quadId = await mintQuad(other, 24, 48, 96);
-
-      await experienceContract.setTemplate(experienceId, fullQuad24);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
-        estateContractAsOther.address,
-        quadId
+      await expect(registryContract.unLink(experienceId)).to.be.revertedWith(
+        'unknown experience'
       );
-      const {estateId} = await createEstate({
-        sizes: [24],
-        xs: [48],
-        ys: [96],
-      });
-
-      await registryContractAsOther.link(estateId, experienceId, 48, 96);
-
-      //await registryContract.unLinkByLandId(39120);
-      //this shouldn't revert
-      await expect(
-        registryContractAsOther.unLinkByLandId(39120)
-      ).to.be.revertedWith('unknown land');
-    });
-    it(`trying to unlink an inexistent land id should revert`, async function () {
-      const {
-        other,
-        landContractAsOther,
-        estateContractAsOther,
-        registryContractAsOther,
-        mintQuad,
-        createEstate,
-        experienceContract,
-      } = await setupL2EstateExperienceAndLand();
-
-      const experienceId = 123;
-
-      const quadId = await mintQuad(other, 24, 48, 96);
-
-      await experienceContract.setTemplate(experienceId, fullQuad24);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
-        estateContractAsOther.address,
-        quadId
-      );
-      const {estateId} = await createEstate({
-        sizes: [24],
-        xs: [48],
-        ys: [96],
-      });
-
-      await registryContractAsOther.link(estateId, experienceId, 48, 96);
-
-      await expect(
-        registryContractAsOther.unLinkByLandId(123)
-      ).to.be.revertedWith('unknown land');
-    });
-    it(`create a link with a cross shape and then remove one land`, async function () {
-      const {
-        other,
-        landContractAsOther,
-        estateContractAsOther,
-        registryContractAsOther,
-        mintQuad,
-        createEstate,
-        experienceContract,
-      } = await setupL2EstateExperienceAndLand();
-
-      const experienceId = 123;
-
-      await mintQuad(other, 1, 0, 2);
-      await mintQuad(other, 1, 1, 2);
-      await mintQuad(other, 1, 2, 2);
-      await mintQuad(other, 1, 1, 1);
-      await mintQuad(other, 1, 1, 3);
-
-      await experienceContract.setTemplate(experienceId, [
-        [0, 2],
-        [1, 2],
-        [2, 2],
-        [1, 1],
-        [1, 3],
-      ]);
-
-      await landContractAsOther.setApprovalForAllFor(
-        other,
-        estateContractAsOther.address,
-        true
-      );
-
-      const {estateId} = await createEstate({
-        sizes: [1, 1, 1, 1, 1],
-        xs: [0, 1, 2, 1, 1],
-        ys: [2, 2, 2, 1, 3],
-      });
-
-      await estateContractAsOther.getLandAt(estateId, 0, 1);
-
-      await registryContractAsOther.link(estateId, experienceId, 0, 0);
-
-      //(0, 2) => x + (y * 408) = 816
-      await registryContractAsOther.unLinkByLandId(816);
     });
   });
   describe('testing unLinkExperience', function () {
@@ -459,7 +378,7 @@ describe('experience estate registry test', function () {
         await registryContractAsOther.link(estateId, experienceId, 48, 96);
 
         const receipt = await waitFor(
-          registryContractAsOther.unLinkByExperienceId(experienceId)
+          registryContractAsOther.unLink(experienceId)
         );
         console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
       });
