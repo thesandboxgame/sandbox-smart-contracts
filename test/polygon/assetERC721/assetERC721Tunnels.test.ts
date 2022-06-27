@@ -1,9 +1,7 @@
-// import {ethers} from 'hardhat';
 import {AbiCoder} from 'ethers/lib/utils';
 import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupAssetERC721Tunnels} from './fixtures';
-// import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 
 describe('PolygonAssetERC721.sol', function () {
@@ -556,14 +554,12 @@ describe('PolygonAssetERC721.sol', function () {
           AssetERC721,
           assetMinter,
           users,
-          MockAssetERC721Tunnel,
           PolygonAssetERC721,
           MockPolygonAssetERC721Tunnel,
         } = await setupAssetERC721Tunnels();
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
         const data = abiCoder.encode(['string'], [uri]);
-        const dataArray = abiCoder.encode(['string[]'], [[uri]]);
         const assetHolder = users[0];
         const Id = 1;
 
