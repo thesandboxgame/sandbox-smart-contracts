@@ -6,6 +6,7 @@ import {
   tileToArray,
   tileWithCoordToJS,
 } from '../map/fixtures';
+import {waitFor} from '../utils';
 
 const fullQuad24 = Array.from({length: 24})
   .map((i, x) => Array.from({length: 24}).map((j, y) => [x, y]))
@@ -372,6 +373,96 @@ describe('experience estate registry test', function () {
 
       // TODO: This only reverts now.
       // await registryContract.unLinkExperience([[24], [0], [0]]);
+    });
+  });
+  describe('gas tests', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    [1, 3, 6, 12, 24].forEach((size) => {
+      it(`@create an ${size}x${size} group of lands and link them`, async function () {
+        const {
+          other,
+          landContractAsOther,
+          estateContractAsOther,
+          registryContractAsOther,
+          mintQuad,
+          createEstate,
+          experienceContract,
+        } = await setupL2EstateExperienceAndLand();
+
+        const experienceId = 123;
+
+        await mintQuad(other, size, 48, 96);
+
+        //get coords from lands
+        const coords = [];
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            coords.push([48 + i, 96 + j]);
+          }
+        }
+
+        await experienceContract.setTemplate(experienceId, coords);
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContractAsOther.address,
+          true
+        );
+        const {estateId} = await createEstate({
+          sizes: [size],
+          xs: [48],
+          ys: [96],
+        });
+
+        const receipt = await waitFor(
+          registryContractAsOther.link(estateId, experienceId, 48, 96)
+        );
+        console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
+      });
+    });
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    [1, 3, 6, 12, 24].forEach((size) => {
+      it(`@unlink an ${size}x${size} group of lands by expId`, async function () {
+        const {
+          other,
+          landContractAsOther,
+          estateContractAsOther,
+          registryContractAsOther,
+          mintQuad,
+          createEstate,
+          experienceContract,
+        } = await setupL2EstateExperienceAndLand();
+
+        const experienceId = 123;
+
+        await mintQuad(other, size, 48, 96);
+
+        //get coords from lands
+        const coords = [];
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            coords.push([48 + i, 96 + j]);
+          }
+        }
+
+        await experienceContract.setTemplate(experienceId, coords);
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContractAsOther.address,
+          true
+        );
+        const {estateId} = await createEstate({
+          sizes: [size],
+          xs: [48],
+          ys: [96],
+        });
+
+        await registryContractAsOther.link(estateId, experienceId, 48, 96);
+
+        const receipt = await waitFor(
+          registryContractAsOther.unLinkByExperienceId(experienceId)
+        );
+        console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
+      });
     });
   });
 });

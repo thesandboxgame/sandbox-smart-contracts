@@ -31,7 +31,9 @@ contract MockExperience is ERC721Mintable {
             uint256 y = coords[i][1];
             uint256 id = x + y * GRID_SIZE;
             exp.landCoords.push(id);
-            (success, newTile) = newTile.addIfNotContain(x, y);
+            (success, newTile) = newTile.addIfNotContain(x % 24, y % 24);
+            //my idea here was just to ignore repeted lands
+            //but since we're listing coordinates, why not
             require(success, "repeated lands");
         }
         exp.tile = newTile;

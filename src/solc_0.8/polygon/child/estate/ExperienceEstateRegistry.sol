@@ -53,9 +53,6 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         uint256 x,
         uint256 y
     ) external override {
-        console.log("link estateId", estateId);
-        console.log("link expId", expId);
-        console.log("link coord", x, y);
         // TODO: This is what we want ?
         _unLinkExperience(expId);
 
@@ -79,7 +76,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         for (uint256 i; i < landCoords.length; i++) {
             // TODO: Check that the template + deltas don't make a mess....
             uint256 landId = landCoords[i] + x + (y * 408);
-            console.log("linked land", landCoords[i], landId);
+
             est.lands.push(landId);
             expXLand[landId] = expId;
         }
@@ -115,14 +112,12 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function _unLinkExperience(uint256 expId) internal {
-        console.log("unlinking", expId);
         uint256[] memory lands = links[expId].lands;
         for (uint256 i; i < lands.length; i++) {
             uint256 landId = lands[i];
             uint256 x = landId % 408;
             uint256 y = landId / 408;
             linkedLands.clear(x, y, 1);
-            console.log(landId);
             delete expXLand[landId];
         }
         delete links[expId];
@@ -131,10 +126,9 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     function _isValidUser(EstateAndLands storage est) internal returns (bool) {
         if (est.estateId == 0) {
             assert(est.lands.length == 1);
-            console.log("Check ownerOf land", est.lands[0]);
+
             return landToken.ownerOf(est.lands[0]) == _msgSender();
         }
-        console.log("Check ownerOf estate", est.estateId);
         return IERC721(address(estateToken)).ownerOf(est.estateId) == _msgSender();
     }
 }
