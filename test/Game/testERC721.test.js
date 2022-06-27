@@ -15,6 +15,9 @@ async function getRandom() {
   return rng.nextInt(1, 1000000000);
 }
 
+let packId = 100;
+let i = 0;
+
 const dummyHash =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e'; // Should not be empty
 
@@ -22,7 +25,7 @@ const creation1155 = {
   assetIdsToRemove: [],
   assetAmountsToRemove: [],
   assetIdsToAdd: [],
-  assetAmountsToAdd: [1],
+  assetAmountsToAdd: [5, 5, 5, 5, 5, 5],
 };
 
 const creation721 = {
@@ -89,17 +92,20 @@ const erc721Tests = require('../erc721')(
     async function mint(to) {
       const assets = [];
       async function supplyAssets(to) {
-        const tx = await assetAsAdmin[
-          'mint(address,uint40,bytes32,uint256,address,bytes)'
-        ](to, 2, dummyHash, 1, to, '0x'); // TODO: fix 'ID_TAKEN'
-        const receipt = tx.wait();
-        const event = await expectEventWithArgsFromReceipt(
-          assetContract1155,
-          receipt,
-          'TransferSingle'
-        );
-        const id = event.args[3];
-        assets.push(id);
+        for (i; i < 6; i++) {
+          const tx = await assetAsAdmin[
+            'mint(address,uint40,bytes32,uint256,address,bytes)'
+          ](to, packId, dummyHash, 100, to, '0x');
+          const receipt = tx.wait();
+          const event = await expectEventWithArgsFromReceipt(
+            assetContract1155,
+            receipt,
+            'TransferSingle'
+          );
+          const id = event.args[3];
+          assets.push(id);
+          packId++;
+        }
       }
       await supplyAssets(to);
       const randomId = await getRandom();

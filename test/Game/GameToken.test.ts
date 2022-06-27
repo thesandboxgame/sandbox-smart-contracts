@@ -4,12 +4,7 @@ import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
 import {waitFor, expectEventWithArgs, findEvents} from '../utils';
-import {
-  setupTest,
-  setupTestWithAdminGameMinter,
-  setupTestWithGameOwnerMinter,
-  User,
-} from './fixtures';
+import {setupTest, setupTestWithAdminGameMinter, User} from './fixtures';
 import {supplyAssets, supplyAssets721} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
 import {sendMetaTx} from '../sendMetaTx';
@@ -525,14 +520,13 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      // TODO: fix
       it('can mint Games with many Assets', async function () {
         ({
           gameToken,
           users,
           GameOwner,
           gameTokenAsAdmin,
-        } = await setupTestWithGameOwnerMinter()); // This setup is only used here
+        } = await setupTestWithAdminGameMinter());
         const assetContract1155 = await ethers.getContract('Asset');
         const assetContract721 = await ethers.getContract('AssetERC721');
 
@@ -560,10 +554,10 @@ describe('GameToken', function () {
 
         const balanceBefore1155 = await assetContract1155[
           'balanceOf(address,uint256)'
-        ](gameToken.address, asset721Id);
+        ](gameToken.address, assetId);
         const balanceBefore1155_2 = await assetContract1155[
           'balanceOf(address,uint256)'
-        ](gameToken.address, asset721Id2);
+        ](gameToken.address, assetId2);
 
         // ---- ERC721
 

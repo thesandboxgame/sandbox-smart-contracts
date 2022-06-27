@@ -1,9 +1,7 @@
-// import {ethers} from 'hardhat';
 import {AbiCoder} from 'ethers/lib/utils';
 import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupAssetERC721Tunnels} from './fixtures';
-// import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 
 describe('PolygonAssetERC721.sol', function () {
@@ -556,7 +554,6 @@ describe('PolygonAssetERC721.sol', function () {
           AssetERC721,
           assetMinter,
           users,
-          MockAssetERC721Tunnel,
           PolygonAssetERC721,
           MockPolygonAssetERC721Tunnel,
         } = await setupAssetERC721Tunnels();
@@ -588,8 +585,8 @@ describe('PolygonAssetERC721.sol', function () {
           )
         );
         const rootData = new AbiCoder().encode(
-          ['address', 'uint256', 'bytes'],
-          [assetHolder.address, Id, data]
+          ['address', 'uint256[]', 'bytes'],
+          [assetHolder.address, [Id], dataArray]
         );
         await deployer.MockAssetERC721Tunnel[`receiveMessage(bytes)`](rootData);
 

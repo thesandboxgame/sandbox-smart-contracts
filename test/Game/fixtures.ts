@@ -28,14 +28,14 @@ const setApprovalForAll = async (
 
 const changeAssetMinter = async (
   assetConstractName: string,
-  assetAdminAddress: string,
-  assetMinterAddress: string
+  assetAdminAddress: string
 ) => {
   const assetContractAsAdmin = await ethers.getContract(
     assetConstractName,
     assetAdminAddress
   );
-  // await assetContractAsAdmin.transferOwnership(assetMinterAddress); // TODO: Function does not exist on The Sandbox's Asset ERC1155 contracts
+  // await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+  return assetContractAsAdmin;
 };
 
 export interface GameFixturesData {
@@ -125,9 +125,9 @@ export const setupTestWithAdminGameMinter = withSnapshot(
 
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
-  const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  // await changeAssetMinter('Asset', assetAdmin, GameOwner.address);
-  // await changeAssetMinter('AssetERC721', assetAdmin, GameOwner.address);
+  const {assetAdmin, gameTokenAsAdmin} = gameFixturesData;
+  await changeAssetMinter('Asset', assetAdmin);
+  await changeAssetMinter('AssetERC721', assetAdmin);
 
   const {gameTokenAdmin} = await getNamedAccounts();
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
