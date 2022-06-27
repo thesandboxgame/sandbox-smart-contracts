@@ -72,6 +72,10 @@ contract MapTester {
         return maps[idx].contain(maps[contained]);
     }
 
+    function containTiles(uint256 idx, uint256 contained) external view returns (bool) {
+        return maps[idx].contain(maps[contained].values);
+    }
+
     function containTileWithOffset(
         uint256 idx,
         TileLib.Tile calldata tile,
@@ -148,6 +152,14 @@ contract MapTester {
         uint256 size
     ) external view returns (bool) {
         return maps[idx].intersect(x, y, size);
+    }
+
+    function intersectMap(uint256 idx, uint256 contained) external view returns (bool) {
+        return maps[idx].intersect(maps[contained]);
+    }
+
+    function intersectTiles(uint256 idx, uint256 contained) external view returns (bool) {
+        return maps[idx].intersect(maps[contained].values);
     }
 
     function isEqual(uint256 idx, uint256 other) external view returns (bool) {

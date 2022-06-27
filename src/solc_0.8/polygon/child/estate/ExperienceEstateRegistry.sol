@@ -6,6 +6,7 @@ import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
+import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import "hardhat/console.sol";
 
@@ -101,6 +102,10 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             }
         }
         return false;
+    }
+
+    function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
+        return linkedLands.intersect(tiles);
     }
 
     function _unLink(uint256 expId) internal {

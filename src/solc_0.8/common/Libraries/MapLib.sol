@@ -92,10 +92,10 @@ library MapLib {
 
     /// @notice Merge the bits of another map in the current one
     /// @param self the Map in which the bits are set
-    /// @param contained the map that is used as source to set the bits in the current one
-    function set(Map storage self, Map storage contained) public {
-        for (uint256 i; i < contained.values.length; i++) {
-            set(self, contained.values[i]);
+    /// @param other the map that is used as source to set the bits in the current one
+    function set(Map storage self, Map storage other) public {
+        for (uint256 i; i < other.values.length; i++) {
+            set(self, other.values[i]);
         }
     }
 
@@ -149,10 +149,10 @@ library MapLib {
 
     /// @notice Clear the bits of another map in the current one
     /// @param self the Map in which the bits are cleared
-    /// @param contained the map that is used as source to clear the bits in the current one
-    function clear(Map storage self, Map storage contained) public {
-        for (uint256 i; i < contained.values.length; i++) {
-            clear(self, contained.values[i]);
+    /// @param other the map that is used as source to clear the bits in the current one
+    function clear(Map storage self, Map storage other) public {
+        for (uint256 i; i < other.values.length; i++) {
+            clear(self, other.values[i]);
         }
     }
 
@@ -229,7 +229,7 @@ library MapLib {
     /// @notice Check if a Map includes all the bits that are set in a TileWithCoord
     /// @param self the Map that is checked for inclusion
     /// @param tile the TileWithCoord that must be included
-    /// @return true if self contain contained TileWithCoord
+    /// @return true if self contain tile TileWithCoord
     function contain(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (bool) {
         if (tile.isEmpty()) {
             return true;
@@ -241,6 +241,20 @@ library MapLib {
             return false;
         }
         return self.values[idx - 1].tile.contain(tile.tile);
+    }
+
+    /// @notice Check if a Map includes all the bits that are set in a TileWithCoord[]
+    /// @param self the Map that is checked for inclusion
+    /// @param tiles the TileWithCoord that must be included
+    /// @return true if self contain tiles TileWithCoord[]
+    function contain(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public view returns (bool) {
+        uint256 len = tiles.length;
+        for (uint256 i; i < len; i++) {
+            if (!contain(self, tiles[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// @notice Check if a Map includes all the bits that are set in translation result
@@ -257,13 +271,13 @@ library MapLib {
     }
 
     /// @notice Check if a Map includes all the bits that are set in another Map
-    /// @dev self can be huge, but contained must be small, we iterate over contained values.
+    /// @dev self can be huge, but other must be small, we iterate over other values.
     /// @param self the Map that is checked for inclusion
-    /// @param contained the Map that must be included
-    /// @return true if self contain contained Map
-    function contain(Map storage self, Map storage contained) public view returns (bool) {
-        for (uint256 i; i < contained.values.length; i++) {
-            if (!contain(self, contained.values[i])) {
+    /// @param other the Map that must be included
+    /// @return true if self contain other Map
+    function contain(Map storage self, Map storage other) public view returns (bool) {
+        for (uint256 i; i < other.values.length; i++) {
+            if (!contain(self, other.values[i])) {
                 return false;
             }
         }
@@ -309,6 +323,20 @@ library MapLib {
         return self.values[idx - 1].tile.intersect(tile.tile);
     }
 
+    /// @notice Check if a Map has at least one of the bits that are set in a TileWithCoord[]
+    /// @param self the Map that is checked for inclusion
+    /// @param tiles the TileWithCoord that must be included
+    /// @return true if there is at least one bit set in both the Map and the TileWithCoord[]
+    function intersect(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public view returns (bool) {
+        uint256 len = tiles.length;
+        for (uint256 i; i < len; i++) {
+            if (intersect(self, tiles[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// @notice Check if a map has at least one bit in common with some translation result
     /// @param self the Map to compare
     /// @param s the four tiles that are the result of a translation
@@ -319,6 +347,20 @@ library MapLib {
             intersect(self, s.topRight) ||
             intersect(self, s.bottomLeft) ||
             intersect(self, s.bottomRight);
+    }
+
+    /// @notice Check if a Map includes any of the bits that are set in another Map
+    /// @dev self can be huge, but other must be small, we iterate over other values.
+    /// @param self the Map that is checked for inclusion
+    /// @param other the Map that must be included
+    /// @return true if there is at least one bit set in both Maps
+    function intersect(Map storage self, Map storage other) public view returns (bool) {
+        for (uint256 i; i < other.values.length; i++) {
+            if (intersect(self, other.values[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// @notice Check if a map is empty (no bits are set)

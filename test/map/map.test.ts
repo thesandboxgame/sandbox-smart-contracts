@@ -70,6 +70,7 @@ describe('MapLib main', function () {
     const t = quads[0];
     await tester.setQuad(1, t[0], t[1], t[2]);
     expect(await tester.containMap(0, 1)).to.be.true;
+    expect(await tester.containTiles(0, 1)).to.be.true;
   });
 
   it('clear map', async function () {
@@ -357,11 +358,16 @@ describe('MapLib main', function () {
 
       // empty map
       expect(await tester.intersectQuad(0, 0, 0, 10)).to.be.false;
+      expect(await tester.intersectMap(0, 1)).to.be.false;
+      expect(await tester.intersectTiles(0, 1)).to.be.false;
 
       // non empty map
       await tester.setQuad(0, 0, 0, 6);
       expect(await tester.intersectQuad(0, 12, 12, 3)).to.be.false;
       expect(await tester.intersectQuad(0, 0, 0, 3)).to.be.true;
+      await tester.setQuad(1, 0, 0, 1);
+      expect(await tester.intersectMap(0, 1)).to.be.true;
+      expect(await tester.intersectTiles(0, 1)).to.be.true;
     });
   });
 
@@ -372,6 +378,9 @@ describe('MapLib main', function () {
       expect(await tester.containQuad(0, 24, 24, 1)).to.be.false;
       await tester.setQuad(1, 24, 24, 1);
       expect(await tester.containMap(0, 1)).to.be.false;
+      expect(await tester.containTiles(0, 1)).to.be.false;
+      expect(await tester.intersectMap(0, 1)).to.be.false;
+      expect(await tester.intersectTiles(0, 1)).to.be.false;
     });
     it('is not Equal', async function () {
       const {tester} = await setupMapTest();
