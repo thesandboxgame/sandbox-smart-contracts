@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -84,4 +83,4 @@ func.dependencies = [
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
-func.skip = skipUnlessTestnet;
+func.skip = async () => true;
