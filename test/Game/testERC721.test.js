@@ -22,7 +22,7 @@ const creation1155 = {
   assetIdsToRemove: [],
   assetAmountsToRemove: [],
   assetIdsToAdd: [],
-  assetAmountsToAdd: [1],
+  assetAmountsToAdd: [5],
 };
 
 const creation721 = {
@@ -86,12 +86,14 @@ const erc721Tests = require('../erc721')(
 
     await assetAsBouncerAdmin.setBouncer(assetAdmin, true);
 
+    let packId = 100;
+
     async function mint(to) {
       const assets = [];
       async function supplyAssets(to) {
         const tx = await assetAsAdmin[
           'mint(address,uint40,bytes32,uint256,address,bytes)'
-        ](to, 2, dummyHash, 1, to, '0x'); // TODO: fix 'ID_TAKEN'
+        ](to, packId, dummyHash, 100, to, '0x');
         const receipt = tx.wait();
         const event = await expectEventWithArgsFromReceipt(
           assetContract1155,
@@ -100,6 +102,7 @@ const erc721Tests = require('../erc721')(
         );
         const id = event.args[3];
         assets.push(id);
+        packId++;
       }
       await supplyAssets(to);
       const randomId = await getRandom();
@@ -145,7 +148,7 @@ function recurse(test) {
   }
 }
 
-describe('GameToken:ERC721', function () {
+describe.only('GameToken:ERC721', function () {
   for (const test of erc721Tests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     recurse(test);

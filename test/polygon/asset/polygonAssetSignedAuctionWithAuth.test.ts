@@ -31,7 +31,7 @@ const backendAuthWallet = new ethers.Wallet(
 );
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('PolygonAssetSignedAuctionAuth', function () {
+describe('PolygonAssetSignedAuctionAuth', function () {
   it('should be able to claim seller offer in ETH', async function () {
     const {
       PolygonAssetERC1155,
