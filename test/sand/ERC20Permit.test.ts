@@ -240,7 +240,7 @@ describe('Gems & Catalysts permit', function () {
   });
 
   it('should fail if owner == address(0) || spender == address(0)', async function () {
-    const nonce = BigNumber.from(await epicCatalyst._nonces(catalystOwner));
+    const nonce = BigNumber.from(await epicCatalyst.nonces(catalystOwner));
     const approve = {
       owner: catalystOwner,
       spender: zeroAddress,
