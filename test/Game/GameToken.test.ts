@@ -4,12 +4,7 @@ import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
 import {waitFor, expectEventWithArgs, findEvents} from '../utils';
-import {
-  setupTest,
-  setupTestWithAdminGameMinter,
-  setupTestWithGameOwnerMinter,
-  User,
-} from './fixtures';
+import {setupTest, setupTestWithAdminGameMinter, User} from './fixtures';
 import {supplyAssets, supplyAssets721} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
 import {sendMetaTx} from '../sendMetaTx';
