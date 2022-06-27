@@ -31,7 +31,7 @@ const backendAuthWallet = new ethers.Wallet(
 );
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('PolygonAssetSignedAuctionAuth', function () {
+describe.only('PolygonAssetSignedAuctionAuth', function () {
   it('should be able to claim seller offer in ETH', async function () {
     const {
       PolygonAssetERC1155,
@@ -66,14 +66,19 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const message = {
       from: seller,
       token: zeroAddress,
-      auctionData: ethers.utils.solidityPack(['uint[]'], [auctionData]),
+      offerId,
+      startingPrice: startingPrice,
+      endingPrice: endingPrice,
+      startedAt,
+      duration,
+      packs,
       ids: ethers.utils.solidityPack(['uint[]'], [[tokenId]]),
       amounts: ethers.utils.solidityPack(['uint[]'], [amounts]),
     };
 
     const signature = await ethers.provider.send('eth_signTypedData_v4', [
       seller,
-      auction712Data(name, version, 31337, verifyingContract, message),
+      auction712Data(name, version, verifyingContract, message),
     ]);
 
     const backendSignature = await signAuthMessageAs(
@@ -81,9 +86,14 @@ describe('PolygonAssetSignedAuctionAuth', function () {
       AUCTION_TYPEHASH,
       seller,
       zeroAddress,
-      auctionData,
+      offerId,
+      startingPrice,
+      endingPrice,
+      startedAt,
+      duration,
+      packs,
       [tokenId],
-      [amounts]
+      amounts
     );
 
     await PolygonAssetERC1155.connect(
@@ -112,7 +122,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
       token: zeroAddress,
       purchase: [buyAmount, '5000000000000000000'], // buy amount,  amount to spend
       auctionData,
-      ids: [tokenId.toString()],
+      ids: [tokenId],
       amounts,
       signature,
       backendSignature,

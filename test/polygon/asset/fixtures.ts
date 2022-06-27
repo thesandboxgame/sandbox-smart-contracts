@@ -245,13 +245,21 @@ export const signAuthMessageAs = async (
 ): Promise<string> => {
   const hashedData = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'address', 'address', 'bytes32', 'bytes32', 'bytes32'],
       [
-        ...args.slice(0, args.length - 3),
-        ethers.utils.solidityKeccak256(
-          ['bytes'],
-          [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 3]])]
-        ),
+        'bytes32',
+        'address',
+        'address',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'bytes32',
+        'bytes32',
+      ],
+      [
+        ...args.slice(0, args.length - 2),
         ethers.utils.solidityKeccak256(
           ['bytes'],
           [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 2]])]
