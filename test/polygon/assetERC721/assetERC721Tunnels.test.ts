@@ -560,6 +560,7 @@ describe('PolygonAssetERC721.sol', function () {
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
         const data = abiCoder.encode(['string'], [uri]);
+        const dataArray = abiCoder.encode(['string[]'], [[uri]]);
         const assetHolder = users[0];
         const Id = 1;
 
@@ -584,8 +585,8 @@ describe('PolygonAssetERC721.sol', function () {
           )
         );
         const rootData = new AbiCoder().encode(
-          ['address', 'uint256', 'bytes'],
-          [assetHolder.address, Id, data]
+          ['address', 'uint256[]', 'bytes'],
+          [assetHolder.address, [Id], dataArray]
         );
         await deployer.MockAssetERC721Tunnel[`receiveMessage(bytes)`](rootData);
 
