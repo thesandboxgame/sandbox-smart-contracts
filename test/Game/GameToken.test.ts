@@ -525,8 +525,7 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      // TODO: fix
-      it.only('can mint Games with many Assets', async function () {
+      it('can mint Games with many Assets', async function () {
         ({
           gameToken,
           users,
