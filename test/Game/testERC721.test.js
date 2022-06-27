@@ -148,7 +148,7 @@ function recurse(test) {
   }
 }
 
-describe.only('GameToken:ERC721', function () {
+describe('GameToken:ERC721', function () {
   for (const test of erc721Tests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     recurse(test);
