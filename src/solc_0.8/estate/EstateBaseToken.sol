@@ -28,17 +28,9 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
     /// @param lands The quads of lands added to the estate.
     event EstateTokenLandsAdded(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
 
-    event EstateTokenLandsRemoved(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
-
     event EstateTokenMinted(uint256 indexed estateId, bytes32 metaData, TileWithCoordLib.TileWithCoord[] tiles);
     event EstateBurned(uint256 indexed estateId);
     event MetadataSet(uint256 indexed estateId, bytes32 metaData);
-    event EstateTokenUpdated(
-        uint256 indexed oldId,
-        uint256 indexed newId,
-        uint256[][3] landToAdd,
-        uint256[][3] landToRemove
-    );
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -85,34 +77,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         require(_landTileSet(storageId).isAdjacent(), "not adjacent");
         emit EstateTokenCreated(estateId, landToAdd, metaData);
         return (estateId, storageId);
-    }
-
-    function update(
-        uint256 estateId,
-        uint256[][3] calldata landToAdd,
-        uint256[][3] calldata landToRemove
-    ) external returns (uint256 newEstateId, uint256 newStorageId) {
-        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
-        uint256 storageId = _storageId(estateId);
-        _addLand(_msgSender(), estateId, storageId, landToAdd);
-        _removeLand(_msgSender(), estateId, storageId, landToRemove);
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
-        emit EstateTokenUpdated(estateId, newEstateId, landToAdd, landToRemove);
-        return (newEstateId, newStorageId);
-    }
-
-    function removeLand(uint256 estateId, uint256[][3] calldata landToRemove)
-        external
-        returns (uint256 newEstateId, uint256 newStorageId)
-    {
-        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
-        uint256 storageId = _storageId(estateId);
-        _removeLand(_msgSender(), estateId, storageId, landToRemove);
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
-        emit EstateTokenLandsRemoved(estateId, newEstateId, landToRemove);
-        return (newEstateId, newStorageId);
     }
 
     function addLand(uint256 estateId, uint256[][3] calldata landToAdd)
@@ -268,22 +232,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
             }
             ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
         }
-    }
-
-    function _removeLand(
-        address to,
-        uint256,
-        uint256 storageId,
-        uint256[][3] calldata quads
-    ) internal virtual {
-        uint256 len = quads[0].length;
-        require(len == quads[1].length && len == quads[2].length, "Invalid data");
-        MapLib.Map storage map = _landTileSet(storageId);
-        for (uint256 i; i < len; i++) {
-            require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
-            map.clear(quads[1][i], quads[2][i], quads[0][i]);
-        }
-        ILandToken(_s().landToken).batchTransferQuad(address(this), to, quads[0], quads[1], quads[2], "");
     }
 
     function _mintToken(address from) internal returns (uint256 estateId, uint256 storageId) {

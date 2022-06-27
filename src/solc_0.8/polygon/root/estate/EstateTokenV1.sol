@@ -11,6 +11,13 @@ import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 // solhint-disable-next-line no-empty-blocks
 contract EstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
+    event EstateTokenLandsRemoved(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
+    event EstateTokenUpdated(
+        uint256 indexed oldId,
+        uint256 indexed newId,
+        uint256[][3] landToAdd,
+        uint256[][3] landToRemove
+    );
 
     function initV1(
         address trustedForwarder,
@@ -19,6 +26,34 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
         uint8 chainIndex
     ) public initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
+    }
+
+    function update(
+        uint256 estateId,
+        uint256[][3] calldata landToAdd,
+        uint256[][3] calldata landToRemove
+    ) external returns (uint256 newEstateId, uint256 newStorageId) {
+        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
+        uint256 storageId = _storageId(estateId);
+        _addLand(_msgSender(), estateId, storageId, landToAdd);
+        _removeLand(_msgSender(), estateId, storageId, landToRemove);
+        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
+        emit EstateTokenUpdated(estateId, newEstateId, landToAdd, landToRemove);
+        return (newEstateId, newStorageId);
+    }
+
+    function removeLand(uint256 estateId, uint256[][3] calldata landToRemove)
+        external
+        returns (uint256 newEstateId, uint256 newStorageId)
+    {
+        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
+        uint256 storageId = _storageId(estateId);
+        _removeLand(_msgSender(), estateId, storageId, landToRemove);
+        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
+        emit EstateTokenLandsRemoved(estateId, newEstateId, landToRemove);
+        return (newEstateId, newStorageId);
     }
 
     /// @notice Return the URI of a specific token.
@@ -36,5 +71,21 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
                     "estateTokenV1.json"
                 )
             );
+    }
+
+    function _removeLand(
+        address to,
+        uint256,
+        uint256 storageId,
+        uint256[][3] calldata quads
+    ) internal virtual {
+        uint256 len = quads[0].length;
+        require(len == quads[1].length && len == quads[2].length, "Invalid data");
+        MapLib.Map storage map = _landTileSet(storageId);
+        for (uint256 i; i < len; i++) {
+            require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
+            map.clear(quads[1][i], quads[2][i], quads[0][i]);
+        }
+        ILandToken(_s().landToken).batchTransferQuad(address(this), to, quads[0], quads[1], quads[2], "");
     }
 }

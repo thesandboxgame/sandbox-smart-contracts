@@ -127,7 +127,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         delete links[expId];
     }
 
-    function _isValidUser(EstateAndLands storage est) internal returns (bool) {
+    function _isValidUser(EstateAndLands storage est) internal view returns (bool) {
         if (est.estateId == 0) {
             return landToken.ownerOf(est.singleLand) == _msgSender();
         }

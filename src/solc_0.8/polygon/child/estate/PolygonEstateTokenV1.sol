@@ -11,6 +11,13 @@ import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
 
 contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
     using MapLib for MapLib.Map;
+    event EstateTokenLandsRemoved(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
+    event EstateTokenUpdated(
+        uint256 indexed oldId,
+        uint256 indexed newId,
+        uint256[][3] landToAdd,
+        uint256[][3] landToRemove
+    );
 
     struct PolygonEstateTokenStorage {
         IEstateExperienceRegistry registryToken;
@@ -45,6 +52,36 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
         _ps().registryToken.unLink(expId);
     }
 
+    function update(
+        uint256 estateId,
+        uint256[][3] calldata landToAdd,
+        uint256[][3] calldata landToRemove,
+        uint256[] calldata expToUnlink
+    ) external returns (uint256 newEstateId, uint256 newStorageId) {
+        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
+        uint256 storageId = _storageId(estateId);
+        _addLand(_msgSender(), estateId, storageId, landToAdd);
+        _removeLand(_msgSender(), estateId, storageId, landToRemove, expToUnlink);
+        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
+        emit EstateTokenUpdated(estateId, newEstateId, landToAdd, landToRemove);
+        return (newEstateId, newStorageId);
+    }
+
+    function removeLand(
+        uint256 estateId,
+        uint256[][3] calldata landToRemove,
+        uint256[] calldata expToUnlink
+    ) external returns (uint256 newEstateId, uint256 newStorageId) {
+        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
+        uint256 storageId = _storageId(estateId);
+        _removeLand(_msgSender(), estateId, storageId, landToRemove, expToUnlink);
+        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
+        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
+        emit EstateTokenLandsRemoved(estateId, newEstateId, landToRemove);
+        return (newEstateId, newStorageId);
+    }
+
     function getRegistry() external view returns (IEstateExperienceRegistry) {
         return _ps().registryToken;
     }
@@ -71,8 +108,13 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
         address to,
         uint256,
         uint256 storageId,
-        uint256[][3] calldata quads
-    ) internal override {
+        uint256[][3] calldata quads,
+        uint256[] calldata expToUnlink
+    ) internal {
+        if (address(_ps().registryToken) != address(0)) {
+            _ps().registryToken.batchUnLink(expToUnlink);
+            require(!_ps().registryToken.isLinked(quads), "must unlink first");
+        }
         uint256 len = quads[0].length;
         require(len == quads[1].length && len == quads[2].length, "Invalid data");
         MapLib.Map storage map = _landTileSet(storageId);
@@ -87,9 +129,6 @@ contract PolygonEstateTokenV1 is EstateBaseToken, Initializable {
             } else {
                 IPolygonLand(_s().landToken).transferQuad(address(this), to, size, x, y, "");
             }
-        }
-        if (address(_ps().registryToken) != address(0)) {
-            require(!_ps().registryToken.isLinked(quads), "must unlink first");
         }
     }
 
