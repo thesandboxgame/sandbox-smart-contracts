@@ -30,6 +30,7 @@ describe('RaffleSteveAoki', function () {
     assert.equal(transferEvents.length, 1);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('should be able to mint 10_000 different tokens', async function () {
     const {
       raffleSteveAokiContract,
@@ -77,6 +78,7 @@ describe('RaffleSteveAoki', function () {
     }
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('should be able to mint 10_000 different tokens in 3 waves', async function () {
     const {
       raffleSteveAokiContract,
@@ -130,6 +132,7 @@ describe('RaffleSteveAoki', function () {
     assert.equal(tokens.length, 10000);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleSteveAokiContract,
