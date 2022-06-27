@@ -28,14 +28,14 @@ const setApprovalForAll = async (
 
 const changeAssetMinter = async (
   assetConstractName: string,
-  assetAdminAddress: string,
-  assetMinterAddress: string
+  assetAdminAddress: string
 ) => {
   const assetContractAsAdmin = await ethers.getContract(
     assetConstractName,
     assetAdminAddress
   );
   // await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+  return assetContractAsAdmin;
 };
 
 export interface GameFixturesData {
