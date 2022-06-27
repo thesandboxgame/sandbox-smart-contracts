@@ -31,7 +31,7 @@ describe('RaffleSteveAoki', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 10_000 different tokens', async function () {
+  it.skip('should be able to mint 3_333 different tokens', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
@@ -45,14 +45,14 @@ describe('RaffleSteveAoki', function () {
     await setupWave(
       raffleSteveAokiContract,
       0,
-      10000,
-      10000,
+      3_333,
+      3_333,
       '1',
       zeroAddress,
       0
     );
     const tokens = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 3_333; i++) {
       if (i % 10 === 0) console.log('minting token', i);
       const receipt = await mint(
         raffleSignWallet,
@@ -79,7 +79,7 @@ describe('RaffleSteveAoki', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 10_000 different tokens in 3 waves', async function () {
+  it.skip('should be able to mint 3_333 different tokens in 3 waves', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
@@ -90,7 +90,7 @@ describe('RaffleSteveAoki', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '10000');
-    const waves = [50, 6950, 3000];
+    const waves = [33, 300, 3000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -129,11 +129,11 @@ describe('RaffleSteveAoki', function () {
         }
       }
     }
-    assert.equal(tokens.length, 10000);
+    assert.equal(tokens.length, 3_333);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 3_333 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
@@ -145,7 +145,7 @@ describe('RaffleSteveAoki', function () {
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '10000');
     // const waves = [50, 200, 500, 1000, 2000, 4000, 6750, 3000];
-    const waves = [50, 6950, 3000];
+    const waves = [33, 300, 3000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -185,6 +185,6 @@ describe('RaffleSteveAoki', function () {
         }
       }
     }
-    assert.equal(tokens.length, 10000);
+    assert.equal(tokens.length, 3_333);
   });
 });
