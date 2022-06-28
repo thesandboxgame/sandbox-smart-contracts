@@ -49,7 +49,7 @@ describe('PolygonAsset.sol', function () {
       await mintAssetOnL1(users[0].address, tokenId, 10);
       const ipfsHashString =
         '0x6d65746164617461486173680000000000000000000000000000000000000000';
-      const  balance = await AssetERC1155['balanceOf(address,uint256)'](
+      const balance = await AssetERC1155['balanceOf(address,uint256)'](
         users[0].address,
         tokenId
       );
