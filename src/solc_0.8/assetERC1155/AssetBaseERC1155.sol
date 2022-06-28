@@ -110,10 +110,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(from != address(0), "FROM==0");
         bool success = _transferFrom(from, to, id, value);
         if (success) {
-            require(
-                _checkOnERC1155Received(isTrustedForwarder(msg.sender) ? from : msg.sender, from, to, id, value, data),
-                "1155_TRANSFER_REJECTED"
-            );
+            require(_checkOnERC1155Received(_msgSender(), from, to, id, value, data), "1155_TRANSFER_REJECTED");
         }
     }
 
@@ -134,15 +131,12 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        bool metaTx = isTrustedForwarder(msg.sender);
-        bool authorized = from == _msgSender() || isApprovedForAll(from, _msgSender());
+        address msgSender = _msgSender();
+        bool authorized = from == msgSender || isApprovedForAll(from, msgSender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
-        emit TransferBatch(metaTx ? from : _msgSender(), from, to, ids, values);
-        require(
-            _checkOnERC1155BatchReceived(metaTx ? from : _msgSender(), from, to, ids, values, data),
-            "1155_TRANSFER_REJECTED"
-        );
+        emit TransferBatch(msgSender, from, to, ids, values);
+        require(_checkOnERC1155BatchReceived(msgSender, from, to, ids, values, data), "1155_TRANSFER_REJECTED");
     }
 
     /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
@@ -440,7 +434,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal {
-        address operator = isTrustedForwarder(msg.sender) ? from : _msgSender();
+        address operator = _msgSender();
         for (uint256 i = 0; i < ids.length; i++) {
             require(amounts[i] > 0 && amounts[i] <= ERC1155ERC721Helper.MAX_SUPPLY, "INVALID_AMOUNT");
             _burnFT(from, ids[i], uint32(amounts[i]));
@@ -518,7 +512,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             );
         }
 
-        emit TransferSingle(isTrustedForwarder(msg.sender) ? from : sender, from, to, id, value);
+        emit TransferSingle(sender, from, to, id, value);
         return true;
     }
 
@@ -564,6 +558,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint256 id,
         uint256 amount
     ) internal {
+        address sender = _msgSender();
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
             index,
@@ -571,8 +566,8 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             ObjectLib32.Operations.ADD
         );
 
-        emit TransferSingle(msg.sender, address(0), account, id, amount);
-        require(_checkOnERC1155Received(msg.sender, address(0), account, id, amount, ""), "TRANSFER_REJECTED");
+        emit TransferSingle(sender, address(0), account, id, amount);
+        require(_checkOnERC1155Received(sender, address(0), account, id, amount, ""), "TRANSFER_REJECTED");
     }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
