@@ -30,6 +30,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         address _trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseChildTunnel(_fxChild) {
+        require(address(_childToken) != address(0), "PolygonAssetERC1155Tunnel: _childToken can't be zero");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
@@ -40,6 +41,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         uint256[] calldata ids,
         uint256[] calldata values
     ) external whenNotPaused {
+        require(to != address(0), "PolygonAssetERC1155Tunnel: to can't be zero");
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         bytes32[] memory metadataHashes = new bytes32[](ids.length);

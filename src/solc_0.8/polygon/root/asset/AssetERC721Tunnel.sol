@@ -29,6 +29,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         address _trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
+        require(address(_rootToken) != address(0), "AssetERC721Tunnel: _rootToken can't be zero");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);

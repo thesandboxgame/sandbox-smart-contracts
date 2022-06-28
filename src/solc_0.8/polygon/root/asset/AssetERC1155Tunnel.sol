@@ -29,6 +29,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         address _trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
+        require(address(_rootToken) != address(0), "AssetERC1155Tunnel: _rootToken can't be zero");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
@@ -44,7 +45,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         address to,
         uint256[] memory ids,
         uint256[] memory values
-    ) public whenNotPaused() {
+    ) public whenNotPaused {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
