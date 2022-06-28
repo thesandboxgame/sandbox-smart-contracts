@@ -28,6 +28,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     event CustomMintingAllowanceChanged(address indexed addressModified, bool indexed isAddressCustomMintingAllowed);
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event QuantitiesByCatalystIdChanged(uint256 indexed id, uint256 indexed newValue);
+    event QuantitiesByAssetTypeIdChanged(uint256 indexed index, uint256 indexed newValue);
+    event NumberOfGemsBurnPerAssetChanged(uint256 indexed newValue);
+    event NumberOfCatalystBurnPerAssetChanged(uint256 indexed newValue);
 
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
@@ -70,18 +74,22 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external override onlyOwner {
         quantitiesByCatalystId[catalystId] = newQuantity;
+        emit QuantitiesByCatalystIdChanged(catalystId, newQuantity);
     }
 
     function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external override onlyOwner {
         quantitiesByAssetTypeId[index1Based] = newQuantity;
+        emit QuantitiesByAssetTypeIdChanged(index1Based, newQuantity);
     }
 
     function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external override onlyOwner {
         numberOfGemsBurnPerAsset = newQuantity;
+        emit NumberOfGemsBurnPerAssetChanged(newQuantity);
     }
 
     function setNumberOfCatalystsBurnPerAsset(uint32 newQuantity) external override onlyOwner {
         numberOfCatalystBurnPerAsset = newQuantity;
+        emit NumberOfCatalystBurnPerAssetChanged(newQuantity);
     }
 
     function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external override onlyOwner {

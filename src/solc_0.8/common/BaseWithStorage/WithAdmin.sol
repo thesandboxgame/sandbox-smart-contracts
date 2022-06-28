@@ -8,7 +8,7 @@ contract WithAdmin {
     /// @dev Emits when the contract administrator is changed.
     /// @param oldAdmin The address of the previous administrator.
     /// @param newAdmin The address of the new administrator.
-    event AdminChanged(address oldAdmin, address newAdmin);
+    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
 
     modifier onlyAdmin() {
         require(msg.sender == _admin, "ADMIN_ONLY");
