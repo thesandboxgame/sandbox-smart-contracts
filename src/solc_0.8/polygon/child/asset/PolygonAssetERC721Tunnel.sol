@@ -28,6 +28,7 @@ contract PolygonAssetERC721Tunnel is
     event Withdraw(address user, uint256 id, bytes data);
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        require(_maxTransferLimit > 0, "PolygonAssetERC721Tunnel: _maxTransferLimit invalid");
         maxTransferLimit = _maxTransferLimit;
         emit SetTransferLimit(_maxTransferLimit);
     }
