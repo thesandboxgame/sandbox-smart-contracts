@@ -54,10 +54,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
-    event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
-    event Bouncer(address bouncer, bool enabled);
+    event BouncerAdminChanged(address indexed oldBouncerAdmin, address indexed newBouncerAdmin);
+    event Bouncer(address indexed bouncer, bool indexed enabled);
     event Extraction(uint256 indexed id, uint256 indexed newId);
-    event AssetERC721Set(IAssetERC721 assetERC721);
+    event AssetERC721Set(IAssetERC721 indexed assetERC721);
 
     function init(
         address trustedForwarder,
