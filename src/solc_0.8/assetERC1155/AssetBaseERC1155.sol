@@ -211,7 +211,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             id == 0x01ffc9a7 || //ERC165
             id == 0xd9b67a26 || // ERC1155
             id == 0x0e89341c || // ERC1155 metadata
-            id == 0x9930ed5a; // ERC2771
+            id == 0x572b6c05; // ERC2771
     }
 
     /// @notice Gives the collection a specific token belongs to.
