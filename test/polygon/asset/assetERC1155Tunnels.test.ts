@@ -9,11 +9,9 @@ describe('PolygonAsset.sol', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
     it('cannot send asset directly to tunnel l2', async function () {
       const {
-        AssetERC1155,
         PolygonAssetERC1155,
         MockPolygonAssetERC1155Tunnel,
         users,
-        deployer,
         mintAssetOnL2,
       } = await setupAssetERC1155Tunnels();
       const tokenId = await mintAssetOnL2(users[0].address, 10);
@@ -42,10 +40,8 @@ describe('PolygonAsset.sol', function () {
     it('cannot send asset directly to tunnel l1', async function () {
       const {
         AssetERC1155,
-        PolygonAssetERC1155,
         MockAssetERC1155Tunnel,
         users,
-        deployer,
         mintAssetOnL1,
       } = await setupAssetERC1155Tunnels();
       const tokenId =
@@ -53,7 +49,7 @@ describe('PolygonAsset.sol', function () {
       await mintAssetOnL1(users[0].address, tokenId, 10);
       const ipfsHashString =
         '0x6d65746164617461486173680000000000000000000000000000000000000000';
-      const balance = await AssetERC1155['balanceOf(address,uint256)'](
+      const  balance = await AssetERC1155['balanceOf(address,uint256)'](
         users[0].address,
         tokenId
       );

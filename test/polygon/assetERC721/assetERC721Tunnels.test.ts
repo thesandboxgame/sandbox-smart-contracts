@@ -103,12 +103,9 @@ describe('PolygonAssetERC721.sol', function () {
 
       it('cannot tranfer asset directly to tunnel l1', async function () {
         const {
-          deployer,
-          AssetERC721,
           assetMinter,
           users,
           AssetERC721Tunnel,
-          PolygonAssetERC721,
         } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
         const abiCoder = new AbiCoder();
@@ -137,12 +134,9 @@ describe('PolygonAssetERC721.sol', function () {
 
       it('cannot tranfer asset directly to tunnel l2', async function () {
         const {
-          deployer,
-          AssetERC721,
           assetMinter,
           users,
           PolygonAssetERC721Tunnel,
-          PolygonAssetERC721,
         } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
         const abiCoder = new AbiCoder();
