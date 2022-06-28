@@ -1,15 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Strings} from "@openzeppelin/contracts-0.8/utils/Strings.sol";
+import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
 import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract EstateTokenV1 is EstateBaseToken, Initializable {
+contract EstateTokenV1 is EstateBaseToken {
     using MapLib for MapLib.Map;
     event EstateTokenLandsRemoved(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
     event EstateTokenUpdated(
@@ -24,7 +23,7 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
         address admin,
         address land,
         uint8 chainIndex
-    ) public initializer {
+    ) external initializer {
         _unchained_initV1(trustedForwarder, admin, land, chainIndex);
     }
 
@@ -43,17 +42,22 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
         return (newEstateId, newStorageId);
     }
 
-    function removeLand(uint256 estateId, uint256[][3] calldata landToRemove)
+    // Used by the bridge
+    function burnEstate(address from, uint256 estateId)
         external
-        returns (uint256 newEstateId, uint256 newStorageId)
+        virtual
+        override
+        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
     {
-        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
+        require(hasRole(BURNER_ROLE, _msgSender()), "not burner");
         uint256 storageId = _storageId(estateId);
-        _removeLand(_msgSender(), estateId, storageId, landToRemove);
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
-        emit EstateTokenLandsRemoved(estateId, newEstateId, landToRemove);
-        return (newEstateId, newStorageId);
+        metaData = _s().metaData[storageId];
+        delete _s().metaData[storageId];
+        tiles = _landTileSet(storageId).getMap();
+        _landTileSet(storageId).clear();
+        _burn(from, _ownerOf(estateId), estateId);
+        emit EstateBurned(estateId);
+        return (metaData, tiles);
     }
 
     /// @notice Return the URI of a specific token.
@@ -66,7 +70,7 @@ contract EstateTokenV1 is EstateBaseToken, Initializable {
             string(
                 abi.encodePacked(
                     "ipfs://bafybei",
-                    Strings.toHexString(uint256(_s().metaData[storageId]), 32),
+                    StringsUpgradeable.toHexString(uint256(_s().metaData[storageId]), 32),
                     "/",
                     "estateTokenV1.json"
                 )

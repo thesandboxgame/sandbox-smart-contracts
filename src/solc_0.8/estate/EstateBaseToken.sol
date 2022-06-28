@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import {IAccessControl} from "@openzeppelin/contracts-0.8/access/IAccessControl.sol";
-import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ImmutableERC721} from "../common/BaseWithStorage/ImmutableERC721.sol";
 import {ILandToken} from "../common/interfaces/ILandToken.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
@@ -14,7 +14,7 @@ import {MapLib} from "../common/Libraries/MapLib.sol";
 import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
 
 /// @dev Base contract for estate contract on L1 and L2, it uses tile maps to save the landTileSet
-abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToken {
+abstract contract EstateBaseToken is ImmutableERC721, AccessControlUpgradeable, IEstateToken {
     using MapLib for MapLib.Map;
     /// @dev Emitted when an estate is updated.
     /// @param estateId The id of the newly minted token.
@@ -123,23 +123,6 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         return estateId;
     }
 
-    // Used by the bridge
-    function burnEstate(address from, uint256 estateId)
-        external
-        override
-        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        require(hasRole(BURNER_ROLE, _msgSender()), "not burner");
-        uint256 storageId = _storageId(estateId);
-        metaData = _s().metaData[storageId];
-        delete _s().metaData[storageId];
-        tiles = _landTileSet(storageId).getMap();
-        _landTileSet(storageId).clear();
-        _burn(from, from, storageId);
-        emit EstateBurned(estateId);
-        return (metaData, tiles);
-    }
-
     function getMetadata(uint256 estateId) external view returns (bytes32) {
         return _s().metaData[_storageId(estateId)];
     }
@@ -206,11 +189,16 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         return this.onERC721BatchReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId) public pure override(AccessControl, ERC721BaseToken) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        pure
+        override(AccessControlUpgradeable, ERC721BaseToken)
+        returns (bool)
+    {
         return
             ERC721BaseToken.supportsInterface(interfaceId) ||
-            // AccessControl.supportsInterface(interfaceId);
-            interfaceId == type(IAccessControl).interfaceId;
+            // IAccessControlUpgradeable.supportsInterface(interfaceId);
+            interfaceId == type(IAccessControlUpgradeable).interfaceId;
     }
 
     function getStorageId(uint256 tokenId) external pure override(ImmutableERC721, IEstateToken) returns (uint256) {
@@ -247,11 +235,11 @@ abstract contract EstateBaseToken is ImmutableERC721, AccessControl, IEstateToke
         return (estateId, storageId);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

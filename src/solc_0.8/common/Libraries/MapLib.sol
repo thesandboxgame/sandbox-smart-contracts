@@ -90,11 +90,22 @@ library MapLib {
         }
     }
 
+    /// @notice Merge the bits of a list of TileWithCoord in the current one
+    /// @param self the Map in which the bits are set
+    /// @param tiles the list of TileWithCoord
+    function set(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {
+        uint256 len = tiles.length;
+        for (uint256 i; i < len; i++) {
+            set(self, tiles[i]);
+        }
+    }
+
     /// @notice Merge the bits of another map in the current one
     /// @param self the Map in which the bits are set
     /// @param other the map that is used as source to set the bits in the current one
     function set(Map storage self, Map storage other) public {
-        for (uint256 i; i < other.values.length; i++) {
+        uint256 len = other.values.length;
+        for (uint256 i; i < len; i++) {
             set(self, other.values[i]);
         }
     }
@@ -147,11 +158,22 @@ library MapLib {
         return true;
     }
 
+    /// @notice Clear the bits of a list of TileWithCoord
+    /// @param self the Map in which the bits are cleared
+    /// @param tiles the list of TileWithCoord
+    function clear(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {
+        uint256 len = tiles.length;
+        for (uint256 i; i < len; i++) {
+            clear(self, tiles[i]);
+        }
+    }
+
     /// @notice Clear the bits of another map in the current one
     /// @param self the Map in which the bits are cleared
     /// @param other the map that is used as source to clear the bits in the current one
     function clear(Map storage self, Map storage other) public {
-        for (uint256 i; i < other.values.length; i++) {
+        uint256 len = other.values.length;
+        for (uint256 i; i < len; i++) {
             clear(self, other.values[i]);
         }
     }
@@ -276,7 +298,8 @@ library MapLib {
     /// @param other the Map that must be included
     /// @return true if self contain other Map
     function contain(Map storage self, Map storage other) public view returns (bool) {
-        for (uint256 i; i < other.values.length; i++) {
+        uint256 len = other.values.length;
+        for (uint256 i; i < len; i++) {
             if (!contain(self, other.values[i])) {
                 return false;
             }
@@ -355,7 +378,8 @@ library MapLib {
     /// @param other the Map that must be included
     /// @return true if there is at least one bit set in both Maps
     function intersect(Map storage self, Map storage other) public view returns (bool) {
-        for (uint256 i; i < other.values.length; i++) {
+        uint256 len = other.values.length;
+        for (uint256 i; i < len; i++) {
             if (intersect(self, other.values[i])) {
                 return true;
             }

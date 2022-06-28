@@ -71,6 +71,13 @@ describe('MapLib main', function () {
     await tester.setQuad(1, t[0], t[1], t[2]);
     expect(await tester.containMap(0, 1)).to.be.true;
     expect(await tester.containTiles(0, 1)).to.be.true;
+
+    // tile set
+    expect(await tester.containMap(10, 1)).to.be.false;
+    await tester.setMapUsingTiles(10, 0);
+    expect(await tester.containMap(10, 1)).to.be.true;
+    await tester.clearMapUsingTiles(10, 0);
+    expect(await tester.containMap(10, 1)).to.be.false;
   });
 
   it('clear map', async function () {

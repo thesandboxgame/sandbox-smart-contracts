@@ -30,6 +30,10 @@ contract MapTester {
         maps[idx].set(maps[contained]);
     }
 
+    function setMapUsingTiles(uint256 idx, uint256 contained) external {
+        maps[idx].set(maps[contained].values);
+    }
+
     function clearQuad(
         uint256 idx,
         uint256 x,
@@ -45,6 +49,10 @@ contract MapTester {
 
     function clearMap(uint256 idx, uint256 contained) external {
         maps[idx].clear(maps[contained]);
+    }
+
+    function clearMapUsingTiles(uint256 idx, uint256 contained) external {
+        maps[idx].clear(maps[contained].values);
     }
 
     function clear(uint256 idx) external {
