@@ -71,9 +71,8 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
             rootToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
             emit Deposit(to, ids[i], uniqueUriData);
         }
-        bytes memory urisEncoded = abi.encode(uris);
         fetchingAssets = false;
-        _sendMessageToChild(abi.encode(to, ids, urisEncoded));
+        _sendMessageToChild(abi.encode(to, ids, uris));
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -93,10 +92,9 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
-        string[] memory uris = abi.decode(data, (string[]));
+        (address to, uint256[] memory ids, string[] memory uris) = abi.decode(message, (address, uint256[], string[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            bytes memory uniqueUriData = abi.encode(["string"], [uris[i]]);
+            bytes memory uniqueUriData = abi.encode(uris[i]);
             if (!rootToken.exists(ids[i])) rootToken.mint(to, ids[i], uniqueUriData);
             else rootToken.safeTransferFrom(address(this), to, ids[i], uniqueUriData);
             emit Withdraw(to, ids[i], uniqueUriData);
