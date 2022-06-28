@@ -21,6 +21,7 @@ contract PolygonAssetERC721Tunnel is
 {
     IPolygonAssetERC721 public childToken;
     uint256 public maxTransferLimit = 20;
+    bool private fetchingAssets = false;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
@@ -45,6 +46,7 @@ contract PolygonAssetERC721Tunnel is
     function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused {
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         string[] memory uris = new string[](ids.length);
+        fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the child tokens in this contract
             uint256 id = ids[i];
@@ -54,6 +56,7 @@ contract PolygonAssetERC721Tunnel is
             childToken.safeTransferFrom(_msgSender(), address(this), ids[i], uniqueUriData);
             emit Withdraw(to, ids[i], uniqueUriData);
         }
+        fetchingAssets = false;
         _sendMessageToRoot(abi.encode(to, ids, uris));
     }
 
@@ -105,7 +108,8 @@ contract PolygonAssetERC721Tunnel is
         address, /* from */
         uint256, /* tokenId */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(fetchingAssets == true, "PolygonAssetERC721Tunnel: can't directly send Assets");
         return this.onERC721Received.selector;
     }
 
@@ -114,7 +118,8 @@ contract PolygonAssetERC721Tunnel is
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(fetchingAssets == true, "PolygonAssetERC721Tunnel: can't directly send Assets");
         return this.onERC721BatchReceived.selector;
     }
 
