@@ -101,6 +101,73 @@ describe('PolygonAssetERC721.sol', function () {
         ).to.be.equal(1);
       });
 
+      it('cannot tranfer asset directly to tunnel l1', async function () {
+        const {
+          deployer,
+          AssetERC721,
+          assetMinter,
+          users,
+          AssetERC721Tunnel,
+          PolygonAssetERC721,
+        } = await setupAssetERC721Tunnels();
+        const assetHolder = users[0];
+        const abiCoder = new AbiCoder();
+        const uri = 'http://myMetadata.io/1';
+        const data = abiCoder.encode(['string'], [uri]);
+
+        // Mint AssetERC721 on L1
+        await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
+          assetHolder.address,
+          123,
+          data
+        );
+
+        expect(
+          await assetHolder.AssetERC721.balanceOf(assetHolder.address)
+        ).to.be.equal(1);
+
+        await expect(
+          assetHolder.AssetERC721['safeTransferFrom(address,address,uint256)'](
+            assetHolder.address,
+            AssetERC721Tunnel.address,
+            123
+          )
+        ).to.be.revertedWith("AssetERC721Tunnel: can't directly send Assets");
+      });
+
+      it('cannot tranfer asset directly to tunnel l2', async function () {
+        const {
+          deployer,
+          AssetERC721,
+          assetMinter,
+          users,
+          PolygonAssetERC721Tunnel,
+          PolygonAssetERC721,
+        } = await setupAssetERC721Tunnels();
+        const assetHolder = users[0];
+        const abiCoder = new AbiCoder();
+        const uri = 'http://myMetadata.io/1';
+        const data = abiCoder.encode(['string'], [uri]);
+
+        // Mint AssetERC721 on L2
+        await assetMinter.PolygonAssetERC721['mint(address,uint256,bytes)'](
+          assetHolder.address,
+          123,
+          data
+        );
+
+        expect(
+          await assetHolder.PolygonAssetERC721.balanceOf(assetHolder.address)
+        ).to.be.equal(1);
+        await expect(
+          assetHolder.PolygonAssetERC721[
+            'safeTransferFrom(address,address,uint256)'
+          ](assetHolder.address, PolygonAssetERC721Tunnel.address, 123)
+        ).to.be.revertedWith(
+          "PolygonAssetERC721Tunnel: can't directly send Assets"
+        );
+      });
+
       it('should be able to transfer multiple assets to L2', async function () {
         const {
           AssetERC721,

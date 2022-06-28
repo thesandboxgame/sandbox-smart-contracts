@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC721 public rootToken;
     uint256 public maxTransferLimit = 20;
+    bool private fetchingAssets = false;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
@@ -39,7 +40,8 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         address, /* from */
         uint256, /* tokenId */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(fetchingAssets == true, "AssetERC721Tunnel: can't directly send Assets");
         return this.onERC721Received.selector;
     }
 
@@ -48,7 +50,8 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(fetchingAssets == true, "AssetERC721Tunnel: can't directly send Assets");
         return this.onERC721BatchReceived.selector;
     }
 
@@ -58,6 +61,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
 
     function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused {
         string[] memory uris = new string[](ids.length);
+        fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the root tokens in this contract
             uint256 id = ids[i];
@@ -68,6 +72,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
             emit Deposit(to, ids[i], uniqueUriData);
         }
         bytes memory urisEncoded = abi.encode(uris);
+        fetchingAssets = false;
         _sendMessageToChild(abi.encode(to, ids, urisEncoded));
     }
 
