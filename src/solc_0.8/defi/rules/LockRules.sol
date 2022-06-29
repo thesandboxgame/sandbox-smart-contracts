@@ -108,6 +108,11 @@ contract LockRules is Context, Ownable {
         emit AmountLockClaimSet(_newAmountLockClaim, _isEnabled);
     }
 
+    // overriding this method to make impossible for the admin to renounce ownership
+    function renounceOwnership() public view override onlyOwner {
+        revert("LockRules: can't renounceOwnership");
+    }
+
     function getRemainingTimelockClaim() external view returns (uint256) {
         return block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
     }

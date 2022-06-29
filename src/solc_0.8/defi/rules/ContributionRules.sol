@@ -268,7 +268,8 @@ contract ContributionRules is Ownable, IContributionRules {
         return _multiplierERC721 / DECIMALS_7;
     }
 
-    function renounceOwnership() public override onlyOwner {
+    // overriding this method to make impossible for the admin to renounce ownership
+    function renounceOwnership() public view override onlyOwner {
         revert("ContributionRules: can't renounceOwnership");
     }
 }

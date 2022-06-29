@@ -320,7 +320,8 @@ contract ERC20RewardPool is
         _updateContribution(_msgSender());
     }
 
-    function renounceOwnership() public override onlyOwner {
+    // overriding this method to make impossible for the admin to renounce ownership
+    function renounceOwnership() public view override onlyOwner {
         revert("ERC20RewardPool: can't renounceOwnership");
     }
 
