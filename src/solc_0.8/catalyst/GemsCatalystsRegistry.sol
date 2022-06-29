@@ -105,7 +105,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16[] calldata gemIds,
         uint256[] calldata amounts
-    ) public override {
+    ) external override {
         for (uint256 i = 0; i < gemIds.length; i++) {
             if (gemIds[i] != 0 && amounts[i] != 0) {
                 burnGem(from, gemIds[i], amounts[i]);
@@ -121,7 +121,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
-    ) public override {
+    ) external override {
         for (uint256 i = 0; i < catalystIds.length; i++) {
             if (catalystIds[i] != 0 && amounts[i] != 0) {
                 burnCatalyst(from, catalystIds[i], amounts[i]);
