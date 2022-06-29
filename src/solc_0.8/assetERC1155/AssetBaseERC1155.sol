@@ -227,7 +227,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @notice Return wether the id is a collection
     /// @param id collectionId to check.
     /// @return whether the id is a collection.
-    function isCollection(uint256 id) public view returns (bool) {
+    function isCollection(uint256 id) external view returns (bool) {
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
         return wasEverMinted(collectionId);
     }
@@ -235,7 +235,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
     /// @param id the token to get the index of.
     /// @return the index/order at which the token `id` was minted in a collection.
-    function collectionIndexOf(uint256 id) public view returns (uint256) {
+    function collectionIndexOf(uint256 id) external view returns (uint256) {
         collectionOf(id); // this check if id and collection indeed was ever minted
         return uint32(id & ERC1155ERC721Helper.PACK_INDEX);
     }

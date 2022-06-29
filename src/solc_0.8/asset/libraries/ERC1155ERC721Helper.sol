@@ -22,7 +22,7 @@ library ERC1155ERC721Helper {
     uint256 public constant MAX_SUPPLY = uint256(2)**32 - 1;
     uint256 public constant MAX_PACK_SIZE = uint256(2)**11;
 
-    function toFullURI(bytes32 hash, uint256 id) public pure returns (string memory) {
+    function toFullURI(bytes32 hash, uint256 id) external pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
     }
 

@@ -116,7 +116,7 @@ abstract contract BaseERC721 is
         address from,
         address to,
         uint256[] calldata ids
-    ) public override(IERC721ExtendedToken) {
+    ) external override(IERC721ExtendedToken) {
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 id = ids[i];
@@ -134,7 +134,7 @@ abstract contract BaseERC721 is
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) public override(IERC721ExtendedToken) {
+    ) external override(IERC721ExtendedToken) {
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 id = ids[i];

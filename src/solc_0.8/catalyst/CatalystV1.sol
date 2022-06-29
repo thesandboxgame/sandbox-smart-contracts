@@ -62,7 +62,7 @@ contract CatalystV1 is ICatalyst, ERC20TokenUpgradeable {
         address owner,
         address spender,
         uint256 amount
-    ) public override(ERC20BaseTokenUpgradeable, ICatalyst) returns (bool success) {
+    ) external override(ERC20BaseTokenUpgradeable, ICatalyst) returns (bool success) {
         require(
             _msgSender() == owner || hasRole(SUPER_OPERATOR_ROLE, _msgSender()) || hasRole(APPROVER_ROLE, _msgSender()),
             "NOT_AUTHORIZED"
