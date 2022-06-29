@@ -252,6 +252,85 @@ describe('Requirementsules', function () {
 
       expect(maxStake).to.be.equal(12);
     });
+    it('checkERC721MaxStake should return correct value', async function () {
+      const {
+        ERC721TokenArray,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const numERC721 = 1;
+
+      const user = await getUser();
+
+      await ERC721TokenArray[0].setFakeBalance(user.address, numERC721);
+      await ERC721TokenArray[1].setFakeBalance(user.address, numERC721);
+
+      await contract.setERC721RequirementList(
+        ERC721TokenArray[0].address,
+        [],
+        true,
+        1,
+        10,
+        0,
+        0
+      );
+
+      let maxStake = await contract.checkAndGetERC721Stake(user.address);
+
+      expect(maxStake).to.be.equal(10);
+
+      await contract.setERC721RequirementList(
+        ERC721TokenArray[1].address,
+        [],
+        true,
+        1,
+        5,
+        0,
+        0
+      );
+
+      maxStake = await contract.checkAndGetERC721Stake(user.address);
+
+      expect(maxStake).to.be.equal(15);
+    });
+    it('checkERC1155MaxStake should return correct value', async function () {
+      const {
+        ERC1155TokenArray,
+        contract,
+        getUser,
+      } = await setupERC20RewardPoolTest();
+
+      const user = await getUser();
+
+      const id = '0x123456';
+      const numERC1155 = 1;
+
+      await ERC1155TokenArray[0].setFakeBalance(user.address, id, numERC1155);
+      await ERC1155TokenArray[1].setFakeBalance(user.address, id, numERC1155);
+
+      await contract.setERC1155RequirementList(
+        ERC1155TokenArray[0].address,
+        [id],
+        1,
+        12
+      );
+
+      let maxStake = await contract.checkAndGetERC1155Stake(user.address);
+
+      expect(maxStake).to.be.equal(12);
+
+      await contract.setERC1155RequirementList(
+        ERC1155TokenArray[1].address,
+        [id],
+        1,
+        5
+      );
+
+      maxStake = await contract.checkAndGetERC1155Stake(user.address);
+
+      expect(maxStake).to.be.equal(17);
+    });
   });
   describe('Max Stake Calculator', function () {
     it('ERC721 balanceOf and ERC1155', async function () {
