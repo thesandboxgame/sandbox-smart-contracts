@@ -309,7 +309,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         for (uint256 i = 0; i < gemIds.length; i++) {
             gemFactors[i] = 10**(_gemsCatalystsRegistry.getGemDecimals(gemIds[i])) * numTimes;
         }
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
+        _gemsCatalystsRegistry.batchBurnGems(from, gemIds, gemFactors);
     }
 
     /// @dev Burn a single type of catalyst.
