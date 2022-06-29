@@ -50,20 +50,20 @@ describe('experience estate registry test', function () {
 
       const experienceId = 123;
 
-      const quadId = await mintQuad(other, 3, 0, 0);
+      await mintQuad(other, 3, 0, 0);
 
       await landContractAsOther.setApprovalForAllFor(
         other,
         estateContractAsOther.address,
-        quadId
+        true
       );
 
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
       await registryContractAsOther.link(0, experienceId, 0, 0);
 
-      // await expect(
-      //   registryContractAsOther.link(0, experienceId, 0, 0)
-      // ).to.be.revertedWith('Exp already in use');
+      /* await expect(
+        registryContractAsOther.link(1, experienceId, 0, 1)
+      ).to.be.revertedWith('Exp already in use'); */
     });
     it(`trying to create a link with a land already in use should revert`, async function () {
       const {
@@ -316,7 +316,7 @@ describe('experience estate registry test', function () {
         const coords = [];
         for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
-            coords.push([48 + i, 96 + j]);
+            coords.push([(48 + i) % 24, (96 + j) % 24]);
           }
         }
 
@@ -359,7 +359,7 @@ describe('experience estate registry test', function () {
         const coords = [];
         for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
-            coords.push([48 + i, 96 + j]);
+            coords.push([(48 + i) % 24, (96 + j) % 24]);
           }
         }
 
@@ -379,6 +379,65 @@ describe('experience estate registry test', function () {
 
         const receipt = await waitFor(
           registryContractAsOther.unLink(experienceId)
+        );
+        console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
+      });
+    });
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    [1, 3, 6, 12, 24].forEach((size) => {
+      it(`@stress test batch unlink ${
+        size * size
+      } exps from a ${size}x${size} quad`, async function () {
+        const {
+          other,
+          landContractAsOther,
+          estateContractAsOther,
+          registryContractAsOther,
+          mintQuad,
+          createEstate,
+          experienceContract,
+        } = await setupL2EstateExperienceAndLand();
+
+        const experienceIds = [];
+
+        await mintQuad(other, size, 0, 0);
+
+        //get coords from lands
+        const coords = [];
+        let k = 0;
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            coords.push([0 + i, 0 + j]);
+            experienceIds[k] = k;
+            k++;
+          }
+        }
+        console.log(experienceIds);
+
+        await landContractAsOther.setApprovalForAllFor(
+          other,
+          estateContractAsOther.address,
+          true
+        );
+        const {estateId} = await createEstate({
+          sizes: [size],
+          xs: [0],
+          ys: [0],
+        });
+
+        for (let i = 0; i < size * size; i++) {
+          await experienceContract.setTemplate(experienceIds[i], [[0, 0]]);
+
+          await registryContractAsOther.link(
+            estateId,
+            experienceIds[i],
+            coords[i][0],
+            coords[i][1]
+          );
+        }
+
+        const receipt = await waitFor(
+          registryContractAsOther.unLink(experienceIds[0])
         );
         console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
       });

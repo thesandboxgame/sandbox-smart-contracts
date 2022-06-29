@@ -52,15 +52,16 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         uint256 x,
         uint256 y
     ) external override {
-        // TODO: This is what we want ?
-        // TODO: This affect the test: trying to create a link with a land already in use should revert
-        // _unLinkExperience(expId);
+        //single lands = 0 exists
 
         // Link
         (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(expId);
         require(landCoords.length > 0, "empty template");
-
         EstateAndLands storage est = links[expId];
+        // TODO: This affect the test: trying to create a link with a land already in use should revert
+        //require(est.estateId == 0, "Exp already in use");
+        //single lands = 0 exists
+
         // TODO: Maybe this one must take storageId directly
         if (estateId == 0) {
             require(landCoords.length == 1, "must be done inside estate");
@@ -70,6 +71,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             require(!linkedLands.contain(translatedX, translatedY), "already linked");
             linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
+            //est.estateId = estateId; if =1
         } else {
             MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
             require(!linkedLands.intersect(s), "already linked");
