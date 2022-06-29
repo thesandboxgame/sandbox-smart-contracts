@@ -11,22 +11,34 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(['RaffleSteveAoki'], async function (
-  hre
-) {
-  const raffleSteveAokiContract = await ethers.getContract('RaffleSteveAoki');
-  const sandContract = await ethers.getContract('Sand');
-  return {
-    raffleSteveAokiContract,
-    sandContract,
-    hre,
-    getNamedAccounts,
-    setupWave,
-    signAuthMessageAs,
-    transferSand,
-    mint: mintSetup(raffleSteveAokiContract, sandContract),
-  };
-});
+export const setupRaffle = withSnapshot(
+  ['RaffleSteveAoki'],
+  async function (hre) {
+    const raffleSteveAokiContract = await ethers.getContract(
+      'RaffleSteveAoki'
+    );
+    const sandContract = await ethers.getContract('Sand');
+    return {
+      raffleSteveAokiContract,
+      sandContract,
+      hre,
+      getNamedAccounts,
+      setupWave,
+      signAuthMessageAs,
+      transferSand,
+      mint: mintSetup(raffleSteveAokiContract, sandContract),
+      personalizeSignature: validPersonalizeSignature,
+      personalize: personalizeSetup(
+        raffleSteveAokiContract,
+        validPersonalizeSignature
+      ),
+      personalizeInvalidSignature: personalizeSetup(
+        raffleSteveAokiContract,
+        invalidPersonalizeSignature
+      ),
+    };
+  }
+);
 
 async function setupWave(
   raffle: Contract,
@@ -65,6 +77,51 @@ async function setupWave(
     contractAddress.toString()
   );
   assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
+}
+
+async function validPersonalizeSignature(
+  wallet: Wallet | SignerWithAddress,
+  address: string,
+  signatureId: number,
+  contractAddress: string,
+  chainId: number,
+  tokenId: number,
+  personalizationMask: number
+) {
+  const hashedData = ethers.utils.defaultAbiCoder.encode(
+    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [
+      address,
+      signatureId,
+      contractAddress,
+      chainId,
+      tokenId,
+      personalizationMask,
+    ]
+  );
+
+  return wallet.signMessage(
+    ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
+  );
+}
+
+async function invalidPersonalizeSignature(
+  wallet: Wallet | SignerWithAddress,
+  address: string,
+  signatureId: number,
+  contractAddress: string,
+  chainId: number,
+  tokenId: number,
+  personalizationMask: number
+) {
+  const hashedData = ethers.utils.defaultAbiCoder.encode(
+    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [signatureId, contractAddress, chainId, personalizationMask, tokenId]
+  );
+
+  return wallet.signMessage(
+    ethers.utils.arrayify(ethers.utils.keccak256(hashedData))
+  );
 }
 
 async function signAuthMessageAs(
@@ -118,6 +175,44 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     const contract = sandContract.connect(ethers.provider.getSigner(address));
     return waitFor(
       contract.approveAndCall(raffleContract.address, price, encodedData)
+    );
+  };
+}
+
+function personalizeSetup(
+  raffleContract: Contract,
+  signatureFunction: (
+    wallet: Wallet | SignerWithAddress,
+    address: string,
+    signatureId: number,
+    contractAddress: string,
+    chainId: number,
+    tokenId: number,
+    personalizationMask: number
+  ) => Promise<string>
+) {
+  return async (
+    wallet: Wallet | SignerWithAddress,
+    address: string,
+    signatureId: number,
+    chainId: number,
+    tokenId: number,
+    personalizationMask: number
+  ) => {
+    const signature = await signatureFunction(
+      wallet,
+      address,
+      signatureId,
+      raffleContract.address,
+      chainId,
+      tokenId,
+      personalizationMask
+    );
+
+    const contract = raffleContract.connect(ethers.provider.getSigner(address));
+
+    return waitFor(
+      contract.personalize(signatureId, signature, tokenId, personalizationMask)
     );
   };
 }

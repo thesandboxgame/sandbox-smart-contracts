@@ -13,9 +13,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
-    metadataUrl = 'https://contracts.sandbox.game/';
+    metadataUrl = 'https://contracts.sandbox.game/steveaoki-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/steveaoki-unrevealed/';
   }
 
   await deploy('RaffleSteveAoki', {
@@ -26,7 +26,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [metadataUrl, 'Steve Aoki', 'SA', treasury, raffleSignWallet],
+        args: [
+          metadataUrl,
+          'Steve Aoki',
+          'SA',
+          treasury,
+          raffleSignWallet,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -35,4 +41,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['RaffleSteveAoki', 'RaffleSteveAoki_deploy'];
+func.tags = ['SteveAoki', 'SteveAoki_deploy'];
