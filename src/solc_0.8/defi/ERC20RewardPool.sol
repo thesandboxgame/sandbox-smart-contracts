@@ -25,7 +25,7 @@ import {RequirementsRules} from "./rules/RequirementsRules.sol";
 /// @dev rewardCalculator is used to manage the rate at which the rewards are distributed.
 /// @dev This way we can build different types of pools by mixing in the plugins we want with this contract.
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
-/// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are giving
+/// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are given
 contract ERC20RewardPool is
     Ownable,
     StakeTokenWrapper,
@@ -74,6 +74,8 @@ contract ERC20RewardPool is
         __ERC2771HandlerV2_initialize(trustedForwarder);
     }
 
+    // Checks that the given address is a contract and
+    // that the caller of the method is the owner of this contract - ERC20RewardPool.
     modifier isContractAndAdmin(address contractAddress) {
         require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
         require(owner() == _msgSender(), "ERC20RewardPool: not admin");
@@ -225,7 +227,7 @@ contract ERC20RewardPool is
     }
 
     /// @notice accumulates the current rewards into rewardPerTokenStored and restart the reward calculator
-    /// @dev calling this function make no difference. It is useful for testing and when the reward calculator
+    /// @dev calling this function makes no difference. It is useful for testing and when the reward calculator
     /// @dev is changed.
     function restartRewards() external {
         _restartRewards();
