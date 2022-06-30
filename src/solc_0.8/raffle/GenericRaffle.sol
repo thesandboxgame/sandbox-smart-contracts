@@ -13,11 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard {
-    uint256 maxSupply;
-
-    constructor(uint256 _maxSupply) {
-      maxSupply = _maxSupply;   
-   }
+    uint256 public maxSupply;
 
     event TogglePaused(bool _pause);
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);
@@ -44,19 +40,21 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     address public signAddress;
     string public baseTokenURI;
 
-    function initialize(
+    function __GenericRaffle_init(
         string memory baseURI,
         string memory _name,
         string memory _symbol,
         address payable _sandOwner,
-        address _signAddress
-    ) public initializer {
+        address _signAddress,
+        uint256 _maxSupply
+    ) internal onlyInitializing {
         __ERC721_init(_name, _symbol);
         __Ownable_init_unchained();
         setBaseURI(baseURI);
         require(_sandOwner != address(0), "Sand owner is zero address");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
+        maxSupply = _maxSupply;
     }
 
     function setupWave(

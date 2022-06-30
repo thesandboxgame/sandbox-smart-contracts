@@ -4,5 +4,16 @@ pragma solidity ^0.8.0;
 import "./GenericRaffle.sol";
 
 /* solhint-disable max-states-count */
-contract SteveAoki is GenericRaffle(3_3333) {
+contract SteveAoki is GenericRaffle {
+    uint256 public constant MAX_SUPPLY = 8_430;
+
+    function initialize(
+        string memory baseURI,
+        string memory _name,
+        string memory _symbol,
+        address payable _sandOwner,
+        address _signAddress
+    ) public initializer {
+        __GenericRaffle_init(baseURI, _name, _symbol, _sandOwner, _signAddress, MAX_SUPPLY);
+    }
 }
