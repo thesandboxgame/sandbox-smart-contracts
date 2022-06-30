@@ -12,7 +12,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const {deployer, assetMinterAdmin} = await getNamedAccounts();
   const AssetERC1155 = await deployments.get('PolygonAssetERC1155');
-  const AssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const assetRegistryData = await read(
     'PolygonAssetAttributesRegistry',
