@@ -110,9 +110,10 @@ async function setupEstateAndLand(isLayer1: boolean) {
   // Estate
   const chainIndex = 100;
   const mapLib = await deployments.deploy('MapLib', {from: deployer});
+  const name = isLayer1 ? 'EstateTokenV1' : 'PolygonEstateTokenV1';
   await deployments.deploy('Estate', {
     from: deployer,
-    contract: isLayer1 ? 'EstateTokenV1' : 'PolygonEstateTokenV1',
+    contract: name,
     libraries: {
       MapLib: mapLib.address,
     },
@@ -126,6 +127,8 @@ async function setupEstateAndLand(isLayer1: boolean) {
           estateTokenAdmin,
           landContract.address,
           chainIndex,
+          name,
+          isLayer1 ? 'EST' : 'PEST',
         ],
       },
     },
@@ -409,5 +412,61 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
         updateGasUsed: BigNumber.from(receipt.gasUsed),
       };
     },
+  };
+});
+export const setupTestEstateBaseERC721 = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  const [other, trustedForwarder, admin] = await getUnnamedAccounts();
+  const name = 'TestEstateBaseERC721';
+  const symbol = 'TEB';
+  await deployments.deploy('TestEstateBaseERC721', {
+    from: deployer,
+    args: [trustedForwarder, admin, name, symbol],
+  });
+  const contractAsDeployer = await ethers.getContract(
+    'TestEstateBaseERC721',
+    deployer
+  );
+  const contractAsOther = await ethers.getContract(
+    'TestEstateBaseERC721',
+    other
+  );
+  return {
+    other,
+    trustedForwarder,
+    admin,
+    contractAsDeployer,
+    contractAsOther,
+    name,
+    symbol,
+  };
+});
+export const setupTestEstateBaseToken = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  const [other, trustedForwarder, admin] = await getUnnamedAccounts();
+  const chainIndex = BigNumber.from(1123);
+  const name = 'TestEstateBaseERC721';
+  const symbol = 'TEB';
+  await deployments.deploy('TestEstateBaseToken', {
+    from: deployer,
+    args: [trustedForwarder, admin, name, symbol],
+  });
+  const contractAsDeployer = await ethers.getContract(
+    'TestEstateBaseToken',
+    deployer
+  );
+  const contractAsOther = await ethers.getContract(
+    'TestEstateBaseToken',
+    other
+  );
+  return {
+    chainIndex,
+    other,
+    trustedForwarder,
+    admin,
+    contractAsDeployer,
+    contractAsOther,
+    name,
+    symbol,
   };
 });

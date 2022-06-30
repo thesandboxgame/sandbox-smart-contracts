@@ -20,4 +20,6 @@ interface IEstateToken {
     function contain(uint256 estateId, MapLib.TranslateResult memory s) external view returns (bool);
 
     function getStorageId(uint256 tokenId) external pure returns (uint256);
+
+    function getOwnerOfStorage(uint256 estateId) external view returns (address owner);
 }

@@ -138,6 +138,6 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         if (est.estateId == 0) {
             return landToken.ownerOf(est.singleLand) == _msgSender();
         }
-        return IERC721(address(estateToken)).ownerOf(est.estateId) == _msgSender();
+        return estateToken.getOwnerOfStorage(est.estateId) == _msgSender();
     }
 }

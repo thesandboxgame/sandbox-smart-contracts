@@ -7,7 +7,6 @@ import {EstateBaseToken} from "../../../estate/EstateBaseToken.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
-// solhint-disable-next-line no-empty-blocks
 contract EstateTokenV1 is EstateBaseToken {
     using MapLib for MapLib.Map;
     event EstateTokenLandsRemoved(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
@@ -18,59 +17,40 @@ contract EstateTokenV1 is EstateBaseToken {
         uint256[][3] landToRemove
     );
 
-    function initV1(
-        address trustedForwarder,
-        address admin,
-        address land,
-        uint8 chainIndex
-    ) external initializer {
-        _unchained_initV1(trustedForwarder, admin, land, chainIndex);
-    }
-
     function update(
-        uint256 estateId,
+        uint256 oldId,
         uint256[][3] calldata landToAdd,
         uint256[][3] calldata landToRemove
-    ) external returns (uint256 newEstateId, uint256 newStorageId) {
-        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
-        uint256 storageId = _storageId(estateId);
-        _addLand(_msgSender(), estateId, storageId, landToAdd);
-        _removeLand(_msgSender(), estateId, storageId, landToRemove);
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
-        emit EstateTokenUpdated(estateId, newEstateId, landToAdd, landToRemove);
-        return (newEstateId, newStorageId);
+    ) external returns (uint256 newEstateId) {
+        require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
+        (Estate storage estate, ) = _estate(oldId);
+        _addLand(estate, _msgSender(), landToAdd);
+        _removeLand(estate, _msgSender(), landToRemove);
+        require(estate.land.isAdjacent(), "not adjacent");
+        _incrementTokenVersion(estate);
+        emit EstateTokenUpdated(oldId, estate.id, landToAdd, landToRemove);
+        return estate.id;
     }
 
-    // Used by the bridge
-    function burnEstate(address from, uint256 estateId)
-        external
-        virtual
-        override
-        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        require(hasRole(BURNER_ROLE, _msgSender()), "not burner");
-        uint256 storageId = _storageId(estateId);
-        metaData = _s().metaData[storageId];
-        delete _s().metaData[storageId];
-        tiles = _landTileSet(storageId).getMap();
-        _landTileSet(storageId).clear();
-        _burn(from, _ownerOf(estateId), estateId);
-        emit EstateBurned(estateId);
-        return (metaData, tiles);
+    function burn(uint256 estateId, uint256[][3] calldata landToRemove) external {
+        require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
+        (Estate storage estate, ) = _estate(estateId);
+        _removeLand(estate, _msgSender(), landToRemove);
+        require(estate.land.isEmpty(), "map not empty");
+        _burnEstate(estate.id);
     }
 
     /// @notice Return the URI of a specific token.
     /// @param estateId The id of the token.
     /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 estateId) external view override returns (string memory uri) {
-        require(_ownerOf(estateId) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 storageId = _storageId(estateId);
+    function tokenURI(uint256 estateId) public view override returns (string memory uri) {
+        require(ownerOf(estateId) != address(0), "BURNED_OR_NEVER_MINTED");
+        (Estate storage estate, ) = _estate(estateId);
         return
             string(
                 abi.encodePacked(
                     "ipfs://bafybei",
-                    StringsUpgradeable.toHexString(uint256(_s().metaData[storageId]), 32),
+                    StringsUpgradeable.toHexString(uint256(estate.metaData), 32),
                     "/",
                     "estateTokenV1.json"
                 )
@@ -78,14 +58,13 @@ contract EstateTokenV1 is EstateBaseToken {
     }
 
     function _removeLand(
+        Estate storage estate,
         address to,
-        uint256,
-        uint256 storageId,
         uint256[][3] calldata quads
     ) internal virtual {
         uint256 len = quads[0].length;
         require(len == quads[1].length && len == quads[2].length, "Invalid data");
-        MapLib.Map storage map = _landTileSet(storageId);
+        MapLib.Map storage map = estate.land;
         for (uint256 i; i < len; i++) {
             require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "Quad missing");
             map.clear(quads[1][i], quads[2][i], quads[0][i]);

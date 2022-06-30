@@ -15,71 +15,40 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         IEstateExperienceRegistry registryToken;
     }
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     event EstateTokenUpdated(
         uint256 indexed oldId,
         uint256 indexed newId,
         uint256[][3] landToAdd,
+        uint256[] expToUnlink,
         uint256[][3] landToRemove
     );
 
-    /// @dev Fallback function that calls the registry. Will run if call data is empty.
-    receive() external payable {
-        _fallback();
-    }
-
-    /// @dev Fallback function that  calls the registry. Will run if no other function in the contract matches the call data.
-    fallback() external payable {
-        _fallback();
-    }
-
-    function initV1(
-        address trustedForwarder,
-        address admin,
-        address land,
-        uint8 chainIndex
-    ) external initializer {
-        _unchained_initV1(trustedForwarder, admin, land, chainIndex);
-        _setupRole(ADMIN_ROLE, admin);
-    }
-
     function update(
-        uint256 estateId,
+        uint256 oldId,
         uint256[][3] calldata landToAdd,
-        uint256[][3] calldata landToRemove,
-        uint256[] calldata expToUnlink
-    ) external returns (uint256 newEstateId, uint256 newStorageId) {
-        require(_ownerOf(estateId) == _msgSender(), "Invalid Owner");
-        uint256 storageId = _storageId(estateId);
-        _addLand(_msgSender(), estateId, storageId, landToAdd);
-        _removeLand(_msgSender(), estateId, storageId, landToRemove, expToUnlink);
-        require(_landTileSet(storageId).isAdjacent(), "not adjacent");
-        (newEstateId, newStorageId) = _incrementTokenVersion(_msgSender(), estateId);
-        emit EstateTokenUpdated(estateId, newEstateId, landToAdd, landToRemove);
-        return (newEstateId, newStorageId);
+        uint256[] calldata expToUnlink,
+        uint256[][3] calldata landToRemove
+    ) external returns (uint256 newEstateId) {
+        require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
+        (Estate storage estate, ) = _estate(oldId);
+        _addLand(estate, _msgSender(), landToAdd);
+        _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
+        require(estate.land.isAdjacent(), "not adjacent");
+        _incrementTokenVersion(estate);
+        emit EstateTokenUpdated(oldId, estate.id, landToAdd, expToUnlink, landToRemove);
+        return estate.id;
     }
 
-    // Used by the bridge
-    function burnEstate(address from, uint256 estateId)
-        external
-        override
-        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        require(hasRole(BURNER_ROLE, _msgSender()) || _ownerOf(estateId) == _msgSender(), "Invalid Owner");
-        uint256 storageId = _storageId(estateId);
-        metaData = _s().metaData[storageId];
-        delete _s().metaData[storageId];
-        MapLib.Map storage map = _landTileSet(storageId);
-        tiles = map.getMap();
-        map.clear();
-        IEstateExperienceRegistry r = _ps().registryToken;
-        if (address(r) != address(0)) {
-            require(!r.isLinked(tiles), "must unlink first");
-        }
-        _burn(from, _ownerOf(estateId), estateId);
-        emit EstateBurned(estateId);
-        return (metaData, tiles);
+    function burn(
+        uint256 estateId,
+        uint256[] calldata expToUnlink,
+        uint256[][3] calldata landToRemove
+    ) external {
+        require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
+        (Estate storage estate, ) = _estate(estateId);
+        _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
+        require(estate.land.isEmpty(), "map not empty");
+        _burnEstate(estate.id);
     }
 
     function setRegistry(IEstateExperienceRegistry registry) external {
@@ -94,14 +63,14 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
     /// @notice Return the URI of a specific token.
     /// @param estateId The id of the token.
     /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 estateId) external view override returns (string memory uri) {
-        require(_ownerOf(estateId) != address(0), "invalid estateId");
-        uint256 storageId = _storageId(estateId);
+    function tokenURI(uint256 estateId) public view override returns (string memory uri) {
+        require(ownerOf(estateId) != address(0), "invalid estateId");
+        (Estate storage estate, ) = _estate(estateId);
         return
             string(
                 abi.encodePacked(
                     "ipfs://bafybei",
-                    StringsUpgradeable.toHexString(uint256(_s().metaData[storageId]), 32),
+                    StringsUpgradeable.toHexString(uint256(estate.metaData), 32),
                     "/",
                     "PolygonEstateTokenV1.json"
                 )
@@ -110,9 +79,8 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
 
     // Complete the removal process.
     function _removeLand(
+        Estate storage estate,
         address to,
-        uint256,
-        uint256 storageId,
         uint256[][3] calldata quads,
         uint256[] calldata expToUnlink
     ) internal {
@@ -124,7 +92,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         uint256 len = quads[0].length;
         require(len == quads[1].length && len == quads[2].length, "Invalid quad data");
         address landToken = _s().landToken;
-        MapLib.Map storage map = _landTileSet(storageId);
+        MapLib.Map storage map = estate.land;
         for (uint256 i; i < len; i++) {
             _removeQuad(to, map, landToken, quads[0][i], quads[1][i], quads[2][i]);
         }
@@ -147,37 +115,23 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         }
     }
 
+    function _burnEstate(uint256 estateId)
+        internal
+        override
+        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
+    {
+        (metaData, tiles) = super._burnEstate(estateId);
+        IEstateExperienceRegistry r = _ps().registryToken;
+        if (address(r) != address(0)) {
+            require(!r.isLinked(tiles), "must unlink first");
+        }
+        return (metaData, tiles);
+    }
+
     function _ps() internal pure returns (PolygonEstateTokenStorage storage ds) {
         bytes32 storagePosition = keccak256("PolygonEstateToken.PolygonEstateTokenStorage");
         assembly {
             ds.slot := storagePosition
-        }
-    }
-
-    // If unknown => call the registry.
-    function _fallback() internal virtual {
-        address implementation = address(_ps().registryToken);
-        assembly {
-            // Copy msg.data. We take full control of memory in this inline assembly
-            // block because it will not return to Solidity code. We overwrite the
-            // Solidity scratch pad at memory position 0.
-            calldatacopy(0, 0, calldatasize())
-
-            // Call the implementation.
-            // out and outsize are 0 because we don't know the size yet.
-            let result := call(gas(), implementation, callvalue(), 0, calldatasize(), 0, 0)
-
-            // Copy the returned data.
-            returndatacopy(0, 0, returndatasize())
-
-            switch result
-                // delegatecall returns 0 on error.
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
         }
     }
 }
