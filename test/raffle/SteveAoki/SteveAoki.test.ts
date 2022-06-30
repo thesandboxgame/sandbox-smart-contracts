@@ -13,7 +13,7 @@ import {
 
 // eslint-disable-next-line mocha/no-skipped-tests
 describe.only('RaffleSteveAoki', function () {
-  it.skip('should be able to mint with valid signature', async function () {
+  it('should be able to mint with valid signature', async function () {
     const {
       raffleSteveAokiContract,
       transferSand,
