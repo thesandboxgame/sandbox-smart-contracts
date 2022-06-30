@@ -43,6 +43,8 @@ const func: DeployFunction = async function (
           estateTokenAdmin,
           landContract.address, //'0xFeD17c5b2B5A59D3c8690a2cc666D41255376062',
           chainIndex,
+          'Estate Token',
+          'PEST',
         ],
       },
       upgradeIndex: 0,

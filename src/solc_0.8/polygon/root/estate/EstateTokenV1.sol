@@ -21,13 +21,13 @@ contract EstateTokenV1 is EstateBaseToken {
         uint256 oldId,
         uint256[][3] calldata landToAdd,
         uint256[][3] calldata landToRemove
-    ) external returns (uint256 newEstateId) {
+    ) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
         (Estate storage estate, ) = _estate(oldId);
         _addLand(estate, _msgSender(), landToAdd);
         _removeLand(estate, _msgSender(), landToRemove);
         require(estate.land.isAdjacent(), "not adjacent");
-        _incrementTokenVersion(estate);
+        estate.id = _incrementTokenVersion(estate.id);
         emit EstateTokenUpdated(oldId, estate.id, landToAdd, landToRemove);
         return estate.id;
     }

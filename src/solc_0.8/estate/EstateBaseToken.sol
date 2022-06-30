@@ -91,7 +91,7 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
         emit MetadataSet(estate.id, estate.metaData);
     }
 
-    function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external returns (uint256 newEstateId) {
+    function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
         (Estate storage estate, ) = _estate(oldId);
         // we can optimize when adding only one quad
@@ -106,9 +106,9 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
             _addLand(estate, _msgSender(), landToAdd);
             require(estate.land.isAdjacent(), "not adjacent");
         }
-        _incrementTokenVersion(estate);
+        estate.id = _incrementTokenVersion(estate.id);
         emit EstateTokenLandsAdded(oldId, estate.id, landToAdd);
-        return newEstateId;
+        return estate.id;
     }
 
     // Used by the bridge
@@ -257,17 +257,19 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to
     /// @dev token-specific data are preserved via the storageId mechanism.
-    /// @param estate The estate to increment.
-    function _incrementTokenVersion(Estate storage estate) internal {
-        (address creator, uint64 subId, uint16 chainId, uint16 version) = _unpackId(estate.id);
+    /// @param estateId The estateId to increment.
+    /// @return new estate id
+    function _incrementTokenVersion(uint256 estateId) internal returns (uint256) {
+        (address creator, uint64 subId, uint16 chainId, uint16 version) = _unpackId(estateId);
         // is it ok to roll over the version we assume the it is impossible to send 2^16 txs
         unchecked {version++;}
 
-        address owner = ownerOf(estate.id);
-        super._burn(estate.id);
+        address owner = ownerOf(estateId);
+        super._burn(estateId);
 
-        estate.id = _packId(creator, subId, chainId, version);
-        super._mint(owner, estate.id);
+        estateId = _packId(creator, subId, chainId, version);
+        super._mint(owner, estateId);
+        return estateId;
     }
 
     /// @dev Create a new tokenId and associate it with an owner.
