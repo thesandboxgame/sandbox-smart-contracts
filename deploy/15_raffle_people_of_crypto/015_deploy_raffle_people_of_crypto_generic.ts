@@ -7,7 +7,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {
     deployer,
     upgradeAdmin,
+    treasury,
+    raffleSignWallet,
   } = await getNamedAccounts();
+
+  let metadataUrl;
+  if (hre.network.name === 'mainnet') {
+    metadataUrl = 'https://contracts.sandbox.game/poc-unrevealed/';
+  } else {
+    metadataUrl = 'https://contracts-demo.sandbox.game/poc-unrevealed/';
+  }
 
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,

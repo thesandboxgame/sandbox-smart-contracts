@@ -8,7 +8,7 @@ import 'hardhat-gas-reporter';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import {accounts, node_url} from './utils/network';
-​
+
 const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
@@ -85,11 +85,11 @@ const config: HardhatUserConfig = {
       default: 1,
       mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
       polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
-      rinkeby: '0x4BF86138e9DC66Fb65F8b9387C53aB4439FC41FF',
-      goerli: '0x4BF86138e9DC66Fb65F8b9387C53aB4439FC41FF',
+      rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
+      goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
-​
+
     sandAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
@@ -98,22 +98,22 @@ const config: HardhatUserConfig = {
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
-​
+
     upgradeAdmin: 'sandAdmin',
-​
+
     multiGiveawayAdmin: 'sandAdmin',
-​
+
     liquidityRewardProvider: {
       default: 'sandBeneficiary',
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
     liquidityRewardAdmin: 'sandAdmin',
-​
+
     kyberDepositor: {
       default: 'sandBeneficiary',
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
-​
+
     sandExecutionAdmin: 'sandAdmin', // can add execution extension to SAND (used for Native metatx support)
     mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
     sandBeneficiary: 'sandAdmin', // will be the owner of all initial SAND
@@ -126,7 +126,7 @@ const config: HardhatUserConfig = {
     genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
     assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
     assetAuctionAdmin: 'sandAdmin', // can change fee collector
-​
+
     sandSaleBeneficiary: {
       default: 3,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
@@ -135,40 +135,40 @@ const config: HardhatUserConfig = {
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
-​
+
     Foundation: {
       default: 5,
       mainnet: '', // TODO
     },
-​
+
     StakingPool: {
       default: 6,
       mainnet: '', // TODO
     },
-​
+
     treasury: {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
       mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
     },
-​
+
     landSaleBeneficiary: {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
       mainnet: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
-​
+
     catalystAssetFeeRecipient: 'treasury',
-​
+
     landSaleFeeRecipient: {
       default: 3,
       rinkeby: 5,
       goerli: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
-​
+
     landAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
@@ -177,7 +177,7 @@ const config: HardhatUserConfig = {
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
-​
+
     gemsAndCatalystsAdmin: 'sandAdmin',
     assetAttributesRegistryAdmin: 'sandAdmin',
     proxyAdminOwner: {
@@ -188,7 +188,7 @@ const config: HardhatUserConfig = {
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
-​
+
     landSaleAdmin: 'sandAdmin', // can enable currencies
     gameTokenAdmin: 'sandAdmin', // can set minter address
     gameTokenFeeBeneficiary: 'treasury', // receives fees from GAME token  minting / Mods
@@ -221,7 +221,7 @@ const config: HardhatUserConfig = {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      mainnet: '0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB',
+      mainnet: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
       default: 4,
@@ -352,7 +352,7 @@ const config: HardhatUserConfig = {
     runOnCompile: false,
     disambiguatePaths: false,
   },
-​
+
   external: process.env.HARDHAT_FORK
     ? {
         deployments: {
@@ -370,5 +370,5 @@ const config: HardhatUserConfig = {
     },
   },
 };
-​
+
 export default config;
