@@ -13,9 +13,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
-    metadataUrl = 'https://contracts.sandbox.game/steveaoki-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/sa-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/steveaoki-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/sa-unrevealed/';
   }
 
   await deploy('RaffleSteveAoki', {
@@ -41,4 +41,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['SteveAoki', 'SteveAoki_deploy'];
+func.tags = ['RaffleSteveAoki', 'RaffleSteveAoki_deploy'];
