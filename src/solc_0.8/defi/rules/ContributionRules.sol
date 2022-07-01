@@ -15,9 +15,9 @@ contract ContributionRules is Ownable, IContributionRules {
     // LIMITS
     // we limited the number of Ids and contracts that we can have in the lists
     // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
-    uint256 public idsLimit = 64;
-    uint256 public contractsLimit = 4;
-    uint256 public maxMultiplier = 1000;
+    uint256 public constant idsLimit = 64;
+    uint256 public constant contractsLimit = 4;
+    uint256 public constant maxMultiplier = 1000;
     uint256 public multiplierLimitERC721 = 1000;
     uint256 public multiplierLimitERC1155 = 1000;
 

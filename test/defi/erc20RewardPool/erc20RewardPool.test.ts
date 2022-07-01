@@ -35,7 +35,6 @@ describe('ERC20RewardPool main contract tests', function () {
         );
       });
     }
-
     // eslint-disable-next-line mocha/no-setup-in-describe
     defaultAdminRoleTest('setContributionRules', (c, rewardToken) =>
       c.setContributionRules(rewardToken)
@@ -52,6 +51,38 @@ describe('ERC20RewardPool main contract tests', function () {
     defaultAdminRoleTest('setRewardCalculator', (c, rewardToken) =>
       c.setRewardCalculator(rewardToken, false)
     );
+    it('admin should be able to call pause & unpause', async function () {
+      const {contract, deployer} = await setupERC20RewardPoolTest();
+      const admin = contract.connect(await ethers.getSigner(deployer));
+      await expect(admin.pause()).not.to.be.reverted;
+      await expect(admin.unpause()).not.to.be.reverted;
+    });
+    it('other should fail to call pause & unpause', async function () {
+      const {contract, getUser, deployer} = await setupERC20RewardPoolTest();
+      const user = await getUser();
+      const admin = contract.connect(await ethers.getSigner(deployer));
+
+      const poolAsOther = contract.connect(
+        await ethers.getSigner(user.address)
+      );
+      await expect(poolAsOther.pause()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+
+      await expect(admin.pause()).not.to.be.reverted;
+
+      await expect(poolAsOther.unpause()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+    });
+    it('admin cant renounce ownership', async function () {
+      const {contract, deployer} = await setupERC20RewardPoolTest();
+      const admin = contract.connect(await ethers.getSigner(deployer));
+      await expect(admin.renounceOwnership()).to.be.revertedWith(
+        "ERC20RewardPool: can't renounceOwnership"
+      );
+    });
+
     it('recoverFunds should fail if contract is not paused', async function () {
       const {
         contract,
