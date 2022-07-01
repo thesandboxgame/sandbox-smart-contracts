@@ -26,13 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [
-          metadataUrl,
-          'Steve Aoki',
-          'SA',
-          treasury,
-          raffleSignWallet,
-        ],
+        args: [metadataUrl, 'Steve Aoki', 'SA', treasury, raffleSignWallet],
       },
       upgradeIndex: 0,
     },

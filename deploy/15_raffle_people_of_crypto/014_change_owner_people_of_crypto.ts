@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const { catchUnknownSigner, execute} = deployments;
+  const {catchUnknownSigner, execute} = deployments;
 
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
@@ -25,4 +25,8 @@ func.tags = [
   'RafflePeopleOfCrypto_setup',
   'RafflePeopleOfCrypto_change_admin',
 ];
-func.dependencies = ['RafflePeopleOfCrypto_deploy', 'RafflePeopleOfCrypto_setup_minter', 'RafflePeopleOfCrypto_setup_wave'];
+func.dependencies = [
+  'RafflePeopleOfCrypto_deploy',
+  'RafflePeopleOfCrypto_setup_minter',
+  'RafflePeopleOfCrypto_setup_wave',
+];

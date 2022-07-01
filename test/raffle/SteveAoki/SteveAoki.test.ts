@@ -24,15 +24,7 @@ describe('RaffleSteveAoki', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(
-      raffleSteveAokiContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleSteveAokiContract, 0, 20, 5, '10', zeroAddress, 0);
     await mint(
       raffleSignWallet,
       deployer,
@@ -221,15 +213,7 @@ describe('RaffleSteveAoki', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      raffleSteveAokiContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleSteveAokiContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
@@ -293,15 +277,7 @@ describe('RaffleSteveAoki', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      raffleSteveAokiContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleSteveAokiContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
@@ -351,15 +327,7 @@ describe('RaffleSteveAoki', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(
-      raffleSteveAokiContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleSteveAokiContract, 0, 20, 5, '10', zeroAddress, 0);
 
     const receipt1 = await mint(
       raffleSignWallet,
@@ -436,15 +404,7 @@ describe('RaffleSteveAoki', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      raffleSteveAokiContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleSteveAokiContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
