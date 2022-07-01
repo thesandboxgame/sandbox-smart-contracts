@@ -5,10 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
 
-  const setupWaveMaxTokens = await read(
-    'RaffleSteveAoki',
-    'waveMaxTokens'
-  );
+  const setupWaveMaxTokens = await read('RaffleSteveAoki', 'waveMaxTokens');
   if (setupWaveMaxTokens.toNumber() === 0) {
     const owner = await read('RaffleSteveAoki', 'owner');
     const waveType = 0;
