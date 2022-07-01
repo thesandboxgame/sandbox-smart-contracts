@@ -30,7 +30,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         uint256[][3] calldata landToRemove
     ) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
-        (Estate storage estate, ) = _estate(oldId);
+        Estate storage estate = _estate(oldId);
         _addLand(estate, _msgSender(), landToAdd);
         _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
         require(estate.land.isAdjacent(), "not adjacent");
@@ -45,7 +45,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         uint256[][3] calldata landToRemove
     ) external {
         require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
-        (Estate storage estate, ) = _estate(estateId);
+        Estate storage estate = _estate(estateId);
         _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
         require(estate.land.isEmpty(), "map not empty");
         _burnEstate(estate.id);
@@ -65,7 +65,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
     /// @return uri The URI of the token metadata.
     function tokenURI(uint256 estateId) public view override returns (string memory uri) {
         require(ownerOf(estateId) != address(0), "invalid estateId");
-        (Estate storage estate, ) = _estate(estateId);
+        Estate storage estate = _estate(estateId);
         return
             string(
                 abi.encodePacked(

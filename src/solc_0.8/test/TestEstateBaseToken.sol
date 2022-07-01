@@ -3,6 +3,8 @@ pragma solidity 0.8.2;
 
 import {EstateBaseToken} from "../estate/EstateBaseToken.sol";
 
+import {EstateTokenIdHelperLib} from "../estate/EstateTokenIdHelperLib.sol";
+
 contract TestEstateBaseToken is EstateBaseToken {
     constructor(
         address trustedForwarder,
@@ -30,7 +32,7 @@ contract TestEstateBaseToken is EstateBaseToken {
     }
 
     function mint(address to) external {
-        _mint(to);
+        _mintEstate(to);
     }
 
     function incrementTokenVersion(uint256 estateId) external returns (uint256 newEstateId) {
@@ -39,10 +41,7 @@ contract TestEstateBaseToken is EstateBaseToken {
     }
 
     function incrementTokenId(uint256 estateId) external pure returns (uint256 newEstateId) {
-        (address creator, uint64 subId, uint16 chainId, uint16 version) = _unpackId(estateId);
-        // is it ok to roll over the version we assume the it is impossible to send 2^16 txs
-        unchecked {version++;}
-        return _packId(creator, subId, chainId, version);
+        return EstateTokenIdHelperLib.incrementVersion(estateId);
     }
 
     function packId(
@@ -51,10 +50,10 @@ contract TestEstateBaseToken is EstateBaseToken {
         uint16 chainId,
         uint16 version
     ) external pure returns (uint256) {
-        return _packId(creator, subId, chainId, version);
+        return EstateTokenIdHelperLib.packId(creator, subId, chainId, version);
     }
 
-    function unpackId(uint256 id)
+    function unpackId(uint256 estateId)
         public
         pure
         returns (
@@ -64,6 +63,6 @@ contract TestEstateBaseToken is EstateBaseToken {
             uint16 version
         )
     {
-        return _unpackId(id);
+        return EstateTokenIdHelperLib.unpackId(estateId);
     }
 }

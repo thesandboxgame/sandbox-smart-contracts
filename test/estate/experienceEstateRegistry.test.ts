@@ -35,7 +35,7 @@ describe('experience estate registry test', function () {
         landId
       );
 
-      await registryContractAsOther.link(1, experienceId, 0, 0);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
     });
 
     it(`TODO: Right now we overwrite !!!. trying to create a link with an experience already in use should revert`, async function () {
@@ -59,10 +59,10 @@ describe('experience estate registry test', function () {
       );
 
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
-      await registryContractAsOther.link(1, experienceId, 0, 0);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
 
       await expect(
-        registryContractAsOther.link(1, experienceId, 0, 1)
+        registryContractAsOther.link(0, experienceId, 0, 1)
       ).to.be.revertedWith('Exp already in use');
     });
     it(`trying to create a link with a land already in use should revert`, async function () {
@@ -87,11 +87,11 @@ describe('experience estate registry test', function () {
       );
 
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
-      await registryContractAsOther.link(1, experienceId, 0, 0);
+      await registryContractAsOther.link(0, experienceId, 0, 0);
 
       await experienceContract.setTemplate(experienceId2, [[0, 0]]);
       await expect(
-        registryContractAsOther.link(1, experienceId2, 0, 0)
+        registryContractAsOther.link(0, experienceId2, 0, 0)
       ).to.be.revertedWith('already linked');
     });
     it(`trying to create a multi land link with a land already in use should revert`, async function () {

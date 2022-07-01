@@ -8,7 +8,6 @@ import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExper
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
-import "hardhat/console.sol";
 
 interface ExperienceTokenInterface {
     function getTemplate(uint256 expId) external view returns (TileLib.Tile calldata, uint256[] calldata landCoords);
@@ -24,6 +23,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     IERC721 public landToken;
 
     struct EstateAndLands {
+        // 0 means not found, 1 means single land,  >1 means multiLand with the value estateId - 1,
         uint256 estateId;
         uint256 singleLand;
         MapLib.Map multiLand;
@@ -63,7 +63,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         //single lands = 0 exists
 
         // TODO: Maybe this one must take storageId directly
-        if (estateId == 1) {
+        if (estateId == 0) {
             require(landCoords.length == 1, "must be done inside estate");
             uint256 translatedId = landCoords[0] + x + (y * 408);
             uint256 translatedX = translatedId % 408;
@@ -71,16 +71,14 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             require(!linkedLands.contain(translatedX, translatedY), "already linked");
             linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
-            est.estateId = estateId;
         } else {
             MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
             require(!linkedLands.intersect(s), "already linked");
             linkedLands.set(s);
-            // TODO: storageId or estateId ?
             require(estateToken.contain(estateId, s), "not enough land");
-            est.estateId = estateId;
             est.multiLand.set(s);
         }
+        est.estateId = estateId + 1;
         require(_isValidUser(est), "invalid user");
     }
 
@@ -106,23 +104,20 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         return false;
     }
 
+    function isLinked(uint256 expId) external view override returns (bool) {
+        EstateAndLands storage est = links[expId];
+        return est.estateId > 0;
+    }
+
     function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
         return linkedLands.intersect(tiles);
     }
 
     function _unLink(uint256 expId) internal {
         EstateAndLands storage est = links[expId];
-        if (est.estateId == 1) {
-            require(est.singleLand != 0, "unknown experience");
-        } else {
-            require(!est.multiLand.isEmpty(), "unknown experience");
-        }
+        require(est.estateId > 0, "unknown experience");
+        require(est.estateId > 0, "unknown experience");
         require(_isValidUser(est), "Invalid user");
-        _unLinkExperience(expId);
-    }
-
-    function _unLinkExperience(uint256 expId) internal {
-        EstateAndLands storage est = links[expId];
         if (est.estateId == 1) {
             uint256 landId = est.singleLand;
             uint256 x = landId % 408;
@@ -138,6 +133,6 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         if (est.estateId == 1) {
             return landToken.ownerOf(est.singleLand) == _msgSender();
         }
-        return estateToken.getOwnerOfStorage(est.estateId) == _msgSender();
+        return estateToken.getOwnerOfStorage(est.estateId - 1) == _msgSender();
     }
 }

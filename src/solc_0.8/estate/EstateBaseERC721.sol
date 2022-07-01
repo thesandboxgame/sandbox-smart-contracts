@@ -22,10 +22,6 @@ abstract contract EstateBaseERC721 is AccessControlUpgradeable, ERC721Upgradeabl
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
-    uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**96;
-    uint256 internal constant STORAGE_ID_MULTIPLIER = uint256(2)**32;
-    uint256 internal constant CHAIN_INDEX_MULTIPLIER = uint256(2)**16;
-
     function __EstateBaseERC721_init(
         address trustedForwarder,
         address admin,

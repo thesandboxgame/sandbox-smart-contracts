@@ -16,6 +16,8 @@ interface IEstateExperienceRegistry {
 
     function batchUnLink(uint256[] calldata expIdsToUnlink) external;
 
+    function isLinked(uint256 expId) external view returns (bool);
+
     function isLinked(uint256[][3] calldata quads) external view returns (bool);
 
     function isLinked(TileWithCoordLib.TileWithCoord[] calldata) external view returns (bool);
