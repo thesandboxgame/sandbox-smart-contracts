@@ -271,7 +271,7 @@ contract RequirementsRules is Ownable {
 
             _totalBal = _totalBal + bal;
 
-            _maxStake = _totalBal * _listERC1155[reqContract].maxAmountId;
+            _maxStake = _maxStake + (_totalBal * _listERC1155[reqContract].maxAmountId);
         }
 
         return _maxStake;
