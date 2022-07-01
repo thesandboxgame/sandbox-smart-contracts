@@ -5,6 +5,8 @@ pragma solidity 0.8.2;
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
+// Note: this contract is meant to be inherited by ERC20RewardPool.
+// we should override the renounceOwnership() method otherwise.
 contract LockRules is Context, Ownable {
     // limits
     uint256 public timeLockLimit = 180 days;
