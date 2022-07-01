@@ -12,7 +12,9 @@ import {IContributionRules} from "../interfaces/IContributionRules.sol";
 contract ContributionRules is Ownable, IContributionRules {
     using Address for address;
 
-    // limits
+    // LIMITS
+    // we limited the number of Ids and contracts that we can have in the lists
+    // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
     uint256 public constant idsLimit = 64;
     uint256 public constant contractsLimit = 4;
     uint256 public constant maxMultiplier = 1000;
@@ -110,6 +112,7 @@ contract ContributionRules is Ownable, IContributionRules {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberMultiplierList(multContract) == false) {
+            // Limiting the size of the array (interations) to avoid the risk of DoS.
             require(contractsLimit > _listERC1155Index.length, "ContributionRules: contractsLimit exceeded");
             _listERC1155Index.push(multContract);
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
@@ -138,6 +141,7 @@ contract ContributionRules is Ownable, IContributionRules {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberMultiplierList(multContract) == false) {
+            // Limiting the size of the array (interations) to avoid the risk of DoS.
             require(contractsLimit > _listERC721Index.length, "ContributionRules: contractsLimit exceeded");
             _listERC721Index.push(multContract);
             _listERC721[multContract].index = _listERC721Index.length - 1;

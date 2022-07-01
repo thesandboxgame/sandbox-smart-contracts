@@ -11,6 +11,11 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 contract RequirementsRules is Ownable {
     using Address for address;
 
+    // we limited the number of Ids and contracts that we can have in the lists
+    // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
+    uint256 public idsLimit = 64;
+    uint256 public contractsLimit = 4;
+
     // maxStake amount allowed if user has no ERC721 or ERC1155
     uint256 public maxStakeOverall;
 
@@ -80,7 +85,7 @@ contract RequirementsRules is Ownable {
     modifier isERC721MemberList(address contractERC721) {
         require(
             isERC721MemberRequirementList(IERC721(contractERC721)),
-            "ContributionRules: contract is not in the list"
+            "RequirementsRules: contract is not in the list"
         );
         _;
     }
@@ -88,7 +93,7 @@ contract RequirementsRules is Ownable {
     modifier isERC1155MemberList(address contractERC1155) {
         require(
             isERC1155MemberRequirementList(IERC1155(contractERC1155)),
-            "ContributionRules: contract is not in the list"
+            "RequirementsRules: contract is not in the list"
         );
         _;
     }
@@ -112,7 +117,7 @@ contract RequirementsRules is Ownable {
     ) external onlyOwner isContract(contractERC721) {
         require(
             (balanceOf == true && minAmountBalanceOf > 0 && maxAmountBalanceOf > 0) ||
-                (balanceOf == false && ids.length > 0 && minAmountId > 0 && maxAmountId > 0),
+                (balanceOf == false && ids.length > 0 && minAmountId > 0 && maxAmountId > 0 && ids.length <= idsLimit),
             "RequirementRules: invalid list"
         );
         IERC721 newContract = IERC721(contractERC721);
@@ -128,6 +133,8 @@ contract RequirementsRules is Ownable {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberRequirementList(newContract) == false) {
+            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            require(contractsLimit > _listERC721Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
         }
@@ -149,7 +156,10 @@ contract RequirementsRules is Ownable {
         uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC1155) {
-        require(ids.length > 0 && minAmountId > 0 && maxAmountId > 0, "RequirementRules: invalid list");
+        require(
+            ids.length > 0 && minAmountId > 0 && maxAmountId > 0 && ids.length <= idsLimit,
+            "RequirementRules: invalid list"
+        );
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
         _listERC1155[newContract].minAmountId = minAmountId;
@@ -157,6 +167,8 @@ contract RequirementsRules is Ownable {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberRequirementList(newContract) == false) {
+            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            require(contractsLimit > _listERC1155Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC1155Index.push(newContract);
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
