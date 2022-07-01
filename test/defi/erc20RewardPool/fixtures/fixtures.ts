@@ -104,6 +104,33 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
 
   const ERC1155Token = await ethers.getContract('ERC1155Token', deployer);
 
+  const ERC721TokenArray = [];
+  const ERC1155TokenArray = [];
+
+  for (let i = 0; i < 3; i++) {
+    await deployments.deploy('ERC721Token' + [i], {
+      from: deployer,
+      contract: 'ERC721Mintable',
+      args: ['ERC721Token', 'LTK'],
+    });
+
+    ERC721TokenArray[i] = await ethers.getContract(
+      'ERC721Token' + [i],
+      deployer
+    );
+
+    await deployments.deploy('ERC1155Token' + [i], {
+      from: deployer,
+      contract: 'ERC1155Mintable',
+      args: ['asset.sandbox.game'],
+    });
+
+    ERC1155TokenArray[i] = await ethers.getContract(
+      'ERC1155Token' + [i],
+      deployer
+    );
+  }
+
   await deployments.deploy('ERC20RewardPool', {
     from: deployer,
     args: [stakeToken.address, rewardToken.address, trustedForwarder.address],
@@ -149,6 +176,8 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
     replaceToken,
     ERC721Token,
     ERC1155Token,
+    ERC721TokenArray,
+    ERC1155TokenArray,
     rewardCalculatorMock,
     contributionRulesMock,
     deployer,

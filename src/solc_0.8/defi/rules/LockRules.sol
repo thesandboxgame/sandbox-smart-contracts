@@ -109,14 +109,23 @@ contract LockRules is Context, Ownable {
     }
 
     function getRemainingTimelockClaim() external view returns (uint256) {
-        return block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
+        uint256 remainingTime =
+            block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
+
+        return remainingTime > 0 ? remainingTime : 0;
     }
 
     function getRemainingTimelockWithdraw() external view returns (uint256) {
-        return block.timestamp - (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
+        uint256 remainingTime =
+            block.timestamp - (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
+
+        return remainingTime > 0 ? remainingTime : 0;
     }
 
     function getRemainingTimelockDeposit() external view returns (uint256) {
-        return block.timestamp - (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
+        uint256 remainingTime =
+            block.timestamp - (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
+
+        return remainingTime > 0 ? remainingTime : 0;
     }
 }
