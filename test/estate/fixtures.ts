@@ -363,11 +363,14 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
       };
     },
     updateEstate: async (data: {
-      estateId: BigNumberish;
+      oldId: BigNumberish;
       landToAdd?: {
         sizes: BigNumberish[];
         xs: BigNumberish[];
         ys: BigNumberish[];
+      };
+      expToUnlink?: {
+        exps: BigNumberish[];
       };
       landToRemove?: {
         sizes: BigNumberish[];
@@ -376,10 +379,11 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
       };
     }): Promise<{updateEstateId: BigNumber; updateGasUsed: BigNumber}> => {
       const tx = await setup.estateContractAsOther.update(
-        data.estateId,
+        data.oldId,
         data.landToAdd
           ? [data.landToAdd.sizes, data.landToAdd.xs, data.landToAdd.ys]
           : [[], [], []],
+        data.expToUnlink ? [data.expToUnlink.exps] : [],
         data.landToRemove
           ? [
               data.landToRemove.sizes,

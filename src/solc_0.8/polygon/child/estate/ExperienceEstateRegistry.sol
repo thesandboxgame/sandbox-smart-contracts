@@ -59,11 +59,11 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         require(landCoords.length > 0, "empty template");
         EstateAndLands storage est = links[expId];
         // TODO: This affect the test: trying to create a link with a land already in use should revert
-        //require(est.estateId == 0, "Exp already in use");
+        require(est.estateId == 0, "Exp already in use");
         //single lands = 0 exists
 
         // TODO: Maybe this one must take storageId directly
-        if (estateId == 0) {
+        if (estateId == 1) {
             require(landCoords.length == 1, "must be done inside estate");
             uint256 translatedId = landCoords[0] + x + (y * 408);
             uint256 translatedX = translatedId % 408;
@@ -71,7 +71,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             require(!linkedLands.contain(translatedX, translatedY), "already linked");
             linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
-            //est.estateId = estateId; if =1
+            est.estateId = estateId;
         } else {
             MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
             require(!linkedLands.intersect(s), "already linked");
@@ -112,7 +112,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
 
     function _unLink(uint256 expId) internal {
         EstateAndLands storage est = links[expId];
-        if (est.estateId == 0) {
+        if (est.estateId == 1) {
             require(est.singleLand != 0, "unknown experience");
         } else {
             require(!est.multiLand.isEmpty(), "unknown experience");
@@ -123,7 +123,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
 
     function _unLinkExperience(uint256 expId) internal {
         EstateAndLands storage est = links[expId];
-        if (est.estateId == 0) {
+        if (est.estateId == 1) {
             uint256 landId = est.singleLand;
             uint256 x = landId % 408;
             uint256 y = landId / 408;
@@ -135,7 +135,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function _isValidUser(EstateAndLands storage est) internal view returns (bool) {
-        if (est.estateId == 0) {
+        if (est.estateId == 1) {
             return landToken.ownerOf(est.singleLand) == _msgSender();
         }
         return estateToken.getOwnerOfStorage(est.estateId) == _msgSender();
