@@ -9,8 +9,8 @@ import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 // we should override the renounceOwnership() method otherwise.
 contract LockRules is Context, Ownable {
     // limits
-    uint256 public timeLockLimit = 180 days;
-    uint256 public amountLockLimit = 1000 ether;
+    uint256 public constant timeLockLimit = 180 days;
+    uint256 public constant amountLockLimit = 1000 ether;
 
     struct TimeLockClaim {
         uint256 lockPeriodInSecs;
