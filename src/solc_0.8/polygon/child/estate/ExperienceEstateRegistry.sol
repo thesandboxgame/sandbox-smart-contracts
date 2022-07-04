@@ -118,6 +118,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         require(est.estateId > 0, "unknown experience");
         require(est.estateId > 0, "unknown experience");
         require(_isValidUser(est), "Invalid user");
+        require(est.estateId != 0, "Invalid Experience Id");
         if (est.estateId == 1) {
             uint256 landId = est.singleLand;
             uint256 x = landId % 408;
