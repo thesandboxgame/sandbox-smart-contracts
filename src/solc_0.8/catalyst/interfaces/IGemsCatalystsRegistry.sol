@@ -14,18 +14,6 @@ interface IGemsCatalystsRegistry {
 
     function getMaxGems(uint16 catalystId) external view returns (uint8);
 
-    function burnDifferentGems(
-        address from,
-        uint16[] calldata gemIds,
-        uint256[] calldata amounts
-    ) external;
-
-    function burnDifferentCatalysts(
-        address from,
-        uint16[] calldata catalystIds,
-        uint256[] calldata amounts
-    ) external;
-
     function batchBurnGems(
         address from,
         uint16[] calldata gemIds,

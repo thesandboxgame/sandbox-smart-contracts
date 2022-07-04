@@ -219,7 +219,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         for (uint256 i = 0; i < gemIds.length; i++) {
             gemFactors[i] = 10**_gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
         }
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, gemFactors);
+        _gemsCatalystsRegistry.batchBurnGems(from, gemIds, gemFactors);
     }
 
     /// @dev Burn a catalyst.

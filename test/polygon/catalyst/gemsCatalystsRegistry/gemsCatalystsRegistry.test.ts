@@ -541,7 +541,7 @@ describe('GemsCatalystsRegistry', function () {
     await gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
-      gemsCatalystsRegistryAsGemOwner.burnDifferentGems(
+      gemsCatalystsRegistryAsGemOwner.batchBurnGems(
         gemOwner,
         [defenseGemId, powerGemId],
         [burnAmount, burnAmount]
@@ -588,7 +588,7 @@ describe('GemsCatalystsRegistry', function () {
     await gemsCatalystsRegistryAsCatalystOwner.setGemsAndCatalystsMaxAllowance();
 
     await waitFor(
-      gemsCatalystsRegistryAsCatalystOwner.burnDifferentCatalysts(
+      gemsCatalystsRegistryAsCatalystOwner.batchBurnCatalysts(
         catalystOwner,
         [rareCatalystId, commonCatalystId],
         [burnAmount, burnAmount]
