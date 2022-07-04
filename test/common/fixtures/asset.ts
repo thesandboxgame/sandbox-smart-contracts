@@ -268,3 +268,67 @@ export const signAuthMessageAs = async (
 
   return wallet.signMessage(ethers.utils.arrayify(hashedData));
 };
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const originalAssetFixtures = async function () {
+  const unnamedAccounts = await getUnnamedAccounts();
+  const otherAccounts = [...unnamedAccounts];
+  const minter = otherAccounts[0];
+  otherAccounts.splice(0, 1);
+
+  const {assetBouncerAdmin} = await getNamedAccounts();
+
+  const originalAsset = await ethers.getContract(
+    'TestAsset',
+    assetBouncerAdmin
+  );
+  await waitFor(originalAsset.setBouncer(minter, true));
+
+  const Asset = await ethers.getContract('TestAsset', minter);
+
+  let id = 0;
+  const ipfsHashString =
+    '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
+  async function mintAsset(to: string, value: number, hash = ipfsHashString) {
+    // Asset to be minted
+    const creator = to;
+    const packId = ++id;
+    const supply = value;
+    const rarity = 1;
+    const owner = to;
+    const data = '0x';
+
+    const receipt = await waitFor(
+      originalAsset
+        .connect(ethers.provider.getSigner(minter))
+        ['mint(address,uint40,bytes32,uint256,uint8,address,bytes)'](
+          creator,
+          packId,
+          hash,
+          supply,
+          rarity, // now deprecated and removed
+          owner,
+          data
+        )
+    );
+
+    const transferEvent = await expectEventWithArgs(
+      originalAsset,
+      receipt,
+      'TransferSingle'
+    );
+    const tokenId = transferEvent.args[3];
+    return tokenId;
+  }
+
+  const users = await setupUsers(otherAccounts, {Asset});
+
+  return {
+    originalAsset,
+    Asset,
+    users,
+    minter,
+    mintAsset,
+  };
+};
