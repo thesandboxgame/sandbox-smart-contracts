@@ -9,18 +9,15 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {
     IERC721ReceiverUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import {IERC721MandatoryTokenReceiver} from "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {ERC2771ContextUpgradeable} from "../common/BaseWithStorage/ERC2771ContextUpgradeable.sol";
+import {ERC2771ContextUpgradeable} from "../BaseWithStorage/ERC2771ContextUpgradeable.sol";
+import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @notice ERC721 token that supports meta-tx and access control.
-/// @dev this contract implements ERC721 with: super-operator and admin roles
-/// @dev and helpers to rotate the tokenId on modifications
-abstract contract EstateBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, ERC2771ContextUpgradeable {
+abstract contract BaseERC721Upgradeable is AccessControlUpgradeable, ERC721Upgradeable, ERC2771ContextUpgradeable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     function __EstateBaseERC721_init(
         address trustedForwarder,
@@ -40,11 +37,6 @@ abstract contract EstateBaseERC721 is AccessControlUpgradeable, ERC721Upgradeabl
     function setTrustedForwarder(address trustedForwarder) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
         _trustedForwarder = trustedForwarder;
-    }
-
-    /// @dev this will give the super user the power to call transferFrom, safeTransferFrom and approve for any tokenId
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return super.isApprovedForAll(owner, operator) || hasRole(SUPER_OPERATOR_ROLE, _msgSender());
     }
 
     /// @notice Check if the contract supports an interface.

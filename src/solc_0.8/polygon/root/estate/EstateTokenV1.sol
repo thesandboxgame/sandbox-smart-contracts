@@ -26,6 +26,7 @@ contract EstateTokenV1 is EstateBaseToken {
         Estate storage estate = _estate(oldId);
         _addLand(estate, _msgSender(), landToAdd);
         _removeLand(estate, _msgSender(), landToRemove);
+        require(!estate.land.isEmpty(), "Estate cannot be empty");
         require(estate.land.isAdjacent(), "not adjacent");
         estate.id = _incrementTokenVersion(estate.id);
         emit EstateTokenUpdated(oldId, estate.id, landToAdd, landToRemove);
@@ -37,7 +38,7 @@ contract EstateTokenV1 is EstateBaseToken {
         Estate storage estate = _estate(estateId);
         _removeLand(estate, _msgSender(), landToRemove);
         require(estate.land.isEmpty(), "map not empty");
-        _burnEstate(estate.id);
+        _burnEstate(estate);
     }
 
     /// @notice Return the URI of a specific token.

@@ -11,12 +11,21 @@ import {MapLib} from "../../../common/Libraries/MapLib.sol";
 
 interface ExperienceTokenInterface {
     function getTemplate(uint256 expId) external view returns (TileLib.Tile calldata, uint256[] calldata landCoords);
+
+    function getStorageId(uint256 expId) external view returns (uint256 storageId);
 }
 
 /// @notice Contract managing tExperiences and Estates
 contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;
+
+    struct RelinkData {
+        uint256 estateId;
+        uint256 expId;
+        uint256 x;
+        uint256 y;
+    }
 
     ExperienceTokenInterface public experienceToken;
     IEstateToken public estateToken;
@@ -46,18 +55,80 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         landToken = _landToken;
     }
 
+    function linkSingle(
+        uint256 expId,
+        uint256 x,
+        uint256 y
+    ) external {
+        _link(0, expId, x, y);
+    }
+
     function link(
         uint256 estateId,
         uint256 expId,
         uint256 x,
         uint256 y
     ) external override {
+        _link(estateId, expId, x, y);
+    }
+
+    function unLink(uint256 expId) external override {
+        _unLink(expId);
+    }
+
+    function relink(uint256[] calldata expIdsToUnlink, RelinkData[] memory expToLink) external {
+        uint256 len = expIdsToUnlink.length;
+        for (uint256 i; i < len; i++) {
+            _unLink(expIdsToUnlink[i]);
+        }
+        len = expToLink.length;
+        for (uint256 i; i < len; i++) {
+            RelinkData memory d;
+            _link(d.estateId, d.expId, d.x, d.y);
+        }
+    }
+
+    function batchUnLink(uint256[] calldata expIdsToUnlink) external override {
+        uint256 len = expIdsToUnlink.length;
+        for (uint256 i; i < len; i++) {
+            _unLink(expIdsToUnlink[i]);
+        }
+    }
+
+    // Called by the estate contract to check that the land are ready to remove.
+    function isLinked(uint256[][3] calldata quads) external view override returns (bool) {
+        uint256 len = quads.length;
+        for (uint256 i; i < len; i++) {
+            if (linkedLands.intersect(quads[1][i], quads[2][i], quads[0][i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isLinked(uint256 expId) external view override returns (bool) {
+        uint256 storageId = _getStorageId(expId);
+        EstateAndLands storage est = links[storageId];
+        return est.estateId > 0;
+    }
+
+    function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
+        return linkedLands.intersect(tiles);
+    }
+
+    function _link(
+        uint256 estateId,
+        uint256 expId,
+        uint256 x,
+        uint256 y
+    ) internal {
         //single lands = 0 exists
 
         // Link
-        (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(expId);
+        uint256 storageId = _getStorageId(expId);
+        (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(storageId);
         require(landCoords.length > 0, "empty template");
-        EstateAndLands storage est = links[expId];
+        EstateAndLands storage est = links[storageId];
         // TODO: This affect the test: trying to create a link with a land already in use should revert
         require(est.estateId == 0, "Exp already in use");
         //single lands = 0 exists
@@ -82,43 +153,11 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         require(_isValidUser(est), "invalid user");
     }
 
-    function unLink(uint256 expId) external override {
-        _unLink(expId);
-    }
-
-    function batchUnLink(uint256[] calldata expIdsToUnlink) external override {
-        uint256 len = expIdsToUnlink.length;
-        for (uint256 i; i < len; i++) {
-            _unLink(expIdsToUnlink[i]);
-        }
-    }
-
-    // Called by the estate contract to check that the land are ready to remove.
-    function isLinked(uint256[][3] calldata quads) external view override returns (bool) {
-        uint256 len = quads.length;
-        for (uint256 i; i < len; i++) {
-            if (linkedLands.intersect(quads[1][i], quads[2][i], quads[0][i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function isLinked(uint256 expId) external view override returns (bool) {
-        EstateAndLands storage est = links[expId];
-        return est.estateId > 0;
-    }
-
-    function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
-        return linkedLands.intersect(tiles);
-    }
-
     function _unLink(uint256 expId) internal {
-        EstateAndLands storage est = links[expId];
-        require(est.estateId > 0, "unknown experience");
+        uint256 storageId = _getStorageId(expId);
+        EstateAndLands storage est = links[storageId];
         require(est.estateId > 0, "unknown experience");
         require(_isValidUser(est), "Invalid user");
-        require(est.estateId != 0, "Invalid Experience Id");
         if (est.estateId == 1) {
             uint256 landId = est.singleLand;
             uint256 x = landId % 408;
@@ -127,7 +166,11 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         } else {
             linkedLands.clear(est.multiLand);
         }
-        delete links[expId];
+        delete links[storageId];
+    }
+
+    function _getStorageId(uint256 expId) internal view returns (uint256) {
+        return experienceToken.getStorageId(expId);
     }
 
     function _isValidUser(EstateAndLands storage est) internal view returns (bool) {

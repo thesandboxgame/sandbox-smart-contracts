@@ -1,11 +1,5 @@
 import {setupL2EstateExperienceAndLand} from './fixtures';
 import {expect} from '../chai-setup';
-import {
-  printTile,
-  printTileWithCoord,
-  tileToArray,
-  tileWithCoordToJS,
-} from '../map/fixtures';
 import {waitFor} from '../utils';
 
 const fullQuad24 = Array.from({length: 24})
@@ -436,6 +430,7 @@ describe('experience estate registry test', function () {
         const experienceIds = [];
 
         await mintQuad(other, size, 0, 0);
+        await mintQuad(other, size, 48, 48);
 
         //get coords from lands
         const coords = [];
@@ -473,8 +468,11 @@ describe('experience estate registry test', function () {
         const {updateGasUsed} = await updateEstate({
           oldId: estateId,
           landToRemove: {sizes: [size], xs: [0], ys: [0]},
+          landToAdd: {sizes: [size], xs: [48], ys: [48]},
         });
-        console.log(`gas used for ${size}, is ${updateGasUsed}`);
+        console.log(
+          `gas used to update estate for ${size}, is ${updateGasUsed}`
+        );
       });
     });
   });

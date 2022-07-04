@@ -1,7 +1,7 @@
-import {setupTestEstateBaseERC721} from './fixtures';
+import {setupBaseERC721Upgradeable} from './fixtures';
 import {expect} from '../chai-setup';
 
-describe('Estate base erc721 test', function () {
+describe('erc721 base test', function () {
   it(`test initial values`, async function () {
     const {
       other,
@@ -10,7 +10,7 @@ describe('Estate base erc721 test', function () {
       contractAsDeployer,
       name,
       symbol,
-    } = await setupTestEstateBaseERC721();
+    } = await setupBaseERC721Upgradeable();
     expect(await contractAsDeployer.name()).to.be.equal(name);
     expect(await contractAsDeployer.symbol()).to.be.equal(symbol);
     expect(await contractAsDeployer.isTrustedForwarder(trustedForwarder)).to.be

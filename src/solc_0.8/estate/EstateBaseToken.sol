@@ -10,11 +10,11 @@ import {ERC721BaseToken} from "../common/BaseWithStorage/ERC721BaseToken.sol";
 import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../common/Libraries/MapLib.sol";
 import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
-import {EstateBaseERC721} from "./EstateBaseERC721.sol";
 import {EstateTokenIdHelperLib} from "./EstateTokenIdHelperLib.sol";
+import {BaseERC721Upgradeable} from "../common/Base/BaseERC721Upgradeable.sol";
 
 /// @dev Base contract for estate contract on L1 and L2, it uses tile maps to save the landTileSet
-abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
+abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     using MapLib for MapLib.Map;
     using EstateTokenIdHelperLib for uint256;
 
@@ -77,7 +77,7 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
     /// @notice Create a new estate token with lands.
     /// @param landToAdd The set of quads to add.
     /// @param metaData The metadata hash to use
-    function create(uint256[][3] calldata landToAdd, bytes32 metaData) external returns (uint256 estateId) {
+    function create(uint256[][3] calldata landToAdd, bytes32 metaData) external virtual returns (uint256 estateId) {
         Estate storage estate = _mintEstate(_msgSender());
         estate.metaData = metaData;
         _addLand(estate, _msgSender(), landToAdd);
@@ -86,14 +86,14 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
         return estate.id;
     }
 
-    function setMetadata(uint256 estateId, bytes32 metadata) external {
+    function setMetadata(uint256 estateId, bytes32 metadata) external virtual {
         require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
         Estate storage estate = _estate(estateId);
         estate.metaData = metadata;
         emit MetadataSet(estate.id, estate.metaData);
     }
 
-    function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external returns (uint256) {
+    function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external virtual returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
         Estate storage estate = _estate(oldId);
         // we can optimize when adding only one quad
@@ -118,7 +118,7 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
         address from,
         bytes32 metaData,
         TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external override returns (uint256) {
+    ) external virtual override returns (uint256) {
         require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         Estate storage estate = _mintEstate(from);
         estate.metaData = metaData;
@@ -130,12 +130,17 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
     // Used by the bridge
     function burnEstate(address from, uint256 estateId)
         external
+        virtual
         override
         returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
     {
         require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
         require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
-        return _burnEstate(estateId);
+        Estate storage estate = _estate(estateId);
+        metadata = estate.metaData;
+        tiles = estate.land.getMap();
+        _burnEstate(estate);
+        return (metadata, tiles);
     }
 
     function getMetadata(uint256 estateId) external view returns (bytes32) {
@@ -227,20 +232,13 @@ abstract contract EstateBaseToken is EstateBaseERC721, IEstateToken {
         return estate;
     }
 
-    function _burnEstate(uint256 estateId)
-        internal
-        virtual
-        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        Estate storage estate = _estate(estateId);
-        metaData = estate.metaData;
-        tiles = estate.land.getMap();
+    function _burnEstate(Estate storage estate) internal {
         estate.land.clear();
         delete estate.land;
+        uint256 estateId = estate.id;
         delete _s().estate[estateId.storageId()];
         super._burn(estateId);
         emit EstateBurned(estateId);
-        return (metaData, tiles);
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to

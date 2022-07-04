@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {EstateBaseERC721} from "../estate/EstateBaseERC721.sol";
+import {BaseERC721Upgradeable} from "../common/Base/BaseERC721Upgradeable.sol";
 
-contract TestEstateBaseERC721 is EstateBaseERC721 {
+contract TestBaseERC721Upgradeable is BaseERC721Upgradeable {
     constructor(
         address trustedForwarder,
         address admin,

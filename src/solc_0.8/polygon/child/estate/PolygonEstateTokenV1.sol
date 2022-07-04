@@ -33,10 +33,30 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         Estate storage estate = _estate(oldId);
         _addLand(estate, _msgSender(), landToAdd);
         _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
+        require(!estate.land.isEmpty(), "Estate cannot be empty");
         require(estate.land.isAdjacent(), "not adjacent");
         estate.id = _incrementTokenVersion(estate.id);
         emit EstateTokenUpdated(oldId, estate.id, landToAdd, expToUnlink, landToRemove);
         return estate.id;
+    }
+
+    // Used by the bridge
+    function burnEstate(address from, uint256 estateId)
+        external
+        override
+        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
+    {
+        require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
+        require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
+        Estate storage estate = _estate(estateId);
+        tiles = estate.land.getMap();
+        IEstateExperienceRegistry r = _ps().registryToken;
+        if (address(r) != address(0)) {
+            require(!r.isLinked(tiles), "must unlink first");
+        }
+        metadata = estate.metaData;
+        _burnEstate(estate);
+        return (metadata, tiles);
     }
 
     function burn(
@@ -48,7 +68,12 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         Estate storage estate = _estate(estateId);
         _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
         require(estate.land.isEmpty(), "map not empty");
-        _burnEstate(estate.id);
+
+        IEstateExperienceRegistry r = _ps().registryToken;
+        if (address(r) != address(0)) {
+            require(!r.isLinked(estate.land.getMap()), "must unlink first");
+        }
+        _burnEstate(estate);
     }
 
     function setRegistry(IEstateExperienceRegistry registry) external {
@@ -113,19 +138,6 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         } else {
             IPolygonLand(landToken).transferQuad(address(this), to, size, x, y, "");
         }
-    }
-
-    function _burnEstate(uint256 estateId)
-        internal
-        override
-        returns (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        (metaData, tiles) = super._burnEstate(estateId);
-        IEstateExperienceRegistry r = _ps().registryToken;
-        if (address(r) != address(0)) {
-            require(!r.isLinked(tiles), "must unlink first");
-        }
-        return (metaData, tiles);
     }
 
     function _ps() internal pure returns (PolygonEstateTokenStorage storage ds) {

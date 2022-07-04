@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../test/ERC721Mintable.sol";
+import {ERC721Mintable} from "../test/ERC721Mintable.sol";
 import {TileLib} from "../common/Libraries/TileLib.sol";
+import {ExperienceTokenInterface} from "../polygon/child/estate/ExperienceEstateRegistry.sol";
 
-contract MockExperience is ERC721Mintable {
+contract MockExperience is ERC721Mintable, ExperienceTokenInterface {
     using TileLib for TileLib.Tile;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -42,9 +43,14 @@ contract MockExperience is ERC721Mintable {
     function getTemplate(uint256 expId)
         external
         view
+        override
         returns (TileLib.Tile memory template, uint256[] memory landList)
     {
         Experience storage exp = experiences[expId];
         return (exp.tile, exp.landCoords);
+    }
+
+    function getStorageId(uint256 expId) external pure override returns (uint256 storageId) {
+        return expId;
     }
 }
