@@ -2,6 +2,7 @@ import {getAssetChainIndex, waitFor, withSnapshot} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
 import {assetFixtures} from '../common/fixtures/asset';
+import {ethers} from 'hardhat';
 
 const setupAsset = withSnapshot(
   [
@@ -33,7 +34,19 @@ describe('AssetERC1155.sol', function () {
     console.log(balance.toString());
     expect(balance).to.be.equal(20);
   });
-
+  it('mintMultiple reverts when ids and amounts length mismatch', async function () {
+    const {Asset, minter} = await setupAsset();
+    const ids = [
+      '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000005000',
+      '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001005001',
+    ];
+    const amounts = [2];
+    await expect(
+      Asset.connect(ethers.provider.getSigner(minter))[
+        'mintMultiple(address,uint256[],uint256[],bytes)'
+      ](minter, ids, amounts, '0x')
+    ).to.revertedWith('AssetERC1155: ids and amounts length mismatch');
+  });
   it('can transfer assets', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
