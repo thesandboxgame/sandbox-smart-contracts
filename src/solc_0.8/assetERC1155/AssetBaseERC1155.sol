@@ -220,7 +220,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        // require(_ownerOf(id) != address(0), "NFT does not exist"); // TODO: update. Cannot be wasEverMinted because this no longer tracks ERC721s
+        require(wasEverMinted(id), "!MINTED"); // Note: wasEverMinted must track ERC721s
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
         require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
@@ -278,7 +278,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type of which to get the balance of.
     /// @return the balance of `owner` for the token type `id`.
     function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        require(wasEverMinted(id), "token was never minted");
+        require(wasEverMinted(id), "!MINTED"); // TODO: need to limit this to just ERC1155
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
