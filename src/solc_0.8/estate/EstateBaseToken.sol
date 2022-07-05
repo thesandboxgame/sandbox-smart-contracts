@@ -21,8 +21,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     struct Estate {
         // current estateId, for the same storageId we have only one valid estateId
         uint256 id;
-        // ipfs url hash
-        bytes32 metaData;
         // estate lands tile set.
         MapLib.Map land;
     }
@@ -31,6 +29,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         address landToken;
         uint64 nextId; // max uint64 = 18,446,744,073,709,551,615
         uint16 chainIndex;
+        string baseUri;
         // storageId -> estateData
         mapping(uint256 => Estate) estate;
     }
@@ -42,8 +41,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @dev Emitted when an estate is updated.
     /// @param estateId The id of the newly minted token.
     /// @param lands initial quads of lands to add
-    /// @param metadata initial metadata to set
-    event EstateTokenCreated(uint256 indexed estateId, uint256[][3] lands, bytes32 metadata);
+    event EstateTokenCreated(uint256 indexed estateId, uint256[][3] lands);
 
     /// @dev Emitted when lands are added to the estate.
     /// @param estateId The id of the previous erc721 ESTATE token.
@@ -51,9 +49,8 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @param lands The quads of lands added to the estate.
     event EstateTokenLandsAdded(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
 
-    event EstateTokenMinted(uint256 indexed estateId, bytes32 metaData, TileWithCoordLib.TileWithCoord[] tiles);
+    event EstateTokenMinted(uint256 indexed estateId, TileWithCoordLib.TileWithCoord[] tiles);
     event EstateBurned(uint256 indexed estateId);
-    event MetadataSet(uint256 indexed estateId, bytes32 metaData);
 
     function initV1(
         address trustedForwarder,
@@ -76,21 +73,12 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
 
     /// @notice Create a new estate token with lands.
     /// @param landToAdd The set of quads to add.
-    /// @param metaData The metadata hash to use
-    function create(uint256[][3] calldata landToAdd, bytes32 metaData) external virtual returns (uint256 estateId) {
+    function create(uint256[][3] calldata landToAdd) external virtual returns (uint256 estateId) {
         Estate storage estate = _mintEstate(_msgSender());
-        estate.metaData = metaData;
         _addLand(estate, _msgSender(), landToAdd);
         require(estate.land.isAdjacent(), "not adjacent");
-        emit EstateTokenCreated(estate.id, landToAdd, estate.metaData);
+        emit EstateTokenCreated(estate.id, landToAdd);
         return estate.id;
-    }
-
-    function setMetadata(uint256 estateId, bytes32 metadata) external virtual {
-        require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
-        Estate storage estate = _estate(estateId);
-        estate.metaData = metadata;
-        emit MetadataSet(estate.id, estate.metaData);
     }
 
     function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external virtual returns (uint256) {
@@ -114,16 +102,16 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     }
 
     // Used by the bridge
-    function mintEstate(
-        address from,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] calldata tiles
-    ) external virtual override returns (uint256) {
+    function mintEstate(address from, TileWithCoordLib.TileWithCoord[] calldata tiles)
+        external
+        virtual
+        override
+        returns (uint256)
+    {
         require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
         Estate storage estate = _mintEstate(from);
-        estate.metaData = metaData;
         estate.land.set(tiles);
-        emit EstateTokenMinted(estate.id, metaData, tiles);
+        emit EstateTokenMinted(estate.id, tiles);
         return estate.id;
     }
 
@@ -132,19 +120,24 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         external
         virtual
         override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
+        returns (TileWithCoordLib.TileWithCoord[] memory tiles)
     {
         require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
         require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
         Estate storage estate = _estate(estateId);
-        metadata = estate.metaData;
         tiles = estate.land.getMap();
         _burnEstate(estate);
-        return (metadata, tiles);
+        return (tiles);
     }
 
-    function getMetadata(uint256 estateId) external view returns (bytes32) {
-        return _estate(estateId).metaData;
+    function setLandToken(address landToken) external {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
+        _s().landToken = landToken;
+    }
+
+    function setBaseURI(string calldata baseUri) external {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
+        _s().baseUri = baseUri;
     }
 
     function getNextId() external view returns (uint256) {
@@ -251,6 +244,15 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         estateId = estateId.incrementVersion();
         super._mint(owner, estateId);
         return estateId;
+    }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`.
+     * We don't use storageId in the url because we want the centralized backend to extract it if needed.
+     */
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _s().baseUri;
     }
 
     function _estate(uint256 estateId) internal view returns (Estate storage) {

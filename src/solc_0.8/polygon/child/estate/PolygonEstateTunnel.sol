@@ -14,14 +14,8 @@ import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IEstateToken public childToken;
 
-    event EstateSentToL1(
-        uint256 estateId,
-        address from,
-        address to,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] tiles
-    );
-    event EstateReceivedFromL1(uint256 estateId, address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] tiles);
+    event EstateSentToL1(uint256 estateId, address from, address to, TileWithCoordLib.TileWithCoord[] tiles);
+    event EstateReceivedFromL1(uint256 estateId, address to, TileWithCoordLib.TileWithCoord[] tiles);
 
     constructor(
         address _fxChild,
@@ -34,10 +28,9 @@ contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver
 
     function sendEstateToL1(address to, uint256 estateId) external whenNotPaused() {
         require(to != address(0), "PolygonEstateTunnel: wrong address");
-        (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
-            childToken.burnEstate(_msgSender(), estateId);
-        _sendMessageToRoot(abi.encode(to, metaData, tiles));
-        emit EstateSentToL1(estateId, _msgSender(), to, metaData, tiles);
+        TileWithCoordLib.TileWithCoord[] memory tiles = childToken.burnEstate(_msgSender(), estateId);
+        _sendMessageToRoot(abi.encode(to, tiles));
+        emit EstateSentToL1(estateId, _msgSender(), to, tiles);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -73,10 +66,10 @@ contract PolygonEstateTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver
         address sender,
         bytes memory data
     ) internal override validateSender(sender) {
-        (address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
-            abi.decode(data, (address, bytes32, TileWithCoordLib.TileWithCoord[]));
-        uint256 estateId = childToken.mintEstate(to, metaData, tiles);
-        emit EstateReceivedFromL1(estateId, to, metaData, tiles);
+        (address to, TileWithCoordLib.TileWithCoord[] memory tiles) =
+            abi.decode(data, (address, TileWithCoordLib.TileWithCoord[]));
+        uint256 estateId = childToken.mintEstate(to, tiles);
+        emit EstateReceivedFromL1(estateId, to, tiles);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

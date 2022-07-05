@@ -7,14 +7,8 @@ import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 
 /// @title Estate bridge on L1
 contract EstateTunnel is BaseRootTunnel {
-    event EstateSentToL2(
-        uint256 estateId,
-        address from,
-        address to,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] tiles
-    );
-    event EstateReceivedFromL2(uint256 estateId, address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] tiles);
+    event EstateSentToL2(uint256 estateId, address from, address to, TileWithCoordLib.TileWithCoord[] tiles);
+    event EstateReceivedFromL2(uint256 estateId, address to, TileWithCoordLib.TileWithCoord[] tiles);
 
     constructor(
         address _checkpointManager,
@@ -29,10 +23,9 @@ contract EstateTunnel is BaseRootTunnel {
     }
 
     function sendEstateToL2(address to, uint256 estateId) external whenNotPaused() {
-        (bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
-            IEstateToken(rootToken).burnEstate(_msgSender(), estateId);
-        _sendMessageToChild(abi.encode(to, metaData, tiles));
-        emit EstateSentToL2(estateId, _msgSender(), to, metaData, tiles);
+        TileWithCoordLib.TileWithCoord[] memory tiles = IEstateToken(rootToken).burnEstate(_msgSender(), estateId);
+        _sendMessageToChild(abi.encode(to, tiles));
+        emit EstateSentToL2(estateId, _msgSender(), to, tiles);
     }
 
     function receiveEstateFromL2(bytes memory inputData) external {
@@ -42,9 +35,9 @@ contract EstateTunnel is BaseRootTunnel {
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, bytes32 metaData, TileWithCoordLib.TileWithCoord[] memory tiles) =
-            abi.decode(message, (address, bytes32, TileWithCoordLib.TileWithCoord[]));
-        uint256 estateId = IEstateToken(rootToken).mintEstate(to, metaData, tiles);
-        emit EstateReceivedFromL2(estateId, to, metaData, tiles);
+        (address to, TileWithCoordLib.TileWithCoord[] memory tiles) =
+            abi.decode(message, (address, TileWithCoordLib.TileWithCoord[]));
+        uint256 estateId = IEstateToken(rootToken).mintEstate(to, tiles);
+        emit EstateReceivedFromL2(estateId, to, tiles);
     }
 }

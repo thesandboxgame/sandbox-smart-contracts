@@ -321,7 +321,7 @@ describe('experience estate registry test', function () {
       // await registryContract.unLinkExperience([[24], [0], [0]]);
     });
   });
-  describe('gas tests', function () {
+  describe('@skip-on-coverage gas tests', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [1, 3, 6, 12, 24].forEach((size) => {
       it(`@create an ${size}x${size} group of lands and link them`, async function () {

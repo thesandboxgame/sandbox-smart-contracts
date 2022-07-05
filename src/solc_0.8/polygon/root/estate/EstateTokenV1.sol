@@ -41,21 +41,12 @@ contract EstateTokenV1 is EstateBaseToken {
         _burnEstate(estate);
     }
 
-    /// @notice Return the URI of a specific token.
-    /// @param estateId The id of the token.
-    /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 estateId) public view override returns (string memory uri) {
-        require(ownerOf(estateId) != address(0), "BURNED_OR_NEVER_MINTED");
-        Estate storage estate = _estate(estateId);
-        return
-            string(
-                abi.encodePacked(
-                    "ipfs://bafybei",
-                    StringsUpgradeable.toHexString(uint256(estate.metaData), 32),
-                    "/",
-                    "estateTokenV1.json"
-                )
-            );
+    /**
+     * @dev See https://docs.opensea.io/docs/contract-level-metadata
+     */
+    function contractURI() public view returns (string memory) {
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "estate.json")) : "";
     }
 
     function _removeLand(

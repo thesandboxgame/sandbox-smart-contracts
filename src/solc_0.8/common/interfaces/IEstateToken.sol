@@ -7,15 +7,11 @@ import {MapLib} from "../Libraries/MapLib.sol";
 
 /// @title Interface for the Estate token on L1
 interface IEstateToken {
-    function mintEstate(
-        address from,
-        bytes32 metaData,
-        TileWithCoordLib.TileWithCoord[] calldata freeLand
-    ) external returns (uint256);
+    function mintEstate(address from, TileWithCoordLib.TileWithCoord[] calldata freeLand) external returns (uint256);
 
     function burnEstate(address from, uint256 estateId)
         external
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles);
+        returns (TileWithCoordLib.TileWithCoord[] memory tiles);
 
     function contain(uint256 estateId, MapLib.TranslateResult memory s) external view returns (bool);
 

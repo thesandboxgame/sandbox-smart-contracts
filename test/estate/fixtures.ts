@@ -232,8 +232,7 @@ async function setupEstateAndLand(isLayer1: boolean) {
       ys: BigNumberish[];
     }): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
       const tx = await estateContractAsOther.create(
-        data ? [data.sizes, data.xs, data.ys] : [[], [], []],
-        ethers.utils.formatBytes32String('uri ???')
+        data ? [data.sizes, data.xs, data.ys] : [[], [], []]
       );
       const receipt: ContractReceipt = await tx.wait();
       const estateCreationEvents = receipt.events?.filter(
@@ -345,9 +344,8 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
       xs: BigNumberish[];
       ys: BigNumberish[];
     }): Promise<{estateId: BigNumber; gasUsed: BigNumber}> => {
-      const metadata = ethers.utils.formatBytes32String('uri ???');
       const lands = data ? [data.sizes, data.xs, data.ys] : [[], [], []];
-      const tx = await setup.estateContractAsOther.create(lands, metadata);
+      const tx = await setup.estateContractAsOther.create(lands);
       const receipt: ContractReceipt = await tx.wait();
       const estateCreationEvents = receipt.events?.filter(
         (e) => e.event === 'EstateTokenCreated'

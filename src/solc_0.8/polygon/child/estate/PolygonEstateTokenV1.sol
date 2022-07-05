@@ -44,7 +44,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
     function burnEstate(address from, uint256 estateId)
         external
         override
-        returns (bytes32 metadata, TileWithCoordLib.TileWithCoord[] memory tiles)
+        returns (TileWithCoordLib.TileWithCoord[] memory tiles)
     {
         require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
         require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
@@ -54,9 +54,8 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         if (address(r) != address(0)) {
             require(!r.isLinked(tiles), "must unlink first");
         }
-        metadata = estate.metaData;
         _burnEstate(estate);
-        return (metadata, tiles);
+        return (tiles);
     }
 
     function burn(
@@ -85,21 +84,12 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         return _ps().registryToken;
     }
 
-    /// @notice Return the URI of a specific token.
-    /// @param estateId The id of the token.
-    /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 estateId) public view override returns (string memory uri) {
-        require(ownerOf(estateId) != address(0), "invalid estateId");
-        Estate storage estate = _estate(estateId);
-        return
-            string(
-                abi.encodePacked(
-                    "ipfs://bafybei",
-                    StringsUpgradeable.toHexString(uint256(estate.metaData), 32),
-                    "/",
-                    "PolygonEstateTokenV1.json"
-                )
-            );
+    /**
+     * @dev See https://docs.opensea.io/docs/contract-level-metadata
+     */
+    function contractURI() public view returns (string memory) {
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "polygon_estate.json")) : "";
     }
 
     // Complete the removal process.
