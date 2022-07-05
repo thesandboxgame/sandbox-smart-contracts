@@ -269,7 +269,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id ERC1155 token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "!MINTED"); // ERC1155 and ERC721 must both be able to use this function
+        require(wasEverMinted(id), "!MINTED"); // TODO: review intent of wasEverMinted and how to limit this to ERC155
         return ERC1155ERC721Helper.toFullURI(_metadataHash[id & ERC1155ERC721Helper.URI_ID], id);
     }
 
