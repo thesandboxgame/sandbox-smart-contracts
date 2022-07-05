@@ -5,7 +5,8 @@ import "./AssetBaseERC1155.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetERC1155 is AssetBaseERC1155 {
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 8);
+    uint256 public constant CHAIN_INDEX = 0x00000000000000000000000000000000000000007F8000000000000000000000;
 
     event PredicateSet(address predicate);
 
@@ -142,6 +143,10 @@ contract AssetERC1155 is AssetBaseERC1155 {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
 
+    function chainIndex(uint256 id) external view returns (uint256) {
+        return uint8((id & CHAIN_INDEX) / CHAIN_INDEX_OFFSET_MULTIPLIER);
+    }
+
     function _generateTokenId(
         address creator,
         uint256 supply,
@@ -152,14 +157,14 @@ contract AssetERC1155 is AssetBaseERC1155 {
         require(supply > 0 && supply <= ERC1155ERC721Helper.MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
         return
             uint256(uint160(creator)) *
-            ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0)
+            ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR uint160
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0), 1 bit
             uint256(_chainIndex) *
-            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
+            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1, uint8
             uint256(packId) *
-            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack)
+            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack), uint40
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack
-            packIndex; // packIndex (position in the pack)
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, uint16
+            packIndex; // packIndex (position in the pack), uint16
     }
 }
