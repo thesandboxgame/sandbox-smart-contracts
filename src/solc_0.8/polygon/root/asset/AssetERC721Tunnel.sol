@@ -13,9 +13,9 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     IAssetERC721 public rootToken;
     uint256 public maxTransferLimit = 20;
 
-    event SetTransferLimit(uint256 limit);
-    event Deposit(address user, uint256 id, bytes data);
-    event Withdraw(address user, uint256 id, bytes data);
+    event SetTransferLimit(uint256 indexed limit);
+    event Deposit(address indexed user, uint256 id, bytes indexed data);
+    event Withdraw(address indexed user, uint256 id, bytes indexed data);
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
         maxTransferLimit = _maxTransferLimit;
