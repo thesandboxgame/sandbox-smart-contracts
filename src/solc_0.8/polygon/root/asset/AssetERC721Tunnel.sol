@@ -56,7 +56,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
-    function batchDepositToChild(address to, uint256[] memory ids) public whenNotPaused {
+    function batchDepositToChild(address to, uint256[] memory ids) external whenNotPaused {
         string[] memory uris = new string[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the root tokens in this contract
@@ -78,12 +78,12 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 

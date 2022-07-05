@@ -48,7 +48,7 @@ abstract contract WithPermitUpgradeable is EIP712Upgradeable, IERC20PermitUpgrad
         return _domainSeparatorV4();
     }
 
-    function nonces(address owner) public view virtual override returns (uint256) {
+    function nonces(address owner) external view virtual override returns (uint256) {
         return _nonces[owner].current();
     }
 
