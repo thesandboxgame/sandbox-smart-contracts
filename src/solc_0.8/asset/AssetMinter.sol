@@ -8,18 +8,14 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IPolygonAssetERC1155.sol";
-import "../common/interfaces/IERC721Token.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
-    uint256 private constant NFT_SUPPLY = 1;
-
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
 
     IAssetAttributesRegistry internal immutable _registry;
     IPolygonAssetERC1155 internal immutable _assetERC1155;
-    IERC721Token internal immutable _assetERC721;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     mapping(uint16 => uint256) public quantitiesByCatalystId;
@@ -35,13 +31,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
-    /// @param assetERC721: Asset ERC721 Token Contract
     /// @param assetERC1155: Asset ERC1155 Token Contract
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
-        IERC721Token assetERC721,
         IPolygonAssetERC1155 assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
@@ -50,7 +44,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint256[] memory quantitiesByAssetTypeId_
     ) {
         _registry = registry;
-        _assetERC721 = assetERC721;
         _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         transferOwnership(admin);
