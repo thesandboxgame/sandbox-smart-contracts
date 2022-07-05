@@ -83,6 +83,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
         uint256[] calldata amounts,
         bytes calldata data
     ) external {
+        require(ids.length == amounts.length, "AssetERC1155: ids and amounts length mismatch");
         require(_msgSender() == _predicate, "!PREDICATE");
         require(data.length > 0, "METADATA_MISSING");
         require(to != address(0), "TO==0");
