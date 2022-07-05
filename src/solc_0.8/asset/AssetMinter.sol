@@ -114,7 +114,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         );
         require(
             _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
-            "AssetMinter: invalid numberOfGemsBurnPerAsset value "
+            "AssetMinter: invalid numberOfGemsBurnPerAsset value"
         );
         assetId = _burnAndMint(mintData, catalystId, gemIds, quantity);
     }
@@ -162,7 +162,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     ) external override returns (uint256 assetId) {
         require(
             quantity == quantitiesByAssetTypeId[typeAsset1Based],
-            "AssetMinter: Invalid quantitiesByAssetType value "
+            "AssetMinter: Invalid quantitiesByAssetType value"
         );
 
         _mintRequirements(mintData.from, quantity, mintData.to);
@@ -193,10 +193,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint256 _numberOfCatalystBurnPerAsset,
         uint256 _numberOfGemsBurnPerAsset
     ) external override returns (uint256 assetId) {
-        require(quantity == quantitiesByCatalystId[catalystId], "AssetMinter : Invalid quantitiesByCatalyst value ");
+        require(quantity == quantitiesByCatalystId[catalystId], "AssetMinter : Invalid quantitiesByCatalyst value");
         require(
             _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
-            "AssetMinter: invalid numberOfCatalystBurnPerAsset value "
+            "AssetMinter: invalid numberOfCatalystBurnPerAsset value"
         );
         require(
             _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,

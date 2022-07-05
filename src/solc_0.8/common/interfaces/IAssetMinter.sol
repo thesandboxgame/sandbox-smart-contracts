@@ -20,14 +20,14 @@ interface IAssetMinter {
     function mintWithoutCatalyst(
         MintData calldata mintData,
         uint16 typeAsset1Based,
-        uint256 quantities
+        uint256 quantity
     ) external returns (uint256 assetId);
 
     function mintWithCatalyst(
         MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantities,
+        uint256 quantity,
         uint256 _numberOfCatalystBurnPerAsset,
         uint256 _numberOfGemsBurnPerAsset
     ) external returns (uint256 assetId);
