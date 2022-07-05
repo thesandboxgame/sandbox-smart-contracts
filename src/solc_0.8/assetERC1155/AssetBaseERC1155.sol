@@ -220,6 +220,8 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             id == 0x9930ed5a; // ERC2771
     }
 
+    /// Collection methods for ERC721s extracted from an ERC1155 -----------------------------------------------------
+
     /// @notice Gives the collection a specific token belongs to.
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
@@ -243,8 +245,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @return the index/order at which the token `id` was minted in a collection.
     function collectionIndexOf(uint256 id) public view returns (uint256) {
         collectionOf(id); // this check if id and collection indeed was ever minted
-        return uint32(id & ERC1155ERC721Helper.PACK_INDEX);
+        return uint32((id & ERC1155ERC721Helper.NFT_INDEX) >> ERC1155ERC721Helper.NFT_INDEX_OFFSET);
     }
+
+    /// end collection methods ---------------------------------------------------------------------------------------
 
     function wasEverMinted(uint256 id) public view returns (bool) {
         // TODO: discuss
@@ -287,14 +291,14 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(to != address(0), "TO==0");
         require(id & ERC1155ERC721Helper.IS_NFT == 0, "UNIQUE_ERC1155");
-        uint32 tokenCollectionIndex = _nextCollectionIndex[id] + 1;
+        uint24 tokenCollectionIndex = uint24(_nextCollectionIndex[id]) + 1;
         _nextCollectionIndex[id] = tokenCollectionIndex;
         string memory metaData = tokenURI(id);
         uint256 newId =
             id +
-                ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER +
+                ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // newId is always an NFT; IS_NFT is 1
                 (tokenCollectionIndex) *
-                2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
+                2**ERC1155ERC721Helper.NFT_INDEX_OFFSET; // uint24 nft index
         _burnFT(sender, id, 1);
         _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
         emit Extraction(id, newId);

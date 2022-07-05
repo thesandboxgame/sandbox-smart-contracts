@@ -105,11 +105,18 @@ describe('AssetERC1155.sol', function () {
     ).to.be.revertedWith(`BALANCE_TOO_LOW`);
   });
 
-  it('can get the chainIndex from the tokenId', async function () {
+  it('can get the chainIndex from the tokenId, supply > 1', async function () {
     const {users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
     const chainIndex = getAssetChainIndex(tokenId);
-    expect(chainIndex).to.be.equal(1);
+    expect(chainIndex).to.be.equal(1); // Note: token was minted on L2 and bridged so chainId is 1
+  });
+
+  it('can get the chainIndex from the tokenId, supply 1', async function () {
+    const {users, mintAsset} = await setupAsset();
+    const tokenId1 = await mintAsset(users[1].address, 1);
+    const chainIndex = getAssetChainIndex(tokenId1);
+    expect(chainIndex).to.be.equal(1); // Note: token was minted on L2 and bridged so chainId is 1
   });
 
   it('can get the URI for an asset of amount 1', async function () {

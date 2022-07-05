@@ -55,13 +55,14 @@ export const assetFixtures = async function () {
     const owner = to;
     const data = '0x';
 
+    // Mint on L2 with NO data. This generates the tokenId as well as the tokenURI
     const receipt = await waitFor(
       polygonAssetERC1155
         .connect(ethers.provider.getSigner(minter))
         ['mint(address,uint40,bytes32,uint256,address,bytes)'](
           creator,
           packId,
-          hash,
+          hash, // TODO: amend to ethers.utils.formatBytes32String('metadataHash') as per MOCK_DATA below
           supply,
           owner,
           data
@@ -79,6 +80,7 @@ export const assetFixtures = async function () {
       .connect(ethers.provider.getSigner(to))
       .setApprovalForAll(polygonAssetTunnel.address, true);
 
+    // "Withdraw" to L1 -------------------------------------------------------------------
     const testMetadataHashArray = [];
 
     testMetadataHashArray.push(
@@ -94,6 +96,7 @@ export const assetFixtures = async function () {
       .connect(ethers.provider.getSigner(to))
       .batchWithdrawToRoot(to, [tokenId], [value]);
 
+    // Mint on L1 to simulate release from tunnel -----------------------------------------
     const admin = await Asset.getAdmin();
     await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
     await waitFor(
@@ -102,6 +105,8 @@ export const assetFixtures = async function () {
       ](to, tokenId, value, MOCK_DATA)
     );
 
+    // Return the tokenId which exists on L1 (owned by `to`) and on L2 (owned by L2 tunnel)
+    // Note that the chainId contained in the tokenId will be the L2 chainId
     return tokenId;
   }
 
