@@ -19,7 +19,7 @@ const zeroAddress = constants.AddressZero;
 // The ERC1155 `collectionIndexOf` are all the same as each other within that packID (using mintMultiple)
 // The ERC721 `collectionIndexOf` increments by 1 for each new extraction from that ERC1155's supply
 
-describe('PolygonAssetERC1155.sol', function () {
+describe.only('PolygonAssetERC1155.sol', function () {
   describe('PolygonAsset: general', function () {
     it('user sending asset to itself keep the same balance', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
