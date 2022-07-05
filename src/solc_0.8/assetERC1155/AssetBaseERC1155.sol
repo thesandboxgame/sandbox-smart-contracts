@@ -220,7 +220,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(wasEverMinted(id), "FT_!MINTED");
+        // require(_ownerOf(id) != address(0), "NFT does not exist"); // TODO: update. Cannot be wasEverMinted because this no longer tracks ERC721s
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
         require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
@@ -244,15 +244,32 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     /// end collection methods ---------------------------------------------------------------------------------------
 
+    /// @notice Whether or not an ERC1155 or ERC721 tokenId has already been minted.
+    /// @param id the token to check.
+    /// @return bool whether an id has been minted or not.
     function wasEverMinted(uint256 id) public view returns (bool) {
-        return _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
+        // ERC1155 with supply == 1 have IS_NFT == true, as do extracted ERC721s
+        // Do not remove the IS_NFT check
+        if ((id & ERC1155ERC721Helper.IS_NFT) > 0) {
+            return
+                (((id & ERC1155ERC721Helper.PACK_INDEX) <
+                    ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
+                        ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+                    _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0) || _assetERC721.exists(id);
+        } else {
+            return
+                ((id & ERC1155ERC721Helper.PACK_INDEX) <
+                    ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
+                        ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+                _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
+        }
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @param id token to get the uri of.
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given ERC1155 asset.
+    /// @param id ERC1155 token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "FT_!MINTED");
+        require(wasEverMinted(id), "!MINTED"); // ERC1155 and ERC721 must both be able to use this function
         return ERC1155ERC721Helper.toFullURI(_metadataHash[id & ERC1155ERC721Helper.URI_ID], id);
     }
 
