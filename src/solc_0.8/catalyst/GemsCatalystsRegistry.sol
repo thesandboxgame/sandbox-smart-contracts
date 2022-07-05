@@ -76,7 +76,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16[] calldata gemIds,
         uint256[] calldata amounts
-    ) external override {
+    ) external {
         uint256 gemIdsLength = gemIds.length;
         require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
         for (uint256 i = 0; i < gemIdsLength; i++) {
@@ -92,7 +92,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
-    ) external override {
+    ) external {
         uint256 catalystIdsLength = catalystIds.length;
         require(catalystIdsLength == amounts.length, "GemsCatalystsRegistry: catalystIds and amounts length mismatch");
         for (uint256 i = 0; i < catalystIdsLength; i++) {
