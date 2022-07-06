@@ -237,13 +237,20 @@ abstract contract ERC20BaseTokenUpgradeable is
     function _msgSender()
         internal
         view
+        virtual
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
         returns (address sender)
     {
         return ERC2771ContextUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes calldata) {
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes calldata)
+    {
         return ERC2771ContextUpgradeable._msgData();
     }
 }

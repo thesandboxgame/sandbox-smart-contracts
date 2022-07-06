@@ -42,5 +42,13 @@ contract ERC20TokenUpgradeable is ERC677Extension, WithPermitUpgradeable, ERC20B
         _approveFor(owner, spender, value);
     }
 
+    function _msgSender() internal view override(Context, ERC20BaseTokenUpgradeable) returns (address sender) {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC20BaseTokenUpgradeable) returns (bytes calldata) {
+        return ERC2771ContextUpgradeable._msgData();
+    }
+
     uint256[50] private __gap;
 }
