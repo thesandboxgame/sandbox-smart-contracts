@@ -68,6 +68,38 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         return gem.getDecimals();
     }
 
+    /// @notice Burns one gem unit from each gem id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param gemIds list of gems to burn one gem from each
+    /// @param amounts amount units to burn
+    function burnDifferentGems(
+        address from,
+        uint16[] calldata gemIds,
+        uint256[] calldata amounts
+    ) external {
+        uint256 gemIdsLength = gemIds.length;
+        require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
+        for (uint256 i = 0; i < gemIdsLength; i++) {
+            burnGem(from, gemIds[i], amounts[i]);
+        }
+    }
+
+    /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param catalystIds list of catalysts to burn
+    /// @param amounts amount to burn
+    function burnDifferentCatalysts(
+        address from,
+        uint16[] calldata catalystIds,
+        uint256[] calldata amounts
+    ) external {
+        uint256 catalystIdsLength = catalystIds.length;
+        require(catalystIdsLength == amounts.length, "GemsCatalystsRegistry: catalystIds and amounts length mismatch");
+        for (uint256 i = 0; i < catalystIdsLength; i++) {
+            burnCatalyst(from, catalystIds[i], amounts[i]);
+        }
+    }
+
     /// @notice Burns few gem units from each gem id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn gem units from each
@@ -77,7 +109,9 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         uint16[] calldata gemIds,
         uint256[] calldata amounts
     ) external override {
-        for (uint256 i = 0; i < gemIds.length; i++) {
+        uint256 gemIdsLength = gemIds.length;
+        require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
+        for (uint256 i = 0; i < gemIdsLength; i++) {
             if (gemIds[i] != 0 && amounts[i] != 0) {
                 burnGem(from, gemIds[i], amounts[i]);
             }
@@ -93,7 +127,9 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
     ) external override {
-        for (uint256 i = 0; i < catalystIds.length; i++) {
+        uint256 catalystIdsLength = catalystIds.length;
+        require(catalystIdsLength == amounts.length, "GemsCatalystsRegistry: catalystIds and amounts length mismatch");
+        for (uint256 i = 0; i < catalystIdsLength; i++) {
             if (catalystIds[i] != 0 && amounts[i] != 0) {
                 burnCatalyst(from, catalystIds[i], amounts[i]);
             }
