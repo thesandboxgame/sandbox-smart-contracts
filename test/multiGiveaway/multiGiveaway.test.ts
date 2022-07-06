@@ -64,6 +64,17 @@ describe('Multi_Giveaway', function () {
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       );
     });
+    it("Admin can't add the same giveaway twice", async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContractAsAdmin} = setUp;
+
+      await giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1);
+
+      await expect(
+        giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1)
+      ).to.be.revertedWith('MULTIGIVEAWAY_ALREADY_EXISTS');
+    });
 
     it('Cannot add a new giveaway if not admin', async function () {
       const options = {};

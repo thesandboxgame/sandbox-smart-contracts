@@ -36,6 +36,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused()
     {
+        require(_expiryTime[merkleRoot] == 0, "MULTIGIVEAWAY_ALREADY_EXISTS");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
