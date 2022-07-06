@@ -1,8 +1,8 @@
 pragma solidity 0.5.9;
 
-import "./TestOldERC1155ERC721.sol";
+import "../Asset.sol";
 
-contract TestAsset is TestOldERC1155ERC721 {
+contract TestAsset is Asset {
 
 ///     Add any test functions here
 
