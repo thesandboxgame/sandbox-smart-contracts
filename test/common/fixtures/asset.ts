@@ -17,6 +17,9 @@ import {AbiCoder} from 'ethers/lib/utils';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 
+const ipfsHashString =
+  '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetFixtures = async function () {
   const unnamedAccounts = await getUnnamedAccounts();
@@ -44,8 +47,6 @@ export const assetFixtures = async function () {
   );
 
   let id = 0;
-  const ipfsHashString =
-    '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
   async function mintAsset(to: string, value: number, hash = ipfsHashString) {
     // Asset to be minted
@@ -62,7 +63,7 @@ export const assetFixtures = async function () {
         ['mint(address,uint40,bytes32,uint256,address,bytes)'](
           creator,
           packId,
-          hash, // TODO: amend to ethers.utils.formatBytes32String('metadataHash') as per MOCK_DATA below
+          hash,
           supply,
           owner,
           data
@@ -83,14 +84,9 @@ export const assetFixtures = async function () {
     // "Withdraw" to L1 -------------------------------------------------------------------
     const testMetadataHashArray = [];
 
-    testMetadataHashArray.push(
-      ethers.utils.formatBytes32String('metadataHash')
-    );
+    testMetadataHashArray.push(ipfsHashString);
 
-    const MOCK_DATA = new AbiCoder().encode(
-      ['bytes32[]'],
-      [testMetadataHashArray]
-    );
+    const MOCK_DATA = new AbiCoder().encode(['bytes32'], testMetadataHashArray);
 
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
@@ -292,8 +288,6 @@ export const originalAssetFixtures = async function () {
   const Asset = await ethers.getContract('TestAsset', minter);
 
   let id = 0;
-  const ipfsHashString =
-    '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
   async function mintAsset(to: string, value: number, hash = ipfsHashString) {
     // Asset to be minted

@@ -4,6 +4,6 @@ import "../Asset.sol";
 
 contract TestAsset is Asset {
 
-///     Add any test functions here
+/// @notice Add any test functions here for development
 
 }
