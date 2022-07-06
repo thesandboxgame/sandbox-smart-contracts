@@ -46,8 +46,13 @@ async function setupWave(
   contractAddress: string,
   erc1155Id: number
 ) {
+  const {raffleSignWallet} = await getNamedAccounts();
+
   const owner = await raffle.owner();
   const contract = raffle.connect(ethers.provider.getSigner(owner));
+
+  await contract.setSignAddress(raffleSignWallet);
+
   await contract.setupWave(
     waveType,
     waveMaxTokens,
@@ -60,6 +65,10 @@ async function setupWave(
   assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
+  );
+  assert.equal(
+    (await raffle.signAddress()).toString(),
+    raffleSignWallet.toString()
   );
   assert.equal(
     (await raffle.waveMaxTokensToBuy()).toString(),
