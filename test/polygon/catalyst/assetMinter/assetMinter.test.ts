@@ -155,7 +155,120 @@ describe('AssetMinter', function () {
         testQuantity
       );
     });
+    it('mintWithCatalyst transaction reverts in case of change in quantitiesByCatalyst', async function () {
+      const {
+        assetMinterContract,
+        catalystOwner,
+        assetMinterContractAsOwner,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
 
+      const mintData = {
+        from: catalystOwner,
+        to: catalystOwner,
+        packId: mintOptions.packId,
+        metadataHash: mintOptions.metaDataHash,
+        data: mintOptions.data,
+      };
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        legendaryCataId
+      );
+      await assetMinterContractAsOwner.addOrReplaceQuantityByCatalystId(
+        legendaryCataId,
+        quantitiesByCatalystId + 1
+      );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintWithCatalyst(
+          mintData,
+          legendaryCataId,
+          [powerGemId],
+          quantitiesByCatalystId,
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
+        )
+      ).to.revertedWith('AssetMinter : Invalid quantitiesByCatalyst value');
+    });
+    it('mintWithCatalyst transaction reverts in case of change in numberOfGemsBurnPerAsset', async function () {
+      const {
+        assetMinterContract,
+        catalystOwner,
+        assetMinterContractAsOwner,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      const mintData = {
+        from: catalystOwner,
+        to: catalystOwner,
+        packId: mintOptions.packId,
+        metadataHash: mintOptions.metaDataHash,
+        data: mintOptions.data,
+      };
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        legendaryCataId
+      );
+      await assetMinterContractAsOwner.setNumberOfGemsBurnPerAsset(
+        numberOfGemsBurnPerAsset + 1
+      );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintWithCatalyst(
+          mintData,
+          legendaryCataId,
+          [powerGemId],
+          quantitiesByCatalystId,
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
+        )
+      ).to.revertedWith('AssetMinter: invalid numberOfGemsBurnPerAsset value');
+    });
+    it('mintWithCatalyst transaction reverts in case of change in numberOfCatalystBurnPerAsset', async function () {
+      const {
+        assetMinterContract,
+        catalystOwner,
+        assetMinterContractAsOwner,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      const mintData = {
+        from: catalystOwner,
+        to: catalystOwner,
+        packId: mintOptions.packId,
+        metadataHash: mintOptions.metaDataHash,
+        data: mintOptions.data,
+      };
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        legendaryCataId
+      );
+      await assetMinterContractAsOwner.setNumberOfCatalystsBurnPerAsset(
+        numberOfCatalystBurnPerAsset + 1
+      );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintWithCatalyst(
+          mintData,
+          legendaryCataId,
+          [powerGemId],
+          quantitiesByCatalystId,
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
+        )
+      ).to.revertedWith(
+        'AssetMinter: invalid numberOfCatalystBurnPerAsset value'
+      );
+    });
     it('Record is created with correct data on minting with legendary catalyst (NFT)', async function () {
       const {
         assetMinterContract,
@@ -174,11 +287,19 @@ describe('AssetMinter', function () {
         metadataHash: mintOptions.metaDataHash,
         data: mintOptions.data,
       };
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        legendaryCataId
+      );
 
       const recipt = await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         legendaryCataId,
-        [powerGemId]
+        [powerGemId],
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
       const event = await expectEventWithArgs(
         assetContract,
@@ -231,18 +352,28 @@ describe('AssetMinter', function () {
         metadataHash: mintOptions.metaDataHash,
         data: mintOptions.data,
       };
-
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        catalystNFT
+      );
       // only legendary catalyst can mint NFT (catalysts[3].catalystId)
       const assetId = await assetMinterAsCatalystOwner.callStatic.mintWithCatalyst(
         mintData,
         catalystNFT,
-        mintOptions.gemIds
+        mintOptions.gemIds,
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       const tx = await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         catalystNFT,
-        mintOptions.gemIds
+        mintOptions.gemIds,
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       const receipt = await tx.wait();
@@ -289,16 +420,28 @@ describe('AssetMinter', function () {
         data: mintOptions.data,
       };
 
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        catalystNFT
+      );
+
       const assetId = await assetMinterAsCatalystOwner.callStatic.mintWithCatalyst(
         mintData,
         catalystNFT,
-        mintOptions.gemIds
+        mintOptions.gemIds,
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       const receipt = await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         catalystNFT,
-        mintOptions.gemIds
+        mintOptions.gemIds,
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       const catalystEvent = await expectEventWithArgs(
@@ -362,13 +505,20 @@ describe('AssetMinter', function () {
         metadataHash: mintOptions.metaDataHash,
         data: mintOptions.data,
       };
+      const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        catalystNFT
+      );
 
-      await assetMinterAsCatalystOwner.mintWithCatalyst(mintData, catalystNFT, [
-        gems[2].gemId,
-        gems[3].gemId,
-        gems[0].gemId,
-        gems[1].gemId,
-      ]);
+      await assetMinterAsCatalystOwner.mintWithCatalyst(
+        mintData,
+        catalystNFT,
+        [gems[2].gemId, gems[3].gemId, gems[0].gemId, gems[1].gemId],
+        quantitiesByCatalystId,
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
+      );
 
       const commonBalanceAfter = await legendaryCatalyst.balanceOf(
         catalystOwner
@@ -412,16 +562,56 @@ describe('AssetMinter', function () {
       );
 
       mintData.packId.add(1);
+      const numberOfGemsBurnPerAssetNew = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAssetNew = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+      const quantitiesByCatalystIdNew = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+        catalysts[0].catalystId
+      );
 
       // Even if we mint 1000 tokens it only cost one common catalyst
       await assetMinterAsCatalystOwner.mintWithCatalyst(
         mintData,
         catalysts[0].catalystId,
-        [gems[2].gemId]
+        [gems[2].gemId],
+        quantitiesByCatalystIdNew,
+        numberOfCatalystBurnPerAssetNew,
+        numberOfGemsBurnPerAssetNew
       );
       expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(oneToken));
     });
+    it('Mint without catalyst reverts in case of change in quantitiesByAssetType', async function () {
+      const {
+        assetMinterContract,
+        catalystOwner,
+        assetMinterContractAsOwner,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
 
+      const mintData = {
+        from: catalystOwner,
+        to: catalystOwner,
+        packId: mintOptions.packId,
+        metadataHash: mintOptions.metaDataHash,
+        data: mintOptions.data,
+      };
+      const quantitiesByAssetTypeId = await assetMinterAsCatalystOwner.quantitiesByAssetTypeId(
+        artId
+      );
+      await assetMinterContractAsOwner.addOrReplaceAssetTypeQuantity(
+        artId,
+        quantitiesByAssetTypeId + 1
+      );
+      // ART
+      await expect(
+        assetMinterAsCatalystOwner.callStatic.mintWithoutCatalyst(
+          mintData,
+          artId,
+          quantitiesByAssetTypeId
+        )
+      ).to.revertedWith('AssetMinter: Invalid quantitiesByAssetType value');
+    });
     it('Mint without catalyst', async function () {
       const {
         assetMinterContract,
@@ -439,14 +629,21 @@ describe('AssetMinter', function () {
         metadataHash: mintOptions.metaDataHash,
         data: mintOptions.data,
       };
-
+      const quantitiesByAssetTypeId = await assetMinterAsCatalystOwner.quantitiesByAssetTypeId(
+        artId
+      );
       // ART
       const assetId = await assetMinterAsCatalystOwner.callStatic.mintWithoutCatalyst(
         mintData,
-        artId
+        artId,
+        quantitiesByAssetTypeId
       );
 
-      await assetMinterAsCatalystOwner.mintWithoutCatalyst(mintData, artId);
+      await assetMinterAsCatalystOwner.mintWithoutCatalyst(
+        mintData,
+        artId,
+        quantitiesByAssetTypeId
+      );
 
       const balanceArt = await assetContract['balanceOf(address,uint256)'](
         catalystOwner,
@@ -455,14 +652,21 @@ describe('AssetMinter', function () {
       expect(balanceArt).to.equal(
         await assetMinterContract.quantitiesByAssetTypeId(artId)
       );
-
+      const quantitiesByAssetTypeIdNew = await assetMinterAsCatalystOwner.quantitiesByAssetTypeId(
+        propId
+      );
       // Prop
       const assetIdProp = await assetMinterAsCatalystOwner.callStatic.mintWithoutCatalyst(
         mintData,
-        propId
+        propId,
+        quantitiesByAssetTypeIdNew
       );
 
-      await assetMinterAsCatalystOwner.mintWithoutCatalyst(mintData, propId);
+      await assetMinterAsCatalystOwner.mintWithoutCatalyst(
+        mintData,
+        propId,
+        quantitiesByAssetTypeIdNew
+      );
 
       const balanceProp = await assetContract['balanceOf(address,uint256)'](
         catalystOwner,
@@ -496,18 +700,24 @@ describe('AssetMinter', function () {
         metadataHash: mintOptions.metaDataHash,
         data: mintOptions.data,
       };
+      const numberOfGemsBurnPerAsset = await assetMinterAsAdmin.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterAsAdmin.numberOfCatalystBurnPerAsset();
       const assetId = await assetMinterAsAdmin.callStatic.mintCustomNumberWithCatalyst(
         mintData,
         catalystNFT,
         [],
-        bn(nbToMint)
+        bn(nbToMint),
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       await assetMinterAsAdmin.mintCustomNumberWithCatalyst(
         mintData,
         catalystNFT,
         [],
-        bn(nbToMint)
+        bn(nbToMint),
+        numberOfCatalystBurnPerAsset,
+        numberOfGemsBurnPerAsset
       );
 
       const customMintBalance = await assetContract[
@@ -534,7 +744,8 @@ describe('AssetMinter', function () {
       await mintCats([
         {contract: legendaryCatalyst, amount: 7, recipient: user3},
       ]);
-
+      const numberOfGemsBurnPerAsset = await assetMinterContractAsUser3.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAsset = await assetMinterContractAsUser3.numberOfCatalystBurnPerAsset();
       await expect(
         assetMinterContractAsUser3.mintCustomNumberWithCatalyst(
           {
@@ -546,7 +757,9 @@ describe('AssetMinter', function () {
           },
           catalystNFT,
           [],
-          bn(nbToMint)
+          bn(nbToMint),
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
         )
       ).to.be.revertedWith('AssetMinter: custom minting unauthorized');
 
@@ -563,7 +776,8 @@ describe('AssetMinter', function () {
         expect(event.args[0]).to.equal(user3);
         expect(event.args[1]).to.equal(true);
       }
-
+      const numberOfGemsBurnPerAssetNew = await assetMinterContractAsUser3.numberOfGemsBurnPerAsset();
+      const numberOfCatalystBurnPerAssetNew = await assetMinterContractAsUser3.numberOfCatalystBurnPerAsset();
       const assetId = await assetMinterContractAsUser3.callStatic.mintCustomNumberWithCatalyst(
         {
           from: user3,
@@ -574,7 +788,9 @@ describe('AssetMinter', function () {
         },
         catalystNFT,
         [],
-        bn(nbToMint)
+        bn(nbToMint),
+        numberOfCatalystBurnPerAssetNew,
+        numberOfGemsBurnPerAssetNew
       );
 
       await assetMinterContractAsUser3.mintCustomNumberWithCatalyst(
@@ -587,7 +803,9 @@ describe('AssetMinter', function () {
         },
         catalystNFT,
         [],
-        bn(nbToMint)
+        bn(nbToMint),
+        numberOfCatalystBurnPerAssetNew,
+        numberOfGemsBurnPerAssetNew
       );
 
       const customMintBalance = await assetContract[
@@ -1159,6 +1377,11 @@ describe('AssetMinter', function () {
             .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
             .changeMinter(assetMinterContract.address)
         );
+        const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+          catalysts[3].catalystId
+        );
         const assetId = await assetMinterAsCatalystOwner.callStatic.mintWithCatalyst(
           {
             from: catalystOwner,
@@ -1168,7 +1391,10 @@ describe('AssetMinter', function () {
             data: mintMultiOptions.data,
           },
           catalysts[3].catalystId,
-          []
+          [],
+          quantitiesByCatalystId,
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
         );
 
         await assetMinterAsCatalystOwner.mintWithCatalyst(
@@ -1180,7 +1406,10 @@ describe('AssetMinter', function () {
             data: mintMultiOptions.data,
           },
           catalysts[3].catalystId,
-          []
+          [],
+          quantitiesByCatalystId,
+          numberOfCatalystBurnPerAsset,
+          numberOfGemsBurnPerAsset
         );
 
         const gemIds = [
@@ -1228,6 +1457,11 @@ describe('AssetMinter', function () {
         const assetMinterAsCatalystOwner = await assetMinterContract.connect(
           ethers.provider.getSigner(catalystOwner)
         );
+        const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+          mintOptions.catalystId
+        );
         await expect(
           assetMinterAsCatalystOwner.mintWithCatalyst(
             {
@@ -1238,7 +1472,10 @@ describe('AssetMinter', function () {
               data: mintMultiOptions.data,
             },
             mintOptions.catalystId,
-            mintOptions.gemIds
+            mintOptions.gemIds,
+            quantitiesByCatalystId,
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
       });
@@ -1252,6 +1489,11 @@ describe('AssetMinter', function () {
         const assetMinterAsMetaTxProcessor = assetMinterContract.connect(
           ethers.provider.getSigner(users[9])
         );
+        const numberOfGemsBurnPerAsset = await assetMinterAsMetaTxProcessor.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsMetaTxProcessor.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsMetaTxProcessor.quantitiesByCatalystId(
+          mintOptions.catalystId
+        );
         await expect(
           assetMinterAsMetaTxProcessor.mintWithCatalyst(
             {
@@ -1262,7 +1504,10 @@ describe('AssetMinter', function () {
               data: mintMultiOptions.data,
             },
             mintOptions.catalystId,
-            mintOptions.gemIds
+            mintOptions.gemIds,
+            quantitiesByCatalystId,
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('AUTH_ACCESS_DENIED');
       });
@@ -1275,6 +1520,11 @@ describe('AssetMinter', function () {
         const assetMinterAsCatalystOwner = await assetMinterContract.connect(
           ethers.provider.getSigner(catalystOwner)
         );
+        const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+          mintOptions.catalystId
+        );
         await expect(
           assetMinterAsCatalystOwner.mintWithCatalyst(
             {
@@ -1285,7 +1535,10 @@ describe('AssetMinter', function () {
               data: mintMultiOptions.data,
             },
             mintOptions.catalystId,
-            [0, gems[1].gemId]
+            [0, gems[1].gemId],
+            quantitiesByCatalystId,
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('GEM_DOES_NOT_EXIST');
       });
@@ -1307,7 +1560,11 @@ describe('AssetMinter', function () {
         await mintGems([
           {contract: luckGem, amount: 17, recipient: catalystOwner},
         ]);
-
+        const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+          mintOptions.catalystId
+        );
         await expect(
           assetMinterAsCatalystOwner.mintWithCatalyst(
             {
@@ -1318,7 +1575,10 @@ describe('AssetMinter', function () {
               data: mintMultiOptions.data,
             },
             mintOptions.catalystId,
-            new Array(17).fill(5)
+            new Array(17).fill(5),
+            quantitiesByCatalystId,
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('GEMS_MAX_REACHED');
       });
@@ -1342,6 +1602,11 @@ describe('AssetMinter', function () {
           {contract: powerGem, amount: 2, recipient: catalystOwner},
           {contract: defenseGem, amount: 1, recipient: catalystOwner},
         ]);
+        const numberOfGemsBurnPerAsset = await assetMinterAsCatalystOwner.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsCatalystOwner.numberOfCatalystBurnPerAsset();
+        const quantitiesByCatalystId = await assetMinterAsCatalystOwner.quantitiesByCatalystId(
+          catalysts[0].catalystId
+        );
 
         await expect(
           assetMinterAsCatalystOwner.mintWithCatalyst(
@@ -1353,7 +1618,10 @@ describe('AssetMinter', function () {
               data: mintMultiOptions.data,
             },
             [catalysts[0].catalystId],
-            [gems[0].gemId, gems[0].gemId, gems[1].gemId]
+            [gems[0].gemId, gems[0].gemId, gems[1].gemId],
+            quantitiesByCatalystId,
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('GEMS_TOO_MANY');
       });
@@ -1366,6 +1634,9 @@ describe('AssetMinter', function () {
         const assetMinterAsCatalystOwner = assetMinterContract.connect(
           ethers.provider.getSigner(catalystOwner)
         );
+        const quantitiesByAssetTypeId = await assetMinterAsCatalystOwner.quantitiesByAssetTypeId(
+          0
+        );
         await expect(
           assetMinterAsCatalystOwner.mintWithoutCatalyst(
             {
@@ -1375,7 +1646,8 @@ describe('AssetMinter', function () {
               metadataHash: mintMultiOptions.metadataHash,
               data: mintMultiOptions.data,
             },
-            0
+            0,
+            quantitiesByAssetTypeId
           )
         ).to.be.revertedWith('AssetMinter: quantity cannot be 0');
       });
@@ -1386,6 +1658,8 @@ describe('AssetMinter', function () {
         const assetMinterAsAdmin = assetMinterContract.connect(
           ethers.provider.getSigner(assetMinterAdmin)
         );
+        const numberOfGemsBurnPerAsset = await assetMinterAsAdmin.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterAsAdmin.numberOfCatalystBurnPerAsset();
         await expect(
           assetMinterAsAdmin.mintCustomNumberWithCatalyst(
             {
@@ -1397,7 +1671,9 @@ describe('AssetMinter', function () {
             },
             mintOptions.catalystId,
             mintOptions.gemIds,
-            bn(0)
+            bn(0),
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('AssetMinter: quantity cannot be 0');
       });
@@ -1407,7 +1683,8 @@ describe('AssetMinter', function () {
           assetMinterContractAsUser3,
           catalystOwner,
         } = await setupAssetMinterGemsAndCatalysts();
-
+        const numberOfGemsBurnPerAsset = await assetMinterContractAsUser3.numberOfGemsBurnPerAsset();
+        const numberOfCatalystBurnPerAsset = await assetMinterContractAsUser3.numberOfCatalystBurnPerAsset();
         await expect(
           assetMinterContractAsUser3.mintCustomNumberWithCatalyst(
             {
@@ -1419,7 +1696,9 @@ describe('AssetMinter', function () {
             },
             mintOptions.catalystId,
             mintOptions.gemIds,
-            bn(0)
+            bn(0),
+            numberOfCatalystBurnPerAsset,
+            numberOfGemsBurnPerAsset
           )
         ).to.be.revertedWith('AssetMinter: custom minting unauthorized');
       });

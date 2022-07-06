@@ -17,12 +17,19 @@ interface IAssetMinter {
         bytes data;
     }
 
-    function mintWithoutCatalyst(MintData calldata mintData, uint16 typeAsset1Based) external returns (uint256 assetId);
+    function mintWithoutCatalyst(
+        MintData calldata mintData,
+        uint16 typeAsset1Based,
+        uint256 quantity
+    ) external returns (uint256 assetId);
 
     function mintWithCatalyst(
         MintData calldata mintData,
         uint16 catalystId,
-        uint16[] calldata gemIds
+        uint16[] calldata gemIds,
+        uint256 quantity,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
     ) external returns (uint256 assetId);
 
     function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
@@ -33,7 +40,9 @@ interface IAssetMinter {
         MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantity
+        uint256 quantity,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
     ) external returns (uint256 assetId);
 
     function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
