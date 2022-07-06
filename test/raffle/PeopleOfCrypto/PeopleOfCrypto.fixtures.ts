@@ -66,12 +66,12 @@ async function setupWave(
   );
   assert.equal((await raffle.waveType()).toString(), waveType.toString());
   assert.equal(
-    (await raffle.signAddress()).toString(),
-    raffleSignWallet.toString()
-  );
-  assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
+  );
+  assert.equal(
+    (await raffle.signAddress()).toString(),
+    raffleSignWallet.toString()
   );
   assert.equal(
     (await raffle.waveMaxTokensToBuy()).toString(),

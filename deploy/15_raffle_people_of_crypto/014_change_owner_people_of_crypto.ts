@@ -20,11 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = [
-  'RafflePeopleOfCrypto',
-  'RafflePeopleOfCrypto_setup',
-  'RafflePeopleOfCrypto_change_admin',
-];
+func.tags = ['RafflePeopleOfCrypto_change_admin'];
 func.dependencies = [
   'RafflePeopleOfCrypto_deploy',
   'RafflePeopleOfCrypto_setup_minter',
