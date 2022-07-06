@@ -111,7 +111,7 @@ function validPersonalizeSignature(
   );
 }
 
-async function invalidPersonalizeSignature(
+function invalidPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
@@ -130,7 +130,7 @@ async function invalidPersonalizeSignature(
   );
 }
 
-async function signAuthMessageAs(
+function signAuthMessageAs(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
