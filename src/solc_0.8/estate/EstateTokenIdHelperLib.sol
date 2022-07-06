@@ -1,64 +1,56 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+/// @title Helper library to manage the estate token Id
 library EstateTokenIdHelperLib {
-    uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**96;
-    uint256 internal constant STORAGE_ID_MULTIPLIER = uint256(2)**32;
-    uint256 internal constant CHAIN_INDEX_MULTIPLIER = uint256(2)**16;
+    uint256 internal constant SUB_ID_MULTIPLIER = uint256(2)**128;
+    uint256 internal constant CHAIN_INDEX_MULTIPLIER = uint256(2)**96;
 
-    /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to
-    /// @dev token-specific data are preserved via the storageId mechanism.
+    /// @notice Increment the version field of the tokenId (the storage Id is kept unchanged).
+    /// @dev Mappings to token-specific data are preserved via the storageId part that doesn't change.
     /// @param estateId The estateId to increment.
     /// @return new estate id
     function incrementVersion(uint256 estateId) internal pure returns (uint256) {
-        (address creator, uint64 subId, uint16 chainId, uint16 version) = unpackId(estateId);
+        (uint128 subId, uint32 chainIndex, uint96 version) = unpackId(estateId);
         // is it ok to roll over the version we assume the it is impossible to send 2^16 txs
         unchecked {version++;}
-        return packId(creator, subId, chainId, version);
+        return packId(subId, chainIndex, version);
     }
 
-    /// @dev Create a new tokenId and associate it with an owner.
-    /// This is a packed id, consisting of 4 parts:
-    /// the creator's address, a uint64 subId, a uint18 chainIndex and a uint16 version.
-    /// @param creator The address of the Token creator.
-    /// @param subId The id used to generate the id.
-    /// @param version The public version used to generate the id.
+    /// @notice Pack a new tokenId and associate it with an owner.
+    /// @param subId The main id of the token, it never changes.
+    /// @param chainIndex The index of the chain, 0: mainet, 1:polygon, etc
+    /// @param version The version of the token, it changes on each modification.
+    /// @return the token id
     function packId(
-        address creator,
-        uint64 subId,
-        uint16 chainId,
-        uint16 version
+        uint128 subId,
+        uint32 chainIndex,
+        uint96 version
     ) internal pure returns (uint256) {
-        return
-            uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER +
-            subId *
-            STORAGE_ID_MULTIPLIER +
-            chainId *
-            CHAIN_INDEX_MULTIPLIER +
-            version;
+        return subId * SUB_ID_MULTIPLIER + chainIndex * CHAIN_INDEX_MULTIPLIER + version;
     }
 
+    /// @notice Unpack the tokenId returning the separated values.
+    /// @param id The token id
+    /// @return subId The main id of the token, it never changes.
+    /// @return chainIndex The index of the chain, 0: mainet, 1:polygon, etc
+    /// @return version The version of the token, it changes on each modification.
     function unpackId(uint256 id)
         internal
         pure
         returns (
-            address creator,
-            uint64 subId,
-            uint16 chainId,
-            uint16 version
+            uint128 subId,
+            uint32 chainIndex,
+            uint96 version
         )
     {
-        return (
-            address(uint160(id / CREATOR_OFFSET_MULTIPLIER)),
-            uint64(id / STORAGE_ID_MULTIPLIER),
-            uint16(id / CHAIN_INDEX_MULTIPLIER),
-            uint16(id)
-        );
+        return (uint64(id / SUB_ID_MULTIPLIER), uint16(id / CHAIN_INDEX_MULTIPLIER), uint16(id));
     }
 
-    /// @dev creator + subId
+    /// @notice Return the part of the tokenId that doesn't change on modifications
+    /// @param id The token id
+    /// @return The storage Id (the part that doesn't change on modifications)
     function storageId(uint256 id) internal pure returns (uint256) {
-        return uint256(id / STORAGE_ID_MULTIPLIER);
+        return uint256(id / CHAIN_INDEX_MULTIPLIER) * CHAIN_INDEX_MULTIPLIER;
     }
 }

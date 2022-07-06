@@ -13,13 +13,15 @@ import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
 import {EstateTokenIdHelperLib} from "./EstateTokenIdHelperLib.sol";
 import {BaseERC721Upgradeable} from "../common/Base/BaseERC721Upgradeable.sol";
 
-/// @dev Base contract for estate contract on L1 and L2, it uses tile maps to save the landTileSet
+/// @title Base contract for estate contract on L1 and L2, it used to group lands together.
+/// @dev it uses tile maps to save the land
+/// @dev each time something is modified the token id (version) is changed (but keeping a common storageId part)
 abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     using MapLib for MapLib.Map;
     using EstateTokenIdHelperLib for uint256;
 
     struct Estate {
-        // current estateId, for the same storageId we have only one valid estateId
+        // current estateId, for the same storageId we have only one valid estateId (the last one)
         uint256 id;
         // estate lands tile set.
         MapLib.Map land;
@@ -27,8 +29,8 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
 
     struct EstateBaseTokenStorage {
         address landToken;
-        uint64 nextId; // max uint64 = 18,446,744,073,709,551,615
-        uint16 chainIndex;
+        uint128 nextId; // max uint64 = 18,446,744,073,709,551,615
+        uint32 chainIndex;
         string baseUri;
         // storageId -> estateData
         mapping(uint256 => Estate) estate;
@@ -49,9 +51,32 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @param lands The quads of lands added to the estate.
     event EstateTokenLandsAdded(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
 
-    event EstateTokenMinted(uint256 indexed estateId, TileWithCoordLib.TileWithCoord[] tiles);
+    /// @dev Emitted when the bridge mint an estate.
+    /// @param estateId The id of the  erc721 ESTATE token.
+    /// @param lands the tiles that compose the estate
+    event EstateTokenMinted(uint256 indexed estateId, TileWithCoordLib.TileWithCoord[] lands);
+
+    /// @dev Emitted when the bridge burn an estate.
+    /// @param estateId The id of the erc721 ESTATE token.
     event EstateBurned(uint256 indexed estateId);
 
+    /// @dev Emitted when the land contract address is changed
+    /// @param oldAddress of the land contract
+    /// @param newAddress of the land contract
+    event LandTokenChanged(address oldAddress, address newAddress);
+
+    /// @dev Emitted when the base uri for the metadata url is changed
+    /// @param oldURI of the metadata url
+    /// @param newURI of the metadata url
+    event BaseUrlChanged(string oldURI, string newURI);
+
+    /// @notice initialization
+    /// @param trustedForwarder address of the meta tx trustedForwarder
+    /// @param admin initial admin role that can grant or revoke other roles
+    /// @param landToken_ the address of the land token contract
+    /// @param chainIndex_ the chain index for example: 0:mainnet, 1:polygon, etc
+    /// @param name_ name of the token
+    /// @param symbol_ symbol of the token
     function initV1(
         address trustedForwarder,
         address admin,
@@ -66,13 +91,17 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         __EstateBaseToken_init_unchained(landToken_, chainIndex_);
     }
 
+    /// @notice initialization unchained
+    /// @param landToken_ the address of the land token contract
+    /// @param chainIndex_ the chain index for example: 0:mainnet, 1:polygon, etc
     function __EstateBaseToken_init_unchained(address landToken_, uint16 chainIndex_) internal onlyInitializing {
         _s().landToken = landToken_;
         _s().chainIndex = chainIndex_;
     }
 
-    /// @notice Create a new estate token with lands.
+    /// @notice Create a new estate token adding the given quads (aka lands).
     /// @param landToAdd The set of quads to add.
+    /// @return estateId the estate Id created
     function create(uint256[][3] calldata landToAdd) external virtual returns (uint256 estateId) {
         Estate storage estate = _mintEstate(_msgSender());
         _addLand(estate, _msgSender(), landToAdd);
@@ -81,6 +110,9 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return estate.id;
     }
 
+    /// @notice Add the given quads (aka lands) to an Estate.
+    /// @param landToAdd The set of quads to add.
+    /// @return estateId the new estate Id
     function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external virtual returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
         Estate storage estate = _estate(oldId);
@@ -101,21 +133,27 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return estate.id;
     }
 
-    // Used by the bridge
-    function mintEstate(address from, TileWithCoordLib.TileWithCoord[] calldata tiles)
+    /// @notice create a new estate from scratch (Used by the bridge)
+    /// @param to user that will get the new minted Estate
+    /// @param tiles the list of tiles (aka lands) to add to the estate
+    /// @return the estate Id created
+    function mintEstate(address to, TileWithCoordLib.TileWithCoord[] calldata tiles)
         external
         virtual
         override
         returns (uint256)
     {
-        require(hasRole(MINTER_ROLE, _msgSender()), "not minter");
-        Estate storage estate = _mintEstate(from);
+        require(hasRole(MINTER_ROLE, _msgSender()), "not authorized");
+        Estate storage estate = _mintEstate(to);
         estate.land.set(tiles);
         emit EstateTokenMinted(estate.id, tiles);
         return estate.id;
     }
 
-    // Used by the bridge
+    /// @notice completely burn an estate (Used by the bridge)
+    /// @param from user that is trying to use the bridge
+    /// @param estateId the id of the estate token
+    /// @return tiles the list of tiles (aka lands) to add to the estate
     function burnEstate(address from, uint256 estateId)
         external
         virtual
@@ -127,43 +165,64 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         Estate storage estate = _estate(estateId);
         tiles = estate.land.getMap();
         _burnEstate(estate);
-        return (tiles);
+        return tiles;
     }
 
+    /// @notice change the address of the land contract
+    /// @param landToken the new address of the land contract
     function setLandToken(address landToken) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
+        address oldAddress = _s().landToken;
         _s().landToken = landToken;
+        emit LandTokenChanged(oldAddress, landToken);
     }
 
+    /// @notice change the base uri of the metadata url
+    /// @param baseUri the base uri of the metadata url
     function setBaseURI(string calldata baseUri) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
+        string memory oldUri = _s().baseUri;
         _s().baseUri = baseUri;
+        emit BaseUrlChanged(oldUri, baseUri);
     }
 
+    /// @notice return the id of the next estate token
+    /// @return next id
     function getNextId() external view returns (uint256) {
         return _s().nextId;
     }
 
+    /// @notice return the chain index
+    /// @return chain index
     function getChainIndex() external view returns (uint256) {
         return _s().chainIndex;
     }
 
+    /// @notice return the address of the land token contract
+    /// @return land token contract address
     function getLandToken() external view returns (address) {
         return _s().landToken;
     }
 
+    /// @notice return owner of the estateId ignoring version rotations (used by the registry)
+    /// @param storageId the storage id for an estate
+    /// @return owner address
     function getOwnerOfStorage(uint256 storageId) external view override returns (address) {
         return ownerOf(_estate(storageId).id);
     }
 
-    function getCurrentEstateId(uint256 storageId) external view returns (uint256) {
-        return _estate(storageId).id;
-    }
-
+    /// @notice return the amount of tiles that describe the land map inside a given estate
+    /// @param estateId the estate id
+    /// @return the length of the tile map
     function getLandLength(uint256 estateId) external view returns (uint256) {
         return _estate(estateId).land.length();
     }
 
+    /// @notice return an array of tiles describing the map of lands for a given estate
+    /// @param estateId the estate id
+    /// @param offset an amount of entries to skip in the array (pagination)
+    /// @param limit amount of entries to get (pagination)
+    /// @return an array of tiles describing the map of lands
     function getLandAt(
         uint256 estateId,
         uint256 offset,
@@ -172,18 +231,29 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return _estate(estateId).land.at(offset, limit);
     }
 
+    /// @notice check if the estate contains certain displaced template (used by the registry)
+    /// @param estateId the estate id
+    /// @param s displaced template
+    /// @return true if the estate contain all the lands of the displaced template
     function contain(uint256 estateId, MapLib.TranslateResult memory s) external view override returns (bool) {
         return _estate(estateId).land.contain(s);
     }
 
+    /// @notice return the amount of lands inside the estate
+    /// @param estateId the estate id
+    /// @return the amount of lands inside the estate
     function getLandCount(uint256 estateId) external view returns (uint256) {
         return _estate(estateId).land.getLandCount();
     }
 
+    /// @notice given and estateId return the part that doesn't change when the version is incremented
+    /// @param estateId the estate id
+    /// @return the storage Id
     function getStorageId(uint256 tokenId) external pure override returns (uint256) {
         return tokenId.storageId();
     }
 
+    /// @notice this is necessary to be able to receive land
     function onERC721Received(
         address, /* operator */
         address, /* from */
@@ -193,6 +263,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return this.onERC721Received.selector;
     }
 
+    /// @notice this is necessary to be able to receive land
     function onERC721BatchReceived(
         address, /* operator */
         address, /* from */
@@ -218,7 +289,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     }
 
     function _mintEstate(address to) internal returns (Estate storage estate) {
-        uint256 estateId = EstateTokenIdHelperLib.packId(to, _s().nextId++, _s().chainIndex, 1);
+        uint256 estateId = EstateTokenIdHelperLib.packId(++(_s().nextId), _s().chainIndex, 1);
         estate = _estate(estateId);
         estate.id = estateId;
         super._mint(to, estateId);
@@ -246,11 +317,9 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return estateId;
     }
 
-    /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`.
-     * We don't use storageId in the url because we want the centralized backend to extract it if needed.
-     */
+    /// @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+    /// @dev token will be the concatenation of the `baseURI` and the `tokenId`.
+    /// @dev We don't use storageId in the url because we want the centralized backend to extract it if needed.
     function _baseURI() internal view virtual override returns (string memory) {
         return _s().baseUri;
     }

@@ -2,8 +2,9 @@
 pragma solidity 0.8.2;
 
 import {EstateBaseToken} from "../estate/EstateBaseToken.sol";
-
 import {EstateTokenIdHelperLib} from "../estate/EstateTokenIdHelperLib.sol";
+import {TileLib} from "../common/Libraries/TileLib.sol";
+import {MapLib} from "../common/Libraries/MapLib.sol";
 
 contract TestEstateBaseToken is EstateBaseToken {
     constructor(
@@ -31,8 +32,12 @@ contract TestEstateBaseToken is EstateBaseToken {
         __EstateBaseToken_init_unchained(landToken, chainIndex);
     }
 
-    function mint(address to) external {
-        _mintEstate(to);
+    function getCurrentEstateId(uint256 storageId) external view returns (uint256) {
+        return _estate(storageId).id;
+    }
+
+    function getBaseUri() external view returns (string memory) {
+        return _baseURI();
     }
 
     function incrementTokenVersion(uint256 estateId) external returns (uint256 newEstateId) {
@@ -45,24 +50,31 @@ contract TestEstateBaseToken is EstateBaseToken {
     }
 
     function packId(
-        address creator,
-        uint64 subId,
-        uint16 chainId,
-        uint16 version
+        uint128 subId,
+        uint32 chainIndex,
+        uint96 version
     ) external pure returns (uint256) {
-        return EstateTokenIdHelperLib.packId(creator, subId, chainId, version);
+        return EstateTokenIdHelperLib.packId(subId, chainIndex, version);
     }
 
     function unpackId(uint256 estateId)
         public
         pure
         returns (
-            address creator,
-            uint64 subId,
-            uint16 chainId,
-            uint16 version
+            uint128 subId,
+            uint32 chainIndex,
+            uint96 version
         )
     {
         return EstateTokenIdHelperLib.unpackId(estateId);
+    }
+
+    function translateSquare(
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external pure returns (MapLib.TranslateResult memory) {
+        TileLib.Tile memory t;
+        return MapLib.translate(TileLib.set(t, 0, 0, size), x, y);
     }
 }

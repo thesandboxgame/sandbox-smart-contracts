@@ -5,8 +5,9 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {withSnapshot} from '../utils';
-import {BigNumber, BigNumberish, ContractReceipt} from 'ethers';
+import {BigNumber, BigNumberish, Contract, ContractReceipt} from 'ethers';
 import {expect} from '../chai-setup';
+import {Event} from '@ethersproject/contracts';
 
 async function setupLand(isLayer1: boolean) {
   const {deployer} = await getNamedAccounts();
@@ -18,6 +19,7 @@ async function setupLand(isLayer1: boolean) {
     estateTokenAdmin,
     estateMinter,
     other,
+    ...rest
   ] = await getUnnamedAccounts();
   // Land
   await deployments.deploy('Land', {
@@ -59,17 +61,18 @@ async function setupLand(isLayer1: boolean) {
     ),
   };
 
-  function getId(size: number, x: BigNumberish, y: BigNumberish): BigNumber {
+  function getId(
+    size: BigNumberish,
+    x: BigNumberish,
+    y: BigNumberish
+  ): BigNumber {
     return BigNumber.from(x)
       .add(BigNumber.from(y).mul(GRID_SIZE))
-      .add(sizeToLayer[size]);
+      .add(sizeToLayer[BigNumber.from(size).toNumber()]);
   }
 
   return {
-    landContract,
-    landContractAsMinter,
-    landContractAsOther,
-    landContractAsAdmin,
+    deployer,
     upgradeAdmin,
     trustedForwarder,
     landAdmin,
@@ -77,6 +80,11 @@ async function setupLand(isLayer1: boolean) {
     estateTokenAdmin,
     estateMinter,
     other,
+    getUnnamedAccounts: () => rest,
+    landContract,
+    landContractAsMinter,
+    landContractAsOther,
+    landContractAsAdmin,
     GRID_SIZE,
     getId,
     getXsYsSizes: (x0: number, y0: number, size: number) => {
@@ -94,7 +102,7 @@ async function setupLand(isLayer1: boolean) {
     },
     mintQuad: async (
       to: string,
-      size: number,
+      size: BigNumberish,
       x: BigNumberish,
       y: BigNumberish
     ): Promise<BigNumber> => {
@@ -103,34 +111,26 @@ async function setupLand(isLayer1: boolean) {
       } else {
         await landContractAsMinter.mint(to, size, x, y, []);
       }
-      const quadId = getId(size, x, y);
-      if (isLayer1) {
-        expect(await landContractAsMinter._owners(quadId)).to.be.equal(other);
-      } else {
-        // don't work on L2 anymore
-        // expect(await landContractAsMinter.ownerOf(quadId)).to.be.equal(other);
-      }
-      return quadId;
+      return getId(size, x, y);
     },
   };
 }
 
 async function setupEstateAndLand(isLayer1: boolean) {
   const landSetup = await setupLand(isLayer1);
-  const {deployer} = await getNamedAccounts();
   const [
     estateTokenAdmin,
     estateMinter,
     checkpointManager,
     fxRoot,
-  ] = await getUnnamedAccounts();
+  ] = landSetup.getUnnamedAccounts();
 
   // Estate
   const chainIndex = 100;
-  const mapLib = await deployments.deploy('MapLib', {from: deployer});
+  const mapLib = await deployments.deploy('MapLib', {from: landSetup.deployer});
   const name = isLayer1 ? 'EstateTokenV1' : 'PolygonEstateTokenV1';
   await deployments.deploy('Estate', {
-    from: deployer,
+    from: landSetup.deployer,
     contract: name,
     libraries: {
       MapLib: mapLib.address,
@@ -172,7 +172,7 @@ async function setupEstateAndLand(isLayer1: boolean) {
   }
   // Estate tunnel
   await deployments.deploy('MockEstateTunnel', {
-    from: deployer,
+    from: landSetup.deployer,
     args: [
       checkpointManager,
       fxRoot,
@@ -180,17 +180,18 @@ async function setupEstateAndLand(isLayer1: boolean) {
       landSetup.trustedForwarder,
     ],
   });
-  const estateTunnel = await ethers.getContract('MockEstateTunnel', deployer);
+  const estateTunnel = await ethers.getContract(
+    'MockEstateTunnel',
+    landSetup.deployer
+  );
 
   return {
-    ...landSetup,
     estateContractAsAdmin,
     estateContractAsMinter,
     estateContractAsOther,
-    estateTokenAdmin,
-    estateMinter,
     estateTunnel,
     mapLib,
+    ...landSetup,
     getXsYsSizes: (x0: number, y0: number, size: number) => {
       const xs = [];
       const ys = [];
@@ -206,7 +207,7 @@ async function setupEstateAndLand(isLayer1: boolean) {
     },
     mintQuad: async (
       to: string,
-      size: number,
+      size: BigNumberish,
       x: BigNumberish,
       y: BigNumberish
     ): Promise<BigNumber> => {
@@ -297,15 +298,14 @@ export const setupL2EstateAndLand = withSnapshot([], async () => {
 
 export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   const setup = await setupEstateAndLand(false);
-  const {deployer} = await getNamedAccounts();
   // Fake Game
   await deployments.deploy('MockExperience', {
-    from: deployer,
+    from: setup.deployer,
     args: [],
   });
   const experienceContract = await ethers.getContract(
     'MockExperience',
-    deployer
+    setup.deployer
   );
   const experienceContractAsOther = await ethers.getContract(
     'MockExperience',
@@ -314,7 +314,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
 
   //Registry
   await deployments.deploy('ExperienceEstateRegistry', {
-    from: deployer,
+    from: setup.deployer,
     contract: 'ExperienceEstateRegistry',
     libraries: {
       MapLib: setup.mapLib.address,
@@ -327,7 +327,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   });
   const registryContract = await ethers.getContract(
     'ExperienceEstateRegistry',
-    deployer
+    setup.deployer
   );
   const registryContractAsOther = await ethers.getContract(
     'ExperienceEstateRegistry',
@@ -406,47 +406,19 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
     },
   };
 });
-export const setupTestEstateBaseERC721 = withSnapshot([], async () => {
-  const {deployer} = await getNamedAccounts();
-  const [other, trustedForwarder, admin] = await getUnnamedAccounts();
-  const name = 'TestEstateBaseERC721';
-  const symbol = 'TEB';
-  await deployments.deploy('TestEstateBaseERC721', {
-    from: deployer,
-    args: [trustedForwarder, admin, name, symbol],
-  });
-  const contractAsDeployer = await ethers.getContract(
-    'TestEstateBaseERC721',
-    deployer
-  );
-  const contractAsOther = await ethers.getContract(
-    'TestEstateBaseERC721',
-    other
-  );
-  return {
-    other,
-    trustedForwarder,
-    admin,
-    contractAsDeployer,
-    contractAsOther,
-    name,
-    symbol,
-  };
-});
 export const setupTestEstateBaseToken = withSnapshot([], async () => {
   const landSetup = await setupLand(true);
-  const {deployer} = await getNamedAccounts();
-  const [other, trustedForwarder, admin] = await getUnnamedAccounts();
+  const [defaultAdmin, admin, minter, burner] = landSetup.getUnnamedAccounts();
   const chainIndex = BigNumber.from(1123);
   const name = 'TestEstateBaseToken';
   const symbol = 'TEB';
 
-  const mapLib = await deployments.deploy('MapLib', {from: deployer});
+  const mapLib = await deployments.deploy('MapLib', {from: landSetup.deployer});
   await deployments.deploy('TestEstateBaseToken', {
-    from: deployer,
+    from: landSetup.deployer,
     args: [
-      trustedForwarder,
-      admin,
+      landSetup.trustedForwarder,
+      defaultAdmin,
       landSetup.landContract.address,
       chainIndex,
       name,
@@ -458,21 +430,94 @@ export const setupTestEstateBaseToken = withSnapshot([], async () => {
   });
   const contractAsDeployer = await ethers.getContract(
     'TestEstateBaseToken',
-    deployer
+    landSetup.deployer
   );
   const contractAsOther = await ethers.getContract(
     'TestEstateBaseToken',
-    other
+    landSetup.other
   );
+  const contractAsDefaultAdmin = await ethers.getContract(name, defaultAdmin);
+  const ADMIN_ROLE = await contractAsDefaultAdmin.ADMIN_ROLE();
+  await contractAsDefaultAdmin.grantRole(ADMIN_ROLE, admin);
+  const contractAsAdmin = await ethers.getContract(name, admin);
+  const MINTER_ROLE = await contractAsDefaultAdmin.MINTER_ROLE();
+  await contractAsDefaultAdmin.grantRole(MINTER_ROLE, minter);
+  const contractAsMinter = await ethers.getContract(name, minter);
+  const BURNER_ROLE = await contractAsDefaultAdmin.BURNER_ROLE();
+  await contractAsDefaultAdmin.grantRole(BURNER_ROLE, burner);
+  const contractAsBurner = await ethers.getContract(name, burner);
+
+  async function mintQuadAndApprove(
+    to: string,
+    contract: Contract,
+    size: BigNumberish,
+    x: BigNumberish,
+    y: BigNumberish
+  ) {
+    const quadId = await landSetup.mintQuad(to, size, x, y);
+    await contract.setApprovalForAllFor(to, contractAsOther.address, quadId);
+    return quadId;
+  }
+
   return {
-    ...landSetup,
+    ADMIN_ROLE,
     chainIndex,
-    other,
-    trustedForwarder,
     admin,
+    minter,
+    burner,
+    defaultAdmin,
     contractAsDeployer,
     contractAsOther,
+    contractAsDefaultAdmin,
+    contractAsAdmin,
+    contractAsMinter,
+    contractAsBurner,
     name,
     symbol,
+    ...landSetup,
+    mintQuadAndApproveAsOther: async (
+      size: BigNumberish,
+      x: BigNumberish,
+      y: BigNumberish
+    ) => {
+      return mintQuadAndApprove(
+        landSetup.other,
+        landSetup.landContractAsOther,
+        size,
+        x,
+        y
+      );
+    },
+    mintQuadAndApprove,
+    createEstate: async (
+      quads: {
+        size: BigNumberish;
+        x: BigNumberish;
+        y: BigNumberish;
+      }[]
+    ) => {
+      const sizes = [];
+      const xs = [];
+      const ys = [];
+      for (const {size, x, y} of quads) {
+        await mintQuadAndApprove(
+          landSetup.other,
+          landSetup.landContractAsOther,
+          size,
+          x,
+          y
+        );
+        sizes.push(size);
+        xs.push(x);
+        ys.push(y);
+      }
+      const receipt = await (
+        await contractAsOther.create([sizes, xs, ys])
+      ).wait();
+      const events = receipt.events.filter(
+        (v: Event) => v.event === 'EstateTokenCreated'
+      );
+      return BigNumber.from(events[0].args['estateId']);
+    },
   };
 });

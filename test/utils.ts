@@ -193,6 +193,17 @@ export function getAssetChainIndex(id: BigNumber): number {
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
 }
 
+export function interfaceSignature(
+  contract: Contract,
+  funcs: string[] | string
+): BigNumber {
+  funcs = Array.isArray(funcs) ? funcs : [funcs];
+  return funcs.reduce(
+    (acc, val) => acc.xor(contract.interface.getSighash(val)),
+    BigNumber.from(0)
+  );
+}
+
 export async function evmRevertToInitialState(): Promise<void> {
   console.log('Revert to initial snapshot, calling reset');
   // This revert the evm state.

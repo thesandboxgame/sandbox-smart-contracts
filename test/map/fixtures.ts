@@ -141,16 +141,16 @@ export function getEmptyExtendedTile(): boolean[][] {
 }
 
 export function setRectangle(
-  x: number,
-  y: number,
-  dx: number,
-  dy: number,
+  x: BigNumberish,
+  y: BigNumberish,
+  dx: BigNumberish,
+  dy: BigNumberish,
   tile: boolean[][] = getEmptyTile(),
   val = true
 ): boolean[][] {
-  for (let i = 0; i < dx; i++) {
-    for (let j = 0; j < dy; j++) {
-      tile[y + j][x + i] = val;
+  for (let i = BigNumber.from(0); i.lt(dx); i = i.add(1)) {
+    for (let j = BigNumber.from(0); j.lt(dy); j = j.add(1)) {
+      tile[j.add(y).toNumber()][i.add(x).toNumber()] = val;
     }
   }
   return tile;

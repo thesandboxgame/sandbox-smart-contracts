@@ -15,10 +15,15 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {ERC2771ContextUpgradeable} from "../BaseWithStorage/ERC2771ContextUpgradeable.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 
-/// @notice ERC721 token that supports meta-tx and access control.
+/// @title An ERC721 token that supports meta-tx and access control.
 abstract contract BaseERC721Upgradeable is AccessControlUpgradeable, ERC721Upgradeable, ERC2771ContextUpgradeable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
+    /// @notice initialization
+    /// @param trustedForwarder address of the meta tx trustedForwarder
+    /// @param admin initial admin role that can grant or revoke other roles
+    /// @param name_ name of the token
+    /// @param symbol_ symbol of the token
     function __EstateBaseERC721_init(
         address trustedForwarder,
         address admin,
@@ -30,13 +35,24 @@ abstract contract BaseERC721Upgradeable is AccessControlUpgradeable, ERC721Upgra
         __EstateBaseERC721_init_unchained(admin);
     }
 
+    /// @notice initialization unchained
+    /// @param admin initial admin role that can grant or revoke other roles
     function __EstateBaseERC721_init_unchained(address admin) internal onlyInitializing {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
+    /// @notice set the trusted forwarder (used by the admin in case of misconfiguration)
+    /// @param trustedForwarder address of the meta tx trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
         _trustedForwarder = trustedForwarder;
+    }
+
+    /// @notice Returns whether `tokenId` exists.
+    /// @dev Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+    /// @dev Tokens start existing when they are minted (`mint`), and stop existing when they are burned (`burn`).
+    function exists(uint256 tokenId) external view returns (bool) {
+        return _exists(tokenId);
     }
 
     /// @notice Check if the contract supports an interface.
@@ -49,11 +65,8 @@ abstract contract BaseERC721Upgradeable is AccessControlUpgradeable, ERC721Upgra
         override(ERC721Upgradeable, AccessControlUpgradeable)
         returns (bool)
     {
-        // AccessControl.supportsInterface(interfaceId);
         return
-            ERC721Upgradeable.supportsInterface(interfaceId) ||
-            ERC165Upgradeable.supportsInterface(interfaceId) ||
-            AccessControlUpgradeable.supportsInterface(interfaceId);
+            ERC721Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
     function _msgSender()
