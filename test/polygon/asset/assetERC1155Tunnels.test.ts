@@ -7,6 +7,66 @@ import {ethers} from 'hardhat';
 
 describe('PolygonAsset.sol', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
+    it('cannot send asset directly to tunnel l2', async function () {
+      const {
+        PolygonAssetERC1155,
+        MockPolygonAssetERC1155Tunnel,
+        users,
+        mintAssetOnL2,
+      } = await setupAssetERC1155Tunnels();
+      const tokenId = await mintAssetOnL2(users[0].address, 10);
+      const ipfsHashString =
+        '0x6d65746164617461486173680000000000000000000000000000000000000000';
+      const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenId
+      );
+      expect(balance).to.be.equal(10);
+
+      await expect(
+        PolygonAssetERC1155.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).safeTransferFrom(
+          users[0].address,
+          MockPolygonAssetERC1155Tunnel.address,
+          tokenId,
+          balance,
+          ipfsHashString
+        )
+      ).to.be.revertedWith(
+        "PolygonAssetERC1155Tunnel: can't directly send Assets"
+      );
+    });
+    it('cannot send asset directly to tunnel l1', async function () {
+      const {
+        AssetERC1155,
+        MockAssetERC1155Tunnel,
+        users,
+        mintAssetOnL1,
+      } = await setupAssetERC1155Tunnels();
+      const tokenId =
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000';
+      await mintAssetOnL1(users[0].address, tokenId, 10);
+      const ipfsHashString =
+        '0x6d65746164617461486173680000000000000000000000000000000000000000';
+      const balance = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenId
+      );
+      expect(balance).to.be.equal(10);
+
+      await expect(
+        AssetERC1155.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).safeTransferFrom(
+          users[0].address,
+          MockAssetERC1155Tunnel.address,
+          tokenId,
+          balance,
+          ipfsHashString
+        )
+      ).to.be.revertedWith("AssetERC1155Tunnel: can't directly send Assets");
+    });
     it('can transfer L2 minted asset: L2 to L1', async function () {
       const {
         AssetERC1155,

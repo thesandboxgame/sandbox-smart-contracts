@@ -10,7 +10,7 @@ abstract contract ERC1155Receiver is IERC1155Receiver {
         uint256, /* id */
         uint256, /* value */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view virtual override returns (bytes4) {
         return this.onERC1155Received.selector;
     }
 
@@ -20,7 +20,7 @@ abstract contract ERC1155Receiver is IERC1155Receiver {
         uint256[] calldata, /* ids */
         uint256[] calldata, /* values */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view virtual override returns (bytes4) {
         return this.onERC1155BatchReceived.selector;
     }
 }
