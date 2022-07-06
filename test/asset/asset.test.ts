@@ -123,8 +123,11 @@ describe('AssetERC1155.sol', function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 1);
     const URI = await Asset.callStatic.tokenURI(tokenId);
+    // const hash =
+    //   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+    // getHash2Base32(hash) ==> dyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy
     expect(URI).to.be.equal(
-      'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/0.json'
+      'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
     );
   });
 
@@ -132,8 +135,11 @@ describe('AssetERC1155.sol', function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
     const URI = await Asset.callStatic.tokenURI(tokenId);
+    // const hash =
+    //   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+    // getHash2Base32(hash) ==> dyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy
     expect(URI).to.be.equal(
-      'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/0.json'
+      'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
     );
   });
 
