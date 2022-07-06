@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,
-    contract: 'PeopleOfCrypto',
+    contract: 'PeopleOfCryptoGeneric',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',

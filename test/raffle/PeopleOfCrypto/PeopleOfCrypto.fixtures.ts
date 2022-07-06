@@ -49,8 +49,13 @@ async function setupWave(
   contractAddress: string,
   erc1155Id: number
 ) {
+  const {raffleSignWallet} = await getNamedAccounts();
+
   const owner = await raffle.owner();
   const contract = raffle.connect(ethers.provider.getSigner(owner));
+
+  await contract.setSignAddress(raffleSignWallet);
+
   await contract.setupWave(
     waveType,
     waveMaxTokens,
@@ -60,6 +65,10 @@ async function setupWave(
     erc1155Id
   );
   assert.equal((await raffle.waveType()).toString(), waveType.toString());
+  assert.equal(
+    (await raffle.signAddress()).toString(),
+    raffleSignWallet.toString()
+  );
   assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
@@ -79,7 +88,7 @@ async function setupWave(
   assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
 }
 
-async function validPersonalizeSignature(
+function validPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
@@ -105,7 +114,7 @@ async function validPersonalizeSignature(
   );
 }
 
-async function invalidPersonalizeSignature(
+function invalidPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
@@ -124,7 +133,7 @@ async function invalidPersonalizeSignature(
   );
 }
 
-async function signAuthMessageAs(
+function signAuthMessageAs(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
