@@ -30,6 +30,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         address _trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
+        require(address(_rootToken) != address(0), "AssetERC1155Tunnel: _rootToken can't be zero");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(_trustedForwarder);
