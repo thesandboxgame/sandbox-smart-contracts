@@ -147,7 +147,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param account the address being revoked
     function _revokeRole(bytes32 role, address account) internal virtual override {
         if (role == DEFAULT_ADMIN_ROLE) {
-            revert("MultiGiveaway: DEFAULT_ADMIN_ROLE role can't be revoked");
+            revert("MULTIGIVEAWAY_PREVENT_REVOKE");
         }
 
         super._revokeRole(role, account);

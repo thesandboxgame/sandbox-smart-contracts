@@ -44,9 +44,7 @@ describe('Multi_Giveaway', function () {
 
       await expect(
         giveawayContractAsAdmin.revokeRole(defaultRole, multiGiveawayAdmin)
-      ).to.be.revertedWith(
-        "MultiGiveaway: DEFAULT_ADMIN_ROLE role can't be revoked"
-      );
+      ).to.be.revertedWith('MULTIGIVEAWAY_PREVENT_REVOKE');
     });
     it('Admin can add a new giveaway', async function () {
       const options = {};
