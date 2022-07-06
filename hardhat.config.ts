@@ -311,6 +311,11 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
       accounts: accounts(),
       tags: ['testnet', 'L1', 'L2'],
+      deploy: ['deploy_polygon', 'deploy'],
+      companionNetworks: {
+        l1: 'localhost',
+        l2: 'localhost',
+      },
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
