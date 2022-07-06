@@ -76,7 +76,7 @@ async function setupWave(
   assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
 }
 
-async function validPersonalizeSignature(
+function validPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   address: string,
   signatureId: number,
