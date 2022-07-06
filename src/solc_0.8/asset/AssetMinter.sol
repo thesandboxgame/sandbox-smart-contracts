@@ -42,7 +42,6 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint256[] memory quantitiesByAssetTypeId_
     ) {
         require(address(registry) != address(0), "AssetMinter: registry can't be zero");
-        require(address(assetERC721) != address(0), "AssetMinter: assetERC721 can't be zero");
         require(address(assetERC1155) != address(0), "AssetMinter: assetERC1155 can't be zero");
         require(address(gemsCatalystsRegistry) != address(0), "AssetMinter: gemsCatalystsRegistry can't be zero");
         _registry = registry;
