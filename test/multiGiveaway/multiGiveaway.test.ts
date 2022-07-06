@@ -36,6 +36,18 @@ describe('Multi_Giveaway', function () {
       expect(await giveawayContract.hasRole(defaultRole, multiGiveawayAdmin)).to
         .be.true;
     });
+    it("Admin can't revoke admin role", async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContractAsAdmin, multiGiveawayAdmin} = setUp;
+      const defaultRole = emptyBytes32;
+
+      await expect(
+        giveawayContractAsAdmin.revokeRole(defaultRole, multiGiveawayAdmin)
+      ).to.be.revertedWith(
+        "MultiGiveaway: DEFAULT_ADMIN_ROLE role can't be revoked"
+      );
+    });
     it('Admin can add a new giveaway', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
