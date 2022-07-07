@@ -61,21 +61,19 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
     }
 
     function setTrustedForwarder(address trustedForwarder)
-        external
+        public
         override(BaseERC721, IPolygonAssetERC721)
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        _trustedForwarder = trustedForwarder;
+        BaseERC721.setTrustedForwarder(trustedForwarder);
     }
 
     function setApprovalForAllFor(
         address from,
         address operator,
         bool approved
-    ) external override(BaseERC721, IPolygonAssetERC721) {
-        require(from != address(0), "ZERO_ADDRESS");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
-        _setApprovalForAll(from, operator, approved);
+    ) public override(BaseERC721, IPolygonAssetERC721) {
+        BaseERC721.setApprovalForAllFor(from, operator, approved);
     }
 
     function safeTransferFrom(
@@ -92,11 +90,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         uint256[] calldata ids,
         bytes calldata data
     ) public override(BaseERC721, IPolygonAssetERC721) {
-        uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
-            uint256 id = ids[i];
-            super.safeTransferFrom(from, to, id, data);
-        }
+        BaseERC721.safeBatchTransferFrom(from, to, ids, data);
     }
 
     function isTrustedForwarder(address forwarder)
@@ -105,30 +99,28 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         override(BaseERC721, IPolygonAssetERC721)
         returns (bool)
     {
-        return forwarder == _trustedForwarder;
+        BaseERC721.isTrustedForwarder(forwarder);
     }
 
     function getTrustedForwarder()
-        external
+        public
         view
         override(BaseERC721, IPolygonAssetERC721)
         returns (address trustedForwarder)
     {
-        return _trustedForwarder;
+        BaseERC721.getTrustedForwarder();
     }
 
-    function exists(uint256 tokenId) external view override(BaseERC721, IPolygonAssetERC721) returns (bool) {
-        return _exists(tokenId);
+    function exists(uint256 tokenId) public view override(BaseERC721, IPolygonAssetERC721) returns (bool) {
+        BaseERC721.exists(tokenId);
     }
 
-    function burnFrom(address from, uint256 id) external override(BaseERC721, IPolygonAssetERC721) {
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
-        require(from == super.ownerOf(id), "NOT_OWNER");
-        _burn(id);
+    function burnFrom(address from, uint256 id) public override(BaseERC721, IPolygonAssetERC721) {
+        BaseERC721.burnFrom(from, id);
     }
 
-    function burn(uint256 id) external override(BaseERC721, IPolygonAssetERC721) onlyRole(BURNER_ROLE) {
-        _burn(id);
+    function burn(uint256 id) public override(BaseERC721, IPolygonAssetERC721) {
+        BaseERC721.burn(id);
     }
 
     function batchTransferFrom(
@@ -136,20 +128,14 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address to,
         uint256[] calldata ids
     ) public override(BaseERC721, IPolygonAssetERC721) {
-        uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
-            uint256 id = ids[i];
-            super.transferFrom(from, to, id);
-        }
+        BaseERC721.batchTransferFrom(from, to, ids);
     }
 
     function approveFor(
         address from,
         address operator,
         uint256 id
-    ) external override(BaseERC721, IPolygonAssetERC721) {
-        require(from != address(0), "ZERO_ADDRESS");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
-        approve(operator, id);
+    ) public override(BaseERC721, IPolygonAssetERC721) {
+        BaseERC721.approveFor(from, operator, id);
     }
 }
