@@ -19,7 +19,7 @@ const zeroAddress = constants.AddressZero;
 // The ERC1155 `collectionIndexOf` are all the same as each other within that packID (using mintMultiple)
 // The ERC721 `collectionIndexOf` increments by 1 for each new extraction from that ERC1155's supply
 
-describe('PolygonAssetERC1155.sol', function () {
+describe.only('PolygonAssetERC1155.sol', function () {
   describe('PolygonAsset: general', function () {
     it('user sending asset to itself keep the same balance', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
@@ -1316,6 +1316,46 @@ describe('PolygonAssetERC1155.sol', function () {
       const chainIndexFromId = getAssetChainIndex(tokenId);
       const chainIndexContract = await PolygonAssetERC1155.chainIndex(tokenId);
       expect(chainIndexFromId).to.be.equal(chainIndexContract);
+    });
+
+    it('collectionOf for ERC1155 with supply == 1 is NOT equal to tokenId because IS_NFT is 1', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 1);
+
+      const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
+      expect(collectionOf).not.to.be.equal(tokenId); // this is not equal, because tokenId has IS_NFT set to 1. When supply > 1 these are equal
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955808000000000000000800000 tokenId
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 collectionOf
+      const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
+      expect(isCollection).to.be.true;
+      const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
+        tokenId
+      );
+      expect(collectionIndexOf).to.be.equal(0);
+    });
+
+    it('collectionOf for ERC1155 with supply > 1 is equal to tokenId', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 2);
+
+      const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
+      expect(collectionOf).to.be.equal(tokenId); // this is equal
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 tokenId
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 collectionOf
+      const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
+      expect(isCollection).to.be.true;
+      const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
+        tokenId
+      );
+      expect(collectionIndexOf).to.be.equal(0);
     });
   });
 });
