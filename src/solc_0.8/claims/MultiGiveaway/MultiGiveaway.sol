@@ -96,6 +96,18 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }
 
+    /// @notice Pause the contract
+    /// @dev Only the role DEFAULT_ADMIN_ROLE can pause
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause the contract
+    /// @dev Only the role DEFAULT_ADMIN_ROLE can unpause
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
     function onERC721Received(
         address, /*operator*/
         address, /*from*/
