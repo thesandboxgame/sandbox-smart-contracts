@@ -249,8 +249,8 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @notice given and estateId return the part that doesn't change when the version is incremented
     /// @param estateId the estate id
     /// @return the storage Id
-    function getStorageId(uint256 tokenId) external pure override returns (uint256) {
-        return tokenId.storageId();
+    function getStorageId(uint256 estateId) external pure override returns (uint256) {
+        return estateId.storageId();
     }
 
     /// @notice this is necessary to be able to receive land
