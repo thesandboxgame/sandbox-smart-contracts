@@ -8,6 +8,7 @@ import {IMintableERC721} from "../common/interfaces/IMintableERC721.sol";
 import {IERC721Token} from "../common/interfaces/IERC721Token.sol";
 import {IERC721ExtendedToken} from "../common/interfaces/IERC721ExtendedToken.sol";
 import {IERC721Minter} from "../common/interfaces/IERC721Minter.sol";
+import {IERC721Base} from "../common/interfaces/IERC721Base.sol";
 
 abstract contract BaseERC721 is
     AccessControlUpgradeable,
