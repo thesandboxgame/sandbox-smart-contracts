@@ -169,7 +169,7 @@ describe('Original Asset intention using TestAsset.sol', function () {
     it('can get the URI for an asset of amount 1', async function () {
       const {Asset, users, mintAsset} = await setupOriginalAsset();
       const tokenId = await mintAsset(users[1].address, 1);
-      const URI = await Asset.callStatic.tokenURI(tokenId);
+      const URI = await Asset.callStatic.tokenURI(tokenId); // uri ERC1155; tokenURI ERC721
       // const hash =
       //   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       // getHash2Base32(hash) ==> dyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy
@@ -178,13 +178,13 @@ describe('Original Asset intention using TestAsset.sol', function () {
       );
     });
 
-    it.skip('can get the URI for a FT', async function () {
+    it('can get the URI for a FT', async function () {
       const {Asset, users, mintAsset} = await setupOriginalAsset();
       const tokenId = await mintAsset(users[1].address, 11);
-      const URI = await Asset.callStatic.tokenURI(tokenId);
+      const URI = await Asset.callStatic.uri(tokenId); // uri ERC1155; tokenURI ERC721
       expect(URI).to.be.equal(
         'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
-      ); // TODO: reverts with NFT does not exist
+      );
     });
 
     it('fails get the URI for an invalid tokeId', async function () {
