@@ -1061,7 +1061,6 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
-        giveawayContractAsAdmin,
         others,
         allTrees,
         allClaims,
@@ -1103,9 +1102,7 @@ describe('Multi_Giveaway', function () {
       };
       const setUp = await setupTestGiveaway(options);
       const {
-        giveawayContract,
         giveawayContractAsAdmin,
-        others,
         allTrees,
         allClaims,
         allMerkleRoots,
