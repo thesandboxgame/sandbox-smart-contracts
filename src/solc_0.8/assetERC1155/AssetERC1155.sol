@@ -142,7 +142,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
 
-    function getChainIndex(uint256 id) external view returns (uint256) {
+    function getChainIndex(uint256 id) external pure returns (uint256) {
         return uint8((id & CHAIN_INDEX) / CHAIN_INDEX_OFFSET_MULTIPLIER);
     }
 
