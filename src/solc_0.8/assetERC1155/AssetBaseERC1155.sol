@@ -9,6 +9,8 @@ import "../common/Libraries/ObjectLib32.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../asset/libraries/ERC1155ERC721Helper.sol";
 
+import "hardhat/console.sol";
+
 // solhint-disable max-states-count
 abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     using Address for address;
@@ -220,9 +222,9 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(wasEverMinted(id), "!MINTED"); // Note: wasEverMinted must track ERC721s
+        require(isValidId(id), "!MINTED"); // Note: isValidId must track ERC721s
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
+        require(isValidId(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
     }
 
@@ -231,7 +233,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @return whether the id is a collection.
     function isCollection(uint256 id) external view returns (bool) {
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        return wasEverMinted(collectionId);
+        return isValidId(collectionId);
     }
 
     /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
@@ -246,30 +248,23 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     /// @notice Whether or not an ERC1155 or ERC721 tokenId has already been minted.
     /// @param id the token to check.
-    /// @return bool whether an id has been minted or not.
-    function wasEverMinted(uint256 id) public view returns (bool) {
-        // ERC1155 with supply == 1 have IS_NFT == true, as do extracted ERC721s
-        // Do not remove the IS_NFT check
-        if ((id & ERC1155ERC721Helper.IS_NFT) > 0) {
-            return
-                (((id & ERC1155ERC721Helper.PACK_INDEX) <
-                    ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
-                        ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
-                    _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0) || _assetERC721.exists(id);
-        } else {
-            return
-                ((id & ERC1155ERC721Helper.PACK_INDEX) <
-                    ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
-                        ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
-                _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
-        }
+    /// @return bool whether a given id has a valid structure
+    function isValidId(uint256 id) public view returns (bool) {
+        console.log(id & ERC1155ERC721Helper.PACK_INDEX);
+        console.log(id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES);
+        console.log(
+            (id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) / ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER
+        );
+        return (((id & ERC1155ERC721Helper.PACK_INDEX) <
+            ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) / ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+            _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0);
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given ERC1155 asset.
     /// @param id ERC1155 token to get the uri of.
     /// @return URI string
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "!MINTED"); // TODO: review intent of wasEverMinted and how to limit this to ERC155
+    function uri(uint256 id) public view returns (string memory) {
+        require(isValidId(id), "INVALID_ID"); // prevent returning invalid uri
         return ERC1155ERC721Helper.toFullURI(_metadataHash[id & ERC1155ERC721Helper.URI_ID], id);
     }
 
@@ -278,7 +273,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type of which to get the balance of.
     /// @return the balance of `owner` for the token type `id`.
     function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        require(wasEverMinted(id), "!MINTED"); // TODO: need to limit this to just ERC1155
+        require(isValidId(id), "INVALID_ID");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
@@ -300,7 +295,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(id & ERC1155ERC721Helper.IS_NFT == 0, "UNIQUE_ERC1155");
         uint24 tokenCollectionIndex = uint24(_nextCollectionIndex[id]) + 1;
         _nextCollectionIndex[id] = tokenCollectionIndex;
-        string memory metaData = tokenURI(id);
+        string memory metaData = uri(id);
         uint256 newId =
             id +
                 ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // newId is always an NFT; IS_NFT is 1
