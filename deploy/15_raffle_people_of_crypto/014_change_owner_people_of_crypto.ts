@@ -3,16 +3,17 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {catchUnknownSigner, execute} = deployments;
+  const {catchUnknownSigner, execute, read} = deployments;
+  const {deployer} = await getNamedAccounts();
 
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const owner = await read('RafflePeopleOfCrypto', 'owner');
 
-  if (upgradeAdmin.toLowerCase() !== deployer.toLowerCase()) {
+  if (deployer?.toLocaleLowerCase() !== owner?.toLocaleLowerCase()) {
     await catchUnknownSigner(
       execute(
         'RafflePeopleOfCrypto',
-        {from: upgradeAdmin, log: true},
-        'changeAdmin',
+        {from: owner, log: true},
+        'transferOwnership',
         deployer
       )
     );
