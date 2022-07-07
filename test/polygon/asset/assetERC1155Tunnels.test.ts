@@ -69,7 +69,6 @@ describe('PolygonAsset.sol', function () {
     });
     it('can transfer L2 minted asset: L2 to L1', async function () {
       const {
-        AssetERC1155,
         PolygonAssetERC1155,
         MockPolygonAssetERC1155Tunnel,
         users,
