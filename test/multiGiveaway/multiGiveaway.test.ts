@@ -25,6 +25,8 @@ const {calculateMultiClaimHash} = helpers;
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
+const randomMerkleTree =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
@@ -53,13 +55,13 @@ describe('Multi_Giveaway', function () {
 
       const receipt = await waitFor(
         giveawayContractAsAdmin.addNewGiveaway(
-          emptyBytes32,
+          randomMerkleTree,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // does not expire
         )
       );
 
       const event = await expectReceiptEventWithArgs(receipt, 'NewGiveaway');
-      expect(event.args[0]).to.equal(emptyBytes32);
+      expect(event.args[0]).to.equal(randomMerkleTree);
       expect(event.args[1]).to.equal(
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       );
@@ -69,10 +71,16 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {giveawayContractAsAdmin} = setUp;
 
-      await giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1);
+      await giveawayContractAsAdmin.addNewGiveaway(
+        randomMerkleTree,
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+      );
 
       await expect(
-        giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1)
+        giveawayContractAsAdmin.addNewGiveaway(
+          randomMerkleTree,
+          '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+        )
       ).to.be.revertedWith('MULTIGIVEAWAY_ALREADY_EXISTS');
     });
 
@@ -87,7 +95,7 @@ describe('Multi_Giveaway', function () {
 
       await expect(
         giveawayContractAsUser.addNewGiveaway(
-          emptyBytes32,
+          randomMerkleTree,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
         )
       ).to.be.reverted;
@@ -1051,9 +1059,14 @@ describe('Multi_Giveaway', function () {
     });
 
     it('User cannot claim after the expiryTime', async function () {
+      const duration = 30 * 24 * 60 * 60;
+      const latestBlock = await ethers.provider.getBlock('latest');
+      const periodFinish = latestBlock.timestamp + duration;
+
       const options = {
         mint: true,
         sand: true,
+        expiryTime: periodFinish,
       };
       const setUp = await setupTestGiveaway(options);
       const {
@@ -1064,10 +1077,6 @@ describe('Multi_Giveaway', function () {
         allClaims,
         allMerkleRoots,
       } = setUp;
-
-      const duration = 30 * 24 * 60 * 60;
-      const latestBlock = await ethers.provider.getBlock('latest');
-      const periodFinish = latestBlock.timestamp + duration;
 
       const userProofs = [];
       const userTrees = [];
@@ -1083,9 +1092,6 @@ describe('Multi_Giveaway', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
 
-      await waitFor(
-        giveawayContractAsAdmin.addNewGiveaway(allMerkleRoots[0], periodFinish)
-      );
       await increaseTime(duration);
 
       const giveawayContractAsUser = await giveawayContract.connect(
@@ -1100,7 +1106,7 @@ describe('Multi_Giveaway', function () {
       ).to.be.revertedWith('MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER');
     });
 
-    it('User cannot claim if expiryTime is 0', async function () {
+    it('User cannot add a giveaway if expiryTime is 0', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1130,20 +1136,9 @@ describe('Multi_Giveaway', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
 
-      await waitFor(
-        giveawayContractAsAdmin.addNewGiveaway(allMerkleRoots[0], periodFinish)
-      );
-
-      const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
-      );
       await expect(
-        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
-          userMerkleRoots,
-          userClaims,
-          userProofs
-        )
-      ).to.be.revertedWith('MULTIGIVEAWAY_DOES_NOT_EXIST');
+        giveawayContractAsAdmin.addNewGiveaway(allMerkleRoots[0], periodFinish)
+      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
     });
   });
 
