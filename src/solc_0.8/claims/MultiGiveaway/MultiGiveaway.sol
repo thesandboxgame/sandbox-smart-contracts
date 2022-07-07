@@ -141,4 +141,15 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
+
+    /// @dev Prevent the renunciation of the DEFAULT_ADMIN_ROLE
+    /// @param role the role to revoke
+    /// @param account the address being revoked
+    function _revokeRole(bytes32 role, address account) internal virtual override {
+        if (role == DEFAULT_ADMIN_ROLE) {
+            revert("MULTIGIVEAWAY_PREVENT_REVOKE");
+        }
+
+        super._revokeRole(role, account);
+    }
 }
