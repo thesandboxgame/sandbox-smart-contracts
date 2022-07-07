@@ -19,7 +19,7 @@ const zeroAddress = constants.AddressZero;
 // The ERC1155 `collectionIndexOf` are all the same as each other within that packID (using mintMultiple)
 // The ERC721 `collectionIndexOf` increments by 1 for each new extraction from that ERC1155's supply
 
-describe.only('PolygonAssetERC1155.sol', function () {
+describe('PolygonAssetERC1155.sol', function () {
   describe('PolygonAsset: general', function () {
     it('user sending asset to itself keep the same balance', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
@@ -117,7 +117,6 @@ describe.only('PolygonAssetERC1155.sol', function () {
     it('can get the URI for an asset with amount 1', async function () {
       const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 1);
-      console.log(tokenId);
       const URI = await PolygonAssetERC1155.callStatic.uri(tokenId);
       expect(URI).to.be.equal(
         'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
@@ -966,11 +965,11 @@ describe.only('PolygonAssetERC1155.sol', function () {
       expect(collectionIndexOf_2).to.be.equal(0);
 
       // [3]
+
       const collectionOf_3 = await PolygonAssetERC1155.collectionOf(
         tokenIds[3]
       );
-      expect(collectionOf_3).not.to.be.equal(tokenIds[3]); // has supply 1 so is not equal
-
+      expect(collectionOf_3).not.to.be.equal(tokenIds[3]); // is not equal because IS_NFT is set to 1
       const isCollection_3 = await PolygonAssetERC1155.isCollection(
         tokenIds[3]
       );
@@ -1198,7 +1197,7 @@ describe.only('PolygonAssetERC1155.sol', function () {
       );
       const nftId = extractionEvent.args[1];
 
-      const nftURI = await PolygonAssetERC721.callStatic.uri(nftId);
+      const nftURI = await PolygonAssetERC721.callStatic.tokenURI(nftId);
       expect(nftURI).to.be.equal(
         'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
       );
