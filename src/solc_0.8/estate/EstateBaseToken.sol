@@ -1,17 +1,16 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    IERC721ReceiverUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import {ILandToken} from "../common/interfaces/ILandToken.sol";
-import {IERC721MandatoryTokenReceiver} from "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import {ERC721BaseToken} from "../common/BaseWithStorage/ERC721BaseToken.sol";
+import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
 import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../common/Libraries/MapLib.sol";
-import {IEstateToken} from "../common/interfaces/IEstateToken.sol";
-import {EstateTokenIdHelperLib} from "./EstateTokenIdHelperLib.sol";
 import {BaseERC721Upgradeable} from "../common/Base/BaseERC721Upgradeable.sol";
+import {IERC721MandatoryTokenReceiver} from "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import {EstateTokenIdHelperLib} from "./EstateTokenIdHelperLib.sol";
 
 /// @title Base contract for estate contract on L1 and L2, it used to group lands together.
 /// @dev it uses tile maps to save the land
@@ -259,7 +258,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         address, /* from */
         uint256, /* id */
         bytes calldata /* data */
-    ) external virtual returns (bytes4) {
+    ) external view virtual returns (bytes4) {
         return this.onERC721Received.selector;
     }
 
@@ -269,8 +268,18 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external virtual returns (bytes4) {
+    ) external view virtual returns (bytes4) {
         return this.onERC721BatchReceived.selector;
+    }
+
+    /// @notice Check if the contract supports an interface.
+    /// @param interfaceId The id of the interface.
+    /// @return Whether the interface is supported.
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC721ReceiverUpgradeable).interfaceId ||
+            interfaceId == type(IERC721MandatoryTokenReceiver).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     function _addLand(
@@ -279,13 +288,12 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         uint256[][3] calldata quads
     ) internal {
         uint256 len = quads[0].length;
-        if (len > 0) {
-            require(len == quads[1].length && len == quads[2].length, "Invalid data");
-            for (uint256 i; i < len; i++) {
-                estate.land.set(quads[1][i], quads[2][i], quads[0][i]);
-            }
-            ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
+        require(len > 0, "nothing to add");
+        require(len == quads[1].length && len == quads[2].length, "invalid data");
+        for (uint256 i; i < len; i++) {
+            estate.land.set(quads[1][i], quads[2][i], quads[0][i]);
         }
+        ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
     }
 
     function _mintEstate(address to) internal returns (Estate storage estate) {

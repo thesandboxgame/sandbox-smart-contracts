@@ -3,7 +3,11 @@ import {assert, expect} from '../chai-setup';
 import {BigNumber} from 'ethers';
 import {Event} from '@ethersproject/contracts';
 import {setRectangle, tileWithCoordToJS} from '../map/fixtures';
+import {AddressZero} from '@ethersproject/constants';
+import {interfaceSignature} from '../utils';
 
+const quadsToBn = (q: number[][]): BigNumber[][] =>
+  q.map((x) => x.map(BigNumber.from));
 describe('Estate base token test', function () {
   it('test initial values', async function () {
     const {
@@ -64,6 +68,7 @@ describe('Estate base token test', function () {
     it('minter should be able to mintEstate and burner to burnEstate', async function () {
       const {
         other,
+        burner,
         contractAsBurner,
         contractAsMinter,
       } = await setupTestEstateBaseToken();
@@ -78,6 +83,10 @@ describe('Estate base token test', function () {
       expect(await contractAsMinter.ownerOf(estateId)).to.be.equal(other);
 
       expect(await contractAsBurner.exists(estateId)).to.be.true;
+      // The estate was minted for the user other, can be only burned for this user
+      await expect(
+        contractAsBurner.burnEstate(burner, estateId)
+      ).to.revertedWith('caller is not owner nor approved');
       await contractAsBurner.burnEstate(other, estateId);
       expect(await contractAsBurner.exists(estateId)).to.be.false;
     });
@@ -157,6 +166,25 @@ describe('Estate base token test', function () {
         )
       ).to.be.false;
     });
+    it('should fail to create an empty estate', async function () {
+      const {contractAsOther} = await setupTestEstateBaseToken();
+      await expect(contractAsOther.create([[], [], []])).to.revertedWith(
+        'nothing to add'
+      );
+    });
+    it('should fail to create with invalid quads (different length)', async function () {
+      const {
+        contractAsOther,
+        mintQuadAndApproveAsOther,
+      } = await setupTestEstateBaseToken();
+      await mintQuadAndApproveAsOther(24, 240, 120);
+      const sizes = [24, 24];
+      const xs = [240, 240];
+      const ys = [120];
+      await expect(contractAsOther.create([sizes, xs, ys])).to.revertedWith(
+        'invalid data'
+      );
+    });
     it('should fail to create using the same land', async function () {
       const {
         contractAsOther,
@@ -187,7 +215,7 @@ describe('Estate base token test', function () {
     });
   });
   describe('add land', function () {
-    it('create an estate then add land', async function () {
+    it('create an estate then add a single land', async function () {
       const {
         contractAsOther,
         createEstate,
@@ -195,9 +223,9 @@ describe('Estate base token test', function () {
       } = await setupTestEstateBaseToken();
       const estateId = await createEstate([{size: 24, x: 240, y: 120}]);
 
-      const size = BigNumber.from(24);
-      const x = BigNumber.from(240 + 24);
-      const y = BigNumber.from(120);
+      const size = 24;
+      const x = 240 + 24;
+      const y = 120;
       const quads = [[size], [x], [y]];
       await mintQuadAndApproveAsOther(size, x, y);
 
@@ -211,7 +239,34 @@ describe('Estate base token test', function () {
       expect(events[0].args['estateId']).to.be.equal(estateId);
       const newId = await contractAsOther.incrementTokenId(estateId);
       expect(events[0].args['newId']).to.be.equal(newId);
-      expect(events[0].args['lands']).to.be.eql(quads);
+      expect(events[0].args['lands']).to.be.eql(quadsToBn(quads));
+    });
+    it('create an estate then add a multiple lands', async function () {
+      const {
+        contractAsOther,
+        createEstate,
+        mintQuadAndApproveAsOther,
+      } = await setupTestEstateBaseToken();
+      const estateId = await createEstate([{size: 24, x: 240, y: 120}]);
+
+      await mintQuadAndApproveAsOther(24, 240, 120 + 24);
+      await mintQuadAndApproveAsOther(24, 240, 120 - 24);
+      const quads = [
+        [24, 24],
+        [240, 240],
+        [120 + 24, 120 - 24],
+      ];
+      const receipt = await (
+        await contractAsOther.addLand(estateId, quads)
+      ).wait();
+      const events = receipt.events.filter(
+        (v: Event) => v.event === 'EstateTokenLandsAdded'
+      );
+      assert.equal(events.length, 1);
+      expect(events[0].args['estateId']).to.be.equal(estateId);
+      const newId = await contractAsOther.incrementTokenId(estateId);
+      expect(events[0].args['newId']).to.be.equal(newId);
+      expect(events[0].args['lands']).to.be.eql(quadsToBn(quads));
     });
     it('should fail to add if quads are not adjacent', async function () {
       const {
@@ -250,60 +305,34 @@ describe('Estate base token test', function () {
       ).to.revertedWith('caller is not owner nor approved');
     });
   });
-  describe('@skip-on-coverage gas measurement', function () {
-    it('create an estate', async function () {
-      const {
-        contractAsOther,
-        mintQuadAndApproveAsOther,
-      } = await setupTestEstateBaseToken();
-      await mintQuadAndApproveAsOther(24, 240, 120);
-      const estimate = await contractAsOther.estimateGas.create([
-        [24],
-        [240],
-        [120],
-      ]);
-      console.log(
-        'Estate creation gas consumption:',
-        BigNumber.from(estimate).toString()
-      );
-    });
-    it('add single land', async function () {
-      const {
-        contractAsOther,
-        mintQuadAndApproveAsOther,
-        createEstate,
-      } = await setupTestEstateBaseToken();
-      const estateId = await createEstate([{size: 24, x: 240, y: 120}]);
-      await mintQuadAndApproveAsOther(24, 240 + 24, 120);
-      const estimate = await contractAsOther.estimateGas.addLand(estateId, [
-        [24],
-        [240 + 24],
-        [120],
-      ]);
-      console.log(
-        'Estate adding a 24x24 gas consumption:',
-        BigNumber.from(estimate).toString()
-      );
-    });
-    it('add multiple land', async function () {
-      const {
-        contractAsOther,
-        mintQuadAndApproveAsOther,
-        createEstate,
-      } = await setupTestEstateBaseToken();
-      const estateId = await createEstate([{size: 24, x: 240, y: 120}]);
-      await mintQuadAndApproveAsOther(24, 240, 120 + 24);
-      await mintQuadAndApproveAsOther(24, 240, 120 + 48);
-      await mintQuadAndApproveAsOther(24, 240, 120 - 24);
-      const estimate = await contractAsOther.estimateGas.addLand(estateId, [
-        [24, 24, 24],
-        [240, 240, 240],
-        [120 + 24, 120 - 24, 120 + 48],
-      ]);
-      console.log(
-        'Estate adding two 24x24 gas consumption:',
-        BigNumber.from(estimate).toString()
-      );
-    });
+  it('estate contract is a valid ERC721/land receiver', async function () {
+    const {contractAsOther} = await setupTestEstateBaseToken();
+    // IERC721ReceiverUpgradeable
+    expect(
+      await contractAsOther.supportsInterface(
+        interfaceSignature(contractAsOther, 'onERC721Received')
+      )
+    ).to.be.true;
+    // IERC721MandatoryTokenReceiver
+    expect(
+      await contractAsOther.supportsInterface(
+        interfaceSignature(contractAsOther, [
+          'onERC721Received',
+          'onERC721BatchReceived',
+        ])
+      )
+    ).to.be.true;
+
+    expect(
+      await contractAsOther.onERC721Received(AddressZero, AddressZero, 0, [])
+    ).to.be.equal(interfaceSignature(contractAsOther, 'onERC721Received'));
+    expect(
+      await contractAsOther.onERC721BatchReceived(
+        AddressZero,
+        AddressZero,
+        [],
+        []
+      )
+    ).to.be.equal(interfaceSignature(contractAsOther, 'onERC721BatchReceived'));
   });
 });
