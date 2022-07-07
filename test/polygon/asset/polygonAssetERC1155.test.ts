@@ -1314,7 +1314,9 @@ describe('PolygonAssetERC1155.sol', function () {
       } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 3);
       const chainIndexFromId = getAssetChainIndex(tokenId);
-      const chainIndexContract = await PolygonAssetERC1155.chainIndex(tokenId);
+      const chainIndexContract = await PolygonAssetERC1155.getChainIndex(
+        tokenId
+      );
       expect(chainIndexFromId).to.be.equal(chainIndexContract);
     });
 
