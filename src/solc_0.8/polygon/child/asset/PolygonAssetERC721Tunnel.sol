@@ -86,8 +86,7 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256[] memory ids, bytes memory data) = abi.decode(syncData, (address, uint256[], bytes));
-        string[] memory uris = abi.decode(data, (string[]));
+        (address to, uint256[] memory ids, string[] memory uris) = abi.decode(syncData, (address, uint256[], string[]));
         for (uint256 i = 0; i < ids.length; i++) {
             bytes memory uniqueUriData = abi.encode(uris[i]);
             if (!childToken.exists(ids[i])) childToken.mint(to, ids[i], uniqueUriData);
