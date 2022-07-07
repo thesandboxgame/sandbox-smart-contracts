@@ -23,6 +23,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     event NewTrustedForwarder(address trustedForwarder);
 
     constructor(address admin, address trustedForwarder) {
+        require(admin != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
     }
