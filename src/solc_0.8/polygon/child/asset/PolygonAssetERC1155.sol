@@ -223,6 +223,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         uint16 packIndex
     ) internal view returns (uint256) {
         require(supply > 0 && supply <= ERC1155ERC721Helper.MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
+        require(numFTs >= 0 && numFTs <= ERC1155ERC721Helper.MAX_NUM_FT, "NUM_FT_OUT_OF_BOUNDS");
         return
             uint256(uint160(creator)) *
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR uint160
@@ -232,7 +233,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
             uint256(packId) *
             ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack), uint40
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, uint16
-            packIndex; // packIndex (position in the pack), uint16
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
+            packIndex; // packIndex (position in the pack), 11 bits
     }
 }
