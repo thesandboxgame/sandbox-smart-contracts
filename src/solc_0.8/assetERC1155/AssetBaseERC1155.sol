@@ -218,7 +218,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(wasEverMinted(id), "FT_!MINTED"); // TODO: review
+        require(wasEverMinted(id), "FT_!MINTED");
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
         require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
@@ -241,10 +241,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     }
 
     function wasEverMinted(uint256 id) public view returns (bool) {
-        // TODO: discuss
-        // ((id & ERC1155ERC721Helper.PACK_INDEX) <
-        //     ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
-        //         ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
     }
 
