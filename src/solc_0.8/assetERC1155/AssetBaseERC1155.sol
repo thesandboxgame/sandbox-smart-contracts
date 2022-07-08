@@ -220,9 +220,9 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(isValidId(id), "INVALID_ID"); // Note: isValidId must track ERC721s
+        require(doesHashExist(id), "INVALID_ID"); // Note: doesHashExist must track ERC721s
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        require(isValidId(collectionId), "UNMINTED_COLLECTION");
+        require(doesHashExist(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
     }
 
@@ -231,7 +231,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @return whether the id is a collection.
     function isCollection(uint256 id) external view returns (bool) {
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        return isValidId(collectionId);
+        return doesHashExist(collectionId);
     }
 
     /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
@@ -248,7 +248,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to check.
     /// @return bool whether a given id has a valid structure.
     /// @dev if IS_NFT > 0 then PACK_NUM_FT_TYPES may be 0
-    function isValidId(uint256 id) public view returns (bool) {
+    function doesHashExist(uint256 id) public view returns (bool) {
         return (((id & ERC1155ERC721Helper.PACK_INDEX) <=
             ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) / ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
             _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0);
@@ -258,7 +258,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id ERC1155 token to get the uri of.
     /// @return URI string
     function uri(uint256 id) public view returns (string memory) {
-        require(isValidId(id), "INVALID_ID"); // prevent returning invalid uri
+        require(doesHashExist(id), "INVALID_ID"); // prevent returning invalid uri
         return ERC1155ERC721Helper.toFullURI(_metadataHash[id & ERC1155ERC721Helper.URI_ID], id);
     }
 
@@ -267,7 +267,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type of which to get the balance of.
     /// @return the balance of `owner` for the token type `id`.
     function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        require(isValidId(id), "INVALID_ID");
+        require(doesHashExist(id), "INVALID_ID");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         return _packedTokenBalance[owner][bin].getValueInBin(index);
     }

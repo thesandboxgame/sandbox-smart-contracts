@@ -86,7 +86,7 @@ interface IPolygonAssetERC1155 {
 
     function creatorOf(uint256 id) external view returns (address);
 
-    function isValidId(uint256 id) external view returns (bool);
+    function doesHashExist(uint256 id) external view returns (bool);
 
     function isSuperOperator(address who) external view returns (bool);
 

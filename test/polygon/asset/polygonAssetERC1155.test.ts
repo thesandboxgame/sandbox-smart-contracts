@@ -1133,8 +1133,8 @@ describe('PolygonAssetERC1155.sol', function () {
         ethers.provider.getSigner(extractor)
       ).burn(tokenId, 5);
 
-      const isValidId = await PolygonAssetERC1155.isValidId(tokenId);
-      expect(isValidId).to.be.true;
+      const doesHashExist = await PolygonAssetERC1155.doesHashExist(tokenId);
+      expect(doesHashExist).to.be.true;
     });
     it('can see that my ERC1155 tokenId was minted even after I burn and extract all ERC1155 in that pack', async function () {
       const {
@@ -1152,8 +1152,8 @@ describe('PolygonAssetERC1155.sol', function () {
         ethers.provider.getSigner(extractor)
       ).extractERC721From(extractor, tokenId, extractor);
 
-      const isValidId = await PolygonAssetERC1155.isValidId(tokenId);
-      expect(isValidId).to.be.true;
+      const doesHashExist = await PolygonAssetERC1155.doesHashExist(tokenId);
+      expect(doesHashExist).to.be.true;
     });
 
     it('can get the URI for an asset of amount 2', async function () {
