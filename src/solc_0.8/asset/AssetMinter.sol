@@ -240,6 +240,28 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         return assetIds;
     }
 
+    function mintMultipleWithoutCatalyst(MintData calldata mintData, uint256[] calldata supplies)
+        external
+        returns (uint256[] memory assetIds)
+    {
+        require(supplies.length != 0, "INVALID_0_ASSETS");
+        require(mintData.to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
+        for (uint256 i = 0; i < supplies.length; i++) {
+            require(supplies[i] != 0, "AssetMinter: quantity cannot be 0");
+        }
+        assetIds = _assetERC1155.mintMultiple(
+            mintData.from,
+            mintData.packId,
+            mintData.metadataHash,
+            supplies,
+            "",
+            mintData.to,
+            mintData.data
+        );
+        return assetIds;
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {

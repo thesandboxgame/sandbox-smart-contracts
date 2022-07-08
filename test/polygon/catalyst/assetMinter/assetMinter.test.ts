@@ -14,6 +14,7 @@ import {
 import {mintCatalyst, mintGem} from '../utils';
 import {expectEventWithArgs, findEvents, waitFor} from '../../../utils';
 import {depositViaChildChainManager} from '../../../polygon/sand/fixtures';
+import {zeroAddress} from '../../../land/fixtures';
 
 const packId = BigNumber.from('1');
 const hash = ethers.utils.keccak256('0x42');
@@ -907,6 +908,52 @@ describe('AssetMinter', function () {
         );
       });
 
+      it('TransferBatch event is emitted on minting a single FT via mintMultipleWithoutCatalyst', async function () {
+        const {
+          catalystOwner,
+          assetMinterContract,
+          assetContract,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+
+        const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultipleWithoutCatalyst(
+          {
+            from: catalystOwner,
+            to: catalystOwner,
+            packId: mintMultiOptions.packId,
+            metadataHash: mintMultiOptions.metadataHash,
+            data: mintMultiOptions.data,
+          },
+          [5]
+        );
+
+        const receipt = await assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+          {
+            from: catalystOwner,
+            to: catalystOwner,
+            packId: mintMultiOptions.packId,
+            metadataHash: mintMultiOptions.metadataHash,
+            data: mintMultiOptions.data,
+          },
+          [5]
+        );
+
+        const mintEvent = await expectEventWithArgs(
+          assetContract,
+          receipt,
+          'TransferBatch'
+        );
+        const args = mintEvent.args;
+
+        expect(args[0]).to.equal(assetMinterContract.address);
+        expect(args[1]).to.equal(ethers.constants.AddressZero);
+        expect(args[2]).to.equal(catalystOwner);
+        expect(args[3]).to.deep.equal(assetIds);
+        expect(args[4]).to.deep.equal([BigNumber.from(5)]);
+      });
+
       it('TransferBatch event is emitted on minting a multiple FTs', async function () {
         const {
           catalystOwner,
@@ -1034,6 +1081,72 @@ describe('AssetMinter', function () {
         // expect(epicBalanceAfter).to.be.equal(
         //   epicBalanceBefore.sub(await assetMinterContract.catalystsFactor())
         // );
+      });
+      it('TransferBatch event is emitted on minting a multiple FTs via mintMultipleWithoutCatalyst', async function () {
+        const {
+          catalystOwner,
+          powerGem,
+          defenseGem,
+          speedGem,
+          commonCatalyst,
+          rareCatalyst,
+          epicCatalyst,
+          assetMinterContract,
+          assetContract,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+
+        await mintCats([
+          {contract: commonCatalyst, amount: 1, recipient: catalystOwner},
+          {contract: rareCatalyst, amount: 1, recipient: catalystOwner},
+          {contract: epicCatalyst, amount: 1, recipient: catalystOwner},
+        ]);
+        await mintGems([
+          {contract: powerGem, amount: 3, recipient: catalystOwner},
+          {contract: defenseGem, amount: 2, recipient: catalystOwner},
+          {contract: speedGem, amount: 1, recipient: catalystOwner},
+        ]);
+        const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultipleWithoutCatalyst(
+          {
+            from: catalystOwner,
+            to: catalystOwner,
+            packId: mintMultiOptions.packId,
+            metadataHash: mintMultiOptions.metadataHash,
+            data: mintMultiOptions.data,
+          },
+          [5, 3, 9, 1]
+        );
+
+        const receipt = await assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+          {
+            from: catalystOwner,
+            to: catalystOwner,
+            packId: mintMultiOptions.packId,
+            metadataHash: mintMultiOptions.metadataHash,
+            data: mintMultiOptions.data,
+          },
+          [5, 3, 9, 1]
+        );
+
+        const mintEvent = await expectEventWithArgs(
+          assetContract,
+          receipt,
+          'TransferBatch'
+        );
+        const args = mintEvent.args;
+
+        expect(args[0]).to.equal(assetMinterContract.address);
+        expect(args[1]).to.equal(ethers.constants.AddressZero);
+        expect(args[2]).to.equal(catalystOwner);
+        expect(args[3]).to.deep.equal(assetIds);
+        expect(args[4]).to.deep.equal([
+          BigNumber.from(5),
+          BigNumber.from(3),
+          BigNumber.from(9),
+          BigNumber.from(1),
+        ]);
       });
 
       it('CatalystApplied event is emitted for each NFT minted with a catalyst', async function () {
@@ -1725,6 +1838,93 @@ describe('AssetMinter', function () {
         ).to.be.revertedWith('INVALID_0_ASSETS');
       });
 
+      it('mintMultipleWithoutCatalyst should fail if supplies.length == 0', async function () {
+        const {
+          assetMinterContract,
+          catalystOwner,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+        await expect(
+          assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+            {
+              from: catalystOwner,
+              to: catalystOwner,
+              packId: mintMultiOptions.packId,
+              metadataHash: mintMultiOptions.metadataHash,
+              data: mintMultiOptions.data,
+            },
+            []
+          )
+        ).to.be.revertedWith('INVALID_0_ASSETS');
+      });
+
+      it('mintMultipleWithoutCatalyst should fail if mintData.to is zero address', async function () {
+        const {
+          assetMinterContract,
+          catalystOwner,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+        await expect(
+          assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+            {
+              from: catalystOwner,
+              to: zeroAddress,
+              packId: mintMultiOptions.packId,
+              metadataHash: mintMultiOptions.metadataHash,
+              data: mintMultiOptions.data,
+            },
+            [2, 3, 7, 5]
+          )
+        ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
+      });
+
+      it('mintMultipleWithoutCatalyst should fail if mintData.from is not message sender', async function () {
+        const {
+          assetMinterContract,
+          catalystOwner,
+          user3,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+        await expect(
+          assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+            {
+              from: user3,
+              to: catalystOwner,
+              packId: mintMultiOptions.packId,
+              metadataHash: mintMultiOptions.metadataHash,
+              data: mintMultiOptions.data,
+            },
+            [2, 3, 7, 5]
+          )
+        ).to.be.revertedWith('AUTH_ACCESS_DENIED');
+      });
+      it('mintMultipleWithoutCatalyst should fail if supplies array has zero element', async function () {
+        const {
+          assetMinterContract,
+          catalystOwner,
+        } = await setupAssetMinterGemsAndCatalysts();
+        const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+          ethers.provider.getSigner(catalystOwner)
+        );
+        await expect(
+          assetMinterAsCatalystOwner.mintMultipleWithoutCatalyst(
+            {
+              from: catalystOwner,
+              to: catalystOwner,
+              packId: mintMultiOptions.packId,
+              metadataHash: mintMultiOptions.metadataHash,
+              data: mintMultiOptions.data,
+            },
+            [0, 3, 7, 5]
+          )
+        ).to.be.revertedWith('AssetMinter: quantity cannot be 0');
+      });
       it('mintMultiple should fail if catalystsQuantities == 0', async function () {
         const {
           catalystOwner,
