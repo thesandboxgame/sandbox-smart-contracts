@@ -20,13 +20,12 @@ describe('experience estate registry test', function () {
 
       const experienceId = 123;
 
-      const landId = await mintQuad(other, 1, 0, 0);
-
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+
+      await mintQuad(other, 1, 0, 0);
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
-        landId
+        true
       );
 
       await registryContractAsOther.link(0, experienceId, 0, 0);
@@ -45,9 +44,7 @@ describe('experience estate registry test', function () {
       const experienceId = 123;
 
       await mintQuad(other, 3, 0, 0);
-
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
         true
       );
@@ -72,12 +69,11 @@ describe('experience estate registry test', function () {
       const experienceId = 123;
       const experienceId2 = 456;
 
-      const landId = await mintQuad(other, 1, 0, 0);
+      await mintQuad(other, 1, 0, 0);
 
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
-        landId
+        true
       );
 
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
@@ -95,22 +91,21 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        createEstate,
+        createEstateAsOther,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
       const experienceId = 123;
       const experienceId2 = 234;
 
-      const quadId = await mintQuad(other, 24, 48, 96);
+      await mintQuad(other, 24, 48, 96);
 
       await experienceContract.setTemplate(experienceId, fullQuad24);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
-        quadId
+        true
       );
-      const {estateId} = await createEstate({
+      const {estateId} = await createEstateAsOther({
         sizes: [24],
         xs: [48],
         ys: [96],
@@ -141,7 +136,7 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        createEstate,
+        createEstateAsOther,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
@@ -165,13 +160,12 @@ describe('experience estate registry test', function () {
       const tta = tileToArray(template.data);
       printTile(tta); */
 
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
         true
       );
 
-      const {estateId} = await createEstate({
+      const {estateId} = await createEstateAsOther({
         sizes: [1, 1, 1, 1, 1],
         xs: [0, 1, 2, 1, 1],
         ys: [2, 2, 2, 1, 3],
@@ -199,7 +193,7 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        createEstate,
+        createEstateAsOther,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
@@ -223,13 +217,12 @@ describe('experience estate registry test', function () {
       const tta = tileToArray(template.data);
       printTile(tta); */
 
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
         true
       );
 
-      const {estateId} = await createEstate({
+      const {estateId} = await createEstateAsOther({
         sizes: [1, 1, 1, 1, 1],
         xs: [0, 1, 2, 1, 1],
         ys: [2, 2, 2, 1, 3],
@@ -262,21 +255,20 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        createEstate,
+        createEstateAsOther,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
       const experienceId = 123;
 
-      const quadId = await mintQuad(other, 24, 48, 96);
+      await mintQuad(other, 24, 48, 96);
 
       await experienceContract.setTemplate(experienceId, fullQuad24);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
-        quadId
+        true
       );
-      const {estateId} = await createEstate({
+      const {estateId} = await createEstateAsOther({
         sizes: [24],
         xs: [48],
         ys: [96],
@@ -295,21 +287,20 @@ describe('experience estate registry test', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        createEstate,
+        createEstateAsOther,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
       const experienceId = 123;
 
-      const quadId = await mintQuad(other, 24, 0, 0);
+      await mintQuad(other, 24, 0, 0);
 
       await experienceContract.setTemplate(experienceId, fullQuad24);
-      await landContractAsOther.setApprovalForAllFor(
-        other,
+      await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
-        quadId
+        true
       );
-      const {estateId} = await createEstate({
+      const {estateId} = await createEstateAsOther({
         sizes: [24],
         xs: [0],
         ys: [0],
@@ -322,157 +313,160 @@ describe('experience estate registry test', function () {
     });
   });
   describe('@skip-on-coverage gas tests', function () {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    [1, 3, 6, 12, 24].forEach((size) => {
-      it(`@create an ${size}x${size} group of lands and link them`, async function () {
-        const {
-          other,
-          landContractAsOther,
-          estateContractAsOther,
-          registryContractAsOther,
-          mintQuad,
-          createEstate,
-          experienceContract,
-        } = await setupL2EstateExperienceAndLand();
+    describe('create a group of lands and link them', function () {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      [1, 3, 6, 12, 24].forEach((size) => {
+        it(`create an ${size}x${size} group of lands and link them`, async function () {
+          const {
+            other,
+            landContractAsOther,
+            estateContractAsOther,
+            registryContractAsOther,
+            mintQuad,
+            createEstateAsOther,
+            experienceContract,
+          } = await setupL2EstateExperienceAndLand();
 
-        const experienceId = 123;
+          const experienceId = 123;
 
-        await mintQuad(other, size, 48, 96);
+          await mintQuad(other, size, 48, 96);
 
-        //get coords from lands
-        const coords = [];
-        for (let i = 0; i < size; i++) {
-          for (let j = 0; j < size; j++) {
-            coords.push([(48 + i) % 24, (96 + j) % 24]);
+          //get coords from lands
+          const coords = [];
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+              coords.push([(48 + i) % 24, (96 + j) % 24]);
+            }
           }
-        }
 
-        await experienceContract.setTemplate(experienceId, coords);
-        await landContractAsOther.setApprovalForAllFor(
-          other,
-          estateContractAsOther.address,
-          true
-        );
-        const {estateId} = await createEstate({
-          sizes: [size],
-          xs: [48],
-          ys: [96],
-        });
-
-        const receipt = await waitFor(
-          registryContractAsOther.link(estateId, experienceId, 48, 96)
-        );
-        console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
-      });
-    });
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    [1, 3, 6, 12, 24].forEach((size) => {
-      it(`@unlink an ${size}x${size} group of lands by expId`, async function () {
-        const {
-          other,
-          landContractAsOther,
-          estateContractAsOther,
-          registryContractAsOther,
-          mintQuad,
-          createEstate,
-          experienceContract,
-        } = await setupL2EstateExperienceAndLand();
-
-        const experienceId = 123;
-
-        await mintQuad(other, size, 48, 96);
-
-        //get coords from lands
-        const coords = [];
-        for (let i = 0; i < size; i++) {
-          for (let j = 0; j < size; j++) {
-            coords.push([(48 + i) % 24, (96 + j) % 24]);
-          }
-        }
-
-        await experienceContract.setTemplate(experienceId, coords);
-        await landContractAsOther.setApprovalForAllFor(
-          other,
-          estateContractAsOther.address,
-          true
-        );
-        const {estateId} = await createEstate({
-          sizes: [size],
-          xs: [48],
-          ys: [96],
-        });
-
-        await registryContractAsOther.link(estateId, experienceId, 48, 96);
-
-        const receipt = await waitFor(
-          registryContractAsOther.unLink(experienceId)
-        );
-        console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
-      });
-    });
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    [1, 3, 6, 12, 24].forEach((size) => {
-      //these are out of place
-      it(`@stress test batch unlink ${
-        size * size
-      } exps from a ${size}x${size} quad`, async function () {
-        const {
-          other,
-          landContractAsOther,
-          estateContractAsOther,
-          registryContractAsOther,
-          mintQuad,
-          createEstate,
-          updateEstate,
-          experienceContract,
-        } = await setupL2EstateExperienceAndLand();
-
-        const experienceIds = [];
-
-        await mintQuad(other, size, 0, 0);
-        await mintQuad(other, size, 48, 48);
-
-        //get coords from lands
-        const coords = [];
-        let k = 0;
-        for (let i = 0; i < size; i++) {
-          for (let j = 0; j < size; j++) {
-            coords.push([0 + i, 0 + j]);
-            experienceIds[k] = k;
-            k++;
-          }
-        }
-
-        await landContractAsOther.setApprovalForAllFor(
-          other,
-          estateContractAsOther.address,
-          true
-        );
-        const {estateId} = await createEstate({
-          sizes: [size],
-          xs: [0],
-          ys: [0],
-        });
-
-        for (let i = 0; i < size * size; i++) {
-          await experienceContract.setTemplate(experienceIds[i], [[0, 0]]);
-
-          await registryContractAsOther.link(
-            estateId,
-            experienceIds[i],
-            coords[i][0],
-            coords[i][1]
+          await experienceContract.setTemplate(experienceId, coords);
+          await landContractAsOther.setApprovalForAll(
+            estateContractAsOther.address,
+            true
           );
-        }
+          const {estateId} = await createEstateAsOther({
+            sizes: [size],
+            xs: [48],
+            ys: [96],
+          });
 
-        const {updateGasUsed} = await updateEstate({
-          oldId: estateId,
-          landToRemove: {sizes: [size], xs: [0], ys: [0]},
-          landToAdd: {sizes: [size], xs: [48], ys: [48]},
+          const receipt = await waitFor(
+            registryContractAsOther.link(estateId, experienceId, 48, 96)
+          );
+          console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
         });
-        console.log(
-          `gas used to update estate for ${size}, is ${updateGasUsed}`
-        );
+      });
+    });
+    describe('unlink a group of lands by expId', function () {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      [1, 3, 6, 12, 24].forEach((size) => {
+        it(`unlink an ${size}x${size} group of lands by expId`, async function () {
+          const {
+            other,
+            landContractAsOther,
+            estateContractAsOther,
+            registryContractAsOther,
+            mintQuad,
+            createEstateAsOther,
+            experienceContract,
+          } = await setupL2EstateExperienceAndLand();
+
+          const experienceId = 123;
+
+          await mintQuad(other, size, 48, 96);
+
+          //get coords from lands
+          const coords = [];
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+              coords.push([(48 + i) % 24, (96 + j) % 24]);
+            }
+          }
+
+          await experienceContract.setTemplate(experienceId, coords);
+          await landContractAsOther.setApprovalForAll(
+            estateContractAsOther.address,
+            true
+          );
+          const {estateId} = await createEstateAsOther({
+            sizes: [size],
+            xs: [48],
+            ys: [96],
+          });
+
+          await registryContractAsOther.link(estateId, experienceId, 48, 96);
+
+          const receipt = await waitFor(
+            registryContractAsOther.unLink(experienceId)
+          );
+          console.log(`gas used for ${size}, is ${receipt.gasUsed}`);
+        });
+      });
+    });
+    describe('stress test batch unlink exps', function () {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      [1, 3, 6, 12, 24].forEach((size) => {
+        //these are out of place
+        it(`stress test batch unlink ${
+          size * size
+        } exps from a ${size}x${size} quad`, async function () {
+          const {
+            other,
+            landContractAsOther,
+            estateContractAsOther,
+            registryContractAsOther,
+            mintQuad,
+            createEstateAsOther,
+            updateEstateAsOther,
+            experienceContract,
+          } = await setupL2EstateExperienceAndLand();
+
+          const experienceIds = [];
+
+          await mintQuad(other, size, 0, 0);
+          await mintQuad(other, size, 48, 48);
+
+          //get coords from lands
+          const coords = [];
+          let k = 0;
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+              coords.push([0 + i, 0 + j]);
+              experienceIds[k] = k;
+              k++;
+            }
+          }
+
+          await landContractAsOther.setApprovalForAll(
+            estateContractAsOther.address,
+            true
+          );
+          const {estateId} = await createEstateAsOther({
+            sizes: [size],
+            xs: [0],
+            ys: [0],
+          });
+
+          for (let i = 0; i < size * size; i++) {
+            await experienceContract.setTemplate(experienceIds[i], [[0, 0]]);
+
+            await registryContractAsOther.link(
+              estateId,
+              experienceIds[i],
+              coords[i][0],
+              coords[i][1]
+            );
+          }
+          const {updateGasUsed} = await updateEstateAsOther(
+            estateId,
+            {sizes: [size], xs: [48], ys: [48]},
+            {sizes: [size], xs: [0], ys: [0]},
+            {exps: experienceIds}
+          );
+          console.log(
+            `gas used to update estate for ${size}, is ${updateGasUsed}`
+          );
+        });
       });
     });
   });

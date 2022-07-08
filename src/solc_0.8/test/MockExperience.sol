@@ -3,9 +3,9 @@ pragma solidity 0.8.2;
 
 import {ERC721Mintable} from "../test/ERC721Mintable.sol";
 import {TileLib} from "../common/Libraries/TileLib.sol";
-import {ExperienceTokenInterface} from "../polygon/child/estate/ExperienceEstateRegistry.sol";
+import {IExperienceToken} from "../common/interfaces/IExperienceToken.sol";
 
-contract MockExperience is ERC721Mintable, ExperienceTokenInterface {
+contract MockExperience is ERC721Mintable, IExperienceToken {
     using TileLib for TileLib.Tile;
 
     uint256 internal constant GRID_SIZE = 408;

@@ -41,33 +41,74 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
 
     /// @dev Emitted when an estate is updated.
     /// @param estateId The id of the newly minted token.
-    /// @param lands initial quads of lands to add
-    event EstateTokenCreated(uint256 indexed estateId, uint256[][3] lands);
+    /// @param user the user to which the estate is created
+    /// @param lands the initial lands of the estate
+    event EstateTokenCreated(uint256 indexed estateId, address user, TileWithCoordLib.TileWithCoord[] lands);
 
     /// @dev Emitted when lands are added to the estate.
     /// @param estateId The id of the previous erc721 ESTATE token.
     /// @param newId The id of the newly minted token.
-    /// @param lands The quads of lands added to the estate.
-    event EstateTokenLandsAdded(uint256 indexed estateId, uint256 indexed newId, uint256[][3] lands);
+    /// @param user the user that is adding lands
+    /// @param lands The lands of the estate.
+    event EstateTokenLandsAdded(
+        uint256 indexed estateId,
+        uint256 indexed newId,
+        address user,
+        TileWithCoordLib.TileWithCoord[] lands
+    );
+
+    /// @dev Emitted when the estate is updated
+    /// @param oldId The original id of the erc721 ESTATE token.
+    /// @param newId The updated id of the erc721 ESTATE token.
+    /// @param user the user that is updating the estate
+    /// @param lands the tiles that compose the estate
+    event EstateTokenUpdated(
+        uint256 indexed oldId,
+        uint256 indexed newId,
+        address user,
+        TileWithCoordLib.TileWithCoord[] lands
+    );
+
+    /// @dev Emitted when the user burn an estate (must be empty).
+    /// @param estateId The id of the erc721 ESTATE token.
+    /// @param from the user from which the estate is taken
+    event EstateTokenBurned(uint256 indexed estateId, address from);
 
     /// @dev Emitted when the bridge mint an estate.
     /// @param estateId The id of the  erc721 ESTATE token.
-    /// @param lands the tiles that compose the estate
-    event EstateTokenMinted(uint256 indexed estateId, TileWithCoordLib.TileWithCoord[] lands);
+    /// @param operator The msg sender
+    /// @param to the user to which the estate is minted
+    /// @param lands the tiles that compose the estate and was sent from the other layer
+    event EstateBridgeMinted(
+        uint256 indexed estateId,
+        address operator,
+        address to,
+        TileWithCoordLib.TileWithCoord[] lands
+    );
 
-    /// @dev Emitted when the bridge burn an estate.
+    /// @dev Emitted when the bridge (burner role) burn an estate.
     /// @param estateId The id of the erc721 ESTATE token.
-    event EstateBurned(uint256 indexed estateId);
+    /// @param operator The msg sender
+    /// @param from the user from which the estate is taken
+    /// @param lands the tiles that compose the estate and will be sent to the other layer
+    event EstateBridgeBurned(
+        uint256 indexed estateId,
+        address operator,
+        address from,
+        TileWithCoordLib.TileWithCoord[] lands
+    );
 
     /// @dev Emitted when the land contract address is changed
+    /// @param operator The msg sender
     /// @param oldAddress of the land contract
     /// @param newAddress of the land contract
-    event LandTokenChanged(address oldAddress, address newAddress);
+    event EstateLandTokenChanged(address indexed operator, address oldAddress, address newAddress);
 
     /// @dev Emitted when the base uri for the metadata url is changed
+    /// @param operator The msg sender
     /// @param oldURI of the metadata url
     /// @param newURI of the metadata url
-    event BaseUrlChanged(string oldURI, string newURI);
+    event EstateBaseUrlChanged(address indexed operator, string oldURI, string newURI);
 
     /// @notice initialization
     /// @param trustedForwarder address of the meta tx trustedForwarder
@@ -103,17 +144,20 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @return estateId the estate Id created
     function create(uint256[][3] calldata landToAdd) external virtual returns (uint256 estateId) {
         Estate storage estate = _mintEstate(_msgSender());
+        require(landToAdd[0].length > 0, "nothing to add");
         _addLand(estate, _msgSender(), landToAdd);
         require(estate.land.isAdjacent(), "not adjacent");
-        emit EstateTokenCreated(estate.id, landToAdd);
+        emit EstateTokenCreated(estate.id, _msgSender(), estate.land.getMap());
         return estate.id;
     }
 
     /// @notice Add the given quads (aka lands) to an Estate.
+    /// @param oldId the estate id that will be updated
     /// @param landToAdd The set of quads to add.
     /// @return estateId the new estate Id
     function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external virtual returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
+        require(landToAdd[0].length > 0, "nothing to add");
         Estate storage estate = _estate(oldId);
         // we can optimize when adding only one quad
         // The risk with this optimizations is that you keep adding lands but then you cannot remove because
@@ -128,7 +172,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
             require(estate.land.isAdjacent(), "not adjacent");
         }
         estate.id = _incrementTokenVersion(estate.id);
-        emit EstateTokenLandsAdded(oldId, estate.id, landToAdd);
+        emit EstateTokenLandsAdded(oldId, estate.id, _msgSender(), estate.land.getMap());
         return estate.id;
     }
 
@@ -145,11 +189,12 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         require(hasRole(MINTER_ROLE, _msgSender()), "not authorized");
         Estate storage estate = _mintEstate(to);
         estate.land.set(tiles);
-        emit EstateTokenMinted(estate.id, tiles);
+        emit EstateBridgeMinted(estate.id, _msgSender(), to, tiles);
         return estate.id;
     }
 
     /// @notice completely burn an estate (Used by the bridge)
+    /// @dev must be implemented for every layer, see PolygonEstateTokenV1 and EstateTokenV1
     /// @param from user that is trying to use the bridge
     /// @param estateId the id of the estate token
     /// @return tiles the list of tiles (aka lands) to add to the estate
@@ -157,23 +202,16 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         external
         virtual
         override
-        returns (TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
-        require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
-        Estate storage estate = _estate(estateId);
-        tiles = estate.land.getMap();
-        _burnEstate(estate);
-        return tiles;
-    }
+        returns (TileWithCoordLib.TileWithCoord[] memory tiles);
 
     /// @notice change the address of the land contract
     /// @param landToken the new address of the land contract
     function setLandToken(address landToken) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
+        require(landToken != address(0), "invalid address");
         address oldAddress = _s().landToken;
         _s().landToken = landToken;
-        emit LandTokenChanged(oldAddress, landToken);
+        emit EstateLandTokenChanged(_msgSender(), oldAddress, landToken);
     }
 
     /// @notice change the base uri of the metadata url
@@ -182,7 +220,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         require(hasRole(ADMIN_ROLE, _msgSender()), "not admin");
         string memory oldUri = _s().baseUri;
         _s().baseUri = baseUri;
-        emit BaseUrlChanged(oldUri, baseUri);
+        emit EstateBaseUrlChanged(_msgSender(), oldUri, baseUri);
     }
 
     /// @notice return the id of the next estate token
@@ -288,7 +326,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         uint256[][3] calldata quads
     ) internal {
         uint256 len = quads[0].length;
-        require(len > 0, "nothing to add");
         require(len == quads[1].length && len == quads[2].length, "invalid data");
         for (uint256 i; i < len; i++) {
             estate.land.set(quads[1][i], quads[2][i], quads[0][i]);
@@ -310,7 +347,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         uint256 estateId = estate.id;
         delete _s().estate[estateId.storageId()];
         super._burn(estateId);
-        emit EstateBurned(estateId);
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to

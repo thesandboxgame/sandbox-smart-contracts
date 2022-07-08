@@ -14,7 +14,8 @@ interface IEstateExperienceRegistry {
 
     function unLink(uint256 expId) external;
 
-    function batchUnLink(uint256[] calldata expIdsToUnlink) external;
+    // Called only by the estate contract
+    function batchUnLinkFrom(address from, uint256[] calldata expIdsToUnlink) external;
 
     function isLinked(uint256 expId) external view returns (bool);
 

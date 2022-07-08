@@ -326,7 +326,7 @@ library MapLib {
             // !intersect
             return false;
         }
-        return self.values[idx - 1].tile.intersect(x, y, size);
+        return self.values[idx - 1].intersect(x, y, size);
     }
 
     /// @notice Check if a map has at least one bit in common with some TileWithCoord

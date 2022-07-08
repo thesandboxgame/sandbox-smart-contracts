@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 import {EstateBaseToken} from "../estate/EstateBaseToken.sol";
 import {EstateTokenIdHelperLib} from "../estate/EstateTokenIdHelperLib.sol";
 import {TileLib} from "../common/Libraries/TileLib.sol";
+import {TileWithCoordLib} from "../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../common/Libraries/MapLib.sol";
 
 contract TestEstateBaseToken is EstateBaseToken {
@@ -76,5 +77,17 @@ contract TestEstateBaseToken is EstateBaseToken {
     ) external pure returns (MapLib.TranslateResult memory) {
         TileLib.Tile memory t;
         return MapLib.translate(TileLib.set(t, 0, 0, size), x, y);
+    }
+
+    // Abusing the estate id to set some coordinates
+    function burnEstate(address, uint256 estateId)
+        external
+        pure
+        override
+        returns (TileWithCoordLib.TileWithCoord[] memory)
+    {
+        TileWithCoordLib.TileWithCoord[] memory tiles = new TileWithCoordLib.TileWithCoord[](1);
+        tiles[0] = TileWithCoordLib.set(TileWithCoordLib.init(estateId, estateId), estateId, estateId, 24);
+        return tiles;
     }
 }

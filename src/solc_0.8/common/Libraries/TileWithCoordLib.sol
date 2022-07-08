@@ -126,6 +126,22 @@ library TileWithCoordLib {
         return self.tile.contain(xi % 24, yi % 24, size);
     }
 
+    /// @notice Check if the TileWithCoord has any bit in common with a square
+    /// @param self the TileWithCoord where the check is done
+    /// @param xi the x coordinate of the square
+    /// @param yi the y coordinate of the square
+    /// @param size the size of the square
+    /// @return true if there is at least one bit set in the TileWithCoords and the square
+    function intersect(
+        TileWithCoord memory self,
+        uint256 xi,
+        uint256 yi,
+        uint256 size
+    ) internal pure returns (bool) {
+        require(getX(self) == xi / 24 && getY(self) == yi / 24, "Invalid tile coordinates");
+        return self.tile.intersect(xi % 24, yi % 24, size);
+    }
+
     /// @notice return the key value stored in the TileWithCoord
     /// @param self the TileWithCoord to get the key from
     /// @return the key value

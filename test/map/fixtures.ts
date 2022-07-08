@@ -136,6 +136,12 @@ export function getEmptyTile(height = 24, width = 24): boolean[][] {
   );
 }
 
+export function getFullTile(height = 24, width = 24): boolean[][] {
+  return Array.from({length: height}, () =>
+    Array.from({length: width}, () => true)
+  );
+}
+
 export function getEmptyExtendedTile(): boolean[][] {
   return getEmptyTile(8 + 24 + 8, 24 * 3);
 }
