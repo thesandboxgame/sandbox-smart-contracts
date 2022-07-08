@@ -100,7 +100,17 @@ describe('Multi_Giveaway', function () {
         )
       ).to.be.reverted;
     });
+    it('Returns the expiry time of a giveaway', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContractAsAdmin, allMerkleRoots} = setUp;
 
+      expect(
+        await giveawayContractAsAdmin.getExpiryTime(allMerkleRoots[0])
+      ).to.be.equal(
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+      );
+    });
     it('User can get their claimed status', async function () {
       const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
