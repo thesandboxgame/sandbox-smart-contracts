@@ -88,7 +88,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             bytes memory metadata = abi.encode(metadataHashes[i]);
-            if (childToken.isValidId(ids[i])) {
+            if (childToken.doesHashExist(ids[i])) {
                 _depositMinted(to, ids[i], values[i], metadata);
             } else {
                 childToken.mint(to, ids[i], values[i], metadata);
