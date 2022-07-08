@@ -31,7 +31,7 @@ type Options = {
   mintSingleAsset?: number; // mint a single asset and add to blank testData for mintSingleAsset number of users
   numberOfAssets?: number; // specify a given number of assets to mint and test
   badData?: boolean; // set the merkle tree up with bad contract addresses and input values for ERC1155, ERC721 and ERC20 assets
-  expiryTime?: number; // set the expiry time of the giveaway
+  duration?: number; // set the expiry time of the giveaway
 };
 
 export const setupTestGiveaway = withSnapshot(
@@ -46,7 +46,7 @@ export const setupTestGiveaway = withSnapshot(
       mintSingleAsset,
       numberOfAssets,
       badData,
-      expiryTime,
+      duration,
     } = options || {};
     const {
       deployer,
@@ -361,20 +361,18 @@ export const setupTestGiveaway = withSnapshot(
     const allClaims = [claims0];
     const allTrees = [];
 
-    let expiryTimeValue;
-    if (expiryTime) {
-      expiryTimeValue = expiryTime;
+    let expiryTime;
+    if (duration) {
+      const latestBlock = await ethers.provider.getBlock('latest');
+      expiryTime = latestBlock.timestamp + duration;
     } else {
-      expiryTimeValue =
+      expiryTime =
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
     }
 
     // Single giveaway
     const hashArray = createDataArrayMultiClaim(claims0);
-    await giveawayContractAsAdmin.addNewGiveaway(
-      merkleRootHash0,
-      expiryTimeValue
-    ); // no expiry
+    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, expiryTime);
     allMerkleRoots.push(merkleRootHash0);
     allTrees.push(new MerkleTree(hashArray));
 
