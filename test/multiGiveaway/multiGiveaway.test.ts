@@ -1070,13 +1070,11 @@ describe('Multi_Giveaway', function () {
 
     it('User cannot claim after the expiryTime', async function () {
       const duration = 30 * 24 * 60 * 60;
-      const latestBlock = await ethers.provider.getBlock('latest');
-      const periodFinish = latestBlock.timestamp + duration;
 
       const options = {
         mint: true,
         sand: true,
-        expiryTime: periodFinish,
+        duration: duration,
       };
       const setUp = await setupTestGiveaway(options);
       const {
