@@ -213,17 +213,28 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// -packId unused packId that will let you predict the resulting tokenId
     /// -metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata)
     /// @param assets data (gems and catalyst data)
-    function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
-        external
-        override
-        returns (uint256[] memory assetIds)
-    {
-        require(assets.length != 0, "INVALID_0_ASSETS");
+    function mintMultipleWithCatalyst(
+        MintData calldata mintData,
+        AssetData[] memory assets,
+        uint256[] memory supplies,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
+    ) external override returns (uint256[] memory assetIds) {
+        uint256 assetsLength = assets.length;
+        require(assetsLength != 0, "INVALID_0_ASSETS");
+        require(assetsLength == supplies.length, "AssetMinter: supplies and assets length mismatch");
         require(mintData.to != address(0), "INVALID_TO_ZERO_ADDRESS");
-
+        require(
+            _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
+            "AssetMinter: invalid numberOfCatalystBurnPerAsset value"
+        );
+        require(
+            _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
+            "AssetMinter: invalid numberOfGemsBurnPerAsset value"
+        );
         require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
 
-        uint256[] memory supplies = _handleMultipleAssetRequirements(mintData.from, assets);
+        _handleMultipleAssetRequirements(mintData.from, assets, supplies);
         assetIds = _assetERC1155.mintMultiple(
             mintData.from,
             mintData.packId,
@@ -240,15 +251,21 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         return assetIds;
     }
 
-    function mintMultipleWithoutCatalyst(MintData calldata mintData, uint256[] calldata supplies)
-        external
-        returns (uint256[] memory assetIds)
-    {
-        require(supplies.length != 0, "INVALID_0_ASSETS");
+    function mintMultipleWithoutCatalyst(
+        MintData calldata mintData,
+        uint256[] calldata supplies,
+        uint16[] calldata assetTypesIds
+    ) external override returns (uint256[] memory assetIds) {
+        uint256 suppliesLength = supplies.length;
+        require(suppliesLength != 0, "INVALID_0_ASSETS");
+        require(suppliesLength == assetTypesIds.length, "AssetMinter: supplies and assets length mismatch");
         require(mintData.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
-        for (uint256 i = 0; i < supplies.length; i++) {
-            require(supplies[i] != 0, "AssetMinter: quantity cannot be 0");
+        for (uint256 i = 0; i < suppliesLength; i++) {
+            require(
+                supplies[i] == quantitiesByAssetTypeId[assetTypesIds[i]],
+                "AssetMinter: Invalid quantitiesByAssetType value"
+            );
         }
         assetIds = _assetERC1155.mintMultiple(
             mintData.from,
@@ -273,12 +290,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @dev Handler for dealing with assets when minting multiple at once.
     /// @param from The original address that signed the transaction.
     /// @param assets An array of AssetData structs to define how the total gems and catalysts are to be allocated.
-    /// @return supplies An array of the quantities for each asset being minted.
-    function _handleMultipleAssetRequirements(address from, AssetData[] memory assets)
-        internal
-        returns (uint256[] memory supplies)
-    {
-        supplies = new uint256[](assets.length);
+    function _handleMultipleAssetRequirements(
+        address from,
+        AssetData[] memory assets,
+        uint256[] memory supplies
+    ) internal {
         uint256[] memory catalystsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfCatalystContracts());
         uint256[] memory gemsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfGemContracts());
 
@@ -298,7 +314,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
             uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
             require(assets[i].gemIds.length <= maxGems, "AssetMinter: too many gems");
-            supplies[i] = quantitiesByCatalystId[assets[i].catalystId];
+            require(
+                supplies[i] == quantitiesByCatalystId[assets[i].catalystId],
+                "AssetMinter: Invalid quantitiesByAssetType value"
+            );
         }
         _batchBurnCatalysts(from, catalystsToBurn);
         _batchBurnGems(from, gemsToBurn);
