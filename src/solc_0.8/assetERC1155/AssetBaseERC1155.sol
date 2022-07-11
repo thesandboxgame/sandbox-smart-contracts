@@ -220,9 +220,9 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(wasEverMinted(id), "FT_!MINTED");
+        require(doesHashExist(id), "INVALID_ID"); // Note: doesHashExist must track ERC721s
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
+        require(doesHashExist(collectionId), "UNMINTED_COLLECTION");
         return collectionId;
     }
 
@@ -231,7 +231,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @return whether the id is a collection.
     function isCollection(uint256 id) external view returns (bool) {
         uint256 collectionId = id & ERC1155ERC721Helper.NOT_NFT_INDEX & ERC1155ERC721Helper.NOT_IS_NFT;
-        return wasEverMinted(collectionId);
+        return doesHashExist(collectionId);
     }
 
     /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
@@ -244,15 +244,21 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     /// end collection methods ---------------------------------------------------------------------------------------
 
-    function wasEverMinted(uint256 id) public view returns (bool) {
-        return _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
+    /// @notice Whether or not an ERC1155 or ERC721 tokenId has a valid structure and the metadata hash exists.
+    /// @param id the token to check.
+    /// @return bool whether a given id has a valid structure.
+    /// @dev if IS_NFT > 0 then PACK_NUM_FT_TYPES may be 0
+    function doesHashExist(uint256 id) public view returns (bool) {
+        return (((id & ERC1155ERC721Helper.PACK_INDEX) <=
+            ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) / ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+            _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0);
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @param id token to get the uri of.
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given ERC1155 asset.
+    /// @param id ERC1155 token to get the uri of.
     /// @return URI string
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "FT_!MINTED");
+    function uri(uint256 id) public view returns (string memory) {
+        require(doesHashExist(id), "INVALID_ID"); // prevent returning invalid uri
         return ERC1155ERC721Helper.toFullURI(_metadataHash[id & ERC1155ERC721Helper.URI_ID], id);
     }
 
@@ -261,7 +267,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type of which to get the balance of.
     /// @return the balance of `owner` for the token type `id`.
     function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        require(wasEverMinted(id), "token was never minted");
+        require(doesHashExist(id), "INVALID_ID");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
@@ -283,7 +289,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(id & ERC1155ERC721Helper.IS_NFT == 0, "UNIQUE_ERC1155");
         uint24 tokenCollectionIndex = uint24(_nextCollectionIndex[id]) + 1;
         _nextCollectionIndex[id] = tokenCollectionIndex;
-        string memory metaData = tokenURI(id);
+        string memory metaData = uri(id);
         uint256 newId =
             id +
                 ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // newId is always an NFT; IS_NFT is 1
@@ -295,8 +301,11 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return newId;
     }
 
+    /// @notice Set the ERC721 contract.
+    /// @param assetERC721 the contract address to set the ERC721 contract to.
+    /// @return true if the operation completes successfully.
     function setAssetERC721(IAssetERC721 assetERC721) external returns (bool) {
-        require(_admin == _msgSender(), "AUTHORIZED");
+        require(_admin == _msgSender(), "!AUTHORIZED");
         _assetERC721 = assetERC721;
         emit AssetERC721Set(assetERC721);
         return true;
@@ -315,6 +324,14 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(owner != address(0), "OWNER==0");
         require(operator != address(0), "OPERATOR==0");
         return _operatorsForAll[owner][operator] || _superOperators[operator];
+    }
+
+    /// @notice Queries the chainIndex that a token was minted on originally.
+    /// @param id the token id to query.
+    /// @return chainIndex the chainIndex that the token was minted on originally.
+    /// @dev take care not to confuse chainIndex with chain ID.
+    function getChainIndex(uint256 id) external pure returns (uint256) {
+        return uint8((id & ERC1155ERC721Helper.CHAIN_INDEX) / ERC1155ERC721Helper.CHAIN_INDEX_OFFSET_MULTIPLIER);
     }
 
     function __ERC2771Handler_initialize(address forwarder) internal {

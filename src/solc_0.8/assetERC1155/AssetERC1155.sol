@@ -5,9 +5,6 @@ import "./AssetBaseERC1155.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetERC1155 is AssetBaseERC1155 {
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 8);
-    uint256 public constant CHAIN_INDEX = 0x00000000000000000000000000000000000000007F8000000000000000000000;
-
     event PredicateSet(address predicate);
 
     function initialize(
@@ -143,10 +140,6 @@ contract AssetERC1155 is AssetBaseERC1155 {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
 
-    function getChainIndex(uint256 id) external pure returns (uint256) {
-        return uint8((id & CHAIN_INDEX) / CHAIN_INDEX_OFFSET_MULTIPLIER);
-    }
-
     function _generateTokenId(
         address creator,
         uint256 supply,
@@ -161,7 +154,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR uint160
             (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0), 1 bit
             uint256(_chainIndex) *
-            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1, uint8
+            ERC1155ERC721Helper.CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1, uint8
             uint256(packId) *
             ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack), uint40
             numFTs *

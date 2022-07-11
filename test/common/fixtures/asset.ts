@@ -17,7 +17,7 @@ import {AbiCoder} from 'ethers/lib/utils';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 
-const ipfsHashString =
+export const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -48,7 +48,11 @@ export const assetFixtures = async function () {
 
   let id = 0;
 
-  async function mintAsset(to: string, value: number, hash = ipfsHashString) {
+  async function mintAssetERC1155(
+    to: string,
+    value: number,
+    hash = ipfsHashString
+  ) {
     // Asset to be minted
     const creator = to;
     const packId = ++id;
@@ -112,7 +116,7 @@ export const assetFixtures = async function () {
     Asset,
     users,
     minter,
-    mintAsset,
+    mintAsset: mintAssetERC1155,
     assetTunnel,
     trustedForwarder,
   };
@@ -277,15 +281,13 @@ export const originalAssetFixtures = async function () {
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
 
-  const {assetBouncerAdmin} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
-  const originalAsset = await ethers.getContract(
-    'TestAsset',
-    assetBouncerAdmin
-  );
+  // deployer is the original assetBouncerAdmin
+  const originalAsset = await ethers.getContract('Asset', deployer);
   await waitFor(originalAsset.setBouncer(minter, true));
 
-  const Asset = await ethers.getContract('TestAsset', minter);
+  const Asset = await ethers.getContract('Asset', minter);
 
   let id = 0;
 
@@ -329,5 +331,6 @@ export const originalAssetFixtures = async function () {
     users,
     minter,
     mintAsset,
+    getNamedAccounts,
   };
 };

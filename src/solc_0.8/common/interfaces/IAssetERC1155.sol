@@ -85,7 +85,7 @@ interface IAssetERC1155 {
 
     function creatorOf(uint256 id) external view returns (address);
 
-    function wasEverMinted(uint256 id) external view returns (bool);
+    function doesHashExist(uint256 id) external view returns (bool);
 
     function isSuperOperator(address who) external view returns (bool);
 
@@ -107,7 +107,7 @@ interface IAssetERC1155 {
 
     function supportsInterface(bytes4 id) external returns (bool);
 
-    function tokenURI(uint256 id) external returns (string memory);
+    function uri(uint256 id) external returns (string memory);
 
     function setAssetERC721(IAssetERC721 assetERC721) external;
 
