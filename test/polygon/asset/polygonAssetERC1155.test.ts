@@ -1,5 +1,10 @@
 import {setupPolygonAsset} from './fixtures';
-import {waitFor, getAssetChainIndex, expectEventWithArgs} from '../../utils';
+import {
+  waitFor,
+  getNftIndex,
+  getAssetChainIndex,
+  expectEventWithArgs,
+} from '../../utils';
 import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {ethers} from 'hardhat';
@@ -12,7 +17,6 @@ const zeroAddress = constants.AddressZero;
 // Notes on collections:
 // The ERC1155 `collectionIndex` increments by 1 for each tokenId within that pack (using mintMultiple)
 // The ERC1155 `collectionIndexOf` are all the same as each other within that packID (using mintMultiple)
-// The ERC721 `collectionIndexOf` is 1 more than the ERC1155 index that it was extracted from
 // The ERC721 `collectionIndexOf` increments by 1 for each new extraction from that ERC1155's supply
 
 describe('PolygonAssetERC1155.sol', function () {
@@ -96,7 +100,14 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith(`BALANCE_TOO_LOW`);
     });
 
-    it('can get the chainIndex from the tokenId', async function () {
+    it('NFT index is 0 for a new ERC1155 tokenId', async function () {
+      const {users, mintAsset} = await setupPolygonAsset();
+      const tokenId = await mintAsset(users[1].address, 11);
+      const nftIndex = getNftIndex(tokenId);
+      expect(nftIndex).to.be.equal(0);
+    });
+
+    it('can get chainIndex from tokenId', async function () {
       const {users, mintAsset} = await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 11);
       const chainIndex = getAssetChainIndex(tokenId);
@@ -585,36 +596,6 @@ describe('PolygonAssetERC1155.sol', function () {
         ).extractERC721From(extractor, tokenId, zeroAddress)
       ).to.be.revertedWith('TO==0');
     });
-    it('can correctly obtain ERC721 metadata after extraction', async function () {
-      const {
-        PolygonAssetERC1155,
-        extractor,
-        mintAsset,
-        PolygonAssetERC721,
-      } = await setupPolygonAsset();
-      const tokenId = await mintAsset(extractor, 10);
-      const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
-      expect(URI).to.be.equal(
-        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
-      );
-      const receipt = await waitFor(
-        PolygonAssetERC1155.connect(
-          ethers.provider.getSigner(extractor)
-        ).extractERC721From(extractor, tokenId, extractor)
-      );
-
-      const extractionEvent = await expectEventWithArgs(
-        PolygonAssetERC1155,
-        receipt,
-        'Extraction'
-      );
-      const nftId = extractionEvent.args[1];
-
-      const nftURI = await PolygonAssetERC721.callStatic.tokenURI(nftId);
-      expect(nftURI).to.be.equal(
-        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
-      );
-    });
     it('can extract more than once', async function () {
       const {
         PolygonAssetERC1155,
@@ -694,7 +675,7 @@ describe('PolygonAssetERC1155.sol', function () {
       ).callStatic.extractERC721From(extractor, tokenId, extractor);
       expect(tokenId).not.to.be.equal(newId);
     });
-    it('can check collectionOf for new ERC721', async function () {
+    it('can check collectionOf for new ERC721 gives the ERC1155 ID', async function () {
       const {
         PolygonAssetERC1155,
         extractor,
@@ -712,13 +693,13 @@ describe('PolygonAssetERC1155.sol', function () {
       const newId = txEvent.args.newId.toString();
       expect(tokenId).not.to.be.equal(newId);
       const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
-      expect(collectionOf).not.to.be.equal(tokenId);
+      expect(collectionOf).to.be.equal(tokenId);
       const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
       expect(isCollection).to.be.true;
       const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         tokenId
       );
-      expect(collectionIndexOf).to.be.equal(1);
+      expect(collectionIndexOf).to.be.equal(0);
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
       expect(nftCollection).to.be.equal(collectionOf);
       const nftIsCollection = await PolygonAssetERC1155.isCollection(newId);
@@ -726,7 +707,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const nftCollectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         newId
       );
-      expect(nftCollectionIndexOf).to.be.equal(2);
+      expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can still check collectionOf for new ERC721 if I burn my ERC1155', async function () {
       const {
@@ -755,7 +736,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         tokenId
       );
-      expect(collectionIndexOf).to.be.equal(1);
+      expect(collectionIndexOf).to.be.equal(0);
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
       expect(nftCollection).to.be.equal(collectionOf);
       const nftIsCollection = await PolygonAssetERC1155.isCollection(newId);
@@ -763,7 +744,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const nftCollectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         newId
       );
-      expect(nftCollectionIndexOf).to.be.equal(2);
+      expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can extract my last ERC1155 to an ERC721 (as long as supply was > 1 originally)', async function () {
       const {
@@ -822,13 +803,13 @@ describe('PolygonAssetERC1155.sol', function () {
       const newId = txEvent.args.newId.toString();
       expect(tokenId).not.to.be.equal(newId);
       const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
-      expect(collectionOf).not.to.be.equal(tokenId);
+      expect(collectionOf).to.be.equal(tokenId);
       const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
       expect(isCollection).to.be.true;
       const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         tokenId
       );
-      expect(collectionIndexOf).to.be.equal(1);
+      expect(collectionIndexOf).to.be.equal(0);
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
       expect(nftCollection).to.be.equal(collectionOf);
       const nftIsCollection = await PolygonAssetERC1155.isCollection(newId);
@@ -836,7 +817,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const nftCollectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         newId
       );
-      expect(nftCollectionIndexOf).to.be.equal(collectionIndexOf.add(1));
+      expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can burn then extract and then burn some more', async function () {
       const {
@@ -939,7 +920,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionOf_0 = await PolygonAssetERC1155.collectionOf(
         tokenIds[0]
       );
-      expect(collectionOf_0).not.to.be.equal(tokenIds[0]);
+      expect(collectionOf_0).to.be.equal(tokenIds[0]);
       expect(collectionOf_0).not.to.be.equal(tokenIds[1]);
       expect(collectionOf_0).not.to.be.equal(tokenIds[2]);
       expect(collectionOf_0).not.to.be.equal(tokenIds[3]);
@@ -951,13 +932,13 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf_0 = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[0]
       );
-      expect(collectionIndexOf_0).to.be.equal(1);
+      expect(collectionIndexOf_0).to.be.equal(0);
 
       // [1]
       const collectionOf_1 = await PolygonAssetERC1155.collectionOf(
         tokenIds[1]
       );
-      expect(collectionOf_1).not.to.be.equal(tokenIds[1]);
+      expect(collectionOf_1).to.be.equal(tokenIds[1]);
 
       const isCollection_1 = await PolygonAssetERC1155.isCollection(
         tokenIds[1]
@@ -966,13 +947,13 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf_1 = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[1]
       );
-      expect(collectionIndexOf_1).to.be.equal(1);
+      expect(collectionIndexOf_1).to.be.equal(0);
 
       // [2]
       const collectionOf_2 = await PolygonAssetERC1155.collectionOf(
         tokenIds[2]
       );
-      expect(collectionOf_2).not.to.be.equal(tokenIds[2]);
+      expect(collectionOf_2).to.be.equal(tokenIds[2]);
 
       const isCollection_2 = await PolygonAssetERC1155.isCollection(
         tokenIds[2]
@@ -981,13 +962,13 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf_2 = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[2]
       );
-      expect(collectionIndexOf_2).to.be.equal(1);
+      expect(collectionIndexOf_2).to.be.equal(0);
 
       // [3]
       const collectionOf_3 = await PolygonAssetERC1155.collectionOf(
         tokenIds[3]
       );
-      expect(collectionOf_3).not.to.be.equal(tokenIds[3]);
+      expect(collectionOf_3).not.to.be.equal(tokenIds[3]); // has supply 1 so is not equal
 
       const isCollection_3 = await PolygonAssetERC1155.isCollection(
         tokenIds[3]
@@ -996,7 +977,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf_3 = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[3]
       );
-      expect(collectionIndexOf_3).to.be.equal(1);
+      expect(collectionIndexOf_3).to.be.equal(0);
 
       // ERC721 - 1
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
@@ -1006,10 +987,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const nftCollectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         newId
       );
-      // The ERC1155 collectionIndex increments by 1 for each tokenId within that pack
-      // The ERC1155 collectionIndexOf are all the same as each other (1)
-      // The ERC721 collectionIndexOf is one more than the ERC1155 index that it was extracted from (2)
-      expect(nftCollectionIndexOf).to.be.equal(collectionIndexOf_2.add(1));
+      expect(nftCollectionIndexOf).to.be.equal(1);
 
       const receiptSecondExtraction = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -1032,7 +1010,7 @@ describe('PolygonAssetERC1155.sol', function () {
         newId2
       );
       // The ERC721 collectionIndexOf increments by 1 for each new extraction
-      expect(nftCollectionIndexOf2).to.be.equal(nftCollectionIndexOf.add(1));
+      expect(nftCollectionIndexOf2).to.be.equal(2);
     });
     it('can see the index of my token after burning another token in the pack', async function () {
       const {
@@ -1059,7 +1037,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[2]
       );
-      expect(collectionIndexOf).to.be.equal(1);
+      expect(collectionIndexOf).to.be.equal(0);
 
       // ERC721
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
@@ -1114,7 +1092,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
         tokenIds[2]
       );
-      expect(collectionIndexOf).to.be.equal(1);
+      expect(collectionIndexOf).to.be.equal(0);
 
       // ERC721
       const nftCollection = await PolygonAssetERC1155.collectionOf(newId);
@@ -1176,6 +1154,210 @@ describe('PolygonAssetERC1155.sol', function () {
 
       const wasEverMinted = await PolygonAssetERC1155.wasEverMinted(tokenId);
       expect(wasEverMinted).to.be.true;
+    });
+
+    it('can get the URI for an asset of amount 2', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 2);
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).extractERC721From(extractor, tokenId, extractor);
+      const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
+      expect(URI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+    });
+
+    it('can correctly obtain ERC721 metadata after extraction', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+        PolygonAssetERC721,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 10);
+      const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
+      expect(URI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+      const receipt = await waitFor(
+        PolygonAssetERC1155.connect(
+          ethers.provider.getSigner(extractor)
+        ).extractERC721From(extractor, tokenId, extractor)
+      );
+
+      const extractionEvent = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt,
+        'Extraction'
+      );
+      const nftId = extractionEvent.args[1];
+
+      const nftURI = await PolygonAssetERC721.callStatic.tokenURI(nftId);
+      expect(nftURI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+    });
+
+    it('get the same URI when extract a 721', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 2);
+      const nftId = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).callStatic.extractERC721From(extractor, tokenId, extractor);
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).extractERC721From(extractor, tokenId, extractor);
+      const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
+      expect(URI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+      const nftURI = await PolygonAssetERC1155.callStatic.tokenURI(
+        nftId.toString()
+      );
+      expect(URI).to.be.equal(nftURI);
+      expect(nftURI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+    });
+
+    it('get the same URIs for extracted 721s from same ERC1155 collection', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 3);
+      const nftId1 = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).callStatic.extractERC721From(extractor, tokenId, extractor);
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).extractERC721From(extractor, tokenId, extractor);
+      const nftId2 = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).callStatic.extractERC721From(extractor, tokenId, extractor);
+      const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
+      expect(URI).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+      const nftURI1 = await PolygonAssetERC1155.callStatic.tokenURI(
+        nftId1.toString()
+      );
+      const nftURI2 = await PolygonAssetERC1155.callStatic.tokenURI(
+        nftId2.toString()
+      );
+
+      expect(nftURI1).to.be.equal(nftURI2);
+      expect(nftURI1).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+      expect(nftURI2).to.be.equal(
+        'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
+      );
+    });
+
+    it('can get the chainId from extracted 721s and it does not cut across NFT_INDEX', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 3);
+      const chainIndexOriginal = getAssetChainIndex(tokenId);
+      expect(chainIndexOriginal).to.be.equal(1);
+
+      const nftId1 = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).callStatic.extractERC721From(extractor, tokenId, extractor);
+
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).extractERC721From(extractor, tokenId, extractor);
+
+      const chainIndex1 = getAssetChainIndex(nftId1);
+      expect(chainIndex1).to.be.equal(1);
+
+      // NFT_INDEX
+      // get chars 48 to 56 (start count from left)
+      const nftIndex1 = getNftIndex(nftId1);
+      expect(nftIndex1).to.be.equal(1);
+
+      const nftId2 = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).callStatic.extractERC721From(extractor, tokenId, extractor);
+
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(extractor)
+      ).extractERC721From(extractor, tokenId, extractor);
+
+      const chainIndex2 = getAssetChainIndex(nftId2);
+      expect(chainIndex2).to.be.equal(1);
+
+      const nftIndex2 = getNftIndex(nftId2);
+      expect(nftIndex2).to.be.equal(2);
+    });
+
+    it('can use chainIndex getter to obtain chainIndex for a given ID', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 3);
+      const chainIndexFromId = getAssetChainIndex(tokenId);
+      const chainIndexContract = await PolygonAssetERC1155.getChainIndex(
+        tokenId
+      );
+      expect(chainIndexFromId).to.be.equal(chainIndexContract);
+    });
+
+    it('collectionOf for ERC1155 with supply == 1 is NOT equal to tokenId because IS_NFT is 1', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 1);
+
+      const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
+      expect(collectionOf).not.to.be.equal(tokenId); // this is not equal, because tokenId has IS_NFT set to 1. When supply > 1 these are equal
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955808000000000000000800000 tokenId
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 collectionOf
+      const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
+      expect(isCollection).to.be.true;
+      const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
+        tokenId
+      );
+      expect(collectionIndexOf).to.be.equal(0);
+    });
+
+    it('collectionOf for ERC1155 with supply > 1 is equal to tokenId', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
+      const tokenId = await mintAsset(extractor, 2);
+
+      const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
+      expect(collectionOf).to.be.equal(tokenId); // this is equal
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 tokenId
+      // 0x14dc79964da2c08b23698b3d3cc7ca32193d9955008000000000000000800000 collectionOf
+      const isCollection = await PolygonAssetERC1155.isCollection(tokenId);
+      expect(isCollection).to.be.true;
+      const collectionIndexOf = await PolygonAssetERC1155.collectionIndexOf(
+        tokenId
+      );
+      expect(collectionIndexOf).to.be.equal(0);
     });
   });
 });

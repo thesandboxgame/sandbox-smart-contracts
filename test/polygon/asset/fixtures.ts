@@ -24,6 +24,9 @@ import {
 
 import {depositViaChildChainManager} from '../sand/fixtures';
 
+const ipfsHashString =
+  '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
 const polygonAssetFixtures = async function () {
   const {deployer, sandAdmin} = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
@@ -111,8 +114,6 @@ const polygonAssetFixtures = async function () {
   await deployerAccount.FxRoot.setFxChild(FxChild.address);
 
   let id = 0;
-  const ipfsHashString =
-    '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
   async function mintAsset(to: string, value: number, hash = ipfsHashString) {
     // Asset to be minted

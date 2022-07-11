@@ -17,6 +17,9 @@ import {AbiCoder} from 'ethers/lib/utils';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 
+const ipfsHashString =
+  '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetFixtures = async function () {
   const unnamedAccounts = await getUnnamedAccounts();
@@ -44,8 +47,6 @@ export const assetFixtures = async function () {
   );
 
   let id = 0;
-  const ipfsHashString =
-    '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
   async function mintAsset(to: string, value: number, hash = ipfsHashString) {
     // Asset to be minted
@@ -55,6 +56,7 @@ export const assetFixtures = async function () {
     const owner = to;
     const data = '0x';
 
+    // Mint on L2 with NO data. This generates the tokenId as well as the tokenURI
     const receipt = await waitFor(
       polygonAssetERC1155
         .connect(ethers.provider.getSigner(minter))
@@ -79,21 +81,18 @@ export const assetFixtures = async function () {
       .connect(ethers.provider.getSigner(to))
       .setApprovalForAll(polygonAssetTunnel.address, true);
 
+    // "Withdraw" to L1 -------------------------------------------------------------------
     const testMetadataHashArray = [];
 
-    testMetadataHashArray.push(
-      ethers.utils.formatBytes32String('metadataHash')
-    );
+    testMetadataHashArray.push(ipfsHashString);
 
-    const MOCK_DATA = new AbiCoder().encode(
-      ['bytes32[]'],
-      [testMetadataHashArray]
-    );
+    const MOCK_DATA = new AbiCoder().encode(['bytes32'], testMetadataHashArray);
 
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
       .batchWithdrawToRoot(to, [tokenId], [value]);
 
+    // Mint on L1 to simulate release from tunnel -----------------------------------------
     const admin = await Asset.getAdmin();
     await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
     await waitFor(
@@ -102,6 +101,8 @@ export const assetFixtures = async function () {
       ](to, tokenId, value, MOCK_DATA)
     );
 
+    // Return the tokenId which exists on L1 (owned by `to`) and on L2 (owned by L2 tunnel)
+    // Note that the chainId contained in the tokenId will be the L2 chainId
     return tokenId;
   }
 
@@ -267,4 +268,66 @@ export const signAuthMessageAs = async (
   );
 
   return wallet.signMessage(ethers.utils.arrayify(hashedData));
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const originalAssetFixtures = async function () {
+  const unnamedAccounts = await getUnnamedAccounts();
+  const otherAccounts = [...unnamedAccounts];
+  const minter = otherAccounts[0];
+  otherAccounts.splice(0, 1);
+
+  const {assetBouncerAdmin} = await getNamedAccounts();
+
+  const originalAsset = await ethers.getContract(
+    'TestAsset',
+    assetBouncerAdmin
+  );
+  await waitFor(originalAsset.setBouncer(minter, true));
+
+  const Asset = await ethers.getContract('TestAsset', minter);
+
+  let id = 0;
+
+  async function mintAsset(to: string, value: number, hash = ipfsHashString) {
+    // Asset to be minted
+    const creator = to;
+    const packId = ++id;
+    const supply = value;
+    const rarity = 1;
+    const owner = to;
+    const data = '0x';
+
+    const receipt = await waitFor(
+      originalAsset
+        .connect(ethers.provider.getSigner(minter))
+        ['mint(address,uint40,bytes32,uint256,uint8,address,bytes)'](
+          creator,
+          packId,
+          hash,
+          supply,
+          rarity, // now deprecated and removed
+          owner,
+          data
+        )
+    );
+
+    const transferEvent = await expectEventWithArgs(
+      originalAsset,
+      receipt,
+      'TransferSingle'
+    );
+    const tokenId = transferEvent.args[3];
+    return tokenId;
+  }
+
+  const users = await setupUsers(otherAccounts, {Asset});
+
+  return {
+    originalAsset,
+    Asset,
+    users,
+    minter,
+    mintAsset,
+  };
 };

@@ -9,7 +9,8 @@ import "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
 contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 8);
+    uint256 public constant CHAIN_INDEX = 0x00000000000000000000000000000000000000007F8000000000000000000000;
     address public _childChainManager;
 
     function initialize(
@@ -170,6 +171,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
 
+    function getChainIndex(uint256 id) external pure returns (uint256) {
+        return uint8((id & CHAIN_INDEX) / CHAIN_INDEX_OFFSET_MULTIPLIER);
+    }
+
     function _allocateIds(
         address creator,
         uint256[] memory supplies,
@@ -218,16 +223,17 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         uint16 packIndex
     ) internal view returns (uint256) {
         require(supply > 0 && supply <= ERC1155ERC721Helper.MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
+        require(numFTs >= 0 && numFTs <= ERC1155ERC721Helper.MAX_NUM_FT, "NUM_FT_OUT_OF_BOUNDS");
         return
             uint256(uint160(creator)) *
-            ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0)
+            ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR uint160
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0), 1 bit
             uint256(_chainIndex) *
-            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
+            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1, uint8
             uint256(packId) *
-            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack)
+            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack), uint40
             numFTs *
-            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, numFTs is 1 if supply > 1, otherwise 0
-            packIndex; // packIndex (position in the pack), is 0 for newly minted token type
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
+            packIndex; // packIndex (position in the pack), 11 bits
     }
 }
