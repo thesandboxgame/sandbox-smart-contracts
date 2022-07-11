@@ -244,7 +244,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     /// end collection methods ---------------------------------------------------------------------------------------
 
-    /// @notice Whether or not an ERC1155 or ERC721 tokenId has a valid structure.
+    /// @notice Whether or not an ERC1155 or ERC721 tokenId has a valid structure and the metadata hash exists.
     /// @param id the token to check.
     /// @return bool whether a given id has a valid structure.
     /// @dev if IS_NFT > 0 then PACK_NUM_FT_TYPES may be 0
