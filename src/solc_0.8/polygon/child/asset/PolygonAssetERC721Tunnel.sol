@@ -2,6 +2,7 @@
 pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
+import "@openzeppelin/contracts-0.8/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
@@ -14,6 +15,7 @@ import "./PolygonAssetERC721.sol";
 /// @title ASSETERC721 bridge on L2
 contract PolygonAssetERC721Tunnel is
     FxBaseChildTunnel,
+    IERC165,
     IERC721MandatoryTokenReceiver,
     ERC2771Handler,
     Ownable,
@@ -124,7 +126,7 @@ contract PolygonAssetERC721Tunnel is
         return this.onERC721BatchReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 }
