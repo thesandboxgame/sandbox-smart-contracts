@@ -7,9 +7,17 @@ import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import "../../../common/interfaces/IERC165.sol";
 
 /// @title ASSETERC721 bridge on L1
-contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
+contract AssetERC721Tunnel is
+    FxBaseRootTunnel,
+    IERC721MandatoryTokenReceiver,
+    ERC2771Handler,
+    Ownable,
+    Pausable,
+    IERC165
+{
     IAssetERC721 public rootToken;
     uint256 public maxTransferLimit = 20;
     bool private fetchingAssets = false;
@@ -57,7 +65,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
         return this.onERC721BatchReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
