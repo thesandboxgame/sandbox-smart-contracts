@@ -32,9 +32,19 @@ interface IAssetMinter {
         uint256 _numberOfGemsBurnPerAsset
     ) external returns (uint256 assetId);
 
-    function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
-        external
-        returns (uint256[] memory assetIds);
+    function mintMultipleWithCatalyst(
+        MintData calldata mintData,
+        AssetData[] memory assets,
+        uint256[] memory supplies,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
+    ) external returns (uint256[] memory assetIds);
+
+    function mintMultipleWithoutCatalyst(
+        MintData calldata mintData,
+        uint256[] calldata supplies,
+        uint16[] calldata assetTypesIds
+    ) external returns (uint256[] memory assetIds);
 
     function mintCustomNumberWithCatalyst(
         MintData calldata mintData,
