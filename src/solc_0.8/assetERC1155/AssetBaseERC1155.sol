@@ -301,6 +301,9 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return newId;
     }
 
+    /// @notice Set the ERC721 contract.
+    /// @param assetERC721 the contract address to set the ERC721 contract to.
+    /// @return true if the operation completes successfully.
     function setAssetERC721(IAssetERC721 assetERC721) external returns (bool) {
         require(_admin == _msgSender(), "!AUTHORIZED");
         _assetERC721 = assetERC721;
@@ -323,6 +326,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    /// @notice Queries the chainIndex that a token was minted on originally.
+    /// @param id the token id to query.
+    /// @return chainIndex the chainIndex that the token was minted on originally.
+    /// @dev take care not to confuse chainIndex with chain ID.
     function getChainIndex(uint256 id) external pure returns (uint256) {
         return uint8((id & ERC1155ERC721Helper.CHAIN_INDEX) / ERC1155ERC721Helper.CHAIN_INDEX_OFFSET_MULTIPLIER);
     }
