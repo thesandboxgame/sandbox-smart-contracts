@@ -4,7 +4,6 @@ pragma solidity 0.8.2;
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "../../../common/interfaces/IPolygonAssetERC1155.sol";
 import "../../common/ERC1155Receiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
@@ -12,14 +11,7 @@ import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonAssetERC1155.sol";
 
 /// @title ASSETERC1155 bridge on L2
-contract PolygonAssetERC1155Tunnel is
-    FxBaseChildTunnel,
-    ERC1155Receiver,
-    ERC2771Handler,
-    Ownable,
-    Pausable,
-    IERC165Upgradeable
-{
+contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
     IPolygonAssetERC1155 public childToken;
     uint256 public maxTransferLimit = 20;
     bool private fetchingAssets = false;
@@ -150,7 +142,7 @@ contract PolygonAssetERC1155Tunnel is
         return 0xbc197c81; //bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure override(IERC165, IERC165Upgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override(IERC165) returns (bool) {
         return
             interfaceId == 0x4e2312e0 || // ERC1155Receiver
             interfaceId == 0x01ffc9a7; // ERC165

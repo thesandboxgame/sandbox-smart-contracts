@@ -7,7 +7,7 @@ import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
+import "../../../common/interfaces/IERC165.sol";
 
 /// @title ASSETERC721 bridge on L1
 contract AssetERC721Tunnel is
@@ -16,7 +16,7 @@ contract AssetERC721Tunnel is
     ERC2771Handler,
     Ownable,
     Pausable,
-    IERC165Upgradeable
+    IERC165
 {
     IAssetERC721 public rootToken;
     uint256 public maxTransferLimit = 20;
