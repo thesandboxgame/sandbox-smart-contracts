@@ -36,13 +36,13 @@ contract PolygonAssetERC1155Tunnel is
     constructor(
         address _fxChild,
         IPolygonAssetERC1155 _childToken,
-        address _trustedForwarder,
+        address trustedForwarder,
         uint256 _maxTransferLimit
     ) FxBaseChildTunnel(_fxChild) {
         require(address(_childToken) != address(0), "PolygonAssetERC1155Tunnel: _childToken can't be zero");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
-        __ERC2771Handler_initialize(_trustedForwarder);
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     function batchWithdrawToRoot(
