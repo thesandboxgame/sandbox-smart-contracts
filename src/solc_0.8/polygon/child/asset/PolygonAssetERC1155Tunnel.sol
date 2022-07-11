@@ -142,7 +142,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         return 0xbc197c81; //bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure override(IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return
             interfaceId == 0x4e2312e0 || // ERC1155Receiver
             interfaceId == 0x01ffc9a7; // ERC165
