@@ -2,11 +2,13 @@
 pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
+import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
+import {IAssetERC721} from "../../../common/interfaces/IAssetERC721.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract AssetERC721 is BaseERC721 {
+contract AssetERC721 is BaseERC721, IAssetERC721 {
     bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
@@ -20,7 +22,7 @@ contract AssetERC721 is BaseERC721 {
     /// @dev Should be callable only by the AssetTunnel on L1 via MINTER_ROLE.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    function mint(address to, uint256 id) public override(BaseERC721) onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id) public override(BaseERC721, IERC721Base) onlyRole(MINTER_ROLE) {
         BaseERC721.mint(to, id);
     }
 
@@ -34,7 +36,7 @@ contract AssetERC721 is BaseERC721 {
         address to,
         uint256 id,
         bytes calldata data
-    ) public override(BaseERC721) onlyRole(MINTER_ROLE) {
+    ) public override(BaseERC721, IERC721Base) onlyRole(MINTER_ROLE) {
         BaseERC721.mint(to, id, data);
     }
 
@@ -42,15 +44,88 @@ contract AssetERC721 is BaseERC721 {
     /// @dev The metadata hash for the ERC721 may need to be manually set or overridden.
     /// @param id The token id.
     /// @param uri The full token URI to be used for the token id.
-    function setTokenURI(uint256 id, string memory uri) external onlyRole(METADATA_ROLE) {
+    function setTokenURI(uint256 id, string memory uri) external override onlyRole(METADATA_ROLE) {
         tokenUris[id] = uri;
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
     /// @param id The token to get the uri of.
     /// @return URI The token's URI string.
-    function tokenURI(uint256 id) public view override returns (string memory) {
+    function tokenURI(uint256 id) public view override(BaseERC721, IAssetERC721) returns (string memory) {
         require(ownerOf(id) != address(0), "ZERO_ADDRESS");
         return tokenUris[id];
+    }
+
+    function supportsInterface(bytes4 id) public view override(BaseERC721, IERC721Base) returns (bool) {
+        return BaseERC721.supportsInterface(id);
+    }
+
+    function setTrustedForwarder(address trustedForwarder)
+        public
+        override(BaseERC721, IERC721Base)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        BaseERC721.setTrustedForwarder(trustedForwarder);
+    }
+
+    function setApprovalForAllFor(
+        address from,
+        address operator,
+        bool approved
+    ) public override(BaseERC721, IERC721Base) {
+        BaseERC721.setApprovalForAllFor(from, operator, approved);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override(BaseERC721, IERC721Base) {
+        BaseERC721.safeTransferFrom(from, to, tokenId);
+    }
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) public override(BaseERC721, IERC721Base) {
+        BaseERC721.safeBatchTransferFrom(from, to, ids, data);
+    }
+
+    function isTrustedForwarder(address forwarder) public view override(BaseERC721, IERC721Base) returns (bool) {
+        return BaseERC721.isTrustedForwarder(forwarder);
+    }
+
+    function getTrustedForwarder() public view override(BaseERC721, IERC721Base) returns (address trustedForwarder) {
+        return BaseERC721.getTrustedForwarder();
+    }
+
+    function exists(uint256 tokenId) public view override(BaseERC721, IERC721Base) returns (bool) {
+        return BaseERC721.exists(tokenId);
+    }
+
+    function burnFrom(address from, uint256 id) public override(BaseERC721, IERC721Base) {
+        BaseERC721.burnFrom(from, id);
+    }
+
+    function burn(uint256 id) public override(BaseERC721, IERC721Base) {
+        BaseERC721.burn(id);
+    }
+
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids
+    ) public override(BaseERC721, IERC721Base) {
+        BaseERC721.batchTransferFrom(from, to, ids);
+    }
+
+    function approveFor(
+        address from,
+        address operator,
+        uint256 id
+    ) public override(BaseERC721, IERC721Base) {
+        BaseERC721.approveFor(from, operator, id);
     }
 }

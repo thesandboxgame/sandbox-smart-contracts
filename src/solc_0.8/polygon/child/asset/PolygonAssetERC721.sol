@@ -3,6 +3,7 @@ pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 import {IPolygonAssetERC721} from "../../../common/interfaces/IPolygonAssetERC721.sol";
+import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev AssetERC721 will be minted only on L2 and can be transferred to L1 but not minted on L1.
@@ -22,7 +23,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
     /// @dev Minting is only permitted to MINTER_ROLE
     /// @param to The address that will receive a new token
     /// @param id The id of the new token
-    function mint(address to, uint256 id) public override(BaseERC721, IPolygonAssetERC721) onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id) public override(BaseERC721, IERC721Base) onlyRole(MINTER_ROLE) {
         BaseERC721.mint(to, id);
     }
 
@@ -36,7 +37,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address to,
         uint256 id,
         bytes calldata data
-    ) public override(BaseERC721, IPolygonAssetERC721) onlyRole(MINTER_ROLE) {
+    ) public override(BaseERC721, IERC721Base) onlyRole(MINTER_ROLE) {
         BaseERC721.mint(to, id, data);
     }
 
@@ -56,13 +57,13 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         return tokenUris[id];
     }
 
-    function supportsInterface(bytes4 id) public view override(BaseERC721, IPolygonAssetERC721) returns (bool) {
+    function supportsInterface(bytes4 id) public view override(BaseERC721, IERC721Base) returns (bool) {
         return BaseERC721.supportsInterface(id);
     }
 
     function setTrustedForwarder(address trustedForwarder)
         public
-        override(BaseERC721, IPolygonAssetERC721)
+        override(BaseERC721, IERC721Base)
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         BaseERC721.setTrustedForwarder(trustedForwarder);
@@ -72,7 +73,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address operator,
         bool approved
-    ) public override(BaseERC721, IPolygonAssetERC721) {
+    ) public override(BaseERC721, IERC721Base) {
         BaseERC721.setApprovalForAllFor(from, operator, approved);
     }
 
@@ -80,7 +81,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address to,
         uint256 tokenId
-    ) public override(BaseERC721, IPolygonAssetERC721) {
+    ) public override(BaseERC721, IERC721Base) {
         BaseERC721.safeTransferFrom(from, to, tokenId);
     }
 
@@ -89,37 +90,27 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) public override(BaseERC721, IPolygonAssetERC721) {
+    ) public override(BaseERC721, IERC721Base) {
         BaseERC721.safeBatchTransferFrom(from, to, ids, data);
     }
 
-    function isTrustedForwarder(address forwarder)
-        public
-        view
-        override(BaseERC721, IPolygonAssetERC721)
-        returns (bool)
-    {
+    function isTrustedForwarder(address forwarder) public view override(BaseERC721, IERC721Base) returns (bool) {
         BaseERC721.isTrustedForwarder(forwarder);
     }
 
-    function getTrustedForwarder()
-        public
-        view
-        override(BaseERC721, IPolygonAssetERC721)
-        returns (address trustedForwarder)
-    {
+    function getTrustedForwarder() public view override(BaseERC721, IERC721Base) returns (address trustedForwarder) {
         BaseERC721.getTrustedForwarder();
     }
 
-    function exists(uint256 tokenId) public view override(BaseERC721, IPolygonAssetERC721) returns (bool) {
+    function exists(uint256 tokenId) public view override(BaseERC721, IERC721Base) returns (bool) {
         BaseERC721.exists(tokenId);
     }
 
-    function burnFrom(address from, uint256 id) public override(BaseERC721, IPolygonAssetERC721) {
+    function burnFrom(address from, uint256 id) public override(BaseERC721, IERC721Base) {
         BaseERC721.burnFrom(from, id);
     }
 
-    function burn(uint256 id) public override(BaseERC721, IPolygonAssetERC721) {
+    function burn(uint256 id) public override(BaseERC721, IERC721Base) {
         BaseERC721.burn(id);
     }
 
@@ -127,7 +118,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address to,
         uint256[] calldata ids
-    ) public override(BaseERC721, IPolygonAssetERC721) {
+    ) public override(BaseERC721, IERC721Base) {
         BaseERC721.batchTransferFrom(from, to, ids);
     }
 
@@ -135,7 +126,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address operator,
         uint256 id
-    ) public override(BaseERC721, IPolygonAssetERC721) {
+    ) public override(BaseERC721, IERC721Base) {
         BaseERC721.approveFor(from, operator, id);
     }
 }
