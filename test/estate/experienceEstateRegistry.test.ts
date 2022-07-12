@@ -395,7 +395,6 @@ describe('ExperienceEstateRegistry tests', function () {
     });
     it(`trying to link a single land that isn't mine should revert`, async function () {
       const {
-        other,
         landContractAsOther,
         estateContractAsOther,
         registryContractAsOther,
@@ -406,7 +405,7 @@ describe('ExperienceEstateRegistry tests', function () {
 
       const experienceId = 123;
 
-      await mintQuad(other, 24, 0, 0);
+      await mintQuad(landAdmin, 24, 0, 0);
 
       await experienceContract.setTemplate(experienceId, [[0, 0]]);
 
@@ -417,7 +416,7 @@ describe('ExperienceEstateRegistry tests', function () {
 
       await expect(
         registryContractAsOther.linkSingle(experienceId, 0, 0)
-      ).to.be.revertedWith('not owner of all sub quads not parent quad');
+      ).to.be.revertedWith('invalid user');
     });
     it(`trying to link an estate that isn't mine should revert`, async function () {
       const {

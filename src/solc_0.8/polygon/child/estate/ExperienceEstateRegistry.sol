@@ -124,7 +124,6 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             uint256 translatedX = translatedId % 408;
             uint256 translatedY = translatedId / 408;
             require(landToken.ownerOf(translatedId) == _msgSender(), "invalid user");
-            //this will revert inside ownerOf with 'not owner of all sub quads not parent quad'
             require(!linkedLands.contain(translatedX, translatedY), "already linked");
             linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
