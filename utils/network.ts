@@ -94,3 +94,22 @@ export function isTest(hre: HardhatRuntimeEnvironment): boolean {
     !!process.env.HARDHAT_FORK
   );
 }
+
+const chainIndexes: {[key: string]: number} = {
+  '0': 0,
+  '1': 1,
+  '137': 137,
+  '1337': 1337,
+  '31337': 31337,
+  '80001': 8001,
+};
+
+export async function getChainIndex(
+  hre: HardhatRuntimeEnvironment
+): Promise<number> {
+  const chainId = await hre.getChainId();
+  if (!chainIndexes[chainId] || chainIndexes[chainId] >= 2 ** 16) {
+    throw new Error('unsupported chainId or invalid chainIndex ' + chainId);
+  }
+  return chainIndexes[chainId];
+}
