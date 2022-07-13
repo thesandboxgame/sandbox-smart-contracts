@@ -1,10 +1,11 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
+import {constants} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, read} = deployments;
   const {deployer} = await getNamedAccounts();
 
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
@@ -29,27 +30,46 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const AssetERC1155Tunnel = await hre.companionNetworks[
     'l1'
   ].deployments.getOrNull('AssetERC1155Tunnel');
-
-  // get deployer on l2
+  // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l1'
   ].getNamedAccounts();
 
-  // Note: if redeploy, delete tunnels, root & child tokens
+  // Note: if redeploy, delete tunnels
 
   if (AssetERC1155Tunnel) {
-    await hre.companionNetworks['l1'].deployments.execute(
+    const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
       'AssetERC1155Tunnel',
-      {from: deployerOnL1},
-      'setFxChildTunnel',
-      PolygonAssetERC1155Tunnel.address
+      'fxChildTunnel'
     );
-    await deployments.execute(
+    const fxRootTunnel = await read(
       'PolygonAssetERC1155Tunnel',
-      {from: deployer},
-      'setFxRootTunnel',
-      AssetERC1155Tunnel.address
+      'fxRootTunnel'
     );
+
+    if (
+      fxRootTunnel !== PolygonAssetERC1155Tunnel.address &&
+      fxRootTunnel == constants.AddressZero
+    ) {
+      await deployments.execute(
+        'PolygonAssetERC1155Tunnel',
+        {from: deployer},
+        'setFxRootTunnel',
+        AssetERC1155Tunnel.address
+      );
+    }
+
+    if (
+      fxChildTunnel !== PolygonAssetERC1155Tunnel.address &&
+      fxChildTunnel == constants.AddressZero
+    ) {
+      await hre.companionNetworks['l1'].deployments.execute(
+        'AssetERC1155Tunnel',
+        {from: deployerOnL1},
+        'setFxChildTunnel',
+        PolygonAssetERC1155Tunnel.address
+      );
+    }
   }
 };
 
