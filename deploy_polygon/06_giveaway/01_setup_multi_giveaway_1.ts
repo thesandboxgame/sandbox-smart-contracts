@@ -1,6 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import CheckAndSetTrustedForwarder from '../../deploy_utils/CheckAndSetTrustedForwarder';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -65,3 +66,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['PolygonMulti_Giveaway_1', 'PolygonMulti_Giveaway_1_setup', 'L2'];
+func.skip = skipUnlessTest;

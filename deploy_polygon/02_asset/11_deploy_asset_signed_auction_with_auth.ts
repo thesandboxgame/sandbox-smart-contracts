@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getUnnamedAccounts} = hre;
@@ -42,4 +42,4 @@ func.dependencies = [
   'PolygonAssetERC1155_deploy',
   'PolygonAuthValidator_deploy',
 ];
-func.skip = skipUnlessTestnet;
+func.skip = skipUnlessTest;

@@ -1,10 +1,11 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
+import {constants} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, read} = deployments;
   const {deployer} = await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
@@ -34,21 +35,38 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l1'
   ].getNamedAccounts();
 
-  // Note: if redeploy, delete tunnels, root & child tokens
+  // Note: if redeploy, delete tunnels
 
   if (AssetERC721Tunnel) {
-    await hre.companionNetworks['l1'].deployments.execute(
+    const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
       'AssetERC721Tunnel',
-      {from: deployerOnL1},
-      'setFxChildTunnel',
-      PolygonAssetERC721Tunnel.address
+      'fxChildTunnel'
     );
-    await deployments.execute(
-      'PolygonAssetERC721Tunnel',
-      {from: deployer},
-      'setFxRootTunnel',
-      AssetERC721Tunnel.address
-    );
+    const fxRootTunnel = await read('PolygonAssetERC721Tunnel', 'fxRootTunnel');
+
+    if (
+      fxRootTunnel !== PolygonAssetERC721Tunnel.address &&
+      fxRootTunnel == constants.AddressZero
+    ) {
+      await deployments.execute(
+        'PolygonAssetERC721Tunnel',
+        {from: deployer},
+        'setFxRootTunnel',
+        AssetERC721Tunnel.address
+      );
+    }
+
+    if (
+      fxChildTunnel !== PolygonAssetERC721Tunnel.address &&
+      fxChildTunnel == constants.AddressZero
+    ) {
+      await hre.companionNetworks['l1'].deployments.execute(
+        'AssetERC721Tunnel',
+        {from: deployerOnL1},
+        'setFxChildTunnel',
+        PolygonAssetERC721Tunnel.address
+      );
+    }
   }
 };
 
