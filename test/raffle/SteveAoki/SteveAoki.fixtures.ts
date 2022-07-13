@@ -11,34 +11,31 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(
-  ['RafflePeopleOfCrypto'],
-  async function (hre) {
-    const rafflePeopleOfCryptoContract = await ethers.getContract(
-      'RafflePeopleOfCrypto'
-    );
-    const sandContract = await ethers.getContract('Sand');
-    return {
-      rafflePeopleOfCryptoContract,
-      sandContract,
-      hre,
-      getNamedAccounts,
-      setupWave,
-      signAuthMessageAs,
-      transferSand,
-      mint: mintSetup(rafflePeopleOfCryptoContract, sandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        rafflePeopleOfCryptoContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        rafflePeopleOfCryptoContract,
-        invalidPersonalizeSignature
-      ),
-    };
-  }
-);
+export const setupRaffle = withSnapshot(['RaffleSteveAoki'], async function (
+  hre
+) {
+  const raffleSteveAokiContract = await ethers.getContract('RaffleSteveAoki');
+  const sandContract = await ethers.getContract('Sand');
+  return {
+    raffleSteveAokiContract,
+    sandContract,
+    hre,
+    getNamedAccounts,
+    setupWave,
+    signAuthMessageAs,
+    transferSand,
+    mint: mintSetup(raffleSteveAokiContract, sandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
+      raffleSteveAokiContract,
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      raffleSteveAokiContract,
+      invalidPersonalizeSignature
+    ),
+  };
+});
 
 async function setupWave(
   raffle: Contract,
@@ -49,8 +46,12 @@ async function setupWave(
   contractAddress: string,
   erc1155Id: number
 ) {
+  const {raffleSignWallet} = await getNamedAccounts();
+
   const owner = await raffle.owner();
   const contract = raffle.connect(ethers.provider.getSigner(owner));
+
+  await contract.setSignAddress(raffleSignWallet);
 
   await contract.setupWave(
     waveType,
@@ -64,6 +65,10 @@ async function setupWave(
   assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
+  );
+  assert.equal(
+    (await raffle.signAddress()).toString(),
+    raffleSignWallet.toString()
   );
   assert.equal(
     (await raffle.waveMaxTokensToBuy()).toString(),
