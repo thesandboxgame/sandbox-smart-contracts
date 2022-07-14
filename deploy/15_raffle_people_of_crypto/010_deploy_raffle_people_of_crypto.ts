@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,
-    contract: 'PeopleOfCryptoGeneric',
+    contract: 'PeopleOfCrypto',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
