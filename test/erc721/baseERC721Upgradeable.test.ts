@@ -16,13 +16,12 @@ describe('erc721 base test', function () {
     } = await setupBaseERC721Upgradeable();
     expect(await contract.name()).to.be.equal(name);
     expect(await contract.symbol()).to.be.equal(symbol);
+    expect(await contract.decimals()).to.be.equal(0);
     expect(await contract.isTrustedForwarder(trustedForwarder)).to.be.true;
     expect(await contract.isTrustedForwarder(other)).to.be.false;
     const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
     expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, defaultAdmin)).to.be.true;
     expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, admin)).to.be.false;
-
-    // await contract.mint(other);
   });
   describe('roles', function () {
     describe('admin', function () {

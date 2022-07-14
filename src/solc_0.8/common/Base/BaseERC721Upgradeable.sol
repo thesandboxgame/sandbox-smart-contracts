@@ -60,6 +60,13 @@ abstract contract BaseERC721Upgradeable is AccessControlUpgradeable, ERC721Upgra
             ERC721Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
+    /// @notice Implement an ERC20 metadata method so it is easier to import the token into metamask
+    /// @dev Returns the decimals places of the token, for ERC721 it is always zero.
+    /// @return
+    function decimals() external pure returns (uint8) {
+        return 0;
+    }
+
     function _msgSender()
         internal
         view
