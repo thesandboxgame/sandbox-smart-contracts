@@ -17,7 +17,7 @@ describe('@skip-on-coverage gas consumption of', function () {
       3: 5700320,
       6: 4166521,
       12: 3802012,
-      24: 3689213,
+      24: 3689235,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     for (const tileSize in gasPerSize) {
@@ -58,12 +58,12 @@ describe('@skip-on-coverage gas consumption of', function () {
     //   6: 23875291,
     // };
     const gasPerCant: {[key: string]: number} = {
-      1: 3689213,
-      2: 7462952,
-      3: 11491435,
-      4: 15784178,
-      5: 20353390,
-      6: 25213950,
+      1: 3689235,
+      2: 7462974,
+      3: 11491457,
+      4: 15784200,
+      5: 20353412,
+      6: 25213972,
     };
     // cant == 7 => Transaction reverted: contract call run out of gas and made the transaction revert
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -208,11 +208,11 @@ describe('@skip-on-coverage gas consumption of', function () {
 
   describe('create one estate', function () {
     const gasPerSize: {[key: string]: number} = {
-      24: 3733397,
-      12: 1234886,
-      6: 579022,
-      3: 385767,
-      1: 311415,
+      24: 3733419,
+      12: 1234908,
+      6: 579044,
+      3: 385789,
+      1: 311437,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -242,10 +242,10 @@ describe('@skip-on-coverage gas consumption of', function () {
   describe('create a lot of states', function () {
     describe('start with 24x24', function () {
       const gasPerSize: {[key: string]: number} = {
-        1: 19943651,
-        12: 3801936,
-        6: 4157013,
-        3: 5527603,
+        1: 19943673,
+        12: 3801958,
+        6: 4157035,
+        3: 5527625,
       };
 
       // eslint-disable-next-line mocha/no-setup-in-describe
@@ -282,11 +282,11 @@ describe('@skip-on-coverage gas consumption of', function () {
   });
   describe('create one estate and update it', function () {
     const gasPerSize: {[key: string]: number} = {
-      24: 6500823,
-      12: 1864547,
-      6: 670320,
-      3: 340489,
-      1: 244085,
+      24: 6500867,
+      12: 1864591,
+      6: 670364,
+      3: 340533,
+      1: 244120,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -324,10 +324,10 @@ describe('@skip-on-coverage gas consumption of', function () {
   describe('update states', function () {
     describe('start with 24x24', function () {
       const gasPerSize: {[key: string]: number} = {
-        1: 25623494,
-        12: 6642535,
-        6: 7081782,
-        3: 8724824,
+        1: 25623538,
+        12: 6642579,
+        6: 7081826,
+        3: 8724868,
       };
       // eslint-disable-next-line mocha/no-setup-in-describe
       [[1], [12], [6], [3]].forEach(([size]) => {

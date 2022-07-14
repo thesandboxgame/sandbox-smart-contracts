@@ -89,7 +89,18 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
       expect(await estateContractAsOther.exists(newId)).to.be.true;
       expect(await estateContractAsOther.ownerOf(newId)).to.be.equal(other);
     });
-    it('should fail if there is nothing to update', async function () {
+    it('should fail if there is nothing to update without registry', async function () {
+      const {
+        estateContractAsOther,
+        mintApproveAndCreateAsOther,
+      } = await setupL2EstateAndLand();
+      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
+
+      await expect(
+        estateContractAsOther.update(estateId, [[], [], []], [], [[], [], []])
+      ).to.revertedWith('nothing to update');
+    });
+    it('should fail if there is nothing to update with registry', async function () {
       const {
         estateContractAsOther,
         mintApproveAndCreateAsOther,
@@ -340,6 +351,20 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
     expect(await estateContractAsOther.contractURI()).to.be.equal(
       uri + 'polygon_estate.json'
     );
+  });
+  it('should fail without registry when expToUnlink has some data', async function () {
+    const {
+      estateContractAsOther,
+      mintApproveAndCreateAsOther,
+    } = await setupL2EstateAndLand();
+    const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
+
+    await expect(
+      estateContractAsOther.update(estateId, [[], [], []], [1], [[], [], []])
+    ).to.revertedWith('invalid data');
+    await expect(
+      estateContractAsOther.burn(estateId, [1], [[], [], []])
+    ).to.revertedWith('invalid data');
   });
   describe('set registry', function () {
     it('admin should be able to set the registry', async function () {

@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessL2, skipUnlessTestnet} from '../../utils/network';
-import {deployments, ethers} from 'hardhat';
+import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment

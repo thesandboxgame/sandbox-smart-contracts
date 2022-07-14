@@ -38,10 +38,19 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         uint256[][3] calldata landToRemove
     ) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
-        require(landToAdd[0].length > 0 || landToRemove[0].length > 0 || expToUnlink.length > 0, "nothing to update");
+        IEstateExperienceRegistry registry = _ps().registryToken;
+        if (address(registry) == address(0)) {
+            require(expToUnlink.length == 0, "invalid data");
+            require(landToAdd[0].length > 0 || landToRemove[0].length > 0, "nothing to update");
+        } else {
+            require(
+                landToAdd[0].length > 0 || landToRemove[0].length > 0 || expToUnlink.length > 0,
+                "nothing to update"
+            );
+        }
         Estate storage estate = _estate(oldId);
         _addLand(estate, _msgSender(), landToAdd);
-        _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
+        _removeLand(estate, registry, _msgSender(), landToRemove, expToUnlink);
         require(!estate.land.isEmpty(), "estate cannot be empty");
         require(estate.land.isAdjacent(), "not adjacent");
         estate.id = _incrementTokenVersion(estate.id);
@@ -62,7 +71,9 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
     ) external {
         require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
         Estate storage estate = _estate(estateId);
-        _removeLand(estate, _msgSender(), landToRemove, expToUnlink);
+        IEstateExperienceRegistry registry = _ps().registryToken;
+        require(expToUnlink.length == 0 || address(registry) != address(0), "invalid data");
+        _removeLand(estate, registry, _msgSender(), landToRemove, expToUnlink);
         require(estate.land.isEmpty(), "map not empty");
         _burnEstate(estate);
         emit EstateTokenBurned(estateId, _msgSender());
@@ -116,16 +127,18 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
 
     function _removeLand(
         Estate storage estate,
+        IEstateExperienceRegistry registry,
         address from,
         uint256[][3] calldata quads,
         uint256[] calldata expToUnlink
     ) internal {
         uint256 len = quads[0].length;
         require(len == quads[1].length && len == quads[2].length, "invalid quad data");
-        IEstateExperienceRegistry r = _ps().registryToken;
-        if (address(r) != address(0)) {
-            r.batchUnLinkFrom(from, expToUnlink);
-            require(!r.isLinked(quads), "must unlink first");
+        if (address(registry) != address(0)) {
+            if (expToUnlink.length > 0) {
+                registry.batchUnLinkFrom(from, expToUnlink);
+            }
+            require(!registry.isLinked(quads), "must unlink first");
         }
         address landToken = _s().landToken;
         MapLib.Map storage map = estate.land;
