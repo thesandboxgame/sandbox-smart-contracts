@@ -1,9 +1,9 @@
-import {setupL1EstateAndLand, setupTestEstateBaseToken} from './fixtures';
+import {setupL1EstateAndLand} from './fixtures';
 import {BigNumber, ethers} from 'ethers';
 import {expect} from '../chai-setup';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('@skip-on-coverage gas consumption of', function () {
+describe('@skip-on-coverage @slow gas consumption of', function () {
   describe('createEstate for a completely filled tile with a lot of lands', function () {
     // const gasPerSize: {[key: string]: number} = {
     //   1: 23068226,
@@ -15,9 +15,9 @@ describe('@skip-on-coverage gas consumption of', function () {
     const gasPerSize: {[key: string]: number} = {
       1: 23068226,
       3: 5700320,
-      6: 4166521,
-      12: 3802012,
-      24: 3689235,
+      6: 4201387,
+      12: 3846166,
+      24: 3733421,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     for (const tileSize in gasPerSize) {
@@ -28,26 +28,22 @@ describe('@skip-on-coverage gas consumption of', function () {
           estateContractAsOther,
           mintQuad,
           other,
+          getXsYsSizes,
           createEstateAsOther,
         } = await setupL1EstateAndLand();
         await landContractAsOther.setApprovalForAll(
           estateContractAsOther.address,
           true
         );
-        await mintQuad(other, 24, 0, 0);
-        const xs = [];
-        const ys = [];
-        const sizes = [];
-        for (let i = 0; i < (24 * 24) / size / size; i++) {
-          xs.push((i * size) % 24);
-          ys.push(Math.floor((i * size) / 24) * size);
-          sizes.push(size);
-        }
+        await mintQuad(other, 24, 240, 240);
+        const {xs, ys, sizes} = getXsYsSizes(240, 240, size);
         const {gasUsed} = await createEstateAsOther({xs, ys, sizes});
         expect(BigNumber.from(gasUsed)).to.be.lte(gasPerSize[tileSize]);
+        console.log(BigNumber.from(gasUsed).toString());
       });
     }
   });
+
   describe(`createEstate of a lot of tiles at once`, function () {
     // const gasPerCant: {[key: string]: number} = {
     //   1: 3448040,
@@ -58,12 +54,12 @@ describe('@skip-on-coverage gas consumption of', function () {
     //   6: 23875291,
     // };
     const gasPerCant: {[key: string]: number} = {
-      1: 3689235,
-      2: 7462974,
-      3: 11491457,
-      4: 15784200,
-      5: 20353412,
-      6: 25213972,
+      1: 3733431,
+      2: 7553382,
+      3: 11640125,
+      4: 16003176,
+      5: 20654744,
+      6: 25609708,
     };
     // cant == 7 => Transaction reverted: contract call run out of gas and made the transaction revert
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -85,8 +81,8 @@ describe('@skip-on-coverage gas consumption of', function () {
         const ys = [];
         const sizes = [];
         for (let i = 0; i < cant; i++) {
-          const x = 24 * i;
-          const y = 0;
+          const x = 240 + 24 * i;
+          const y = 384;
           await mintQuad(other, 24, x, y);
           xs.push(x);
           ys.push(y);
@@ -145,7 +141,7 @@ describe('@skip-on-coverage gas consumption of', function () {
         estateContractAsOther,
         mintQuad,
         other,
-      } = await setupTestEstateBaseToken();
+      } = await setupL1EstateAndLand();
       await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
         true
@@ -156,40 +152,30 @@ describe('@skip-on-coverage gas consumption of', function () {
         [240],
         [120],
       ]);
-      expect(estimate).to.be.lte(3727985);
+      expect(estimate).to.be.lte(3799044);
     });
-    it('add single land', async function () {
+    it('add a full tile to a full tile', async function () {
       const {
-        landContractAsOther,
         estateContractAsOther,
         mintQuad,
         other,
         mintApproveAndCreateAsOther,
-      } = await setupTestEstateBaseToken();
-      await landContractAsOther.setApprovalForAll(
-        estateContractAsOther.address,
-        true
-      );
+      } = await setupL1EstateAndLand();
       const {estateId} = await mintApproveAndCreateAsOther(24, 240, 120);
       await mintQuad(other, 24, 240 + 24, 120);
       const estimate = await estateContractAsOther.estimateGas.addLand(
         estateId,
         [[24], [240 + 24], [120]]
       );
-      expect(estimate).to.be.lte(3427786);
+      expect(estimate).to.be.lte(3492563);
     });
     it('add multiple land', async function () {
       const {
-        landContractAsOther,
         estateContractAsOther,
         mintQuad,
         other,
         mintApproveAndCreateAsOther,
-      } = await setupTestEstateBaseToken();
-      await landContractAsOther.setApprovalForAll(
-        estateContractAsOther.address,
-        true
-      );
+      } = await setupL1EstateAndLand();
       const {estateId} = await mintApproveAndCreateAsOther(24, 240, 120);
       await mintQuad(other, 24, 240, 120 + 24);
       await mintQuad(other, 24, 240, 120 + 48);
@@ -202,7 +188,7 @@ describe('@skip-on-coverage gas consumption of', function () {
           [120 + 24, 120 - 24, 120 + 48],
         ]
       );
-      expect(estimate).to.be.lte(11980639);
+      expect(estimate).to.be.lte(12181362);
     });
   });
 
@@ -239,48 +225,7 @@ describe('@skip-on-coverage gas consumption of', function () {
       });
     });
   });
-  describe('create a lot of states', function () {
-    describe('start with 24x24', function () {
-      const gasPerSize: {[key: string]: number} = {
-        1: 19943673,
-        12: 3801958,
-        6: 4157035,
-        3: 5527625,
-      };
-
-      // eslint-disable-next-line mocha/no-setup-in-describe
-      [
-        [576, 1],
-        [4, 12],
-        [16, 6],
-        [256, 3],
-      ].forEach(([cant, size]) => {
-        it(`@slow create ${cant} 1x1 quads then create an ${size}x${size} estate with that`, async function () {
-          const {
-            landContractAsOther,
-            estateContractAsOther,
-            mintQuad,
-            other,
-            getXsYsSizes,
-            createEstateAsOther,
-          } = await setupL1EstateAndLand();
-          await landContractAsOther.setApprovalForAll(
-            estateContractAsOther.address,
-            true
-          );
-          await mintQuad(other, 24, 0, 0);
-          const {xs, ys, sizes} = getXsYsSizes(0, 0, size);
-          const {gasUsed} = await createEstateAsOther({
-            sizes,
-            xs,
-            ys,
-          });
-          expect(gasUsed).to.be.equal(gasPerSize[size]);
-        });
-      });
-    });
-  });
-  describe('create one estate and update it', function () {
+  describe('create one estate remove one tile add a different one', function () {
     const gasPerSize: {[key: string]: number} = {
       24: 6500867,
       12: 1864591,
@@ -322,22 +267,63 @@ describe('@skip-on-coverage gas consumption of', function () {
     });
   });
   describe('update states', function () {
-    describe('start with 24x24', function () {
-      const gasPerSize: {[key: string]: number} = {
-        1: 25623538,
-        12: 6642579,
-        6: 7081826,
-        3: 8724868,
+    const gasPerSize: {[key: string]: number} = {
+      24: 6500843,
+      12: 6642579,
+      6: 7081826,
+      3: 8724868,
+      1: 25623538,
+    };
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    [[24], [12], [6], [3], [1]].forEach(([size]) => {
+      it(`create ${size}x${size} quads and estate with that then update`, async function () {
+        const {
+          landContractAsOther,
+          estateContractAsOther,
+          other,
+          mintQuad,
+          getXsYsSizes,
+          createEstateAsOther,
+          updateEstateAsOther,
+        } = await setupL1EstateAndLand();
+        await landContractAsOther.setApprovalForAll(
+          estateContractAsOther.address,
+          true
+        );
+        await mintQuad(other, 24, 0, 0);
+        await mintQuad(other, 24, 144, 144);
+
+        const {estateId} = await createEstateAsOther({
+          xs: [0],
+          ys: [0],
+          sizes: [24],
+        });
+        // we don't have enough gas to add and remove 576 1x1 pixels
+        // so we just remove one by and add one big quad
+        const {updateGasUsed} = await updateEstateAsOther(
+          estateId,
+          {xs: [144], ys: [144], sizes: [24]},
+          getXsYsSizes(0, 0, size)
+        );
+        expect(updateGasUsed).to.be.equal(gasPerSize[size]);
+      });
+    });
+    describe('update states, remove', function () {
+      const gasPerCant: {[key: string]: number} = {
+        5: 14858039,
+        4: 12339984,
+        3: 10278522,
+        2: 8458929,
+        1: 6884059,
       };
       // eslint-disable-next-line mocha/no-setup-in-describe
-      [[1], [12], [6], [3]].forEach(([size]) => {
-        it(`@slow create ${size}x${size} quads and estate with that then update`, async function () {
+      [[5], [4], [3], [2], [1]].forEach(([cant]) => {
+        it(`remove ${cant} full tiles`, async function () {
           const {
             landContractAsOther,
             estateContractAsOther,
-            other,
             mintQuad,
-            getXsYsSizes,
+            other,
             createEstateAsOther,
             updateEstateAsOther,
           } = await setupL1EstateAndLand();
@@ -345,22 +331,26 @@ describe('@skip-on-coverage gas consumption of', function () {
             estateContractAsOther.address,
             true
           );
-          await mintQuad(other, 24, 0, 0);
-          await mintQuad(other, 24, 144, 144);
-
-          const {estateId} = await createEstateAsOther({
-            xs: [0],
-            ys: [0],
-            sizes: [24],
-          });
-          // we don't have enough gas to add and remove 576 1x1 pixels
-          // so we just remove one by and add one big quad
+          const sizes = [];
+          const xs = [];
+          const ys = [];
+          for (let i = 0; i < 6; i++) {
+            await mintQuad(other, 24, 24 + 24 * i, 120);
+            sizes.push(24);
+            xs.push(24 + 24 * i);
+            ys.push(120);
+          }
+          const {estateId} = await createEstateAsOther({xs, ys, sizes});
           const {updateGasUsed} = await updateEstateAsOther(
             estateId,
-            {xs: [144], ys: [144], sizes: [24]},
-            getXsYsSizes(0, 0, size)
+            undefined,
+            {
+              sizes: sizes.slice(0, cant),
+              xs: xs.slice(0, cant),
+              ys: ys.slice(0, cant),
+            }
           );
-          expect(updateGasUsed).to.be.equal(gasPerSize[size]);
+          expect(updateGasUsed).to.be.equal(gasPerCant[cant]);
         });
       });
     });
