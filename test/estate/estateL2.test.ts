@@ -130,8 +130,9 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
         )
       ).to.revertedWith('caller is not owner nor approved');
     });
-    it('should fail if the estate end up empty', async function () {
+    it('should burn if the estate end up empty', async function () {
       const {
+        other,
         estateContractAsOther,
         mintApproveAndCreateAsOther,
       } = await setupL2EstateExperienceAndLand();
@@ -143,7 +144,9 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
           [],
           [[24], [48], [96]]
         )
-      ).to.revertedWith('estate cannot be empty');
+      )
+        .to.emit(estateContractAsOther, 'EstateTokenBurned')
+        .withArgs(estateId, other);
     });
     it('should fail if the estate end up not adjacent', async function () {
       const {
@@ -177,7 +180,7 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
           [],
           [[24], [48], []]
         )
-      ).to.revertedWith('invalid quad data');
+      ).to.revertedWith('invalid remove data');
     });
     it('should fail to remove if quads are missing', async function () {
       const {
@@ -193,72 +196,6 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
           [[24], [96], [96]]
         )
       ).to.revertedWith('quad missing');
-    });
-  });
-  describe('burn estates', function () {
-    it('burn an estate without registry', async function () {
-      const {
-        other,
-        estateContractAsOther,
-        estateContractAsBurner,
-        mintApproveAndCreateAsOther,
-      } = await setupL2EstateAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      // burn and remove
-      const receipt = await (
-        await estateContractAsOther.burn(estateId, [], [[24], [48], [96]])
-      ).wait();
-      const events = receipt.events.filter(
-        (v: Event) => v.event === 'EstateTokenBurned'
-      );
-      assert.equal(events.length, 1);
-      expect(events[0].args['estateId']).to.be.equal(estateId);
-      expect(events[0].args['from']).to.be.equal(other);
-      expect(await estateContractAsBurner.exists(estateId)).to.be.false;
-    });
-    it('burn an estate with registry', async function () {
-      const {
-        other,
-        estateContractAsOther,
-        estateContractAsBurner,
-        mintApproveAndCreateAsOther,
-      } = await setupL2EstateExperienceAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      // burn and remove
-      const receipt = await (
-        await estateContractAsOther.burn(estateId, [], [[24], [48], [96]])
-      ).wait();
-      const events = receipt.events.filter(
-        (v: Event) => v.event === 'EstateTokenBurned'
-      );
-      assert.equal(events.length, 1);
-      expect(events[0].args['estateId']).to.be.equal(estateId);
-      expect(events[0].args['from']).to.be.equal(other);
-      expect(await estateContractAsBurner.exists(estateId)).to.be.false;
-    });
-    it('should fail if not owner', async function () {
-      const {
-        other,
-        estateContractAsDeployer,
-        mintQuad,
-        mintApproveAndCreateAsOther,
-      } = await setupL2EstateExperienceAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      await mintQuad(other, 24, 144, 144);
-
-      await expect(
-        estateContractAsDeployer.burn(estateId, [], [[24], [48], [96]])
-      ).to.revertedWith('caller is not owner nor approved');
-    });
-    it('should fail if the estate is not empty', async function () {
-      const {
-        estateContractAsOther,
-        mintApproveAndCreateAsOther,
-      } = await setupL2EstateExperienceAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      await expect(
-        estateContractAsOther.burn(estateId, [], [[], [], []])
-      ).to.revertedWith('map not empty');
     });
   });
   describe('burner, used by the estate tunnel', function () {
@@ -361,9 +298,6 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
 
     await expect(
       estateContractAsOther.update(estateId, [[], [], []], [1], [[], [], []])
-    ).to.revertedWith('invalid data');
-    await expect(
-      estateContractAsOther.burn(estateId, [1], [[], [], []])
     ).to.revertedWith('invalid data');
   });
   describe('set registry', function () {
@@ -491,19 +425,16 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
         await registryContractAsOther.link(estateId, experienceId, 50, 100);
 
         // burn and remove
-        const receipt = await (
-          await estateContractAsOther.burn(
+        expect(
+          estateContractAsOther.update(
             estateId,
+            [[], [], []],
             [experienceId],
             [[24], [48], [96]]
           )
-        ).wait();
-        const events = receipt.events.filter(
-          (v: Event) => v.event === 'EstateTokenBurned'
-        );
-        assert.equal(events.length, 1);
-        expect(events[0].args['estateId']).to.be.equal(estateId);
-        expect(events[0].args['from']).to.be.equal(other);
+        )
+          .to.emit(estateContractAsOther, 'EstateTokenBurned')
+          .withArgs(estateId, other);
         expect(await estateContractAsBurner.exists(estateId)).to.be.false;
         expect(await registryContractAsOther['isLinked(uint256)'](experienceId))
           .to.be.false;
@@ -525,7 +456,12 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
         await registryContractAsOther.link(estateId, experienceId, 50, 100);
 
         await expect(
-          estateContractAsOther.burn(estateId, [], [[24], [48], [96]])
+          estateContractAsOther.update(
+            estateId,
+            [[], [], []],
+            [],
+            [[24], [48], [96]]
+          )
         ).to.revertedWith('must unlink first');
       });
       it('burner, used by the estate tunnel should fail if linked', async function () {
@@ -577,7 +513,17 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
     const estateId = events[0].args['estateId'];
 
     expect(await landContractAsDeployer.exists(24, 144, 144)).to.be.false;
-    await estateContractAsOther.burn(estateId, [], [[24], [144], [144]]);
+    await expect(
+      estateContractAsOther.update(
+        estateId,
+        [[], [], []],
+        [],
+        [[24], [144], [144]]
+      )
+    )
+      .to.emit(estateContractAsOther, 'EstateTokenBurned')
+      .withArgs(estateId, other);
+
     expect(await estateContractAsBurner.exists(estateId)).to.be.false;
     expect(await landContractAsDeployer.exists(24, 144, 144)).to.be.true;
   });

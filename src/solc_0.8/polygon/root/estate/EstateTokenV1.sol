@@ -20,28 +20,13 @@ contract EstateTokenV1 is EstateBaseToken {
         uint256[][3] calldata landToRemove
     ) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
-        require(landToAdd[0].length > 0 || landToRemove[0].length > 0, "nothing to update");
-        Estate storage estate = _estate(oldId);
-        _addLand(estate, _msgSender(), landToAdd);
-        _removeLand(estate, _msgSender(), landToRemove);
-        require(!estate.land.isEmpty(), "estate cannot be empty");
-        require(estate.land.isAdjacent(), "not adjacent");
-        estate.id = _incrementTokenVersion(estate.id);
-        emit EstateTokenUpdated(oldId, estate.id, _msgSender(), estate.land.getMap());
-        return estate.id;
-    }
 
-    /// @notice burn an estate
-    /// @dev to be able to burn an estate it must be empty
-    /// @param estateId the estate id that will be updated
-    /// @param landToRemove The set of quads to remove.
-    function burn(uint256 estateId, uint256[][3] calldata landToRemove) external {
-        require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
-        Estate storage estate = _estate(estateId);
-        _removeLand(estate, _msgSender(), landToRemove);
-        require(estate.land.isEmpty(), "map not empty");
-        _burnEstate(estate);
-        emit EstateTokenBurned(estateId, _msgSender());
+        uint256 alen = landToAdd[0].length;
+        require(alen == landToAdd[1].length && alen == landToAdd[2].length, "invalid add data");
+        uint256 rlen = landToRemove[0].length;
+        require(rlen == landToRemove[1].length && rlen == landToRemove[2].length, "invalid remove data");
+        require(alen > 0 || rlen > 0, "nothing to update");
+        return _update(_msgSender(), oldId, landToAdd, landToRemove);
     }
 
     /// @notice completely burn an estate (Used by the bridge)
@@ -58,7 +43,7 @@ contract EstateTokenV1 is EstateBaseToken {
         require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
         Estate storage estate = _estate(estateId);
         tiles = estate.land.getMap();
-        _burnEstate(estate);
+        _burnEstate(estate, from);
         emit EstateBridgeBurned(estateId, _msgSender(), from, tiles);
         return tiles;
     }
@@ -68,20 +53,5 @@ contract EstateTokenV1 is EstateBaseToken {
     function contractURI() public view returns (string memory) {
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "estate.json")) : "";
-    }
-
-    function _removeLand(
-        Estate storage estate,
-        address to,
-        uint256[][3] calldata quads
-    ) internal virtual {
-        uint256 len = quads[0].length;
-        require(len == quads[1].length && len == quads[2].length, "invalid quad data");
-        MapLib.Map storage map = estate.land;
-        for (uint256 i; i < len; i++) {
-            require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "quad missing");
-            map.clear(quads[1][i], quads[2][i], quads[0][i]);
-        }
-        ILandToken(_s().landToken).batchTransferQuad(address(this), to, quads[0], quads[1], quads[2], "");
     }
 }

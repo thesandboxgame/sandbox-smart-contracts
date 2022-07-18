@@ -38,45 +38,25 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         uint256[][3] calldata landToRemove
     ) external returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
+
+        uint256 alen = landToAdd[0].length;
+        require(alen == landToAdd[1].length && alen == landToAdd[2].length, "invalid add data");
+        uint256 rlen = landToRemove[0].length;
+        require(rlen == landToRemove[1].length && rlen == landToRemove[2].length, "invalid remove data");
+
+        uint256 xlen = expToUnlink.length;
         IEstateExperienceRegistry registry = _ps().registryToken;
         if (address(registry) == address(0)) {
-            require(expToUnlink.length == 0, "invalid data");
-            require(landToAdd[0].length > 0 || landToRemove[0].length > 0, "nothing to update");
+            require(xlen == 0, "invalid data");
+            require(alen > 0 || rlen > 0, "nothing to update");
         } else {
-            require(
-                landToAdd[0].length > 0 || landToRemove[0].length > 0 || expToUnlink.length > 0,
-                "nothing to update"
-            );
+            require(alen > 0 || rlen > 0 || xlen > 0, "nothing to update");
+            if (xlen > 0) {
+                registry.batchUnLinkFrom(_msgSender(), expToUnlink);
+            }
+            require(!registry.isLinked(landToRemove), "must unlink first");
         }
-        Estate storage estate = _estate(oldId);
-        _addLand(estate, _msgSender(), landToAdd);
-        _removeLand(estate, registry, _msgSender(), landToRemove, expToUnlink);
-        require(!estate.land.isEmpty(), "estate cannot be empty");
-        require(estate.land.isAdjacent(), "not adjacent");
-        estate.id = _incrementTokenVersion(estate.id);
-        emit EstateTokenUpdated(oldId, estate.id, _msgSender(), estate.land.getMap());
-        return estate.id;
-    }
-
-    /// @notice burn an estate
-    /// @dev to be able to remove lands they must be completely unlinked from any experience (in the registry)
-    /// @dev to be able to burn an estate it must be empty
-    /// @param estateId the estate id that will be updated
-    /// @param expToUnlink experiences to unlink
-    /// @param landToRemove The set of quads to remove.
-    function burn(
-        uint256 estateId,
-        uint256[] calldata expToUnlink,
-        uint256[][3] calldata landToRemove
-    ) external {
-        require(_isApprovedOrOwner(_msgSender(), estateId), "caller is not owner nor approved");
-        Estate storage estate = _estate(estateId);
-        IEstateExperienceRegistry registry = _ps().registryToken;
-        require(expToUnlink.length == 0 || address(registry) != address(0), "invalid data");
-        _removeLand(estate, registry, _msgSender(), landToRemove, expToUnlink);
-        require(estate.land.isEmpty(), "map not empty");
-        _burnEstate(estate);
-        emit EstateTokenBurned(estateId, _msgSender());
+        return _update(_msgSender(), oldId, landToAdd, landToRemove);
     }
 
     /// @notice completely burn an estate (Used by the bridge)
@@ -97,7 +77,7 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         if (address(r) != address(0)) {
             require(!r.isLinked(tiles), "must unlink first");
         }
-        _burnEstate(estate);
+        _burnEstate(estate, from);
         emit EstateBridgeBurned(estateId, _msgSender(), from, tiles);
         return (tiles);
     }
@@ -125,43 +105,18 @@ contract PolygonEstateTokenV1 is EstateBaseToken {
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "polygon_estate.json")) : "";
     }
 
-    function _removeLand(
-        Estate storage estate,
-        IEstateExperienceRegistry registry,
-        address from,
-        uint256[][3] calldata quads,
-        uint256[] calldata expToUnlink
-    ) internal {
+    /// @dev this code is necessary for the tunnel, it is more expensive than batchTransfer, so we can remove it if
+    /// @dev we won't support the tunnel.
+    function _transferQuadsToOwner(uint256[][3] calldata quads) internal override {
+        IPolygonLand landToken = IPolygonLand(_s().landToken);
         uint256 len = quads[0].length;
-        require(len == quads[1].length && len == quads[2].length, "invalid quad data");
-        if (address(registry) != address(0)) {
-            if (expToUnlink.length > 0) {
-                registry.batchUnLinkFrom(from, expToUnlink);
-            }
-            require(!registry.isLinked(quads), "must unlink first");
-        }
-        address landToken = _s().landToken;
-        MapLib.Map storage map = estate.land;
         for (uint256 i; i < len; i++) {
-            _removeQuad(from, map, landToken, quads[0][i], quads[1][i], quads[2][i]);
-        }
-    }
-
-    function _removeQuad(
-        address to,
-        MapLib.Map storage map,
-        address landToken,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal {
-        require(map.contain(x, y, size), "quad missing");
-        map.clear(x, y, size);
-        if (!IPolygonLand(landToken).exists(size, x, y)) {
-            // The only way this can happen is if the lands passed trough the bridge
-            IPolygonLand(landToken).mintQuad(to, size, x, y, "");
-        } else {
-            IPolygonLand(landToken).transferQuad(address(this), to, size, x, y, "");
+            if (!landToken.exists(quads[0][i], quads[1][i], quads[2][i])) {
+                // The only way this can happen is if the lands passed trough the bridge
+                landToken.mintQuad(_msgSender(), quads[0][i], quads[1][i], quads[2][i], "");
+            } else {
+                landToken.transferQuad(address(this), _msgSender(), quads[0][i], quads[1][i], quads[2][i], "");
+            }
         }
     }
 

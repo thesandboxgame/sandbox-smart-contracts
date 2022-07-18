@@ -33,6 +33,8 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         string baseUri;
         // storageId -> estateData
         mapping(uint256 => Estate) estate;
+        // owner -> total amount of lands
+        mapping(address => uint256) totalLands;
     }
 
     uint256[50] private __preGap;
@@ -143,36 +145,15 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @param landToAdd The set of quads to add.
     /// @return estateId the estate Id created
     function create(uint256[][3] calldata landToAdd) external virtual returns (uint256 estateId) {
+        uint256 alen = landToAdd[0].length;
+        require(alen == landToAdd[1].length && alen == landToAdd[2].length, "invalid data");
+        require(alen > 0, "nothing to add");
+
         Estate storage estate = _mintEstate(_msgSender());
-        require(landToAdd[0].length > 0, "nothing to add");
         _addLand(estate, _msgSender(), landToAdd);
         require(estate.land.isAdjacent(), "not adjacent");
+        _s().totalLands[_msgSender()] += _estate(estate.id).land.getLandCount();
         emit EstateTokenCreated(estate.id, _msgSender(), estate.land.getMap());
-        return estate.id;
-    }
-
-    /// @notice Add the given quads (aka lands) to an Estate.
-    /// @param oldId the estate id that will be updated
-    /// @param landToAdd The set of quads to add.
-    /// @return estateId the new estate Id
-    function addLand(uint256 oldId, uint256[][3] calldata landToAdd) external virtual returns (uint256) {
-        require(_isApprovedOrOwner(_msgSender(), oldId), "caller is not owner nor approved");
-        require(landToAdd[0].length > 0, "nothing to add");
-        Estate storage estate = _estate(oldId);
-        // we can optimize when adding only one quad
-        // The risk with this optimizations is that you keep adding lands but then you cannot remove because
-        // the removal check is the expensive one.
-        if (landToAdd[0].length == 1) {
-            // check that the quad is adjacent before adding
-            require(estate.land.isAdjacent(landToAdd[1][0], landToAdd[2][0], landToAdd[0][0]), "not adjacent");
-            _addLand(estate, _msgSender(), landToAdd);
-        } else {
-            // add everything then make the heavier check of the result
-            _addLand(estate, _msgSender(), landToAdd);
-            require(estate.land.isAdjacent(), "not adjacent");
-        }
-        estate.id = _incrementTokenVersion(estate.id);
-        emit EstateTokenLandsAdded(oldId, estate.id, _msgSender(), estate.land.getMap());
         return estate.id;
     }
 
@@ -189,6 +170,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         require(hasRole(MINTER_ROLE, _msgSender()), "not authorized");
         Estate storage estate = _mintEstate(to);
         estate.land.set(tiles);
+        _s().totalLands[to] += _estate(estate.id).land.getLandCount();
         emit EstateBridgeMinted(estate.id, _msgSender(), to, tiles);
         return estate.id;
     }
@@ -283,6 +265,13 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return _estate(estateId).land.getLandCount();
     }
 
+    /// @notice return the amount of lands inside the estate
+    /// @param owner the owner of the estate
+    /// @return the amount of lands inside the estate
+    function getTotalLandCount(address owner) external view returns (uint256) {
+        return _s().totalLands[owner];
+    }
+
     /// @notice given and estateId return the part that doesn't change when the version is incremented
     /// @param estateId the estate id
     /// @return the storage Id
@@ -320,20 +309,61 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
             super.supportsInterface(interfaceId);
     }
 
+    function _update(
+        address owner,
+        uint256 oldId,
+        uint256[][3] calldata landToAdd,
+        uint256[][3] calldata landToRemove
+    ) internal virtual returns (uint256) {
+        Estate storage estate = _estate(oldId);
+        _s().totalLands[owner] -= estate.land.getLandCount();
+        if (landToAdd[0].length == 1 && landToRemove[0].length == 0) {
+            // check that the quad is adjacent before adding
+            require(estate.land.isAdjacent(landToAdd[1][0], landToAdd[2][0], landToAdd[0][0]), "not adjacent");
+            _addLand(estate, _msgSender(), landToAdd);
+        } else {
+            _addLand(estate, _msgSender(), landToAdd);
+            _removeLand(estate, landToRemove);
+            if (estate.land.isEmpty()) {
+                _burnEstate(estate, _msgSender());
+                emit EstateTokenBurned(oldId, _msgSender());
+                return 0;
+            }
+            require(estate.land.isAdjacent(), "not adjacent");
+        }
+        _s().totalLands[owner] += estate.land.getLandCount();
+        estate.id = _incrementTokenVersion(estate.id);
+        emit EstateTokenUpdated(oldId, estate.id, _msgSender(), estate.land.getMap());
+        return estate.id;
+    }
+
     function _addLand(
         Estate storage estate,
         address from,
         uint256[][3] calldata quads
-    ) internal {
+    ) internal virtual {
         uint256 len = quads[0].length;
-        require(len == quads[1].length && len == quads[2].length, "invalid data");
-        for (uint256 i; i < len; i++) {
-            estate.land.set(quads[1][i], quads[2][i], quads[0][i]);
+        if (len > 0) {
+            for (uint256 i; i < len; i++) {
+                estate.land.set(quads[1][i], quads[2][i], quads[0][i]);
+            }
+            ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
         }
-        ILandToken(_s().landToken).batchTransferQuad(from, address(this), quads[0], quads[1], quads[2], "");
     }
 
-    function _mintEstate(address to) internal returns (Estate storage estate) {
+    function _removeLand(Estate storage estate, uint256[][3] calldata quads) internal virtual {
+        MapLib.Map storage map = estate.land;
+        uint256 len = quads[0].length;
+        if (len > 0) {
+            for (uint256 i; i < len; i++) {
+                require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "quad missing");
+                map.clear(quads[1][i], quads[2][i], quads[0][i]);
+            }
+            _transferQuadsToOwner(quads);
+        }
+    }
+
+    function _mintEstate(address to) internal virtual returns (Estate storage estate) {
         uint256 estateId = EstateTokenIdHelperLib.packId(++(_s().nextId), _s().chainIndex, 1);
         estate = _estate(estateId);
         estate.id = estateId;
@@ -341,7 +371,8 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return estate;
     }
 
-    function _burnEstate(Estate storage estate) internal {
+    function _burnEstate(Estate storage estate, address owner) internal virtual {
+        _s().totalLands[owner] -= estate.land.getLandCount();
         estate.land.clear();
         delete estate.land;
         uint256 estateId = estate.id;
@@ -349,11 +380,15 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         super._burn(estateId);
     }
 
+    function _transferQuadsToOwner(uint256[][3] calldata quads) internal virtual {
+        ILandToken(_s().landToken).batchTransferQuad(address(this), _msgSender(), quads[0], quads[1], quads[2], "");
+    }
+
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to
     /// @dev token-specific data are preserved via the storageId mechanism.
     /// @param estateId The estateId to increment.
     /// @return new estate id
-    function _incrementTokenVersion(uint256 estateId) internal returns (uint256) {
+    function _incrementTokenVersion(uint256 estateId) internal virtual returns (uint256) {
         address owner = ownerOf(estateId);
         super._burn(estateId);
         estateId = estateId.incrementVersion();
