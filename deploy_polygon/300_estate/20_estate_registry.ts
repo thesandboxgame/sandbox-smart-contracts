@@ -35,11 +35,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = [
-  'PolygonEstate',
-  'PolygonEstateRegistry',
-  'PolygonEstateRegistry_deploy',
-];
+func.tags = ['PolygonEstateRegistry', 'PolygonEstateRegistry_deploy'];
 func.dependencies = [
   'PolygonLand',
   'TRUSTED_FORWARDER',
