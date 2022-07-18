@@ -179,7 +179,9 @@ export function drawExtendedTile(rectangles: number[][]): boolean[][] {
 export function printTile(jsTile: boolean[][], compact = false): void {
   if (compact) {
     console.log(
-      jsTile.map((x) => x.reduce((acc, val) => acc + (val ? 'X ' : 'O '), ''))
+      jsTile.map((x) =>
+        x.reduce((acc, val) => acc + (val ? 'X ' : '\u00B7 '), '')
+      )
     );
     return;
   }
@@ -200,18 +202,30 @@ export function printTile(jsTile: boolean[][], compact = false): void {
   for (let i = 0; i < jsTile.length; i++) {
     console.log(
       i.toString().padEnd(5),
-      jsTile[i].reduce((acc, val) => acc + (val ? 'X ' : 'O '), '')
+      jsTile[i].reduce((acc, val) => acc + (val ? 'X ' : '\u00B7 '), '')
     );
   }
 }
 
-export function printTileWithCoord(jsTile: {
+export type TileWithCoord = {
   tile: boolean[][];
-  x: BigNumber;
-  y: BigNumber;
-}): void {
-  console.log('X', jsTile.x.toString(), jsTile.x.toHexString());
-  console.log('Y', jsTile.y.toString(), jsTile.y.toHexString());
+  x: BigNumberish;
+  y: BigNumberish;
+};
+
+export function printTileWithCoord(jsTile: TileWithCoord): void {
+  console.log(
+    'X',
+    BigNumber.from(jsTile.x).toString(),
+    BigNumber.from(jsTile.x).mul(24).toString(),
+    BigNumber.from(jsTile.x).toHexString()
+  );
+  console.log(
+    'Y',
+    BigNumber.from(jsTile.y).toString(),
+    BigNumber.from(jsTile.y).mul(24).toString(),
+    BigNumber.from(jsTile.y).toHexString()
+  );
   printTile(jsTile.tile);
 }
 
