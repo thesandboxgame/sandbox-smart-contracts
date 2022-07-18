@@ -1,7 +1,6 @@
 import {ethers} from 'hardhat';
 import {getArgParser} from '../utils/utils';
 import {BigNumber} from 'ethers';
-import {ownerToSteal} from './landToSteal';
 import {
   printTileWithCoord,
   TileWithCoord,
@@ -13,16 +12,20 @@ async function main() {
   if (!nodeUrl) {
     throw new Error(`Set the env var ETH_NODE_URI_POLYGON`);
   }
+  const pk = process.env.USER_PK;
+  if (!pk) {
+    throw new Error(`Set the env var USER_PK`);
+  }
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.ETH_NODE_URI_POLYGON
+  );
+  const signer = new ethers.Wallet(pk, provider);
 
   const parser = getArgParser({
     description: `RUN WITH: yarn execute mumbai ${process.argv[0]}`,
   });
   parser.addArgument(['token'], {help: 'token id'});
   const processArgs = parser.parseArgs();
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.ETH_NODE_URI_POLYGON
-  );
-  const signer = provider.getSigner(ownerToSteal);
   const estateId = BigNumber.from(processArgs.token);
 
   const estateContact = await ethers.getContract('PolygonEstate', signer);
