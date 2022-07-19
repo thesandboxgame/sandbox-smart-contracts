@@ -5,7 +5,7 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {withSnapshot} from '../utils';
-import {BigNumber, BigNumberish, Contract, ContractReceipt} from 'ethers';
+import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {Event} from '@ethersproject/contracts';
 
 async function setupLand(isLayer1: boolean) {
@@ -164,8 +164,6 @@ async function setupEstateAndLand(
     estateAdmin,
     estateMinter,
     estateBurner,
-    checkpointManager,
-    fxRoot,
   ] = setup.getUnnamedAccounts();
 
   // Estate
@@ -203,21 +201,6 @@ async function setupEstateAndLand(
   const burnerRole = await estateContractAsDefaultAdmin.BURNER_ROLE();
   await estateContractAsDefaultAdmin.grantRole(burnerRole, estateBurner);
 
-  // Estate tunnel
-  await deployments.deploy('MockEstateTunnel', {
-    from: setup.deployer,
-    args: [
-      checkpointManager,
-      fxRoot,
-      estateContractAsMinter.address,
-      setup.trustedForwarder,
-    ],
-  });
-  const estateTunnel = await ethers.getContract(
-    'MockEstateTunnel',
-    setup.deployer
-  );
-
   async function createAndReturnEstateId(
     contract: Contract,
     quads: [BigNumberish[], BigNumberish[], BigNumberish[]]
@@ -243,7 +226,6 @@ async function setupEstateAndLand(
     estateContractAsMinter,
     estateContractAsBurner,
     estateContractAsOther,
-    estateTunnel,
     estateDefaultAdmin,
     estateAdmin,
     ...setup,
@@ -298,7 +280,12 @@ async function setupEstateAndLand(
       expToUnlink?: {
         exps: BigNumberish[];
       }
-    ): Promise<{updateEstateId: BigNumber; updateGasUsed: BigNumber}> => {
+    ): Promise<{
+      updateEstateId: BigNumber;
+      newId: BigNumber;
+      oldId: BigNumber;
+      updateGasUsed: BigNumber;
+    }> => {
       const a1 = landToAdd
         ? [landToAdd.sizes, landToAdd.xs, landToAdd.ys]
         : [[], [], []];
@@ -307,19 +294,17 @@ async function setupEstateAndLand(
         ? [landToRemove.sizes, landToRemove.xs, landToRemove.ys]
         : [[], [], []];
       const args = isLayer1 ? [oldId, a1, a3] : [oldId, a1, a2, a3];
-      const tx = await estateContractAsOther.update(...args);
-      const receipt: ContractReceipt = await tx.wait();
-      const estateCreationEvents = receipt.events?.filter(
-        (e) => e.event === 'EstateTokenUpdated'
+      const receipt = await (
+        await estateContractAsOther.update(...args)
+      ).wait();
+      const events = receipt.events.filter(
+        (v: Event) => v.event === 'EstateTokenUpdated'
       );
-      const estateId =
-        estateCreationEvents &&
-        estateCreationEvents.length > 0 &&
-        estateCreationEvents[0].args &&
-        estateCreationEvents[0].args[0];
       return {
-        updateEstateId: BigNumber.from(estateId),
+        updateEstateId: BigNumber.from(events[0].args['newId']),
         updateGasUsed: BigNumber.from(receipt.gasUsed),
+        oldId: BigNumber.from(events[0].args['oldId']),
+        newId: BigNumber.from(events[0].args['newId']),
       };
     },
   };

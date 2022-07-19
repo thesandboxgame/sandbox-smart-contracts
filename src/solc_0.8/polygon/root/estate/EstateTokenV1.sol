@@ -29,25 +29,6 @@ contract EstateTokenV1 is EstateBaseToken {
         return _update(_msgSender(), oldId, landToAdd, landToRemove);
     }
 
-    /// @notice completely burn an estate (Used by the bridge)
-    /// @param from user that is trying to use the bridge
-    /// @param estateId the id of the estate token
-    /// @return tiles the list of tiles (aka lands) to add to the estate
-    function burnEstate(address from, uint256 estateId)
-        external
-        virtual
-        override
-        returns (TileWithCoordLib.TileWithCoord[] memory tiles)
-    {
-        require(hasRole(BURNER_ROLE, _msgSender()), "not authorized");
-        require(_isApprovedOrOwner(from, estateId), "caller is not owner nor approved");
-        Estate storage estate = _estate(estateId);
-        tiles = estate.land.getMap();
-        _burnEstate(estate, from);
-        emit EstateBridgeBurned(estateId, _msgSender(), from, tiles);
-        return tiles;
-    }
-
     /// @dev See https://docs.opensea.io/docs/contract-level-metadata
     /// @return the metadata url for the whole contract
     function contractURI() public view returns (string memory) {

@@ -79,15 +79,9 @@ contract TestEstateBaseToken is EstateBaseToken {
         return MapLib.translate(TileLib.set(t, 0, 0, size), x, y);
     }
 
-    // Abusing the estate id to set some coordinates
-    function burnEstate(address, uint256 estateId)
-        external
-        pure
-        override
-        returns (TileWithCoordLib.TileWithCoord[] memory)
-    {
+    function getTileWithCoord(uint256 x, uint256 y) external pure returns (TileWithCoordLib.TileWithCoord[] memory) {
         TileWithCoordLib.TileWithCoord[] memory tiles = new TileWithCoordLib.TileWithCoord[](1);
-        tiles[0] = TileWithCoordLib.set(TileWithCoordLib.init(estateId, estateId), estateId, estateId, 24);
+        tiles[0] = TileWithCoordLib.set(TileWithCoordLib.init(x, y), x, y, 24);
         return tiles;
     }
 }

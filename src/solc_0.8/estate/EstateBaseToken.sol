@@ -76,30 +76,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     /// @param from the user from which the estate is taken
     event EstateTokenBurned(uint256 indexed estateId, address from);
 
-    /// @dev Emitted when the bridge mint an estate.
-    /// @param estateId The id of the  erc721 ESTATE token.
-    /// @param operator The msg sender
-    /// @param to the user to which the estate is minted
-    /// @param lands the tiles that compose the estate and was sent from the other layer
-    event EstateBridgeMinted(
-        uint256 indexed estateId,
-        address operator,
-        address to,
-        TileWithCoordLib.TileWithCoord[] lands
-    );
-
-    /// @dev Emitted when the bridge (burner role) burn an estate.
-    /// @param estateId The id of the erc721 ESTATE token.
-    /// @param operator The msg sender
-    /// @param from the user from which the estate is taken
-    /// @param lands the tiles that compose the estate and will be sent to the other layer
-    event EstateBridgeBurned(
-        uint256 indexed estateId,
-        address operator,
-        address from,
-        TileWithCoordLib.TileWithCoord[] lands
-    );
-
     /// @dev Emitted when the land contract address is changed
     /// @param operator The msg sender
     /// @param oldAddress of the land contract
@@ -156,35 +132,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         emit EstateTokenCreated(estate.id, _msgSender(), estate.land.getMap());
         return estate.id;
     }
-
-    /// @notice create a new estate from scratch (Used by the bridge)
-    /// @param to user that will get the new minted Estate
-    /// @param tiles the list of tiles (aka lands) to add to the estate
-    /// @return the estate Id created
-    function mintEstate(address to, TileWithCoordLib.TileWithCoord[] calldata tiles)
-        external
-        virtual
-        override
-        returns (uint256)
-    {
-        require(hasRole(MINTER_ROLE, _msgSender()), "not authorized");
-        Estate storage estate = _mintEstate(to);
-        estate.land.set(tiles);
-        _s().totalLands[to] += _estate(estate.id).land.getLandCount();
-        emit EstateBridgeMinted(estate.id, _msgSender(), to, tiles);
-        return estate.id;
-    }
-
-    /// @notice completely burn an estate (Used by the bridge)
-    /// @dev must be implemented for every layer, see PolygonEstateTokenV1 and EstateTokenV1
-    /// @param from user that is trying to use the bridge
-    /// @param estateId the id of the estate token
-    /// @return tiles the list of tiles (aka lands) to add to the estate
-    function burnEstate(address from, uint256 estateId)
-        external
-        virtual
-        override
-        returns (TileWithCoordLib.TileWithCoord[] memory tiles);
 
     /// @notice change the address of the land contract
     /// @param landToken the new address of the land contract
@@ -352,9 +299,9 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     }
 
     function _removeLand(Estate storage estate, uint256[][3] calldata quads) internal virtual {
-        MapLib.Map storage map = estate.land;
         uint256 len = quads[0].length;
         if (len > 0) {
+            MapLib.Map storage map = estate.land;
             for (uint256 i; i < len; i++) {
                 require(map.contain(quads[1][i], quads[2][i], quads[0][i]), "quad missing");
                 map.clear(quads[1][i], quads[2][i], quads[0][i]);

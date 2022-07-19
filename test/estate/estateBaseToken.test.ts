@@ -83,40 +83,6 @@ describe('Estate base token test', function () {
       });
     });
   });
-  describe('minter used by the estate tunnel', function () {
-    it('minter should be able to mintEstate', async function () {
-      const {
-        other,
-        estateMinter,
-        estateContractAsMinter,
-      } = await setupTestEstateBaseToken();
-      // Used to get a TileWithCoord[]
-      const tiles = await estateContractAsMinter.burnEstate(other, 144);
-      const receipt = await (
-        await estateContractAsMinter.mintEstate(other, tiles)
-      ).wait();
-      const events = receipt.events.filter(
-        (v: Event) => v.event === 'EstateBridgeMinted'
-      );
-      assert.equal(events.length, 1);
-      const estateId = events[0].args['estateId'];
-      expect(events[0].args['operator']).to.be.equal(estateMinter);
-      expect(events[0].args['to']).to.be.equal(other);
-      const lands = events[0].args['lands'];
-      expect(lands.length).to.be.equal(1);
-      const l = tileWithCoordToJS(lands[0]);
-      expect(l.x).to.be.equal(144 / 24);
-      expect(l.y).to.be.equal(144 / 24);
-      expect(l.tile).to.be.eql(getFullTile());
-      expect(await estateContractAsMinter.ownerOf(estateId)).to.be.equal(other);
-    });
-    it('other should fail to mintEstate', async function () {
-      const {other, estateContractAsOther} = await setupTestEstateBaseToken();
-      await expect(estateContractAsOther.mintEstate(other, [])).to.revertedWith(
-        'not authorized'
-      );
-    });
-  });
   describe('create', function () {
     it('create an estate', async function () {
       const {

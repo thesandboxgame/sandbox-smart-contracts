@@ -127,57 +127,6 @@ describe('EstateTokenV1 tests for L1', function () {
       ).to.revertedWith('quad missing');
     });
   });
-  describe('burner, used by the estate tunnel', function () {
-    it('burner should be able to burnEstate', async function () {
-      const {
-        other,
-        estateBurner,
-        estateContractAsBurner,
-        mintApproveAndCreateAsOther,
-      } = await setupL1EstateAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      const receipt = await (
-        await estateContractAsBurner.burnEstate(other, estateId)
-      ).wait();
-      const events = receipt.events.filter(
-        (v: Event) => v.event === 'EstateBridgeBurned'
-      );
-      assert.equal(events.length, 1);
-      expect(events[0].args['estateId']).to.be.equal(estateId);
-      expect(events[0].args['operator']).to.be.equal(estateBurner);
-      expect(events[0].args['from']).to.be.equal(other);
-      const lands = events[0].args['lands'];
-      expect(lands.length).to.be.equal(1);
-      const l = tileWithCoordToJS(lands[0]);
-      expect(l.x).to.be.equal(48 / 24);
-      expect(l.y).to.be.equal(96 / 24);
-      expect(l.tile).to.be.eql(getFullTile());
-
-      expect(await estateContractAsBurner.exists(estateId)).to.be.false;
-    });
-    it('other should fail to burnEstate', async function () {
-      const {
-        other,
-        estateContractAsOther,
-        mintApproveAndCreateAsOther,
-      } = await setupL1EstateAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      await expect(
-        estateContractAsOther.burnEstate(other, estateId)
-      ).to.revertedWith('not authorized');
-    });
-    it('should fail when not burning for the owner', async function () {
-      const {
-        estateBurner,
-        estateContractAsBurner,
-        mintApproveAndCreateAsOther,
-      } = await setupL1EstateAndLand();
-      const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-      await expect(
-        estateContractAsBurner.burnEstate(estateBurner, estateId)
-      ).to.revertedWith('caller is not owner nor approved');
-    });
-  });
   it('check contractURI', async function () {
     const {
       estateContractAsOther,
