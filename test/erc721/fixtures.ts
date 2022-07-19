@@ -10,9 +10,11 @@ export const setupBaseERC721Upgradeable = withSnapshot([], async () => {
   const {deployer} = await getNamedAccounts();
   const [
     other,
+    another,
     trustedForwarder,
     defaultAdmin,
     admin,
+    superoperator,
   ] = await getUnnamedAccounts();
   const name = 'TestBaseERC721Upgradeable';
   const symbol = 'TEB';
@@ -25,6 +27,9 @@ export const setupBaseERC721Upgradeable = withSnapshot([], async () => {
   const contractAsDefaultAdmin = await ethers.getContract(name, defaultAdmin);
   const ADMIN_ROLE = await contractAsDefaultAdmin.ADMIN_ROLE();
   await contractAsDefaultAdmin.grantRole(ADMIN_ROLE, admin);
+  const SUPER_OPERATOR_ROLE = await contractAsDefaultAdmin.SUPER_OPERATOR_ROLE();
+  await contractAsDefaultAdmin.grantRole(SUPER_OPERATOR_ROLE, superoperator);
+  const contractAsSuperOperator = await ethers.getContract(name, superoperator);
   const contractAsAdmin = await ethers.getContract(name, admin);
   const contractAsTrustedForwarder = await ethers.getContract(
     name,
@@ -33,6 +38,8 @@ export const setupBaseERC721Upgradeable = withSnapshot([], async () => {
   return {
     ADMIN_ROLE,
     other,
+    deployer,
+    another,
     trustedForwarder,
     defaultAdmin,
     admin,
@@ -40,6 +47,7 @@ export const setupBaseERC721Upgradeable = withSnapshot([], async () => {
     contractAsOther,
     contractAsDefaultAdmin,
     contractAsTrustedForwarder,
+    contractAsSuperOperator,
     contractAsAdmin,
     name,
     symbol,

@@ -25,4 +25,8 @@ contract TestBaseERC721Upgradeable is BaseERC721Upgradeable {
     function mint(address to, uint256 tokenId) external {
         _mint(to, tokenId);
     }
+
+    function msgData(bytes calldata) external view returns (bytes calldata) {
+        return _msgData();
+    }
 }
