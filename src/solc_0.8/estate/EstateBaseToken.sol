@@ -319,7 +319,6 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
     }
 
     function _burnEstate(Estate storage estate, address owner) internal virtual {
-        _s().totalLands[owner] -= estate.land.getLandCount();
         estate.land.clear();
         delete estate.land;
         uint256 estateId = estate.id;
