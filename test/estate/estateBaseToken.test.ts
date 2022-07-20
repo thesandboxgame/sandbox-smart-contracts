@@ -143,6 +143,9 @@ describe('Estate base token test', function () {
       expect(await estateContractAsOther.getLandCount(estateId)).to.be.equal(
         24 * 24
       );
+      expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(
+        24 * 24
+      );
       expect(await estateContractAsOther.getLandLength(estateId)).to.be.equal(
         1
       );
@@ -270,5 +273,88 @@ describe('Estate base token test', function () {
     ).to.be.equal(
       interfaceSignature(estateContractAsOther, 'onERC721BatchReceived')
     );
+  });
+  it('getTotalLandCount, create, update, burn', async function () {
+    const {
+      other,
+      estateContractAsOther,
+      mintQuad,
+      updateEstateAsOther,
+      mintApproveAndCreateAsOther,
+    } = await setupTestEstateBaseToken();
+    expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(0);
+    const {estateId: id0} = await mintApproveAndCreateAsOther(24, 120, 120);
+    expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(
+      24 * 24
+    );
+    await mintQuad(other, 24, 120 + 24, 120);
+    const {newId: id1} = await updateEstateAsOther(id0, {
+      xs: [120 + 24],
+      ys: [120],
+      sizes: [24],
+    });
+    expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(
+      2 * 24 * 24
+    );
+    await mintQuad(other, 24, 120 - 24, 120);
+    const {newId: id2} = await updateEstateAsOther(
+      id1,
+      {
+        xs: [120 - 24],
+        ys: [120],
+        sizes: [24],
+      },
+      {
+        xs: [120 + 24],
+        ys: [120],
+        sizes: [24],
+      }
+    );
+    expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(
+      2 * 24 * 24
+    );
+    const {burnId: id3} = await updateEstateAsOther(id2, undefined, {
+      xs: [120 - 24, 120],
+      ys: [120, 120],
+      sizes: [24, 24],
+    });
+    expect(await estateContractAsOther.getTotalLandCount(other)).to.be.equal(0);
+    expect(await estateContractAsOther.exists(id3)).to.be.false;
+  });
+  it('should fail if the estate end up not adjacent', async function () {
+    const {
+      other,
+      estateContractAsOther,
+      mintQuad,
+      mintApproveAndCreateAsOther,
+      updateEstateAsOther,
+    } = await setupTestEstateBaseToken();
+    const {estateId} = await mintApproveAndCreateAsOther(1, 144, 144);
+    await mintQuad(other, 1, 145, 144);
+    await mintQuad(other, 1, 144, 145);
+    await mintQuad(other, 1, 145, 145);
+    await mintQuad(other, 1, 146, 146);
+    await expect(
+      estateContractAsOther.update(estateId, [[1], [145], [145]], [[], [], []])
+    ).to.revertedWith('not adjacent');
+    await expect(
+      estateContractAsOther.update(
+        estateId,
+        [
+          [1, 1],
+          [145, 146],
+          [145, 146],
+        ],
+        [[], [], []]
+      )
+    ).to.revertedWith('not adjacent');
+    const {newId} = await updateEstateAsOther(estateId, {
+      xs: [145, 144],
+      ys: [144, 145],
+      sizes: [1, 1],
+    });
+    await expect(
+      estateContractAsOther.update(newId, [[], [], []], [[1], [144], [144]])
+    ).to.revertedWith('not adjacent');
   });
 });

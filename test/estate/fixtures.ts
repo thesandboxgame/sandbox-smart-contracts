@@ -281,10 +281,10 @@ async function setupEstateAndLand(
         exps: BigNumberish[];
       }
     ): Promise<{
-      updateEstateId: BigNumber;
       newId: BigNumber;
       oldId: BigNumber;
-      updateGasUsed: BigNumber;
+      burnId: BigNumber;
+      gasUsed: BigNumber;
     }> => {
       const a1 = landToAdd
         ? [landToAdd.sizes, landToAdd.xs, landToAdd.ys]
@@ -298,13 +298,18 @@ async function setupEstateAndLand(
         await estateContractAsOther.update(...args)
       ).wait();
       const events = receipt.events.filter(
-        (v: Event) => v.event === 'EstateTokenUpdated'
+        (v: Event) =>
+          v.event === 'EstateTokenUpdated' || v.event === 'EstateTokenBurned'
       );
       return {
-        updateEstateId: BigNumber.from(events[0].args['newId']),
-        updateGasUsed: BigNumber.from(receipt.gasUsed),
-        oldId: BigNumber.from(events[0].args['oldId']),
-        newId: BigNumber.from(events[0].args['newId']),
+        gasUsed: BigNumber.from(receipt.gasUsed),
+        oldId:
+          events[0].args['oldId'] && BigNumber.from(events[0].args['oldId']),
+        newId:
+          events[0].args['newId'] && BigNumber.from(events[0].args['newId']),
+        burnId:
+          events[0].args['estateId'] &&
+          BigNumber.from(events[0].args['estateId']),
       };
     },
   };

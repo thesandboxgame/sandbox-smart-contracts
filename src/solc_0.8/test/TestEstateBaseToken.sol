@@ -33,6 +33,14 @@ contract TestEstateBaseToken is EstateBaseToken {
         __EstateBaseToken_init_unchained(landToken, chainIndex);
     }
 
+    function update(
+        uint256 oldId,
+        uint256[][3] calldata landToAdd,
+        uint256[][3] calldata landToRemove
+    ) external returns (uint256) {
+        return _update(_msgSender(), oldId, landToAdd, landToRemove);
+    }
+
     function getCurrentEstateId(uint256 storageId) external view returns (uint256) {
         return _estate(storageId).id;
     }

@@ -88,23 +88,15 @@ describe('EstateTokenV1 tests for L1', function () {
         .to.emit(estateContractAsOther, 'EstateTokenBurned')
         .withArgs(estateId, other);
     });
-    it('should fail if the estate end up not adjacent', async function () {
+    it('should fail to add if quads are invalid', async function () {
       const {
-        other,
         estateContractAsOther,
-        mintQuad,
         mintApproveAndCreateAsOther,
       } = await setupL1EstateAndLand();
       const {estateId} = await mintApproveAndCreateAsOther(24, 48, 96);
-
-      await mintQuad(other, 24, 144, 144);
       await expect(
-        estateContractAsOther.update(
-          estateId,
-          [[24], [144], [144]],
-          [[], [], []]
-        )
-      ).to.revertedWith('not adjacent');
+        estateContractAsOther.update(estateId, [[24], [48], []], [[], [], []])
+      ).to.revertedWith('invalid add data');
     });
     it('should fail to remove if quads are invalid', async function () {
       const {

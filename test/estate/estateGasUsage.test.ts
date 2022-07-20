@@ -130,19 +130,19 @@ describe('@skip-on-coverage @slow gas consumption of', function () {
         xs: [240],
         ys: [120 + 24],
       });
-      estimate.push(u1.updateGasUsed);
+      estimate.push(u1.gasUsed);
       const u2 = await updateEstateAsOther(u1.newId, {
         sizes: [24],
         xs: [240],
         ys: [120 - 24],
       });
-      estimate.push(u2.updateGasUsed);
+      estimate.push(u2.gasUsed);
       const u3 = await updateEstateAsOther(u2.newId, {
         sizes: [24],
         xs: [240],
         ys: [120 + 48],
       });
-      estimate.push(u3.updateGasUsed);
+      estimate.push(u3.gasUsed);
       expect(sum(estimate)).to.be.equal(10261784);
     });
     it('add three full quads', async function () {
@@ -234,12 +234,12 @@ describe('@skip-on-coverage @slow gas consumption of', function () {
 
         // mint lands for update
         await mintQuad(other, size, 144, 144);
-        const {updateGasUsed} = await updateEstateAsOther(
+        const {gasUsed} = await updateEstateAsOther(
           estateId,
           {sizes: [size], xs: [144], ys: [144]},
           {sizes: [size], xs: [48], ys: [96]}
         );
-        expect(updateGasUsed).to.be.equal(gasPerSize[size]);
+        expect(gasUsed).to.be.equal(gasPerSize[size]);
       });
     });
   });
@@ -277,12 +277,12 @@ describe('@skip-on-coverage @slow gas consumption of', function () {
         });
         // we don't have enough gas to add and remove 576 1x1 pixels
         // so we just remove one by and add one big quad
-        const {updateGasUsed} = await updateEstateAsOther(
+        const {gasUsed} = await updateEstateAsOther(
           estateId,
           {xs: [144], ys: [144], sizes: [24]},
           getXsYsSizes(0, 0, size)
         );
-        expect(updateGasUsed).to.be.equal(gasPerSize[size]);
+        expect(gasUsed).to.be.equal(gasPerSize[size]);
       });
     });
     describe('update states, remove', function () {
@@ -318,16 +318,12 @@ describe('@skip-on-coverage @slow gas consumption of', function () {
             ys.push(120);
           }
           const {estateId} = await createEstateAsOther({xs, ys, sizes});
-          const {updateGasUsed} = await updateEstateAsOther(
-            estateId,
-            undefined,
-            {
-              sizes: sizes.slice(0, cant),
-              xs: xs.slice(0, cant),
-              ys: ys.slice(0, cant),
-            }
-          );
-          expect(updateGasUsed).to.be.equal(gasPerCant[cant]);
+          const {gasUsed} = await updateEstateAsOther(estateId, undefined, {
+            sizes: sizes.slice(0, cant),
+            xs: xs.slice(0, cant),
+            ys: ys.slice(0, cant),
+          });
+          expect(gasUsed).to.be.equal(gasPerCant[cant]);
         });
       });
     });

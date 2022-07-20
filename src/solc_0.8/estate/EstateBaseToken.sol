@@ -272,7 +272,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
             _addLand(estate, _msgSender(), landToAdd);
             _removeLand(estate, landToRemove);
             if (estate.land.isEmpty()) {
-                _burnEstate(estate, _msgSender());
+                _burnEstate(estate);
                 emit EstateTokenBurned(oldId, _msgSender());
                 return 0;
             }
@@ -318,7 +318,7 @@ abstract contract EstateBaseToken is BaseERC721Upgradeable, IEstateToken {
         return estate;
     }
 
-    function _burnEstate(Estate storage estate, address owner) internal virtual {
+    function _burnEstate(Estate storage estate) internal virtual {
         estate.land.clear();
         delete estate.land;
         uint256 estateId = estate.id;

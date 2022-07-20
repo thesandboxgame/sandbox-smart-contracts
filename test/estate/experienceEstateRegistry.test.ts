@@ -631,15 +631,13 @@ describe('ExperienceEstateRegistry tests', function () {
               coords[i][1]
             );
           }
-          const {updateGasUsed} = await updateEstateAsOther(
+          const {gasUsed} = await updateEstateAsOther(
             estateId,
             {sizes: [size], xs: [48], ys: [48]},
             {sizes: [size], xs: [0], ys: [0]},
             {exps: experienceIds}
           );
-          console.log(
-            `gas used to update estate for ${size}, is ${updateGasUsed}`
-          );
+          console.log(`gas used to update estate for ${size}, is ${gasUsed}`);
         });
       });
     });
