@@ -1,4 +1,3 @@
-
 ---
 description: Estate
 ---
@@ -6,6 +5,7 @@ description: Estate
 # Estate
 
 ## Introduction
+
 Estate is an ERC-721 token, it can group ERC-721 Land tokens.
 
 ## Model
@@ -23,6 +23,7 @@ Estate is an ERC-721 token, it can group ERC-721 Land tokens.
 |                      |                                         |
 
 ### Class diagram
+
 ```plantuml
 title class diagram
 
@@ -95,41 +96,60 @@ EstateBaseToken <|-- PolygonEstateTokenV1
 
 ``` 
 
-## Processes 
+## Processes
 
 #### Preamble: Quads
-Quads are a representation of a group of land. They were introduced in the Land contract as cheap way fro mintng and transfering lands. Each quad is characterized by it's size, and a pair of x and y coordinates. For more information about quads, refere to the Land contract documentation. 
+
+Quads are a representation of a group of land. They were introduced in the Land contract as cheap way fro mintng and
+transfering lands. Each quad is characterized by it's size, and a pair of x and y coordinates. For more information
+about quads, refere to the Land contract documentation.
 
 ### Token Id
-Each ER721 is associated with an unique token Id, Estate tokens are a bit more especial, they can be updated, with the adition or removal of lands. The token id pattern follows the following table:
+
+Each ER721 is associated with an unique token Id, Estate tokens are a bit more especial, they can be updated, with the
+adition or removal of lands. The token id pattern follows the following table:
 ![](../../img/EstateId.png)
 
-Storage Id is the immutable part of the token id, that isn't altered by updates. 
--subId The main id of the token, it never changes.
--chainIndex The index of the chain, 0: mainet, 1:polygon, etc
+Storage Id is the immutable part of the token id, that isn't altered by updates. -subId The main id of the token, it
+never changes. -chainIndex The index of the chain, 0: mainet, 1:polygon, etc
 
 ### Contract storage
+
 ```shell
+    struct EstateBaseTokenStorage {
         address landToken;
-        uint128 nextId; 
+        uint128 nextId;
         uint32 chainIndex;
         string baseUri;
         mapping(uint256 => Estate) estate;
         mapping(address => uint256) totalLands;
+    }
+
+    struct Estate {
+        // current estateId, for the same storageId we have only one valid estateId (the last one)
+        uint256 id;
+        // estate lands tile set.
+        MapLib.Map land;
+    }
 ```
-* landToken;
-* nextId
-* chainIndex
-* baseUri
-* mapping estate
-* mapping totalLands
+
+* landToken: address of the land token contract
+* nextId: the id set to the next estate created
+* chainIndex: the chainIndex for this contract (related to block.chainid)
+* baseUri: the base url for metadata
+* mapping estate: storageId => maps that represent the lands + estateId
+* mapping totalLands: total amount of lands for a given user
 
 #### PolygonEstateTokenV1
-On Polygon's version of Estate, we have a pointer to the EstateExperienceRegistry, a registry that tracks the links between lands and experieces through Estate. Refer to EstateExperienceRegistry's documentation to lear more about it.
+
+On Polygon's version of Estate, we have a pointer to the EstateExperienceRegistry, a registry that tracks the links
+between lands and experieces through Estate. Refer to EstateExperienceRegistry's documentation to learn more about it.
 
 #### Diamond proxy storage
+
 EstateBaseToken adopts a diamond proxy approach to its storage
-https://eips.ethereum.org/EIPS/eip-2535#:~:text=function%20diamondStorage()%20internal%20pure%20returns(DiamondStorage%20storage%20ds)%20%7B
+[Diamond storage](https://eips.ethereum.org/EIPS/eip-2535#:~:text=function%20diamondStorage()%20internal%20pure%20returns(DiamondStorage%20storage%20ds)%20%7B)
+
 ```shell
 function _s() internal pure returns (EstateBaseTokenStorage storage ds) {
         bytes32 storagePosition = keccak256("EstateBaseTokenStorage.EstateBaseTokenStorage");
@@ -140,9 +160,12 @@ function _s() internal pure returns (EstateBaseTokenStorage storage ds) {
 ```    
 
 ### Estate creation
-A landowner can create an estate, providing the set of quads to add. The group of lands has to be adjacent, in accordance to the method isAdjacent() from MapLib.
+
+A landowner can create an estate, providing the set of quads to add. The group of lands has to be adjacent, in
+accordance to the method isAdjacent() from MapLib.
 
 #### Input for estate creation:
+
 ```shell
     /// @param landToAdd[][0] size of quad to add;
     /// landToAdd[][1] x coord of quad to add;
@@ -150,17 +173,19 @@ A landowner can create an estate, providing the set of quads to add. The group o
     uint256[][3] calldata landToAdd 
 ```
 
-
-
 ### Update Estate
 
-The update function can be used to add and remove lands from an estate, as long as the changes don't break the adjacency of the lands in the estate. Update has to impact the token id, this is a safety measure, to avoid users listing their token on marketplace, and then removing the token lands. During an update the previous token is burned, and a new one is minted. The storgage id part of the token is kept between updates. 
+The update function can be used to add and remove lands from an estate, as long as the changes don't break the adjacency
+of the lands in the estate. Update has to impact the token id, this is a safety measure, to avoid users listing their
+token on marketplace, and then removing the token lands. During an update the previous token is burned, and a new one is
+minted. The storage id part of the token is kept between updates.
 
 It is important to notice that if an update renders the estate token empty, the token will be burned.
 
 #### Inputs for update:
 
 ##### L1, from EstateTokenV1
+
 ```shell
     /// @param oldId the estate id that will be updated
     /// @param landToAdd The set of quads(size, x, y) to add.
