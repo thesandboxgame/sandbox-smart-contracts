@@ -27,7 +27,7 @@ function parseArgs() {
   });
 
   const args = parser.parseArgs();
-  const ifNullEmpty = (x: unknown[]) => (x === null ? [] : x);
+  const ifNullEmpty = <T>(x: T[]) => (x === null ? [] : x);
   args.add = ifNullEmpty(args.add);
   return [
     args.add.map((x: {size: BigNumber}) => x.size),

@@ -2,47 +2,16 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {Event} from '@ethersproject/contracts';
 import {getArgParser} from '../utils/utils';
+import {tileWithCoordToJS} from '../../test/map/fixtures';
+import {Box, Point, QuadTreeWithCounter} from './quadTree';
 
 function parseArgs() {
   const parser = getArgParser({
     description: `RUN WITH: yarn execute mumbai ${process.argv[0]}`,
   });
-
-  function quad(x: string) {
-    const arr = x.split(',');
-    if (arr.length != 3)
-      throw TypeError('quad must have 3 components separated by comma');
-    return {
-      size: BigNumber.from(arr[0]),
-      x: BigNumber.from(arr[1]),
-      y: BigNumber.from(arr[2]),
-    };
-  }
-
   parser.addArgument(['token'], {help: 'token id'});
-
-  parser.addArgument(['-r', '--remove'], {
-    action: 'append',
-    help: 'remove quad',
-    type: quad,
-  });
-  parser.addArgument(['-u', '--unlink'], {
-    action: 'append',
-    help: 'unlink experience id',
-    type: (x: string) => BigNumber.from(x),
-  });
   const args = parser.parseArgs();
-  const ifNullEmpty = (x: unknown[]) => (x === null ? [] : x);
-  args.remove = ifNullEmpty(args.remove);
-  return {
-    estateId: BigNumber.from(args.token),
-    expToUnlink: ifNullEmpty(args.unlink) as BigNumber[],
-    landToRemove: [
-      args.remove.map((x: {size: BigNumber}) => x.size),
-      args.remove.map((x: {x: BigNumber}) => x.x),
-      args.remove.map((x: {y: BigNumber}) => x.y),
-    ],
-  };
+  return BigNumber.from(args.token);
 }
 
 async function main() {
@@ -58,24 +27,49 @@ async function main() {
     process.env.ETH_NODE_URI_POLYGON
   );
   const wallet = new ethers.Wallet(pk, provider);
-  const {estateId, expToUnlink, landToRemove} = parseArgs();
+  const estateId = parseArgs();
 
+  const estateContact = await ethers.getContract('PolygonEstate', wallet);
+  const tileCant = await estateContact.getLandLength(estateId);
+  const quadMultiple = 24 * 2 * 2 * 2 * 2 * 2;
+  const quadTree = new QuadTreeWithCounter(
+    new Box(0, 0, quadMultiple, quadMultiple)
+  );
+  for (let i = 0; i < tileCant; i += 10) {
+    const tileArray = await estateContact.getLandAt(
+      estateId,
+      i,
+      Math.min(i + 10, tileCant)
+    );
+    tileArray
+      .map(tileWithCoordToJS)
+      .forEach((t: {tile: boolean[][]; x: BigNumber; y: BigNumber}) => {
+        for (let x = 0; x < 24; x++)
+          for (let y = 0; y < 24; y++)
+            if (t.tile[y][x])
+              quadTree.insert(
+                new Point(t.x.toNumber() + x, t.y.toNumber() + y)
+              );
+      });
+  }
+  const landToRemove = quadTree
+    .findFullQuads()
+    .map((q) => ({x: q.x, y: q.y, size: Math.sqrt(q.h * q.w)}));
+  landToRemove.sort((a, b) => a.size - b.size);
   console.log(
     'Calling update for token',
     estateId.toString(),
-    estateId.toHexString()
-  );
-  console.log(
-    'Unlinking',
-    expToUnlink.map((x) => x.toString())
-  );
-  console.log(
-    'Removing',
-    landToRemove.map((x) => x.toString())
+    estateId.toHexString(),
+    'everything: ',
+    landToRemove
   );
 
-  const estateContact = await ethers.getContract('PolygonEstate', wallet);
-  const tx = await estateContact.burn(estateId, expToUnlink, landToRemove);
+  const tx = await estateContact.update(
+    estateId,
+    [[], [], []],
+    [],
+    landToRemove
+  );
   const receipt = await tx.wait();
   const events = receipt.events.filter(
     (v: Event) => v.event === 'EstateTokenBurned'

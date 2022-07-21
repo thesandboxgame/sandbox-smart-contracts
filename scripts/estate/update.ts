@@ -38,7 +38,7 @@ function parseArgs() {
     type: (x: string) => BigNumber.from(x),
   });
   const args = parser.parseArgs();
-  const ifNullEmpty = (x: unknown[]) => (x === null ? [] : x);
+  const ifNullEmpty = <T>(x: T[]) => (x === null ? [] : x);
   args.add = ifNullEmpty(args.add);
   args.remove = ifNullEmpty(args.remove);
   return {
