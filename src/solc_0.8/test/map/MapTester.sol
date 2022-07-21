@@ -47,6 +47,16 @@ contract MapTester {
         maps[idx].clear(tile);
     }
 
+    function clearTranslateResult(
+        uint256 idx,
+        TileLib.Tile calldata tile,
+        uint256 x,
+        uint256 y
+    ) external {
+        MapLib.TranslateResult memory s = MapLib.translate(tile, x, y);
+        maps[idx].clear(s);
+    }
+
     function clearMap(uint256 idx, uint256 contained) external {
         maps[idx].clear(maps[contained]);
     }

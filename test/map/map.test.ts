@@ -4,6 +4,7 @@ import {
   drawTile,
   getEmptyTile,
   getEmptyTranslateResult,
+  getFullTile,
   printMap,
   setRectangle,
   setTileQuads,
@@ -290,6 +291,33 @@ describe('MapLib main', function () {
         expect(
           BigNumber.from(await tester.estimateGas.translate(t.tile, 23, 23))
         ).to.be.lte(37885);
+      });
+      it('clear a figure', async function () {
+        const {tester, getMap} = await setupMapTest();
+        await tester.setQuad(0, 0, 0, 24);
+        await tester.setQuad(0, 24, 0, 24);
+        await tester.setQuad(0, 0, 24, 24);
+        await tester.setQuad(0, 24, 24, 24);
+
+        await tester.setQuad(11, 0, 0, 6);
+        const smallTile = await tester.at(11, 0);
+
+        await tester.clearTranslateResult(0, smallTile.tile, 24 - 3, 24 - 3);
+        const ret = translateResultToArray({
+          topLeft: await tester.at(0, 0),
+          topRight: await tester.at(0, 1),
+          bottomLeft: await tester.at(0, 2),
+          bottomRight: await tester.at(0, 3),
+        });
+        const result = setRectangle(
+          24 - 3,
+          24 - 3,
+          6,
+          6,
+          getFullTile(48, 48),
+          false
+        );
+        expect(ret).to.be.eql(result);
       });
       it('translate a figure', async function () {
         const {tester} = await setupMapTest();

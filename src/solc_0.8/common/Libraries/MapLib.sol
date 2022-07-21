@@ -138,6 +138,16 @@ library MapLib {
         return true;
     }
 
+    /// @notice Given a translation of a tile the corresponding bits are cleared in the current map
+    /// @param self the Map in which the bits are cleared
+    /// @param s translation result, the result of a translation of a tile are four tiles.
+    function clear(Map storage self, TranslateResult memory s) public {
+        clear(self, s.topLeft);
+        clear(self, s.topRight);
+        clear(self, s.bottomLeft);
+        clear(self, s.bottomRight);
+    }
+
     /// @notice Given a TileWithCoord (a tile that includes coordinates inside it) clear the corresponding bits in the map
     /// @param self the Map, in which the bits will be cleared
     /// @param tile the tile that is used to clear the bits inside the map
