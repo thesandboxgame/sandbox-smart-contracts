@@ -22,10 +22,6 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         uint256 y;
     }
 
-    IExperienceToken public experienceToken;
-    IEstateToken public estateToken;
-    IERC721 public landToken;
-
     struct EstateAndLands {
         // 0 means not found, 1 means single land,  >1 means multiLand with the value estateId - 1,
         uint256 estateId;
@@ -33,21 +29,29 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         MapLib.Map multiLand;
     }
 
-    // Experience Id => EstateAndLands
-    mapping(uint256 => EstateAndLands) internal links;
+    struct RegistryStorage {
+        address experienceToken;
+        address estateToken;
+        address landToken;
+        // Experience Id => EstateAndLands
+        mapping(uint256 => EstateAndLands) links;
+        MapLib.Map linkedLands;
+    }
 
-    MapLib.Map internal linkedLands;
+    //IExperienceToken public experienceToken;
+    //IEstateToken public estateToken;
+    //IERC721 public landToken;
 
     constructor(
         //address trustedForwarder,
-        IEstateToken _estateToken,
-        IExperienceToken _experienceToken,
+        address estateToken_,
+        address experienceToken_,
         //uint8 chainIndex,
-        IERC721 _landToken
+        address landToken_
     ) {
-        experienceToken = _experienceToken;
-        estateToken = _estateToken;
-        landToken = _landToken;
+        _s().experienceToken = experienceToken_;
+        _s().estateToken = estateToken_;
+        _s().landToken = landToken_;
     }
 
     function linkSingle(
@@ -81,7 +85,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function batchUnLinkFrom(address from, uint256[] calldata expIdsToUnlink) external override {
-        require(address(estateToken) == _msgSender(), "can be called only by estate");
+        require(address(_s().estateToken) == _msgSender(), "can be called only by estate");
         _batchUnLinkFrom(from, expIdsToUnlink);
     }
 
@@ -89,7 +93,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     function isLinked(uint256[][3] calldata quads) external view override returns (bool) {
         uint256 len = quads[0].length;
         for (uint256 i; i < len; i++) {
-            if (linkedLands.intersect(quads[1][i], quads[2][i], quads[0][i])) {
+            if (_s().linkedLands.intersect(quads[1][i], quads[2][i], quads[0][i])) {
                 return true;
             }
         }
@@ -97,13 +101,13 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function isLinked(uint256 expId) external view override returns (bool) {
-        uint256 expStorageId = experienceToken.getStorageId(expId);
-        EstateAndLands storage est = links[expStorageId];
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        EstateAndLands storage est = _s().links[expStorageId];
         return est.estateId > 0;
     }
 
     function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
-        return linkedLands.intersect(tiles);
+        return _s().linkedLands.intersect(tiles);
     }
 
     function _link(
@@ -112,10 +116,11 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         uint256 x,
         uint256 y
     ) internal {
-        uint256 expStorageId = experienceToken.getStorageId(expId);
-        (TileLib.Tile memory template, uint256[] memory landCoords) = experienceToken.getTemplate(expStorageId);
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        (TileLib.Tile memory template, uint256[] memory landCoords) =
+            IExperienceToken(_s().experienceToken).getTemplate(expStorageId);
         require(landCoords.length > 0, "empty template");
-        EstateAndLands storage est = links[expStorageId];
+        EstateAndLands storage est = _s().links[expStorageId];
         require(est.estateId == 0, "Exp already in use");
 
         if (estateId == 0) {
@@ -123,16 +128,16 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             uint256 translatedId = landCoords[0] + x + (y * 408);
             uint256 translatedX = translatedId % 408;
             uint256 translatedY = translatedId / 408;
-            require(landToken.ownerOf(translatedId) == _msgSender(), "invalid user");
-            require(!linkedLands.contain(translatedX, translatedY), "already linked");
-            linkedLands.set(translatedX, translatedY, 1);
+            require(IERC721(_s().landToken).ownerOf(translatedId) == _msgSender(), "invalid user");
+            require(!_s().linkedLands.contain(translatedX, translatedY), "already linked");
+            _s().linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
         } else {
-            require(estateToken.getOwnerOfStorage(estateId) == _msgSender(), "invalid user");
+            require(IEstateToken(_s().estateToken).getOwnerOfStorage(estateId) == _msgSender(), "invalid user");
             MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
-            require(!linkedLands.intersect(s), "already linked");
-            linkedLands.set(s);
-            require(estateToken.contain(estateId, s), "not enough land");
+            require(!_s().linkedLands.intersect(s), "already linked");
+            _s().linkedLands.set(s);
+            require(IEstateToken(_s().estateToken).contain(estateId, s), "not enough land");
             est.multiLand.set(s);
         }
         est.estateId = estateId + 1;
@@ -146,19 +151,28 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function _unLinkFrom(address from, uint256 expId) internal {
-        uint256 expStorageId = experienceToken.getStorageId(expId);
-        EstateAndLands storage est = links[expStorageId];
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        EstateAndLands storage est = _s().links[expStorageId];
         require(est.estateId > 0, "unknown experience");
         if (est.estateId == 1) {
             uint256 landId = est.singleLand;
-            require(landToken.ownerOf(landId) == from, "invalid user");
+            require(IERC721(_s().landToken).ownerOf(landId) == from, "invalid user");
             uint256 x = landId % 408;
             uint256 y = landId / 408;
-            linkedLands.clear(x, y, 1);
+            _s().linkedLands.clear(x, y, 1);
         } else {
-            require(estateToken.getOwnerOfStorage(est.estateId - 1) == from, "invalid user");
-            linkedLands.clear(est.multiLand);
+            require(IEstateToken(_s().estateToken).getOwnerOfStorage(est.estateId - 1) == from, "invalid user");
+            _s().linkedLands.clear(est.multiLand);
         }
-        delete links[expStorageId];
+        delete _s().links[expStorageId];
     }
+
+    function _s() internal pure returns (RegistryStorage storage ds) {
+        bytes32 storagePosition = keccak256("EstateBaseTokenStorage.EstateBaseTokenStorage");
+        assembly {
+            ds.slot := storagePosition
+        }
+    }
+
+    uint256[50] private __gap;
 }
