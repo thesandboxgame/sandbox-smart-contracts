@@ -1,6 +1,7 @@
 import {setupL2EstateExperienceAndLand} from './fixtures';
-import {expect} from '../chai-setup';
+import {assert, expect} from '../chai-setup';
 import {waitFor} from '../utils';
+import {Event} from '@ethersproject/contracts';
 
 const fullQuad24 = Array.from({length: 24})
   .map((i, x) => Array.from({length: 24}).map((j, y) => [x, y]))
@@ -640,6 +641,40 @@ describe('ExperienceEstateRegistry tests', function () {
           console.log(`gas used to update estate for ${size}, is ${gasUsed}`);
         });
       });
+    });
+  });
+  describe('Events test', function () {
+    it(`create a link a link with a single land should emit an event`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceContract,
+        registryContractAsOther,
+        mintQuad,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
+
+      await mintQuad(other, 1, 0, 0);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+
+      const receipt = await (
+        await registryContractAsOther.linkSingle(experienceId, 0, 0)
+      ).wait();
+      const events = receipt.events.filter(
+        (v: Event) => v.event === 'LinkCreated'
+      );
+      assert.equal(events.length, 1);
+      expect(events[0].args['estateId']).to.be.equal(0);
+      expect(events[0].args['expId']).to.be.equal(123);
+      expect(events[0].args['x']).to.be.equal(0);
+      expect(events[0].args['y']).to.be.equal(0);
     });
   });
 });

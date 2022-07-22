@@ -38,9 +38,19 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         MapLib.Map linkedLands;
     }
 
-    //IExperienceToken public experienceToken;
-    //IEstateToken public estateToken;
-    //IERC721 public landToken;
+    /// @dev Emitted when a link is created
+    /// @param estateId Id of the erc721 ESTATE token cointaining the lands that were linked.
+    /// @param expId The experience id that is now linked to the lands.
+    /// @param x x coordiante of the linked lands
+    /// @param y y coordiante of the linked lands
+    /// @param expTemplate template of the exp being linked
+    /// @param user user creating the link
+    event LinkCreated(uint256 estateId, uint256 expId, uint256 x, uint256 y, TileLib.Tile expTemplate, address user);
+
+    /// @dev Emitted when a link is deleted
+    /// @param expId id of the experience that was unkinked
+    /// @param user from which the link is deleated
+    event LinkDeleted(uint256 expId, address user);
 
     constructor(
         //address trustedForwarder,
@@ -141,6 +151,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             est.multiLand.set(s);
         }
         est.estateId = estateId + 1;
+        emit LinkCreated(estateId, expId, x, y, template, _msgSender());
     }
 
     function _batchUnLinkFrom(address from, uint256[] calldata expIdsToUnlink) internal {
@@ -165,6 +176,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             _s().linkedLands.clear(est.multiLand);
         }
         delete _s().links[expStorageId];
+        emit LinkDeleted(expId, from);
     }
 
     function _s() internal pure returns (RegistryStorage storage ds) {

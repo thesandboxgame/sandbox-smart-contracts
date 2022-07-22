@@ -19,7 +19,7 @@ library EstateTokenIdHelperLib {
 
     /// @notice Pack a new tokenId and associate it with an owner.
     /// @param subId The main id of the token, it never changes.
-    /// @param chainIndex The index of the chain, 0: mainet, 1:polygon, etc
+    /// @param chainIndex The index of the chain, 0: mainnet, 1:polygon, etc
     /// @param version The version of the token, it changes on each modification.
     /// @return the token id
     function packId(
@@ -33,7 +33,7 @@ library EstateTokenIdHelperLib {
     /// @notice Unpack the tokenId returning the separated values.
     /// @param id The token id
     /// @return subId The main id of the token, it never changes.
-    /// @return chainIndex The index of the chain, 0: mainet, 1:polygon, etc
+    /// @return chainIndex The index of the chain, 0: mainnet, 1:polygon, etc
     /// @return version The version of the token, it changes on each modification.
     function unpackId(uint256 id)
         internal
