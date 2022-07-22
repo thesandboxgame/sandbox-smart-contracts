@@ -39,10 +39,10 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     /// @dev Emitted when a link is created
-    /// @param estateId Id of the erc721 ESTATE token cointaining the lands that were linked.
+    /// @param estateId Id of the erc721 ESTATE token containing the lands that were linked.
     /// @param expId The experience id that is now linked to the lands.
-    /// @param x x coordiante of the linked lands
-    /// @param y y coordiante of the linked lands
+    /// @param x x coordinate of the linked lands
+    /// @param y y coordinate of the linked lands
     /// @param expTemplate template of the exp being linked
     /// @param user user creating the link
     event LinkCreated(uint256 estateId, uint256 expId, uint256 x, uint256 y, TileLib.Tile expTemplate, address user);
@@ -180,7 +180,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     }
 
     function _s() internal pure returns (RegistryStorage storage ds) {
-        bytes32 storagePosition = keccak256("EstateBaseTokenStorage.EstateBaseTokenStorage");
+        bytes32 storagePosition = keccak256("ExperienceEstateRegistry.RegistryStorage");
         assembly {
             ds.slot := storagePosition
         }
