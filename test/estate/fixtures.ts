@@ -352,11 +352,18 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
     libraries: {
       MapLib: setup.mapLib.address,
     },
-    args: [
-      setup.estateContractAsMinter.address,
-      experienceContract.address,
-      setup.landContractAsDeployer.address,
-    ],
+    proxy: {
+      owner: setup.upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      execute: {
+        methodName: 'ExperienceEstateRegistry_init',
+        args: [
+          setup.estateContractAsMinter.address,
+          experienceContract.address,
+          setup.landContractAsDeployer.address,
+        ],
+      },
+    },
   });
   const registryContract = await ethers.getContract(
     'ExperienceEstateRegistry',

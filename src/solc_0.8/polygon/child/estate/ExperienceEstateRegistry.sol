@@ -2,16 +2,24 @@
 pragma solidity 0.8.2;
 
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
-import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+//import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
 import {TileLib} from "../../../common/Libraries/TileLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import {IExperienceToken} from "../../../common/interfaces/IExperienceToken.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @notice Contract managing tExperiences and Estates
-contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
+contract ExperienceEstateRegistry is
+    Initializable,
+    ContextUpgradeable,
+    AccessControlUpgradeable,
+    IEstateExperienceRegistry
+{
     using MapLib for MapLib.Map;
     using TileLib for TileLib.Tile;
 
@@ -38,6 +46,8 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         MapLib.Map linkedLands;
     }
 
+    bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
+
     /// @dev Emitted when a link is created
     /// @param estateId Id of the erc721 ESTATE token containing the lands that were linked.
     /// @param expId The experience id that is now linked to the lands.
@@ -52,16 +62,42 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
     /// @param user from which the link is deleated
     event LinkDeleted(uint256 expId, address user);
 
-    constructor(
+    function ExperienceEstateRegistry_init(
         //address trustedForwarder,
         address estateToken_,
         address experienceToken_,
         //uint8 chainIndex,
         address landToken_
-    ) {
+    ) external initializer {
         _s().experienceToken = experienceToken_;
         _s().estateToken = estateToken_;
         _s().landToken = landToken_;
+        //_grantRole(APPROVER_ROLE, approver);
+    }
+
+    //getters
+    /// @notice return the amount of tiles that describe the land map inside a given estate
+    /// @param expId the experience id
+    /// @return the length of the tile map
+    function getNumberTiles(uint256 expId) external view returns (uint256) {
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        return _s().links[expStorageId].multiLand.length();
+    }
+
+    /// @notice return the amount of lands inked to an experience
+    /// @param expId the experience id
+    /// @return the amount of lands linked to the experience
+    function getLandCount(uint256 expId) external view returns (uint256) {
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        return _s().links[expStorageId].multiLand.getLandCount();
+    }
+
+    /// @notice return the estate id linked to an experience
+    /// @param expId the experience id
+    /// @return the estate id linked to the experice from the given id
+    function getEstateId(uint256 expId) external view returns (uint256) {
+        uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
+        return _s().links[expStorageId].estateId;
     }
 
     function linkSingle(
@@ -150,7 +186,7 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
             require(IEstateToken(_s().estateToken).contain(estateId, s), "not enough land");
             est.multiLand.set(s);
         }
-        est.estateId = estateId + 1;
+        est.estateId = estateId + 1; //why increment the estateId?
         emit LinkCreated(estateId, expId, x, y, template, _msgSender());
     }
 
@@ -177,6 +213,41 @@ contract ExperienceEstateRegistry is Context, IEstateExperienceRegistry {
         }
         delete _s().links[expStorageId];
         emit LinkDeleted(expId, from);
+    }
+
+    /// @notice update the address of the land token
+    /// @param newLandToken new land token address
+    function setLandContract(address newLandToken) external {
+        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().landToken = newLandToken;
+    }
+
+    /// @notice update the address of the estate token
+    /// @param newEstateToken new estate token address
+    function setEstateContract(address newEstateToken) external {
+        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().estateToken = newEstateToken;
+    }
+
+    /// @notice update the address of the experience token
+    /// @param newExperienceToken new land token address
+    function setExperienceContract(address newExperienceToken) external {
+        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().experienceToken = newExperienceToken;
+    }
+
+    /// @notice grant setter role to a new account
+    /// @param newSetter new setter address
+    function grantSetterRole(address newSetter) external {
+        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _grantRole(SETTER_ROLE, newSetter);
+    }
+
+    /// @notice revoke setter role from account
+    /// @param setter setter address
+    function revokeSetterRole(address setter) external {
+        require(hasRole(SETTER_ROLE, _msgSender()) && hasRole(SETTER_ROLE, setter), "NOT_AUTHORIZED");
+        revokeRole(SETTER_ROLE, setter);
     }
 
     function _s() internal pure returns (RegistryStorage storage ds) {

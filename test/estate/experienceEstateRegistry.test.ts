@@ -2,6 +2,7 @@ import {setupL2EstateExperienceAndLand} from './fixtures';
 import {assert, expect} from '../chai-setup';
 import {waitFor} from '../utils';
 import {Event} from '@ethersproject/contracts';
+import {BigNumber} from 'ethers';
 
 const fullQuad24 = Array.from({length: 24})
   .map((i, x) => Array.from({length: 24}).map((j, y) => [x, y]))
@@ -675,6 +676,48 @@ describe('ExperienceEstateRegistry tests', function () {
       expect(events[0].args['expId']).to.be.equal(123);
       expect(events[0].args['x']).to.be.equal(0);
       expect(events[0].args['y']).to.be.equal(0);
+    });
+  });
+  describe('Getters test', function () {
+    it(`testing getLandLength`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceContract,
+        registryContractAsOther,
+        mintQuad,
+        createEstateAsOther,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await mintQuad(other, 24, 48, 96);
+
+      await experienceContract.setTemplate(experienceId, fullQuad24);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+      const {estateId} = await createEstateAsOther({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await registryContractAsOther.link(estateId, experienceId, 48, 96);
+
+      expect(
+        BigNumber.from(
+          await registryContractAsOther.getNumberTiles(experienceId)
+        )
+      ).to.be.equal(1);
+      expect(
+        BigNumber.from(await registryContractAsOther.getLandCount(experienceId))
+      ).to.be.equal(576);
+      expect(
+        BigNumber.from(await registryContractAsOther.getEstateId(experienceId))
+      ).to.be.equal(estateId.add(1));
     });
   });
 });
