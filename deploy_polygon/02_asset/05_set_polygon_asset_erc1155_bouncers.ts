@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {assetBouncerAdmin} = await getNamedAccounts();
   const assetMinter = await deployments.get('PolygonAssetMinter');
-  const assetTunnel = await deployments.get('AssetERC1155Tunnel');
+  const assetTunnel = await deployments.get('PolygonAssetERC1155Tunnel');
   await setBouncer(hre, assetBouncerAdmin, assetMinter.address);
   await setBouncer(hre, assetBouncerAdmin, assetTunnel.address);
 };
@@ -40,6 +40,7 @@ func.runAtTheEnd = true;
 func.tags = [
   'PolygonAssetMinter',
   'PolygonAssetMinter_setup',
+  'PolygonAssetERC1155_setup',
   'PolygonAsset',
   'L2',
 ];
