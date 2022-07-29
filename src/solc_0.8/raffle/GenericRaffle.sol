@@ -7,12 +7,13 @@ import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard {
+contract GenericRaffle is ERC721EnumerableUpgradeable, ERC2771Context, OwnableUpgradeable, ReentrancyGuard {
     uint256 public maxSupply;
 
     event TogglePaused(bool _pause);
