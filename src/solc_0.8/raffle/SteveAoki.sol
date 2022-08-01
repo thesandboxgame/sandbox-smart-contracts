@@ -12,8 +12,9 @@ contract SteveAoki is GenericRaffle {
         string memory _name,
         string memory _symbol,
         address payable _sandOwner,
-        address _signAddress
+        address _signAddress,
+        address _trustedForwarder
     ) public initializer {
-        __GenericRaffle_init(baseURI, _name, _symbol, _sandOwner, _signAddress, MAX_SUPPLY);
+        __GenericRaffle_init(baseURI, _name, _symbol, _sandOwner, _signAddress, _trustedForwarder, MAX_SUPPLY);
     }
 }
