@@ -22,6 +22,8 @@ contractsInfo.json
 deployments/hardhat
 deployments/localhost
 deployments/rinkeby_test
+deployments/goerli_test
+deployments/mumbai_test
 
 .google_credentials.json
 token.json
