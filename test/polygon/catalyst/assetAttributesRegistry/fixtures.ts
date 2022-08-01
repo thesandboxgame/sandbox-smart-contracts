@@ -21,6 +21,7 @@ export const setupAssetAttributesRegistryGemsAndCatalysts = withSnapshot(
     'PolygonGemsCatalystsRegistry_setup',
     'PolygonAssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
     'PolygonAssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
+    'L2',
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),

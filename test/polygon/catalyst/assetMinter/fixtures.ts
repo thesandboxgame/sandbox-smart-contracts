@@ -30,7 +30,7 @@ const assetMinterFixtures = async () => {
 };
 
 export const setupAssetMinter = withSnapshot(
-  ['PolygonAssetMinter'],
+  ['PolygonAssetMinter', 'L2'],
   assetMinterFixtures
 );
 
@@ -39,6 +39,7 @@ export const setupAssetMinterGemsAndCatalysts = withSnapshot(
     'PolygonAssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
     'PolygonAssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
     'PolygonGemsCatalystsRegistry_setup',
+    'L2',
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),
@@ -50,6 +51,7 @@ export const setupAssetMinterAttributesRegistryGemsAndCatalysts = withSnapshot(
     'PolygonAssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
     'PolygonAssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
     'PolygonGemsCatalystsRegistry_setup',
+    'L2',
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),
@@ -65,6 +67,7 @@ export const setupAssetMinterUpgraderGemsAndCatalysts = withSnapshot(
     'PolygonGemsCatalystsRegistry_setup',
     'PolygonAssetUpgrader_setup',
     'PolygonAssetUpgraderFeeBurner_setup',
+    'L2',
   ],
   async () => ({
     ...(await assetUpgraderFixtures()),
