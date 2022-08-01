@@ -75,7 +75,11 @@ describe('Multi_Giveaway', function () {
     it('User can get their claimed status', async function () {
       const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others, allMerkleRoots} = setUp;
+      const {giveawayContract, others, allClaims} = setUp;
+
+      const claim = [];
+      claim.push(allClaims[0][0]);
+      claim.push(allClaims[1][0]);
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
@@ -83,7 +87,7 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        claim
       );
 
       expect(statuses[0]).to.equal(false);
@@ -128,7 +132,7 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statuses[0]).to.equal(false);
@@ -142,7 +146,7 @@ describe('Multi_Giveaway', function () {
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statusesAfterClaim[0]).to.equal(true);
@@ -167,10 +171,13 @@ describe('Multi_Giveaway', function () {
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
       const userClaims = [];
+      const claimOnlyOne = [];
+      const claim = allClaims[0][0];
       const secondClaim = allClaims[1][0];
+      userClaims.push(claim);
       userClaims.push(secondClaim);
       userProofs.push(
-        allTrees[1].getProof(calculateMultiClaimHash(userClaims[0]))
+        allTrees[1].getProof(calculateMultiClaimHash(userClaims[1]))
       );
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[1]);
@@ -181,21 +188,23 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statuses[0]).to.equal(false);
       expect(statuses[1]).to.equal(false);
 
+      claimOnlyOne.push(secondClaim);
+
       await giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
         userMerkleRoots,
-        userClaims,
+        claimOnlyOne,
         userProofs
       );
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statusesAfterClaim[0]).to.equal(false);

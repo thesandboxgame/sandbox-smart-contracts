@@ -3,9 +3,11 @@
 
 pragma solidity 0.8.2;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
+import "../../../common/interfaces/IPolygonLand.sol";
 
-contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
+abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721BaseTokenV2 {
     using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -16,6 +18,22 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+
+    mapping(address => bool) internal _minters;
+
+    event Minter(address minter, bool enabled);
+
+    modifier validQuad(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) {
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        _;
+    }
 
     /**
      * @notice Return the name of the token contract
@@ -61,29 +79,6 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         return id / GRID_SIZE;
     }
 
-    // solium-disable-next-line security/no-assign-params
-    function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
     /**
      * @notice Return the URI of a specific token
      * @param id The id of the token
@@ -91,7 +86,10 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(id), "/metadata.json"));
+        return
+            string(
+                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
+            );
     }
 
     /**
@@ -107,13 +105,24 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     }
 
     /**
-     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
-     * @param to The recipient of the new quad
+     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
+     * @param user The recipient of the new quad
      * @param size The size of the new quad
      * @param x The top left x coordinate of the new quad
      * @param y The top left y coordinate of the new quad
      * @param data extra data to pass to the transfer
      */
+    function mintQuad(
+        address user,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) external virtual override {
+        require(isMinter(_msgSender()), "!AUTHORIZED");
+        _mintQuad(user, size, x, y, data);
+    }
+
     function _mintQuad(
         address to,
         uint256 size,
@@ -137,8 +146,6 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
             quadId = LAYER_12x12 + id;
         } else if (size == 24) {
             quadId = LAYER_24x24 + id;
-        } else {
-            require(false, "Invalid size");
         }
 
         for (uint256 i = 0; i < size * size; i++) {
@@ -158,13 +165,13 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes calldata data
-    ) external {
+    ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
         if (_msgSender() != from) {
             require(
-                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
+                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
                 "not authorized to transferMultiQuads"
             );
         }
@@ -201,12 +208,12 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256 x,
         uint256 y,
         bytes calldata data
-    ) external {
+    ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         if (_msgSender() != from) {
             require(
-                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
+                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
                 "not authorized to transferQuad"
             );
         }
@@ -217,14 +224,20 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
     }
 
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) public override(ILandToken, ERC721BaseTokenV2) {
+        super.batchTransferFrom(from, to, ids, data);
+    }
+
     function exists(
         uint256 size,
         uint256 x,
         uint256 y
-    ) public view returns (bool) {
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-
+    ) public view override validQuad(size, x, y) returns (bool) {
         if (_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] != 0) return true;
         uint256 toX = x + size;
         uint256 toY = y + size;
@@ -268,13 +281,30 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         return false;
     }
 
+    /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(_msgSender() == _admin, "only admin is allowed to add minters");
+        require(minter != address(0), "PolygonLand: Invalid address");
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
+    /// @notice check whether address `who` is given minter rights.
+    /// @param who The address to query.
+    /// @return whether the address has minter rights.
+    function isMinter(address who) public view returns (bool) {
+        return _minters[who];
+    }
+
     function _transferQuad(
         address from,
         address to,
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal {
+    ) internal validQuad(size, x, y) {
         if (size == 1) {
             uint256 id1x1 = x + y * GRID_SIZE;
             address owner = _ownerOf(id1x1);
@@ -311,9 +341,6 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256 x,
         uint256 y
     ) internal {
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-
         if (size == 3) {
             _regroup3x3(from, to, x, y, true);
         } else if (size == 6) {
@@ -322,8 +349,6 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
             _regroup12x12(from, to, x, y, true);
         } else if (size == 24) {
             _regroup24x24(from, to, x, y, true);
-        } else {
-            require(false, "Invalid size");
         }
     }
 
@@ -344,16 +369,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(3, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -387,14 +403,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(6, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -428,12 +437,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         }
         if (set) {
             if (!ownerOfAll) {
-                require(
-                    _owners[quadId] == uint256(uint160(address(from))) ||
-                        _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(uint160(address(from))),
-                    "not owner of all sub quads nor parent quads"
-                );
+                require(_ownerOfQuad(12, x, y) == from, "not owner of all sub quads nor parent quads");
             }
             _owners[quadId] = uint256(uint160(address(to)));
             return true;
@@ -478,6 +482,34 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         return ownerOfAll || _owners[quadId] == uint256(uint160(address(from)));
     }
 
+    function _ownerOfQuad(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) internal returns (address) {
+        uint256 layer;
+        uint256 parentSize = size * 2;
+        if (size == 3) {
+            layer = LAYER_3x3;
+        } else if (size == 6) {
+            layer = LAYER_6x6;
+        } else if (size == 12) {
+            layer = LAYER_12x12;
+        } else if (size == 24) {
+            layer = LAYER_24x24;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        address owner = address(uint160(_owners[layer + (x / size) * size + ((y / size) * size) * GRID_SIZE]));
+        if (owner != address(0)) {
+            return owner;
+        } else if (size < 24) {
+            return _ownerOfQuad(parentSize, x, y);
+        }
+        return address(0);
+    }
+
     function _ownerOf(uint256 id) internal view override returns (address) {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = id % GRID_SIZE;
@@ -514,6 +546,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
         uint256 owner = _owners[id];
         if (owner != 0) {
+            require((owner & BURNED_FLAG) != BURNED_FLAG, "not owner");
             require(address(uint160(owner)) == from, "not owner");
             _owners[id] = 0;
             return true;
@@ -553,6 +586,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
             operatorEnabled = (owner1x1 & OPERATOR_FLAG) == OPERATOR_FLAG;
+            return (owner, operatorEnabled);
         }
 
         if (owner1x1 != 0) {

@@ -4,12 +4,13 @@ pragma solidity 0.8.2;
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {ClaimERC1155ERC721ERC20} from "./ClaimERC1155ERC721ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
 /// @notice This contract manages claims for multiple token types
 /// @dev The contract implements ERC2771 to ensure that users do not pay gas
-contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler {
+contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler, Pausable {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
@@ -19,6 +20,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     mapping(bytes32 => uint256) internal _expiryTime;
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
+    event NewTrustedForwarder(address trustedForwarder);
 
     constructor(address admin, address trustedForwarder) {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
@@ -28,7 +30,11 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        whenNotPaused()
+    {
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -37,6 +43,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = trustedForwarder;
+
+        emit NewTrustedForwarder(trustedForwarder);
     }
 
     /// @notice Function to permit the claiming of multiple tokens from multiple giveaways to a reserved address.
@@ -56,12 +64,13 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
 
     /// @notice Function to check which giveaways have been claimed by a particular user.
     /// @param user The user (intended token destination) address.
-    /// @param rootHashes The array of giveaway root hashes to check.
+    /// @param claims The claim struct containing the destination address, all items to be claimed and optional salt param.
     /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
-    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external view returns (bool[] memory) {
-        bool[] memory claimedGiveaways = new bool[](rootHashes.length);
-        for (uint256 i = 0; i < rootHashes.length; i++) {
-            claimedGiveaways[i] = claimed[user][rootHashes[i]];
+    function getClaimedStatus(address user, Claim[] memory claims) external view returns (bool[] memory) {
+        bool[] memory claimedGiveaways = new bool[](claims.length);
+        for (uint256 i = 0; i < claims.length; i++) {
+            bytes32 merkleLeaf = _generateClaimHash(claims[i]);
+            claimedGiveaways[i] = claimed[user][merkleLeaf];
         }
         return claimedGiveaways;
     }
@@ -74,14 +83,16 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof
-    ) public {
+    ) public whenNotPaused() {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
         require(giveawayExpiryTime != 0, "MULTIGIVEAWAY_DOES_NOT_EXIST");
         require(block.timestamp < giveawayExpiryTime, "MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER");
-        require(claimed[claim.to][merkleRoot] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
-        claimed[claim.to][merkleRoot] = true;
+        bytes32 merkleLeaf = _generateClaimHash(claim);
+        require(claimed[claim.to][merkleLeaf] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
+        claimed[claim.to][merkleLeaf] = true;
+
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }
 

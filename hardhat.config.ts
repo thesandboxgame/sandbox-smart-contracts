@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import {HardhatUserConfig} from 'hardhat/types';
-import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
-import 'hardhat-gas-reporter';
-import '@openzeppelin/hardhat-upgrades';
-import 'solidity-coverage';
-import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
+import '@openzeppelin/hardhat-upgrades';
+import 'dotenv/config';
+import 'hardhat-contract-sizer';
+import 'hardhat-deploy';
+import 'hardhat-gas-reporter';
+import {HardhatUserConfig} from 'hardhat/types';
+import 'solidity-coverage';
 import {accounts, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -202,6 +202,7 @@ const config: HardhatUserConfig = {
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
+    // To be used with AuthValidator only
     backendAuthWallet: {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
@@ -210,11 +211,17 @@ const config: HardhatUserConfig = {
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
+    backendCashbackWallet: {
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      polygon: '0x564c8aADBd35b6175C0d18595cc335106AA250Dc',
+    },
     raffleSignWallet: {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      mainnet: '0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB',
+      mainnet: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
       default: 4,
@@ -245,6 +252,17 @@ const config: HardhatUserConfig = {
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
     gemsCatalystsRegistryAdmin: 'sandAdmin',
+    ozdRelayer: {
+      default: 1,
+      polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
+      mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
+    },
+    // OZ Defender relay
+    landMigrationBatchExecutor: {
+      default: 1,
+      mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
+      goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
+    },
   },
   networks: {
     /**
@@ -322,7 +340,7 @@ const config: HardhatUserConfig = {
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       companionNetworks: {
-        l2: 'mainnet',
+        l1: 'mainnet',
       },
     },
   },

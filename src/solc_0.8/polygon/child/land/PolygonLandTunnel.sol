@@ -12,16 +12,18 @@ import "./PolygonLandBaseToken.sol";
 
 /// @title LAND bridge on L2
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
-    IPolygonLand public childToken;
+    IPolygonLand public immutable childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
+    bool internal transferringToL1;
+
     mapping(uint8 => uint32) public gasLimits;
 
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
     event SetMaxAllowedQuads(uint256 maxQuads);
-    event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
-    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
@@ -29,6 +31,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
+        require(_maxAllowedQuads > 0, "PolygonLandTunnel: max allowed value cannot be zero");
         maxAllowedQuads = _maxAllowedQuads;
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
@@ -84,11 +87,13 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
 
         require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
+        transferringToL1 = true;
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
             emit Withdraw(to, sizes[i], xs[i], ys[i], data);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
+        transferringToL1 = false;
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -98,12 +103,12 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
@@ -118,7 +123,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
-        if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
+        if (!childToken.exists(size, x, y)) childToken.mintQuad(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
         emit Deposit(to, size, x, y, data);
     }
@@ -136,7 +141,8 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         address, /* from */
         uint256, /* tokenId */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(transferringToL1, "PolygonLandTunnel: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -145,7 +151,8 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external pure override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        require(transferringToL1, "PolygonLandTunnel: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 

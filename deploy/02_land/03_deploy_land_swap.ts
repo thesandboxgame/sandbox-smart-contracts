@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -34,20 +33,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   const admin = await read('Land', 'getAdmin');
-  await catchUnknownSigner(
-    execute('Land', {from: admin}, 'setMinter', LandSwap.address, true)
-  );
+  const isMinter = await read('Land', 'isMinter', LandSwap.address);
+  if (!isMinter) {
+    await catchUnknownSigner(
+      execute('Land', {from: admin}, 'setMinter', LandSwap.address, true)
+    );
+  }
 
-  const adminOld = await read('Land_Old', 'getAdmin');
-  await catchUnknownSigner(
-    execute(
-      'Land_Old',
-      {from: adminOld},
-      'setMetaTransactionProcessor',
-      LandSwap.address,
-      true
-    )
+  const isMetaTransactionProcessor = await read(
+    'Land_Old',
+    'isMetaTransactionProcessor',
+    LandSwap.address
   );
+  if (!isMetaTransactionProcessor) {
+    const adminOld = await read('Land_Old', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'Land_Old',
+        {from: adminOld},
+        'setMetaTransactionProcessor',
+        LandSwap.address,
+        true
+      )
+    );
+  }
 };
 
 export default func;

@@ -5,11 +5,21 @@ pragma solidity 0.8.2;
 /// @title Interface for the Game token
 
 interface IGameToken {
-    struct GameData {
+    struct GameData1155 {
         uint256[] assetIdsToRemove;
         uint256[] assetAmountsToRemove;
         uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
+    }
+
+    struct GameData721 {
+        uint256[] assetIdsToRemove;
+        uint256[] assetIdsToAdd;
+    }
+
+    struct GameData {
+        GameData1155 gameData1155;
+        GameData721 gameData721;
         bytes32 uri; // ipfs hash (without the prefix, assume cidv1 folder)
     }
 
@@ -29,14 +39,16 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata assetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) external;
 
     function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata assetIds
+        uint256[] calldata assetERC1155Ids,
+        uint256[] calldata assetERC721Ids
     ) external;
 
     function updateGame(
@@ -45,7 +57,15 @@ interface IGameToken {
         GameData calldata update
     ) external returns (uint256);
 
-    function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
+    function getERC1155AssetBalances(uint256 gameId, uint256[] calldata assetIds)
+        external
+        view
+        returns (uint256[] calldata);
+
+    function getERC721AssetBalances(uint256 gameId, uint256[] calldata assetIds)
+        external
+        view
+        returns (uint256[] calldata);
 
     function setGameEditor(
         address gameCreator,

@@ -5,7 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   await deploy('PolygonLand', {
     from: deployer,

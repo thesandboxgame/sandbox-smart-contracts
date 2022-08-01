@@ -1,13 +1,12 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, execute, read, catchUnknownSigner} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonLand = await deployments.get('PolygonLand');
   const maxGasLimit = 500;
@@ -38,31 +37,45 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ].getNamedAccounts();
 
   if (LandTunnel) {
-    await hre.companionNetworks['l1'].deployments.execute(
+    const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
       'LandTunnel',
-      {from: deployerOnL1},
-      'setFxChildTunnel',
-      PolygonLandTunnel.address
+      'fxChildTunnel'
     );
-    await deployments.execute(
-      'PolygonLandTunnel',
-      {from: deployer},
-      'setFxRootTunnel',
-      LandTunnel.address
-    );
+    if (fxChildTunnel !== PolygonLandTunnel.address) {
+      await hre.companionNetworks['l1'].deployments.execute(
+        'LandTunnel',
+        {from: deployerOnL1, log: true},
+        'setFxChildTunnel',
+        PolygonLandTunnel.address
+      );
+    }
+    const fxRootTunnel = await read('PolygonLandTunnel', 'fxRootTunnel');
+    if (fxRootTunnel !== LandTunnel.address) {
+      await execute(
+        'PolygonLandTunnel',
+        {from: deployer, log: true},
+        'setFxRootTunnel',
+        LandTunnel.address
+      );
+    }
   }
 
-  const polygonLandTunnel = await deployments.read(
+  const isMinter = await read(
     'PolygonLand',
-    'polygonLandTunnel'
+    'isMinter',
+    PolygonLandTunnel.address
   );
 
-  if (polygonLandTunnel !== PolygonLandTunnel.address) {
-    await deployments.execute(
-      'PolygonLand',
-      {from: deployer},
-      'setPolygonLandTunnel',
-      PolygonLandTunnel.address
+  if (!isMinter) {
+    const admin = await read('PolygonLand', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'PolygonLand',
+        {from: admin, log: true},
+        'setMinter',
+        PolygonLandTunnel.address,
+        true
+      )
     );
   }
 };
@@ -70,4 +83,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['PolygonLandTunnel', 'PolygonLandTunnel_deploy', 'L2'];
 func.dependencies = ['PolygonLand', 'FXCHILD'];
-func.skip = skipUnlessTestnet;

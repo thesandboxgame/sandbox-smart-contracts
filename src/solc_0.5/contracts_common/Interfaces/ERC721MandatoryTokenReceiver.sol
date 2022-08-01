@@ -1,4 +1,4 @@
-pragma solidity ^0.5.2;
+pragma solidity 0.5.9;
 
 /**
     Note: The ERC-165 identifier for this interface is 0x5e8bf644.
@@ -17,10 +17,4 @@ interface ERC721MandatoryTokenReceiver {
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4); // needs to return 0x150b7a02
-
-    // needs to implements EIP-165
-    // function supportsInterface(bytes4 interfaceId)
-    //     external
-    //     view
-    //     returns (bool);
 }
