@@ -18,6 +18,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     metadataUrl = 'https://contracts-demo.sandbox.game/poc-unrevealed/';
   }
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+
   await deploy('RafflePeopleOfCrypto', {
     from: deployer,
     contract: 'PeopleOfCryptoGeneric',
@@ -32,6 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           'POC',
           treasury,
           raffleSignWallet,
+          TRUSTED_FORWARDER.address,
         ],
       },
       upgradeIndex: 0,
@@ -42,3 +45,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['RafflePeopleOfCrypto', 'RafflePeopleOfCrypto_deploy'];
+func.dependencies = ['TRUSTED_FORWARDER'];
