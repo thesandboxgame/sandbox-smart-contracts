@@ -1,5 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {constants} from 'ethers';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -36,12 +38,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l1'
   ].getNamedAccounts();
 
+  // TODO: review
   if (LandTunnel) {
     const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
       'LandTunnel',
       'fxChildTunnel'
     );
-    if (fxChildTunnel !== PolygonLandTunnel.address) {
+    if (
+      fxChildTunnel !== PolygonLandTunnel.address &&
+      fxChildTunnel == constants.AddressZero
+    ) {
       await hre.companionNetworks['l1'].deployments.execute(
         'LandTunnel',
         {from: deployerOnL1, log: true},
@@ -50,7 +56,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
     }
     const fxRootTunnel = await read('PolygonLandTunnel', 'fxRootTunnel');
-    if (fxRootTunnel !== LandTunnel.address) {
+    if (
+      fxRootTunnel !== LandTunnel.address &&
+      fxRootTunnel == constants.AddressZero
+    ) {
       await execute(
         'PolygonLandTunnel',
         {from: deployer, log: true},
@@ -83,3 +92,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['PolygonLandTunnel', 'PolygonLandTunnel_deploy', 'L2'];
 func.dependencies = ['PolygonLand', 'FXCHILD'];
+func.skip = skipUnlessTest;

@@ -3,6 +3,10 @@ import {BigNumber, Contract} from 'ethers';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {expectEventWithArgsFromReceipt} from '../utils';
 
+const emptyBytes = '0x';
+const dummyHash =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
+
 let packId = 0;
 
 async function getAssetsFromReceipts(
@@ -45,29 +49,39 @@ export async function supplyAssets(
   creator: Address,
   supplies: number[]
 ): Promise<BigNumber[]> {
-  const {assetAdmin} = await getNamedAccounts();
+  const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
 
   // ------------ ERC1155 -------------
   const asset1155Contract = await ethers.getContract(
-    'MockERC1155Asset',
-    assetAdmin
+    'Asset',
+    assetBouncerAdmin
   );
-  const assetReceipts1155: Receipt[] = [];
 
-  const asset1155AsAdmin = await asset1155Contract.connect(
+  await asset1155Contract.setBouncer(assetAdmin, true);
+
+  const assetReceipts: Receipt[] = [];
+
+  const assetAsAdmin = await asset1155Contract.connect(
     ethers.provider.getSigner(assetAdmin)
   );
   packId = 0;
   for (let i = 0; i < supplies.length; i++) {
-    assetReceipts1155.push(
-      await asset1155AsAdmin.mint(creator, packId, supplies[i], '0x00')
+    assetReceipts.push(
+      await assetAsAdmin['mint(address,uint40,bytes32,uint256,address,bytes)'](
+        creator,
+        packId,
+        dummyHash,
+        supplies[i],
+        creator,
+        emptyBytes
+      )
     );
     packId++;
   }
 
   const assetsFromReceipts = await getAssetsFromReceipts(
-    asset1155AsAdmin,
-    assetReceipts1155
+    assetAsAdmin,
+    assetReceipts
   );
   return assetsFromReceipts;
 }
@@ -80,20 +94,19 @@ export async function supplyAssets721(
 
   // ------------ ERC721 -------------
 
-  const asset721Contract = await ethers.getContract(
-    'MockERC721Asset',
-    assetAdmin
-  );
+  const asset721Contract = await ethers.getContract('AssetERC721', assetAdmin);
   const assetReceipts721: Receipt[] = [];
 
   const asset721AsAdmin = await asset721Contract.connect(
     ethers.provider.getSigner(assetAdmin)
   );
+  const MINTER_ROLE = await asset721Contract.MINTER_ROLE();
+  await asset721AsAdmin.grantRole(MINTER_ROLE, assetAdmin);
 
-  packId = 0;
   for (let i = 0; i < nbAssets; i++) {
-    assetReceipts721.push(await asset721AsAdmin.mint(creator));
-    packId++;
+    assetReceipts721.push(
+      await asset721AsAdmin['mint(address,uint256)'](creator, i)
+    );
   }
 
   const assetsFromReceipts = await getAssets721FromReceipts(

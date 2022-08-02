@@ -135,3 +135,4 @@ func.dependencies = [
   'Asset_deploy',
   'AuthValidator_deploy',
 ];
+func.skip = skipUnlessTest;

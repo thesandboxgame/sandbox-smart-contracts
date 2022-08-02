@@ -3,7 +3,7 @@ import {erc20BasicApproveExtensionFixtures} from '../common/fixtures/erc20BasicA
 import {withSnapshot} from '../utils';
 
 export const setupGemsAndCatalysts = withSnapshot(
-  ['GemsCatalystsRegistry_setup'],
+  ['PolygonGemsCatalystsRegistry_setup', 'PolygonSand'],
   gemsAndCatalystsFixtures
 );
 

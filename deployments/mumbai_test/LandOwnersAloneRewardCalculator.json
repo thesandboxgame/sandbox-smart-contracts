@@ -1,0 +1,818 @@
+{
+  "address": "0x64181E2693Ca1f7DfBD5FdcF11476c029656628D",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "rewardPool_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish2",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate2",
+          "type": "uint256"
+        }
+      ],
+      "name": "InitialCampaign",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish2",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate2",
+          "type": "uint256"
+        }
+      ],
+      "name": "NextCampaign",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate1",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "finish2",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rate2",
+          "type": "uint256"
+        }
+      ],
+      "name": "UpdateCampaign",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "REWARD_DISTRIBUTION",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "finish1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "finish2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getFinish",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRewards",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isCampaignFinished",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isCampaignRunning",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastUpdateTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rate1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rate2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "restartRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardPool",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "runCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "savedRewards",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "setInitialCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        }
+      ],
+      "name": "setSavedRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateCurrentCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateNextCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xfa062f1ebde25cf4b26b200eec7713ebcd02a7c53b9cb0e7c4361175c72330d1",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0x64181E2693Ca1f7DfBD5FdcF11476c029656628D",
+    "transactionIndex": 0,
+    "gasUsed": "969973",
+    "logsBloom": "0x00000004000000020000000000000000000000000000000000000000000000000002000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000810000000000000000000180000000000000000000020000000000000000000800000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000200000200000000000000020000000000000000001000000000000001000000000004000000000000000000001000000000000000000000000000100108000000020000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x327ff2f880f0dcbb263fee1c666d0b45c4cbf9721e8689eba35be0483e5dd699",
+    "transactionHash": "0xfa062f1ebde25cf4b26b200eec7713ebcd02a7c53b9cb0e7c4361175c72330d1",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 24554803,
+        "transactionHash": "0xfa062f1ebde25cf4b26b200eec7713ebcd02a7c53b9cb0e7c4361175c72330d1",
+        "address": "0x64181E2693Ca1f7DfBD5FdcF11476c029656628D",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x327ff2f880f0dcbb263fee1c666d0b45c4cbf9721e8689eba35be0483e5dd699"
+      },
+      {
+        "transactionIndex": 0,
+        "blockNumber": 24554803,
+        "transactionHash": "0xfa062f1ebde25cf4b26b200eec7713ebcd02a7c53b9cb0e7c4361175c72330d1",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x000000000000000000000000c26880a0af2ea0c7e8130e6ec47af756465452e8"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000008139f2ebf91c8580000000000000000000000000000000000000000000000003c810ba01b92fd8d00000000000000000000000000000000000000000000057cb09080ec32eb5f3d000000000000000000000000000000000000000000000000346d6c715c01353500000000000000000000000000000000000000000000057cb8a4201af27d2795",
+        "logIndex": 1,
+        "blockHash": "0x327ff2f880f0dcbb263fee1c666d0b45c4cbf9721e8689eba35be0483e5dd699"
+      }
+    ],
+    "blockNumber": 24554803,
+    "cumulativeGasUsed": "969973",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x72fD23fc914B7C10A59c25EEcFE53cbe76e1Ef84"
+  ],
+  "solcInputHash": "9d3e5544393fa19b09d32737775221b5",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"rewardPool_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish2\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate2\",\"type\":\"uint256\"}],\"name\":\"InitialCampaign\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish2\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate2\",\"type\":\"uint256\"}],\"name\":\"NextCampaign\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate1\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"finish2\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rate2\",\"type\":\"uint256\"}],\"name\":\"UpdateCampaign\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"REWARD_DISTRIBUTION\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"finish1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"finish2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getFinish\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewards\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isCampaignFinished\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isCampaignRunning\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastUpdateTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rate1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rate2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"restartRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rewardPool\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"runCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"savedRewards\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"setInitialCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"setSavedRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"updateCurrentCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"updateNextCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getRewards()\":{\"details\":\"At any point in time this function must return the accumulated rewards from the last call to restartRewards\"},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.\"},\"restartRewards()\":{\"details\":\"The main contract has distributed the rewards (getRewards()) until this point, this must startfrom scratch => getRewards() == 0\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role.\"},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol\":\"TwoPeriodsRewardCalculator\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.8/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\nimport \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControl {\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n    function grantRole(bytes32 role, address account) external;\\n    function revokeRole(bytes32 role, address account) external;\\n    function renounceRole(bytes32 role, address account) external;\\n}\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping (address => bool) members;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping (bytes32 => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     *\\n     * _Available since v3.1._\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId\\n            || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view override returns (bool) {\\n        return _roles[role].members[account];\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view override returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual override {\\n        require(hasRole(getRoleAdmin(role), _msgSender()), \\\"AccessControl: sender must be an admin to grant\\\");\\n\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual override {\\n        require(hasRole(getRoleAdmin(role), _msgSender()), \\\"AccessControl: sender must be an admin to revoke\\\");\\n\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) public virtual override {\\n        require(account == _msgSender(), \\\"AccessControl: can only renounce roles for self\\\");\\n\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event. Note that unlike {grantRole}, this function doesn't perform any\\n     * checks on the calling account.\\n     *\\n     * [WARNING]\\n     * ====\\n     * This function should only be called from the constructor when setting\\n     * up the initial roles for the system.\\n     *\\n     * Using this function in any other way is effectively circumventing the admin\\n     * system imposed by {AccessControl}.\\n     * ====\\n     */\\n    function _setupRole(bytes32 role, address account) internal virtual {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        emit RoleAdminChanged(role, getRoleAdmin(role), adminRole);\\n        _roles[role].adminRole = adminRole;\\n    }\\n\\n    function _grantRole(bytes32 role, address account) private {\\n        if (!hasRole(role, account)) {\\n            _roles[role].members[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n        }\\n    }\\n\\n    function _revokeRole(bytes32 role, address account) private {\\n        if (hasRole(role, account)) {\\n            _roles[role].members[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x897b526c3c1b6196d7c2202b3dbb04b77513a40633c6083a00e8c11402011710\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0x5718c5df9bd67ac68a796961df938821bb5dc0cd4c6118d77e9145afb187409b\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/math/Math.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Standard math utilities missing in the Solidity language.\\n */\\nlibrary Math {\\n    /**\\n     * @dev Returns the largest of two numbers.\\n     */\\n    function max(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a >= b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the smallest of two numbers.\\n     */\\n    function min(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a < b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the average of two numbers. The result is rounded towards\\n     * zero.\\n     */\\n    function average(uint256 a, uint256 b) internal pure returns (uint256) {\\n        // (a + b) / 2 can overflow, so we distribute\\n        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);\\n    }\\n}\\n\",\"keccak256\":\"0xa1477864def7febd9826918e50482a1ee7068b337b03804a7e0e98c674ac57c2\",\"license\":\"MIT\"},\"src/solc_0.8/defi/interfaces/IRewardCalculator.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\n/// @title Plugins for the SandRewardPool that calculate the rewards must implement this interface\\ninterface IRewardCalculator {\\n    /// @dev At any point in time this function must return the accumulated rewards from the last call to restartRewards\\n    function getRewards() external view returns (uint256);\\n\\n    /// @dev The main contract has distributed the rewards (getRewards()) until this point, this must start\\n    /// @dev from scratch => getRewards() == 0\\n    function restartRewards() external;\\n}\\n\",\"keccak256\":\"0xb1b0565a96e7e5ab9c20fe6e338dd0b7d46e82d6cd46547187a84736056503ba\",\"license\":\"MIT\"},\"src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\nimport {Math} from \\\"@openzeppelin/contracts-0.8/utils/math/Math.sol\\\";\\nimport {AccessControl} from \\\"@openzeppelin/contracts-0.8/access/AccessControl.sol\\\";\\nimport {IRewardCalculator} from \\\"../interfaces/IRewardCalculator.sol\\\";\\n\\ncontract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {\\n    event InitialCampaign(\\n        uint256 reward,\\n        uint256 duration,\\n        uint256 finish1,\\n        uint256 rate1,\\n        uint256 finish2,\\n        uint256 rate2\\n    );\\n    event NextCampaign(\\n        uint256 reward,\\n        uint256 duration,\\n        uint256 finish1,\\n        uint256 rate1,\\n        uint256 finish2,\\n        uint256 rate2\\n    );\\n    event UpdateCampaign(\\n        uint256 reward,\\n        uint256 duration,\\n        uint256 finish1,\\n        uint256 rate1,\\n        uint256 finish2,\\n        uint256 rate2\\n    );\\n\\n    // This role is in charge of configuring reward distribution\\n    bytes32 public constant REWARD_DISTRIBUTION = keccak256(\\\"REWARD_DISTRIBUTION\\\");\\n    // Each time a parameter that affects the reward distribution is changed the rewards are distributed by the reward\\n    // pool contract this is the restart time.\\n    uint256 public lastUpdateTime;\\n    // This variable is only used when a new campaign starts (notifyRewardAmount is called)\\n    // We need to save the rewards accumulated between the last call to restartRewards and the call to notifyRewardAmount\\n    uint256 public savedRewards;\\n    // The reward distribution is divided in two periods with two different rated\\n    //                   |            |            |************|*\\n    //                   |            |          **|            |*\\n    //                   |            |        **  |            |*\\n    //                   |            |      **    |            |*\\n    //                   |            |    **      |            |*\\n    //                   |            |  **        |            |*\\n    //                   |            |**          |            |*\\n    //                   |        ****|            |            |*\\n    //                   |    ****    |            |            |*\\n    //                   |****        |            |            |*\\n    // zero -> **********|            |            |            |********************\\n    //                   |<-perido1-> |<-period2-> |<-restart-> |\\n    uint256 public finish1;\\n    uint256 public rate1;\\n    uint256 public finish2;\\n    uint256 public rate2;\\n\\n    // The address of the reward pool, the only one authorized to restart rewards\\n    address public immutable rewardPool;\\n\\n    constructor(address rewardPool_) {\\n        rewardPool = rewardPool_;\\n        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());\\n    }\\n\\n    // For the UI\\n    function getRate() external view returns (uint256) {\\n        return rate1;\\n    }\\n\\n    // For the UI\\n    function getFinish() external view returns (uint256) {\\n        return finish1;\\n    }\\n\\n    // At any point in time this function must return the accumulated rewards from last call to restartRewards\\n    function getRewards() external view override returns (uint256) {\\n        return savedRewards + _getRewards();\\n    }\\n\\n    // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0\\n    function restartRewards() external override {\\n        require(msg.sender == rewardPool, \\\"not reward pool\\\");\\n        lastUpdateTime = block.timestamp;\\n        savedRewards = 0;\\n    }\\n\\n    // Useful when switching reward calculators to set an initial reward.\\n    function setSavedRewards(uint256 reward) external {\\n        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), \\\"not reward distribution\\\");\\n        savedRewards = reward;\\n        lastUpdateTime = block.timestamp;\\n    }\\n\\n    // This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly\\n    function runCampaign(uint256 reward, uint256 duration) external {\\n        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), \\\"not reward distribution\\\");\\n        if (block.timestamp >= finish2) {\\n            _initialCampaign(reward, duration);\\n        } else {\\n            _updateNextCampaign(reward, duration);\\n        }\\n    }\\n\\n    // Start an initial campaign, set the period1 of reward distribution, period2 rate is zero\\n    function setInitialCampaign(uint256 reward, uint256 duration) external {\\n        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), \\\"not reward distribution\\\");\\n        require(block.timestamp >= finish2, \\\"initial campaign running\\\");\\n        _initialCampaign(reward, duration);\\n    }\\n\\n    // Update the period2 of rate distribution, must be called after an initial campaign is set\\n    // If period1 is running, period2 is set with the rate reward/duration.\\n    // If period1 is finished it is updated with the values of period2 and period2 is set with the rate reward/duration.\\n    function updateNextCampaign(uint256 reward, uint256 duration) external {\\n        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), \\\"not reward distribution\\\");\\n        require(block.timestamp < finish2, \\\"initial campaign not running\\\");\\n        _updateNextCampaign(reward, duration);\\n    }\\n\\n    function updateCurrentCampaign(uint256 reward, uint256 duration) external {\\n        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), \\\"not reward distribution\\\");\\n        require(block.timestamp < finish2, \\\"initial campaign not running\\\");\\n        _updateCurrentCampaign(reward, duration);\\n    }\\n\\n    // Check if both periods already ended => campaign is finished\\n    function isCampaignFinished() external view returns (bool) {\\n        return (block.timestamp >= finish2);\\n    }\\n\\n    // Check if some of the periods are still running\\n    function isCampaignRunning() external view returns (bool) {\\n        return (block.timestamp < finish2);\\n    }\\n\\n    function _initialCampaign(uint256 reward, uint256 duration) internal {\\n        // block.timestamp >= finish2\\n        _saveRewards();\\n        finish1 = block.timestamp + duration;\\n        rate1 = reward / duration;\\n        finish2 = block.timestamp + duration;\\n        rate2 = 0;\\n        emit InitialCampaign(reward, duration, finish1, rate1, finish2, rate2);\\n    }\\n\\n    function _updateNextCampaign(uint256 reward, uint256 duration) internal {\\n        // block.timestamp < finish2\\n        _saveRewards();\\n        if (block.timestamp >= finish1) {\\n            // The next campaign is new.\\n            finish1 = finish2;\\n            rate1 = rate2;\\n        }\\n        finish2 = finish1 + duration;\\n        rate2 = reward / duration;\\n        emit NextCampaign(reward, duration, finish1, rate1, finish2, rate2);\\n    }\\n\\n    // TODO: we need to check the logic for this one, what to do with the remainder rewards and the next campaign duration ?\\n    // TODO: Right now we restart the current campaign forgetting the old values and leaving next one untouched.\\n    function _updateCurrentCampaign(uint256 reward, uint256 duration) internal {\\n        _saveRewards();\\n        if (block.timestamp >= finish1) {\\n            // The next campaign is new.\\n            finish1 = finish2;\\n            rate1 = rate2;\\n            rate2 = 0;\\n        }\\n        assert(finish1 <= finish2);\\n        uint256 duration2 = finish2 - finish1;\\n        finish1 = block.timestamp + duration;\\n        finish2 = finish1 + duration2;\\n        rate1 = reward / duration;\\n        emit UpdateCampaign(reward, duration, finish1, rate1, finish2, rate2);\\n    }\\n\\n    function _saveRewards() internal {\\n        savedRewards = savedRewards + _getRewards();\\n        lastUpdateTime = block.timestamp;\\n    }\\n\\n    function _getRewards() internal view returns (uint256) {\\n        assert(lastUpdateTime <= block.timestamp);\\n        assert(finish1 <= finish2);\\n        if (lastUpdateTime >= finish2) {\\n            return 0;\\n        }\\n        if (block.timestamp <= finish1) {\\n            return (block.timestamp - lastUpdateTime) * rate1;\\n        }\\n        // block.timestamp > finish1\\n        uint256 rewards2 = (Math.min(block.timestamp, finish2) - Math.max(lastUpdateTime, finish1)) * rate2;\\n        if (lastUpdateTime < finish1) {\\n            // add reward1 + reward2\\n            return (finish1 - lastUpdateTime) * rate1 + rewards2;\\n        }\\n        return rewards2;\\n    }\\n}\\n\",\"keccak256\":\"0xbe61eefb0136fec0dae4300a2e10611658bf37aee32ef0cda6c719a8bf79aa8e\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b5060405161116b38038061116b83398101604081905261002f916100fe565b606081901b6001600160601b03191660805261004c600033610052565b5061012c565b61005c8282610060565b5050565b6000828152602081815260408083206001600160a01b038516845290915290205460ff1661005c576000828152602081815260408083206001600160a01b03851684529091529020805460ff191660011790556100ba3390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b60006020828403121561010f578081fd5b81516001600160a01b0381168114610125578182fd5b9392505050565b60805160601c61101a610151600039600081816102960152610700015261101a6000f3fe608060405234801561001057600080fd5b50600436106101ae5760003560e01c80637da73d18116100ee578063cf85496911610097578063db63233d11610071578063db63233d14610388578063e9fcdd101461039b578063f555b815146103a4578063fbfe5bd3146103ad576101ae565b8063cf85496914610359578063d4bd8fed14610362578063d547741f14610375576101ae565b8063b0165840116100c8578063b016584014610335578063b073f3421461033d578063c8f33c9114610350576101ae565b80637da73d18146102e357806391d14854146102f6578063a217fddf1461032d576101ae565b8063360f60b11161015b5780634df98bfc116101355780634df98bfc1461026a57806366666aa914610291578063679aefce146102d057806376eb43e9146102d8576101ae565b8063360f60b11461024557806336568abe1461024f5780633ec8ec5a14610262576101ae565b80632ddc40f71161018c5780632ddc40f7146102145780632ede53a3146102295780632f2ff15d14610232576101ae565b806301ffc9a7146101b35780630572b0cc146101db578063248a9ca3146101f1575b600080fd5b6101c66101c1366004610ee1565b6103b6565b60405190151581526020015b60405180910390f35b6101e361044f565b6040519081526020016101d2565b6101e36101ff366004610e8f565b60009081526020819052604090206001015490565b610227610222366004610f21565b61046c565b005b6101e360035481565b610227610240366004610ea7565b61050d565b60055442106101c6565b61022761025d366004610ea7565b6105a6565b6003546101e3565b6101e37f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b81565b6102b87f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016101d2565b6004546101e3565b6005544210156101c6565b6102276102f1366004610f21565b61062e565b6101c6610304366004610ea7565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b6101e3600081565b6102276106f5565b61022761034b366004610e8f565b610778565b6101e360015481565b6101e360045481565b610227610370366004610f21565b6107f7565b610227610383366004610ea7565b6108c9565b610227610396366004610f21565b610956565b6101e360025481565b6101e360065481565b6101e360055481565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b00000000000000000000000000000000000000000000000000000000148061044957507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b92915050565b6000610459610a27565b6002546104669190610f42565b90505b90565b6104967f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6104e75760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064015b60405180910390fd5b60055442106104ff576104fa8282610b19565b610509565b6105098282610bb0565b5050565b60008281526020819052604090206001015461052a905b33610304565b61059c5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201527f2061646d696e20746f206772616e74000000000000000000000000000000000060648201526084016104de565b6105098282610c4b565b6001600160a01b03811633146106245760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084016104de565b6105098282610ce9565b6106587f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6106a45760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b60055442106104ff5760405162461bcd60e51b815260206004820152601c60248201527f696e697469616c2063616d706169676e206e6f742072756e6e696e670000000060448201526064016104de565b336001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000161461076d5760405162461bcd60e51b815260206004820152600f60248201527f6e6f742072657761726420706f6f6c000000000000000000000000000000000060448201526064016104de565b426001556000600255565b6107a27f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6107ee5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b60025542600155565b6108217f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b61086d5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b6005544210156108bf5760405162461bcd60e51b815260206004820152601860248201527f696e697469616c2063616d706169676e2072756e6e696e67000000000000000060448201526064016104de565b6105098282610b19565b6000828152602081905260409020600101546108e490610524565b6106245760405162461bcd60e51b815260206004820152603060248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201527f2061646d696e20746f207265766f6b650000000000000000000000000000000060648201526084016104de565b6109807f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6109cc5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b6005544210610a1d5760405162461bcd60e51b815260206004820152601c60248201527f696e697469616c2063616d706169676e206e6f742072756e6e696e670000000060448201526064016104de565b6105098282610d68565b6000426001541115610a4957634e487b7160e01b600052600160045260246000fd5b6005546003541115610a6b57634e487b7160e01b600052600160045260246000fd5b60055460015410610a7e57506000610469565b6003544211610aa857600454600154610a979042610fb7565b610aa19190610f7a565b9050610469565b6000600654610abb600154600354610e52565b610ac742600554610e6b565b610ad19190610fb7565b610adb9190610f7a565b905060035460015410156104665780600454600154600354610afd9190610fb7565b610b079190610f7a565b610b119190610f42565b915050610469565b610b21610e7a565b610b2b8142610f42565b600355610b388183610f5a565b600455610b458142610f42565b6005819055600060068190556003546004546040805187815260208101879052908101929092526060820152608081019290925260a08201527f6613481053266930293e519022ee89096bd8adba04d23586c5e64e20d640ec519060c0015b60405180910390a15050565b610bb8610e7a565b6003544210610bce576005546003556006546004555b80600354610bdc9190610f42565b600555610be98183610f5a565b60068190556003546004546005546040805187815260208101879052908101939093526060830191909152608082015260a08101919091527f62fe920d1258e46a0c0ad6ae0720652679e9991ca4205c12358d7c4f1d9a73d09060c001610ba4565b6000828152602081815260408083206001600160a01b038516845290915290205460ff16610509576000828152602081815260408083206001600160a01b03851684529091529020805460ff19166001179055610ca53390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b6000828152602081815260408083206001600160a01b038516845290915290205460ff1615610509576000828152602081815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b610d70610e7a565b6003544210610d8b5760055460035560068054600455600090555b6005546003541115610dad57634e487b7160e01b600052600160045260246000fd5b6000600354600554610dbf9190610fb7565b9050610dcb8242610f42565b6003819055610ddb908290610f42565b600555610de88284610f5a565b60048190556003546005546006546040805188815260208101889052908101939093526060830193909352608082015260a08101919091527f19902fdc8a70bd6ba84e7161fb544495b8d6e4524914e2df32b024acc5e67fe89060c00160405180910390a1505050565b600081831015610e625781610e64565b825b9392505050565b6000818310610e625781610e64565b610e82610a27565b6002546107ee9190610f42565b600060208284031215610ea0578081fd5b5035919050565b60008060408385031215610eb9578081fd5b8235915060208301356001600160a01b0381168114610ed6578182fd5b809150509250929050565b600060208284031215610ef2578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610e64578182fd5b60008060408385031215610f33578182fd5b50508035926020909101359150565b60008219821115610f5557610f55610fce565b500190565b600082610f7557634e487b7160e01b81526012600452602481fd5b500490565b6000817fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0483118215151615610fb257610fb2610fce565b500290565b600082821015610fc957610fc9610fce565b500390565b634e487b7160e01b600052601160045260246000fdfea2646970667358221220a279739956a1943b12fe5ddcbe0321308c97cb9c8e4a61b32bbd7fc8f478058664736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101ae5760003560e01c80637da73d18116100ee578063cf85496911610097578063db63233d11610071578063db63233d14610388578063e9fcdd101461039b578063f555b815146103a4578063fbfe5bd3146103ad576101ae565b8063cf85496914610359578063d4bd8fed14610362578063d547741f14610375576101ae565b8063b0165840116100c8578063b016584014610335578063b073f3421461033d578063c8f33c9114610350576101ae565b80637da73d18146102e357806391d14854146102f6578063a217fddf1461032d576101ae565b8063360f60b11161015b5780634df98bfc116101355780634df98bfc1461026a57806366666aa914610291578063679aefce146102d057806376eb43e9146102d8576101ae565b8063360f60b11461024557806336568abe1461024f5780633ec8ec5a14610262576101ae565b80632ddc40f71161018c5780632ddc40f7146102145780632ede53a3146102295780632f2ff15d14610232576101ae565b806301ffc9a7146101b35780630572b0cc146101db578063248a9ca3146101f1575b600080fd5b6101c66101c1366004610ee1565b6103b6565b60405190151581526020015b60405180910390f35b6101e361044f565b6040519081526020016101d2565b6101e36101ff366004610e8f565b60009081526020819052604090206001015490565b610227610222366004610f21565b61046c565b005b6101e360035481565b610227610240366004610ea7565b61050d565b60055442106101c6565b61022761025d366004610ea7565b6105a6565b6003546101e3565b6101e37f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b81565b6102b87f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016101d2565b6004546101e3565b6005544210156101c6565b6102276102f1366004610f21565b61062e565b6101c6610304366004610ea7565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b6101e3600081565b6102276106f5565b61022761034b366004610e8f565b610778565b6101e360015481565b6101e360045481565b610227610370366004610f21565b6107f7565b610227610383366004610ea7565b6108c9565b610227610396366004610f21565b610956565b6101e360025481565b6101e360065481565b6101e360055481565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b00000000000000000000000000000000000000000000000000000000148061044957507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b92915050565b6000610459610a27565b6002546104669190610f42565b90505b90565b6104967f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6104e75760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064015b60405180910390fd5b60055442106104ff576104fa8282610b19565b610509565b6105098282610bb0565b5050565b60008281526020819052604090206001015461052a905b33610304565b61059c5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201527f2061646d696e20746f206772616e74000000000000000000000000000000000060648201526084016104de565b6105098282610c4b565b6001600160a01b03811633146106245760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084016104de565b6105098282610ce9565b6106587f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6106a45760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b60055442106104ff5760405162461bcd60e51b815260206004820152601c60248201527f696e697469616c2063616d706169676e206e6f742072756e6e696e670000000060448201526064016104de565b336001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000161461076d5760405162461bcd60e51b815260206004820152600f60248201527f6e6f742072657761726420706f6f6c000000000000000000000000000000000060448201526064016104de565b426001556000600255565b6107a27f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6107ee5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b60025542600155565b6108217f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b61086d5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b6005544210156108bf5760405162461bcd60e51b815260206004820152601860248201527f696e697469616c2063616d706169676e2072756e6e696e67000000000000000060448201526064016104de565b6105098282610b19565b6000828152602081905260409020600101546108e490610524565b6106245760405162461bcd60e51b815260206004820152603060248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201527f2061646d696e20746f207265766f6b650000000000000000000000000000000060648201526084016104de565b6109807f4a46aaaa31bd6eb7c4586d8b31ef0034f45e1cd695217392f1dd55078385ce0b33610304565b6109cc5760405162461bcd60e51b815260206004820152601760248201527f6e6f742072657761726420646973747269627574696f6e00000000000000000060448201526064016104de565b6005544210610a1d5760405162461bcd60e51b815260206004820152601c60248201527f696e697469616c2063616d706169676e206e6f742072756e6e696e670000000060448201526064016104de565b6105098282610d68565b6000426001541115610a4957634e487b7160e01b600052600160045260246000fd5b6005546003541115610a6b57634e487b7160e01b600052600160045260246000fd5b60055460015410610a7e57506000610469565b6003544211610aa857600454600154610a979042610fb7565b610aa19190610f7a565b9050610469565b6000600654610abb600154600354610e52565b610ac742600554610e6b565b610ad19190610fb7565b610adb9190610f7a565b905060035460015410156104665780600454600154600354610afd9190610fb7565b610b079190610f7a565b610b119190610f42565b915050610469565b610b21610e7a565b610b2b8142610f42565b600355610b388183610f5a565b600455610b458142610f42565b6005819055600060068190556003546004546040805187815260208101879052908101929092526060820152608081019290925260a08201527f6613481053266930293e519022ee89096bd8adba04d23586c5e64e20d640ec519060c0015b60405180910390a15050565b610bb8610e7a565b6003544210610bce576005546003556006546004555b80600354610bdc9190610f42565b600555610be98183610f5a565b60068190556003546004546005546040805187815260208101879052908101939093526060830191909152608082015260a08101919091527f62fe920d1258e46a0c0ad6ae0720652679e9991ca4205c12358d7c4f1d9a73d09060c001610ba4565b6000828152602081815260408083206001600160a01b038516845290915290205460ff16610509576000828152602081815260408083206001600160a01b03851684529091529020805460ff19166001179055610ca53390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b6000828152602081815260408083206001600160a01b038516845290915290205460ff1615610509576000828152602081815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b610d70610e7a565b6003544210610d8b5760055460035560068054600455600090555b6005546003541115610dad57634e487b7160e01b600052600160045260246000fd5b6000600354600554610dbf9190610fb7565b9050610dcb8242610f42565b6003819055610ddb908290610f42565b600555610de88284610f5a565b60048190556003546005546006546040805188815260208101889052908101939093526060830193909352608082015260a08101919091527f19902fdc8a70bd6ba84e7161fb544495b8d6e4524914e2df32b024acc5e67fe89060c00160405180910390a1505050565b600081831015610e625781610e64565b825b9392505050565b6000818310610e625781610e64565b610e82610a27565b6002546107ee9190610f42565b600060208284031215610ea0578081fd5b5035919050565b60008060408385031215610eb9578081fd5b8235915060208301356001600160a01b0381168114610ed6578182fd5b809150509250929050565b600060208284031215610ef2578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610e64578182fd5b60008060408385031215610f33578182fd5b50508035926020909101359150565b60008219821115610f5557610f55610fce565b500190565b600082610f7557634e487b7160e01b81526012600452602481fd5b500490565b6000817fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0483118215151615610fb257610fb2610fce565b500290565b600082821015610fc957610fc9610fce565b500390565b634e487b7160e01b600052601160045260246000fdfea2646970667358221220a279739956a1943b12fe5ddcbe0321308c97cb9c8e4a61b32bbd7fc8f478058664736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getRewards()": {
+        "details": "At any point in time this function must return the accumulated rewards from the last call to restartRewards"
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`."
+      },
+      "restartRewards()": {
+        "details": "The main contract has distributed the rewards (getRewards()) until this point, this must startfrom scratch => getRewards() == 0"
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 61,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)56_storage)"
+      },
+      {
+        "astId": 25897,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "lastUpdateTime",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 25899,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "savedRewards",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 25901,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "finish1",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 25903,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "rate1",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 25905,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "finish2",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 25907,
+        "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+        "label": "rate2",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)56_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)56_storage"
+      },
+      "t_struct(RoleData)56_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControl.RoleData",
+        "members": [
+          {
+            "astId": 53,
+            "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+            "label": "members",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 55,
+            "contract": "src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculator.sol:TwoPeriodsRewardCalculator",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

@@ -27,5 +27,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'Asset_deploy'];
+func.tags = ['Asset', 'Asset_deploy', 'AssetV1'];
 func.dependencies = ['Sand', 'Sand_deploy'];

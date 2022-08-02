@@ -25,5 +25,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Cashback', 'ERC20SignedClaim', 'ERC20SignedClaim_deploy'];
+func.tags = ['Cashback', 'ERC20SignedClaim', 'ERC20SignedClaim_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER_V2'];

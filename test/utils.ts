@@ -185,10 +185,18 @@ export async function setupUser<T extends Contracts>(
   return users[0];
 }
 
-export function getAssetChainIndex(id: BigNumber): number {
+export function getNftIndex(id: BigNumber): number {
   // js bitwise & operands are converted to 32-bit integers
   const idAsHexString = utils.hexValue(id);
   const slicedId = Number('0x' + idAsHexString.slice(48, 56));
+  const SLICED_NFT_INDEX_MASK = Number('0x7F800000');
+  return (slicedId & SLICED_NFT_INDEX_MASK) >>> 23;
+}
+
+export function getAssetChainIndex(id: BigNumber): number {
+  // js bitwise & operands are converted to 32-bit integers
+  const idAsHexString = utils.hexValue(id);
+  const slicedId = Number('0x' + idAsHexString.slice(42, 50));
   const SLICED_CHAIN_INDEX_MASK = Number('0x7F800000');
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
 }

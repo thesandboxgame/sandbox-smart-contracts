@@ -3,9 +3,9 @@ import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {withSnapshot} from '../utils';
 
-export const setupERC677 = withSnapshot(['Gems'], async () => {
+export const setupERC677 = withSnapshot(['PolygonGems'], async () => {
   const accounts = await getNamedAccounts();
-  const gemToken: Contract = await ethers.getContract('Gem_POWER');
+  const gemToken: Contract = await ethers.getContract('PolygonGem_POWER');
   await deployments.deploy('MockERC677Receiver', {
     from: accounts.deployer,
     args: [],

@@ -1,5 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {constants} from 'ethers';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -36,7 +38,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'PolygonLandTunnel',
       'fxRootTunnel'
     );
-    if (fxRootTunnel !== LandTunnel.address) {
+    if (
+      fxRootTunnel !== LandTunnel.address &&
+      fxRootTunnel == constants.AddressZero
+    ) {
       await deploymentsL2.execute(
         'PolygonLandTunnel',
         {from: deployerOnL2},
@@ -45,7 +50,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
     }
     const fxChildTunnel = await deployments.read('LandTunnel', 'fxChildTunnel');
-    if (fxChildTunnel !== PolygonLandTunnel.address) {
+    if (
+      fxChildTunnel !== PolygonLandTunnel.address &&
+      fxChildTunnel == constants.AddressZero
+    ) {
       await deployments.execute(
         'LandTunnel',
         {from: deployer},
@@ -83,3 +91,4 @@ func.dependencies = [
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
+func.skip = skipUnlessTest;

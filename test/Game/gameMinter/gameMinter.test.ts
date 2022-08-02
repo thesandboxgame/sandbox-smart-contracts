@@ -142,18 +142,10 @@ const setupTest = withSnapshot(
       users: await Promise.all(
         users.map((acc: string) =>
           (async () => {
-            setApprovalForAll('MockERC1155Asset', GameMinter.address, acc);
-            setApprovalForAll('MockERC721Asset', GameMinter.address, acc);
-            setApprovalForAll(
-              'MockERC1155Asset',
-              gameTokenContract.address,
-              acc
-            );
-            setApprovalForAll(
-              'MockERC721Asset',
-              gameTokenContract.address,
-              acc
-            );
+            setApprovalForAll('Asset', GameMinter.address, acc);
+            setApprovalForAll('AssetERC721', GameMinter.address, acc);
+            setApprovalForAll('Asset', gameTokenContract.address, acc);
+            setApprovalForAll('AssetERC721', gameTokenContract.address, acc);
 
             return {
               address: acc,
@@ -191,16 +183,8 @@ describe('GameMinter', function () {
       );
       await gameAsAdmin.changeMinter(GameMinter.address);
 
-      setApprovalForAll(
-        'MockERC1155Asset',
-        gameTokenContract.address,
-        users[1].address
-      );
-      setApprovalForAll(
-        'MockERC1155Asset',
-        gameTokenContract.address,
-        users[8].address
-      );
+      setApprovalForAll('Asset', gameTokenContract.address, users[1].address);
+      setApprovalForAll('Asset', gameTokenContract.address, users[8].address);
       const signers = await ethers.getSigners();
       gameTokenFeeBeneficiary = await signers[3].getAddress();
 

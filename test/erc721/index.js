@@ -1182,9 +1182,10 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         const {tokenId} = await mint(user0);
-        const receipt = await contractAsUser0[
-          'burnFrom(address,uint256,uint256)'
-        ](user0, tokenId, 1).then((tx) => tx.wait());
+        const receipt = await contractAsUser0['burnFrom(address,uint256)'](
+          user0,
+          tokenId
+        ).then((tx) => tx.wait());
         const eventsMatching = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber
@@ -1203,10 +1204,9 @@ module.exports = (init, extensions) => {
       }) {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
-        await contractAsUser0['burnFrom(address,uint256,uint256)'](
+        await contractAsUser0['burnFrom(address,uint256)'](
           user0,
-          tokenId,
-          1
+          tokenId
         ).then((tx) => tx.wait());
         await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
@@ -1995,24 +1995,6 @@ module.exports = (init, extensions) => {
         tokenIds[0]
       );
       assert.equal(approvedAddress, zeroAddress);
-    });
-
-    it('transfering the approved NFT results in aproval reset for it but no approval event', async function ({
-      contractAsOwner,
-      contractAsUser1,
-      owner,
-      user0,
-      user1,
-      tokenIds,
-    }) {
-      await contractAsOwner.approve(user1, tokenIds[0]).then((tx) => tx.wait());
-      const receipt = await contractAsUser1
-        .transferFrom(owner, user0, tokenIds[0])
-        .then((tx) => tx.wait());
-      const eventsMatching = receipt.events.filter(
-        (v) => v.event === 'Approval'
-      );
-      assert.equal(eventsMatching.length, 0);
     });
 
     it('transfering the approved NFT again will fail', async function ({

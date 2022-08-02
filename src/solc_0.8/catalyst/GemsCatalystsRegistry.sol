@@ -1,30 +1,32 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "./Gem.sol";
-import "./Catalyst.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./interfaces/IGem.sol";
+import "./interfaces/ICatalyst.sol";
+import "../common/interfaces/IERC20Extended.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
+contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
+    bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
-    Gem[] internal _gems;
-    Catalyst[] internal _catalysts;
+    IGem[] internal _gems;
+    ICatalyst[] internal _catalysts;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
-    constructor(address admin, address trustedForwarder) {
-        _admin = admin;
+    function initV1(address trustedForwarder, address admin) public initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
+        __Ownable_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
@@ -37,44 +39,64 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         uint256 assetId,
         IAssetAttributesRegistry.GemEvent[] calldata events
     ) external view override returns (uint32[] memory values) {
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getAttributes(assetId, events);
     }
 
     /// @notice Returns the maximum number of gems for a given catalyst
     /// @param catalystId catalyst identifier
     function getMaxGems(uint16 catalystId) external view override returns (uint8) {
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getMaxGems();
+    }
+
+    /// @notice Returns the decimals for a given catalyst
+    /// @param catalystId catalyst identifier
+    function getCatalystDecimals(uint16 catalystId) external view override returns (uint8) {
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        return catalyst.getDecimals();
+    }
+
+    /// @notice Returns the decimals for a given gem
+    /// @param gemId gem identifier
+    function getGemDecimals(uint16 gemId) external view override returns (uint8) {
+        IGem gem = getGem(gemId);
+        require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
+        return gem.getDecimals();
     }
 
     /// @notice Burns one gem unit from each gem id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn one gem from each
-    /// @param amount amount units to burn
+    /// @param amounts amount units to burn
     function burnDifferentGems(
         address from,
         uint16[] calldata gemIds,
-        uint256 amount
-    ) external override {
-        for (uint256 i = 0; i < gemIds.length; i++) {
-            burnGem(from, gemIds[i], amount);
+        uint256[] calldata amounts
+    ) external {
+        uint256 gemIdsLength = gemIds.length;
+        require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
+        for (uint256 i = 0; i < gemIdsLength; i++) {
+            burnGem(from, gemIds[i], amounts[i]);
         }
     }
 
     /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
-    /// @param catalystIds list of catalysts to burn one catalyst from each
-    /// @param amount amount to burn
+    /// @param catalystIds list of catalysts to burn
+    /// @param amounts amount to burn
     function burnDifferentCatalysts(
         address from,
         uint16[] calldata catalystIds,
-        uint256 amount
-    ) external override {
-        for (uint256 i = 0; i < catalystIds.length; i++) {
-            burnCatalyst(from, catalystIds[i], amount);
+        uint256[] calldata amounts
+    ) external {
+        uint256 catalystIdsLength = catalystIds.length;
+        require(catalystIdsLength == amounts.length, "GemsCatalystsRegistry: catalystIds and amounts length mismatch");
+        for (uint256 i = 0; i < catalystIdsLength; i++) {
+            burnCatalyst(from, catalystIds[i], amounts[i]);
         }
     }
 
@@ -86,8 +108,10 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         address from,
         uint16[] calldata gemIds,
         uint256[] calldata amounts
-    ) public override {
-        for (uint256 i = 0; i < gemIds.length; i++) {
+    ) external override {
+        uint256 gemIdsLength = gemIds.length;
+        require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
+        for (uint256 i = 0; i < gemIdsLength; i++) {
             if (gemIds[i] != 0 && amounts[i] != 0) {
                 burnGem(from, gemIds[i], amounts[i]);
             }
@@ -102,8 +126,10 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
-    ) public override {
-        for (uint256 i = 0; i < catalystIds.length; i++) {
+    ) external override {
+        uint256 catalystIdsLength = catalystIds.length;
+        require(catalystIdsLength == amounts.length, "GemsCatalystsRegistry: catalystIds and amounts length mismatch");
+        for (uint256 i = 0; i < catalystIdsLength; i++) {
             if (catalystIds[i] != 0 && amounts[i] != 0) {
                 burnCatalyst(from, catalystIds[i], amounts[i]);
             }
@@ -113,23 +139,25 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @notice Adds both arrays of gems and catalysts to registry
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
-    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
-        require(_msgSender() == _admin, "NOT_AUTHORIZED");
-
+    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(
             uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
             "GemsCatalystsRegistry: Too many gem and catalyst contracts"
         );
 
         for (uint256 i = 0; i < gems.length; i++) {
-            Gem gem = gems[i];
+            IGem gem = gems[i];
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
             _gems.push(gem);
         }
 
         for (uint256 i = 0; i < catalysts.length; i++) {
-            Catalyst catalyst = catalysts[i];
+            ICatalyst catalyst = catalysts[i];
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);
@@ -140,14 +168,14 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param gemId The gem being queried.
     /// @return Whether the gem exists.
     function doesGemExist(uint16 gemId) external view override returns (bool) {
-        return getGem(gemId) != Gem(address(0));
+        return getGem(gemId) != IGem(address(0));
     }
 
     /// @notice Query whether a giving catalyst exists.
     /// @param catalystId The catalyst being queried.
     /// @return Whether the catalyst exists.
     function doesCatalystExist(uint16 catalystId) external view returns (bool) {
-        return getCatalyst(catalystId) != Catalyst(address(0));
+        return getCatalyst(catalystId) != ICatalyst(address(0));
     }
 
     /// @notice Burn a catalyst.
@@ -158,10 +186,9 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         address from,
         uint16 catalystId,
         uint256 amount
-    ) public override {
-        _checkAuthorization(from);
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+    ) public override checkAuthorization(from) {
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
     }
 
@@ -173,10 +200,9 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         address from,
         uint16 gemId,
         uint256 amount
-    ) public override {
-        _checkAuthorization(from);
-        Gem gem = getGem(gemId);
-        require(gem != Gem(address(0)), "GEM_DOES_NOT_EXIST");
+    ) public override checkAuthorization(from) {
+        IGem gem = getGem(gemId);
+        require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
     }
 
@@ -192,7 +218,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         _setGemsAndCatalystsAllowance(0);
     }
 
-    function setGemsandCatalystsMaxAllowance() external {
+    function setGemsAndCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(MAX_UINT256);
     }
 
@@ -211,29 +237,30 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @dev Get the catalyst contract corresponding to the id.
     /// @param catalystId The catalyst id to use to retrieve the contract.
     /// @return The requested Catalyst contract.
-    function getCatalyst(uint16 catalystId) internal view returns (Catalyst) {
+    function getCatalyst(uint16 catalystId) public view returns (ICatalyst) {
         if (catalystId > 0 && catalystId <= _catalysts.length) {
             return _catalysts[catalystId - 1];
         } else {
-            return Catalyst(address(0));
+            return ICatalyst(address(0));
         }
     }
 
     /// @dev Get the gem contract corresponding to the id.
     /// @param gemId The gem id to use to retrieve the contract.
     /// @return The requested Gem contract.
-    function getGem(uint16 gemId) internal view returns (Gem) {
+    function getGem(uint16 gemId) public view returns (IGem) {
         if (gemId > 0 && gemId <= _gems.length) {
             return _gems[gemId - 1];
         } else {
-            return Gem(address(0));
+            return IGem(address(0));
         }
     }
 
     /// @dev verify that the caller is authorized for this function call.
     /// @param from The original signer of the transaction.
-    function _checkAuthorization(address from) internal view {
-        require(_msgSender() == from || isSuperOperator(_msgSender()), "AUTH_ACCESS_DENIED");
+    modifier checkAuthorization(address from) {
+        require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
+        _;
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -244,11 +271,11 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         emit TrustedForwarderChanged(trustedForwarder);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 }
