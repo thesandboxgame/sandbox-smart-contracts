@@ -3,7 +3,7 @@ import deadlines from '../../data/landSales/deadlines';
 import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {isTestnet} from '../../utils/network';
+import {isTestnet, skipUnlessTest} from '../../utils/network';
 
 const {calculateLandHash} = helpers;
 
@@ -102,3 +102,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = [LANDSALE_NAME, LANDSALE_NAME + '_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
+func.skip = skipUnlessTest;

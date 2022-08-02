@@ -5,8 +5,8 @@ const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, gameTokenAdmin, upgradeAdmin} = await getNamedAccounts();
-  const erc1155Contract = await deployments.get('MockERC1155Asset');
-  const erc721Contract = await deployments.get('MockERC721Asset');
+  const erc1155Contract = await deployments.get('Asset'); // TODO: change to PolygonAssetERC1155
+  const erc721Contract = await deployments.get('AssetERC721'); // TODO: change to PolygonAssetERC721
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
 
@@ -36,10 +36,10 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['ChildGameToken', 'ChildGameToken_deploy'];
 func.dependencies = [
-  'MockERC1155Asset_deploy',
-  'MockERC721Asset_deploy',
+  'Asset_deploy',
+  'AssetERC721_deploy',
   'Sand',
   'TRUSTED_FORWARDER',
 ];
-// TODO: Setup deploy-polygon folder and network.
-func.skip = skipUnlessTest; // TODO enable
+// TODO: Setup deploy-polygon folder and network. Delete MockAsset contracts
+func.skip = skipUnlessTest; // TODO: enable

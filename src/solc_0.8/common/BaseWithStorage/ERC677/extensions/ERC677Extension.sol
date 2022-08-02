@@ -5,8 +5,9 @@ import "../../../interfaces/IERC677.sol";
 import "../../../interfaces/IERC677Receiver.sol";
 import "../../ERC20/extensions/ERC20Internal.sol";
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
+import "@openzeppelin/contracts-0.8/utils/Context.sol";
 
-abstract contract ERC677Extension is ERC20Internal, IERC677 {
+abstract contract ERC677Extension is ERC20Internal, IERC677, Context {
     using Address for address;
 
     /// @notice Transfers tokens to an address with _data if the recipient is a contact.
@@ -18,10 +19,10 @@ abstract contract ERC677Extension is ERC20Internal, IERC677 {
         uint256 _value,
         bytes calldata _data
     ) external override returns (bool success) {
-        _transfer(msg.sender, _to, _value);
+        _transfer(_msgSender(), _to, _value);
         if (_to.isContract()) {
             IERC677Receiver receiver = IERC677Receiver(_to);
-            receiver.onTokenTransfer(msg.sender, _value, _data);
+            receiver.onTokenTransfer(_msgSender(), _value, _data);
         }
         return true;
     }

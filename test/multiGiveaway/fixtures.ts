@@ -11,6 +11,7 @@ import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getCl
 import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
+import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {
   expectReceiptEventWithArgs,
   sequentially,
@@ -34,7 +35,13 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  ['Multi_Giveaway_1', 'Asset', 'Gems', 'Sand', 'Catalysts'],
+  [
+    'Multi_Giveaway_1',
+    'PolygonAssetERC1155',
+    'PolygonGems',
+    'PolygonSand',
+    'PolygonCatalysts',
+  ],
   async function (hre, options?: Options) {
     const {network, getChainId} = hre;
     const chainId = await getChainId();
@@ -49,16 +56,20 @@ export const setupTestGiveaway = withSnapshot(
       gemMinter,
       multiGiveawayAdmin,
     } = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
-    const sandContract = await ethers.getContract('Sand');
-    const assetContract = await ethers.getContract('Asset');
-    const speedGemContract = await ethers.getContract('Gem_SPEED');
-    const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
+    const otherAccounts = await getUnnamedAccounts();
+    const others = otherAccounts;
+    const sandContract = await ethers.getContract('PolygonSand');
+    const assetContract = await ethers.getContract('PolygonAssetERC1155');
+    const speedGemContract = await ethers.getContract('PolygonGem_SPEED');
+    const rareCatalystContract = await ethers.getContract(
+      'PolygonCatalyst_RARE'
+    );
 
     await deployments.deploy('TestMetaTxForwarder', {
       from: deployer,
     });
     const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
     await deployments.deploy('MockLand', {
       from: deployer,
@@ -71,6 +82,12 @@ export const setupTestGiveaway = withSnapshot(
     );
 
     const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
+
+    await depositViaChildChainManager(
+      {sand: sandContract, childChainManager},
+      sandAdmin,
+      SAND_AMOUNT
+    );
 
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
@@ -103,7 +120,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
-      'Asset',
+      'PolygonAssetERC1155',
       assetBouncerAdmin
     );
 
@@ -113,7 +130,6 @@ export const setupTestGiveaway = withSnapshot(
       const packId = id;
       const hash = ipfsHashString;
       const supply = value;
-      const rarity = 1;
       const owner = giveawayContract.address;
       const data = '0x';
 
@@ -124,15 +140,9 @@ export const setupTestGiveaway = withSnapshot(
       );
 
       const receipt = await waitFor(
-        assetContractAsCreator.mint(
-          creator,
-          packId,
-          hash,
-          supply,
-          rarity,
-          owner,
-          data
-        )
+        assetContractAsCreator[
+          'mint(address,uint40,bytes32,uint256,address,bytes)'
+        ](creator, packId, hash, supply, owner, data)
       );
 
       const transferEvent = await expectReceiptEventWithArgs(

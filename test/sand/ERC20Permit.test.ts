@@ -5,7 +5,7 @@ import {BigNumber, constants, Contract} from 'ethers';
 import {expect} from '../chai-setup';
 import {setupGemsAndCatalysts} from './fixtures';
 import {expectEventWithArgs, waitFor} from '../utils';
-import {data712} from '../permit/data712';
+import {data712Upgradeable} from '../permit/data712Upgradeable';
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
@@ -37,12 +37,22 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData712 = data712(luckGem, approve);
+
+    const permitData712 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      luckGem,
+      approve
+    );
+
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       gemOwner,
       permitData712,
     ]);
+
     const sig = splitSignature(flatSig);
+
     const gemAllowanceBefore = await luckGem.allowance(gemOwner, user3);
     expect(gemAllowanceBefore).to.equal(0);
 
@@ -76,7 +86,13 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData712 = data712(epicCatalyst, approve);
+    const permitData712 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      epicCatalyst,
+      approve
+    );
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
@@ -131,7 +147,13 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData712 = data712(epicCatalyst, approve);
+    const permitData712 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      epicCatalyst,
+      approve
+    );
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
@@ -159,7 +181,13 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData712 = data712(epicCatalyst, approve);
+    const permitData712 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      epicCatalyst,
+      approve
+    );
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
@@ -185,7 +213,13 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData7122 = data712(epicCatalyst, approve2);
+    const permitData7122 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      epicCatalyst,
+      approve2
+    );
     const flatSig2 = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData7122,
@@ -206,7 +240,7 @@ describe('Gems & Catalysts permit', function () {
   });
 
   it('should fail if owner == address(0) || spender == address(0)', async function () {
-    const nonce = BigNumber.from(await epicCatalyst._nonces(catalystOwner));
+    const nonce = BigNumber.from(await epicCatalyst.nonces(catalystOwner));
     const approve = {
       owner: catalystOwner,
       spender: zeroAddress,
@@ -214,7 +248,13 @@ describe('Gems & Catalysts permit', function () {
       nonce: nonce._hex,
       deadline: deadline._hex,
     };
-    const permitData712 = data712(epicCatalyst, approve);
+    const permitData712 = data712Upgradeable(
+      'The Sandbox',
+      '1',
+      31337,
+      epicCatalyst,
+      approve
+    );
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,

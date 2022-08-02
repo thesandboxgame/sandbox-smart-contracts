@@ -1,25 +1,19 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/interfaces/IAssetToken.sol";
+import "../common/interfaces/IPolygonAssetERC1155.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
-    uint256 private constant NFT_SUPPLY = 1;
-
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
-    uint256 public gemsFactor = 1000000000000000000;
-    uint256 public catalystsFactor = 1000000000000000000;
 
     IAssetAttributesRegistry internal immutable _registry;
-    IAssetToken internal immutable _asset;
+    IPolygonAssetERC1155 internal immutable _assetERC1155;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     mapping(uint16 => uint256) public quantitiesByCatalystId;
@@ -28,23 +22,30 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     event CustomMintingAllowanceChanged(address indexed addressModified, bool indexed isAddressCustomMintingAllowed);
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event QuantitiesByCatalystIdChanged(uint256 indexed id, uint256 indexed newValue);
+    event QuantitiesByAssetTypeIdChanged(uint256 indexed index, uint256 indexed newValue);
+    event NumberOfGemsBurnPerAssetChanged(uint256 indexed newValue);
+    event NumberOfCatalystBurnPerAssetChanged(uint256 indexed newValue);
 
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
-    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
+    /// @param assetERC1155: Asset ERC1155 Token Contract
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
-        IAssetToken asset,
+        IPolygonAssetERC1155 assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
         address trustedForwarder,
         uint256[] memory quantitiesByCatalystId_,
         uint256[] memory quantitiesByAssetTypeId_
     ) {
+        require(address(registry) != address(0), "AssetMinter: registry can't be zero");
+        require(address(assetERC1155) != address(0), "AssetMinter: assetERC1155 can't be zero");
+        require(address(gemsCatalystsRegistry) != address(0), "AssetMinter: gemsCatalystsRegistry can't be zero");
         _registry = registry;
-        _asset = asset;
+        _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         transferOwnership(admin);
         __ERC2771Handler_initialize(trustedForwarder);
@@ -61,28 +62,24 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         }
     }
 
-    function addOrReplaceQuantitiyByCatalystId(uint16 catalystId, uint256 newQuantity) external override onlyOwner {
+    function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external override onlyOwner {
         quantitiesByCatalystId[catalystId] = newQuantity;
+        emit QuantitiesByCatalystIdChanged(catalystId, newQuantity);
     }
 
     function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external override onlyOwner {
         quantitiesByAssetTypeId[index1Based] = newQuantity;
+        emit QuantitiesByAssetTypeIdChanged(index1Based, newQuantity);
     }
 
     function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external override onlyOwner {
         numberOfGemsBurnPerAsset = newQuantity;
+        emit NumberOfGemsBurnPerAssetChanged(newQuantity);
     }
 
     function setNumberOfCatalystsBurnPerAsset(uint32 newQuantity) external override onlyOwner {
         numberOfCatalystBurnPerAsset = newQuantity;
-    }
-
-    function setGemsFactor(uint256 newQuantity) external override onlyOwner {
-        gemsFactor = newQuantity;
-    }
-
-    function setCatalystsFactor(uint256 newQuantity) external override onlyOwner {
-        catalystsFactor = newQuantity;
+        emit NumberOfCatalystBurnPerAssetChanged(newQuantity);
     }
 
     function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external override onlyOwner {
@@ -105,18 +102,47 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantity
+        uint256 quantity,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
     ) external override returns (uint256 assetId) {
         require(
             customMinterAllowance[_msgSender()] == true || _msgSender() == owner(),
-            "AssetyMinter: custom minting unauthorized"
+            "AssetMinter: custom minting unauthorized"
         );
-        assetId = _burnAndMint(
+        require(
+            _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
+            "AssetMinter: invalid numberOfCatalystBurnPerAsset value "
+        );
+        require(
+            _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
+            "AssetMinter: invalid numberOfGemsBurnPerAsset value"
+        );
+        assetId = _burnAndMint(mintData, catalystId, gemIds, quantity);
+    }
+
+    /// @notice mint "quantity" number of Asset token without using a catalyst.
+    /// @param mintData (-from address creating the Asset, need to be the tx sender or meta tx signer.
+    ///  -packId unused packId that will let you predict the resulting tokenId.
+    /// - metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// - to destination address receiving the minted tokens.
+    /// - data extra data)
+    /// @param quantity number of token to mint
+    /// @return assetId The new token Id.
+    function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
+        external
+        override
+        returns (uint256 assetId)
+    {
+        require(
+            customMinterAllowance[_msgSender()] == true || _msgSender() == owner(),
+            "AssetMinter: custom minting unauthorized"
+        );
+        _mintRequirements(mintData.from, quantity, mintData.to);
+        assetId = _assetERC1155.mint(
             mintData.from,
             mintData.packId,
             mintData.metadataHash,
-            catalystId,
-            gemIds,
             quantity,
             mintData.to,
             mintData.data
@@ -131,20 +157,22 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// - data extra data)
     /// @param typeAsset1Based (art, prop...) decide how many asset will be minted (start at 1)
     /// @return assetId The new token Id.
-    function mintWithoutCatalyst(MintData calldata mintData, uint16 typeAsset1Based)
-        external
-        override
-        returns (uint256 assetId)
-    {
-        uint256 quantity = quantitiesByAssetTypeId[typeAsset1Based];
+    function mintWithoutCatalyst(
+        MintData calldata mintData,
+        uint16 typeAsset1Based,
+        uint256 quantity
+    ) external override returns (uint256 assetId) {
+        require(
+            quantity == quantitiesByAssetTypeId[typeAsset1Based],
+            "AssetMinter: Invalid quantitiesByAssetType value"
+        );
 
         _mintRequirements(mintData.from, quantity, mintData.to);
-        assetId = _asset.mint(
+        assetId = _assetERC1155.mint(
             mintData.from,
             mintData.packId,
             mintData.metadataHash,
             quantity,
-            0,
             mintData.to,
             mintData.data
         );
@@ -162,20 +190,22 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     function mintWithCatalyst(
         MintData calldata mintData,
         uint16 catalystId,
-        uint16[] calldata gemIds
+        uint16[] calldata gemIds,
+        uint256 quantity,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
     ) external override returns (uint256 assetId) {
-        uint256 quantity = quantitiesByCatalystId[catalystId];
-
-        assetId = _burnAndMint(
-            mintData.from,
-            mintData.packId,
-            mintData.metadataHash,
-            catalystId,
-            gemIds,
-            quantity,
-            mintData.to,
-            mintData.data
+        require(quantity == quantitiesByCatalystId[catalystId], "AssetMinter : Invalid quantitiesByCatalyst value");
+        require(
+            _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
+            "AssetMinter: invalid numberOfCatalystBurnPerAsset value"
         );
+        require(
+            _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
+            "AssetMinter: invalid numberOfGemsBurnPerAsset value "
+        );
+
+        assetId = _burnAndMint(mintData, catalystId, gemIds, quantity);
     }
 
     /// @notice mint multiple Asset tokens.
@@ -183,18 +213,29 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// -packId unused packId that will let you predict the resulting tokenId
     /// -metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata)
     /// @param assets data (gems and catalyst data)
-    function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
-        external
-        override
-        returns (uint256[] memory assetIds)
-    {
-        require(assets.length != 0, "INVALID_0_ASSETS");
+    function mintMultipleWithCatalyst(
+        MintData calldata mintData,
+        AssetData[] memory assets,
+        uint256[] memory supplies,
+        uint256 _numberOfCatalystBurnPerAsset,
+        uint256 _numberOfGemsBurnPerAsset
+    ) external override returns (uint256[] memory assetIds) {
+        uint256 assetsLength = assets.length;
+        require(assetsLength != 0, "INVALID_0_ASSETS");
+        require(assetsLength == supplies.length, "AssetMinter: supplies and assets length mismatch");
         require(mintData.to != address(0), "INVALID_TO_ZERO_ADDRESS");
-
+        require(
+            _numberOfCatalystBurnPerAsset == numberOfCatalystBurnPerAsset,
+            "AssetMinter: invalid numberOfCatalystBurnPerAsset value"
+        );
+        require(
+            _numberOfGemsBurnPerAsset == numberOfGemsBurnPerAsset,
+            "AssetMinter: invalid numberOfGemsBurnPerAsset value"
+        );
         require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
 
-        uint256[] memory supplies = _handleMultipleAssetRequirements(mintData.from, assets);
-        assetIds = _asset.mintMultiple(
+        _handleMultipleAssetRequirements(mintData.from, assets, supplies);
+        assetIds = _assetERC1155.mintMultiple(
             mintData.from,
             mintData.packId,
             mintData.metadataHash,
@@ -210,6 +251,34 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         return assetIds;
     }
 
+    function mintMultipleWithoutCatalyst(
+        MintData calldata mintData,
+        uint256[] calldata supplies,
+        uint16[] calldata assetTypesIds
+    ) external override returns (uint256[] memory assetIds) {
+        uint256 suppliesLength = supplies.length;
+        require(suppliesLength != 0, "INVALID_0_ASSETS");
+        require(suppliesLength == assetTypesIds.length, "AssetMinter: supplies and assets length mismatch");
+        require(mintData.to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
+        for (uint256 i = 0; i < suppliesLength; i++) {
+            require(
+                supplies[i] == quantitiesByAssetTypeId[assetTypesIds[i]],
+                "AssetMinter: Invalid quantitiesByAssetType value"
+            );
+        }
+        assetIds = _assetERC1155.mintMultiple(
+            mintData.from,
+            mintData.packId,
+            mintData.metadataHash,
+            supplies,
+            "",
+            mintData.to,
+            mintData.data
+        );
+        return assetIds;
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
@@ -221,12 +290,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @dev Handler for dealing with assets when minting multiple at once.
     /// @param from The original address that signed the transaction.
     /// @param assets An array of AssetData structs to define how the total gems and catalysts are to be allocated.
-    /// @return supplies An array of the quantities for each asset being minted.
-    function _handleMultipleAssetRequirements(address from, AssetData[] memory assets)
-        internal
-        returns (uint256[] memory supplies)
-    {
-        supplies = new uint256[](assets.length);
+    function _handleMultipleAssetRequirements(
+        address from,
+        AssetData[] memory assets,
+        uint256[] memory supplies
+    ) internal {
         uint256[] memory catalystsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfCatalystContracts());
         uint256[] memory gemsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfGemContracts());
 
@@ -246,7 +314,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
             uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
             require(assets[i].gemIds.length <= maxGems, "AssetMinter: too many gems");
-            supplies[i] = quantitiesByCatalystId[assets[i].catalystId];
+            require(
+                supplies[i] == quantitiesByCatalystId[assets[i].catalystId],
+                "AssetMinter: Invalid quantitiesByAssetType value"
+            );
         }
         _batchBurnCatalysts(from, catalystsToBurn);
         _batchBurnGems(from, gemsToBurn);
@@ -283,7 +354,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint16[] memory gemIds,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, numTimes * gemsFactor);
+        uint256[] memory gemFactors = new uint256[](gemIds.length);
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gemFactors[i] = 10**(_gemsCatalystsRegistry.getGemDecimals(gemIds[i])) * numTimes;
+        }
+        _gemsCatalystsRegistry.batchBurnGems(from, gemIds, gemFactors);
     }
 
     /// @dev Burn a single type of catalyst.
@@ -295,7 +370,11 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint16 catalystId,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * catalystsFactor);
+        _gemsCatalystsRegistry.burnCatalyst(
+            from,
+            catalystId,
+            numTimes * 10**(_gemsCatalystsRegistry.getCatalystDecimals(catalystId))
+        );
     }
 
     /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
@@ -308,7 +387,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * gemsFactor * numberOfGemsBurnPerAsset;
+            uint256 gemFactor = 10**_gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
+            scaledQuantities[i] = quantities[i] * gemFactor * numberOfGemsBurnPerAsset;
         }
     }
 
@@ -322,7 +402,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * catalystsFactor * numberOfCatalystBurnPerAsset;
+            uint256 catalystFactor = 10**_gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
+            scaledQuantities[i] = quantities[i] * catalystFactor * numberOfCatalystBurnPerAsset;
         }
     }
 
@@ -345,21 +426,24 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     }
 
     function _burnAndMint(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
+        MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantity,
-        address to,
-        bytes calldata data
+        uint256 quantity
     ) internal returns (uint256 assetId) {
-        _mintRequirements(from, quantity, to);
+        _mintRequirements(mintData.from, quantity, mintData.to);
 
-        _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
-        _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
+        _burnCatalyst(mintData.from, catalystId, numberOfCatalystBurnPerAsset);
+        _burnGems(mintData.from, gemIds, numberOfGemsBurnPerAsset);
 
-        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+        assetId = _assetERC1155.mint(
+            mintData.from,
+            mintData.packId,
+            mintData.metadataHash,
+            quantity,
+            mintData.to,
+            mintData.data
+        );
         _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 }

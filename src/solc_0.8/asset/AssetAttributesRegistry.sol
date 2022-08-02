@@ -207,11 +207,6 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         }
     }
 
-    function setOverLayerDepositor(address overLayerDepositor_) external {
-        require(_msgSender() == _admin, "NOT_AUTHORIZED");
-        overLayerDepositor = overLayerDepositor_;
-    }
-
     /// @dev Set a catalyst for the given asset.
     /// @param assetId The asset to set a catalyst on.
     /// @param catalystId The catalyst to set.

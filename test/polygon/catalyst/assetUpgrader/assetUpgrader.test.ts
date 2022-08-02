@@ -16,13 +16,15 @@ const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
 const setupAssetUpgrader = withSnapshot(
   [
     // taken from assetUpgraderFixtures
-    'AssetUpgrader',
-    'Catalysts',
-    'Gems',
-    'AssetUpgraderFeeBurner',
-    'AssetAttributesRegistry',
-    'GemsCatalystsRegistry',
-    'Asset',
+    'PolygonAssetUpgrader',
+    'PolygonCatalysts',
+    'PolygonGems',
+    'PolygonAssetUpgraderFeeBurner',
+    'PolygonAssetAttributesRegistry',
+    'PolygonGemsCatalystsRegistry',
+    'PolygonGemsCatalystsRegistry_setup',
+    'PolygonAssetERC1155',
+    'PolygonAssetERC721',
   ],
   assetUpgraderFixtures
 );
@@ -34,6 +36,7 @@ describe('AssetUpgrader', function () {
       upgradeFee,
       assetAttributesRegistry,
       assetContract,
+      assetERC721Contract,
       sandContract,
       feeRecipient,
       rareCatalyst,
@@ -60,13 +63,12 @@ describe('AssetUpgrader', function () {
 
     const sandBalanceFromBefore = await sandContract.balanceOf(catalystOwner);
     const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
-    const assetSupply = BigNumber.from('3');
+    const assetSupply = BigNumber.from('2'); // Must be supply == 1 in order for Extraction to be allowed
     const assetId = await mintAsset(
       catalystOwner,
       BigNumber.from('22'),
       '0x1111111111111111111111111111111111111111111111111111111111111111',
       assetSupply,
-      0,
       catalystOwner,
       Buffer.from('ff')
     );
@@ -126,45 +128,10 @@ describe('AssetUpgrader', function () {
     expect(record.catalystId).to.equal(catalystId);
     expect(record.exists).to.equal(true);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(tokenId);
+    const newOwner = await assetERC721Contract.callStatic.ownerOf(tokenId);
     expect(newOwner).to.equal(catalystOwner);
   });
-  it('extractAndSetCatalyst should fail for NFT', async function () {
-    const {
-      catalystOwner,
-      rareCatalyst,
-      powerGem,
-      gemsCatalystsUnit,
-      assetUpgraderContractAsCatalystOwner,
-    } = await setupAssetUpgrader();
-    const catalystId = await rareCatalyst.catalystId();
-    const mintingAmount = BigNumber.from('8').mul(
-      BigNumber.from(gemsCatalystsUnit)
-    );
-    await mintCatalyst(rareCatalyst, mintingAmount, catalystOwner);
-    await mintGem(powerGem, mintingAmount, catalystOwner);
 
-    const powerGemId = await powerGem.gemId();
-
-    const assetId = await mintAsset(
-      catalystOwner,
-      BigNumber.from('2233'),
-      '0x1111111111111111111100111111111111111111111111111111111111111111',
-      1,
-      0,
-      catalystOwner,
-      Buffer.from('ff')
-    );
-    await expect(
-      assetUpgraderContractAsCatalystOwner.extractAndSetCatalyst(
-        catalystOwner,
-        assetId,
-        catalystId,
-        [powerGemId],
-        catalystOwner
-      )
-    ).to.be.revertedWith(`!1155`);
-  });
   it('setting a rareCatalyst with powerGem and defenseGem', async function () {
     const {
       user2,
@@ -186,6 +153,13 @@ describe('AssetUpgrader', function () {
       user5,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user5))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
+
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
     );
@@ -197,7 +171,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('12312'),
       '0x1111111111111111111222211111111111111111111111111111111111111111',
       1,
-      0,
       user5,
       Buffer.from('ff')
     );
@@ -262,8 +235,8 @@ describe('AssetUpgrader', function () {
     expect(record.catalystId).to.equal(catalystId);
     expect(record.exists).to.equal(true);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(assetId);
-    expect(newOwner).to.equal(user2);
+    const balance = await assetContract.callStatic.balanceOf(user2, assetId);
+    expect(balance).to.equal(1);
   });
   it('adding powerGem and defenseGem to a rareCatalyst with no gems', async function () {
     const {
@@ -289,6 +262,13 @@ describe('AssetUpgrader', function () {
       user4,
       BigNumber.from('100').mul(gemAdditionFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user4))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('100').mul(gemAdditionFee)
+      );
+
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
     );
@@ -300,7 +280,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('2257'),
       '0x2211111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user4,
       Buffer.from('ff')
     );
@@ -370,8 +349,8 @@ describe('AssetUpgrader', function () {
     expect(record.exists).to.equal(true);
     expect(record.gemIds).to.eql([...gemIds, ...zeroPaddedArray]);
     // check asset transfer
-    const newOwner = await assetContract.callStatic.ownerOf(assetId);
-    expect(newOwner).to.equal(user4);
+    const balance = await assetContract.callStatic.balanceOf(user4, assetId);
+    expect(balance).to.equal(1);
   });
   it('setting a rareCatalyst where ownerOf(assetId)!= msg.sender should fail', async function () {
     const {
@@ -391,19 +370,30 @@ describe('AssetUpgrader', function () {
       user5,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user5))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
 
     await transferSand(
       sandContract,
       user10,
       BigNumber.from('2').mul(upgradeFee)
     );
+    await sandContract
+      .connect(ethers.provider.getSigner(user10))
+      .approve(
+        assetUpgraderContract.address,
+        BigNumber.from('2').mul(upgradeFee)
+      );
 
     const assetId = await mintAsset(
       user5,
       BigNumber.from('22'),
       '0x1111111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user5,
       Buffer.from('ff')
     );
@@ -472,7 +462,6 @@ describe('AssetUpgrader', function () {
       BigNumber.from('2257'),
       '0x2211111111111111111111111111111111111111111111111111111111111111',
       1,
-      0,
       user4,
       Buffer.from('ff')
     );

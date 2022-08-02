@@ -6,6 +6,7 @@ import {
   setAsLandMinter,
 } from '../../data/landSales/getLandSales';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const LANDSALE_NAME = 'LandPreSale_10';
 
@@ -71,3 +72,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = [LANDSALE_NAME, LANDSALE_NAME + '_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
+func.skip = skipUnlessTest;

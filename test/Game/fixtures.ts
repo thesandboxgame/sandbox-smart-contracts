@@ -28,14 +28,14 @@ const setApprovalForAll = async (
 
 const changeAssetMinter = async (
   assetConstractName: string,
-  assetAdminAddress: string,
-  assetMinterAddress: string
+  assetAdminAddress: string
 ) => {
   const assetContractAsAdmin = await ethers.getContract(
     assetConstractName,
     assetAdminAddress
   );
-  await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+  // await assetContractAsAdmin.transferOwnership(assetMinterAddress);
+  return assetContractAsAdmin;
 };
 
 export interface GameFixturesData {
@@ -91,17 +91,9 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
     Game: gameToken.connect(ethers.provider.getSigner(users[2].address)),
   };
 
-  setApprovalForAll(
-    'MockERC1155Asset',
-    gameTokenAsAdmin.address,
-    users[0].address
-  );
+  setApprovalForAll('Asset', gameTokenAsAdmin.address, users[0].address);
 
-  setApprovalForAll(
-    'MockERC721Asset',
-    gameTokenAsAdmin.address,
-    users[0].address
-  );
+  setApprovalForAll('AssetERC721', gameTokenAsAdmin.address, users[0].address);
 
   return {
     gameToken,
@@ -133,9 +125,9 @@ export const setupTestWithAdminGameMinter = withSnapshot(
 
 const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   const gameFixturesData: GameFixturesData = await gameFixtures();
-  const {assetAdmin, gameTokenAsAdmin, GameOwner} = gameFixturesData;
-  await changeAssetMinter('MockERC1155Asset', assetAdmin, GameOwner.address);
-  await changeAssetMinter('MockERC721Asset', assetAdmin, GameOwner.address);
+  const {assetAdmin, gameTokenAsAdmin} = gameFixturesData;
+  await changeAssetMinter('Asset', assetAdmin);
+  await changeAssetMinter('AssetERC721', assetAdmin);
 
   const {gameTokenAdmin} = await getNamedAccounts();
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -143,7 +135,8 @@ const gameFixturesWithGameOwnerMinter = async (): Promise<GameFixturesData> => {
   return gameFixturesData;
 };
 
+// Remove - use setupadmingameminter
 export const setupTestWithGameOwnerMinter = withSnapshot(
-  ['MockERC1155Asset', 'MockERC721Asset', 'ChildGameToken'],
+  ['Asset', 'AssetERC721', 'ChildGameToken'],
   gameFixturesWithGameOwnerMinter
 );
