@@ -36,8 +36,7 @@ const func: DeployFunction = async function () {
   }
 
   const {merkleRootHash, saltedClaims, tree} = createClaimMerkleTree(
-    network.live,
-    chainId,
+    hre,
     claimData,
     claimContract
   );
@@ -73,7 +72,7 @@ const func: DeployFunction = async function () {
     'hasRole',
     ADMIN_ROLE,
     multiGiveawayAdmin
-  );
+  ).catch(() => null);
 
   let currentAdmin = multiGiveawayAdmin;
 

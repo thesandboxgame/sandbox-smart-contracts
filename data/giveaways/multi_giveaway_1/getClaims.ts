@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {BigNumber} from 'ethers';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 
@@ -9,32 +9,21 @@ const {
 } = helpers;
 
 export function createClaimMerkleTree(
-  isDeploymentChainId: boolean,
-  chainId: string,
+  hre: HardhatRuntimeEnvironment,
   claimData: Array<MultiClaim>,
   claimContract: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
-  let secretPath = `./secret/multi-giveaway/.${claimContract.toLowerCase()}_secret`;
-  if (BigNumber.from(chainId).toString() === '1') {
-    console.log('MAINNET secret');
-    secretPath = `./secret/multi-giveaway/.${claimContract.toLowerCase()}_secret.mainnet`;
-  }
-
-  let expose = false;
+  const secretPath = `./secret/multi-giveaway/.${claimContract.toLowerCase()}_secret${hre.network.live ? ('.' + hre.network.name) : ''}`;
   let secret;
   try {
     secret = fs.readFileSync(secretPath);
   } catch (e) {
-    if (isDeploymentChainId) {
+    if (hre.network.live) {
       throw e;
     }
     secret =
       '0x4467363716526536535425451427798982881775318563547751090997863683';
-  }
-
-  if (!isDeploymentChainId) {
-    expose = true;
   }
 
   const saltedClaims = saltMultiClaim(claimData, secret);
@@ -44,7 +33,7 @@ export function createClaimMerkleTree(
   const merkleRootHash = tree.getRoot().hash;
 
   return {
-    claims: expose ? saltedClaims : claimData,
+    claims: hre.network.live ? claimData : saltedClaims,
     merkleRootHash,
     saltedClaims,
     tree,
