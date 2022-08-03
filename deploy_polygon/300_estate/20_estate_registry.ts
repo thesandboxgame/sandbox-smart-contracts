@@ -7,7 +7,7 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
   const estateContract = await deployments.get('PolygonEstate');
   // TODO: Fake Game, right now we don't have the finished experience contract, fix this!!!
   await deployments.deploy('MockExperience', {
@@ -22,15 +22,25 @@ const func: DeployFunction = async function (
   const mapLib = await deployments.get('MapLib');
   await deployments.deploy('PolygonExperienceEstateRegistry', {
     from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
     contract: 'ExperienceEstateRegistry',
     libraries: {
       MapLib: mapLib.address,
     },
-    args: [
-      estateContract.address,
-      experienceContract.address,
-      landContract.address,
-    ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: 'ExperienceEstateRegistry_init',
+        args: [
+          estateContract.address,
+          experienceContract.address,
+          landContract.address,
+        ],
+      },
+      upgradeIndex: 0,
+    },
   });
 };
 
