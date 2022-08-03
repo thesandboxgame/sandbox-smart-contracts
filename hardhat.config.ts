@@ -242,9 +242,11 @@ const config: HardhatUserConfig = {
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
       mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
+      polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     backendCashbackWallet: {
       // default is computed from private key:

@@ -1,16 +1,16 @@
 import fs from 'fs-extra';
+import {ethers} from 'hardhat';
+import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
 import MerkleTree from '../../lib/merkleTree';
-import addresses from '../addresses.json';
 import helpers, {
   SaleLandInfo,
   SaltedProofSaleLandInfo,
-  SaltedSaleLandInfo,
+  SaltedSaleLandInfo
 } from '../../lib/merkleTreeHelper';
-import deadlines from './deadlines';
-import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
 import {isTestnet} from '../../utils/network';
+import addresses from '../addresses.json';
+import deadlines from './deadlines';
 import prices from './prices';
-import {ethers} from 'hardhat';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
@@ -143,13 +143,13 @@ async function generateLandsForMerkleTree(
     if (!(landGroup.x % size === 0 && landGroup.y % size === 0)) {
       reportError(
         'invalid coordinates: ' +
-          JSON.stringify({
-            x: landGroup.x,
-            originalX: landGroup.originalX,
-            y: landGroup.y,
-            originalY: landGroup.originalY,
-            size,
-          })
+        JSON.stringify({
+          x: landGroup.x,
+          originalX: landGroup.originalX,
+          y: landGroup.y,
+          originalY: landGroup.originalY,
+          size,
+        })
       );
       return;
     }
@@ -361,8 +361,8 @@ export function getDeadline(
     throw new Error(`no deadline for sector ${sector}`);
   }
   if (isTestnet(hre)) {
-    hre.deployments.log('increasing deadline by 1 year');
-    deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
+    hre.deployments.log('increasing deadline by 10 years');
+    deadline += 10 * 365 * 24 * 60 * 60; //add 1 year on testnets
   }
   return deadline;
 }

@@ -1,14 +1,8 @@
-import {
-  getDeadline,
-  getLandSales,
-  writeProofs,
-  setAsLandMinter,
-  LandSale,
-} from '../../data/landSales/getLandSales';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {readJSONSync, removeSync, writeJSONSync} from 'fs-extra';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {getDeadline, getLandSales, LandSale, setAsLandMinter, writeProofs} from '../../data/landSales/getLandSales';
+import {skipUnlessTest} from '../../utils/network';
 
 type SaleDeployment = {
   name: string;
@@ -42,7 +36,6 @@ const func: DeployFunction = async function (hre) {
     landSaleFeeRecipient,
     landSaleAdmin,
   } = await getNamedAccounts();
-
   const sandContract = await deployments.get('Sand');
   const landContract = await deployments.get('Land');
   const assetContract = await deployments.get('Asset');
@@ -50,10 +43,7 @@ const func: DeployFunction = async function (hre) {
 
   async function deployLandSale(name: string, landSale: LandSale) {
     const {lands, merkleRootHash, sector} = landSale;
-
     const landSaleName = `${name}_${sector}`;
-    const deadline = getDeadline(hre, sector);
-
     const newDeployment = await deployments.getOrNull(`LandPreSale_${sector}`);
     if (newDeployment) return;
     const landSaleDeployment = await deploy(landSaleName, {
@@ -67,7 +57,7 @@ const func: DeployFunction = async function (hre) {
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        deadline,
+        getDeadline(hre, sector),
         backendReferralWallet,
         2000,
         '0x0000000000000000000000000000000000000000',
@@ -79,9 +69,7 @@ const func: DeployFunction = async function (hre) {
       log: true,
     });
     checkAndUpdateExistingDeployments(hre.network.name, sector, landSaleName);
-
     writeProofs(hre, landSaleName, landSale);
-
     const args = landSaleDeployment.args || [];
     const landName = args.includes(landContract.address) ? 'Land' : 'Land_Old';
     await setAsLandMinter(hre, landSaleDeployment.address, landName);
@@ -135,4 +123,3 @@ func.dependencies = [
   'Asset_deploy',
   'AuthValidator_deploy',
 ];
-func.skip = skipUnlessTest;
