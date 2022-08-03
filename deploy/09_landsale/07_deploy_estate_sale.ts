@@ -1,7 +1,13 @@
 import {readJSONSync, removeSync, writeJSONSync} from 'fs-extra';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {getDeadline, getLandSales, LandSale, setAsLandMinter, writeProofs} from '../../data/landSales/getLandSales';
+import {
+  getDeadline,
+  getLandSales,
+  LandSale,
+  setAsLandMinter,
+  writeProofs,
+} from '../../data/landSales/getLandSales';
 import {skipUnlessTest} from '../../utils/network';
 
 type SaleDeployment = {
