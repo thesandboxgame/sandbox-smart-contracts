@@ -1,4 +1,4 @@
-import {getNamedAccounts, network, deployments} from 'hardhat';
+import {deployments, getNamedAccounts, network} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import 'dotenv/config';
 import catalysts from '../../data/catalysts';
@@ -10,7 +10,7 @@ const {execute} = deployments;
  * How to use:
  *  - yarn run hardhat run --network mumbai_test ./scripts/faucet/mint_cats_gems_to_mumbai_faucet.ts
  */
-(async () => {
+void (async () => {
   // Only for minting tokens on mumbai_test (local) network
   // Note: change name from 'mumbai_test' to 'mumbai' for QA
   if (network.name !== 'hardhat' && network.name !== 'mumbai_test') {

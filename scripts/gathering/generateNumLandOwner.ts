@@ -55,7 +55,7 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
 const args = process.argv.slice(2);
 const blockNumber = parseInt(args[0]);
 
-(async () => {
+void (async () => {
   const landOwners: {id: string; numLands: string}[] = await query(
     queryString,
     'owners',

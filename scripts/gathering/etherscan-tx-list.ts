@@ -26,7 +26,7 @@ async function getBlockNumber(date: string) {
   return block;
 }
 
-(async () => {
+void (async () => {
   if (!fromDate) throw new Error('From date must be provided');
   const fromBlock = await getBlockNumber(fromDate);
   const toBlock = await getBlockNumber(toDate);
@@ -72,8 +72,8 @@ async function getBlockNumber(date: string) {
       totalGas: ethers.utils.formatEther(expenders[address].totalGas),
     });
   }
-  fs.outputJSON(`tmp/transactions_${contractAddress}.json`, txs);
-  fs.outputJSON(
+  await fs.outputJSON(`tmp/transactions_${contractAddress}.json`, txs);
+  await fs.outputJSON(
     `tmp/transactions_${contractAddress}_expenders.json`,
     mappedExpenders.sort((a, b) => a.txCount - b.txCount)
   );

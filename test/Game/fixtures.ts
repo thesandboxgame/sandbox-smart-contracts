@@ -91,9 +91,13 @@ const gameFixtures = async (): Promise<GameFixturesData> => {
     Game: gameToken.connect(ethers.provider.getSigner(users[2].address)),
   };
 
-  setApprovalForAll('Asset', gameTokenAsAdmin.address, users[0].address);
+  await setApprovalForAll('Asset', gameTokenAsAdmin.address, users[0].address);
 
-  setApprovalForAll('AssetERC721', gameTokenAsAdmin.address, users[0].address);
+  await setApprovalForAll(
+    'AssetERC721',
+    gameTokenAsAdmin.address,
+    users[0].address
+  );
 
   return {
     gameToken,

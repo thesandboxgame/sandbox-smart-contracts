@@ -27,7 +27,7 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
 }
 `;
 
-(async () => {
+void (async () => {
   const assetCollections: {id: string}[] = await theGraph.query(
     queryString,
     'assetCollections',

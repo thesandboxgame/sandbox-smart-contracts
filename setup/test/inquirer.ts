@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 
-(async () => {
+void (async () => {
   const answers = await inquirer.prompt([
     {type: 'confirm', name: 'continue', message: 'continue?'},
   ]);

@@ -350,7 +350,7 @@ describe('GemsCatalystsRegistry', function () {
     //approving
     gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
 
-    expect(
+    await expect(
       gemsCatalystsRegistryAsUser3.burnGem(user3, gemId, burnAmount)
     ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });

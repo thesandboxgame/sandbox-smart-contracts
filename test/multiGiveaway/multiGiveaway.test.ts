@@ -1,26 +1,26 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
-import {constants, BigNumber} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 import {
-  waitFor,
-  expectReceiptEventWithArgs,
   expectEventWithArgs,
-  findEvents,
   expectEventWithArgsFromReceipt,
+  expectReceiptEventWithArgs,
+  findEvents,
   increaseTime,
+  waitFor,
 } from '../utils';
 import {sendMetaTx} from '../sendMetaTx';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateMultiClaimHash} = helpers;
-
 import {
-  testInitialAssetAndLandBalances,
   testFinalAssetAndLandBalances,
+  testInitialAssetAndLandBalances,
   testInitialERC20Balance,
   testUpdatedERC20Balance,
 } from './balanceHelpers';
+
+const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
@@ -1721,7 +1721,8 @@ describe('Multi_Giveaway', function () {
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(user)
       );
-      expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be.reverted;
+      await expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be
+        .reverted;
     });
 
     it('should succeed in setting the trusted forwarder if admin', async function () {
@@ -1730,7 +1731,7 @@ describe('Multi_Giveaway', function () {
       const {giveawayContractAsAdmin, others} = setUp;
       const user = others[7];
 
-      expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
+      await expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
         .reverted;
 
       expect(await giveawayContractAsAdmin.getTrustedForwarder()).to.be.equal(

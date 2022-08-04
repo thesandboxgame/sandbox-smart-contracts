@@ -3,6 +3,7 @@ import BN from 'bn.js';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {Deployment} from 'hardhat-deploy/types';
+
 const {ethers} = hre;
 
 type Land = {
@@ -146,7 +147,7 @@ async function getOwner(landContracts: Contract[], event: Event) {
   return currentLandOwner || '0x0000000000000000000000000000000000000000';
 }
 
-(async () => {
+void (async () => {
   const presaleDeployments = await getLandPreSales();
   const networkName = hre.network.name;
   const exportFilePath = `tmp/${networkName}-landOwners.json`;

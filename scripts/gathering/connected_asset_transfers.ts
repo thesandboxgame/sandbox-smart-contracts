@@ -63,7 +63,7 @@ async function queryEvents(
   return events;
 }
 
-(async () => {
+void (async () => {
   const Asset = await ethers.getContract('Asset');
   const singleTransferEvents = (
     await queryEvents(
