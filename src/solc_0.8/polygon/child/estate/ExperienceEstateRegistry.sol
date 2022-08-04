@@ -6,7 +6,7 @@ import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
-import {TileLib} from "../../../common/Libraries/TileLib.sol";
+import {TileOrLandLib} from "../../../common/Libraries/TileOrLandLib.sol";
 import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
 import {MapLib} from "../../../common/Libraries/MapLib.sol";
 import {IExperienceToken} from "../../../common/interfaces/IExperienceToken.sol";
@@ -21,7 +21,7 @@ contract ExperienceEstateRegistry is
     IEstateExperienceRegistry
 {
     using MapLib for MapLib.Map;
-    using TileLib for TileLib.Tile;
+    using TileOrLandLib for TileOrLandLib.TileOrLand;
 
     struct RelinkData {
         uint256 estateId;
@@ -55,7 +55,14 @@ contract ExperienceEstateRegistry is
     /// @param y y coordinate of the linked lands
     /// @param expTemplate template of the exp being linked
     /// @param user user creating the link
-    event LinkCreated(uint256 estateId, uint256 expId, uint256 x, uint256 y, TileLib.Tile expTemplate, address user);
+    event LinkCreated(
+        uint256 estateId,
+        uint256 expId,
+        uint256 x,
+        uint256 y,
+        TileOrLandLib.TileOrLand expTemplate,
+        address user
+    );
 
     /// @dev Emitted when a link is deleted
     /// @param expId id of the experience that was unkinked
@@ -163,30 +170,30 @@ contract ExperienceEstateRegistry is
         uint256 y
     ) internal {
         uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
-        (TileLib.Tile memory template, uint256[] memory landCoords) =
-            IExperienceToken(_s().experienceToken).getTemplate(expStorageId);
-        require(landCoords.length > 0, "empty template");
+        TileOrLandLib.TileOrLand memory template = IExperienceToken(_s().experienceToken).getTemplate(expStorageId);
+        require(!template.isEmpty(), "empty template");
         EstateAndLands storage est = _s().links[expStorageId];
         require(est.estateId == 0, "Exp already in use");
 
         if (estateId == 0) {
-            require(landCoords.length == 1, "must be done inside estate");
-            uint256 translatedId = landCoords[0] + x + (y * 408);
-            uint256 translatedX = translatedId % 408;
-            uint256 translatedY = translatedId / 408;
+            require(template.isOneLand(), "must be done inside estate");
+            uint256 translatedX = template.getX() + x;
+            uint256 translatedY = template.getY() + y;
+            uint256 translatedId = translatedX + (translatedY * 408);
             require(IERC721(_s().landToken).ownerOf(translatedId) == _msgSender(), "invalid user");
             require(!_s().linkedLands.contain(translatedX, translatedY), "already linked");
             _s().linkedLands.set(translatedX, translatedY, 1);
             est.singleLand = translatedId;
         } else {
             require(IEstateToken(_s().estateToken).getOwnerOfStorage(estateId) == _msgSender(), "invalid user");
-            MapLib.TranslateResult memory s = MapLib.translate(template, x, y);
+            MapLib.TranslateResult memory s = MapLib.translate(template.getTile(), x, y);
             require(!_s().linkedLands.intersect(s), "already linked");
             _s().linkedLands.set(s);
             require(IEstateToken(_s().estateToken).contain(estateId, s), "not enough land");
             est.multiLand.set(s);
         }
-        est.estateId = estateId + 1; //why increment the estateId?
+        est.estateId = estateId + 1;
+        //why increment the estateId?
         emit LinkCreated(estateId, expId, x, y, template, _msgSender());
     }
 
