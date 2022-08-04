@@ -343,7 +343,7 @@ describe('PolygonEstateTokenV1 tests for L2', function () {
         await registryContractAsOther.link(estateId, experienceId, 50, 100);
 
         // burn and remove
-        expect(
+        await expect(
           estateContractAsOther.update(
             estateId,
             [[], [], []],
