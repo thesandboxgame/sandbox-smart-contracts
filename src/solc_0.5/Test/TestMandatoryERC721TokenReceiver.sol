@@ -34,7 +34,7 @@ contract TestMandatoryERC721TokenReceiver {
         address, // from,
         uint256 _tokenId,
         bytes memory // data
-    ) public returns (bytes4) {
+    ) public view returns (bytes4) {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"
@@ -59,7 +59,7 @@ contract TestMandatoryERC721TokenReceiver {
         address from,
         uint256[] calldata ids,
         bytes calldata data
-    ) external returns (bytes4) {
+    ) external view returns (bytes4) {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"
@@ -72,7 +72,7 @@ contract TestMandatoryERC721TokenReceiver {
         }
     }
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 }

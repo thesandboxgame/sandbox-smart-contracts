@@ -85,7 +85,7 @@ contract TestERC1155ERC721TokenReceiver {
         uint256[] calldata _ids,
         uint256[] calldata _values,
         bytes calldata _data
-    ) external returns (bytes4) {
+    ) external view returns (bytes4) {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"
@@ -103,7 +103,7 @@ contract TestERC1155ERC721TokenReceiver {
         address, // from,
         uint256 _tokenId,
         bytes memory // data
-    ) public returns (bytes4) {
+    ) public view returns (bytes4) {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"
