@@ -95,15 +95,15 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
     }
 
     function isTrustedForwarder(address forwarder) public view override(BaseERC721, IERC721Base) returns (bool) {
-        BaseERC721.isTrustedForwarder(forwarder);
+        return BaseERC721.isTrustedForwarder(forwarder);
     }
 
-    function getTrustedForwarder() public view override(BaseERC721, IERC721Base) returns (address trustedForwarder) {
-        BaseERC721.getTrustedForwarder();
+    function getTrustedForwarder() public view override(BaseERC721, IERC721Base) returns (address) {
+        return BaseERC721.getTrustedForwarder();
     }
 
     function exists(uint256 tokenId) public view override(BaseERC721, IERC721Base) returns (bool) {
-        BaseERC721.exists(tokenId);
+        return BaseERC721.exists(tokenId);
     }
 
     function burnFrom(address from, uint256 id) public override(BaseERC721, IERC721Base) {

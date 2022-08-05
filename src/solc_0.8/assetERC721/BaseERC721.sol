@@ -200,7 +200,7 @@ abstract contract BaseERC721 is
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        super.tokenURI(tokenId);
+        return super.tokenURI(tokenId);
     }
 
     function _baseURI() internal view override(ERC721Upgradeable) returns (string memory) {
