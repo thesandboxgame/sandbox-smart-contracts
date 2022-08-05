@@ -36,5 +36,5 @@ func.tags = [
   'L2',
   'PolygonAsset',
 ];
-func.dependencies = ['TRUSTED_FORWARDER'];
+func.dependencies = ['TRUSTED_FORWARDER_V2'];
 func.skip = skipUnlessTestnet;
