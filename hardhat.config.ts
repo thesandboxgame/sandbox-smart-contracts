@@ -19,6 +19,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
   solidity: {
     compilers: [
