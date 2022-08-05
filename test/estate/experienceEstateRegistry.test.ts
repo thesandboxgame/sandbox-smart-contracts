@@ -488,7 +488,7 @@ describe('ExperienceEstateRegistry tests', function () {
       ).to.be.revertedWith('not enough land');
     });
   });
-  describe('@skip-on-coverage gas tests', function () {
+  describe('@skip-on-coverage @skip-on-ci gas tests', function () {
     describe('create a group of lands and link them', function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
       [1, 3, 6, 12, 24].forEach((size) => {

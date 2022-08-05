@@ -4,7 +4,7 @@ import {expect} from '../chai-setup';
 import {sum} from '../defi/sandRewardPool/fixtures/sandRewardPool.fixture';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('@skip-on-coverage @slow gas consumption of', function () {
+describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
   describe('createEstate for a completely filled tile with a lot of lands', function () {
     // const gasPerSize: {[key: string]: number} = {
     //   1: 23068226,
