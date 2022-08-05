@@ -16,6 +16,8 @@
     "func-visibility": ["error", {"ignoreConstructors": true}],
     "not-rely-on-time": "off",
     "no-inline-assembly": "off",
-    "reason-string": ["warn", {"maxLength": 64}]
+    "reason-string": ["warn", {"maxLength": 64}],
+    "no-unused-vars": ["warn", "^0.6.0"],
+    "no-shadowed-variable": ["warn", "^0.6.0"]
   }
 }
