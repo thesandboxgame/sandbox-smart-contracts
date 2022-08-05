@@ -60,24 +60,6 @@ const config: HardhatUserConfig = {
       },
     ],
     overrides: {
-      'src/solc_0.8/polygon/child/asset/PolygonAssetV2.sol': {
-        version: '0.8.2',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 0,
-          },
-        },
-      },
-      'src/solc_0.8/asset/AssetV2.sol': {
-        version: '0.8.2',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 100,
-          },
-        },
-      },
       'src/solc_0.8/polygon/child/asset/PolygonAssetERC1155.sol:PolygonAssetERC1155': {
         version: '0.8.2',
         settings: {
