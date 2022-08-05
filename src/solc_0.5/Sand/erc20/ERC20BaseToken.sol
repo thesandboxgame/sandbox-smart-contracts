@@ -36,7 +36,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
 
     /// @notice returns the number of decimals for that token.
     /// @return the number of decimals.
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return uint8(18);
     }
 

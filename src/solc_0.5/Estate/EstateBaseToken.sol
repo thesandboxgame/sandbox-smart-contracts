@@ -101,7 +101,7 @@ contract EstateBaseToken is ERC721BaseToken {
         emit Transfer(sender, address(0), estateId);
     }
 
-    function transferFromDestroyedEstate(address sender, address to, uint256 num) external {
+    function transferFromDestroyedEstate(address sender, address to, uint256 num) external view {
         _check_authorized(sender, WITHDRAWAL);
         // TODO
         // require(sender != address(this), "from itself");
@@ -117,7 +117,7 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _check_authorized(address sender, uint8 action) internal {
+    function _check_authorized(address sender, uint8 action) internal view {
         require(sender != address(0), "sender is zero address");
         if (action == ADD) {
             address minter = _minter;
@@ -138,7 +138,7 @@ contract EstateBaseToken is ERC721BaseToken {
         }
     }
 
-    function _check_hasOwnerRights(address sender, uint256 estateId) internal {
+    function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
         require(owner != address(0), "token does not exist");
         require(owner == sender, "not owner");
@@ -293,7 +293,7 @@ contract EstateBaseToken is ERC721BaseToken {
         address from,
         uint256[] calldata ids,
         bytes calldata data
-    ) external returns (bytes4) {
+    ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
 
@@ -302,7 +302,7 @@ contract EstateBaseToken is ERC721BaseToken {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external returns (bytes4) {
+    ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
 }

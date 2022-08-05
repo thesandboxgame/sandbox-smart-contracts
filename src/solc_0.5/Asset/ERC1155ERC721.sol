@@ -606,7 +606,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
     }
 
-    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal {
+    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal view {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "can't substract more than there is");
     }
@@ -972,7 +972,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param packId the packId to check
     /// @param numFTs number of Fungible Token in that pack (can reuse packId if different)
     /// @return whether the pack has already been used
-    function isPackIdUsed(address creator, uint40 packId, uint16 numFTs) external returns(bool) {
+    function isPackIdUsed(address creator, uint40 packId, uint16 numFTs) external view returns(bool) {
         uint256 uriId = uint256(creator) * CREATOR_OFFSET_MULTIPLIER + // CREATOR
             uint256(packId) * PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
             numFTs * PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES

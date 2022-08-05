@@ -38,20 +38,20 @@ contract LandBaseToken is ERC721BaseToken {
 
     /// @notice total width of the map
     /// @return width
-    function width() external returns(uint256) {
+    function width() external pure returns(uint256) {
         return GRID_SIZE;
     }
 
     /// @notice total height of the map
     /// @return height
-    function height() external returns(uint256) {
+    function height() external pure returns(uint256) {
         return GRID_SIZE;
     }
 
     /// @notice x coordinate of Land token
     /// @param id tokenId
     /// @return the x coordinates
-    function x(uint256 id) external returns(uint256) {
+    function x(uint256 id) external view returns(uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id % GRID_SIZE;
     }
@@ -59,7 +59,7 @@ contract LandBaseToken is ERC721BaseToken {
     /// @notice y coordinate of Land token
     /// @param id tokenId
     /// @return the y coordinates
-    function y(uint256 id) external returns(uint256) {
+    function y(uint256 id) external view returns(uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }

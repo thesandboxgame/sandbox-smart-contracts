@@ -14,13 +14,13 @@ contract Sand is ERC20BasicApproveExtension,ERC20ExecuteExtension, ERC20BaseToke
 
     /// @notice A descriptive name for the tokens
     /// @return name of the tokens
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return "SAND";
     }
 
     /// @notice An abbreviated name for the tokens
     /// @return symbol of the tokens
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return "SAND";
     }
 
