@@ -1,9 +1,9 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
-import {BigNumber, utils, Contract, BytesLike} from 'ethers';
+import {BigNumber, BigNumberish, BytesLike, Contract, utils} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
-import {waitFor, expectEventWithArgs, findEvents} from '../utils';
+import {expectEventWithArgs, findEvents, waitFor} from '../utils';
 import {setupTest, setupTestWithAdminGameMinter, User} from './fixtures';
 import {supplyAssets, supplyAssets721} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
@@ -27,6 +27,7 @@ type UpdateGame721 = {
 type UpdateGame = {
   gameData1155: UpdateGame1155;
   gameData721: UpdateGame721;
+  tileOrLand: {tile: {data: BigNumberish[]}};
   uri: BytesLike;
 };
 
@@ -45,6 +46,7 @@ const update721: UpdateGame721 = {
 const update: UpdateGame = {
   gameData1155: update1155,
   gameData721: update721,
+  tileOrLand: {tile: {data: [0, 0, 0]}},
   uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
 };
 

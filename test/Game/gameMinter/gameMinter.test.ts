@@ -4,7 +4,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {BigNumber, BytesLike, Contract, utils} from 'ethers';
+import {BigNumber, BigNumberish, BytesLike, Contract, utils} from 'ethers';
 import Prando from 'prando';
 import {expect} from '../../chai-setup';
 import {
@@ -47,6 +47,7 @@ type UpdateGame721 = {
 type UpdateGame = {
   gameData1155: UpdateGame1155;
   gameData721: UpdateGame721;
+  tileOrLand: {tile: {data: BigNumberish[]}};
   uri: BytesLike;
 };
 
@@ -65,6 +66,7 @@ const update721: UpdateGame721 = {
 const update: UpdateGame = {
   gameData1155: update1155,
   gameData721: update721,
+  tileOrLand: {tile: {data: [0, 0, 0]}},
   uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
 };
 
@@ -309,7 +311,7 @@ describe('GameMinter', function () {
       expect(updateArgs[0][2]).to.deep.equal([assets[0], assets[1]]);
       expect(updateArgs[0][3][0]).to.deep.equal(77);
       expect(updateArgs[0][3][1]).to.deep.equal(3);
-      expect(updateArgs[2]).to.be.equal(
+      expect(updateArgs['uri']).to.be.equal(
         await getURI('Updated URI with Assets!')
       );
     });
@@ -538,7 +540,7 @@ describe('GameMinter', function () {
         receipt,
         'GameTokenUpdated'
       );
-      const eventURI = updateEvent.args[2][2];
+      const eventURI = updateEvent.args[2]['uri'];
       expect(eventURI).to.be.equal(await getURI('Updating URI'));
 
       const balancesAfter = await getTokenBalances(
@@ -575,7 +577,7 @@ describe('GameMinter', function () {
         receipt,
         'GameTokenUpdated'
       );
-      const eventURI = updateEvent.args[2][2];
+      const eventURI = updateEvent.args[2]['uri'];
 
       const balancesAfter = await getTokenBalances(
         sandContract,
@@ -762,7 +764,9 @@ describe('GameMinter', function () {
       expect(event.args[2][0][2]).to.deep.equal(assets);
       expect(event.args[2][0][3][0]).to.deep.equal(42);
       expect(event.args[2][0][3][1]).to.deep.equal(3);
-      expect(event.args[2][2]).to.be.equal(await getURI('Sandbox MetaTx URI'));
+      expect(event.args[2]['uri']).to.be.equal(
+        await getURI('Sandbox MetaTx URI')
+      );
     });
 
     it('should allow GAME Owner to remove assets via MetaTx', async function () {
@@ -820,7 +824,9 @@ describe('GameMinter', function () {
       expect(event.args[1]).to.be.equal(gameId2);
       expect(event.args[2][0][2]).to.deep.equal([assets[0]]);
       expect(event.args[2][0][3][0]).to.deep.equal(42);
-      expect(event.args[2][2]).to.be.equal(await getURI('Sandbox MetaTx URI'));
+      expect(event.args[2]['uri']).to.be.equal(
+        await getURI('Sandbox MetaTx URI')
+      );
     });
 
     it('should allow GAME Owner to set URI via MetaTx', async function () {
@@ -868,7 +874,7 @@ describe('GameMinter', function () {
 
       expect(event.args[0]).to.be.equal(gameId2.sub(1));
       expect(event.args[1]).to.be.equal(gameId2);
-      expect(event.args[2][2]).to.be.equal(
+      expect(event.args[2]['uri']).to.be.equal(
         await getURI('Sandbox MetaTx change URI')
       );
       expect(balancesAfter[0]).to.be.equal(

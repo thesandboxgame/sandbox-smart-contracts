@@ -2,6 +2,8 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
+import "../Libraries/TileOrLandLib.sol";
+
 /// @title Interface for the Game token
 
 interface IGameToken {
@@ -20,6 +22,7 @@ interface IGameToken {
     struct GameData {
         GameData1155 gameData1155;
         GameData721 gameData721;
+        TileOrLandLib.TileOrLand tileOrLand;
         bytes32 uri; // ipfs hash (without the prefix, assume cidv1 folder)
     }
 
