@@ -120,13 +120,13 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     /// @notice set the reward calculator
     /// @param contractAddress address of a plugin that calculates absolute rewards at any point in time
-    /// @param restartRewards if true the rewards from the previous calculator are accumulated before changing it
-    function setRewardCalculator(address contractAddress, bool restartRewards)
+    /// @param restartRewardsBool if true the rewards from the previous calculator are accumulated before changing it
+    function setRewardCalculator(address contractAddress, bool restartRewardsBool)
         external
         isContractAndAdmin(contractAddress)
     {
         // We process the rewards of the current reward calculator before the switch.
-        if (restartRewards) {
+        if (restartRewardsBool) {
             _restartRewards();
         }
         rewardCalculator = IRewardCalculator(contractAddress);
@@ -350,7 +350,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         }
     }
 
-    function _earned(address account, uint256 rewardPerToken) internal view returns (uint256) {
+    function _earned(address account, uint256 rewardPerTokenInput) internal view returns (uint256) {
         // - userRewardPerTokenPaid[account] * _contributions[account]  / _totalContributions is the portion of
         //      rewards the last time the user changed his contribution and called _restartRewards
         //      (_totalContributions corresponds to previous value of that moment).
@@ -363,7 +363,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         // The important thing to note is that at any moment in time _contributions[account] / _totalContributions is
         // the share of the user even if _totalContributions changes because of other users activity.
         return
-            ((rewardPerToken + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
+            ((rewardPerTokenInput + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
             1e24;
     }
 
