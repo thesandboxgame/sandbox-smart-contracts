@@ -33,7 +33,7 @@ contract TestERC721TokenReceiver {
         address, // from,
         uint256 _tokenId,
         bytes memory // data
-    ) public returns (bytes4) {
+    ) public view returns (bytes4) {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"
