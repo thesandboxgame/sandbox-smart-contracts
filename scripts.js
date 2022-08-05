@@ -63,7 +63,7 @@ function execute(command) {
   });
 }
 
-(async () => {
+void (async () => {
   const firstArg = rawArgs[0];
   if (firstArg === 'run') {
     const {fixedArgs, extra} = parseArgs(3, {});

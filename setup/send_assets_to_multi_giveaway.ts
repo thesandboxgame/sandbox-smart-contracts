@@ -9,7 +9,8 @@ import fs from 'fs-extra';
 import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {MultiClaim, AssetHash} from '../lib/merkleTreeHelper';
+import {AssetHash, MultiClaim} from '../lib/merkleTreeHelper';
+
 const {deployments, getNamedAccounts} = hre;
 const {execute, catchUnknownSigner, read} = deployments;
 
@@ -113,5 +114,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

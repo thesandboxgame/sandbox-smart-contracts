@@ -4,8 +4,8 @@ import {BigNumber, constants, Contract} from 'ethers';
 import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {transferSand} from '../polygon/catalyst/utils';
-import MerkleTree = require('../../lib/merkleTree');
 import MerkleTreeHelper, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
+import MerkleTree = require('../../lib/merkleTree');
 
 const zeroAddress = constants.AddressZero;
 
@@ -384,7 +384,7 @@ describe('ERC20BasicApproveExtension', function () {
 
       const txValue = toWei(0);
 
-      expect(
+      await expect(
         sandContractAsUser0.approveAndCall(
           mockERC20BasicApprovalTarget.address,
           approvalAmount,

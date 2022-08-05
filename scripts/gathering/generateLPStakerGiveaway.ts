@@ -24,7 +24,7 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
 }
 `;
 
-(async () => {
+void (async () => {
   const stakers: {
     id: string;
   }[] = await theGraph.query(queryString, 'stakers', {

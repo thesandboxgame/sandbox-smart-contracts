@@ -8,7 +8,7 @@ const {execute, catchUnknownSigner, read} = deployments;
 const args = process.argv.slice(2);
 const landSalePrefix = args[0];
 
-(async () => {
+void (async () => {
   const networkName = hre.network.name;
   const {landSaleAdmin} = await getNamedAccounts();
 

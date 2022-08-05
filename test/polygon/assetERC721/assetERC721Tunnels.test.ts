@@ -655,7 +655,7 @@ describe('PolygonAssetERC721.sol', function () {
           true
         );
 
-        waitFor(
+        await waitFor(
           assetHolder.MockPolygonAssetERC721Tunnel.batchWithdrawToRoot(
             assetHolder.address,
             [Id]

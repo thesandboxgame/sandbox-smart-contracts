@@ -1,4 +1,4 @@
-import {getNamedAccounts, ethers, network, deployments} from 'hardhat';
+import {deployments, ethers, getNamedAccounts, network} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import 'dotenv/config';
 
@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
  * <ADDRESS_V2_OWNER>...: List of owner SAND V2 addresses
  * The script will refill these addresses with SAND V3
  */
-(async () => {
+void (async () => {
   // Only for minting tokens through deposit method on Mumbai or Matic network
   if (
     network.name !== 'hardhat' &&

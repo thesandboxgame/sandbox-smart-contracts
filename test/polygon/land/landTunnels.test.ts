@@ -387,7 +387,7 @@ describe('PolygonLand', function () {
           .map((elem) => elem * elem)
           .reduce((a, b) => a + b, 0);
         await sequentially([...Array(numberOfLands).keys()], async (idx) => {
-          waitFor(
+          await waitFor(
             landMinter.Land.mintQuad(
               landHolder.address,
               ...mintingData.map((x) => x[idx]),

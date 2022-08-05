@@ -11,6 +11,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
+
 const {calculateMultiClaimHash} = helpers;
 
 const args = process.argv.slice(2);
@@ -111,5 +112,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

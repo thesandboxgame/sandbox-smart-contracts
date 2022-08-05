@@ -6,7 +6,7 @@ const args = process.argv.slice(2);
 const txHash = args[0];
 
 // this script allow to stop pending transaction
-(async () => {
+void (async () => {
   const {deployer} = await getNamedAccounts();
   console.log('Fetching nonce for account:', deployer);
   let nonce;

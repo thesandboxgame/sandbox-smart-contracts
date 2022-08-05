@@ -52,7 +52,7 @@ async function queryEvents(
   return events;
 }
 
-(async () => {
+void (async () => {
   const Sand = await ethers.getContract('Sand');
   const superOperatorEvents = await queryEvents(
     Sand.queryFilter.bind(Sand, Sand.filters.SuperOperator()),

@@ -6,6 +6,7 @@ import 'dotenv/config';
 // run the script: yarn execute mainnet scripts/rouleth/rouleth.ts
 // this script need a json file with the same file name containing a block number, a number of ticket and a list of addresses
 const {solidityKeccak256} = utils;
+
 interface Owner {
   id: string;
   numLands: number;
@@ -77,11 +78,14 @@ const lottery = async (
   blockNumber: number
 ) => {
   const seed: string = (await ethers.provider.getBlock(blockNumber)).hash;
+
   class SeededRand {
     private seed;
+
     constructor(seed: string) {
       this.seed = seed;
     }
+
     nextInteger(): number {
       this.seed = solidityKeccak256(['bytes32'], [this.seed]);
       return BigNumber.from(this.seed)
@@ -89,6 +93,7 @@ const lottery = async (
         .toNumber();
     }
   }
+
   // return an array of address subscribe on the back
   // if an address own x land, add x time the address to the array (x >= 1)
   const extendedAddressArray = async () => {
@@ -152,4 +157,4 @@ const main = async () => {
   // fs.writeFileSync(`./roulethResult`, await lottery(addBack, addGraph, maxWinnerNb, blockNumber));
 };
 
-main();
+main().catch((err) => console.error(err));

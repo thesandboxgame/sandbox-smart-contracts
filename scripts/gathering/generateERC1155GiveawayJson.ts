@@ -29,7 +29,7 @@ console.log('filename:', resultFilename);
 
 const assetsByAddress = new Map<string, ERC1155data>();
 
-(async () => {
+void (async () => {
   const assetContract = await ethers.getContract('Asset');
 
   const csvFilePath = path.resolve(__dirname, csvFile);

@@ -512,8 +512,10 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
     );
-
-    await assetSignedAuctionAuthContract.cancelSellerOffer(offerId);
+    const assetSignedAuctionAuthContractAsSeller = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(seller)
+    );
+    await assetSignedAuctionAuthContractAsSeller.cancelSellerOffer(offerId);
 
     const hashedData = ethers.utils.solidityKeccak256(
       [
@@ -590,7 +592,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
       true
     );
 
-    expect(
+    await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig(
         {
           buyer: users[1].address,
