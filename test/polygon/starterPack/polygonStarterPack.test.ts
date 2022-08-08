@@ -122,7 +122,7 @@ const getPackedNonce = (nonce: number, queueId: number) => {
   return concatedNonce;
 };
 
-describe.only('PolygonStarterPack.sol', function () {
+describe('PolygonStarterPack.sol', function () {
   describe('PurchaseValidator.sol', function () {
     it('can get the backend signing wallet', async function () {
       const {
