@@ -74,12 +74,13 @@ contract ExperienceEstateRegistry is
         address estateToken_,
         address experienceToken_,
         //uint8 chainIndex,
-        address landToken_
+        address landToken_,
+        address approver
     ) external initializer {
         _s().experienceToken = experienceToken_;
         _s().estateToken = estateToken_;
         _s().landToken = landToken_;
-        //_grantRole(APPROVER_ROLE, approver);
+        _grantRole(SETTER_ROLE, approver);
     }
 
     //getters
@@ -251,10 +252,11 @@ contract ExperienceEstateRegistry is
     }
 
     /// @notice revoke setter role from account
-    /// @param setter setter address
-    function revokeSetterRole(address setter) external {
-        require(hasRole(SETTER_ROLE, _msgSender()) && hasRole(SETTER_ROLE, setter), "NOT_AUTHORIZED");
-        revokeRole(SETTER_ROLE, setter);
+    /// @param oldSetter old setter address
+    function revokeSetterRole(address oldSetter) external {
+        //use admin instead of setter_role?
+        require(hasRole(SETTER_ROLE, _msgSender()) && hasRole(SETTER_ROLE, oldSetter), "NOT_AUTHORIZED");
+        _revokeRole(SETTER_ROLE, oldSetter);
     }
 
     function _s() internal pure returns (RegistryStorage storage ds) {

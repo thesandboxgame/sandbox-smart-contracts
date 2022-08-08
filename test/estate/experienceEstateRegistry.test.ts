@@ -155,6 +155,29 @@ describe('ExperienceEstateRegistry tests', function () {
         ])
       ).to.be.revertedWith('can be called only by estate');
     });
+    it(`create a link between a single land and an experience and unlink`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceContract,
+        registryContractAsOther,
+        mintQuad,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
+
+      await mintQuad(other, 1, 0, 0);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+
+      await registryContractAsOther.linkSingle(experienceId, 0, 0);
+      await registryContractAsOther.unLink(experienceId);
+    });
   });
   describe('complex shape', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -275,7 +298,7 @@ describe('ExperienceEstateRegistry tests', function () {
       console.log(`gas used ${receipt.gasUsed}`);
     });
   });
-  describe('Link and unlink', function () {
+  describe('Link, relink and unlink', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     it(`create a link between an estate and an experience and unlink it by exp id`, async function () {
       const {
@@ -305,6 +328,40 @@ describe('ExperienceEstateRegistry tests', function () {
 
       await registryContractAsOther.link(estateId, experienceId, 48, 96);
       await registryContractAsOther.unLink(experienceId);
+    });
+    it(`link and relink`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        registryContractAsOther,
+        mintQuad,
+        createEstateAsOther,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+      const experienceId2 = 456;
+
+      await mintQuad(other, 24, 48, 96);
+
+      await experienceContract.setTemplate(experienceId, fullQuad24);
+      await experienceContract.setTemplate(experienceId2, fullQuad24);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+      const {estateId} = await createEstateAsOther({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await registryContractAsOther.link(estateId, experienceId, 48, 96);
+      await registryContractAsOther.relink(
+        [experienceId],
+        [{estateId: estateId, expId: experienceId2, x: 48, y: 96}]
+      );
     });
   });
   describe('testing unLinkExperience', function () {
@@ -718,6 +775,71 @@ describe('ExperienceEstateRegistry tests', function () {
       expect(
         BigNumber.from(await registryContractAsOther.getEstateId(experienceId))
       ).to.be.equal(estateId.add(1));
+    });
+  });
+  describe('Setters', function () {
+    it(`set should revert if not authorized`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        registryContractAsOther,
+      } = await setupL2EstateExperienceAndLand();
+
+      await expect(
+        registryContractAsOther.setLandContract(landContractAsOther.address)
+      ).to.be.revertedWith('NOT_AUTHORIZED');
+
+      await expect(
+        registryContractAsOther.setEstateContract(landContractAsOther.address)
+      ).to.be.revertedWith('NOT_AUTHORIZED');
+
+      await expect(
+        registryContractAsOther.setExperienceContract(
+          landContractAsOther.address
+        )
+      ).to.be.revertedWith('NOT_AUTHORIZED');
+    });
+    it(`setters`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        registryContractAsOther,
+        registryContractAsAdmin,
+        estateContractAsOther,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      await registryContractAsAdmin.grantSetterRole(other);
+
+      await registryContractAsOther.setLandContract(
+        landContractAsOther.address
+      );
+      await registryContractAsOther.setEstateContract(
+        estateContractAsOther.address
+      );
+      await registryContractAsOther.setExperienceContract(
+        experienceContract.address
+      );
+    });
+    it(`revoking setter role`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        registryContractAsOther,
+        registryContractAsAdmin,
+      } = await setupL2EstateExperienceAndLand();
+
+      await registryContractAsAdmin.grantSetterRole(other);
+
+      await registryContractAsOther.setLandContract(
+        landContractAsOther.address
+      );
+
+      await registryContractAsAdmin.revokeSetterRole(other);
+
+      await expect(
+        registryContractAsOther.setLandContract(landContractAsOther.address)
+      ).to.be.revertedWith('NOT_AUTHORIZED');
     });
   });
 });

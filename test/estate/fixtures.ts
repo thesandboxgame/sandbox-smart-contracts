@@ -361,6 +361,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
           setup.estateContractAsMinter.address,
           experienceContract.address,
           setup.landContractAsDeployer.address,
+          setup.upgradeAdmin,
         ],
       },
     },
@@ -373,6 +374,10 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
     'ExperienceEstateRegistry',
     setup.other
   );
+  const registryContractAsAdmin = await ethers.getContract(
+    'ExperienceEstateRegistry',
+    setup.upgradeAdmin
+  );
   // Set the registry in the estate contract.
   await setup.estateContractAsAdmin.setRegistry(
     registryContractAsOther.address
@@ -380,6 +385,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   return {
     registryContract,
     registryContractAsOther,
+    registryContractAsAdmin,
     experienceContract,
     experienceContractAsOther,
     ...setup,
