@@ -122,7 +122,7 @@ const getPackedNonce = (nonce: number, queueId: number) => {
   return concatedNonce;
 };
 
-describe('PolygonStarterPack.sol', function () {
+describe.only('PolygonStarterPack.sol', function () {
   describe('PurchaseValidator.sol', function () {
     it('can get the backend signing wallet', async function () {
       const {
@@ -1509,7 +1509,7 @@ describe('PolygonStarterPack.sol', function () {
     });
   });
   describe('metatransactions', function () {
-    it.skip('can purchase with metatx', async function () {
+    it('can purchase with metatx', async function () {
       const {
         buyer,
         trustedForwarder,
@@ -1523,12 +1523,14 @@ describe('PolygonStarterPack.sol', function () {
         epicCatalyst,
         legendaryCatalyst,
         PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
       } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
       const signature = signPurchaseMessage(privateKey, Message, buyer.address);
 
       const {
-        to, // 0x20Fbd46DeEd5EEDEB6e5c87eeB31924e9CA312ad
+        to,
         data,
       } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
         buyer.address,
