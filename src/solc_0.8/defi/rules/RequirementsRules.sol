@@ -116,7 +116,7 @@ contract RequirementsRules is Ownable {
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC721) {
         require(
-            (balanceOf == true && minAmountBalanceOf > 0 && maxAmountBalanceOf > 0) ||
+            (balanceOf == true && ids.length == 0 && minAmountBalanceOf > 0 && maxAmountBalanceOf > 0) ||
                 (balanceOf == false && ids.length > 0 && minAmountId > 0 && maxAmountId > 0 && ids.length <= idsLimit),
             "RequirementRules: invalid list"
         );

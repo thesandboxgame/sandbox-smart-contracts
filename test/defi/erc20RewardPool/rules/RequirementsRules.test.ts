@@ -198,7 +198,7 @@ describe('Requirementsules', function () {
 
       await contract.setERC721RequirementList(
         ERC721Token.address,
-        [id],
+        [],
         true,
         1,
         5,
