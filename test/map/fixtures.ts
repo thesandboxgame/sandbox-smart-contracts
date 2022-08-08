@@ -14,6 +14,12 @@ export const setupTileWithCoordsLibTest = withSnapshot([], async () => {
   return await ethers.getContract('TileWithCoordTester', deployer);
 });
 
+export const setupTileOrLandLibTest = withSnapshot([], async () => {
+  const {deployer} = await getNamedAccounts();
+  await deployments.deploy('TileOrLandTester', {from: deployer});
+  return await ethers.getContract('TileOrLandTester', deployer);
+});
+
 export const setupMapTest = withSnapshot([], async () => {
   const {deployer} = await getNamedAccounts();
   const mapLib = await deployments.deploy('MapLib', {from: deployer});

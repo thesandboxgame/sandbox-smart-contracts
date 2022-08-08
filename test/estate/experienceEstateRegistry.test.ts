@@ -780,7 +780,6 @@ describe('ExperienceEstateRegistry tests', function () {
   describe('Setters', function () {
     it(`set should revert if not authorized`, async function () {
       const {
-        other,
         landContractAsOther,
         registryContractAsOther,
       } = await setupL2EstateExperienceAndLand();

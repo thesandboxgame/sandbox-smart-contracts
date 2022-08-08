@@ -109,6 +109,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
             _setGameEditor(to, editor, true);
         }
         if (!creation.tileOrLand.isEmpty()) {
+            require(creation.tileOrLand.isValid(), "invalid tile");
             tileOrLand[storageId] = creation.tileOrLand;
         }
         _addERC721Assets(from, storageId, creation.gameData721.assetIdsToAdd);
@@ -137,6 +138,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     ) external override onlyMinter returns (uint256) {
         uint256 storageId = _storageId(gameId);
         if (!update.tileOrLand.isEmpty()) {
+            require(update.tileOrLand.isValid(), "invalid tile");
             tileOrLand[storageId] = update.tileOrLand;
         }
         _addERC721Assets(from, storageId, update.gameData721.assetIdsToAdd);

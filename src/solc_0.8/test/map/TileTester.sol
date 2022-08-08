@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import {TileLib} from "../../common/Libraries/TileLib.sol"; // TODO: Separate this code into a library + something to store the masks
+import {TileLib} from "../../common/Libraries/TileLib.sol";
 
 contract TileTester {
     using TileLib for TileLib.Tile;

@@ -7,7 +7,7 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer, upgradeAdmin, gameTokenAdmin} = await getNamedAccounts();
   const estateContract = await deployments.get('PolygonEstate');
   // TODO: Fake Game, right now we don't have the finished experience contract, fix this!!!
   await deployments.deploy('MockExperience', {
@@ -37,6 +37,7 @@ const func: DeployFunction = async function (
           estateContract.address,
           experienceContract.address,
           landContract.address,
+          gameTokenAdmin,
         ],
       },
       upgradeIndex: 0,
