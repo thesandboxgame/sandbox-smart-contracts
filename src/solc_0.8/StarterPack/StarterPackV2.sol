@@ -355,7 +355,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256 amount
     ) internal {
         uint256 amountForDestination = amount;
-        require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED"); // TODO: review
+        require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }
 
     /// @dev this override is required
