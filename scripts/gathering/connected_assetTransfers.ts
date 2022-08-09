@@ -1,9 +1,7 @@
 import {Event} from 'ethers';
-// import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
-import {ethers} from 'hardhat';
-
-const startBlock = 9040032;
+import hre from 'hardhat';
+const {ethers} = hre;
 
 async function queryEvents(
   filterFunc: (startBlock: number, endBlock: number) => Promise<Event[]>,
@@ -23,7 +21,6 @@ async function queryEvents(
   while (fromBlock <= endBlock) {
     try {
       const moreEvents = await filterFunc(fromBlock, toBlock);
-
       console.log({fromBlock, toBlock, numEvents: moreEvents.length});
       successes[blockRange] = true;
       consecutiveSuccess++;
@@ -34,7 +31,6 @@ async function queryEvents(
           console.log({blockRange});
         }
       }
-
       fromBlock = toBlock + 1;
       toBlock = Math.min(fromBlock + blockRange, endBlock);
       events.push(...moreEvents);
@@ -43,7 +39,6 @@ async function queryEvents(
       consecutiveSuccess = 0;
       blockRange /= 2;
       toBlock = Math.min(fromBlock + blockRange, endBlock);
-
       console.log({fromBlock, toBlock, numEvents: 'ERROR'});
       console.log({blockRange});
       console.error(e);
@@ -53,37 +48,17 @@ async function queryEvents(
 }
 
 (async () => {
-  const Asset = await ethers.getContract('OldAsset');
+  const Asset = await ethers.getContract('Asset');
+  const startBlock = (await import(`../../deployments/${hre.network.name}/Asset.json`)).receipt.blockNumber;
   const singleTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferSingle()),
     startBlock
   );
-
   console.log('SINGLE TRANSFERS', singleTransferEvents.length);
-
   const batchTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferBatch()),
     startBlock
   );
-
   console.log('BATCH TRANSFERS', singleTransferEvents.length);
-
-  // for (const transfer of singleTransferEvents) {
-  //   const t = transfer as any;
-  //   t.args[3] = t.args[3].toString();
-  //   t.args[4] = t.args[4].toString();
-  // }
-
-  // for (const transfer of batchTransferEvents) {
-  //   const t = transfer as any;
-  //   t.args[3] = t.args[3].map((v: BigNumber) => v.toString());
-  //   t.args[4] = t.args[4].map((v: BigNumber) => v.toString());
-  // }
-
-  // write to disk
-  fs.ensureDirSync('tmp');
-  fs.writeFileSync(
-    'tmp/asset_transfers.json',
-    JSON.stringify({singleTransferEvents, batchTransferEvents}, null, '  ')
-  );
+  fs.outputJSONSync('tmp/asset_transfers.json', {singleTransferEvents, batchTransferEvents});
 })();
