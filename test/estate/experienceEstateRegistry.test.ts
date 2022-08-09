@@ -208,10 +208,6 @@ describe('ExperienceEstateRegistry tests', function () {
         [1, 3],
       ]);
 
-      /* const {template} = await experienceContract.getTemplate(experienceId);
-      const tta = tileToArray(template.data);
-      printTile(tta); */
-
       await landContractAsOther.setApprovalForAll(
         estateContractAsOther.address,
         true
@@ -222,16 +218,6 @@ describe('ExperienceEstateRegistry tests', function () {
         xs: [0, 1, 2, 1, 1],
         ys: [2, 2, 2, 1, 3],
       });
-
-      /* const landInEstate = await estateContractAsOther.getLandAt(
-        estateId,
-        0,
-        1
-      );
-
-      const map1 = landInEstate[0];
-      const twjs = tileWithCoordToJS(map1);
-      printTileWithCoord(twjs); */
 
       const receipt = await waitFor(
         registryContractAsOther.link(estateId, experienceId, 0, 0)
@@ -362,6 +348,52 @@ describe('ExperienceEstateRegistry tests', function () {
         [experienceId],
         [{estateId: estateId, expId: experienceId2, x: 48, y: 96}]
       );
+    });
+    it(`isLinked`, async function () {
+      const {
+        other,
+        landContractAsOther,
+        estateContractAsOther,
+        registryContractAsOther,
+        mintQuad,
+        chainIndex,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await mintQuad(other, 24, 48, 96);
+
+      await experienceContract.setTemplate(experienceId, fullQuad24);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+
+      const nextId = BigNumber.from(await estateContractAsOther.getNextId());
+
+      const quads = [[24], [48], [96]];
+      const receipt = await (await estateContractAsOther.create(quads)).wait();
+      expect(await estateContractAsOther.getNextId()).to.be.equal(
+        nextId.add(1)
+      );
+      const events = receipt.events.filter(
+        (v: Event) => v.event === 'EstateTokenCreated'
+      );
+      assert.equal(events.length, 1);
+
+      const lands = events[0].args['lands'];
+      console.log(lands);
+
+      await registryContractAsOther.link(
+        events[0].args['estateId'],
+        experienceId,
+        48,
+        96
+      );
+
+      await expect(registryContractAsOther['isLinked(((uint256[3]))[])'](lands))
+        .to.be.true;
     });
   });
   describe('testing unLinkExperience', function () {
@@ -808,6 +840,10 @@ describe('ExperienceEstateRegistry tests', function () {
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
+      await expect(
+        registryContractAsOther.grantSetterRole(other)
+      ).to.be.revertedWith('NOT_AUTHORIZED');
+
       await registryContractAsAdmin.grantSetterRole(other);
 
       await registryContractAsOther.setLandContract(
@@ -827,6 +863,10 @@ describe('ExperienceEstateRegistry tests', function () {
         registryContractAsOther,
         registryContractAsAdmin,
       } = await setupL2EstateExperienceAndLand();
+
+      await expect(
+        registryContractAsOther.revokeSetterRole(other)
+      ).to.be.revertedWith('NOT_AUTHORIZED');
 
       await registryContractAsAdmin.grantSetterRole(other);
 
