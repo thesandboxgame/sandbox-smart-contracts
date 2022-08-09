@@ -138,8 +138,8 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin,
         other,
       } = await setupPolygonStarterPack();
-      expect(await PolygonStarterPackAsAdmin.setSigningWallet(other.address)).to
-        .be.ok;
+      await expect(PolygonStarterPackAsAdmin.setSigningWallet(other.address)).to
+        .not.be.reverted;
     });
     it('a SigningWallet event is emitted when the signing wallet is updated', async function () {
       const {
@@ -199,7 +199,7 @@ describe('PolygonStarterPack.sol', function () {
   describe('getReceivingWallet', function () {
     it('can view the receiving wallet', async function () {
       const {PolygonStarterPack} = await setupPolygonStarterPack();
-      expect(await PolygonStarterPack.getReceivingWallet()).to.be.ok;
+      await expect(PolygonStarterPack.getReceivingWallet()).to.not.be.reverted;
     });
   });
   describe('setReceivingWallet', function () {
@@ -208,8 +208,8 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin,
         other,
       } = await setupPolygonStarterPack();
-      expect(await PolygonStarterPackAsAdmin.setReceivingWallet(other.address))
-        .to.be.ok;
+      await expect(PolygonStarterPackAsAdmin.setReceivingWallet(other.address))
+        .to.not.be.reverted;
     });
     it('a ReceivingWallet event is emitted when the receiving wallet is updated', async function () {
       const {
@@ -246,7 +246,8 @@ describe('PolygonStarterPack.sol', function () {
   describe('setSANDEnabled', function () {
     it('default admin can set SAND enabled', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      expect(await PolygonStarterPackAsAdmin.setSANDEnabled(true)).to.be.ok;
+      await expect(PolygonStarterPackAsAdmin.setSANDEnabled(true)).to.not.be
+        .reverted;
     });
     it('if not default admin cannot set SAND enabled', async function () {
       const {other} = await setupPolygonStarterPack();
@@ -258,7 +259,8 @@ describe('PolygonStarterPack.sol', function () {
     });
     it('default admin can disable SAND', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      expect(await PolygonStarterPackAsAdmin.setSANDEnabled(false)).to.be.ok;
+      await expect(PolygonStarterPackAsAdmin.setSANDEnabled(false)).to.not.be
+        .reverted;
     });
     it('if not default admin cannot disable SAND', async function () {
       const {other} = await setupPolygonStarterPack();
@@ -272,36 +274,36 @@ describe('PolygonStarterPack.sol', function () {
   describe('setPrices', function () {
     it('default admin can set the prices for all cats and gems', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      expect(
-        await PolygonStarterPackAsAdmin.setPrices(
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
           catalystIds,
           catPrices,
           gemIds,
           gemPrices
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('an individual catalyst price can be updated', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      expect(
-        await PolygonStarterPackAsAdmin.setPrices(
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
           [1],
           ['10000000000000000000'],
           [],
           []
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('an individual gem price can be updated', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      expect(
-        await PolygonStarterPackAsAdmin.setPrices(
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
           [],
           [],
           [1],
           ['10000000000000000000']
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('if not default admin cannot set prices', async function () {
       const {other} = await setupPolygonStarterPack();
@@ -458,7 +460,7 @@ describe('PolygonStarterPack.sol', function () {
           [1, 2, 3, 4],
           [1, 2, 3, 4, 5]
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('default admin receives correct cats and gems balances upon withdrawal', async function () {
       const {
@@ -586,7 +588,7 @@ describe('PolygonStarterPack.sol', function () {
           [1, 2, 3, 4],
           [1, 2, 3, 4, 5]
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
   });
   describe('purchaseWithSAND', function () {
@@ -604,7 +606,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('can purchase bundle of cats and gems when SAND is enabled and prices are >0 with correct SAND amount', async function () {
       const {
@@ -646,7 +648,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
         Message.catalystQuantities,
@@ -948,7 +950,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(
           buyer.address,
@@ -1091,7 +1093,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
         Message.catalystQuantities,
@@ -1141,7 +1143,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
         Message.catalystQuantities,
@@ -1192,7 +1194,7 @@ describe('PolygonStarterPack.sol', function () {
           Message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
         Message.catalystQuantities,
@@ -1265,7 +1267,7 @@ describe('PolygonStarterPack.sol', function () {
           message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
 
       let nonce = 0;
       const queueId = 454;
@@ -1285,7 +1287,7 @@ describe('PolygonStarterPack.sol', function () {
           messageQueue2,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
 
       // Now we can simply increment the nonce in the new queue (with packing)
       nonce = 1;
@@ -1308,7 +1310,7 @@ describe('PolygonStarterPack.sol', function () {
           updatedMessageQueue2,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('order of cat IDs should not matter', async function () {
       const {
@@ -1330,7 +1332,7 @@ describe('PolygonStarterPack.sol', function () {
           message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       message.catalystIds = [4, 3, 2, 1];
       message.nonce++;
       signature = signPurchaseMessage(privateKey, message, other.address);
@@ -1340,7 +1342,7 @@ describe('PolygonStarterPack.sol', function () {
           message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('order of gem IDs should not matter', async function () {
       const {
@@ -1362,7 +1364,7 @@ describe('PolygonStarterPack.sol', function () {
           message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
       message.gemIds = [5, 4, 3, 2, 1];
       message.nonce++;
       signature = signPurchaseMessage(privateKey, message, other.address);
@@ -1372,7 +1374,7 @@ describe('PolygonStarterPack.sol', function () {
           message,
           signature
         )
-      ).to.be.ok;
+      ).to.not.be.reverted;
     });
     it('can get nonce for a buyer', async function () {
       const {PolygonStarterPack, buyer} = await setupPolygonStarterPack();
