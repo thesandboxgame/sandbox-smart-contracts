@@ -33,6 +33,36 @@ describe('ExperienceEstateRegistry tests', function () {
       await registryContractAsOther.linkSingle(experienceId, 0, 0);
     });
 
+    it(`trying to unlink an exp without owning the land should revert`, async function () {
+      const {
+        other,
+        other2,
+        landContractAsOther,
+        estateContractAsOther,
+        experienceContract,
+        registryContractAsOther,
+        mintQuad,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await experienceContract.setTemplate(experienceId, [[0, 0]]);
+
+      await mintQuad(other, 1, 0, 0);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+
+      await registryContractAsOther.linkSingle(experienceId, 0, 0);
+
+      await landContractAsOther.transferQuad(other, other2, 1, 0, 0, '0x00');
+
+      await expect(
+        registryContractAsOther.unLink(experienceId)
+      ).to.be.revertedWith('invalid user');
+    });
+
     it(`trying to create a link with an experience already in use should revert`, async function () {
       const {
         other,
@@ -313,6 +343,7 @@ describe('ExperienceEstateRegistry tests', function () {
       });
 
       await registryContractAsOther.link(estateId, experienceId, 48, 96);
+
       await registryContractAsOther.unLink(experienceId);
     });
     it(`link and relink`, async function () {
@@ -349,6 +380,41 @@ describe('ExperienceEstateRegistry tests', function () {
         [{estateId: estateId, expId: experienceId2, x: 48, y: 96}]
       );
     });
+    it(`if user doens't own the estate, they can't unlink`, async function () {
+      const {
+        other,
+        other2,
+        landContractAsOther,
+        estateContractAsOther,
+        registryContractAsOther,
+        mintQuad,
+        createEstateAsOther,
+        experienceContract,
+      } = await setupL2EstateExperienceAndLand();
+
+      const experienceId = 123;
+
+      await mintQuad(other, 24, 48, 96);
+
+      await experienceContract.setTemplate(experienceId, fullQuad24);
+      await landContractAsOther.setApprovalForAll(
+        estateContractAsOther.address,
+        true
+      );
+      const {estateId} = await createEstateAsOther({
+        sizes: [24],
+        xs: [48],
+        ys: [96],
+      });
+
+      await registryContractAsOther.link(estateId, experienceId, 48, 96);
+
+      await estateContractAsOther.transferFrom(other, other2, estateId);
+
+      await expect(
+        registryContractAsOther.unLink(experienceId)
+      ).to.be.revertedWith('invalid user');
+    });
     it(`isLinked`, async function () {
       const {
         other,
@@ -356,7 +422,6 @@ describe('ExperienceEstateRegistry tests', function () {
         estateContractAsOther,
         registryContractAsOther,
         mintQuad,
-        chainIndex,
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
@@ -383,7 +448,6 @@ describe('ExperienceEstateRegistry tests', function () {
       assert.equal(events.length, 1);
 
       const lands = events[0].args['lands'];
-      console.log(lands);
 
       await registryContractAsOther.link(
         events[0].args['estateId'],
@@ -392,7 +456,7 @@ describe('ExperienceEstateRegistry tests', function () {
         96
       );
 
-      await expect(registryContractAsOther['isLinked(((uint256[3]))[])'](lands))
+      expect(await registryContractAsOther['isLinked(((uint256[3]))[])'](lands))
         .to.be.true;
     });
   });

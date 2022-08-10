@@ -16,6 +16,7 @@ async function setupLand(isLayer1: boolean) {
     landAdmin,
     landMinter,
     other,
+    other2,
     ...rest
   ] = await getUnnamedAccounts();
   // Land
@@ -85,6 +86,7 @@ async function setupLand(isLayer1: boolean) {
     landAdmin,
     landMinter,
     other,
+    other2,
     getUnnamedAccounts: () => rest,
     landContractAsDeployer,
     landContractAsMinter,
