@@ -4,7 +4,8 @@ import hre from 'hardhat';
 import {TheGraph} from '../utils/thegraph';
 import {getBlockArgs} from '../utils/utils';
 const blockNumber = getBlockArgs(0);
-const graphUrl = process.env[`SANDBOX_GRAPH_URL_${hre.network.name.toUpperCase()}`] || ''
+const graphUrl =
+  process.env[`SANDBOX_GRAPH_URL_${hre.network.name.toUpperCase()}`] || '';
 const theGraph = new TheGraph(graphUrl);
 const queryString = `
 query($blockNumber: Int! $first: Int! $lastId: ID!) {

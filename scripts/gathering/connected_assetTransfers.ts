@@ -49,7 +49,9 @@ async function queryEvents(
 
 (async () => {
   const Asset = await ethers.getContract('Asset');
-  const startBlock = (await import(`../../deployments/${hre.network.name}/Asset.json`)).receipt.blockNumber;
+  const startBlock = (
+    await import(`../../deployments/${hre.network.name}/Asset.json`)
+  ).receipt.blockNumber;
   const singleTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferSingle()),
     startBlock
@@ -60,5 +62,8 @@ async function queryEvents(
     startBlock
   );
   console.log('BATCH TRANSFERS', singleTransferEvents.length);
-  fs.outputJSONSync('tmp/asset_transfers.json', {singleTransferEvents, batchTransferEvents});
+  fs.outputJSONSync('tmp/asset_transfers.json', {
+    singleTransferEvents,
+    batchTransferEvents,
+  });
 })();

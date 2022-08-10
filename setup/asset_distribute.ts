@@ -35,7 +35,9 @@ const func: DeployFunction = async function () {
     }
     fs.outputJSONSync(transfer_executed_file, transferExecuted);
   }
-  const toContracts: Record<string, string> = fs.readJSONSync(`tmp/asset_owner_contracts_${hre.network.name}.json`);
+  const toContracts: Record<string, string> = fs.readJSONSync(
+    `tmp/asset_owner_contracts_${hre.network.name}.json`
+  );
   type Transfer = {
     index: number;
     to: string;
@@ -98,7 +100,9 @@ const func: DeployFunction = async function () {
         values,
       });
     } else {
-      console.log(`already being transfered in batch (${performed.hash})  nonce :${performed.nonce}`);
+      console.log(
+        `already being transfered in batch (${performed.hash})  nonce :${performed.nonce}`
+      );
     }
     index++;
   }

@@ -49,8 +49,8 @@ const func: DeployFunction = async function () {
 
   const Asset = await ethers.getContract('Asset');
 
-  const {batchMints, extractions} = JSON.parse(
-    fs.readFileSync('tmp/asset_regenerations.json').toString()
+  const {batchMints, extractions} = fs.readJSONSync(
+    'tmp/asset721_regenerations.json'
   );
 
   type MintBatch = {
