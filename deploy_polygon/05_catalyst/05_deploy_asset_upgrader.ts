@@ -1,7 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-
-import {upgradeFee, gemAdditionFee} from '../../data/assetUpgraderFees';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {gemAdditionFee, upgradeFee} from '../../data/assetUpgraderFees';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -36,6 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       TRUSTED_FORWARDER.address,
     ],
     contract: `AssetUpgrader`,
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
