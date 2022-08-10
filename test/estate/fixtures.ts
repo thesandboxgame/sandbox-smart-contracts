@@ -166,6 +166,7 @@ async function setupEstateAndLand(
     estateAdmin,
     estateMinter,
     estateBurner,
+    ...rest
   ] = setup.getUnnamedAccounts();
 
   // Estate
@@ -231,6 +232,7 @@ async function setupEstateAndLand(
     estateDefaultAdmin,
     estateAdmin,
     ...setup,
+    getUnnamedAccounts: () => rest,
     getXsYsSizes: (x0: number, y0: number, size: number) => {
       const xs = [];
       const ys = [];
@@ -333,6 +335,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   const setup = await setupEstateAndLand(false, (s) =>
     deployEstate('PolygonEstateTokenV1', s)
   );
+  const [registryAdmin] = setup.getUnnamedAccounts();
   // Fake Game
   await deployments.deploy('MockExperience', {
     from: setup.deployer,
@@ -363,7 +366,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
           setup.estateContractAsMinter.address,
           experienceContract.address,
           setup.landContractAsDeployer.address,
-          setup.upgradeAdmin,
+          registryAdmin,
         ],
       },
     },
@@ -378,7 +381,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
   );
   const registryContractAsAdmin = await ethers.getContract(
     'ExperienceEstateRegistry',
-    setup.upgradeAdmin
+    registryAdmin
   );
   // Set the registry in the estate contract.
   await setup.estateContractAsAdmin.setRegistry(
@@ -390,6 +393,7 @@ export const setupL2EstateExperienceAndLand = withSnapshot([], async () => {
     registryContractAsAdmin,
     experienceContract,
     experienceContractAsOther,
+    registryAdmin,
     ...setup,
   };
 });
