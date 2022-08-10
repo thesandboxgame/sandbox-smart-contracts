@@ -1,4 +1,4 @@
-import {BigNumber} from '@ethersproject/bignumber';
+import {BigNumber} from 'ethers';
 import fs from 'fs-extra';
 import {extractFromId} from '../../utils/asset-extract-from-id';
 import {extractIpfsString, toHash} from '../../utils/asset-uri-to-hash';
