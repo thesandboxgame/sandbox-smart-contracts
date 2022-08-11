@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const MAX_TRANSFER_LIMIT = 20;
 
-  const AssetERC1155Tunnel = await deploy('AssetERC1155Tunnel', {
+  await deploy('AssetERC1155Tunnel', {
     from: deployer,
     contract: 'AssetERC1155Tunnel',
     args: [
@@ -28,43 +28,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-
-  const PolygonAssetERC1155Tunnel = await hre.companionNetworks[
-    'l2'
-  ].deployments.getOrNull('PolygonAssetERC1155Tunnel');
-
-  // get deployer on l2
-  const {deployer: deployerOnL2} = await hre.companionNetworks[
-    'l2'
-  ].getNamedAccounts();
-
-  if (PolygonAssetERC1155Tunnel) {
-    const fxChildTunnel = await deployments.read(
-      'AssetERC721Tunnel',
-      'fxChildTunnel'
-    );
-    const fxRootTunnel = await hre.companionNetworks['l2'].deployments.read(
-      'PolygonAssetERC721Tunnel',
-      'fxRootTunnel'
-    );
-
-    if (fxRootTunnel == constants.AddressZero) {
-      await hre.companionNetworks['l2'].deployments.execute(
-        'PolygonAssetERC1155Tunnel',
-        {from: deployerOnL2, log: true},
-        'setFxRootTunnel',
-        AssetERC1155Tunnel.address
-      );
-    }
-    if (fxChildTunnel == constants.AddressZero) {
-      await deployments.execute(
-        'AssetERC1155Tunnel',
-        {from: deployer, log: true},
-        'setFxChildTunnel',
-        PolygonAssetERC1155Tunnel.address
-      );
-    }
-  }
 };
 
 export default func;
