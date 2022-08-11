@@ -21,5 +21,5 @@ interface IEstateExperienceRegistry {
 
     function isLinked(uint256[][3] calldata quads) external view returns (bool);
 
-    function isLinked(TileWithCoordLib.TileWithCoord[] calldata) external view returns (bool);
+    function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view returns (bool);
 }
