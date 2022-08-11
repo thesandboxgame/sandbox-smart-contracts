@@ -6,7 +6,7 @@ import {skipUnlessTestnet} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
   const FXCHILD = await deployments.get('FXCHILD');
@@ -17,15 +17,35 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('PolygonAssetERC1155Tunnel', {
     from: deployer,
     contract: 'PolygonAssetERC1155Tunnel',
-    args: [
-      FXCHILD.address,
-      PolygonAssetERC1155.address,
-      TRUSTED_FORWARDER.address,
-      MAX_TRANSFER_LIMIT,
-    ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: 'initialize',
+        args: [
+          FXCHILD.address,
+          PolygonAssetERC1155.address,
+          TRUSTED_FORWARDER.address,
+          MAX_TRANSFER_LIMIT,
+        ],
+      },
+      upgradeIndex: 0,
+    },
     log: true,
-    skipIfAlreadyDeployed: true,
   });
+
+  // await deploy('PolygonAssetERC1155Tunnel', {
+  //   from: deployer,
+  //   contract: 'PolygonAssetERC1155Tunnel',
+  //   args: [
+  //     FXCHILD.address,
+  //     PolygonAssetERC1155.address,
+  //     TRUSTED_FORWARDER.address,
+  //     MAX_TRANSFER_LIMIT,
+  //   ],
+  //   log: true,
+  //   skipIfAlreadyDeployed: true,
+  // });
 };
 
 export default func;
@@ -35,10 +55,5 @@ func.tags = [
   'L2',
   'PolygonAsset',
 ];
-func.dependencies = [
-  'PolygonAssetERC1155',
-  'FXCHILD',
-  'CHECKPOINTMANAGER',
-  'TRUSTED_FORWARDER',
-];
+func.dependencies = ['PolygonAssetERC1155', 'FXCHILD', 'TRUSTED_FORWARDER'];
 func.skip = skipUnlessTestnet;
