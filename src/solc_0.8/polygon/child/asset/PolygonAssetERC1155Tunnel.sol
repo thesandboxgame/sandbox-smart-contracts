@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import "../../../common/FX-Portal/FxBaseChildTunnelUpgradeable.sol";
+// import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+
 import "../../../common/interfaces/IPolygonAssetERC1155.sol";
 import "../../common/ERC1155Receiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
@@ -11,30 +13,37 @@ import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonAssetERC1155.sol";
 
 /// @title ASSETERC1155 bridge on L2
-contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
+contract PolygonAssetERC1155Tunnel is
+    FxBaseChildTunnelUpgradeable,
+    ERC1155Receiver,
+    ERC2771Handler,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
     IPolygonAssetERC1155 public childToken;
-    uint256 public maxTransferLimit = 20;
+    uint256 public maxTransferLimit;
     bool private fetchingAssets = false;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
 
-    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
-        maxTransferLimit = _maxTransferLimit;
-        emit SetTransferLimit(_maxTransferLimit);
-    }
-
-    constructor(
+    function initialize(
         address _fxChild,
         IPolygonAssetERC1155 _childToken,
         address trustedForwarder,
         uint256 _maxTransferLimit
-    ) FxBaseChildTunnel(_fxChild) {
+    ) public initializer {
         require(address(_childToken) != address(0), "PolygonAssetERC1155Tunnel: _childToken can't be zero");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
         __ERC2771Handler_initialize(trustedForwarder);
+        __FxBaseChildTunnelUpgradeable_initialize(_fxChild);
+    }
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
     }
 
     function batchWithdrawToRoot(
@@ -112,11 +121,11 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
         }
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

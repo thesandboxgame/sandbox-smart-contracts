@@ -5,10 +5,12 @@ pragma solidity 0.8.2;
 import "./PolygonAssetERC1155Tunnel.sol";
 
 contract MockPolygonAssetERC1155Tunnel is PolygonAssetERC1155Tunnel {
-    constructor(
+    function init(
         address _fxChild,
         IPolygonAssetERC1155 _childToken,
-        address _trustedForwarder,
+        address trustedForwarder,
         uint256 _maxTransferLimit
-    ) PolygonAssetERC1155Tunnel(_fxChild, _childToken, _trustedForwarder, _maxTransferLimit) {}
+    ) external {
+        PolygonAssetERC1155Tunnel.initialize(_fxChild, _childToken, trustedForwarder, _maxTransferLimit);
+    }
 }

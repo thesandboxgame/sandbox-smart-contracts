@@ -5,15 +5,14 @@ import "../polygon/root/asset/AssetERC721Tunnel.sol";
 import "../common/interfaces/IAssetERC721.sol";
 
 contract MockAssetERC721Tunnel is AssetERC721Tunnel {
-    constructor(
+    function init(
         address _checkpointManager,
         address _fxRoot,
         IAssetERC721 _rootToken,
-        address _trustedForwarder,
+        address trustedForwarder,
         uint256 _maxTransferLimit
-    ) AssetERC721Tunnel(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder, _maxTransferLimit) {
-        checkpointManager = ICheckpointManager(_checkpointManager);
-        fxRoot = IFxStateSender(_fxRoot);
+    ) external {
+        AssetERC721Tunnel.initialize(_checkpointManager, _fxRoot, _rootToken, trustedForwarder, _maxTransferLimit);
     }
 
     function receiveMessage(bytes memory message) public virtual override {
