@@ -940,6 +940,13 @@
   resolved "https://registry.npmjs.org/@graphql-typed-document-node/core/-/core-3.1.0.tgz"
   integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
 
+"@maticnetwork/fx-portal@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@maticnetwork/fx-portal/-/fx-portal-1.0.4.tgz#2274b02d4600b8ca40b06a0c9f7f1a788fff0496"
+  integrity sha512-z7K7blFgDJWCCaXTtqgqI20GDB0b4QIE8bmtxzijlbpSEziJsQMulJVZYVubAB2f/HNDObXE+i/jkpqSDxkC2A==
+  dependencies:
+    "@openzeppelin/contracts" "^4.2.0"
+
 "@nodelib/fs.scandir@2.1.3":
   version "2.1.3"
   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.3.tgz"
@@ -5069,7 +5076,7 @@ functional-red-black-tree@^1.0.1, functional-red-black-tree@~1.0.1:
 
 fx-portal@^1.0.3:
   version "1.0.3"
-  resolved "https://registry.npmjs.org/fx-portal/-/fx-portal-1.0.3.tgz"
+  resolved "https://registry.yarnpkg.com/fx-portal/-/fx-portal-1.0.3.tgz#6882497b1eb1a148716dbd762daf5b7ab511741b"
   integrity sha512-wjjc/RQzHpjimeNVrOuLLwGBcjSzj0pTTaL26wAwTTrmaeeLrs2bcM4OldA0awZcaLqQXe3oQME8oC281jxzGw==
   dependencies:
     "@openzeppelin/contracts" "^4.2.0"
