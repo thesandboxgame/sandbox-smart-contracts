@@ -5,27 +5,51 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
-  const maxTransferLimit = 20;
+  const MAX_TRANSFER_LIMIT = 20;
 
-  const MockPolygonAssetERC721Tunnel = await deploy(
-    'MockPolygonAssetERC721Tunnel',
-    {
-      from: deployer,
-      contract: 'PolygonAssetERC721Tunnel',
-      args: [
-        FXCHILD.address,
-        PolygonAssetERC721.address,
-        TRUSTED_FORWARDER.address,
-        maxTransferLimit,
-      ],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    }
+  await deploy('MockPolygonAssetERC721Tunnel', {
+    from: deployer,
+    contract: 'PolygonAssetERC721Tunnel',
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: 'initialize',
+        args: [
+          FXCHILD.address,
+          PolygonAssetERC721.address,
+          TRUSTED_FORWARDER.address,
+          MAX_TRANSFER_LIMIT,
+        ],
+      },
+      upgradeIndex: 0,
+    },
+    log: true,
+  });
+
+  // const MockPolygonAssetERC721Tunnel = await deploy(
+  //   'MockPolygonAssetERC721Tunnel',
+  //   {
+  //     from: deployer,
+  //     contract: 'PolygonAssetERC721Tunnel',
+  //     args: [
+  //       FXCHILD.address,
+  //       PolygonAssetERC721.address,
+  //       TRUSTED_FORWARDER.address,
+  //       maxTransferLimit,
+  //     ],
+  //     log: true,
+  //     skipIfAlreadyDeployed: true,
+  //   }
+  // );
+
+  const MockPolygonAssetERC721Tunnel = await deployments.get(
+    'MockPolygonAssetERC721Tunnel'
   );
 
   // get deployer on l1
