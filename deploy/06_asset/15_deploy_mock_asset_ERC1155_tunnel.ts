@@ -5,7 +5,7 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAdmin} = await getNamedAccounts();
+  const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
   const AssetERC1155 = await deployments.get('Asset');
   const FXROOT = await deployments.get('FXROOT');
@@ -14,19 +14,44 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const MAX_TRANSFER_LIMIT = 20;
 
-  const MockAssetERC1155Tunnel = await deploy('MockAssetERC1155Tunnel', {
+  await deploy('MockAssetERC1155Tunnel', {
     from: deployer,
     contract: 'MockAssetERC1155Tunnel',
-    args: [
-      CHECKPOINTMANAGER.address,
-      FXROOT.address,
-      AssetERC1155.address,
-      TRUSTED_FORWARDER.address,
-      MAX_TRANSFER_LIMIT,
-    ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: 'initialize',
+        args: [
+          CHECKPOINTMANAGER.address,
+          FXROOT.address,
+          AssetERC1155.address,
+          TRUSTED_FORWARDER.address,
+          MAX_TRANSFER_LIMIT,
+        ],
+      },
+      upgradeIndex: 0,
+    },
     log: true,
-    skipIfAlreadyDeployed: true,
   });
+
+  // const MockAssetERC1155Tunnel = await deploy('MockAssetERC1155Tunnel', {
+  //   from: deployer,
+  //   contract: 'MockAssetERC1155Tunnel',
+  //   args: [
+  //     CHECKPOINTMANAGER.address,
+  //     FXROOT.address,
+  //     AssetERC1155.address,
+  //     TRUSTED_FORWARDER.address,
+  //     MAX_TRANSFER_LIMIT,
+  //   ],
+  //   log: true,
+  //   skipIfAlreadyDeployed: true,
+  // });
+
+  const MockAssetERC1155Tunnel = await deployments.get(
+    'MockAssetERC1155Tunnel'
+  );
 
   const MockPolygonAssetERC1155Tunnel = await hre.companionNetworks[
     'l2'
