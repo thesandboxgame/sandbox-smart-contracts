@@ -46,8 +46,6 @@ contract ExperienceEstateRegistry is
         MapLib.Map linkedLands;
     }
 
-    bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
-
     /// @dev Emitted when a link is created
     /// @param estateId Id of the erc721 ESTATE token containing the lands that were linked.
     /// @param expId The experience id that is now linked to the lands.
@@ -75,12 +73,12 @@ contract ExperienceEstateRegistry is
         address experienceToken_,
         //uint8 chainIndex,
         address landToken_,
-        address approver
+        address admin
     ) external initializer {
         _s().experienceToken = experienceToken_;
         _s().estateToken = estateToken_;
         _s().landToken = landToken_;
-        _grantRole(SETTER_ROLE, approver);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     //getters
@@ -190,6 +188,27 @@ contract ExperienceEstateRegistry is
         return _s().linkedLands.intersect(tiles);
     }
 
+    /// @notice update the address of the land token
+    /// @param newLandToken new land token address
+    function setLandContract(address newLandToken) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().landToken = newLandToken;
+    }
+
+    /// @notice update the address of the estate token
+    /// @param newEstateToken new estate token address
+    function setEstateContract(address newEstateToken) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().estateToken = newEstateToken;
+    }
+
+    /// @notice update the address of the experience token
+    /// @param newExperienceToken new land token address
+    function setExperienceContract(address newExperienceToken) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
+        _s().experienceToken = newExperienceToken;
+    }
+
     function _link(
         uint256 estateId,
         uint256 expId,
@@ -247,42 +266,6 @@ contract ExperienceEstateRegistry is
         }
         delete _s().links[expStorageId];
         emit LinkDeleted(expId, from);
-    }
-
-    /// @notice update the address of the land token
-    /// @param newLandToken new land token address
-    function setLandContract(address newLandToken) external {
-        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
-        _s().landToken = newLandToken;
-    }
-
-    /// @notice update the address of the estate token
-    /// @param newEstateToken new estate token address
-    function setEstateContract(address newEstateToken) external {
-        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
-        _s().estateToken = newEstateToken;
-    }
-
-    /// @notice update the address of the experience token
-    /// @param newExperienceToken new land token address
-    function setExperienceContract(address newExperienceToken) external {
-        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
-        _s().experienceToken = newExperienceToken;
-    }
-
-    /// @notice grant setter role to a new account
-    /// @param newSetter new setter address
-    function grantSetterRole(address newSetter) external {
-        require(hasRole(SETTER_ROLE, _msgSender()), "NOT_AUTHORIZED");
-        _grantRole(SETTER_ROLE, newSetter);
-    }
-
-    /// @notice revoke setter role from account
-    /// @param oldSetter old setter address
-    function revokeSetterRole(address oldSetter) external {
-        //use admin instead of setter_role?
-        require(hasRole(SETTER_ROLE, _msgSender()) && hasRole(SETTER_ROLE, oldSetter), "NOT_AUTHORIZED");
-        _revokeRole(SETTER_ROLE, oldSetter);
     }
 
     function _s() internal pure returns (RegistryStorage storage ds) {

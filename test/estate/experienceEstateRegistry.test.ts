@@ -183,7 +183,7 @@ describe('ExperienceEstateRegistry tests', function () {
         registryContractAsOther.batchUnLinkFrom(estateContractAsOther.address, [
           experienceId,
         ])
-      ).to.be.revertedWith('can be called only by estate');
+      ).to.be.revertedWith('can only be called by estate');
     });
     it(`create a link between a single land and an experience and unlink`, async function () {
       const {
@@ -904,11 +904,18 @@ describe('ExperienceEstateRegistry tests', function () {
         experienceContract,
       } = await setupL2EstateExperienceAndLand();
 
-      await expect(
-        registryContractAsOther.grantSetterRole(other)
-      ).to.be.revertedWith('NOT_AUTHORIZED');
+      const DEFAULT_ADMIN_ROLE = await registryContractAsOther.DEFAULT_ADMIN_ROLE();
 
-      await registryContractAsAdmin.grantSetterRole(other);
+      await expect(
+        registryContractAsOther.grantRole(DEFAULT_ADMIN_ROLE, other)
+      ).to.be.revertedWith(
+        'AccessControl: account ' +
+          other.toLowerCase() +
+          ' is missing role ' +
+          DEFAULT_ADMIN_ROLE
+      );
+
+      await registryContractAsAdmin.grantRole(DEFAULT_ADMIN_ROLE, other);
 
       await registryContractAsOther.setLandContract(
         landContractAsOther.address
@@ -928,17 +935,24 @@ describe('ExperienceEstateRegistry tests', function () {
         registryContractAsAdmin,
       } = await setupL2EstateExperienceAndLand();
 
-      await expect(
-        registryContractAsOther.revokeSetterRole(other)
-      ).to.be.revertedWith('NOT_AUTHORIZED');
+      const DEFAULT_ADMIN_ROLE = await registryContractAsOther.DEFAULT_ADMIN_ROLE();
 
-      await registryContractAsAdmin.grantSetterRole(other);
+      await expect(
+        registryContractAsOther.revokeRole(DEFAULT_ADMIN_ROLE, other)
+      ).to.be.revertedWith(
+        'AccessControl: account ' +
+          other.toLowerCase() +
+          ' is missing role ' +
+          DEFAULT_ADMIN_ROLE
+      );
+
+      await registryContractAsAdmin.grantRole(DEFAULT_ADMIN_ROLE, other);
 
       await registryContractAsOther.setLandContract(
         landContractAsOther.address
       );
 
-      await registryContractAsAdmin.revokeSetterRole(other);
+      await registryContractAsAdmin.revokeRole(DEFAULT_ADMIN_ROLE, other);
 
       await expect(
         registryContractAsOther.setLandContract(landContractAsOther.address)
