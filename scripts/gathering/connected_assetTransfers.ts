@@ -47,7 +47,7 @@ async function queryEvents(
   return events;
 }
 
-(async () => {
+void (async () => {
   const Asset = await ethers.getContract('Asset');
   const startBlock = (
     await import(`../../deployments/${hre.network.name}/Asset.json`)

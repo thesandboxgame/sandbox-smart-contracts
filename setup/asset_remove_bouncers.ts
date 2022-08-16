@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 
-(async () => {
+void (async () => {
   const {deployments, ethers} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
   const Asset = await ethers.getContract('Asset');

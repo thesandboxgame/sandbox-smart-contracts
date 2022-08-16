@@ -71,7 +71,7 @@ type TransferTX = {
   values: string[];
 };
 
-(async () => {
+void (async () => {
   const collections: {[collectionId: string]: Token} = {};
   const extractions: ExtractionTx[] = [];
   const transfers: TransferTX[] = [];

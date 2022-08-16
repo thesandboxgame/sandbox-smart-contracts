@@ -100,4 +100,4 @@ const func: DeployFunction = async function () {
 
 export default func;
 
-if (require.main === module) func(hre);
+if (require.main === module) void func(hre);
