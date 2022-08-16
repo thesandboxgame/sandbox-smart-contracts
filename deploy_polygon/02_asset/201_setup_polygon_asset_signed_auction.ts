@@ -52,14 +52,7 @@ const func: DeployFunction = async function (hre) {
       )
     );
   }
-
-  const startBlock = (
-    await import(
-      `../../deployments/${
-        process.env.HARDHAT_FORK ?? hre.network.name
-      }/PolygonAssetERC1155SignedAuction.json`
-    )
-  ).receipt.blockNumber;
+  const startBlock = PolygonAssetERC1155SignedAuction.deployTransaction.blockNumber || 0;
   const fee10000th = 500;
   const feeEvents = await queryEvents(
     PolygonAssetERC1155SignedAuction,
