@@ -1,5 +1,5 @@
-const path = require("path")
-const tsconfigPath = path.join(__dirname, "./tsconfig.json")
+const path = require('path');
+const tsconfigPath = path.join(__dirname, './tsconfig.json');
 module.exports = {
   root: true,
   extends: ['eslint:recommended', 'plugin:mocha/recommended', 'prettier'],
