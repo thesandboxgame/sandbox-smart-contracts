@@ -8,14 +8,18 @@ const func: DeployFunction = async function (hre) {
   const {read, execute, catchUnknownSigner} = deployments;
   const {assetAuctionFeeCollector} = await getNamedAccounts();
 
-  const PolygonAssetERC1155SignedAuction = await ethers.getContract('PolygonAssetERC1155SignedAuction');
+  const PolygonAssetERC1155SignedAuction = await ethers.getContract(
+    'PolygonAssetERC1155SignedAuction'
+  );
   const isAssetSuperOperator = await read(
     'PolygonAssetERC1155',
     'isSuperOperator',
     PolygonAssetERC1155SignedAuction.address
   );
   if (!isAssetSuperOperator) {
-    console.log('setting PolygonAssetERC1155SignedAuction as super operator for PolygonAssetERC1155');
+    console.log(
+      'setting PolygonAssetERC1155SignedAuction as super operator for PolygonAssetERC1155'
+    );
     const currentAssetAdmin = await read('PolygonAssetERC1155', 'getAdmin');
     await catchUnknownSigner(
       execute(
@@ -34,7 +38,9 @@ const func: DeployFunction = async function (hre) {
     PolygonAssetERC1155SignedAuction.address
   );
   if (!isSandSuperOperator) {
-    console.log('setting PolygonAssetERC1155SignedAuction as super operator for PolygonSand');
+    console.log(
+      'setting PolygonAssetERC1155SignedAuction as super operator for PolygonSand'
+    );
     const currentSandAdmin = await read('PolygonSand', 'getAdmin');
     await catchUnknownSigner(
       execute(
@@ -47,13 +53,19 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const startBlock = (await import(`../../deployments/${process.env.HARDHAT_FORK ?? hre.network.name}/PolygonAssetERC1155SignedAuction.json`)).receipt.blockNumber;
+  const startBlock = (
+    await import(
+      `../../deployments/${
+        process.env.HARDHAT_FORK ?? hre.network.name
+      }/PolygonAssetERC1155SignedAuction.json`
+    )
+  ).receipt.blockNumber;
   const fee10000th = 500;
   const feeEvents = await queryEvents(
     PolygonAssetERC1155SignedAuction,
     PolygonAssetERC1155SignedAuction.filters.FeeSetup(),
     startBlock
-  )
+  );
   let lastFeeEvent: Event | undefined;
   if (feeEvents.length > 0) {
     lastFeeEvent = feeEvents[feeEvents.length - 1];
@@ -72,7 +84,9 @@ const func: DeployFunction = async function (hre) {
   }
 
   if (!isFeeSet) {
-    console.log(`set PolygonAssetERC1155SignedAuction's fee to ${fee10000th / 100}%`);
+    console.log(
+      `set PolygonAssetERC1155SignedAuction's fee to ${fee10000th / 100}%`
+    );
     console.log(
       `set PolygonAssetERC1155SignedAuction's fee colletor to ${assetAuctionFeeCollector}`
     );
@@ -96,5 +110,9 @@ func.tags = [
   'PolygonAssetERC1155SignedAuction',
   'PolygonAssetERC1155SignedAuction_setup',
 ];
-func.dependencies = ['PolygonAssetERC721_deploy', 'PolygonAssetERC1155_deploy', 'PolygonSand_deploy'];
+func.dependencies = [
+  'PolygonAssetERC721_deploy',
+  'PolygonAssetERC1155_deploy',
+  'PolygonSand_deploy',
+];
 func.skip = skipUnlessTestnet;

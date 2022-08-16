@@ -22,9 +22,12 @@ const func: DeployFunction = async function () {
   const gasPrice = await (await ethers.provider.getGasPrice()).toString();
   const {deployer, assetAdmin} = await getNamedAccounts();
 
-  const batchMints: {id: string; owner: string, tokenURI?: string, isContract?: boolean}[] = fs.readJSONSync(
-    'tmp/asset721_regenerations.json'
-  );
+  const batchMints: {
+    id: string;
+    owner: string;
+    tokenURI?: string;
+    isContract?: boolean;
+  }[] = fs.readJSONSync('tmp/asset721_regenerations.json');
   console.log({batchMints: batchMints.length});
   const batches: MintBatch[][] = [];
   let currentBatch: MintBatch[] = [];
@@ -33,15 +36,16 @@ const func: DeployFunction = async function () {
       batches.push(currentBatch);
       currentBatch = [];
     }
-    const exists = await read("AssetERC721", "exists", batch.id);
+    const exists = await read('AssetERC721', 'exists', batch.id);
     if (!exists) {
-      batch.tokenURI = batch.tokenURI || await read('Asset', 'tokenURI', batch.id);
-      batch.isContract = batch.isContract || await isContract(batch.owner);
+      batch.tokenURI =
+        batch.tokenURI || (await read('Asset', 'tokenURI', batch.id));
+      batch.isContract = batch.isContract || (await isContract(batch.owner));
       if (batch.isContract) {
-        console.log("skipping:", {owner: batch.owner, id: batch.id});
+        console.log('skipping:', {owner: batch.owner, id: batch.id});
         continue;
       }
-      const metadata = abiCoder.encode(['string'], [batch.tokenURI || ""]);
+      const metadata = abiCoder.encode(['string'], [batch.tokenURI || '']);
       currentBatch.push({
         to: batch.owner,
         id: batch.id,

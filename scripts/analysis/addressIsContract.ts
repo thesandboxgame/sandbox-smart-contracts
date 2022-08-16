@@ -36,4 +36,3 @@ async function scan(contracts: string[], address: string) {
   const result = await isContract(address);
   if (result) contracts.push(address);
 }
-

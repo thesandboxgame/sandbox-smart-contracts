@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
 import {ethers} from 'hardhat';
 
-const cachedCode: {[address: string]: string} = fs.readJSONSync('tmp/cachedCode.json', {throws: false}) || {}
+const cachedCode: {[address: string]: string} =
+  fs.readJSONSync('tmp/cachedCode.json', {throws: false}) || {};
 
 export async function isContract(address: string): Promise<boolean> {
   try {

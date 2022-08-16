@@ -43,7 +43,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'PolygonAssetERC721Tunnel',
       'fxRootTunnel'
     );
-    const fxChildTunnel = await deployments.read("AssetERC721Tunnel", "fxChildTunnel");
+    const fxChildTunnel = await deployments.read(
+      'AssetERC721Tunnel',
+      'fxChildTunnel'
+    );
     if (fxRootTunnel == constants.AddressZero) {
       await hre.companionNetworks['l2'].deployments.execute(
         'PolygonAssetERC721Tunnel',

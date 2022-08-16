@@ -21,13 +21,13 @@ const func: DeployFunction = async function (
   const assetHelperLib = await deploy('AssetHelper', {
     from: deployer,
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
   });
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
     from: deployer,
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
   });
 
   await deploy('PolygonAssetERC1155', {

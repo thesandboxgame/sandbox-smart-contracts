@@ -32,5 +32,9 @@ func.tags = [
   'PolygonAssetERC1155SignedAuction',
   'PolygonAssetERC1155SignedAuction_deploy',
 ];
-func.dependencies = ['PolygonAssetERC721_deploy', 'PolygonAssetERC1155_deploy', 'PolygonSand_deploy'];
+func.dependencies = [
+  'PolygonAssetERC721_deploy',
+  'PolygonAssetERC1155_deploy',
+  'PolygonSand_deploy',
+];
 func.skip = skipUnlessTestnet;
