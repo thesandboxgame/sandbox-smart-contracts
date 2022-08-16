@@ -108,6 +108,10 @@ contract ExperienceEstateRegistry is
         return _s().links[expStorageId].estateId;
     }
 
+    /// @notice creation of a link between a single land and an experience
+    /// @param expId the experience id
+    /// @param x coordinate of the template
+    /// @param y coordinate of the template
     function linkSingle(
         uint256 expId,
         uint256 x,
@@ -116,6 +120,11 @@ contract ExperienceEstateRegistry is
         _link(0, expId, x, y);
     }
 
+    /// @notice creation of a link between an estate and an experience
+    /// @param estateId the estate id
+    /// @param expId the experience id
+    /// @param x coordinate of the template
+    /// @param y coordinate of the template
     function link(
         uint256 estateId,
         uint256 expId,
@@ -125,10 +134,19 @@ contract ExperienceEstateRegistry is
         _link(estateId, expId, x, y);
     }
 
+    /// @notice unlink an experience from either land or estate
+    /// @param expId the experience id to be unlinked
     function unLink(uint256 expId) external override {
         _unLinkFrom(_msgSender(), expId);
     }
 
+    /// @notice relink an experience, ereasing the previous link and creating a new one
+    /// @param expIdsToUnlink array of experience ids to unlink
+    /// @param expToLink RelinkData, cointaining
+    /// estateId: estate id to be linked
+    /// expId: exp id to be linked
+    /// x: template x coord
+    /// y: template y
     function relink(uint256[] calldata expIdsToUnlink, RelinkData[] memory expToLink) external {
         _batchUnLinkFrom(_msgSender(), expIdsToUnlink);
         uint256 len = expToLink.length;
@@ -138,12 +156,16 @@ contract ExperienceEstateRegistry is
         }
     }
 
+    /// @notice unlink links in batch, can only be callied through the Estate contract
+    /// @param from owner of the links
+    /// @param expIdsToUnlink array of ids to be unlinked
     function batchUnLinkFrom(address from, uint256[] calldata expIdsToUnlink) external override {
-        require(address(_s().estateToken) == _msgSender(), "can be called only by estate");
+        require(address(_s().estateToken) == _msgSender(), "can only be called by estate");
         _batchUnLinkFrom(from, expIdsToUnlink);
     }
 
-    // Called by the estate contract to check that the land are ready to remove.
+    /// @notice check if quads are linked
+    /// @param quads set of quads to verify if they are linked
     function isLinked(uint256[][3] calldata quads) external view override returns (bool) {
         uint256 len = quads[0].length;
         for (uint256 i; i < len; i++) {
@@ -154,12 +176,16 @@ contract ExperienceEstateRegistry is
         return false;
     }
 
+    /// @notice check if quads are linked
+    /// @param expId experience id to verify if it is linked
     function isLinked(uint256 expId) external view override returns (bool) {
         uint256 expStorageId = IExperienceToken(_s().experienceToken).getStorageId(expId);
         EstateAndLands storage est = _s().links[expStorageId];
         return est.estateId > 0;
     }
 
+    /// @notice check if quads are linked
+    /// @param tiles tile with coordinate, to verify if is linked
     function isLinked(TileWithCoordLib.TileWithCoord[] calldata tiles) external view override returns (bool) {
         return _s().linkedLands.intersect(tiles);
     }
