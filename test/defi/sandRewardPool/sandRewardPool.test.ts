@@ -477,9 +477,13 @@ describe('new SandRewardPool main contract tests', function () {
       const emitPromise = expect(
         contract.computeContributionInBatch(users.map((u) => u.address))
       ).to.emit(contract, 'ContributionUpdated');
-      users.forEach((u) =>
-        emitPromise.withArgs(u.address, u.contributed.div(2), u.contributed)
-      );
+      for (const u of users) {
+        await emitPromise.withArgs(
+          u.address,
+          u.contributed.div(2),
+          u.contributed
+        );
+      }
       await emitPromise;
       // Now the changes are reflected
       for (const u of users) {
@@ -705,9 +709,13 @@ describe('new SandRewardPool main contract tests', function () {
           usersWithReward.map((u) => u.address)
         )
       ).to.emit(contract, 'ContributionUpdated');
-      usersWithReward.forEach((u) =>
-        emitPromise.withArgs(u.address, u.newContribution, u.oldContribution)
-      );
+      for (const u of usersWithReward) {
+        await emitPromise.withArgs(
+          u.address,
+          u.newContribution,
+          u.oldContribution
+        );
+      }
       await emitPromise;
 
       // Contributions where updated user got the earnings from old contribution
@@ -749,7 +757,7 @@ describe('new SandRewardPool main contract tests', function () {
       const {getUser, contractAsOther} = await setupSandRewardPoolTest();
       const user = await getUser();
 
-      expect(
+      await expect(
         contractAsOther.setTrustedForwarder(user.address)
       ).to.be.revertedWith('SandRewardPool: not admin');
     });
@@ -758,7 +766,8 @@ describe('new SandRewardPool main contract tests', function () {
 
       const user = await getUser();
 
-      expect(contract.setTrustedForwarder(user.address)).to.be.not.reverted;
+      await expect(contract.setTrustedForwarder(user.address)).to.be.not
+        .reverted;
 
       expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
     });

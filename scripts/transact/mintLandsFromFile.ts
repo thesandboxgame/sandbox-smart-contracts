@@ -8,8 +8,9 @@ yarn execute localhost scripts/transact/mintLandsFromFile.ts --sourceNetwork rin
 */
 
 import fs from 'fs-extra';
-import {ethers, deployments} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
 import minimist from 'minimist';
+
 const {execute, read} = deployments;
 
 type Land = {
@@ -42,7 +43,7 @@ function log(msg: string) {
   console.log(`${new Date().toISOString()} - ${msg}`);
 }
 
-(async () => {
+void (async () => {
   const argv = minimist(process.argv.slice(2));
   if (!argv.sourceNetwork) throw new Error('sourceNetwork argument is missing');
   const sourceNetwork = argv.sourceNetwork;

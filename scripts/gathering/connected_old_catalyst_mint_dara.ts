@@ -3,7 +3,7 @@ import {deployments} from 'hardhat';
 
 const {read} = deployments;
 
-(async () => {
+void (async () => {
   for (let i = 0; i < 4; i++) {
     const mintData = await read('Catalyst', 'getMintData', i);
     const maxGems = BigNumber.from(mintData.maxGems).mul(

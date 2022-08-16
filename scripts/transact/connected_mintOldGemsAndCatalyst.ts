@@ -1,7 +1,8 @@
 import {deployments, getNamedAccounts} from 'hardhat';
+
 const {read, execute, catchUnknownSigner} = deployments;
 
-(async () => {
+void (async () => {
   const {sandAdmin, sandboxAccount} = await getNamedAccounts();
 
   if (!(await read('OldGems', {}, 'isMinter', sandAdmin))) {

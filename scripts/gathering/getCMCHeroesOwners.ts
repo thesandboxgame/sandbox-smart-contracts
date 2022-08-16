@@ -42,7 +42,7 @@ async function fetchOwnersOf(
   return assetOwners;
 }
 
-(async () => {
+void (async () => {
   const owners: {[address: string]: {[tokenId: string]: number}} = {};
   for (const id of ids) {
     const ownersOfToken = await fetchOwnersOf(id);

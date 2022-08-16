@@ -15,6 +15,7 @@ module.exports = {
       files: ['*.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
+        project: ['./tsconfig.json'],
         ecmaVersion: 2020,
         sourceType: 'module',
       },
@@ -26,6 +27,10 @@ module.exports = {
         'prettier',
         'prettier/@typescript-eslint',
       ],
+      rules: {
+        '@typescript-eslint/no-misused-promises': 'error',
+        '@typescript-eslint/no-floating-promises': 'error',
+      },
     },
   ],
 };

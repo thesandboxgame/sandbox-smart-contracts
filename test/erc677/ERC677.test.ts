@@ -2,6 +2,7 @@ import {ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../chai-setup';
 import {setupERC677} from './fixtures';
+
 describe('ERC677Token', function () {
   it('Transfering tokens to ERC677Receiver contract should emit an OnTokenTransferEvent event', async function () {
     const {gemToken, tokenReceiver} = await setupERC677();
@@ -53,7 +54,7 @@ describe('ERC677Token', function () {
     const toBalanceBefore = await gemToken.balanceOf(emptyContract.address);
 
     const amount = BigNumber.from('100000000000000000');
-    expect(
+    await expect(
       gemToken
         .connect(ethers.provider.getSigner(accounts.deployer))
         .transferAndCall(emptyContract.address, amount, Buffer.from('data'))

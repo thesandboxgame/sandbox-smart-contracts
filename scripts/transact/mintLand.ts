@@ -1,4 +1,5 @@
 import {deployments, getNamedAccounts} from 'hardhat';
+
 const {read, execute} = deployments;
 
 const args = process.argv.slice(2);
@@ -7,7 +8,7 @@ const coordinateY = parseInt(args[1] || '95');
 const size = args[2] || 1;
 const to = args[3] || '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea';
 
-(async () => {
+void (async () => {
   const {landAdmin} = await getNamedAccounts();
   const x = coordinateX + 204;
   const y = coordinateY + 204;

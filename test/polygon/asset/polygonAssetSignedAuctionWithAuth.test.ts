@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 import {setupPolygonAsset, signAuthMessageAs} from './fixtures';
-import {waitFor} from '../../utils';
+import {getTime, waitFor} from '../../utils';
 import BN from 'bn.js';
 import crypto from 'crypto';
 import {BigNumber, constants} from 'ethers';
@@ -42,7 +42,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -157,7 +157,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -251,7 +251,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     await provideSand(users[1].address, BigNumber.from('5000000000000000000'));
 
@@ -373,7 +373,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -507,13 +507,15 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
     );
-
-    await assetSignedAuctionAuthContract.cancelSellerOffer(offerId);
+    const assetSignedAuctionAuthContractAsSeller = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(seller)
+    );
+    await assetSignedAuctionAuthContractAsSeller.cancelSellerOffer(offerId);
 
     const hashedData = ethers.utils.solidityKeccak256(
       [
@@ -590,7 +592,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
       true
     );
 
-    expect(
+    await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig(
         {
           buyer: users[1].address,
@@ -620,7 +622,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -731,7 +733,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 500;
+    const startedAt = (await getTime()) - 500;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -833,7 +835,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) + 1000;
+    const startedAt = (await getTime()) + 1000;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)
@@ -925,7 +927,7 @@ describe('PolygonAssetSignedAuctionAuth', function () {
     const seller = users[0].address;
 
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    const startedAt = Math.floor(Date.now() / 1000) - 10000;
+    const startedAt = (await getTime()) - 10000;
 
     const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(users[1].address)

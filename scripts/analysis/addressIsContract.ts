@@ -6,7 +6,7 @@
 import fs from 'fs-extra';
 import {isContract} from '../../utils/address';
 
-(async () => {
+void (async () => {
   const addresses: string[] = fs
     .readJSONSync('tmp/addressList.json')
     .map((a: string) => a.toLowerCase());

@@ -7,7 +7,7 @@ const to = args[0]; // in Ethers
 const value = args[1]; // in Ethers
 
 // this script allow to stop pending transaction
-(async () => {
+void (async () => {
   const {deployer} = await getNamedAccounts();
   const balance = await ethers.provider.getBalance(deployer);
   const valueWei = ethers.utils.parseEther(value).toString();
