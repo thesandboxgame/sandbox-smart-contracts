@@ -50,8 +50,7 @@ const func: DeployFunction = async function (
         'ERC20RewardPool',
         {from: currentAdmin, log: true},
         'setContributionRules',
-        contributionRules.address,
-        false
+        contributionRules.address
       )
     );
   }
