@@ -375,7 +375,7 @@ describe('ExperienceEstateRegistry tests', function () {
       });
 
       await registryContractAsOther.link(estateId, experienceId, 48, 96);
-      await registryContractAsOther.relink(
+      await registryContractAsOther.reLink(
         [experienceId],
         [{estateId: estateId, expId: experienceId2, x: 48, y: 96}]
       );

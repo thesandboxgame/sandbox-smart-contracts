@@ -145,7 +145,7 @@ contract ExperienceEstateRegistry is
     /// expId: exp id to be linked
     /// x: template x coord
     /// y: template y
-    function relink(uint256[] calldata expIdsToUnlink, RelinkData[] memory expToLink) external {
+    function reLink(uint256[] calldata expIdsToUnlink, RelinkData[] memory expToLink) external {
         _batchUnLinkFrom(_msgSender(), expIdsToUnlink);
         uint256 len = expToLink.length;
         for (uint256 i; i < len; i++) {
