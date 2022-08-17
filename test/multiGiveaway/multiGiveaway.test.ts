@@ -1,26 +1,26 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
-import {constants, BigNumber} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 import {
-  waitFor,
-  expectReceiptEventWithArgs,
   expectEventWithArgs,
-  findEvents,
   expectEventWithArgsFromReceipt,
+  expectReceiptEventWithArgs,
+  findEvents,
   increaseTime,
+  waitFor,
 } from '../utils';
 import {sendMetaTx} from '../sendMetaTx';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateMultiClaimHash} = helpers;
-
 import {
-  testInitialAssetAndLandBalances,
   testFinalAssetAndLandBalances,
+  testInitialAssetAndLandBalances,
   testInitialERC20Balance,
   testUpdatedERC20Balance,
 } from './balanceHelpers';
+
+const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
@@ -75,7 +75,11 @@ describe('Multi_Giveaway', function () {
     it('User can get their claimed status', async function () {
       const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others, allMerkleRoots} = setUp;
+      const {giveawayContract, others, allClaims} = setUp;
+
+      const claim = [];
+      claim.push(allClaims[0][0]);
+      claim.push(allClaims[1][0]);
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
@@ -83,7 +87,7 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        claim
       );
 
       expect(statuses[0]).to.equal(false);
@@ -128,7 +132,7 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statuses[0]).to.equal(false);
@@ -142,7 +146,7 @@ describe('Multi_Giveaway', function () {
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statusesAfterClaim[0]).to.equal(true);
@@ -167,10 +171,13 @@ describe('Multi_Giveaway', function () {
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
       const userClaims = [];
+      const claimOnlyOne = [];
+      const claim = allClaims[0][0];
       const secondClaim = allClaims[1][0];
+      userClaims.push(claim);
       userClaims.push(secondClaim);
       userProofs.push(
-        allTrees[1].getProof(calculateMultiClaimHash(userClaims[0]))
+        allTrees[1].getProof(calculateMultiClaimHash(userClaims[1]))
       );
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[1]);
@@ -181,21 +188,23 @@ describe('Multi_Giveaway', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statuses[0]).to.equal(false);
       expect(statuses[1]).to.equal(false);
 
+      claimOnlyOne.push(secondClaim);
+
       await giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
         userMerkleRoots,
-        userClaims,
+        claimOnlyOne,
         userProofs
       );
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        allMerkleRoots
+        userClaims
       );
 
       expect(statusesAfterClaim[0]).to.equal(false);
@@ -346,7 +355,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract', async function () {
@@ -1194,7 +1203,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract - multiple giveaways, 1 claim', async function () {
@@ -1556,7 +1565,7 @@ describe('Multi_Giveaway', function () {
 
       await expect(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
-      ).to.be.revertedWith(`not enough fund`);
+      ).to.be.revertedWith(`INSUFFICIENT_FUNDS`);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract', async function () {
@@ -1712,7 +1721,8 @@ describe('Multi_Giveaway', function () {
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(user)
       );
-      expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be.reverted;
+      await expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be
+        .reverted;
     });
 
     it('should succeed in setting the trusted forwarder if admin', async function () {
@@ -1721,7 +1731,7 @@ describe('Multi_Giveaway', function () {
       const {giveawayContractAsAdmin, others} = setUp;
       const user = others[7];
 
-      expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
+      await expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
         .reverted;
 
       expect(await giveawayContractAsAdmin.getTrustedForwarder()).to.be.equal(

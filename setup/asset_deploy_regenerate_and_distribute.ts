@@ -14,5 +14,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

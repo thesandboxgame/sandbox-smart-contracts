@@ -10,7 +10,7 @@ const cachedCode: {[address: string]: string} = loadCached(
   'tmp/cachedCode.json'
 );
 
-(async () => {
+void (async () => {
   const addresses: string[] = fs
     .readJSONSync('tmp/addressList.json')
     .map((a: string) => a.toLowerCase());

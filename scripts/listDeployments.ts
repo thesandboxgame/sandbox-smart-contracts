@@ -1,5 +1,6 @@
 import hre from 'hardhat';
-(async () => {
+
+void (async () => {
   const deploys = await hre.deployments.all();
   console.log(Object.keys(deploys));
 })();

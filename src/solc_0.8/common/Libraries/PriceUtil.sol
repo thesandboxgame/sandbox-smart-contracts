@@ -1,12 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./SafeMathWithRequire.sol";
-
 library PriceUtil {
-    using SafeMathWithRequire for uint256;
-    using SafeMath for uint256;
-
     function calculateCurrentPrice(
         uint256 startingPrice,
         uint256 endingPrice,

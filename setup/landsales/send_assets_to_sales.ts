@@ -8,7 +8,7 @@ const {read, execute, catchUnknownSigner} = deployments;
 const args = process.argv.slice(2);
 const landSalePrefix = args[0];
 
-(async () => {
+void (async () => {
   const networkName = hre.network.name;
   const {sectors, bundles} = await getLandSaleFiles(
     landSalePrefix,

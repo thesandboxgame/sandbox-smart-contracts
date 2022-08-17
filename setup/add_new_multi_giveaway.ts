@@ -11,16 +11,20 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
+
 const {calculateMultiClaimHash} = helpers;
 
 const args = process.argv.slice(2);
 const claimContract = args[0];
 const claimFile = args[1];
+const ADMIN_ROLE =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 const func: DeployFunction = async function () {
-  const {deployments, network, getChainId} = hre;
+  const {deployments, network, getChainId, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
   const chainId = await getChainId();
+  const {multiGiveawayAdmin} = await getNamedAccounts();
 
   let claimData: MultiClaim[];
   try {
@@ -65,7 +69,18 @@ const func: DeployFunction = async function () {
     return;
   }
 
-  const currentAdmin = await read(claimContract, 'getAdmin');
+  const isMultiGiveAwaySuperOperator = await read(
+    claimContract,
+    'hasRole',
+    ADMIN_ROLE,
+    multiGiveawayAdmin
+  );
+
+  let currentAdmin = multiGiveawayAdmin;
+
+  if (!isMultiGiveAwaySuperOperator) {
+    currentAdmin = await read(claimContract, 'getAdmin');
+  }
 
   await catchUnknownSigner(
     execute(
@@ -97,5 +112,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

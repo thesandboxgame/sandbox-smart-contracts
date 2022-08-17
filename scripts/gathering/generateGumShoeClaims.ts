@@ -3,7 +3,7 @@ import {isAddress} from '@ethersproject/address';
 import fs from 'fs';
 import {read} from '../utils/spreadsheet';
 
-(async () => {
+void (async () => {
   const data: Array<string[]> = await read(
     {
       document: '1aSFdWvHpQEQrUu6eRVRNfVan8-OVILS16ft6uowhX5c',

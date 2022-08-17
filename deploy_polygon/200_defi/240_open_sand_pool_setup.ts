@@ -39,6 +39,29 @@ const func: DeployFunction = async function (
     );
   }
 
+  const contributionCalculator = await deployments.get(
+    'LandContributionCalculator'
+  );
+
+  const contributionCalculatorAddress = await deployments.read(
+    'OpenSandRewardPool',
+    'contributionCalculator'
+  );
+
+  if (
+    contributionCalculatorAddress.toLowerCase() !==
+    contributionCalculator.address.toLowerCase()
+  ) {
+    await deployments.catchUnknownSigner(
+      deployments.execute(
+        'OpenSandRewardPool',
+        {from: currentAdmin, log: true},
+        'setContributionCalculator',
+        contributionCalculator.address
+      )
+    );
+  }
+
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const isTrustedForwarder = await read(
     'OpenSandRewardPool',
@@ -62,6 +85,7 @@ export default func;
 func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_setup'];
 func.dependencies = [
   'OpenSandRewardCalculator_deploy',
+  'LandContributionCalculator_deploy',
   'OpenSandRewardPool_deploy',
   'TRUSTED_FORWARDER_V2',
 ];

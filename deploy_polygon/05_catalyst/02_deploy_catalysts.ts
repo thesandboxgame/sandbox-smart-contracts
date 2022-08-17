@@ -10,22 +10,32 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const GemsCatalystsRegistry = await deployments.get(
     'PolygonGemsCatalystsRegistry'
   );
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
 
-  const {catalystAdmin, deployer} = await getNamedAccounts();
+  const {catalystAdmin, upgradeAdmin, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
     await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
-      contract: 'Catalyst',
+      contract: 'CatalystV1',
       from: deployer,
       log: true,
-      args: [
-        `Sandbox ${catalyst.symbol} Catalysts`,
-        catalyst.symbol,
-        catalystAdmin,
-        catalyst.maxGems,
-        catalyst.catalystId,
-        DefaultAttributes.address,
-        GemsCatalystsRegistry.address,
-      ],
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: '__CatalystV1_init',
+          args: [
+            `Sandbox ${catalyst.symbol} Catalysts`, //name
+            catalyst.symbol, //symbol
+            TRUSTED_FORWARDER_V2.address, //trusted forwarder
+            catalystAdmin, //admin
+            catalyst.maxGems, //maxGems
+            catalyst.catalystId, //catalystId
+            DefaultAttributes.address, //attributes
+            GemsCatalystsRegistry.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
       skipIfAlreadyDeployed: true,
     });
   }

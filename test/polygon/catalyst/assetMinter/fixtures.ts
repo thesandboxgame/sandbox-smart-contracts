@@ -4,11 +4,12 @@ import {assetAttributesRegistryFixture} from '../../../common/fixtures/assetAttr
 import {assetUpgraderFixtures} from '../../../common/fixtures/assetUpgrader';
 import {withSnapshot} from '../../../utils';
 
+// Deployed on Polygon
 const assetMinterFixtures = async () => {
-  const assetMinterContract = await ethers.getContract('AssetMinter');
-  const assetContract = await ethers.getContract('Asset');
+  const assetMinterContract = await ethers.getContract('PolygonAssetMinter');
+  const assetContract = await ethers.getContract('PolygonAssetERC1155');
   const user3 = (await getUnnamedAccounts())[3];
-  const {assetMinterAdmin} = await getNamedAccounts();
+  const {assetMinterAdmin, sandAdmin} = await getNamedAccounts();
 
   const assetMinterContractAsOwner = assetMinterContract.connect(
     ethers.provider.getSigner(assetMinterAdmin)
@@ -24,19 +25,21 @@ const assetMinterFixtures = async () => {
     assetContract,
     assetMinterContractAsUser3,
     user3,
+    sandAdmin,
   };
 };
 
 export const setupAssetMinter = withSnapshot(
-  ['AssetMinter'],
+  ['PolygonAssetMinter', 'L2'],
   assetMinterFixtures
 );
 
 export const setupAssetMinterGemsAndCatalysts = withSnapshot(
   [
-    'AssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
-    'AssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'PolygonAssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
+    'PolygonAssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
+    'PolygonGemsCatalystsRegistry_setup',
+    'L2',
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),
@@ -45,9 +48,10 @@ export const setupAssetMinterGemsAndCatalysts = withSnapshot(
 );
 export const setupAssetMinterAttributesRegistryGemsAndCatalysts = withSnapshot(
   [
-    'AssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
-    'AssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'PolygonAssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
+    'PolygonAssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
+    'PolygonGemsCatalystsRegistry_setup',
+    'L2',
   ],
   async () => ({
     ...(await gemsAndCatalystsFixtures()),
@@ -58,11 +62,12 @@ export const setupAssetMinterAttributesRegistryGemsAndCatalysts = withSnapshot(
 
 export const setupAssetMinterUpgraderGemsAndCatalysts = withSnapshot(
   [
-    'AssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
-    'AssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
-    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
-    'AssetUpgrader_setup',
-    'AssetUpgraderFeeBurner_setup',
+    'PolygonAssetMinter_setup', // we need to set up the bouncer, 'only bouncer allowed to mint'
+    'PolygonAssetAttributesRegistry_setup', // we need to set AssetMinter as AuthorizedMinter NOT_AUTHORIZED_MINTER
+    'PolygonGemsCatalystsRegistry_setup',
+    'PolygonAssetUpgrader_setup',
+    'PolygonAssetUpgraderFeeBurner_setup',
+    'L2',
   ],
   async () => ({
     ...(await assetUpgraderFixtures()),

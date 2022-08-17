@@ -54,8 +54,10 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         uint256 id
     ) external {
         uint256 ownerData = _owners[_storageId(id)];
+        address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
+        require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
             msgSender == sender || _superOperators[msgSender] || _operatorsForAll[sender][msgSender],
             "UNAUTHORIZED_APPROVAL"
@@ -102,7 +104,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external {
+    ) public virtual {
         _batchTransferFrom(from, to, ids, data, false);
     }
 
@@ -309,8 +311,14 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
             _numNFTPerAddress[to] += numTokens;
         }
 
-        if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
-            require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_TRANSFER_REJECTED");
+        if (to.isContract()) {
+            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
+            } else if (safe) {
+                for (uint256 i = 0; i < numTokens; i++) {
+                    require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
+                }
+            }
         }
     }
 

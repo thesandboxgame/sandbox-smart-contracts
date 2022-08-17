@@ -952,6 +952,7 @@ module.exports = (init, extensions) => {
         erc721ABI,
         ethers.provider
       );
+
       const owner = users[0];
       const user0 = users[1];
       const user1 = users[2];
@@ -1181,9 +1182,10 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         const {tokenId} = await mint(user0);
-        const receipt = await contractAsUser0[
-          'burnFrom(address,uint256,uint256)'
-        ](user0, tokenId, 1).then((tx) => tx.wait());
+        const receipt = await contractAsUser0['burnFrom(address,uint256)'](
+          user0,
+          tokenId
+        ).then((tx) => tx.wait());
         const eventsMatching = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber
@@ -1202,10 +1204,9 @@ module.exports = (init, extensions) => {
       }) {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
-        await contractAsUser0['burnFrom(address,uint256,uint256)'](
+        await contractAsUser0['burnFrom(address,uint256)'](
           user0,
-          tokenId,
-          1
+          tokenId
         ).then((tx) => tx.wait());
         await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
@@ -1537,6 +1538,50 @@ module.exports = (init, extensions) => {
           .safeBatchTransferFrom(owner, user0, tokenIds, '0x')
           .then((tx) => tx.wait());
         // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
+      });
+
+      it('safe batch transfering to a contract that do not implemented onERC721Received should fail', async function ({
+        deployNonReceivingContract,
+        contract,
+        contractAsOwner,
+        owner,
+        tokenIds,
+      }) {
+        const receiverContract = await deployNonReceivingContract(
+          contract.address
+        );
+        const receiverAddress = receiverContract.address;
+        await expect(
+          contractAsOwner.safeBatchTransferFrom(
+            owner,
+            receiverAddress,
+            tokenIds,
+            '0x'
+          )
+        ).to.be.reverted;
+      });
+
+      it('safe batch transfering to a contract that implements onERC721Received should succeed', async function ({
+        deployERC721TokenReceiver,
+        contract,
+        contractAsOwner,
+        owner,
+        tokenIds,
+      }) {
+        const receiverContract = await deployERC721TokenReceiver(
+          contract.address,
+          true,
+          true
+        );
+        const receiverAddress = receiverContract.address;
+        await expect(
+          contractAsOwner.safeBatchTransferFrom(
+            owner,
+            receiverAddress,
+            tokenIds,
+            '0x'
+          )
+        ).to.not.be.reverted;
       });
     });
   }
@@ -1950,24 +1995,6 @@ module.exports = (init, extensions) => {
         tokenIds[0]
       );
       assert.equal(approvedAddress, zeroAddress);
-    });
-
-    it('transfering the approved NFT results in aproval reset for it but no approval event', async function ({
-      contractAsOwner,
-      contractAsUser1,
-      owner,
-      user0,
-      user1,
-      tokenIds,
-    }) {
-      await contractAsOwner.approve(user1, tokenIds[0]).then((tx) => tx.wait());
-      const receipt = await contractAsUser1
-        .transferFrom(owner, user0, tokenIds[0])
-        .then((tx) => tx.wait());
-      const eventsMatching = receipt.events.filter(
-        (v) => v.event === 'Approval'
-      );
-      assert.equal(eventsMatching.length, 0);
     });
 
     it('transfering the approved NFT again will fail', async function ({

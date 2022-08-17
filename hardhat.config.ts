@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import {HardhatUserConfig} from 'hardhat/types';
-import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
-import 'hardhat-gas-reporter';
-import '@openzeppelin/hardhat-upgrades';
-import 'solidity-coverage';
-import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
+import '@openzeppelin/hardhat-upgrades';
+import 'dotenv/config';
+import 'hardhat-contract-sizer';
+import 'hardhat-deploy';
+import 'hardhat-gas-reporter';
+import {HardhatUserConfig} from 'hardhat/types';
+import 'solidity-coverage';
 import {accounts, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -19,6 +19,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
   solidity: {
     compilers: [
@@ -78,6 +79,24 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      'src/solc_0.8/polygon/child/asset/PolygonAssetERC1155.sol:PolygonAssetERC1155': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 0,
+          },
+        },
+      },
+      'src/solc_0.8/assetERC1155/AssetERC1155.sol:AssetERC1155': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 0,
+          },
+        },
+      },
     },
   },
   namedAccounts: {
@@ -87,7 +106,9 @@ const config: HardhatUserConfig = {
       polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+      goerli_test: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+      mumbai_test: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
@@ -96,7 +117,9 @@ const config: HardhatUserConfig = {
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     upgradeAdmin: 'sandAdmin',
@@ -133,7 +156,9 @@ const config: HardhatUserConfig = {
       polygon: '0xbc4fE9A8a46442eDaF13Bd5c615D7CFe0953885B', // TODO: get sand admin multi sig contract
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
+      goerli_test: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
+      mumbai_test: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
 
     Foundation: {
@@ -150,6 +175,7 @@ const config: HardhatUserConfig = {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
+      goerli_test: 'sandSaleBeneficiary',
       mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
     },
 
@@ -157,6 +183,8 @@ const config: HardhatUserConfig = {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
       goerli: 'sandSaleBeneficiary',
+      goerli_test: 'sandSaleBeneficiary',
+
       mainnet: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
@@ -166,6 +194,7 @@ const config: HardhatUserConfig = {
       default: 3,
       rinkeby: 5,
       goerli: 5,
+      goerli_test: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
@@ -175,7 +204,10 @@ const config: HardhatUserConfig = {
       polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     gemsAndCatalystsAdmin: 'sandAdmin',
@@ -186,7 +218,9 @@ const config: HardhatUserConfig = {
       polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -201,7 +235,9 @@ const config: HardhatUserConfig = {
       mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
+    // To be used with AuthValidator only
     backendAuthWallet: {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
@@ -209,12 +245,19 @@ const config: HardhatUserConfig = {
       mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+    },
+    backendCashbackWallet: {
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      polygon: '0x564c8aADBd35b6175C0d18595cc335106AA250Dc',
     },
     raffleSignWallet: {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      mainnet: '0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB',
+      mainnet: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
       default: 4,
@@ -222,6 +265,7 @@ const config: HardhatUserConfig = {
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     sandboxFoundation: {
       default: 4,
@@ -232,6 +276,7 @@ const config: HardhatUserConfig = {
       mainnet: null,
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
     catalystMinter: 'sandAdmin', // account that can mint catalysts
@@ -245,6 +290,17 @@ const config: HardhatUserConfig = {
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
     gemsCatalystsRegistryAdmin: 'sandAdmin',
+    ozdRelayer: {
+      default: 1,
+      polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
+      mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
+    },
+    // OZ Defender relay
+    landMigrationBatchExecutor: {
+      default: 1,
+      mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
+      goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
+    },
   },
   networks: {
     /**
@@ -298,6 +354,16 @@ const config: HardhatUserConfig = {
         l2: 'mumbai',
       },
     },
+    goerli_test: {
+      url: node_url('goerli'),
+      accounts: accounts('goerli_test'),
+      tags: ['testnet', 'L1'],
+      deploy: ['deploy'],
+      gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
+      companionNetworks: {
+        l2: 'mumbai_test',
+      },
+    },
     mainnet: {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
@@ -316,13 +382,23 @@ const config: HardhatUserConfig = {
         l1: 'goerli',
       },
     },
+    mumbai_test: {
+      url: node_url('mumbai'),
+      accounts: accounts('mumbai_test'),
+      tags: ['testnet', 'L2'],
+      deploy: ['deploy_polygon'],
+      //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
+      companionNetworks: {
+        l1: 'goerli_test',
+      },
+    },
     polygon: {
       url: node_url('polygon'),
       accounts: accounts('polygon'),
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       companionNetworks: {
-        l2: 'mainnet',
+        l1: 'mainnet',
       },
     },
   },
@@ -348,7 +424,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
-      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY_MUMBAI || '',
     },
   },
 };

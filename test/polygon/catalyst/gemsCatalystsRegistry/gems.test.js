@@ -4,7 +4,7 @@ const generateERC20Tests = require('../../../erc20');
 
 function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
-    withSnapshot(['Gems'], async () => {
+    withSnapshot(['PolygonGems'], async () => {
       const others = await getUnnamedAccounts();
       const {gemMinter} = await getNamedAccounts();
       const contract = await ethers.getContract(gemName);
@@ -38,7 +38,7 @@ function testGem(gemName) {
   });
 }
 
-testGem('Gem_POWER');
+testGem('PolygonGem_POWER');
 // testGem('Gem_DEFENSE');
 // testGem('Gem_SPEED');
 // testGem('Gem_MAGIC');

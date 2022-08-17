@@ -6,7 +6,7 @@
  * Do not use or deploy this code before reviewing it personally first.
  */
 // solhint-disable-next-line compiler-fixed
-pragma solidity ^0.5.2;
+pragma solidity 0.5.9;
 
 interface ERC721TokenReceiver {
     function onERC721Received(

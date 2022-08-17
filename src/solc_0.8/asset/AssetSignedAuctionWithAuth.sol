@@ -69,7 +69,7 @@ contract AssetSignedAuctionWithAuth is
 
     mapping(address => mapping(uint256 => uint256)) public claimed;
 
-    IAuthValidator internal _authValidator;
+    IAuthValidator public _authValidator;
     IERC1155 public _asset;
     uint256 public _fee10000th = 0;
     uint256 public _feeLimit = 500;

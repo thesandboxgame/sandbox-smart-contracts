@@ -52,7 +52,7 @@ async function queryEvents(
   return events;
 }
 
-(async () => {
+void (async () => {
   const Asset = await ethers.getContract('OldAsset');
   const singleTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferSingle()),

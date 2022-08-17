@@ -25,7 +25,15 @@ const AUCTION_TYPEHASH = ethers.utils.solidityKeccak256(
 );
 
 const setupAssetSignedAuction = withSnapshot(
-  ['Asset', 'AuthValidator', 'AssetSignedAuctionWithAuth', 'Sand'],
+  [
+    'Asset',
+    'AuthValidator',
+    'AssetSignedAuctionWithAuth',
+    'Sand',
+    'PolygonAssetERC1155',
+    'AssetERC1155Tunnel',
+    'PolygonAssetERC1155Tunnel',
+  ],
   async () => {
     return {
       assetFixture: await assetFixtures(),
