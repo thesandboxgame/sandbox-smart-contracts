@@ -7,16 +7,24 @@ const func: DeployFunction = async function (
   const {deployments, ethers} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
   const rewardsCalculator = await deployments.get('ERC20RewardCalculator');
+  const contributionRules = await deployments.get('ContributionRules');
 
   const rewardsCalculatorAddress = await deployments.read(
     'ERC20RewardPool',
     'rewardCalculator'
   );
 
+  const contributionRulesAddress = await deployments.read(
+    'ERC20RewardPool',
+    'contributionRules'
+  );
+
   const sandPool = await ethers.getContract('ERC20RewardPool');
 
-  // check who has Admin role: deployer or sandAdmin
+  // get currentAdmin
   const currentAdmin = await sandPool.owner();
+
+  // set rewawardCalculator contract
   if (
     rewardsCalculatorAddress.toLowerCase() !==
     rewardsCalculator.address.toLowerCase()
@@ -27,6 +35,22 @@ const func: DeployFunction = async function (
         {from: currentAdmin, log: true},
         'setRewardCalculator',
         rewardsCalculator.address,
+        false
+      )
+    );
+  }
+
+  // set contributionRules contract
+  if (
+    contributionRulesAddress.toLowerCase() !==
+    contributionRules.address.toLowerCase()
+  ) {
+    await deployments.catchUnknownSigner(
+      deployments.execute(
+        'ERC20RewardPool',
+        {from: currentAdmin, log: true},
+        'setContributionRules',
+        contributionRules.address,
         false
       )
     );
