@@ -52,7 +52,9 @@ const func: DeployFunction = async function (hre) {
       )
     );
   }
-  const startBlock = PolygonAssetERC1155SignedAuction.deployTransaction.blockNumber || 0;
+  const startBlock =
+    (await deployments.get('PolygonAssetERC1155SignedAuction')).receipt
+      ?.blockNumber || 0;
   const fee10000th = 500;
   const feeEvents = await queryEvents(
     PolygonAssetERC1155SignedAuction,
