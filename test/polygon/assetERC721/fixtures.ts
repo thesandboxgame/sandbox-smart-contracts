@@ -163,6 +163,17 @@ export const setupAssetERC721Tunnels = deployments.createFixture(
       AssetERC721,
       PolygonAssetERC721,
     });
+    const upgradeAdmin = await setupUser(namedAccounts.upgradeAdmin, {
+      PolygonAssetERC721,
+      AssetERC721,
+      PolygonAssetERC721Tunnel,
+      AssetERC721Tunnel,
+      FxRoot,
+      FxChild,
+      CheckpointManager,
+      MockAssetERC721Tunnel,
+      MockPolygonAssetERC721Tunnel,
+    });
 
     // Grant MINTER_ROLE to minter for test purposes
     const MINTER_ROLE = await AssetERC721.MINTER_ROLE();
@@ -232,6 +243,7 @@ export const setupAssetERC721Tunnels = deployments.createFixture(
       trustedForwarder,
       l1PredicateAsMinter,
       l2PredicateAsMinter,
+      upgradeAdmin,
     };
   }
 );
