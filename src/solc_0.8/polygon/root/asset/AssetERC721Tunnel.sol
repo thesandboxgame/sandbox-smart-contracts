@@ -38,6 +38,8 @@ contract AssetERC721Tunnel is
         require(_maxTransferLimit > 0, "AssetERC721Tunnel: _maxTransferLimit invalid");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
+        __Ownable_init();
+        __Pausable_init();
         __ERC2771Handler_initialize(trustedForwarder);
         __FxBaseRootTunnelUpgradeable_initialize(_checkpointManager, _fxRoot);
     }

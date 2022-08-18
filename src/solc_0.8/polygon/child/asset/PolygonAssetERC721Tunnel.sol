@@ -39,6 +39,8 @@ contract PolygonAssetERC721Tunnel is
         require(address(_childToken) != address(0), "PolygonAssetERC721Tunnel: _childToken can't be zero");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
+        __Ownable_init();
+        __Pausable_init();
         __ERC2771Handler_initialize(_trustedForwarder);
         __FxBaseChildTunnelUpgradeable_initialize(_fxChild);
     }

@@ -35,6 +35,8 @@ contract AssetERC1155Tunnel is
         require(address(_rootToken) != address(0), "AssetERC1155Tunnel: _rootToken can't be zero");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
+        __Ownable_init();
+        __Pausable_init();
         __ERC2771Handler_initialize(trustedForwarder);
         __FxBaseRootTunnelUpgradeable_initialize(_checkpointManager, _fxRoot);
     }
