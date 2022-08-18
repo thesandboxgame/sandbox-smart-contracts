@@ -1024,7 +1024,7 @@ describe('assetSignedAuctionWithAuth', function () {
       [buyAmount, '5000000000000000000']
     );
 
-    await expect(
+    void expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
           buyer: buyer,
