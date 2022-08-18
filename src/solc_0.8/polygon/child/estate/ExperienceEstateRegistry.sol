@@ -2,7 +2,6 @@
 pragma solidity 0.8.2;
 
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
-//import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IEstateToken} from "../../../common/interfaces/IEstateToken.sol";
 import {IEstateExperienceRegistry} from "../../../common/interfaces/IEstateExperienceRegistry.sol";
@@ -13,7 +12,8 @@ import {IExperienceToken} from "../../../common/interfaces/IExperienceToken.sol"
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-/// @notice Contract managing tExperiences and Estates
+/// @notice Contract managing Experiences and Estates linking, creating a relationship
+/// @notice between an experience and one or more lands.
 contract ExperienceEstateRegistry is
     Initializable,
     ContextUpgradeable,
@@ -81,7 +81,6 @@ contract ExperienceEstateRegistry is
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
-    //getters
     /// @notice return the amount of tiles that describe the land map inside a given estate
     /// @param expId the experience id
     /// @return the length of the tile map
@@ -238,8 +237,8 @@ contract ExperienceEstateRegistry is
             require(IEstateToken(_s().estateToken).contain(estateId, s), "not enough land");
             est.multiLand.set(s);
         }
+        // we add one so: 0 means not found, 1 means single land,  >1 means multiLand with the value estateId - 1,
         est.estateId = estateId + 1;
-        //why increment the estateId?
         emit LinkCreated(estateId, expId, x, y, template, _msgSender());
     }
 
