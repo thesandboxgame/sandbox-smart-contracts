@@ -88,6 +88,7 @@ describe('Estate base token test', function () {
       const {
         other,
         estateContractAsOther,
+        estateTokenIdHelperLib,
         chainIndex,
         mintQuad,
         landContractAsOther,
@@ -112,7 +113,7 @@ describe('Estate base token test', function () {
         (v: Event) => v.event === 'EstateTokenCreated'
       );
       assert.equal(events.length, 1);
-      const estateId = await estateContractAsOther.packId(
+      const estateId = await estateTokenIdHelperLib.packId(
         nextId.add(1),
         chainIndex,
         1

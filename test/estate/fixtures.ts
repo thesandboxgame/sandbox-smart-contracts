@@ -204,6 +204,14 @@ async function setupEstateAndLand(
   const burnerRole = await estateContractAsDefaultAdmin.BURNER_ROLE();
   await estateContractAsDefaultAdmin.grantRole(burnerRole, estateBurner);
 
+  await deployments.deploy('TestEstateTokenIdHelperLib', {
+    from: setup.deployer,
+  });
+  const estateTokenIdHelperLib = await ethers.getContract(
+    'TestEstateTokenIdHelperLib',
+    setup.other
+  );
+
   async function createAndReturnEstateId(
     contract: Contract,
     quads: [BigNumberish[], BigNumberish[], BigNumberish[]]
@@ -231,6 +239,7 @@ async function setupEstateAndLand(
     estateContractAsOther,
     estateDefaultAdmin,
     estateAdmin,
+    estateTokenIdHelperLib,
     ...setup,
     getUnnamedAccounts: () => rest,
     getXsYsSizes: (x0: number, y0: number, size: number) => {

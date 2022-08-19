@@ -14,11 +14,11 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
     //   24: 3448040,
     // };
     const gasPerSize: {[key: string]: number} = {
-      1: 20020134,
-      3: 5600054,
-      6: 4229080,
-      12: 3873859,
-      24: 3761115,
+      1: 20030000,
+      3: 5604000,
+      6: 4233000,
+      12: 3878000,
+      24: 3765000,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     for (const tileSize in gasPerSize) {
@@ -39,7 +39,7 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
         await mintQuad(other, 24, 240, 240);
         const {xs, ys, sizes} = getXsYsSizes(240, 240, size);
         const {gasUsed} = await createEstateAsOther({xs, ys, sizes});
-        expect(BigNumber.from(gasUsed)).to.be.equal(gasPerSize[tileSize]);
+        expect(BigNumber.from(gasUsed)).to.be.lt(gasPerSize[tileSize]);
       });
     }
   });
@@ -54,12 +54,12 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
     //   6: 23875291,
     // };
     const gasPerCant: {[key: string]: number} = {
-      1: 3761127,
-      2: 7584211,
-      3: 11674087,
-      4: 16040273,
-      5: 20694974,
-      6: 25653071,
+      1: 3765000,
+      2: 7588000,
+      3: 11678000,
+      4: 16044000,
+      5: 20699000,
+      6: 25657000,
     };
     // cant == 7 => Transaction reverted: contract call run out of gas and made the transaction revert
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -89,7 +89,7 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
           sizes.push(24);
         }
         const {gasUsed} = await createEstateAsOther({xs, ys, sizes});
-        expect(BigNumber.from(gasUsed)).to.be.equal(gasPerCant[cant]);
+        expect(BigNumber.from(gasUsed)).to.be.lt(gasPerCant[cant]);
       });
     }
   });
@@ -111,7 +111,7 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
         [240],
         [120],
       ]);
-      expect(estimate).to.be.equal(3827227);
+      expect(estimate).to.be.lt(3840000);
     });
     it('add three full quads one by one', async function () {
       const {
@@ -143,7 +143,7 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
         ys: [120 + 48],
       });
       estimate.push(u3.gasUsed);
-      expect(sum(estimate)).to.be.equal(10261916);
+      expect(sum(estimate)).to.be.lt(10277000);
     });
     it('add three full quads', async function () {
       const {
@@ -165,17 +165,17 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
         ],
         [[], [], []]
       );
-      expect(estimate).to.be.equal(12207769);
+      expect(estimate).to.be.lt(12213000);
     });
   });
 
   describe('create one estate', function () {
     const gasPerSize: {[key: string]: number} = {
-      24: 3761115,
-      12: 1262604,
-      6: 606740,
-      3: 413485,
-      1: 339133,
+      24: 3765000,
+      12: 1267000,
+      6: 610000,
+      3: 417000,
+      1: 343000,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -198,17 +198,17 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
           xs: [48],
           ys: [96],
         });
-        expect(gasUsed).to.be.equal(gasPerSize[size]);
+        expect(gasUsed).to.be.lt(gasPerSize[size]);
       });
     });
   });
   describe('create one estate remove one tile add a different one', function () {
     const gasPerSize: {[key: string]: number} = {
-      24: 6512897,
-      12: 1876621,
-      6: 682394,
-      3: 352563,
-      1: 255984,
+      24: 6518000,
+      12: 1882000,
+      6: 688000,
+      3: 358000,
+      1: 260000,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     [24, 12, 6, 3, 1].forEach((size) => {
@@ -239,17 +239,17 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
           {sizes: [size], xs: [144], ys: [144]},
           {sizes: [size], xs: [48], ys: [96]}
         );
-        expect(gasUsed).to.be.equal(gasPerSize[size]);
+        expect(gasUsed).to.be.lt(gasPerSize[size]);
       });
     });
   });
   describe('update states', function () {
     const gasPerSize: {[key: string]: number} = {
-      24: 6512873,
-      12: 6654474,
-      6: 7093194,
-      3: 8734124,
-      1: 25610276,
+      24: 6518000,
+      12: 6660000,
+      6: 7098000,
+      3: 8739000,
+      1: 25616000,
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
     [[24], [12], [6], [3], [1]].forEach(([size]) => {
@@ -282,16 +282,16 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
           {xs: [144], ys: [144], sizes: [24]},
           getXsYsSizes(0, 0, size)
         );
-        expect(gasUsed).to.be.equal(gasPerSize[size]);
+        expect(gasUsed).to.be.lt(gasPerSize[size]);
       });
     });
     describe('update states, remove', function () {
       const gasPerCant: {[key: string]: number} = {
-        5: 14872314,
-        4: 12357440,
-        3: 10299155,
-        2: 8482739,
-        1: 6911047,
+        5: 14877000,
+        4: 12363000,
+        3: 10304000,
+        2: 8488000,
+        1: 6916000,
       };
       // eslint-disable-next-line mocha/no-setup-in-describe
       [[5], [4], [3], [2], [1]].forEach(([cant]) => {
@@ -323,7 +323,7 @@ describe('@skip-on-coverage @skip-on-ci @slow gas consumption of', function () {
             xs: xs.slice(0, cant),
             ys: ys.slice(0, cant),
           });
-          expect(gasUsed).to.be.equal(gasPerCant[cant]);
+          expect(gasUsed).to.be.lt(gasPerCant[cant]);
         });
       });
     });
