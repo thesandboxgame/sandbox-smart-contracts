@@ -429,7 +429,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY_MUMBAI || '',
+      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
     },
   },
 };
