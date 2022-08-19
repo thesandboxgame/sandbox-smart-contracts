@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['AssetERC1155Tunnel_setup', 'L1'];
+func.tags = ['AssetERC1155Tunnel', 'AssetERC1155Tunnel_setup', 'L1'];
 func.runAtTheEnd = true;
 func.dependencies = [
   'Asset',
