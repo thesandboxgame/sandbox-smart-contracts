@@ -51,7 +51,7 @@ describe('PolygonAssetERC721.sol', function () {
           AssetERC721,
           assetMinter,
           users,
-          AssetERC721Tunnel,
+          MockAssetERC721Tunnel,
           PolygonAssetERC721,
         } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
@@ -69,22 +69,22 @@ describe('PolygonAssetERC721.sol', function () {
 
         // Transfer to L1 Tunnel
         await assetHolder.AssetERC721.setApprovalForAll(
-          AssetERC721Tunnel.address,
+          MockAssetERC721Tunnel.address,
           true
         );
-        await deployer.AssetERC721Tunnel.pause();
+        await deployer.MockAssetERC721Tunnel.pause();
 
         await expect(
-          assetHolder.AssetERC721Tunnel.batchDepositToChild(
+          assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
             assetHolder.address,
             [123]
           )
         ).to.be.revertedWith('Pausable: paused');
 
-        await deployer.AssetERC721Tunnel.unpause();
+        await deployer.MockAssetERC721Tunnel.unpause();
 
         await waitFor(
-          assetHolder.AssetERC721Tunnel.batchDepositToChild(
+          assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
             assetHolder.address,
             [123]
           )
@@ -92,7 +92,7 @@ describe('PolygonAssetERC721.sol', function () {
 
         expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);
         expect(
-          await AssetERC721.balanceOf(AssetERC721Tunnel.address)
+          await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
         ).to.be.equal(1);
         expect(
           await PolygonAssetERC721.balanceOf(assetHolder.address)
