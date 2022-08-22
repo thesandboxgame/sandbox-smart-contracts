@@ -10,6 +10,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {Wallet, constants, utils} from 'ethers';
 import {sendMetaTx} from '../../sendMetaTx';
+import {zeroAddress} from '../../land/fixtures';
 const {solidityKeccak256, arrayify} = ethers.utils;
 
 const privateKey =
@@ -461,6 +462,16 @@ describe('PolygonStarterPack.sol', function () {
           [1, 2, 3, 4, 5]
         )
       ).to.not.be.reverted;
+    });
+    it('default admin cannot withdraw remaining cats and gems from contract to zeroAddress', async function () {
+      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      await expect(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          zeroAddress,
+          [1, 2, 3, 4],
+          [1, 2, 3, 4, 5]
+        )
+      ).to.be.revertedWith('ZERO_ADDRESS');
     });
     it('default admin receives correct cats and gems balances upon withdrawal', async function () {
       const {

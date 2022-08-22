@@ -117,6 +117,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] calldata catalystIds,
         uint256[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
