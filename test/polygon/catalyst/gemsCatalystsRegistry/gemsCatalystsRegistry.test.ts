@@ -4,6 +4,7 @@ import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {deployments} from 'hardhat';
+import {zeroAddress} from '../../../land/fixtures';
 
 const setupGemsAndCatalysts = withSnapshot(
   [
@@ -774,5 +775,17 @@ describe('GemsCatalystsRegistry', function () {
         trustedForwarder.address
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+  it('cannot set trustedForwarder to zero address', async function () {
+    const {
+      gemsCatalystsRegistryAsDeployer,
+      trustedForwarder,
+    } = await setupGemsAndCatalysts();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+
+    await expect(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(zeroAddress)
+    ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });

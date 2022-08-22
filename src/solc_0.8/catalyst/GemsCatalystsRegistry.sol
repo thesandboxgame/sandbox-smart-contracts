@@ -266,6 +266,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        require(trustedForwarder != address(0), "ZERO_ADDRESS");
         _trustedForwarder = trustedForwarder;
 
         emit TrustedForwarderChanged(trustedForwarder);
