@@ -23,7 +23,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
-    function initV1(address trustedForwarder, address admin) public initializer {
+    function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
         __Ownable_init();
