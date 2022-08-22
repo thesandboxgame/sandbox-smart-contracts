@@ -590,6 +590,38 @@ describe('PolygonStarterPack.sol', function () {
         )
       ).to.not.be.reverted;
     });
+    it('withdrawAll event is emitted upon withdrawal', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [1, 2, 3, 4],
+          [1, 2, 3, 4, 5]
+        )
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'WithdrawAll'
+      );
+      const to = event.args[0];
+      const catIds = event.args[1];
+      const gemIds = event.args[2];
+      expect(to).to.be.equal(other.address);
+      expect(catIds[0]).to.be.equal(1);
+      expect(catIds[1]).to.be.equal(2);
+      expect(catIds[2]).to.be.equal(3);
+      expect(catIds[3]).to.be.equal(4);
+      expect(gemIds[0]).to.be.equal(1);
+      expect(gemIds[1]).to.be.equal(2);
+      expect(gemIds[2]).to.be.equal(3);
+      expect(gemIds[3]).to.be.equal(4);
+      expect(gemIds[4]).to.be.equal(5);
+    });
   });
   describe('purchaseWithSAND', function () {
     it('can purchase bundle of cats and gems when SAND is enabled - zero prices', async function () {

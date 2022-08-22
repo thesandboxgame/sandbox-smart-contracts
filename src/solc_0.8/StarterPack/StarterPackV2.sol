@@ -42,6 +42,8 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256 priceChangeTimestamp
     );
 
+    event WithdrawAll(address to, uint256[] catalystIds, uint256[] gemIds);
+
     struct Message {
         uint256[] catalystIds;
         uint256[] catalystQuantities;
@@ -131,6 +133,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
             uint256 balance = gem.balanceOf(address(this));
             _executeRegistryTransferGem(gem, address(this), to, balance);
         }
+        emit WithdrawAll(to, catalystIds, gemIds);
     }
 
     /// @notice Purchase StarterPacks with SAND
