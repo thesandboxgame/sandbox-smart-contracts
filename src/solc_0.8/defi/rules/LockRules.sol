@@ -113,8 +113,8 @@ contract LockRules is Context, Ownable {
     function getRemainingTimelockClaim() external view returns (uint256) {
         uint256 timeLock = (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
 
-        if (block.timestamp > timeLock) {
-            return block.timestamp - timeLock;
+        if (timeLock > block.timestamp) {
+            return timeLock - block.timestamp;
         } else {
             return 0;
         }
@@ -123,8 +123,8 @@ contract LockRules is Context, Ownable {
     function getRemainingTimelockWithdraw() external view returns (uint256) {
         uint256 timeLock = (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
 
-        if (block.timestamp > timeLock) {
-            return block.timestamp - timeLock;
+        if (timeLock > block.timestamp) {
+            return timeLock - block.timestamp;
         } else {
             return 0;
         }
@@ -133,8 +133,8 @@ contract LockRules is Context, Ownable {
     function getRemainingTimelockDeposit() external view returns (uint256) {
         uint256 timeLock = (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
 
-        if (block.timestamp > timeLock) {
-            return block.timestamp - timeLock;
+        if (timeLock > block.timestamp) {
+            return timeLock - block.timestamp;
         } else {
             return 0;
         }
