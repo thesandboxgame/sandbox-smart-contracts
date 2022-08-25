@@ -9,6 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGu
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
@@ -363,9 +364,13 @@ contract ERC20RewardPool is
 
     function _computeContribution(address account) internal returns (uint256) {
         if (contributionRules == IContributionRules(address(0))) {
-            return _balances[account];
+            return Math.min(_balances[account], maxStakeAllowedCalculator(account));
         } else {
-            return contributionRules.computeMultiplier(account, _balances[account]);
+            return
+                contributionRules.computeMultiplier(
+                    account,
+                    Math.min(_balances[account], maxStakeAllowedCalculator(account))
+                );
         }
     }
 

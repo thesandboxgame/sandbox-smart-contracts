@@ -75,7 +75,7 @@ contract RequirementsRules is Ownable {
         uint256 maxStakeERC1155 = checkAndGetERC1155Stake(account);
         uint256 maxAllowed = _maxStakeAllowedCalculator(maxStakeERC721, maxStakeERC1155);
 
-        if (maxAllowed != 0) {
+        if ((maxAllowed > 0) || _listERC721Index.length > 0 || _listERC1155Index.length > 0) {
             require(amount + balanceOf <= maxAllowed, "RequirementsRules: maxAllowed");
         }
 
@@ -277,7 +277,7 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    function maxStakeAllowedCalculator(address account) external view returns (uint256) {
+    function maxStakeAllowedCalculator(address account) public view returns (uint256) {
         uint256 maxStakeERC721 = getERC721MaxStake(account);
         uint256 maxStakeERC1155 = getERC1155MaxStake(account);
         return _maxStakeAllowedCalculator(maxStakeERC721, maxStakeERC1155);
