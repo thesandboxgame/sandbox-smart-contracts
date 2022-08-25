@@ -139,6 +139,8 @@ describe('ERC20RewardPool main contract tests', function () {
         getUser,
       } = await setupERC20RewardPoolTest();
 
+      await contract.setMaxStakeOverall(999999999);
+
       const user = await getUser();
 
       await user.pool.stake(1000);
@@ -174,6 +176,9 @@ describe('ERC20RewardPool main contract tests', function () {
           rewardCalculatorMock,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
+
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -206,6 +211,9 @@ describe('ERC20RewardPool main contract tests', function () {
           rewardCalculatorMock,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
+
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -239,6 +247,8 @@ describe('ERC20RewardPool main contract tests', function () {
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
+        await contract.setMaxStakeOverall(999999999);
+
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -269,6 +279,9 @@ describe('ERC20RewardPool main contract tests', function () {
           rewardCalculatorMock,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
+
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -307,6 +320,9 @@ describe('ERC20RewardPool main contract tests', function () {
           contract,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
+
         const users = await getUsers(2);
         const [user1, user2] = users;
 
@@ -335,6 +351,8 @@ describe('ERC20RewardPool main contract tests', function () {
           contract,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
 
         const users = await getUsers(2);
         const user1 = users[0];
@@ -369,6 +387,9 @@ describe('ERC20RewardPool main contract tests', function () {
           contract,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
+
         const users = await getUsers(2);
         const user1 = users[0];
         const user2 = users[1];
@@ -405,6 +426,8 @@ describe('ERC20RewardPool main contract tests', function () {
           contract,
         } = await setupERC20RewardPoolTest();
         await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+        await contract.setMaxStakeOverall(999999999);
 
         const users = await getUsers(10);
 
@@ -869,6 +892,8 @@ describe('ERC20RewardPool main contract tests', function () {
       } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
+      await contract.setMaxStakeOverall(999999999);
+
       const user = await getUser();
 
       const {to, data} = await contract.populateTransaction.stake(1000);
@@ -886,6 +911,8 @@ describe('ERC20RewardPool main contract tests', function () {
         rewardCalculatorMock,
       } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      await contract.setMaxStakeOverall(999999999);
 
       const user = await getUser();
 

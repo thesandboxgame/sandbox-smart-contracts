@@ -37,6 +37,8 @@ describe('ERC20RewardPool Lock Rules', function () {
     const lockTimeMS = 10 * 1000;
     await contract.setTimelockClaim(lockTimeMS);
 
+    await contract.setMaxStakeOverall(999999999);
+
     const user = await getUser();
 
     const initialBalance = await balances(user.address);
@@ -83,6 +85,8 @@ describe('ERC20RewardPool Lock Rules', function () {
     const lockTimeMS = 10 * 1000;
     await contract.setTimelockClaim(lockTimeMS);
 
+    await contract.setMaxStakeOverall(999999999);
+
     const user = await getUser();
 
     await rewardCalculatorMock.setReward(30);
@@ -123,6 +127,8 @@ describe('ERC20RewardPool Lock Rules', function () {
     const lockTimeMS = 10 * 1000;
     await contract.setTimelockDeposit(lockTimeMS);
 
+    await contract.setMaxStakeOverall(999999999);
+
     const user = await getUser();
 
     await user.pool.stake(1000);
@@ -162,6 +168,8 @@ describe('ERC20RewardPool Lock Rules', function () {
     const lockTimeMS = 10 * 1000;
     await contract.setTimeLockWithdraw(lockTimeMS);
 
+    await contract.setMaxStakeOverall(999999999);
+
     const user = await getUser();
 
     await rewardCalculatorMock.setReward(30);
@@ -193,6 +201,8 @@ describe('ERC20RewardPool Lock Rules', function () {
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     await expect(contract.setAmountLockClaim(10, true)).not.to.be.reverted;
+
+    await contract.setMaxStakeOverall(999999999);
 
     const user = await getUser();
 
