@@ -22,6 +22,10 @@ type Data712 = {
         type: 'string';
       },
       {
+        name: 'chainId';
+        type: 'uint256';
+      },
+      {
         name: 'verifyingContract';
         type: 'address';
       }
@@ -53,12 +57,14 @@ type Data712 = {
   domain: {
     name: 'The Sandbox';
     version: '1';
+    chainId: number;
     verifyingContract: string;
   };
   message: Message;
 };
 
 export const data712 = function (
+  chainId: number,
   verifyingContract: Contract,
   message: Message
 ): Data712 {
@@ -72,6 +78,10 @@ export const data712 = function (
         {
           name: 'version',
           type: 'string',
+        },
+        {
+          name: 'chainId',
+          type: 'uint256',
         },
         {
           name: 'verifyingContract',
@@ -105,6 +115,7 @@ export const data712 = function (
     domain: {
       name: 'The Sandbox',
       version: '1',
+      chainId: chainId,
       verifyingContract: verifyingContract.address,
     },
     message: message,

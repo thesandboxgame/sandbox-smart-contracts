@@ -1,16 +1,17 @@
+import {BigNumber} from 'ethers';
 import {
   deployments,
   ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {BigNumber} from 'ethers';
-import {expect} from '../chai-setup';
-import MerkleTree from '../../lib/merkleTree';
-import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
-import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
+import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
+import MerkleTree from '../../lib/merkleTree';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
+import {expect} from '../chai-setup';
+import {zeroAddress} from '../land-sale/fixtures';
 import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {
   expectReceiptEventWithArgs,
@@ -18,7 +19,6 @@ import {
   waitFor,
   withSnapshot,
 } from '../utils';
-import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
 
@@ -43,8 +43,6 @@ export const setupTestGiveaway = withSnapshot(
     'PolygonCatalysts',
   ],
   async function (hre, options?: Options) {
-    const {network, getChainId} = hre;
-    const chainId = await getChainId();
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
       options || {};
     const {
@@ -352,12 +350,7 @@ export const setupTestGiveaway = withSnapshot(
     const {
       claims: claims0,
       merkleRootHash: merkleRootHash0,
-    } = createClaimMerkleTree(
-      network.live,
-      chainId,
-      dataWithIds0,
-      'Multi_Giveaway_1'
-    );
+    } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
 
     const allMerkleRoots = [];
     const allClaims = [claims0];
@@ -377,12 +370,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: claims1,
         merkleRootHash: merkleRootHash1,
-      } = createClaimMerkleTree(
-        network.live,
-        chainId,
-        dataWithIds1,
-        'Multi_Giveaway_1'
-      );
+      } = createClaimMerkleTree(hre, dataWithIds1, 'Multi_Giveaway_1');
       allClaims.push(claims1);
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
@@ -404,12 +392,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: badClaims0,
         merkleRootHash: badMerkleRootHash0,
-      } = createClaimMerkleTree(
-        network.live,
-        chainId,
-        dataWithIds0,
-        'Multi_Giveaway_1'
-      );
+      } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
       allClaims.push(badClaims0);
       allMerkleRoots.push(badMerkleRootHash0);
       const hashArray2 = createDataArrayMultiClaim(badClaims0);

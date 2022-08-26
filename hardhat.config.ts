@@ -124,7 +124,11 @@ const config: HardhatUserConfig = {
 
     upgradeAdmin: 'sandAdmin',
 
-    multiGiveawayAdmin: 'sandAdmin',
+    multiGiveawayAdmin: {
+      default: 'sandAdmin',
+      mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
+    },
 
     liquidityRewardProvider: {
       default: 'sandBeneficiary',
@@ -270,6 +274,7 @@ const config: HardhatUserConfig = {
     sandboxFoundation: {
       default: 4,
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
+      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', //'0xfe66Ec1B46494FE49F53733a098587bf5D12BD88',
     },
     extraCatalystAndGemMinter: {
       default: null,
