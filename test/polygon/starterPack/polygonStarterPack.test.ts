@@ -1582,4 +1582,111 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
   });
+  describe('test array lengths for withdrawAll', function () {
+    it('can withdraw 20 types of gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(15);
+      await PolygonStarterPackAsAdmin.withdrawAll(
+        other.address,
+        [1, 2, 3, 4],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      );
+    });
+    it('can withdraw 20 types of cats and gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(15);
+      await deployManyCatalystContracts(16);
+      await PolygonStarterPackAsAdmin.withdrawAll(
+        other.address,
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      );
+    });
+    it('can withdraw 30 types of cats and gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(25);
+      await deployManyCatalystContracts(26);
+      await PolygonStarterPackAsAdmin.withdrawAll(
+        other.address,
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+        ]
+      );
+    });
+  });
 });
