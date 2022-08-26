@@ -1,4 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {fee10000th} from '../../data/assetSignedAuction';
 import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
@@ -9,32 +10,32 @@ const func: DeployFunction = async function (hre) {
     assetAuctionAdmin,
     assetAuctionFeeCollector,
   } = await getNamedAccounts();
-  const fee10000th = 500;
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
-  const PolygonSand = await deployments.get('PolygonSand');
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
-  await deploy('PolygonAssetERC1155SignedAuction', {
+  await deploy('PolygonAssetERC1155SignedAuctionWithAuth', {
     from: deployer,
     args: [
       PolygonAssetERC1155.address,
       assetAuctionAdmin,
-      PolygonSand.address,
+      TRUSTED_FORWARDER_V2.address,
       assetAuctionFeeCollector,
       fee10000th,
+      authValidatorContract.address,
     ],
-    contract: 'AssetSignedAuction',
+    contract: 'AssetSignedAuctionWithAuth',
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
 export default func;
 func.tags = [
-  'PolygonAssetERC1155SignedAuction',
-  'PolygonAssetERC1155SignedAuction_deploy',
+  'PolygonAssetERC1155SignedAuctionWithAuth',
+  'PolygonAssetERC1155SignedAuctionWithAuth_deploy',
 ];
 func.dependencies = [
-  'PolygonAssetERC721_deploy',
   'PolygonAssetERC1155_deploy',
-  'PolygonSand_deploy',
+  'PolygonAuthValidator_deploy',
 ];
 func.skip = skipUnlessTestnet;

@@ -1,5 +1,6 @@
 import {Event} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {fee10000th} from '../../data/assetSignedAuction';
 import {queryEvents} from '../../scripts/utils/query-events';
 import {skipUnlessTestnet} from '../../utils/network';
 
@@ -8,17 +9,17 @@ const func: DeployFunction = async function (hre) {
   const {read, execute, catchUnknownSigner} = deployments;
   const {assetAuctionFeeCollector} = await getNamedAccounts();
 
-  const PolygonAssetERC1155SignedAuction = await ethers.getContract(
-    'PolygonAssetERC1155SignedAuction'
+  const PolygonAssetERC1155SignedAuctionWithAuth = await ethers.getContract(
+    'PolygonAssetERC1155SignedAuctionWithAuth'
   );
   const isAssetSuperOperator = await read(
     'PolygonAssetERC1155',
     'isSuperOperator',
-    PolygonAssetERC1155SignedAuction.address
+    PolygonAssetERC1155SignedAuctionWithAuth.address
   );
   if (!isAssetSuperOperator) {
     console.log(
-      'setting PolygonAssetERC1155SignedAuction as super operator for PolygonAssetERC1155'
+      'setting PolygonAssetERC1155SignedAuctionWithAuth as super operator for PolygonAssetERC1155'
     );
     const currentAssetAdmin = await read('PolygonAssetERC1155', 'getAdmin');
     await catchUnknownSigner(
@@ -26,7 +27,7 @@ const func: DeployFunction = async function (hre) {
         'PolygonAssetERC1155',
         {from: currentAssetAdmin, log: true},
         'setSuperOperator',
-        PolygonAssetERC1155SignedAuction.address,
+        PolygonAssetERC1155SignedAuctionWithAuth.address,
         true
       )
     );
@@ -35,11 +36,11 @@ const func: DeployFunction = async function (hre) {
   const isSandSuperOperator = await read(
     'PolygonSand',
     'isSuperOperator',
-    PolygonAssetERC1155SignedAuction.address
+    PolygonAssetERC1155SignedAuctionWithAuth.address
   );
   if (!isSandSuperOperator) {
     console.log(
-      'setting PolygonAssetERC1155SignedAuction as super operator for PolygonSand'
+      'setting PolygonAssetERC1155SignedAuctionWithAuth as super operator for PolygonSand'
     );
     const currentSandAdmin = await read('PolygonSand', 'getAdmin');
     await catchUnknownSigner(
@@ -47,18 +48,17 @@ const func: DeployFunction = async function (hre) {
         'PolygonSand',
         {from: currentSandAdmin, log: true},
         'setSuperOperator',
-        PolygonAssetERC1155SignedAuction.address,
+        PolygonAssetERC1155SignedAuctionWithAuth.address,
         true
       )
     );
   }
   const startBlock =
-    (await deployments.get('PolygonAssetERC1155SignedAuction')).receipt
+    (await deployments.get('PolygonAssetERC1155SignedAuctionWithAuth')).receipt
       ?.blockNumber || 0;
-  const fee10000th = 500;
   const feeEvents = await queryEvents(
-    PolygonAssetERC1155SignedAuction,
-    PolygonAssetERC1155SignedAuction.filters.FeeSetup(),
+    PolygonAssetERC1155SignedAuctionWithAuth,
+    PolygonAssetERC1155SignedAuctionWithAuth.filters.FeeSetup(),
     startBlock
   );
   let lastFeeEvent: Event | undefined;
@@ -80,18 +80,18 @@ const func: DeployFunction = async function (hre) {
 
   if (!isFeeSet) {
     console.log(
-      `set PolygonAssetERC1155SignedAuction's fee to ${fee10000th / 100}%`
+      `set PolygonAssetERC1155SignedAuctionWithAuth's fee to ${fee10000th / 100}%`
     );
     console.log(
-      `set PolygonAssetERC1155SignedAuction's fee colletor to ${assetAuctionFeeCollector}`
+      `set PolygonAssetERC1155SignedAuctionWithAuth's fee colletor to ${assetAuctionFeeCollector}`
     );
     const currentAssetAuctionAdmin = await read(
-      'PolygonAssetERC1155SignedAuction',
+      'PolygonAssetERC1155SignedAuctionWithAuth',
       'getAdmin'
     );
     await catchUnknownSigner(
       execute(
-        'PolygonAssetERC1155SignedAuction',
+        'PolygonAssetERC1155SignedAuctionWithAuth',
         {from: currentAssetAuctionAdmin, log: true},
         'setFee',
         assetAuctionFeeCollector,
@@ -102,8 +102,8 @@ const func: DeployFunction = async function (hre) {
 };
 export default func;
 func.tags = [
-  'PolygonAssetERC1155SignedAuction',
-  'PolygonAssetERC1155SignedAuction_setup',
+  'PolygonAssetERC1155SignedAuctionWithAuth',
+  'PolygonAssetERC1155SignedAuctionWithAuth_setup',
 ];
 func.dependencies = [
   'PolygonAssetERC721_deploy',

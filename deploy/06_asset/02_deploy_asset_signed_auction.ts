@@ -1,4 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {fee10000th} from '../../data/assetSignedAuction';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -10,7 +11,6 @@ const func: DeployFunction = async function (hre) {
     assetAuctionFeeCollector,
   } = await getNamedAccounts();
 
-  const fee10000th = 500;
 
   const asset = await deployments.get('Asset');
   const sandContract = await deployments.get('Sand');
