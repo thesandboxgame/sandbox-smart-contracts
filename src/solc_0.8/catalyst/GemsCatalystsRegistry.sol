@@ -151,6 +151,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < gems.length; i++) {
             IGem gem = gems[i];
+            require(address(gem) != address(0), "GEM_ZERO_ADDRESS");
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
             _gems.push(gem);
@@ -158,6 +159,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < catalysts.length; i++) {
             ICatalyst catalyst = catalysts[i];
+            require(address(catalyst) != address(0), "CATALYST_ZERO_ADDRESS");
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);

@@ -383,6 +383,20 @@ describe('GemsCatalystsRegistry', function () {
     ).to.be.revertedWith('CATALYST_ID_NOT_IN_ORDER');
   });
 
+  it('addGemsAndCatalysts should fail for catalyst with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([], [zeroAddress])
+    ).to.be.revertedWith('CATALYST_ZERO_ADDRESS');
+  });
+
+  it('addGemsAndCatalysts should fail for gem with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([zeroAddress], [])
+    ).to.be.revertedWith('GEM_ZERO_ADDRESS');
+  });
+
   it('addGemsAndCatalysts should add gemExample', async function () {
     const {
       gemsCatalystsRegistry,
