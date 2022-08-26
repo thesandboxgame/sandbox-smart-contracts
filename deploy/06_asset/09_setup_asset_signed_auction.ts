@@ -8,7 +8,7 @@ import {skipUnlessTestnet} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   await setupContract(deployments, 'AssetSignedAuction', fee10000th);
-  const skip = await skipUnlessTestnet(hre)
+  const skip = await skipUnlessTestnet(hre);
   if (!skip) {
     await setupContract(deployments, 'AssetSignedAuctionWithAuth', fee10000th);
   }
@@ -111,4 +111,3 @@ func.dependencies = [
   'AssetSignedAuction_deploy',
   'AssetSignedAuctionWithAuth_deploy',
 ];
-

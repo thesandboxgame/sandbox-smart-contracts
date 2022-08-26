@@ -80,7 +80,9 @@ const func: DeployFunction = async function (hre) {
 
   if (!isFeeSet) {
     console.log(
-      `set PolygonAssetERC1155SignedAuctionWithAuth's fee to ${fee10000th / 100}%`
+      `set PolygonAssetERC1155SignedAuctionWithAuth's fee to ${
+        fee10000th / 100
+      }%`
     );
     console.log(
       `set PolygonAssetERC1155SignedAuctionWithAuth's fee colletor to ${assetAuctionFeeCollector}`
