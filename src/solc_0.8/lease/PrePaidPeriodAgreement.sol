@@ -11,6 +11,9 @@ import {Lease} from "./Lease.sol";
 contract PrePaidPeriodAgreement is ILeaseImpl {
     struct LeaseData {
         uint256 expiration;
+        // TODO: If a user propose a cancellation and then sells the lease he can cheat the buyer.
+        // TODO: If we generalize this mechanism maybe we can move it to Lease.sol an clean this value on beforeTransfer.
+        uint256 cancellationPenalty;
     }
 
     IERC20 public sandToken;
@@ -42,8 +45,39 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         // emit
     }
 
+    /// @dev called by user to renew a lease (and pay for it).
     function renew(uint256 agreementId) external override {
+        // TODO: Automatic renewal can be perjudicial to the owner, maybe we need a propose and accept mechanism.
         _accept(agreementId);
+        // emit
+    }
+
+    /// @dev called by user to give the owner an opportunity to cancel a lease.
+    function proposeCancellation(uint256 agreementId, uint256 cancellationAmount) external {
+        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        require(address(this) == address(agreement.impl), "invalid agreement");
+        require(msg.sender == agreement.user, "invalid user");
+        leases[agreementId].cancellationPenalty = cancellationAmount;
+        // emit
+    }
+
+    /// @dev called by the owner to cancel a lease (and pay the penalty).
+    function acceptCancellation(uint256 agreementId) external {
+        uint256 amount = leases[agreementId].cancellationPenalty;
+        require(amount > 0, "not proposed");
+
+        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        require(address(this) == address(agreement.impl), "invalid agreement");
+        // TODO: Maybe anybody can cancel?
+        require(msg.sender == agreement.owner, "invalid user");
+        if (balances[msg.sender] < amount) {
+            require(sandToken.transferFrom(msg.sender, address(this), amount - balances[msg.sender]), "transfer error");
+            balances[msg.sender] = 0;
+        } else {
+            balances[msg.sender] -= amount;
+        }
+        balances[agreement.user] += amount;
+        leases[agreementId].expiration = 0;
         // emit
     }
 
@@ -53,16 +87,12 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     }
 
     /// @notice called by owner to claim his earnings
-    function claim(uint256 agreementId, uint256 amount) external {
+    function claim(uint256 amount) external {
         require(amount > 0, "invalid amount");
-        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
-        require(address(this) == address(agreement.impl), "invalid agreement");
-        require(msg.sender == agreement.owner, "invalid user");
-        uint256 balance = balances[agreement.owner];
-        require(balance >= amount, "not enough");
-        balances[agreement.owner] = balance - amount;
-        require(sandToken.transfer(agreement.owner, amount), "transfer error");
-        // emit
+        require(balances[msg.sender] >= amount, "not enough");
+        balances[msg.sender] -= amount;
+        require(sandToken.transfer(msg.sender, amount), "transfer error");
+        // emit?
     }
 
     function isLeased(uint256 agreementId) external view override returns (bool) {
@@ -79,10 +109,9 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     function _accept(uint256 agreementId) internal {
         ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
-        address user = leaseContract.ownerOf(agreementId);
-        require(msg.sender == user, "invalid user");
-        require(sandToken.transferFrom(user, address(this), amountPerPeriod), "transfer error");
-        leases[agreementId].expiration = leases[agreementId].expiration + period;
-        balances[agreement.owner] = balances[agreement.owner] + amountPerPeriod;
+        require(msg.sender == agreement.user, "invalid user");
+        require(sandToken.transferFrom(agreement.user, address(this), amountPerPeriod), "transfer error");
+        leases[agreementId].expiration += period;
+        balances[agreement.owner] += amountPerPeriod;
     }
 }
