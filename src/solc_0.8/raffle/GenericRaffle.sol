@@ -8,9 +8,9 @@ import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
@@ -52,6 +52,7 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         uint256 _maxSupply
     ) internal onlyInitializing {
         __ERC721_init(_name, _symbol);
+        ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
         __Ownable_init_unchained();
         setBaseURI(baseURI);
         require(bytes(baseURI).length != 0, "baseURI is not set");
@@ -287,4 +288,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }
