@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
@@ -76,7 +76,6 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     ) external onlyOwner {
         require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
         require(_waveType < 3 && _waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
-        require(_contractAddress != address(0x0), "Invalid contract address");
         if (_waveType != 0) {
             require(_contractAddress != address(0x0), "Invalid contract address");
         }

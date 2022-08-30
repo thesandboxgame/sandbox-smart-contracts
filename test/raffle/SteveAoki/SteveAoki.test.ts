@@ -12,7 +12,7 @@ import {
 } from './SteveAoki.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('RaffleSteveAoki', function () {
+describe.only('RaffleSteveAoki', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       raffleSteveAokiContract,
