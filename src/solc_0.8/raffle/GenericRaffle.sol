@@ -156,6 +156,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         }
     }
 
+    function renounceOwnership() public virtual override onlyOwner {}
+
     function checkSignature(
         address _wallet,
         uint256 _signatureId,
