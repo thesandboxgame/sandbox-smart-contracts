@@ -9,7 +9,16 @@ import {Lease} from "./Lease.sol";
 // TODO: Check reentrancy issues when calling sandToken and leaseContract
 // TODO: leaseContract value is critical!!!.
 contract PrePaidPeriodAgreement is ILeaseImpl {
+    struct LeaseProposal {
+        uint256 rentalPrice;
+        uint256 rentalPeriod;
+        // TODO: This is to avoid a front-running from the owner on the user, there is another alternative using a
+        // TODO: sequential id that let the owner update his proposal.
+        uint256 proposalExpiration;
+    }
+
     struct LeaseData {
+        LeaseProposal leaseProposal;
         uint256 expiration;
         // TODO: If a user propose a cancellation and then sells the lease he can cheat the buyer.
         // TODO: If we generalize this mechanism maybe we can move it to Lease.sol an clean this value on beforeTransfer.
@@ -18,8 +27,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
 
     IERC20 public sandToken;
     Lease public leaseContract;
-    uint256 public amountPerPeriod;
-    uint256 public period;
     mapping(uint256 => LeaseData) public leases;
     // owner balances
     mapping(address => uint256) internal balances;
@@ -27,16 +34,28 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     // TODO: We can use a factory call from the leaseContract so it is known value instead a constructor onez).
     // TODO: The same for the sandToken we can configure it in
     // TODO: the leaseContract (it affects which contract must be approved, where we store the sand, etc)
-    constructor(
-        IERC20 sandToken_,
-        Lease leaseContract_,
-        uint256 amountPerPeriod_,
-        uint256 period_
-    ) {
+    constructor(IERC20 sandToken_, Lease leaseContract_) {
         sandToken = sandToken_;
         leaseContract = leaseContract_;
-        amountPerPeriod = amountPerPeriod_;
-        period = period_;
+    }
+
+    /// @dev called by the owner to propose a lease.
+    function propose(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 proposalTime
+    ) external {
+        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        require(address(this) == address(agreement.impl), "invalid agreement");
+        require(msg.sender == agreement.owner, "invalid user");
+        require(leases[agreementId].leaseProposal.proposalExpiration < block.timestamp, "active proposal");
+        leases[agreementId].leaseProposal = LeaseProposal({
+            rentalPrice: rentalPrice,
+            rentalPeriod: rentalPeriod,
+            proposalExpiration: block.timestamp + proposalTime
+        });
+        // emit
     }
 
     /// @dev called by user to accept a lease (and pay for it).
@@ -47,7 +66,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
 
     /// @dev called by user to renew a lease (and pay for it).
     function renew(uint256 agreementId) external override {
-        // TODO: Automatic renewal can be perjudicial to the owner, maybe we need a propose and accept mechanism.
         _accept(agreementId);
         // emit
     }
@@ -77,7 +95,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
             balances[msg.sender] -= amount;
         }
         balances[agreement.user] += amount;
-        leases[agreementId].expiration = 0;
+        delete leases[agreementId];
         // emit
     }
 
@@ -110,8 +128,20 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.user, "invalid user");
-        require(sandToken.transferFrom(agreement.user, address(this), amountPerPeriod), "transfer error");
-        leases[agreementId].expiration += period;
-        balances[agreement.owner] += amountPerPeriod;
+
+        LeaseData storage data = leases[agreementId];
+        require(data.leaseProposal.proposalExpiration < block.timestamp, "nothing to accept");
+
+        require(
+            sandToken.transferFrom(agreement.user, address(this), data.leaseProposal.rentalPrice),
+            "transfer error"
+        );
+        balances[agreement.owner] += data.leaseProposal.rentalPrice;
+        if (data.expiration == 0) {
+            data.expiration = block.timestamp;
+        }
+        data.expiration += data.leaseProposal.rentalPeriod;
+        delete data.leaseProposal;
+        data.cancellationPenalty = 0;
     }
 }

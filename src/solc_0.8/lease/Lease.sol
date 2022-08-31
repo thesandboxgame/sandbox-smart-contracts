@@ -154,12 +154,12 @@ contract Lease is IERC721, ERC721 {
         address user = ownerOf(agreementId);
         _burn(agreementId);
         LeaseData memory data = _agreements[agreementId];
+        address owner = data.tokenContract.ownerOf(data.tokenId);
+        require(msg.sender == owner, "only owner");
         delete _agreements[agreementId];
         require(address(data.impl) != address(0), "invalid impl");
         require(!data.impl.isLeased(agreementId), "isLeased");
         data.impl.clean(agreementId);
-        address owner = data.tokenContract.ownerOf(data.tokenId);
-        require(msg.sender == owner, "only owner");
         emit LeaseAgreementBurned(agreementId, data.tokenContract, data.tokenId, user, owner, data.impl);
     }
 }
