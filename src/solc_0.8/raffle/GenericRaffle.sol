@@ -20,6 +20,13 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
 
     event TogglePaused(bool _pause);
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);
+    event WaveSetup(
+        uint256 _waveType,
+        uint256 _waveMaxTokens,
+        uint256 _waveMaxTokensToBuy,
+        uint256 _waveSingleTokenPrice
+    );
+    event AllowedExecuteMintSet(address _address);
 
     uint256 public waveType = 0;
     uint256 public waveMaxTokens;
@@ -89,6 +96,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         contractAddress = _waveType == 0 ? address(0) : _contractAddress;
         erc1155Id = _waveType == 2 ? _erc1155Id : 0;
         indexWave++;
+
+        emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
     function price(uint256 _count) public view virtual returns (uint256) {
@@ -267,6 +276,7 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     function setAllowedExecuteMint(address _address) external onlyOwner {
         require(_address != address(0x0), "Address is zero address");
         allowedToExecuteMint = _address;
+        emit AllowedExecuteMintSet(_address);
     }
 
     function setSandOwnerAddress(address _owner) external onlyOwner {
