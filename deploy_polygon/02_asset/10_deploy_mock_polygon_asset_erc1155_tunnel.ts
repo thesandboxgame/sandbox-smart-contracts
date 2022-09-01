@@ -30,6 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       upgradeIndex: 0,
     },
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 
