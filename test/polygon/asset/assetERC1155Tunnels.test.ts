@@ -5,7 +5,7 @@ import {expect} from '../../chai-setup';
 import {AbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
-describe('PolygonAsset.sol', function () {
+describe('Asset_ERC1155_Tunnels', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
     it('cannot send asset directly to tunnel l2', async function () {
       const {

@@ -4,7 +4,7 @@ import {waitFor} from '../../utils';
 import {setupAssetERC721Tunnels} from './fixtures';
 import {BigNumber} from 'ethers';
 
-describe('PolygonAssetERC721.sol', function () {
+describe('Asset_ERC721_Tunnels', function () {
   describe('AssetERC721 <> PolygonAssetERC721: Transfer', function () {
     describe('L1 to L2', function () {
       it('if not owner cannot pause tunnels', async function () {
