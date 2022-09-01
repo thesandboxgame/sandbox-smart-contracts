@@ -35,20 +35,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  // const MockAssetERC721Tunnel = await deploy('MockAssetERC721Tunnel', {
-  //   from: deployer,
-  //   contract: 'MockAssetERC721Tunnel',
-  //   args: [
-  //     CHECKPOINTMANAGER.address,
-  //     FXROOT.address,
-  //     AssetERC721.address,
-  //     TRUSTED_FORWARDER.address,
-  //     MAX_TRANSFER_LIMIT,
-  //   ],
-  //   log: true,
-  //   skipIfAlreadyDeployed: true,
-  // });
-
   const MockAssetERC721Tunnel = await deployments.get('MockAssetERC721Tunnel');
 
   // get deployer on l2

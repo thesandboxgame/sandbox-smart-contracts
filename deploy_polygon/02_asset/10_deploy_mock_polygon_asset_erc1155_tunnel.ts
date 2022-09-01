@@ -31,20 +31,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     log: true,
   });
-
-  // await deploy('MockPolygonAssetERC1155Tunnel', {
-  //   from: deployer,
-  //   contract: 'MockPolygonAssetERC1155Tunnel',
-  //   args: [
-  //     FXCHILD.address,
-  //     PolygonAssetERC1155.address,
-  //     TRUSTED_FORWARDER.address,
-  //     maxTransferLimit,
-  //   ],
-  //   log: true,
-  //   skipIfAlreadyDeployed: true,
-  //   // gasLimit: 600000000000,
-  // });
 };
 
 export default func;

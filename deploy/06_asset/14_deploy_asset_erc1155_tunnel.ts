@@ -35,20 +35,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     log: true,
   });
-
-  // await deploy('AssetERC1155Tunnel', {
-  //   from: deployer,
-  //   contract: 'AssetERC1155Tunnel',
-  //   args: [
-  //     CHECKPOINTMANAGER.address,
-  //     FXROOT.address,
-  //     AssetERC1155.address,
-  //     TRUSTED_FORWARDER.address,
-  //     MAX_TRANSFER_LIMIT,
-  //   ],
-  //   log: true,
-  //   skipIfAlreadyDeployed: true,
-  // });
 };
 
 export default func;
