@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/FX-Portal/FxBaseRootTunnelUpgradeable.sol";
+import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
 import "../../../common/interfaces/IAssetERC1155.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "../../common/ERC1155Receiver.sol";
-// import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
