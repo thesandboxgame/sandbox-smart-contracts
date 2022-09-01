@@ -594,8 +594,6 @@ describe('Requirementsules', function () {
 
       await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
 
-      contract.setMaxStakeOverall(100);
-
       await contract.setERC1155RequirementList(
         ERC1155Token.address,
         [id],
@@ -634,8 +632,6 @@ describe('Requirementsules', function () {
       const user = await getUser();
 
       await ERC1155Token.setFakeBalance(user.address, id, numERC1155);
-
-      contract.setMaxStakeOverall(100);
 
       await contract.setERC1155RequirementList(
         ERC1155Token.address,
