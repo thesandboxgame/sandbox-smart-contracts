@@ -58,7 +58,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address initialSigningWallet,
         address registry
     ) PurchaseValidator(initialSigningWallet) {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
