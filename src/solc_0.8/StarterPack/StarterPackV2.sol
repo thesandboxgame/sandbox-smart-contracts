@@ -92,6 +92,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
+        require(block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY, "DELAY_PERIOD_IN_EFFECT");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
             require(_isValidCatalyst(id), "INVALID_CAT_ID");
