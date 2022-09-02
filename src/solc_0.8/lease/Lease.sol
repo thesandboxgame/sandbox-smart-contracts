@@ -102,8 +102,15 @@ contract Lease is IERC721, ERC721 {
     /// @notice return the current agreement for a particular tokenContract/tokenId pair
     /// @param tokenContract ERC721 contract whose token is being leased
     /// @param tokenId ERC721 tokenId being leased
-    function getAgreement(IERC721 tokenContract, uint256 tokenId) external view returns (LeaseData memory) {
-        return _agreements[_agreementId(tokenContract, tokenId)];
+    function getAgreement(IERC721 tokenContract, uint256 tokenId) external view returns (ILeaseImpl.Agreement memory) {
+        uint256 agreementId = _agreementId(tokenContract, tokenId);
+        LeaseData memory data = _agreements[agreementId];
+        return
+            ILeaseImpl.Agreement({
+                impl: data.impl,
+                owner: data.tokenContract.ownerOf(data.tokenId),
+                user: ownerOf(agreementId)
+            });
     }
 
     /// @notice return whether an particular token (tokenContract/tokenId pair) is being leased

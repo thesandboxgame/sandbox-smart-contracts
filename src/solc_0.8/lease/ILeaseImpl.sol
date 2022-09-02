@@ -13,9 +13,5 @@ interface ILeaseImpl {
 
     function isLeased(uint256 leaseId) external view returns (bool);
 
-    function accept(uint256 agreementId) external;
-
-    function renew(uint256 agreementId) external;
-
     function clean(uint256 agreementId) external;
 }
