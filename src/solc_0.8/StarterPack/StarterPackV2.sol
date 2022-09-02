@@ -2,12 +2,12 @@ pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
 /// @title StarterPack contract that supports SAND as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
-contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
+contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
 
@@ -57,10 +57,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
-    ) PurchaseValidator(initialSigningWallet) {
+    ) PurchaseValidator(initialSigningWallet) ERC2771HandlerV2(trustedForwarder) {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
-        __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
         _registry = registry;
     }
@@ -359,7 +358,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     }
 
     /// @dev this override is required
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
         if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
@@ -372,7 +371,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     }
 
     /// @dev this override is required
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
         if (isTrustedForwarder(msg.sender)) {
             return msg.data[:msg.data.length - 20];
         } else {
