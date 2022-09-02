@@ -1,7 +1,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import "../common/Libraries/SigUtil.sol";
+import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 
 /// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles.
 /// @notice This contract manages the validation of purchases.
@@ -60,7 +60,7 @@ contract PurchaseValidator is AccessControl {
             keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
 
         address signer =
-            SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
+            ECDSA.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
     }
 
