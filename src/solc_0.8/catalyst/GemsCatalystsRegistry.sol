@@ -27,6 +27,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
         __Ownable_init();
+        __AccessControl_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
