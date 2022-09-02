@@ -48,9 +48,9 @@ contract PurchaseValidator is AccessControl {
     /// @return true if the purchase is valid
     function _isPurchaseValid(
         address buyer,
-        uint256[] memory catalystIds,
+        uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
-        uint256[] memory gemIds,
+        uint16[] memory gemIds,
         uint256[] memory gemQuantities,
         uint256 nonce,
         bytes memory signature
