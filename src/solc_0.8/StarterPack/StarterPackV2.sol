@@ -5,8 +5,8 @@ import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
-/// @title StarterPack contract that supports SAND as payment
-/// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
+/// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
+/// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
@@ -43,6 +43,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     );
 
     struct Message {
+        address buyer;
         uint256[] catalystIds;
         uint256[] catalystQuantities;
         uint256[] gemIds;
@@ -57,7 +58,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
-    ) PurchaseValidator(initialSigningWallet) {
+    ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
@@ -134,19 +135,14 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     }
 
     /// @notice Purchase StarterPacks with SAND
-    /// @param buyer The destination address for the purchased Catalysts and Gems and the address that will pay for the purchase; if not metaTx then buyer must be equal to msg.sender
-    /// @param message A message containing information about the Catalysts and Gems to be purchased together with a nonce
+    /// @param message A message containing information about the Catalysts and Gems to be purchased together with the destination (buyer) and a nonce
     /// @param signature A signed message specifying tx details
-    function purchaseWithSAND(
-        address buyer,
-        Message calldata message,
-        bytes calldata signature
-    ) external {
-        require(buyer == _msgSender(), "INVALID_SENDER");
+    function purchaseWithSAND(Message calldata message, bytes calldata signature) external {
+        require(message.buyer == _msgSender(), "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(
             _isPurchaseValid(
-                buyer,
+                message.buyer,
                 message.catalystIds,
                 message.catalystQuantities,
                 message.gemIds,
@@ -164,10 +160,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
                 message.gemIds,
                 message.gemQuantities
             );
-        _transferSANDPayment(buyer, _wallet, amountInSAND);
-        _transferCatalysts(message.catalystIds, message.catalystQuantities, buyer);
-        _transferGems(message.gemIds, message.gemQuantities, buyer);
-        emit Purchase(buyer, message, amountInSAND, _sand);
+        _transferSANDPayment(message.buyer, _wallet, amountInSAND);
+        _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
+        _transferGems(message.gemIds, message.gemQuantities, message.buyer);
+        emit Purchase(message.buyer, message, amountInSAND, _sand);
     }
 
     /// @notice Get current StarterPack prices for catalysts and gems by id
