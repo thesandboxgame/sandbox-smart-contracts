@@ -1,20 +1,30 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
 import "../common/Libraries/SigUtil.sol";
 
-/// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles.
-/// @notice This contract manages the validation of purchases.
-/// @dev It is intended that this contract is inherited by StarterPack.
-contract PurchaseValidator is AccessControl {
+/// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles
+/// @notice This contract manages the validation of purchases
+/// @dev It is intended that this contract is inherited by StarterPack
+contract PurchaseValidator is AccessControl, EIP712 {
     address private _signingWallet;
 
     // A parallel-queue mapping to nonces.
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
+    bytes32 public constant PURCHASE_TYPEHASH =
+        keccak256(
+            "Purchase(address buyer,uint256[] catalystIds,uint256[] catalystQuantities,uint256[] gemIds,uint256[] gemQuantities,uint256 nonce)"
+        );
+
     event SigningWallet(address newSigningWallet);
 
-    constructor(address initialSigningWallet) {
+    constructor(
+        address initialSigningWallet,
+        string memory name,
+        string memory version
+    ) EIP712(name, version) {
         _signingWallet = initialSigningWallet;
     }
 
@@ -35,8 +45,24 @@ contract PurchaseValidator is AccessControl {
         return queuedNonces[_buyer][_queueId];
     }
 
-    /// @notice Check if a purchase message is valid
-    /// @dev Intended to inherit contract to use this internal function.
+    /// @notice Function to get the domain separator
+    function domainSeparator() external view returns (bytes32) {
+        return _domainSeparatorV4();
+    }
+
+    /// @notice Function to get the chainId
+    function getChainId() external view returns (uint256) {
+        return block.chainid;
+    }
+
+    /// @notice Get the wallet authorized for signing purchase-messages.
+    /// @return _signingWallet the address of the signing wallet
+    function getSigningWallet() external view returns (address) {
+        return _signingWallet;
+    }
+
+    /// @notice Check if a purchase message is valid by verifying a ERC712 signature for the purchase message
+    /// @dev It is intended that this contract is inherited so this internal function can be used
     /// @param buyer The address paying for the purchase & receiving tokens
     /// @param catalystIds The catalyst IDs to be purchased
     /// @param catalystQuantities The quantities of the catalysts to be purchased
@@ -56,18 +82,22 @@ contract PurchaseValidator is AccessControl {
         bytes memory signature
     ) internal returns (bool) {
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        bytes32 hashedData =
-            keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
-
-        address signer =
-            SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
-        return signer == _signingWallet;
-    }
-
-    /// @notice Get the wallet authorized for signing purchase-messages.
-    /// @return _signingWallet the address of the signing wallet
-    function getSigningWallet() external view returns (address) {
-        return _signingWallet;
+        bytes32 digest =
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        PURCHASE_TYPEHASH,
+                        buyer,
+                        keccak256(abi.encodePacked(catalystIds)),
+                        keccak256(abi.encodePacked(catalystQuantities)),
+                        keccak256(abi.encodePacked(gemIds)),
+                        keccak256(abi.encodePacked(gemQuantities)),
+                        nonce
+                    )
+                )
+            );
+        address recoveredSigner = ECDSA.recover(digest, signature);
+        return recoveredSigner == _signingWallet;
     }
 
     /// @dev Function for validating the nonce for a user.
