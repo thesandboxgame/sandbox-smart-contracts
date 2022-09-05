@@ -13,7 +13,7 @@ export const setupPolygonStarterPack = withSnapshot(
     'PolygonGems',
     'PolygonGemsCatalystsRegistry_setup',
   ],
-  async function () {
+  async function (hre) {
     // Reuse existing cats & gems fixture
     const {
       sandContract,
@@ -138,6 +138,7 @@ export const setupPolygonStarterPack = withSnapshot(
       buyer, // [3]
       other,
       trustedForwarder,
+      hre,
     };
   }
 );

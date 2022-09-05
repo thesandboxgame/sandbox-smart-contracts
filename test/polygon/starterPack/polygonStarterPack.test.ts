@@ -195,6 +195,12 @@ describe('PolygonStarterPack.sol', function () {
         domainSeparator
       );
     });
+    it('check the chainId', async function () {
+      const {PolygonStarterPack, hre} = await setupPolygonStarterPack();
+      expect(await PolygonStarterPack.getChainId()).to.be.equal(
+        hre.network.config.chainId || 31337 // Polygon || hardhat
+      );
+    });
   });
   describe('getReceivingWallet', function () {
     it('can view the receiving wallet', async function () {
