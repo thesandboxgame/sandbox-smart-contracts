@@ -4,7 +4,7 @@ import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
 import "../common/Libraries/SigUtil.sol";
 
-/// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles
+/// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles with EIP712
 /// @notice This contract manages the validation of purchases
 /// @dev It is intended that this contract is inherited by StarterPack
 contract PurchaseValidator is AccessControl, EIP712 {
@@ -61,7 +61,7 @@ contract PurchaseValidator is AccessControl, EIP712 {
         return _signingWallet;
     }
 
-    /// @notice Check if a purchase message is valid by verifying a ERC712 signature for the purchase message
+    /// @notice Check if a purchase message is valid by verifying a EIP712 signature for the purchase message
     /// @dev It is intended that this contract is inherited so this internal function can be used
     /// @param buyer The address paying for the purchase & receiving tokens
     /// @param catalystIds The catalyst IDs to be purchased
