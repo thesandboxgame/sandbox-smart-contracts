@@ -3,12 +3,10 @@ pragma solidity 0.8.2;
 import "./PurchaseValidator.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
 
 /// @title StarterPack contract that supports SAND as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
-    using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
 
     address internal immutable _sand;
