@@ -1611,7 +1611,7 @@ describe('PolygonStarterPack.sol', function () {
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
       );
     });
-    it('can withdraw 30 types of cats and gems', async function () {
+    it('cannot withdraw more than the limit of catalysts and gems', async function () {
       const {
         PolygonStarterPackAsAdmin,
         other,
@@ -1620,73 +1620,116 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       await deployManyGemContracts(25);
       await deployManyCatalystContracts(26);
-      await PolygonStarterPackAsAdmin.withdrawAll(
-        other.address,
-        [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18,
-          19,
-          20,
-          21,
-          22,
-          23,
-          24,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-        ],
-        [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18,
-          19,
-          20,
-          21,
-          22,
-          23,
-          24,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-        ]
-      );
+      await expect(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+          ]
+        )
+      ).to.be.revertedWith('TOO_MANY_IDS');
     });
   });
   describe('GAS:PolygonStarterPack-PurchaseWithSAND', function () {
@@ -1978,6 +2021,158 @@ describe('PolygonStarterPack.sol', function () {
         'Gas - WithdrawAll 100 each of 50 cats and 100 each of 50 gems - ',
         receipt.gasUsed
       );
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 50 cats only', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(45);
+      await deployManyCatalystContracts(46);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ],
+          []
+        )
+      );
+      record('Gas - WithdrawAll 100 each of 50 cats - ', receipt.gasUsed);
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 50 gems only', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(45);
+      await deployManyCatalystContracts(46);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ]
+        )
+      );
+      record('Gas - WithdrawAll 100 each of 50 gems - ', receipt.gasUsed);
       console.log(JSON.stringify(gasReport, null, '  '));
     });
   });
