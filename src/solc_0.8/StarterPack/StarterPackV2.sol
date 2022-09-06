@@ -9,6 +9,7 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
+    uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
 
     address internal immutable _sand;
@@ -92,6 +93,8 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
+        require(catalystPrices.length <= MAX_UINT16, "TOO_MANY_CATALYST_PRICES");
+        require(gemPrices.length <= MAX_UINT16, "TOO_MANY_GEM_PRICES");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = catalystIds[i];
             require(_isValidCatalyst(id), "INVALID_CAT_ID");
