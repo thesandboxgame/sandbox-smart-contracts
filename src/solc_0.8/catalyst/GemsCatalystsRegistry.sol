@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-/// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
+/// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
 /// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes
 contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
