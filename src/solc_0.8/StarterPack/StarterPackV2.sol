@@ -44,6 +44,8 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
 
     event WithdrawAll(address to, uint256[] catalystIds, uint256[] gemIds);
 
+    event SandEnabled(bool enabled);
+
     struct Message {
         uint256[] catalystIds;
         uint256[] catalystQuantities;
@@ -79,6 +81,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param enabled Whether to enable or disable
     function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _sandEnabled = enabled;
+        emit SandEnabled(enabled);
     }
 
     /// @notice Enables admin to change the prices (in SAND) of the catalysts and gems in the StarterPack bundle
