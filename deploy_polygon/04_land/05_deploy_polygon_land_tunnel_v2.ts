@@ -44,7 +44,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l1'
   ].getNamedAccounts();
 
-  // TODO: review
   if (LandTunnelV2) {
     const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
       'LandTunnelV2',
