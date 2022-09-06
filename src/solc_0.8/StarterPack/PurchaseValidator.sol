@@ -12,7 +12,7 @@ contract PurchaseValidator is AccessControl {
     // A parallel-queue mapping to nonces.
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
-    event SigningWallet(address newSigningWallet);
+    event SigningWallet(address indexed newSigningWallet);
 
     constructor(address initialSigningWallet) {
         _signingWallet = initialSigningWallet;
