@@ -9,7 +9,7 @@ import "../common/Libraries/SigUtil.sol";
 contract PurchaseValidator is AccessControl {
     address private _signingWallet;
 
-    // A parallel-queue mapping to nonces.
+    // A parallel-queue mapping to nonces: user => (queueID => nonce)
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
     event SigningWallet(address newSigningWallet);
