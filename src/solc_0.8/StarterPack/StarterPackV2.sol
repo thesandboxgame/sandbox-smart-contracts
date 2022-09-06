@@ -73,6 +73,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param newReceivingWallet Address of the new receiving wallet
     function setReceivingWallet(address payable newReceivingWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newReceivingWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newReceivingWallet != _wallet, "WALLET_ALREADY_SET");
         _wallet = newReceivingWallet;
         emit ReceivingWallet(newReceivingWallet);
     }
