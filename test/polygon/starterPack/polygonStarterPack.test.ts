@@ -249,6 +249,37 @@ describe('PolygonStarterPack.sol', function () {
       await expect(PolygonStarterPackAsAdmin.setSANDEnabled(true)).to.not.be
         .reverted;
     });
+    it('SandEnabled event is emitted when SAND is enabled', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.setSANDEnabled(true)
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'SandEnabled'
+      );
+      expect(event.args[0]).to.be.true;
+    });
+    it('SandEnabled event is emitted when SAND is disabled', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.setSANDEnabled(false)
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'SandEnabled'
+      );
+      expect(event.args[0]).to.be.false;
+    });
     it('if not default admin cannot set SAND enabled', async function () {
       const {other} = await setupPolygonStarterPack();
       await expect(
