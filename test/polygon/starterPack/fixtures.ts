@@ -38,17 +38,27 @@ export const setupPolygonStarterPack = withSnapshot(
       starterPackAdmin,
       starterPackSaleBeneficiary,
       backendMessageSigner,
+      sandAdmin,
     } = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
 
     const PolygonStarterPack = await ethers.getContract('PolygonStarterPack');
 
+    // DEFAULT_ADMIN_ROLE
     const PolygonStarterPackAsAdmin = await ethers.getContract(
+      'PolygonStarterPack',
+      sandAdmin
+    );
+
+    // STARTERPACK_ROLE
+    const PolygonStarterPackAsStarterPackAdmin = await ethers.getContract(
       'PolygonStarterPack',
       starterPackAdmin
     );
 
     const defaultAdminRole = await PolygonStarterPack.DEFAULT_ADMIN_ROLE();
+
+    const starterPackRole = await PolygonStarterPack.STARTERPACK_ROLE();
 
     // Mint 100 of each type of cat & gem to StarterPack contract --------
     const gemsCatalystsUnit = '1000000000000000000';
@@ -118,6 +128,7 @@ export const setupPolygonStarterPack = withSnapshot(
     return {
       PolygonStarterPack,
       PolygonStarterPackAsAdmin,
+      PolygonStarterPackAsStarterPackAdmin,
       starterPackAdmin,
       starterPackSaleBeneficiary,
       backendMessageSigner,
@@ -138,6 +149,8 @@ export const setupPolygonStarterPack = withSnapshot(
       buyer, // [3]
       other,
       trustedForwarder,
+      sandAdmin,
+      starterPackRole,
     };
   }
 );
