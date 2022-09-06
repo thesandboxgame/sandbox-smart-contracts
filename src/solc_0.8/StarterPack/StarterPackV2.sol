@@ -30,7 +30,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
-    event ReceivingWallet(address newReceivingWallet);
+    event ReceivingWallet(address indexed newReceivingWallet);
 
     event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
 
