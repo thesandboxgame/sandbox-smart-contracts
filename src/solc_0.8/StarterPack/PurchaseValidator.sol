@@ -22,6 +22,7 @@ contract PurchaseValidator is AccessControl {
     /// @param newSigningWallet The new address of the signing wallet
     function setSigningWallet(address newSigningWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newSigningWallet != _wallet, "WALLET_ALREADY_SET");
         _signingWallet = newSigningWallet;
         emit SigningWallet(newSigningWallet);
     }
