@@ -7,6 +7,8 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 
 /// @title StarterPack contract that supports SAND as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
+/// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, STARTERPACK_ROLE
+/// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, STARTERPACK_ROLE is provided for business purposes
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
@@ -30,6 +32,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
+    // The following role is provided for business-related admin functions
+    bytes32 public constant STARTERPACK_ROLE = keccak256("STARTERPACK_ROLE");
+
     event ReceivingWallet(address newReceivingWallet);
 
     event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
@@ -51,14 +56,16 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     }
 
     constructor(
-        address admin,
+        address defaultAdmin,
+        address starterPackAdmin,
         address sandContractAddress,
         address trustedForwarder,
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
     ) PurchaseValidator(initialSigningWallet) {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(STARTERPACK_ROLE, starterPackAdmin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
@@ -75,7 +82,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
 
     /// @dev Enable / disable the specific SAND payment for StarterPacks
     /// @param enabled Whether to enable or disable
-    function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setSANDEnabled(bool enabled) external onlyRole(STARTERPACK_ROLE) {
         _sandEnabled = enabled;
     }
 
@@ -89,7 +96,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] calldata catalystPrices,
         uint256[] calldata gemIds,
         uint256[] calldata gemPrices
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(STARTERPACK_ROLE) {
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
         for (uint256 i = 0; i < catalystIds.length; i++) {
