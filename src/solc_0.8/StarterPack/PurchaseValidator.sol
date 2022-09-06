@@ -5,6 +5,7 @@ import "../common/Libraries/SigUtil.sol";
 
 /// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles.
 /// @notice This contract manages the validation of purchases.
+/// @notice The following privileged roles are used in PurchaseValidator: DEFAULT_ADMIN_ROLE.
 /// @dev It is intended that this contract is inherited by StarterPack.
 contract PurchaseValidator is AccessControl {
     address private _signingWallet;
