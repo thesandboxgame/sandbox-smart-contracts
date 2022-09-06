@@ -2,7 +2,6 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
-import "../common/Libraries/SigUtil.sol";
 
 /// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles with EIP712
 /// @notice This contract manages the validation of purchases
