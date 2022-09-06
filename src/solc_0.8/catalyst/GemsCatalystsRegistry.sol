@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IGem.sol";
 import "./interfaces/ICatalyst.sol";
 import "../common/interfaces/IERC20Extended.sol";
@@ -15,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each new Catalyst get assigned a new id (starting at 1)
 /// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
 /// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes
-contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
+contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
@@ -28,7 +27,6 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     function initV1(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
-        __Ownable_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
@@ -166,6 +164,15 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         }
     }
 
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderChanged(trustedForwarder);
+    }
+
     /// @notice Query whether a given gem exists.
     /// @param gemId The gem being queried.
     /// @return Whether the gem exists.
@@ -263,14 +270,6 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     modifier checkAuthorization(address from) {
         require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
         _;
-    }
-
-    /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
-        _trustedForwarder = trustedForwarder;
-
-        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
