@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {ILeaseImpl} from "./ILeaseImpl.sol";
-import {Lease} from "./Lease.sol";
+import {ILease} from "./ILease.sol";
 
 // TODO: Check reentrancy issues when calling sandToken and leaseContract
 contract PrePaidPeriodAgreement is ILeaseImpl {
@@ -24,7 +24,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     }
 
     IERC20 public sandToken;
-    Lease public leaseContract;
+    ILease public leaseContract;
     mapping(uint256 => LeaseData) public leases;
     // owner balances
     mapping(address => uint256) internal balances;
@@ -32,7 +32,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     // TODO: We can use a factory call from the leaseContract so it is known value instead a constructor one.
     // TODO: The same for the sandToken we can configure it in
     // TODO: the leaseContract (it affects which contract must be approved, where we store the sand, etc)
-    constructor(IERC20 sandToken_, Lease leaseContract_) {
+    constructor(IERC20 sandToken_, ILease leaseContract_) {
         sandToken = sandToken_;
         leaseContract = leaseContract_;
     }
@@ -43,7 +43,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         uint256 rentalPrice,
         uint256 rentalPeriod
     ) external {
-        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.owner, "invalid user");
         leases[agreementId].leaseProposal = LeaseProposal({
@@ -68,7 +68,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
 
     /// @dev called by user to give the owner an opportunity to cancel a lease.
     function proposeCancellation(uint256 agreementId, uint256 cancellationAmount) external {
-        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.user, "invalid user");
         leases[agreementId].cancellationPenalty = cancellationAmount;
@@ -80,7 +80,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         uint256 amount = leases[agreementId].cancellationPenalty;
         require(amount > 0, "not proposed");
 
-        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         // TODO: Maybe anybody can cancel?
         require(msg.sender == agreement.owner, "invalid user");
@@ -121,7 +121,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     }
 
     function _accept(uint256 agreementId, uint256 nonce) internal {
-        ILeaseImpl.Agreement memory agreement = leaseContract.getAgreement(agreementId);
+        ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.user, "invalid user");
 

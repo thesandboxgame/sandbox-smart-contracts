@@ -4,13 +4,14 @@ pragma solidity 0.8.2;
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {ERC721} from "@openzeppelin/contracts-0.8/token/ERC721/ERC721.sol";
 import {ILeaseImpl} from "./ILeaseImpl.sol";
+import {ILease} from "./ILease.sol";
 
 // TODO: Maybe we can limit the agreement types ?
 // TODO: we can use a fixed list of acceptable agreements.
 // TODO: Check reentrancy issues when calling tokenContract and impl
 /// @dev sub-lease must be implemented in the agreement if necessary
 /// @dev the leaser can always freely transfer the ownership of the lease to another user
-contract Lease is IERC721, ERC721 {
+contract Lease is ILease, ERC721 {
     struct LeaseData {
         uint256 tokenId;
         IERC721 tokenContract;
@@ -27,7 +28,7 @@ contract Lease is IERC721, ERC721 {
         address owner,
         ILeaseImpl agreement
     );
-    event LeaseAgreementBurned(
+    event LeaseAgreementDestroyed(
         uint256 agreementId,
         IERC721 indexed tokenContract,
         uint256 indexed tokenId,
@@ -89,10 +90,10 @@ contract Lease is IERC721, ERC721 {
 
     /// @notice return the current agreement for a particular lease
     /// @param agreementId agreement token id
-    function getAgreement(uint256 agreementId) external view returns (ILeaseImpl.Agreement memory) {
+    function getAgreement(uint256 agreementId) external view override returns (ILease.Agreement memory) {
         LeaseData memory data = _agreements[agreementId];
         return
-            ILeaseImpl.Agreement({
+            ILease.Agreement({
                 impl: data.impl,
                 owner: data.tokenContract.ownerOf(data.tokenId),
                 user: ownerOf(agreementId)
@@ -102,11 +103,11 @@ contract Lease is IERC721, ERC721 {
     /// @notice return the current agreement for a particular tokenContract/tokenId pair
     /// @param tokenContract ERC721 contract whose token is being leased
     /// @param tokenId ERC721 tokenId being leased
-    function getAgreement(IERC721 tokenContract, uint256 tokenId) external view returns (ILeaseImpl.Agreement memory) {
+    function getAgreement(IERC721 tokenContract, uint256 tokenId) external view returns (ILease.Agreement memory) {
         uint256 agreementId = _agreementId(tokenContract, tokenId);
         LeaseData memory data = _agreements[agreementId];
         return
-            ILeaseImpl.Agreement({
+            ILease.Agreement({
                 impl: data.impl,
                 owner: data.tokenContract.ownerOf(data.tokenId),
                 user: ownerOf(agreementId)
@@ -115,7 +116,20 @@ contract Lease is IERC721, ERC721 {
 
     /// @notice return whether an particular token (tokenContract/tokenId pair) is being leased
     /// @param agreementId agreement token id
-    function isLeased(uint256 agreementId) external view returns (bool) {
+    function exists(uint256 agreementId) external view returns (bool) {
+        return _exists(agreementId);
+    }
+
+    /// @notice return whether an particular token (tokenContract/tokenId pair) is being leased
+    /// @param tokenContract ERC721 contract whose token is being leased
+    /// @param tokenId ERC721 tokenId being leased
+    function exists(IERC721 tokenContract, uint256 tokenId) external view returns (bool) {
+        return _exists(_agreementId(tokenContract, tokenId));
+    }
+
+    /// @notice return whether an particular token (tokenContract/tokenId pair) is being leased
+    /// @param agreementId agreement token id
+    function isLeased(uint256 agreementId) external view override returns (bool) {
         return _isLeased(agreementId);
     }
 
@@ -167,6 +181,6 @@ contract Lease is IERC721, ERC721 {
         require(address(data.impl) != address(0), "invalid impl");
         require(!data.impl.isLeased(agreementId), "isLeased");
         data.impl.clean(agreementId);
-        emit LeaseAgreementBurned(agreementId, data.tokenContract, data.tokenId, user, owner, data.impl);
+        emit LeaseAgreementDestroyed(agreementId, data.tokenContract, data.tokenId, user, owner, data.impl);
     }
 }
