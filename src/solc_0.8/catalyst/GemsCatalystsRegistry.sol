@@ -15,7 +15,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
-    uint256 internal constant MAX_UINT256 = ~uint256(0);
+    uint256 internal constant MAX_UINT256 = type(uint256).max;
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     IGem[] internal _gems;
