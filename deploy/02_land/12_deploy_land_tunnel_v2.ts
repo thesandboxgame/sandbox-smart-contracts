@@ -36,7 +36,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const hreL2 = hre.companionNetworks.l2;
   const deploymentsL2 = hreL2.deployments;
-  const PolygonLandTunnelV2 = await deploymentsL2.getOrNull('PolygonLandTunnelV2');
+  const PolygonLandTunnelV2 = await deploymentsL2.getOrNull(
+    'PolygonLandTunnelV2'
+  );
 
   // get deployer on l2
   const {deployer: deployerOnL2} = await hreL2.getNamedAccounts();
@@ -57,7 +59,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         LandTunnelV2.address
       );
     }
-    const fxChildTunnel = await deployments.read('LandTunnelV2', 'fxChildTunnel');
+    const fxChildTunnel = await deployments.read(
+      'LandTunnelV2',
+      'fxChildTunnel'
+    );
     if (
       fxChildTunnel !== PolygonLandTunnelV2.address &&
       fxChildTunnel == constants.AddressZero
