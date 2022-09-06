@@ -9,11 +9,13 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 /// @title LAND bridge on L1
-contract LandTunnelV2 is FxBaseRootTunnelUpgradeable,
+contract LandTunnelV2 is
+    FxBaseRootTunnelUpgradeable,
     IERC721MandatoryTokenReceiver,
     ERC2771Handler,
     OwnableUpgradeable,
-    PausableUpgradeable{
+    PausableUpgradeable
+{
     address public rootToken;
     bool internal transferringToL2;
 
