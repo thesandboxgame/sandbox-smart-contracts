@@ -357,25 +357,13 @@ contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
         require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }
 
-    /// @dev this override is required
+    /// @dev this override is required; two or more base classes define function
     function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return msg.sender;
-        }
+        return ERC2771HandlerV2._msgSender();
     }
 
-    /// @dev this override is required
+    /// @dev this override is required; two or more base classes define function
     function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
-            return msg.data[:msg.data.length - 20];
-        } else {
-            return msg.data;
-        }
+        return ERC2771HandlerV2._msgData();
     }
 }
