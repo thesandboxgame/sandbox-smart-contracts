@@ -214,10 +214,12 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         number = _gems.length;
     }
 
+    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance
     function revokeGemsandCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(0);
     }
 
+    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance
     function setGemsAndCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(MAX_UINT256);
     }
