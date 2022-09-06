@@ -8,10 +8,10 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, ethers} = hre;
 
-  const sandPool = await ethers.getContract('ERC20RewardPool');
+  const sandPool = await ethers.getContract('ERC20RewardPoolV2');
 
   const antiCompound = await deployments.read(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     'timeLockClaim'
   );
 
@@ -27,7 +27,7 @@ const func: DeployFunction = async function (
   if (!antiCompound.eq(lockPeriodInSecs)) {
     await deployments.catchUnknownSigner(
       deployments.execute(
-        'ERC20RewardPool',
+        'ERC20RewardPoolV2',
         {from: currentAdmin, log: true},
         'setTimelockClaim',
         lockPeriodInSecs
@@ -37,7 +37,7 @@ const func: DeployFunction = async function (
 
   await deployments.catchUnknownSigner(
     deployments.execute(
-      'ERC20RewardPool',
+      'ERC20RewardPoolV2',
       {from: currentAdmin, log: true},
       'setTimelockDeposit',
       lockPeriodInSecs
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (
 
   await deployments.catchUnknownSigner(
     deployments.execute(
-      'ERC20RewardPool',
+      'ERC20RewardPoolV2',
       {from: currentAdmin, log: true},
       'setTimeLockWithdraw',
       lockPeriodInSecs
@@ -55,7 +55,7 @@ const func: DeployFunction = async function (
 
   await deployments.catchUnknownSigner(
     deployments.execute(
-      'ERC20RewardPool',
+      'ERC20RewardPoolV2',
       {from: currentAdmin, log: true},
       'setAmountLockClaim',
       amountLockClaim,

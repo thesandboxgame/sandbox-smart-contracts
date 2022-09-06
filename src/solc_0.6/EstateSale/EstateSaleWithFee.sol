@@ -2,7 +2,7 @@
 pragma solidity 0.6.5;
 
 import "../common/Libraries/SafeMathWithRequire.sol";
-import "./LandToken.sol";
+import "./ILandToken.sol";
 import "../common/Interfaces/ERC1155.sol";
 import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
@@ -216,7 +216,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     ERC1155 internal immutable _asset;
-    LandToken internal immutable _land;
+    ILandToken internal immutable _land;
     ERC20 internal immutable _sand;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
@@ -244,7 +244,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         address asset,
         address feeDistributor
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
-        _land = LandToken(landAddress);
+        _land = ILandToken(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;

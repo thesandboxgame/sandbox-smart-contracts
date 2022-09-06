@@ -7,6 +7,7 @@ import {
 } from './fixtures';
 import {toWei} from '../../utils';
 import {BigNumber} from 'ethers';
+import {ethers} from 'hardhat';
 
 describe('PolygonSand.sol Meta TX', function () {
   let fixtures: Fixtures;
@@ -53,14 +54,18 @@ describe('PolygonSand.sol Meta TX', function () {
       const preAllowance = BigNumber.from(
         await fixtures.sand.allowance(sandBeneficiary, users[0])
       );
-      fixtures.sandBeneficiary.sand.approve(users[0], amount);
+      await fixtures.sandBeneficiary.sand.approve(users[0], amount);
       expect(
         await fixtures.sand.allowance(
           fixtures.sandBeneficiary.address,
           users[0]
         )
       ).to.be.equal(preAllowance.add(amount));
-      fixtures.users[0].sand.transferFrom(sandBeneficiary, users[0], amount);
+      await fixtures.users[0].sand.transferFrom(
+        sandBeneficiary,
+        users[0],
+        amount
+      );
       expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         preBalance.add(amount)
       );
@@ -137,13 +142,15 @@ describe('PolygonSand.sol Meta TX', function () {
   describe('trusted forwarder', function () {
     it('should fail to set the trusted forwarder if not owner', async function () {
       await expect(
-        fixtures.sandBeneficiary.sand.setTrustedForwarder(users[3])
+        fixtures.deployer.sand.setTrustedForwarder(users[3])
       ).to.revertedWith('caller is not the owner');
     });
     it('should success to set the trusted forwarder if owner', async function () {
       expect(await fixtures.sandBeneficiary.sand.isTrustedForwarder(users[3]))
         .to.be.false;
-      await fixtures.deployer.sand.setTrustedForwarder(users[3]);
+      await fixtures.sand
+        .connect(await ethers.getSigner(await fixtures.sand.getAdmin()))
+        .setTrustedForwarder(users[3]);
       expect(await fixtures.sandBeneficiary.sand.isTrustedForwarder(users[3]))
         .to.be.true;
       expect(

@@ -1,0 +1,761 @@
+{
+  "address": "0x14ca96Df5150a624ac097cD85F12624a90Fae0Bc",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "Deposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "Withdraw",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "SEND_MESSAGE_EVENT_SIG",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "sizes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "xs",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ys",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "batchTransferQuadToL2",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "checkpointManager",
+      "outputs": [
+        {
+          "internalType": "contract ICheckpointManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "fxChildTunnel",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "fxRoot",
+      "outputs": [
+        {
+          "internalType": "contract IFxStateSender",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTrustedForwarder",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "trustedForwarder",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_checkpointManager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_fxRoot",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ILandTokenV2",
+          "name": "_rootToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_trustedForwarder",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "forwarder",
+          "type": "address"
+        }
+      ],
+      "name": "isTrustedForwarder",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "processedExits",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "inputData",
+          "type": "bytes"
+        }
+      ],
+      "name": "receiveMessage",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rootToken",
+      "outputs": [
+        {
+          "internalType": "contract ILandTokenV2",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_fxChildTunnel",
+          "type": "address"
+        }
+      ],
+      "name": "setFxChildTunnel",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "trustedForwarder",
+          "type": "address"
+        }
+      ],
+      "name": "setTrustedForwarder",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unpause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xe2bedcb1e0f14b453bbb22deed5633e793752e45a47d4b966674bc711b80b104",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x14ca96Df5150a624ac097cD85F12624a90Fae0Bc",
+    "transactionIndex": 173,
+    "gasUsed": "3216409",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x69c5a2cc5833274a94afb395552170e0750f8f682df3279c4d883fc880eec757",
+    "transactionHash": "0xe2bedcb1e0f14b453bbb22deed5633e793752e45a47d4b966674bc711b80b104",
+    "logs": [],
+    "blockNumber": 8548152,
+    "cumulativeGasUsed": "20846904",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "0e15663eff5589f9de01a18f0fba777a",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"Withdraw\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"SEND_MESSAGE_EVENT_SIG\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"sizes\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"xs\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"ys\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"batchTransferQuadToL2\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"checkpointManager\",\"outputs\":[{\"internalType\":\"contract ICheckpointManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fxChildTunnel\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fxRoot\",\"outputs\":[{\"internalType\":\"contract IFxStateSender\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTrustedForwarder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_checkpointManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_fxRoot\",\"type\":\"address\"},{\"internalType\":\"contract ILandTokenV2\",\"name\":\"_rootToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_trustedForwarder\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"forwarder\",\"type\":\"address\"}],\"name\":\"isTrustedForwarder\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721BatchReceived\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"processedExits\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"inputData\",\"type\":\"bytes\"}],\"name\":\"receiveMessage\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rootToken\",\"outputs\":[{\"internalType\":\"contract ILandTokenV2\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_fxChildTunnel\",\"type\":\"address\"}],\"name\":\"setFxChildTunnel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"}],\"name\":\"setTrustedForwarder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"onERC721BatchReceived(address,address,uint256[],bytes)\":{\"details\":\"called on ERC721 batch trasnfer to this contract\",\"params\":{\"operator\":\"address of the one sending the ERC721 Token\"},\"returns\":{\"_0\":\"onERC721BatchReceived function selector\"}},\"onERC721Received(address,address,uint256,bytes)\":{\"details\":\"called on ERC721 trasnfer to this contract\",\"params\":{\"operator\":\"address of the one sending the ERC721 Token\"},\"returns\":{\"_0\":\"onERC721Received function selector\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"pause()\":{\"details\":\"Pauses all token transfers across bridge\"},\"paused()\":{\"details\":\"Returns true if the contract is paused, and false otherwise.\"},\"receiveMessage(bytes)\":{\"details\":\"This function verifies if the transaction actually happened on child chain\",\"params\":{\"inputData\":\"RLP encoded data of the reference tx containing following list of fields  0 - headerNumber - Checkpoint header block number containing the reference tx  1 - blockProof - Proof that the block header (in the child chain) is a leaf in the submitted merkle root  2 - blockNumber - Block number containing the reference tx on child chain  3 - blockTime - Reference tx block time  4 - txRoot - Transactions root of block  5 - receiptRoot - Receipts root of block  6 - receipt - Receipt of the reference transaction  7 - receiptProof - Merkle proof of the reference receipt  8 - branchMask - 32 bits denoting the path of receipt in merkle tree  9 - receiptLogIndex - Log Index to read from the receipt\"}},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"setTrustedForwarder(address)\":{\"details\":\"Change the address of the trusted forwarder for meta-TX\",\"params\":{\"trustedForwarder\":\"The new trustedForwarder\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"},\"unpause()\":{\"details\":\"Unpauses all token transfers across bridge\"}},\"title\":\"LAND bridge on L1\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"receiveMessage(bytes)\":{\"notice\":\"receive message from  L2 to L1, validated by proof\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/polygon/root/land/LandTunnelV2.sol\":\"LandTunnelV2\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@maticnetwork/fx-portal/contracts/lib/ExitPayloadReader.sol\":{\"content\":\"pragma solidity ^0.8.0;\\n\\nimport {RLPReader} from \\\"./RLPReader.sol\\\";\\n\\nlibrary ExitPayloadReader {\\n    using RLPReader for bytes;\\n    using RLPReader for RLPReader.RLPItem;\\n\\n    uint8 constant WORD_SIZE = 32;\\n\\n    struct ExitPayload {\\n        RLPReader.RLPItem[] data;\\n    }\\n\\n    struct Receipt {\\n        RLPReader.RLPItem[] data;\\n        bytes raw;\\n        uint256 logIndex;\\n    }\\n\\n    struct Log {\\n        RLPReader.RLPItem data;\\n        RLPReader.RLPItem[] list;\\n    }\\n\\n    struct LogTopics {\\n        RLPReader.RLPItem[] data;\\n    }\\n\\n    // copy paste of private copy() from RLPReader to avoid changing of existing contracts\\n    function copy(\\n        uint256 src,\\n        uint256 dest,\\n        uint256 len\\n    ) private pure {\\n        if (len == 0) return;\\n\\n        // copy as many word sizes as possible\\n        for (; len >= WORD_SIZE; len -= WORD_SIZE) {\\n            assembly {\\n                mstore(dest, mload(src))\\n            }\\n\\n            src += WORD_SIZE;\\n            dest += WORD_SIZE;\\n        }\\n        \\n        if (len == 0) return;\\n\\n        // left over bytes. Mask is used to remove unwanted bytes from the word\\n        uint256 mask = 256**(WORD_SIZE - len) - 1;\\n        assembly {\\n            let srcpart := and(mload(src), not(mask)) // zero out src\\n            let destpart := and(mload(dest), mask) // retrieve the bytes\\n            mstore(dest, or(destpart, srcpart))\\n        }\\n    }\\n\\n    function toExitPayload(bytes memory data) internal pure returns (ExitPayload memory) {\\n        RLPReader.RLPItem[] memory payloadData = data.toRlpItem().toList();\\n\\n        return ExitPayload(payloadData);\\n    }\\n\\n    function getHeaderNumber(ExitPayload memory payload) internal pure returns (uint256) {\\n        return payload.data[0].toUint();\\n    }\\n\\n    function getBlockProof(ExitPayload memory payload) internal pure returns (bytes memory) {\\n        return payload.data[1].toBytes();\\n    }\\n\\n    function getBlockNumber(ExitPayload memory payload) internal pure returns (uint256) {\\n        return payload.data[2].toUint();\\n    }\\n\\n    function getBlockTime(ExitPayload memory payload) internal pure returns (uint256) {\\n        return payload.data[3].toUint();\\n    }\\n\\n    function getTxRoot(ExitPayload memory payload) internal pure returns (bytes32) {\\n        return bytes32(payload.data[4].toUint());\\n    }\\n\\n    function getReceiptRoot(ExitPayload memory payload) internal pure returns (bytes32) {\\n        return bytes32(payload.data[5].toUint());\\n    }\\n\\n    function getReceipt(ExitPayload memory payload) internal pure returns (Receipt memory receipt) {\\n        receipt.raw = payload.data[6].toBytes();\\n        RLPReader.RLPItem memory receiptItem = receipt.raw.toRlpItem();\\n\\n        if (receiptItem.isList()) {\\n            // legacy tx\\n            receipt.data = receiptItem.toList();\\n        } else {\\n            // pop first byte before parsting receipt\\n            bytes memory typedBytes = receipt.raw;\\n            bytes memory result = new bytes(typedBytes.length - 1);\\n            uint256 srcPtr;\\n            uint256 destPtr;\\n            assembly {\\n                srcPtr := add(33, typedBytes)\\n                destPtr := add(0x20, result)\\n            }\\n\\n            copy(srcPtr, destPtr, result.length);\\n            receipt.data = result.toRlpItem().toList();\\n        }\\n\\n        receipt.logIndex = getReceiptLogIndex(payload);\\n        return receipt;\\n    }\\n\\n    function getReceiptProof(ExitPayload memory payload) internal pure returns (bytes memory) {\\n        return payload.data[7].toBytes();\\n    }\\n\\n    function getBranchMaskAsBytes(ExitPayload memory payload) internal pure returns (bytes memory) {\\n        return payload.data[8].toBytes();\\n    }\\n\\n    function getBranchMaskAsUint(ExitPayload memory payload) internal pure returns (uint256) {\\n        return payload.data[8].toUint();\\n    }\\n\\n    function getReceiptLogIndex(ExitPayload memory payload) internal pure returns (uint256) {\\n        return payload.data[9].toUint();\\n    }\\n\\n    // Receipt methods\\n    function toBytes(Receipt memory receipt) internal pure returns (bytes memory) {\\n        return receipt.raw;\\n    }\\n\\n    function getLog(Receipt memory receipt) internal pure returns (Log memory) {\\n        RLPReader.RLPItem memory logData = receipt.data[3].toList()[receipt.logIndex];\\n        return Log(logData, logData.toList());\\n    }\\n\\n    // Log methods\\n    function getEmitter(Log memory log) internal pure returns (address) {\\n        return RLPReader.toAddress(log.list[0]);\\n    }\\n\\n    function getTopics(Log memory log) internal pure returns (LogTopics memory) {\\n        return LogTopics(log.list[1].toList());\\n    }\\n\\n    function getData(Log memory log) internal pure returns (bytes memory) {\\n        return log.list[2].toBytes();\\n    }\\n\\n    function toRlpBytes(Log memory log) internal pure returns (bytes memory) {\\n        return log.data.toRlpBytes();\\n    }\\n\\n    // LogTopics methods\\n    function getField(LogTopics memory topics, uint256 index) internal pure returns (RLPReader.RLPItem memory) {\\n        return topics.data[index];\\n    }\\n}\\n\",\"keccak256\":\"0xe0a46b1a34ba0564638fb0b8d3c38b969dd6dcf8a84f7de935f18d9abbf3c584\"},\"@maticnetwork/fx-portal/contracts/lib/Merkle.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nlibrary Merkle {\\n    function checkMembership(\\n        bytes32 leaf,\\n        uint256 index,\\n        bytes32 rootHash,\\n        bytes memory proof\\n    ) internal pure returns (bool) {\\n        require(proof.length % 32 == 0, \\\"Invalid proof length\\\");\\n        uint256 proofHeight = proof.length / 32;\\n        // Proof of size n means, height of the tree is n+1.\\n        // In a tree of height n+1, max #leafs possible is 2 ^ n\\n        require(index < 2**proofHeight, \\\"Leaf index is too big\\\");\\n\\n        bytes32 proofElement;\\n        bytes32 computedHash = leaf;\\n        for (uint256 i = 32; i <= proof.length; i += 32) {\\n            assembly {\\n                proofElement := mload(add(proof, i))\\n            }\\n\\n            if (index % 2 == 0) {\\n                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));\\n            } else {\\n                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));\\n            }\\n\\n            index = index / 2;\\n        }\\n        return computedHash == rootHash;\\n    }\\n}\\n\",\"keccak256\":\"0x3efdfa22d02994bddb88a504ec63920018b912768ea1782f8dc09e70237060a8\",\"license\":\"MIT\"},\"@maticnetwork/fx-portal/contracts/lib/MerklePatriciaProof.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {RLPReader} from \\\"./RLPReader.sol\\\";\\n\\nlibrary MerklePatriciaProof {\\n    /*\\n     * @dev Verifies a merkle patricia proof.\\n     * @param value The terminating value in the trie.\\n     * @param encodedPath The path in the trie leading to value.\\n     * @param rlpParentNodes The rlp encoded stack of nodes.\\n     * @param root The root hash of the trie.\\n     * @return The boolean validity of the proof.\\n     */\\n    function verify(\\n        bytes memory value,\\n        bytes memory encodedPath,\\n        bytes memory rlpParentNodes,\\n        bytes32 root\\n    ) internal pure returns (bool) {\\n        RLPReader.RLPItem memory item = RLPReader.toRlpItem(rlpParentNodes);\\n        RLPReader.RLPItem[] memory parentNodes = RLPReader.toList(item);\\n\\n        bytes memory currentNode;\\n        RLPReader.RLPItem[] memory currentNodeList;\\n\\n        bytes32 nodeKey = root;\\n        uint256 pathPtr = 0;\\n\\n        bytes memory path = _getNibbleArray(encodedPath);\\n        if (path.length == 0) {\\n            return false;\\n        }\\n\\n        for (uint256 i = 0; i < parentNodes.length; i++) {\\n            if (pathPtr > path.length) {\\n                return false;\\n            }\\n\\n            currentNode = RLPReader.toRlpBytes(parentNodes[i]);\\n            if (nodeKey != keccak256(currentNode)) {\\n                return false;\\n            }\\n            currentNodeList = RLPReader.toList(parentNodes[i]);\\n\\n            if (currentNodeList.length == 17) {\\n                if (pathPtr == path.length) {\\n                    if (keccak256(RLPReader.toBytes(currentNodeList[16])) == keccak256(value)) {\\n                        return true;\\n                    } else {\\n                        return false;\\n                    }\\n                }\\n\\n                uint8 nextPathNibble = uint8(path[pathPtr]);\\n                if (nextPathNibble > 16) {\\n                    return false;\\n                }\\n                nodeKey = bytes32(RLPReader.toUintStrict(currentNodeList[nextPathNibble]));\\n                pathPtr += 1;\\n            } else if (currentNodeList.length == 2) {\\n                uint256 traversed = _nibblesToTraverse(RLPReader.toBytes(currentNodeList[0]), path, pathPtr);\\n                if (pathPtr + traversed == path.length) {\\n                    //leaf node\\n                    if (keccak256(RLPReader.toBytes(currentNodeList[1])) == keccak256(value)) {\\n                        return true;\\n                    } else {\\n                        return false;\\n                    }\\n                }\\n\\n                //extension node\\n                if (traversed == 0) {\\n                    return false;\\n                }\\n\\n                pathPtr += traversed;\\n                nodeKey = bytes32(RLPReader.toUintStrict(currentNodeList[1]));\\n            } else {\\n                return false;\\n            }\\n        }\\n    }\\n\\n    function _nibblesToTraverse(\\n        bytes memory encodedPartialPath,\\n        bytes memory path,\\n        uint256 pathPtr\\n    ) private pure returns (uint256) {\\n        uint256 len = 0;\\n        // encodedPartialPath has elements that are each two hex characters (1 byte), but partialPath\\n        // and slicedPath have elements that are each one hex character (1 nibble)\\n        bytes memory partialPath = _getNibbleArray(encodedPartialPath);\\n        bytes memory slicedPath = new bytes(partialPath.length);\\n\\n        // pathPtr counts nibbles in path\\n        // partialPath.length is a number of nibbles\\n        for (uint256 i = pathPtr; i < pathPtr + partialPath.length; i++) {\\n            bytes1 pathNibble = path[i];\\n            slicedPath[i - pathPtr] = pathNibble;\\n        }\\n\\n        if (keccak256(partialPath) == keccak256(slicedPath)) {\\n            len = partialPath.length;\\n        } else {\\n            len = 0;\\n        }\\n        return len;\\n    }\\n\\n    // bytes b must be hp encoded\\n    function _getNibbleArray(bytes memory b) internal pure returns (bytes memory) {\\n        bytes memory nibbles = \\\"\\\";\\n        if (b.length > 0) {\\n            uint8 offset;\\n            uint8 hpNibble = uint8(_getNthNibbleOfBytes(0, b));\\n            if (hpNibble == 1 || hpNibble == 3) {\\n                nibbles = new bytes(b.length * 2 - 1);\\n                bytes1 oddNibble = _getNthNibbleOfBytes(1, b);\\n                nibbles[0] = oddNibble;\\n                offset = 1;\\n            } else {\\n                nibbles = new bytes(b.length * 2 - 2);\\n                offset = 0;\\n            }\\n\\n            for (uint256 i = offset; i < nibbles.length; i++) {\\n                nibbles[i] = _getNthNibbleOfBytes(i - offset + 2, b);\\n            }\\n        }\\n        return nibbles;\\n    }\\n\\n    function _getNthNibbleOfBytes(uint256 n, bytes memory str) private pure returns (bytes1) {\\n        return bytes1(n % 2 == 0 ? uint8(str[n / 2]) / 0x10 : uint8(str[n / 2]) % 0x10);\\n    }\\n}\\n\",\"keccak256\":\"0xefa98466a4e3c85857cea4772f25f52ed61f2b90662fb6f67fb155455d644ffc\",\"license\":\"MIT\"},\"@maticnetwork/fx-portal/contracts/lib/RLPReader.sol\":{\"content\":\"/*\\n * @author Hamdi Allam hamdi.allam97@gmail.com\\n * Please reach out with any questions or concerns\\n */\\npragma solidity ^0.8.0;\\n\\nlibrary RLPReader {\\n    uint8 constant STRING_SHORT_START = 0x80;\\n    uint8 constant STRING_LONG_START = 0xb8;\\n    uint8 constant LIST_SHORT_START = 0xc0;\\n    uint8 constant LIST_LONG_START = 0xf8;\\n    uint8 constant WORD_SIZE = 32;\\n\\n    struct RLPItem {\\n        uint256 len;\\n        uint256 memPtr;\\n    }\\n\\n    struct Iterator {\\n        RLPItem item; // Item that's being iterated over.\\n        uint256 nextPtr; // Position of the next item in the list.\\n    }\\n\\n    /*\\n     * @dev Returns the next element in the iteration. Reverts if it has not next element.\\n     * @param self The iterator.\\n     * @return The next element in the iteration.\\n     */\\n    function next(Iterator memory self) internal pure returns (RLPItem memory) {\\n        require(hasNext(self));\\n\\n        uint256 ptr = self.nextPtr;\\n        uint256 itemLength = _itemLength(ptr);\\n        self.nextPtr = ptr + itemLength;\\n\\n        return RLPItem(itemLength, ptr);\\n    }\\n\\n    /*\\n     * @dev Returns true if the iteration has more elements.\\n     * @param self The iterator.\\n     * @return true if the iteration has more elements.\\n     */\\n    function hasNext(Iterator memory self) internal pure returns (bool) {\\n        RLPItem memory item = self.item;\\n        return self.nextPtr < item.memPtr + item.len;\\n    }\\n\\n    /*\\n     * @param item RLP encoded bytes\\n     */\\n    function toRlpItem(bytes memory item) internal pure returns (RLPItem memory) {\\n        uint256 memPtr;\\n        assembly {\\n            memPtr := add(item, 0x20)\\n        }\\n\\n        return RLPItem(item.length, memPtr);\\n    }\\n\\n    /*\\n     * @dev Create an iterator. Reverts if item is not a list.\\n     * @param self The RLP item.\\n     * @return An 'Iterator' over the item.\\n     */\\n    function iterator(RLPItem memory self) internal pure returns (Iterator memory) {\\n        require(isList(self));\\n\\n        uint256 ptr = self.memPtr + _payloadOffset(self.memPtr);\\n        return Iterator(self, ptr);\\n    }\\n\\n    /*\\n     * @param item RLP encoded bytes\\n     */\\n    function rlpLen(RLPItem memory item) internal pure returns (uint256) {\\n        return item.len;\\n    }\\n\\n    /*\\n     * @param item RLP encoded bytes\\n     */\\n    function payloadLen(RLPItem memory item) internal pure returns (uint256) {\\n        return item.len - _payloadOffset(item.memPtr);\\n    }\\n\\n    /*\\n     * @param item RLP encoded list in bytes\\n     */\\n    function toList(RLPItem memory item) internal pure returns (RLPItem[] memory) {\\n        require(isList(item));\\n\\n        uint256 items = numItems(item);\\n        RLPItem[] memory result = new RLPItem[](items);\\n\\n        uint256 memPtr = item.memPtr + _payloadOffset(item.memPtr);\\n        uint256 dataLen;\\n        for (uint256 i = 0; i < items; i++) {\\n            dataLen = _itemLength(memPtr);\\n            result[i] = RLPItem(dataLen, memPtr);\\n            memPtr = memPtr + dataLen;\\n        }\\n\\n        return result;\\n    }\\n\\n    // @return indicator whether encoded payload is a list. negate this function call for isData.\\n    function isList(RLPItem memory item) internal pure returns (bool) {\\n        if (item.len == 0) return false;\\n\\n        uint8 byte0;\\n        uint256 memPtr = item.memPtr;\\n        assembly {\\n            byte0 := byte(0, mload(memPtr))\\n        }\\n\\n        if (byte0 < LIST_SHORT_START) return false;\\n        return true;\\n    }\\n\\n    /*\\n     * @dev A cheaper version of keccak256(toRlpBytes(item)) that avoids copying memory.\\n     * @return keccak256 hash of RLP encoded bytes.\\n     */\\n    function rlpBytesKeccak256(RLPItem memory item) internal pure returns (bytes32) {\\n        uint256 ptr = item.memPtr;\\n        uint256 len = item.len;\\n        bytes32 result;\\n        assembly {\\n            result := keccak256(ptr, len)\\n        }\\n        return result;\\n    }\\n\\n    function payloadLocation(RLPItem memory item) internal pure returns (uint256, uint256) {\\n        uint256 offset = _payloadOffset(item.memPtr);\\n        uint256 memPtr = item.memPtr + offset;\\n        uint256 len = item.len - offset; // data length\\n        return (memPtr, len);\\n    }\\n\\n    /*\\n     * @dev A cheaper version of keccak256(toBytes(item)) that avoids copying memory.\\n     * @return keccak256 hash of the item payload.\\n     */\\n    function payloadKeccak256(RLPItem memory item) internal pure returns (bytes32) {\\n        (uint256 memPtr, uint256 len) = payloadLocation(item);\\n        bytes32 result;\\n        assembly {\\n            result := keccak256(memPtr, len)\\n        }\\n        return result;\\n    }\\n\\n    /** RLPItem conversions into data types **/\\n\\n    // @returns raw rlp encoding in bytes\\n    function toRlpBytes(RLPItem memory item) internal pure returns (bytes memory) {\\n        bytes memory result = new bytes(item.len);\\n        if (result.length == 0) return result;\\n\\n        uint256 ptr;\\n        assembly {\\n            ptr := add(0x20, result)\\n        }\\n\\n        copy(item.memPtr, ptr, item.len);\\n        return result;\\n    }\\n\\n    // any non-zero byte is considered true\\n    function toBoolean(RLPItem memory item) internal pure returns (bool) {\\n        require(item.len == 1);\\n        uint256 result;\\n        uint256 memPtr = item.memPtr;\\n        assembly {\\n            result := byte(0, mload(memPtr))\\n        }\\n\\n        return result == 0 ? false : true;\\n    }\\n\\n    function toAddress(RLPItem memory item) internal pure returns (address) {\\n        // 1 byte for the length prefix\\n        require(item.len == 21);\\n\\n        return address(uint160(toUint(item)));\\n    }\\n\\n    function toUint(RLPItem memory item) internal pure returns (uint256) {\\n        require(item.len > 0 && item.len <= 33);\\n\\n        uint256 offset = _payloadOffset(item.memPtr);\\n        uint256 len = item.len - offset;\\n\\n        uint256 result;\\n        uint256 memPtr = item.memPtr + offset;\\n        assembly {\\n            result := mload(memPtr)\\n\\n            // shfit to the correct location if neccesary\\n            if lt(len, 32) {\\n                result := div(result, exp(256, sub(32, len)))\\n            }\\n        }\\n\\n        return result;\\n    }\\n\\n    // enforces 32 byte length\\n    function toUintStrict(RLPItem memory item) internal pure returns (uint256) {\\n        // one byte prefix\\n        require(item.len == 33);\\n\\n        uint256 result;\\n        uint256 memPtr = item.memPtr + 1;\\n        assembly {\\n            result := mload(memPtr)\\n        }\\n\\n        return result;\\n    }\\n\\n    function toBytes(RLPItem memory item) internal pure returns (bytes memory) {\\n        require(item.len > 0);\\n\\n        uint256 offset = _payloadOffset(item.memPtr);\\n        uint256 len = item.len - offset; // data length\\n        bytes memory result = new bytes(len);\\n\\n        uint256 destPtr;\\n        assembly {\\n            destPtr := add(0x20, result)\\n        }\\n\\n        copy(item.memPtr + offset, destPtr, len);\\n        return result;\\n    }\\n\\n    /*\\n     * Private Helpers\\n     */\\n\\n    // @return number of payload items inside an encoded list.\\n    function numItems(RLPItem memory item) private pure returns (uint256) {\\n        if (item.len == 0) return 0;\\n\\n        uint256 count = 0;\\n        uint256 currPtr = item.memPtr + _payloadOffset(item.memPtr);\\n        uint256 endPtr = item.memPtr + item.len;\\n        while (currPtr < endPtr) {\\n            currPtr = currPtr + _itemLength(currPtr); // skip over an item\\n            count++;\\n        }\\n\\n        return count;\\n    }\\n\\n    // @return entire rlp item byte length\\n    function _itemLength(uint256 memPtr) private pure returns (uint256) {\\n        uint256 itemLen;\\n        uint256 byte0;\\n        assembly {\\n            byte0 := byte(0, mload(memPtr))\\n        }\\n\\n        if (byte0 < STRING_SHORT_START) itemLen = 1;\\n        else if (byte0 < STRING_LONG_START) itemLen = byte0 - STRING_SHORT_START + 1;\\n        else if (byte0 < LIST_SHORT_START) {\\n            assembly {\\n                let byteLen := sub(byte0, 0xb7) // # of bytes the actual length is\\n                memPtr := add(memPtr, 1) // skip over the first byte\\n                /* 32 byte word size */\\n                let dataLen := div(mload(memPtr), exp(256, sub(32, byteLen))) // right shifting to get the len\\n                itemLen := add(dataLen, add(byteLen, 1))\\n            }\\n        } else if (byte0 < LIST_LONG_START) {\\n            itemLen = byte0 - LIST_SHORT_START + 1;\\n        } else {\\n            assembly {\\n                let byteLen := sub(byte0, 0xf7)\\n                memPtr := add(memPtr, 1)\\n\\n                let dataLen := div(mload(memPtr), exp(256, sub(32, byteLen))) // right shifting to the correct length\\n                itemLen := add(dataLen, add(byteLen, 1))\\n            }\\n        }\\n\\n        return itemLen;\\n    }\\n\\n    // @return number of bytes until the data\\n    function _payloadOffset(uint256 memPtr) private pure returns (uint256) {\\n        uint256 byte0;\\n        assembly {\\n            byte0 := byte(0, mload(memPtr))\\n        }\\n\\n        if (byte0 < STRING_SHORT_START) return 0;\\n        else if (byte0 < STRING_LONG_START || (byte0 >= LIST_SHORT_START && byte0 < LIST_LONG_START)) return 1;\\n        else if (byte0 < LIST_SHORT_START)\\n            // being explicit\\n            return byte0 - (STRING_LONG_START - 1) + 1;\\n        else return byte0 - (LIST_LONG_START - 1) + 1;\\n    }\\n\\n    /*\\n     * @param src Pointer to source\\n     * @param dest Pointer to destination\\n     * @param len Amount of memory to copy from the source\\n     */\\n    function copy(\\n        uint256 src,\\n        uint256 dest,\\n        uint256 len\\n    ) private pure {\\n        if (len == 0) return;\\n\\n        // copy as many word sizes as possible\\n        for (; len >= WORD_SIZE; len -= WORD_SIZE) {\\n            assembly {\\n                mstore(dest, mload(src))\\n            }\\n\\n            src += WORD_SIZE;\\n            dest += WORD_SIZE;\\n        }\\n\\n        if (len == 0) return;\\n\\n        // left over bytes. Mask is used to remove unwanted bytes from the word\\n        uint256 mask = 256**(WORD_SIZE - len) - 1;\\n\\n        assembly {\\n            let srcpart := and(mload(src), not(mask)) // zero out src\\n            let destpart := and(mload(dest), mask) // retrieve the bytes\\n            mstore(dest, or(destpart, srcpart))\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x16e8cbf7c2a240044182576be529be0fa666ce0cdec46be3ff76d40491362a80\"},\"@maticnetwork/fx-portal/contracts/tunnel/FxBaseRootTunnel.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {RLPReader} from \\\"../lib/RLPReader.sol\\\";\\nimport {MerklePatriciaProof} from \\\"../lib/MerklePatriciaProof.sol\\\";\\nimport {Merkle} from \\\"../lib/Merkle.sol\\\";\\nimport \\\"../lib/ExitPayloadReader.sol\\\";\\n\\ninterface IFxStateSender {\\n    function sendMessageToChild(address _receiver, bytes calldata _data) external;\\n}\\n\\ncontract ICheckpointManager {\\n    struct HeaderBlock {\\n        bytes32 root;\\n        uint256 start;\\n        uint256 end;\\n        uint256 createdAt;\\n        address proposer;\\n    }\\n\\n    /**\\n     * @notice mapping of checkpoint header numbers to block details\\n     * @dev These checkpoints are submited by plasma contracts\\n     */\\n    mapping(uint256 => HeaderBlock) public headerBlocks;\\n}\\n\\nabstract contract FxBaseRootTunnel {\\n    using RLPReader for RLPReader.RLPItem;\\n    using Merkle for bytes32;\\n    using ExitPayloadReader for bytes;\\n    using ExitPayloadReader for ExitPayloadReader.ExitPayload;\\n    using ExitPayloadReader for ExitPayloadReader.Log;\\n    using ExitPayloadReader for ExitPayloadReader.LogTopics;\\n    using ExitPayloadReader for ExitPayloadReader.Receipt;\\n\\n    // keccak256(MessageSent(bytes))\\n    bytes32 public constant SEND_MESSAGE_EVENT_SIG = 0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036;\\n\\n    // state sender contract\\n    IFxStateSender public fxRoot;\\n    // root chain manager\\n    ICheckpointManager public checkpointManager;\\n    // child tunnel contract which receives and sends messages\\n    address public fxChildTunnel;\\n\\n    // storage to avoid duplicate exits\\n    mapping(bytes32 => bool) public processedExits;\\n\\n    constructor(address _checkpointManager, address _fxRoot) {\\n        checkpointManager = ICheckpointManager(_checkpointManager);\\n        fxRoot = IFxStateSender(_fxRoot);\\n    }\\n\\n    // set fxChildTunnel if not set already\\n    function setFxChildTunnel(address _fxChildTunnel) public virtual {\\n        require(fxChildTunnel == address(0x0), \\\"FxBaseRootTunnel: CHILD_TUNNEL_ALREADY_SET\\\");\\n        fxChildTunnel = _fxChildTunnel;\\n    }\\n\\n    /**\\n     * @notice Send bytes message to Child Tunnel\\n     * @param message bytes message that will be sent to Child Tunnel\\n     * some message examples -\\n     *   abi.encode(tokenId);\\n     *   abi.encode(tokenId, tokenMetadata);\\n     *   abi.encode(messageType, messageData);\\n     */\\n    function _sendMessageToChild(bytes memory message) internal {\\n        fxRoot.sendMessageToChild(fxChildTunnel, message);\\n    }\\n\\n    function _validateAndExtractMessage(bytes memory inputData) internal returns (bytes memory) {\\n        ExitPayloadReader.ExitPayload memory payload = inputData.toExitPayload();\\n\\n        bytes memory branchMaskBytes = payload.getBranchMaskAsBytes();\\n        uint256 blockNumber = payload.getBlockNumber();\\n        // checking if exit has already been processed\\n        // unique exit is identified using hash of (blockNumber, branchMask, receiptLogIndex)\\n        bytes32 exitHash = keccak256(\\n            abi.encodePacked(\\n                blockNumber,\\n                // first 2 nibbles are dropped while generating nibble array\\n                // this allows branch masks that are valid but bypass exitHash check (changing first 2 nibbles only)\\n                // so converting to nibble array and then hashing it\\n                MerklePatriciaProof._getNibbleArray(branchMaskBytes),\\n                payload.getReceiptLogIndex()\\n            )\\n        );\\n        require(processedExits[exitHash] == false, \\\"FxRootTunnel: EXIT_ALREADY_PROCESSED\\\");\\n        processedExits[exitHash] = true;\\n\\n        ExitPayloadReader.Receipt memory receipt = payload.getReceipt();\\n        ExitPayloadReader.Log memory log = receipt.getLog();\\n\\n        // check child tunnel\\n        require(fxChildTunnel == log.getEmitter(), \\\"FxRootTunnel: INVALID_FX_CHILD_TUNNEL\\\");\\n\\n        bytes32 receiptRoot = payload.getReceiptRoot();\\n        // verify receipt inclusion\\n        require(\\n            MerklePatriciaProof.verify(receipt.toBytes(), branchMaskBytes, payload.getReceiptProof(), receiptRoot),\\n            \\\"FxRootTunnel: INVALID_RECEIPT_PROOF\\\"\\n        );\\n\\n        // verify checkpoint inclusion\\n        _checkBlockMembershipInCheckpoint(\\n            blockNumber,\\n            payload.getBlockTime(),\\n            payload.getTxRoot(),\\n            receiptRoot,\\n            payload.getHeaderNumber(),\\n            payload.getBlockProof()\\n        );\\n\\n        ExitPayloadReader.LogTopics memory topics = log.getTopics();\\n\\n        require(\\n            bytes32(topics.getField(0).toUint()) == SEND_MESSAGE_EVENT_SIG, // topic0 is event sig\\n            \\\"FxRootTunnel: INVALID_SIGNATURE\\\"\\n        );\\n\\n        // received message data\\n        bytes memory message = abi.decode(log.getData(), (bytes)); // event decodes params again, so decoding bytes to get message\\n        return message;\\n    }\\n\\n    function _checkBlockMembershipInCheckpoint(\\n        uint256 blockNumber,\\n        uint256 blockTime,\\n        bytes32 txRoot,\\n        bytes32 receiptRoot,\\n        uint256 headerNumber,\\n        bytes memory blockProof\\n    ) private view returns (uint256) {\\n        (bytes32 headerRoot, uint256 startBlock, , uint256 createdAt, ) = checkpointManager.headerBlocks(headerNumber);\\n\\n        require(\\n            keccak256(abi.encodePacked(blockNumber, blockTime, txRoot, receiptRoot)).checkMembership(\\n                blockNumber - startBlock,\\n                headerRoot,\\n                blockProof\\n            ),\\n            \\\"FxRootTunnel: INVALID_HEADER\\\"\\n        );\\n        return createdAt;\\n    }\\n\\n    /**\\n     * @notice receive message from  L2 to L1, validated by proof\\n     * @dev This function verifies if the transaction actually happened on child chain\\n     *\\n     * @param inputData RLP encoded data of the reference tx containing following list of fields\\n     *  0 - headerNumber - Checkpoint header block number containing the reference tx\\n     *  1 - blockProof - Proof that the block header (in the child chain) is a leaf in the submitted merkle root\\n     *  2 - blockNumber - Block number containing the reference tx on child chain\\n     *  3 - blockTime - Reference tx block time\\n     *  4 - txRoot - Transactions root of block\\n     *  5 - receiptRoot - Receipts root of block\\n     *  6 - receipt - Receipt of the reference transaction\\n     *  7 - receiptProof - Merkle proof of the reference receipt\\n     *  8 - branchMask - 32 bits denoting the path of receipt in merkle tree\\n     *  9 - receiptLogIndex - Log Index to read from the receipt\\n     */\\n    function receiveMessage(bytes memory inputData) public virtual {\\n        bytes memory message = _validateAndExtractMessage(inputData);\\n        _processMessageFromChild(message);\\n    }\\n\\n    /**\\n     * @notice Process message received from Child Tunnel\\n     * @dev function needs to be implemented to handle message as per requirement\\n     * This is called by onStateReceive function.\\n     * Since it is called via a system call, any event will not be emitted during its execution.\\n     * @param message bytes message that was sent from Child Tunnel\\n     */\\n    function _processMessageFromChild(bytes memory message) internal virtual;\\n}\\n\",\"keccak256\":\"0xd9ddea51d758d6406e10c35f10a150495cfcc90f9334e34755ce5de31b27d447\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    function __Ownable_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n        __Ownable_init_unchained();\\n    }\\n\\n    function __Ownable_init_unchained() internal onlyInitializing {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x9ffedb33e192f8821cbaead72596c79ea87fb28a73f8d3a9f5004449799f8e1b\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/AddressUpgradeable.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To initialize the implementation contract, you can either invoke the\\n * initializer manually, or you can include a constructor to automatically mark it as initialized when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() initializer {}\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     */\\n    bool private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Modifier to protect an initializer function from being invoked twice.\\n     */\\n    modifier initializer() {\\n        // If the contract is initializing we ignore whether _initialized is set in order to support multiple\\n        // inheritance patterns, but we only do this in the context of a constructor, because in other contexts the\\n        // contract may have been reentered.\\n        require(_initializing ? _isConstructor() : !_initialized, \\\"Initializable: contract is already initialized\\\");\\n\\n        bool isTopLevelCall = !_initializing;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n            _initialized = true;\\n        }\\n\\n        _;\\n\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} modifier, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    function _isConstructor() private view returns (bool) {\\n        return !AddressUpgradeable.isContract(address(this));\\n    }\\n}\\n\",\"keccak256\":\"0x68861bcc80cacbd498efde75aab6c74a486cc48262660d326c8d7530d9752097\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (security/Pausable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module which allows children to implement an emergency stop\\n * mechanism that can be triggered by an authorized account.\\n *\\n * This module is used through inheritance. It will make available the\\n * modifiers `whenNotPaused` and `whenPaused`, which can be applied to\\n * the functions of your contract. Note that they will not be pausable by\\n * simply including this module, only once the modifiers are put in place.\\n */\\nabstract contract PausableUpgradeable is Initializable, ContextUpgradeable {\\n    /**\\n     * @dev Emitted when the pause is triggered by `account`.\\n     */\\n    event Paused(address account);\\n\\n    /**\\n     * @dev Emitted when the pause is lifted by `account`.\\n     */\\n    event Unpaused(address account);\\n\\n    bool private _paused;\\n\\n    /**\\n     * @dev Initializes the contract in unpaused state.\\n     */\\n    function __Pausable_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n        __Pausable_init_unchained();\\n    }\\n\\n    function __Pausable_init_unchained() internal onlyInitializing {\\n        _paused = false;\\n    }\\n\\n    /**\\n     * @dev Returns true if the contract is paused, and false otherwise.\\n     */\\n    function paused() public view virtual returns (bool) {\\n        return _paused;\\n    }\\n\\n    /**\\n     * @dev Modifier to make a function callable only when the contract is not paused.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must not be paused.\\n     */\\n    modifier whenNotPaused() {\\n        require(!paused(), \\\"Pausable: paused\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Modifier to make a function callable only when the contract is paused.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must be paused.\\n     */\\n    modifier whenPaused() {\\n        require(paused(), \\\"Pausable: not paused\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Triggers stopped state.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must not be paused.\\n     */\\n    function _pause() internal virtual whenNotPaused {\\n        _paused = true;\\n        emit Paused(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Returns to normal state.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must be paused.\\n     */\\n    function _unpause() internal virtual whenPaused {\\n        _paused = false;\\n        emit Unpaused(_msgSender());\\n    }\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0xf93da311a3b34a8363a759c404d575746fa38351fb29ecd646c608e27219ebec\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Address.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary AddressUpgradeable {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize, which returns 0 for contracts in\\n        // construction, since the code is only stored at the end of the\\n        // constructor execution.\\n\\n        uint256 size;\\n        assembly {\\n            size := extcodesize(account)\\n        }\\n        return size > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verifies that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x3f0f878c796dfc7feba6d3c4e3e526c14c7deae8b7bfc71088e3f38fab0d77b3\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x0b0d548f6381370d394f7a434f994dc678b3ef3e755de106109d61343a685ea7\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC2771Handler.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\n/// @dev minimal ERC2771 handler to keep bytecode-size down\\n/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol\\n/// with an initializer for proxies and a mutable forwarder\\n\\nabstract contract ERC2771Handler {\\n    address internal _trustedForwarder;\\n\\n    function __ERC2771Handler_initialize(address forwarder) internal {\\n        _trustedForwarder = forwarder;\\n    }\\n\\n    function isTrustedForwarder(address forwarder) public view returns (bool) {\\n        return forwarder == _trustedForwarder;\\n    }\\n\\n    function getTrustedForwarder() external view returns (address trustedForwarder) {\\n        return _trustedForwarder;\\n    }\\n\\n    function _msgSender() internal view virtual returns (address sender) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            // The assembly code is more direct than the Solidity version using `abi.decode`.\\n            // solhint-disable-next-line no-inline-assembly\\n            assembly {\\n                sender := shr(96, calldataload(sub(calldatasize(), 20)))\\n            }\\n        } else {\\n            return msg.sender;\\n        }\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            return msg.data[:msg.data.length - 20];\\n        } else {\\n            return msg.data;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xd4723b9664afa6448f1a217736f91e5e48ec483162a8da0940da9e016eab3fe0\",\"license\":\"MIT\"},\"src/solc_0.8/common/fx-portal/FxBaseRootTunnelUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport {\\n    FxBaseRootTunnel,\\n    ICheckpointManager,\\n    IFxStateSender\\n} from \\\"@maticnetwork/fx-portal/contracts/tunnel/FxBaseRootTunnel.sol\\\";\\n\\nabstract contract FxBaseRootTunnelUpgradeable is FxBaseRootTunnel {\\n    // solhint-disable-next-line no-empty-blocks\\n    constructor() FxBaseRootTunnel(address(0), address(0)) {}\\n\\n    function __FxBaseRootTunnelUpgradeable_initialize(address _checkpointManager, address _fxRoot) internal {\\n        checkpointManager = ICheckpointManager(_checkpointManager);\\n        fxRoot = IFxStateSender(_fxRoot);\\n    }\\n\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0xd8515d5120ff00177c32cbee02bdee338842eb0391eb7f96e83427fed21adcf2\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC721MandatoryTokenReceiver.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\n/// @dev Note: The ERC-165 identifier for this interface is 0x5e8bf644.\\ninterface IERC721MandatoryTokenReceiver {\\n    function onERC721BatchReceived(\\n        address operator,\\n        address from,\\n        uint256[] calldata ids,\\n        bytes calldata data\\n    ) external returns (bytes4); // needs to return 0x4b808c46\\n\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4); // needs to return 0x150b7a02\\n}\\n\",\"keccak256\":\"0x66db07bc53d4c7f6b8f23dfa76874378e01b87a1b81726d5d637942d072203a9\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/ILandToken.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface ILandToken {\\n    function batchTransferQuad(\\n        address from,\\n        address to,\\n        uint256[] calldata sizes,\\n        uint256[] calldata xs,\\n        uint256[] calldata ys,\\n        bytes calldata data\\n    ) external;\\n\\n    function transferQuad(\\n        address from,\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes calldata data\\n    ) external;\\n\\n    function batchTransferFrom(\\n        address from,\\n        address to,\\n        uint256[] calldata ids,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0xf1cb108c7274c973356adedb18230b18bdad992b946e0921cc3ebed04f59c92e\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/ILandTokenV2.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"./ILandToken.sol\\\";\\n\\ninterface ILandTokenV2 is ILandToken {\\n    function isSuperOperator(address who) external view returns (bool);\\n\\n    function exists(\\n        uint256 size,\\n        uint256 x,\\n        uint256 y\\n    ) external view returns (bool);\\n\\n    function mintQuad(\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes calldata data\\n    ) external;\\n\\n    function mintAndTransferQuad(\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0xa14d83a61c4a9c6ef90cd4160b4f5309d9af082389dd7056c8742350d7865760\",\"license\":\"MIT\"},\"src/solc_0.8/polygon/root/land/LandTunnelV2.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\\\";\\nimport \\\"@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol\\\";\\nimport \\\"../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol\\\";\\nimport \\\"../../../common/BaseWithStorage/ERC2771Handler.sol\\\";\\nimport \\\"../../../common/interfaces/ILandTokenV2.sol\\\";\\nimport \\\"../../../common/interfaces/IERC721MandatoryTokenReceiver.sol\\\";\\n\\n/// @title LAND bridge on L1\\ncontract LandTunnelV2 is\\n    FxBaseRootTunnelUpgradeable,\\n    IERC721MandatoryTokenReceiver,\\n    ERC2771Handler,\\n    OwnableUpgradeable,\\n    PausableUpgradeable\\n{\\n    ILandTokenV2 public rootToken;\\n    bool internal transferringToL2;\\n\\n    event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);\\n    event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);\\n\\n    function initialize(\\n        address _checkpointManager,\\n        address _fxRoot,\\n        ILandTokenV2 _rootToken,\\n        address _trustedForwarder\\n    ) public initializer {\\n        rootToken = _rootToken;\\n        __Ownable_init();\\n        __Pausable_init();\\n        __FxBaseRootTunnelUpgradeable_initialize(_checkpointManager, _fxRoot);\\n        __ERC2771Handler_initialize(_trustedForwarder);\\n    }\\n\\n    /// @dev called on ERC721 trasnfer to this contract\\n    /// @param operator address of the one sending the ERC721 Token\\n    /// @return onERC721Received function selector\\n    function onERC721Received(\\n        address operator,\\n        address, /* from */\\n        uint256, /* tokenId */\\n        bytes calldata /* data */\\n    ) external view override returns (bytes4) {\\n        require(transferringToL2 || rootToken.isSuperOperator(operator), \\\"LandTunnel: !BRIDGING\\\");\\n        return this.onERC721Received.selector;\\n    }\\n\\n    /// @dev called on ERC721 batch trasnfer to this contract\\n    /// @param operator address of the one sending the ERC721 Token\\n    /// @return onERC721BatchReceived function selector\\n    function onERC721BatchReceived(\\n        address operator,\\n        address, /* from */\\n        uint256[] calldata, /* ids */\\n        bytes calldata /* data */\\n    ) external view override returns (bytes4) {\\n        require(transferringToL2 || rootToken.isSuperOperator(operator), \\\"LandTunnel: !BRIDGING\\\");\\n        return this.onERC721BatchReceived.selector;\\n    }\\n\\n    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {\\n        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;\\n    }\\n\\n    function batchTransferQuadToL2(\\n        address to,\\n        uint256[] memory sizes,\\n        uint256[] memory xs,\\n        uint256[] memory ys,\\n        bytes memory data\\n    ) public whenNotPaused() {\\n        require(to != address(0), \\\"can't send to zero address\\\");\\n        require(sizes.length == xs.length && xs.length == ys.length, \\\"l2: invalid data\\\");\\n        transferringToL2 = true;\\n        rootToken.batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);\\n        transferringToL2 = false;\\n        for (uint256 index = 0; index < sizes.length; index++) {\\n            bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);\\n            _sendMessageToChild(message);\\n            emit Deposit(to, sizes[index], xs[index], ys[index], data);\\n        }\\n    }\\n\\n    /// @dev Change the address of the trusted forwarder for meta-TX\\n    /// @param trustedForwarder The new trustedForwarder\\n    function setTrustedForwarder(address trustedForwarder) external onlyOwner {\\n        _trustedForwarder = trustedForwarder;\\n    }\\n\\n    /// @dev Pauses all token transfers across bridge\\n    function pause() external onlyOwner {\\n        _pause();\\n    }\\n\\n    /// @dev Unpauses all token transfers across bridge\\n    function unpause() external onlyOwner {\\n        _unpause();\\n    }\\n\\n    function _processMessageFromChild(bytes memory message) internal override {\\n        (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =\\n            abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));\\n        for (uint256 index = 0; index < x.length; index++) {\\n            rootToken.mintAndTransferQuad(to, size[index], x[index], y[index], data);\\n            emit Withdraw(to, size[index], x[index], y[index], data);\\n        }\\n    }\\n\\n    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {\\n        return ERC2771Handler._msgSender();\\n    }\\n\\n    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {\\n        return ERC2771Handler._msgData();\\n    }\\n\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x122941fb5e97134cb1c9cd54c9564e5a97030d7d41066cd5cb1165f7b5d32dd7\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50600180546001600160a01b03199081169091556000805490911690556139448061003c6000396000f3fe608060405234801561001057600080fd5b50600436106101825760003560e01c80638da5cb5b116100d8578063ce1b815f1161008c578063f2fde38b11610066578063f2fde38b14610361578063f8c8765e14610374578063f953cec71461038757610182565b8063ce1b815f1461032a578063da7422281461033b578063de9b771f1461034e57610182565b8063aea4e49e116100bd578063aea4e49e146102f1578063c0857ba014610304578063c4d168d61461031757610182565b80638da5cb5b146102cd578063972c4928146102de57610182565b80634b808c461161013a578063607f2d4211610114578063607f2d421461029a578063715018a6146102bd5780638456cb59146102c557610182565b80634b808c461461025d578063572b6c05146102705780635c975abb1461029257610182565b8063150b7a021161016b578063150b7a02146101e45780631f2d0065146102285780633f4ba83a1461025357610182565b806301ffc9a7146101875780630e387de6146101af575b600080fd5b61019a6101953660046133cf565b61039a565b60405190151581526020015b60405180910390f35b6101d67f8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b03681565b6040519081526020016101a6565b6101f76101f236600461322c565b610435565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020016101a6565b60cd5461023b906001600160a01b031681565b6040516001600160a01b0390911681526020016101a6565b61025b61055d565b005b6101f761026b366004613112565b6105e0565b61019a61027e36600461303a565b6036546001600160a01b0390811691161490565b61019a610704565b61019a6102a836600461336b565b60036020526000908152604090205460ff1681565b61025b61070e565b61025b610791565b6069546001600160a01b031661023b565b60025461023b906001600160a01b031681565b61025b6102ff36600461303a565b610812565b60015461023b906001600160a01b031681565b61025b61032536600461329d565b6108c0565b6036546001600160a01b031661023b565b61025b61034936600461303a565b610c1d565b60005461023b906001600160a01b031681565b61025b61036f36600461303a565b610cc5565b61025b6103823660046131d1565b610dc6565b61025b61039536600461340f565b610fa3565b60007f5e8bf644000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316148061042d57507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b60cd54600090600160a01b900460ff16806104e1575060cd546040517f654b748a0000000000000000000000000000000000000000000000000000000081526001600160a01b0388811660048301529091169063654b748a9060240160206040518083038186803b1580156104a957600080fd5b505afa1580156104bd573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104e1919061334b565b6105325760405162461bcd60e51b815260206004820152601560248201527f4c616e6454756e6e656c3a20214252494447494e47000000000000000000000060448201526064015b60405180910390fd5b507f150b7a020000000000000000000000000000000000000000000000000000000095945050505050565b610565610fbd565b6001600160a01b03166105806069546001600160a01b031690565b6001600160a01b0316146105d65760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de610fcc565b565b60cd54600090600160a01b900460ff168061068c575060cd546040517f654b748a0000000000000000000000000000000000000000000000000000000081526001600160a01b0389811660048301529091169063654b748a9060240160206040518083038186803b15801561065457600080fd5b505afa158015610668573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061068c919061334b565b6106d85760405162461bcd60e51b815260206004820152601560248201527f4c616e6454756e6e656c3a20214252494447494e4700000000000000000000006044820152606401610529565b507f4b808c46000000000000000000000000000000000000000000000000000000009695505050505050565b609b5460ff165b90565b610716610fbd565b6001600160a01b03166107316069546001600160a01b031690565b6001600160a01b0316146107875760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de6000611070565b610799610fbd565b6001600160a01b03166107b46069546001600160a01b031690565b6001600160a01b03161461080a5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de6110cf565b6002546001600160a01b0316156108915760405162461bcd60e51b815260206004820152602a60248201527f467842617365526f6f7454756e6e656c3a204348494c445f54554e4e454c5f4160448201527f4c52454144595f534554000000000000000000000000000000000000000000006064820152608401610529565b6002805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6108c8610704565b156109155760405162461bcd60e51b815260206004820152601060248201527f5061757361626c653a20706175736564000000000000000000000000000000006044820152606401610529565b6001600160a01b03851661096b5760405162461bcd60e51b815260206004820152601a60248201527f63616e27742073656e6420746f207a65726f20616464726573730000000000006044820152606401610529565b8251845114801561097d575081518351145b6109c95760405162461bcd60e51b815260206004820152601060248201527f6c323a20696e76616c69642064617461000000000000000000000000000000006044820152606401610529565b60cd80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff16600160a01b17908190556001600160a01b031663eaa5e067610a0f610fbd565b30878787876040518763ffffffff1660e01b8152600401610a3596959493929190613508565b600060405180830381600087803b158015610a4f57600080fd5b505af1158015610a63573d6000803e3d6000fd5b505060cd80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff16905550600090505b8451811015610c1557600086868381518110610abf57634e487b7160e01b600052603260045260246000fd5b6020026020010151868481518110610ae757634e487b7160e01b600052603260045260246000fd5b6020026020010151868581518110610b0f57634e487b7160e01b600052603260045260246000fd5b602002602001015186604051602001610b2c959493929190613590565b6040516020818303038152906040529050610b468161115a565b866001600160a01b03167f86beac9ed9e1aa4efb77b948567a4c352c177bb58b134f4c9d0d92c2c8ffbfb1878481518110610b9157634e487b7160e01b600052603260045260246000fd5b6020026020010151878581518110610bb957634e487b7160e01b600052603260045260246000fd5b6020026020010151878681518110610be157634e487b7160e01b600052603260045260246000fd5b602002602001015187604051610bfa94939291906135cf565b60405180910390a25080610c0d81613866565b915050610a93565b505050505050565b610c25610fbd565b6001600160a01b0316610c406069546001600160a01b031690565b6001600160a01b031614610c965760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6036805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b610ccd610fbd565b6001600160a01b0316610ce86069546001600160a01b031690565b6001600160a01b031614610d3e5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6001600160a01b038116610dba5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f64647265737300000000000000000000000000000000000000000000000000006064820152608401610529565b610dc381611070565b50565b603654600160a81b900460ff16610dea57603654600160a01b900460ff1615610dee565b303b155b610e605760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a65640000000000000000000000000000000000006064820152608401610529565b603654600160a81b900460ff16158015610ecd57603680547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffffff909116600160a81b1716600160a01b1790555b60cd805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038516179055610efd6111d7565b610f05611254565b610f458585600180546001600160a01b0393841673ffffffffffffffffffffffffffffffffffffffff199182161790915560008054929093169116179055565b6036805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0384161790558015610f9c57603680547fffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffffff1690555b5050505050565b6000610fae826112d1565b9050610fb981611602565b5050565b6000610fc76117ef565b905090565b610fd4610704565b6110205760405162461bcd60e51b815260206004820152601460248201527f5061757361626c653a206e6f74207061757365640000000000000000000000006044820152606401610529565b609b805460ff191690557f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa611053610fbd565b6040516001600160a01b03909116815260200160405180910390a1565b606980546001600160a01b0383811673ffffffffffffffffffffffffffffffffffffffff19831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b6110d7610704565b156111245760405162461bcd60e51b815260206004820152601060248201527f5061757361626c653a20706175736564000000000000000000000000000000006044820152606401610529565b609b805460ff191660011790557f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258611053610fbd565b6000546002546040517fb47204770000000000000000000000000000000000000000000000000000000081526001600160a01b039283169263b4720477926111a992911690859060040161356e565b600060405180830381600087803b1580156111c357600080fd5b505af1158015610f9c573d6000803e3d6000fd5b603654600160a81b900460ff166112445760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b61124c611839565b6105de6118a6565b603654600160a81b900460ff166112c15760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b6112c9611839565b6105de611923565b606060006112de8361199c565b905060006112eb826119fb565b905060006112f883611a32565b905060008161130684611a69565b61130f86611c8f565b604051602001611321939291906134db565b60408051601f1981840301815291815281516020928301206000818152600390935291205490915060ff16156113be5760405162461bcd60e51b8152602060048201526024808201527f4678526f6f7454756e6e656c3a20455849545f414c52454144595f50524f434560448201527f53534544000000000000000000000000000000000000000000000000000000006064820152608401610529565b6000818152600360205260408120805460ff191660011790556113e085611cb9565b905060006113ed82611e1f565b90506113f881611ecb565b6002546001600160a01b0390811691161461147b5760405162461bcd60e51b815260206004820152602560248201527f4678526f6f7454756e6e656c3a20494e56414c49445f46585f4348494c445f5460448201527f554e4e454c0000000000000000000000000000000000000000000000000000006064820152608401610529565b600061148687611f02565b90506114a6611496846020015190565b876114a08a611f2c565b84611f56565b6115185760405162461bcd60e51b815260206004820152602360248201527f4678526f6f7454756e6e656c3a20494e56414c49445f524543454950545f505260448201527f4f4f4600000000000000000000000000000000000000000000000000000000006064820152608401610529565b611546856115258961227d565b61152e8a6122a7565b846115388c6122d1565b6115418d6122fb565b612325565b50600061155283612473565b90507f8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b0366115886115838360006124bd565b612503565b146115d55760405162461bcd60e51b815260206004820152601f60248201527f4678526f6f7454756e6e656c3a20494e56414c49445f5349474e4154555245006044820152606401610529565b60006115e08461257e565b8060200190518101906115f39190613442565b9b9a5050505050505050505050565b60008060008060008580602001905181019061161e9190613056565b9450945094509450945060005b83518110156117e65760cd5485516001600160a01b0390911690634e6a0f4490889088908590811061166d57634e487b7160e01b600052603260045260246000fd5b602002602001015187858151811061169557634e487b7160e01b600052603260045260246000fd5b60200260200101518786815181106116bd57634e487b7160e01b600052603260045260246000fd5b6020026020010151876040518663ffffffff1660e01b81526004016116e6959493929190613590565b600060405180830381600087803b15801561170057600080fd5b505af1158015611714573d6000803e3d6000fd5b50505050856001600160a01b03167f91ee42a3ae048785d7370790775b6bf02c58c5d7bfb5de80f6d7cb27e46a207e86838151811061176357634e487b7160e01b600052603260045260246000fd5b602002602001015186848151811061178b57634e487b7160e01b600052603260045260246000fd5b60200260200101518685815181106117b357634e487b7160e01b600052603260045260246000fd5b6020026020010151866040516117cc94939291906135cf565b60405180910390a2806117de81613866565b91505061162b565b50505050505050565b6036546000906001600160a01b031633141561183257507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c61070b565b503361070b565b603654600160a81b900460ff166105de5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b603654600160a81b900460ff166119135760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b6105de61191e610fbd565b611070565b603654600160a81b900460ff166119905760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b609b805460ff19169055565b60408051602081019091526060815260006119e66119e18460408051808201825260008082526020918201528151808301909252825182529182019181019190915290565b6125a8565b60408051602081019091529081529392505050565b606061042d8260000151600881518110611a2557634e487b7160e01b600052603260045260246000fd5b60200260200101516126da565b600061042d8260000151600281518110611a5c57634e487b7160e01b600052603260045260246000fd5b6020026020010151612503565b6040805160208101909152600081528151606091901561042d57600080611a91600086612785565b60f81c90506001811480611aa857508060ff166003145b15611b8457600185516002611abd91906137dd565b611ac791906137fc565b67ffffffffffffffff811115611aed57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611b17576020820181803683370190505b5092506000611b27600187612785565b90508084600081518110611b4b57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506001925050611bf6565b600285516002611b9491906137dd565b611b9e91906137fc565b67ffffffffffffffff811115611bc457634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611bee576020820181803683370190505b509250600091505b60ff82165b8351811015611c8657611c25611c1460ff8516836137fc565b611c1f90600261367b565b87612785565b848281518110611c4557634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535080611c7e81613866565b915050611bfb565b50505092915050565b600061042d8260000151600981518110611a5c57634e487b7160e01b600052603260045260246000fd5b611cdd60405180606001604052806060815260200160608152602001600081525090565b611d058260000151600681518110611a2557634e487b7160e01b600052603260045260246000fd5b602082810182905260408051808201825260008082529083015280518082019091528251815291810190820152611d3b81612822565b15611d5057611d49816125a8565b8252611e0b565b60208201518051600090611d66906001906137fc565b67ffffffffffffffff811115611d8c57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611db6576020820181803683370190505b509050600080836021019150826020019050611dd48282855161285c565b604080518082018252600080825260209182015281518083019092528451825280850190820152611e04906119e1565b8652505050505b611e1483611c8f565b604083015250919050565b604080516080810182526000918101828152606080830193909352815260208101919091526000611e7b8360000151600381518110611e6e57634e487b7160e01b600052603260045260246000fd5b60200260200101516125a8565b836040015181518110611e9e57634e487b7160e01b600052603260045260246000fd5b602002602001015190506040518060400160405280828152602001611ec2836125a8565b90529392505050565b600061042d8260200151600081518110611ef557634e487b7160e01b600052603260045260246000fd5b60200260200101516128e0565b600061042d8260000151600581518110611a5c57634e487b7160e01b600052603260045260246000fd5b606061042d8260000151600781518110611a2557634e487b7160e01b600052603260045260246000fd5b600080611f8a8460408051808201825260008082526020918201528151808301909252825182529182019181019190915290565b90506000611f97826125a8565b905060608085600080611fa98b611a69565b9050805160001415611fc5576000975050505050505050612275565b60005b865181101561226c578151831115611feb57600098505050505050505050612275565b61201b87828151811061200e57634e487b7160e01b600052603260045260246000fd5b60200260200101516128fa565b95508580519060200120841461203c57600098505050505050505050612275565b61205f878281518110611e6e57634e487b7160e01b600052603260045260246000fd5b945084516011141561215e5781518314156120cf578c805190602001206120a086601081518110611a2557634e487b7160e01b600052603260045260246000fd5b8051906020012014156120be57600198505050505050505050612275565b600098505050505050505050612275565b60008284815181106120f157634e487b7160e01b600052603260045260246000fd5b016020015160f81c905060108111156121165760009950505050505050505050612275565b612149868260ff168151811061213c57634e487b7160e01b600052603260045260246000fd5b6020026020010151612989565b945061215660018561367b565b93505061225a565b8451600214156120be57600061219861219187600081518110611a2557634e487b7160e01b600052603260045260246000fd5b84866129b7565b83519091506121a7828661367b565b141561220a578d805190602001206121d987600181518110611a2557634e487b7160e01b600052603260045260246000fd5b8051906020012014156121f85760019950505050505050505050612275565b60009950505050505050505050612275565b806122215760009950505050505050505050612275565b61222b818561367b565b93506122518660018151811061213c57634e487b7160e01b600052603260045260246000fd5b945061225a9050565b8061226481613866565b915050611fc8565b50505050505050505b949350505050565b600061042d8260000151600381518110611a5c57634e487b7160e01b600052603260045260246000fd5b600061042d8260000151600481518110611a5c57634e487b7160e01b600052603260045260246000fd5b600061042d8260000151600081518110611a5c57634e487b7160e01b600052603260045260246000fd5b606061042d8260000151600181518110611a2557634e487b7160e01b600052603260045260246000fd5b6001546040517f41539d4a000000000000000000000000000000000000000000000000000000008152600481018490526000918291829182916001600160a01b03909116906341539d4a9060240160a06040518083038186803b15801561238b57600080fd5b505afa15801561239f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906123c39190613383565b509350509250925061241a828b6123da91906137fc565b6040805160208082018f90528183018e9052606082018d905260808083018d90528351808403909101815260a09092019092528051910120908588612b1c565b6124665760405162461bcd60e51b815260206004820152601c60248201527f4678526f6f7454756e6e656c3a20494e56414c49445f484541444552000000006044820152606401610529565b9998505050505050505050565b60408051602081019091526060815260405180602001604052806124b58460200151600181518110611e6e57634e487b7160e01b600052603260045260246000fd5b905292915050565b604080518082019091526000808252602082015282518051839081106124f357634e487b7160e01b600052603260045260246000fd5b6020026020010151905092915050565b80516000901580159061251857508151602110155b61252157600080fd5b60006125308360200151612c92565b9050600081846000015161254491906137fc565b9050600080838660200151612559919061367b565b905080519150602083101561257557826020036101000a820491505b50949350505050565b606061042d8260200151600281518110611a2557634e487b7160e01b600052603260045260246000fd5b60606125b382612822565b6125bc57600080fd5b60006125c783612d17565b905060008167ffffffffffffffff8111156125f257634e487b7160e01b600052604160045260246000fd5b60405190808252806020026020018201604052801561263757816020015b60408051808201909152600080825260208201528152602001906001900390816126105790505b50905060006126498560200151612c92565b8560200151612658919061367b565b90506000805b848110156126cf5761266f83612d9a565b91506040518060400160405280838152602001848152508482815181106126a657634e487b7160e01b600052603260045260246000fd5b60209081029190910101526126bb828461367b565b9250806126c781613866565b91505061265e565b509195945050505050565b80516060906126e857600080fd5b60006126f78360200151612c92565b9050600081846000015161270b91906137fc565b905060008167ffffffffffffffff81111561273657634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612760576020820181803683370190505b509050600081602001905061257584876020015161277e919061367b565b8285612e5c565b6000612792600284613881565b156127da576010826127a5600286613693565b815181106127c357634e487b7160e01b600052603260045260246000fd5b01602001516127d5919060f81c613895565b612818565b6010826127e8600286613693565b8151811061280657634e487b7160e01b600052603260045260246000fd5b0160200151612818919060f81c6136a7565b60f81b9392505050565b805160009061283357506000610430565b6020820151805160001a9060c082101561285257600092505050610430565b5060019392505050565b80612866576128db565b6020811061289e578251825261287d60208461367b565b925061288a60208361367b565b91506128976020826137fc565b9050612866565b806128a8576128db565b600060016128b78360206137fc565b6128c39061010061370f565b6128cd91906137fc565b845184518216911916178352505b505050565b80516000906015146128f157600080fd5b61042d82612503565b60606000826000015167ffffffffffffffff81111561292957634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612953576020820181803683370190505b509050805160001415612967579050610430565b60008160200190506129828460200151828660000151612e5c565b5092915050565b805160009060211461299a57600080fd5b600080836020015160016129ae919061367b565b51949350505050565b600080806129c486611a69565b90506000815167ffffffffffffffff8111156129f057634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612a1a576020820181803683370190505b509050845b8251612a2b908761367b565b811015612aea576000878281518110612a5457634e487b7160e01b600052603260045260246000fd5b01602001517fff000000000000000000000000000000000000000000000000000000000000001690508083612a8989856137fc565b81518110612aa757634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350508080612ae290613866565b915050612a1f565b50808051906020012082805190602001201415612b0a5781519250612b0f565b600092505b50909150505b9392505050565b600060208251612b2c9190613881565b15612b795760405162461bcd60e51b815260206004820152601460248201527f496e76616c69642070726f6f66206c656e6774680000000000000000000000006044820152606401610529565b600060208351612b899190613693565b9050612b9681600261370f565b8510612be45760405162461bcd60e51b815260206004820152601560248201527f4c65616620696e64657820697320746f6f2062696700000000000000000000006044820152606401610529565b60008660205b85518111612c8457858101519250612c03600289613881565b612c38576040805160208101849052908101849052606001604051602081830303815290604052805190602001209150612c65565b60408051602081018590529081018390526060016040516020818303038152906040528051906020012091505b612c70600289613693565b9750612c7d60208261367b565b9050612bea565b509094149695505050505050565b8051600090811a6080811015612cac576000915050610430565b60b8811080612cc7575060c08110801590612cc7575060f881105b15612cd6576001915050610430565b60c0811015612d0b57612ceb600160b8613813565b612cf89060ff16826137fc565b612d0390600161367b565b915050610430565b612ceb600160f8613813565b8051600090612d2857506000610430565b600080612d388460200151612c92565b8460200151612d47919061367b565b9050600084600001518560200151612d5f919061367b565b90505b80821015612d9157612d7382612d9a565b612d7d908361367b565b915082612d8981613866565b935050612d62565b50909392505050565b80516000908190811a6080811015612db55760019150612982565b60b8811015612ddb57612dc96080826137fc565b612dd490600161367b565b9150612982565b60c0811015612e085760b78103600185019450806020036101000a85510460018201810193505050612982565b60f8811015612e1c57612dc960c0826137fc565b60019390930151602084900360f7016101000a90049092017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0a0192915050565b80612e66576128db565b6020811061289e5782518252612e7d60208461367b565b9250612e8a60208361367b565b9150612e976020826137fc565b9050612e66565b600082601f830112612eae578081fd5b81356020612ec3612ebe8361362f565b6135fe565b8281528181019085830183850287018401881015612edf578586fd5b855b85811015612efd57813584529284019290840190600101612ee1565b5090979650505050505050565b600082601f830112612f1a578081fd5b81516020612f2a612ebe8361362f565b8281528181019085830183850287018401881015612f46578586fd5b855b85811015612efd57815184529284019290840190600101612f48565b60008083601f840112612f75578182fd5b50813567ffffffffffffffff811115612f8c578182fd5b602083019150836020828501011115612fa457600080fd5b9250929050565b600082601f830112612fbb578081fd5b8135612fc9612ebe82613653565b818152846020838601011115612fdd578283fd5b816020850160208301379081016020019190915292915050565b600082601f830112613007578081fd5b8151613015612ebe82613653565b818152846020838601011115613029578283fd5b612275826020830160208701613836565b60006020828403121561304b578081fd5b8135612b15816138f9565b600080600080600060a0868803121561306d578081fd5b8551613078816138f9565b602087015190955067ffffffffffffffff80821115613095578283fd5b6130a189838a01612f0a565b955060408801519150808211156130b6578283fd5b6130c289838a01612f0a565b945060608801519150808211156130d7578283fd5b6130e389838a01612f0a565b935060808801519150808211156130f8578283fd5b5061310588828901612ff7565b9150509295509295909350565b6000806000806000806080878903121561312a578081fd5b8635613135816138f9565b95506020870135613145816138f9565b9450604087013567ffffffffffffffff80821115613161578283fd5b818901915089601f830112613174578283fd5b813581811115613182578384fd5b8a60208083028501011115613195578384fd5b6020830196508095505060608901359150808211156131b2578283fd5b506131bf89828a01612f64565b979a9699509497509295939492505050565b600080600080608085870312156131e6578384fd5b84356131f1816138f9565b93506020850135613201816138f9565b92506040850135613211816138f9565b91506060850135613221816138f9565b939692955090935050565b600080600080600060808688031215613243578283fd5b853561324e816138f9565b9450602086013561325e816138f9565b935060408601359250606086013567ffffffffffffffff811115613280578182fd5b61328c88828901612f64565b969995985093965092949392505050565b600080600080600060a086880312156132b4578283fd5b85356132bf816138f9565b9450602086013567ffffffffffffffff808211156132db578485fd5b6132e789838a01612e9e565b955060408801359150808211156132fc578485fd5b61330889838a01612e9e565b9450606088013591508082111561331d578283fd5b61332989838a01612e9e565b9350608088013591508082111561333e578283fd5b5061310588828901612fab565b60006020828403121561335c578081fd5b81518015158114612b15578182fd5b60006020828403121561337c578081fd5b5035919050565b600080600080600060a0868803121561339a578283fd5b8551945060208601519350604086015192506060860151915060808601516133c1816138f9565b809150509295509295909350565b6000602082840312156133e0578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114612b15578182fd5b600060208284031215613420578081fd5b813567ffffffffffffffff811115613436578182fd5b61227584828501612fab565b600060208284031215613453578081fd5b815167ffffffffffffffff811115613469578182fd5b61227584828501612ff7565b6000815180845260208085019450808401835b838110156134a457815187529582019590820190600101613488565b509495945050505050565b600081518084526134c7816020860160208601613836565b601f01601f19169290920160200192915050565b600084825283516134f3816020850160208801613836565b60209201918201929092526040019392505050565b60006001600160a01b03808916835280881660208401525060c0604083015261353460c0830187613475565b82810360608401526135468187613475565b9050828103608084015261355a8186613475565b905082810360a084015261246681856134af565b60006001600160a01b03841682526040602083015261227560408301846134af565b60006001600160a01b038716825285602083015284604083015283606083015260a060808301526135c460a08301846134af565b979650505050505050565b6000858252846020830152836040830152608060608301526135f460808301846134af565b9695505050505050565b604051601f8201601f1916810167ffffffffffffffff81118282101715613627576136276138e3565b604052919050565b600067ffffffffffffffff821115613649576136496138e3565b5060209081020190565b600067ffffffffffffffff82111561366d5761366d6138e3565b50601f01601f191660200190565b6000821982111561368e5761368e6138b7565b500190565b6000826136a2576136a26138cd565b500490565b600060ff8316806136ba576136ba6138cd565b8060ff84160491505092915050565b80825b60018086116136db5750613706565b8187048211156136ed576136ed6138b7565b808616156136fa57918102915b9490941c9380026136cc565b94509492505050565b6000612b15600019848460008261372857506001612b15565b8161373557506000612b15565b816001811461374b576002811461375557613782565b6001915050612b15565b60ff841115613766576137666138b7565b6001841b91508482111561377c5761377c6138b7565b50612b15565b5060208310610133831016604e8410600b84101617156137b5575081810a838111156137b0576137b06138b7565b612b15565b6137c284848460016136c9565b8086048211156137d4576137d46138b7565b02949350505050565b60008160001904831182151516156137f7576137f76138b7565b500290565b60008282101561380e5761380e6138b7565b500390565b600060ff821660ff84168082101561382d5761382d6138b7565b90039392505050565b60005b83811015613851578181015183820152602001613839565b83811115613860576000848401525b50505050565b600060001982141561387a5761387a6138b7565b5060010190565b600082613890576138906138cd565b500690565b600060ff8316806138a8576138a86138cd565b8060ff84160691505092915050565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052601260045260246000fd5b634e487b7160e01b600052604160045260246000fd5b6001600160a01b0381168114610dc357600080fdfea2646970667358221220fa2c8a5747ef10f8d0da852344bcd3d910dbf45e7a89d502834f1c36484f13cc64736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101825760003560e01c80638da5cb5b116100d8578063ce1b815f1161008c578063f2fde38b11610066578063f2fde38b14610361578063f8c8765e14610374578063f953cec71461038757610182565b8063ce1b815f1461032a578063da7422281461033b578063de9b771f1461034e57610182565b8063aea4e49e116100bd578063aea4e49e146102f1578063c0857ba014610304578063c4d168d61461031757610182565b80638da5cb5b146102cd578063972c4928146102de57610182565b80634b808c461161013a578063607f2d4211610114578063607f2d421461029a578063715018a6146102bd5780638456cb59146102c557610182565b80634b808c461461025d578063572b6c05146102705780635c975abb1461029257610182565b8063150b7a021161016b578063150b7a02146101e45780631f2d0065146102285780633f4ba83a1461025357610182565b806301ffc9a7146101875780630e387de6146101af575b600080fd5b61019a6101953660046133cf565b61039a565b60405190151581526020015b60405180910390f35b6101d67f8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b03681565b6040519081526020016101a6565b6101f76101f236600461322c565b610435565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020016101a6565b60cd5461023b906001600160a01b031681565b6040516001600160a01b0390911681526020016101a6565b61025b61055d565b005b6101f761026b366004613112565b6105e0565b61019a61027e36600461303a565b6036546001600160a01b0390811691161490565b61019a610704565b61019a6102a836600461336b565b60036020526000908152604090205460ff1681565b61025b61070e565b61025b610791565b6069546001600160a01b031661023b565b60025461023b906001600160a01b031681565b61025b6102ff36600461303a565b610812565b60015461023b906001600160a01b031681565b61025b61032536600461329d565b6108c0565b6036546001600160a01b031661023b565b61025b61034936600461303a565b610c1d565b60005461023b906001600160a01b031681565b61025b61036f36600461303a565b610cc5565b61025b6103823660046131d1565b610dc6565b61025b61039536600461340f565b610fa3565b60007f5e8bf644000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316148061042d57507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b60cd54600090600160a01b900460ff16806104e1575060cd546040517f654b748a0000000000000000000000000000000000000000000000000000000081526001600160a01b0388811660048301529091169063654b748a9060240160206040518083038186803b1580156104a957600080fd5b505afa1580156104bd573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104e1919061334b565b6105325760405162461bcd60e51b815260206004820152601560248201527f4c616e6454756e6e656c3a20214252494447494e47000000000000000000000060448201526064015b60405180910390fd5b507f150b7a020000000000000000000000000000000000000000000000000000000095945050505050565b610565610fbd565b6001600160a01b03166105806069546001600160a01b031690565b6001600160a01b0316146105d65760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de610fcc565b565b60cd54600090600160a01b900460ff168061068c575060cd546040517f654b748a0000000000000000000000000000000000000000000000000000000081526001600160a01b0389811660048301529091169063654b748a9060240160206040518083038186803b15801561065457600080fd5b505afa158015610668573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061068c919061334b565b6106d85760405162461bcd60e51b815260206004820152601560248201527f4c616e6454756e6e656c3a20214252494447494e4700000000000000000000006044820152606401610529565b507f4b808c46000000000000000000000000000000000000000000000000000000009695505050505050565b609b5460ff165b90565b610716610fbd565b6001600160a01b03166107316069546001600160a01b031690565b6001600160a01b0316146107875760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de6000611070565b610799610fbd565b6001600160a01b03166107b46069546001600160a01b031690565b6001600160a01b03161461080a5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6105de6110cf565b6002546001600160a01b0316156108915760405162461bcd60e51b815260206004820152602a60248201527f467842617365526f6f7454756e6e656c3a204348494c445f54554e4e454c5f4160448201527f4c52454144595f534554000000000000000000000000000000000000000000006064820152608401610529565b6002805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6108c8610704565b156109155760405162461bcd60e51b815260206004820152601060248201527f5061757361626c653a20706175736564000000000000000000000000000000006044820152606401610529565b6001600160a01b03851661096b5760405162461bcd60e51b815260206004820152601a60248201527f63616e27742073656e6420746f207a65726f20616464726573730000000000006044820152606401610529565b8251845114801561097d575081518351145b6109c95760405162461bcd60e51b815260206004820152601060248201527f6c323a20696e76616c69642064617461000000000000000000000000000000006044820152606401610529565b60cd80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff16600160a01b17908190556001600160a01b031663eaa5e067610a0f610fbd565b30878787876040518763ffffffff1660e01b8152600401610a3596959493929190613508565b600060405180830381600087803b158015610a4f57600080fd5b505af1158015610a63573d6000803e3d6000fd5b505060cd80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff16905550600090505b8451811015610c1557600086868381518110610abf57634e487b7160e01b600052603260045260246000fd5b6020026020010151868481518110610ae757634e487b7160e01b600052603260045260246000fd5b6020026020010151868581518110610b0f57634e487b7160e01b600052603260045260246000fd5b602002602001015186604051602001610b2c959493929190613590565b6040516020818303038152906040529050610b468161115a565b866001600160a01b03167f86beac9ed9e1aa4efb77b948567a4c352c177bb58b134f4c9d0d92c2c8ffbfb1878481518110610b9157634e487b7160e01b600052603260045260246000fd5b6020026020010151878581518110610bb957634e487b7160e01b600052603260045260246000fd5b6020026020010151878681518110610be157634e487b7160e01b600052603260045260246000fd5b602002602001015187604051610bfa94939291906135cf565b60405180910390a25080610c0d81613866565b915050610a93565b505050505050565b610c25610fbd565b6001600160a01b0316610c406069546001600160a01b031690565b6001600160a01b031614610c965760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6036805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b610ccd610fbd565b6001600160a01b0316610ce86069546001600160a01b031690565b6001600160a01b031614610d3e5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610529565b6001600160a01b038116610dba5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f64647265737300000000000000000000000000000000000000000000000000006064820152608401610529565b610dc381611070565b50565b603654600160a81b900460ff16610dea57603654600160a01b900460ff1615610dee565b303b155b610e605760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a65640000000000000000000000000000000000006064820152608401610529565b603654600160a81b900460ff16158015610ecd57603680547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffffff909116600160a81b1716600160a01b1790555b60cd805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038516179055610efd6111d7565b610f05611254565b610f458585600180546001600160a01b0393841673ffffffffffffffffffffffffffffffffffffffff199182161790915560008054929093169116179055565b6036805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0384161790558015610f9c57603680547fffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffffff1690555b5050505050565b6000610fae826112d1565b9050610fb981611602565b5050565b6000610fc76117ef565b905090565b610fd4610704565b6110205760405162461bcd60e51b815260206004820152601460248201527f5061757361626c653a206e6f74207061757365640000000000000000000000006044820152606401610529565b609b805460ff191690557f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa611053610fbd565b6040516001600160a01b03909116815260200160405180910390a1565b606980546001600160a01b0383811673ffffffffffffffffffffffffffffffffffffffff19831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b6110d7610704565b156111245760405162461bcd60e51b815260206004820152601060248201527f5061757361626c653a20706175736564000000000000000000000000000000006044820152606401610529565b609b805460ff191660011790557f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258611053610fbd565b6000546002546040517fb47204770000000000000000000000000000000000000000000000000000000081526001600160a01b039283169263b4720477926111a992911690859060040161356e565b600060405180830381600087803b1580156111c357600080fd5b505af1158015610f9c573d6000803e3d6000fd5b603654600160a81b900460ff166112445760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b61124c611839565b6105de6118a6565b603654600160a81b900460ff166112c15760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b6112c9611839565b6105de611923565b606060006112de8361199c565b905060006112eb826119fb565b905060006112f883611a32565b905060008161130684611a69565b61130f86611c8f565b604051602001611321939291906134db565b60408051601f1981840301815291815281516020928301206000818152600390935291205490915060ff16156113be5760405162461bcd60e51b8152602060048201526024808201527f4678526f6f7454756e6e656c3a20455849545f414c52454144595f50524f434560448201527f53534544000000000000000000000000000000000000000000000000000000006064820152608401610529565b6000818152600360205260408120805460ff191660011790556113e085611cb9565b905060006113ed82611e1f565b90506113f881611ecb565b6002546001600160a01b0390811691161461147b5760405162461bcd60e51b815260206004820152602560248201527f4678526f6f7454756e6e656c3a20494e56414c49445f46585f4348494c445f5460448201527f554e4e454c0000000000000000000000000000000000000000000000000000006064820152608401610529565b600061148687611f02565b90506114a6611496846020015190565b876114a08a611f2c565b84611f56565b6115185760405162461bcd60e51b815260206004820152602360248201527f4678526f6f7454756e6e656c3a20494e56414c49445f524543454950545f505260448201527f4f4f4600000000000000000000000000000000000000000000000000000000006064820152608401610529565b611546856115258961227d565b61152e8a6122a7565b846115388c6122d1565b6115418d6122fb565b612325565b50600061155283612473565b90507f8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b0366115886115838360006124bd565b612503565b146115d55760405162461bcd60e51b815260206004820152601f60248201527f4678526f6f7454756e6e656c3a20494e56414c49445f5349474e4154555245006044820152606401610529565b60006115e08461257e565b8060200190518101906115f39190613442565b9b9a5050505050505050505050565b60008060008060008580602001905181019061161e9190613056565b9450945094509450945060005b83518110156117e65760cd5485516001600160a01b0390911690634e6a0f4490889088908590811061166d57634e487b7160e01b600052603260045260246000fd5b602002602001015187858151811061169557634e487b7160e01b600052603260045260246000fd5b60200260200101518786815181106116bd57634e487b7160e01b600052603260045260246000fd5b6020026020010151876040518663ffffffff1660e01b81526004016116e6959493929190613590565b600060405180830381600087803b15801561170057600080fd5b505af1158015611714573d6000803e3d6000fd5b50505050856001600160a01b03167f91ee42a3ae048785d7370790775b6bf02c58c5d7bfb5de80f6d7cb27e46a207e86838151811061176357634e487b7160e01b600052603260045260246000fd5b602002602001015186848151811061178b57634e487b7160e01b600052603260045260246000fd5b60200260200101518685815181106117b357634e487b7160e01b600052603260045260246000fd5b6020026020010151866040516117cc94939291906135cf565b60405180910390a2806117de81613866565b91505061162b565b50505050505050565b6036546000906001600160a01b031633141561183257507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c61070b565b503361070b565b603654600160a81b900460ff166105de5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b603654600160a81b900460ff166119135760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b6105de61191e610fbd565b611070565b603654600160a81b900460ff166119905760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608401610529565b609b805460ff19169055565b60408051602081019091526060815260006119e66119e18460408051808201825260008082526020918201528151808301909252825182529182019181019190915290565b6125a8565b60408051602081019091529081529392505050565b606061042d8260000151600881518110611a2557634e487b7160e01b600052603260045260246000fd5b60200260200101516126da565b600061042d8260000151600281518110611a5c57634e487b7160e01b600052603260045260246000fd5b6020026020010151612503565b6040805160208101909152600081528151606091901561042d57600080611a91600086612785565b60f81c90506001811480611aa857508060ff166003145b15611b8457600185516002611abd91906137dd565b611ac791906137fc565b67ffffffffffffffff811115611aed57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611b17576020820181803683370190505b5092506000611b27600187612785565b90508084600081518110611b4b57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506001925050611bf6565b600285516002611b9491906137dd565b611b9e91906137fc565b67ffffffffffffffff811115611bc457634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611bee576020820181803683370190505b509250600091505b60ff82165b8351811015611c8657611c25611c1460ff8516836137fc565b611c1f90600261367b565b87612785565b848281518110611c4557634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535080611c7e81613866565b915050611bfb565b50505092915050565b600061042d8260000151600981518110611a5c57634e487b7160e01b600052603260045260246000fd5b611cdd60405180606001604052806060815260200160608152602001600081525090565b611d058260000151600681518110611a2557634e487b7160e01b600052603260045260246000fd5b602082810182905260408051808201825260008082529083015280518082019091528251815291810190820152611d3b81612822565b15611d5057611d49816125a8565b8252611e0b565b60208201518051600090611d66906001906137fc565b67ffffffffffffffff811115611d8c57634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611db6576020820181803683370190505b509050600080836021019150826020019050611dd48282855161285c565b604080518082018252600080825260209182015281518083019092528451825280850190820152611e04906119e1565b8652505050505b611e1483611c8f565b604083015250919050565b604080516080810182526000918101828152606080830193909352815260208101919091526000611e7b8360000151600381518110611e6e57634e487b7160e01b600052603260045260246000fd5b60200260200101516125a8565b836040015181518110611e9e57634e487b7160e01b600052603260045260246000fd5b602002602001015190506040518060400160405280828152602001611ec2836125a8565b90529392505050565b600061042d8260200151600081518110611ef557634e487b7160e01b600052603260045260246000fd5b60200260200101516128e0565b600061042d8260000151600581518110611a5c57634e487b7160e01b600052603260045260246000fd5b606061042d8260000151600781518110611a2557634e487b7160e01b600052603260045260246000fd5b600080611f8a8460408051808201825260008082526020918201528151808301909252825182529182019181019190915290565b90506000611f97826125a8565b905060608085600080611fa98b611a69565b9050805160001415611fc5576000975050505050505050612275565b60005b865181101561226c578151831115611feb57600098505050505050505050612275565b61201b87828151811061200e57634e487b7160e01b600052603260045260246000fd5b60200260200101516128fa565b95508580519060200120841461203c57600098505050505050505050612275565b61205f878281518110611e6e57634e487b7160e01b600052603260045260246000fd5b945084516011141561215e5781518314156120cf578c805190602001206120a086601081518110611a2557634e487b7160e01b600052603260045260246000fd5b8051906020012014156120be57600198505050505050505050612275565b600098505050505050505050612275565b60008284815181106120f157634e487b7160e01b600052603260045260246000fd5b016020015160f81c905060108111156121165760009950505050505050505050612275565b612149868260ff168151811061213c57634e487b7160e01b600052603260045260246000fd5b6020026020010151612989565b945061215660018561367b565b93505061225a565b8451600214156120be57600061219861219187600081518110611a2557634e487b7160e01b600052603260045260246000fd5b84866129b7565b83519091506121a7828661367b565b141561220a578d805190602001206121d987600181518110611a2557634e487b7160e01b600052603260045260246000fd5b8051906020012014156121f85760019950505050505050505050612275565b60009950505050505050505050612275565b806122215760009950505050505050505050612275565b61222b818561367b565b93506122518660018151811061213c57634e487b7160e01b600052603260045260246000fd5b945061225a9050565b8061226481613866565b915050611fc8565b50505050505050505b949350505050565b600061042d8260000151600381518110611a5c57634e487b7160e01b600052603260045260246000fd5b600061042d8260000151600481518110611a5c57634e487b7160e01b600052603260045260246000fd5b600061042d8260000151600081518110611a5c57634e487b7160e01b600052603260045260246000fd5b606061042d8260000151600181518110611a2557634e487b7160e01b600052603260045260246000fd5b6001546040517f41539d4a000000000000000000000000000000000000000000000000000000008152600481018490526000918291829182916001600160a01b03909116906341539d4a9060240160a06040518083038186803b15801561238b57600080fd5b505afa15801561239f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906123c39190613383565b509350509250925061241a828b6123da91906137fc565b6040805160208082018f90528183018e9052606082018d905260808083018d90528351808403909101815260a09092019092528051910120908588612b1c565b6124665760405162461bcd60e51b815260206004820152601c60248201527f4678526f6f7454756e6e656c3a20494e56414c49445f484541444552000000006044820152606401610529565b9998505050505050505050565b60408051602081019091526060815260405180602001604052806124b58460200151600181518110611e6e57634e487b7160e01b600052603260045260246000fd5b905292915050565b604080518082019091526000808252602082015282518051839081106124f357634e487b7160e01b600052603260045260246000fd5b6020026020010151905092915050565b80516000901580159061251857508151602110155b61252157600080fd5b60006125308360200151612c92565b9050600081846000015161254491906137fc565b9050600080838660200151612559919061367b565b905080519150602083101561257557826020036101000a820491505b50949350505050565b606061042d8260200151600281518110611a2557634e487b7160e01b600052603260045260246000fd5b60606125b382612822565b6125bc57600080fd5b60006125c783612d17565b905060008167ffffffffffffffff8111156125f257634e487b7160e01b600052604160045260246000fd5b60405190808252806020026020018201604052801561263757816020015b60408051808201909152600080825260208201528152602001906001900390816126105790505b50905060006126498560200151612c92565b8560200151612658919061367b565b90506000805b848110156126cf5761266f83612d9a565b91506040518060400160405280838152602001848152508482815181106126a657634e487b7160e01b600052603260045260246000fd5b60209081029190910101526126bb828461367b565b9250806126c781613866565b91505061265e565b509195945050505050565b80516060906126e857600080fd5b60006126f78360200151612c92565b9050600081846000015161270b91906137fc565b905060008167ffffffffffffffff81111561273657634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612760576020820181803683370190505b509050600081602001905061257584876020015161277e919061367b565b8285612e5c565b6000612792600284613881565b156127da576010826127a5600286613693565b815181106127c357634e487b7160e01b600052603260045260246000fd5b01602001516127d5919060f81c613895565b612818565b6010826127e8600286613693565b8151811061280657634e487b7160e01b600052603260045260246000fd5b0160200151612818919060f81c6136a7565b60f81b9392505050565b805160009061283357506000610430565b6020820151805160001a9060c082101561285257600092505050610430565b5060019392505050565b80612866576128db565b6020811061289e578251825261287d60208461367b565b925061288a60208361367b565b91506128976020826137fc565b9050612866565b806128a8576128db565b600060016128b78360206137fc565b6128c39061010061370f565b6128cd91906137fc565b845184518216911916178352505b505050565b80516000906015146128f157600080fd5b61042d82612503565b60606000826000015167ffffffffffffffff81111561292957634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612953576020820181803683370190505b509050805160001415612967579050610430565b60008160200190506129828460200151828660000151612e5c565b5092915050565b805160009060211461299a57600080fd5b600080836020015160016129ae919061367b565b51949350505050565b600080806129c486611a69565b90506000815167ffffffffffffffff8111156129f057634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015612a1a576020820181803683370190505b509050845b8251612a2b908761367b565b811015612aea576000878281518110612a5457634e487b7160e01b600052603260045260246000fd5b01602001517fff000000000000000000000000000000000000000000000000000000000000001690508083612a8989856137fc565b81518110612aa757634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350508080612ae290613866565b915050612a1f565b50808051906020012082805190602001201415612b0a5781519250612b0f565b600092505b50909150505b9392505050565b600060208251612b2c9190613881565b15612b795760405162461bcd60e51b815260206004820152601460248201527f496e76616c69642070726f6f66206c656e6774680000000000000000000000006044820152606401610529565b600060208351612b899190613693565b9050612b9681600261370f565b8510612be45760405162461bcd60e51b815260206004820152601560248201527f4c65616620696e64657820697320746f6f2062696700000000000000000000006044820152606401610529565b60008660205b85518111612c8457858101519250612c03600289613881565b612c38576040805160208101849052908101849052606001604051602081830303815290604052805190602001209150612c65565b60408051602081018590529081018390526060016040516020818303038152906040528051906020012091505b612c70600289613693565b9750612c7d60208261367b565b9050612bea565b509094149695505050505050565b8051600090811a6080811015612cac576000915050610430565b60b8811080612cc7575060c08110801590612cc7575060f881105b15612cd6576001915050610430565b60c0811015612d0b57612ceb600160b8613813565b612cf89060ff16826137fc565b612d0390600161367b565b915050610430565b612ceb600160f8613813565b8051600090612d2857506000610430565b600080612d388460200151612c92565b8460200151612d47919061367b565b9050600084600001518560200151612d5f919061367b565b90505b80821015612d9157612d7382612d9a565b612d7d908361367b565b915082612d8981613866565b935050612d62565b50909392505050565b80516000908190811a6080811015612db55760019150612982565b60b8811015612ddb57612dc96080826137fc565b612dd490600161367b565b9150612982565b60c0811015612e085760b78103600185019450806020036101000a85510460018201810193505050612982565b60f8811015612e1c57612dc960c0826137fc565b60019390930151602084900360f7016101000a90049092017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0a0192915050565b80612e66576128db565b6020811061289e5782518252612e7d60208461367b565b9250612e8a60208361367b565b9150612e976020826137fc565b9050612e66565b600082601f830112612eae578081fd5b81356020612ec3612ebe8361362f565b6135fe565b8281528181019085830183850287018401881015612edf578586fd5b855b85811015612efd57813584529284019290840190600101612ee1565b5090979650505050505050565b600082601f830112612f1a578081fd5b81516020612f2a612ebe8361362f565b8281528181019085830183850287018401881015612f46578586fd5b855b85811015612efd57815184529284019290840190600101612f48565b60008083601f840112612f75578182fd5b50813567ffffffffffffffff811115612f8c578182fd5b602083019150836020828501011115612fa457600080fd5b9250929050565b600082601f830112612fbb578081fd5b8135612fc9612ebe82613653565b818152846020838601011115612fdd578283fd5b816020850160208301379081016020019190915292915050565b600082601f830112613007578081fd5b8151613015612ebe82613653565b818152846020838601011115613029578283fd5b612275826020830160208701613836565b60006020828403121561304b578081fd5b8135612b15816138f9565b600080600080600060a0868803121561306d578081fd5b8551613078816138f9565b602087015190955067ffffffffffffffff80821115613095578283fd5b6130a189838a01612f0a565b955060408801519150808211156130b6578283fd5b6130c289838a01612f0a565b945060608801519150808211156130d7578283fd5b6130e389838a01612f0a565b935060808801519150808211156130f8578283fd5b5061310588828901612ff7565b9150509295509295909350565b6000806000806000806080878903121561312a578081fd5b8635613135816138f9565b95506020870135613145816138f9565b9450604087013567ffffffffffffffff80821115613161578283fd5b818901915089601f830112613174578283fd5b813581811115613182578384fd5b8a60208083028501011115613195578384fd5b6020830196508095505060608901359150808211156131b2578283fd5b506131bf89828a01612f64565b979a9699509497509295939492505050565b600080600080608085870312156131e6578384fd5b84356131f1816138f9565b93506020850135613201816138f9565b92506040850135613211816138f9565b91506060850135613221816138f9565b939692955090935050565b600080600080600060808688031215613243578283fd5b853561324e816138f9565b9450602086013561325e816138f9565b935060408601359250606086013567ffffffffffffffff811115613280578182fd5b61328c88828901612f64565b969995985093965092949392505050565b600080600080600060a086880312156132b4578283fd5b85356132bf816138f9565b9450602086013567ffffffffffffffff808211156132db578485fd5b6132e789838a01612e9e565b955060408801359150808211156132fc578485fd5b61330889838a01612e9e565b9450606088013591508082111561331d578283fd5b61332989838a01612e9e565b9350608088013591508082111561333e578283fd5b5061310588828901612fab565b60006020828403121561335c578081fd5b81518015158114612b15578182fd5b60006020828403121561337c578081fd5b5035919050565b600080600080600060a0868803121561339a578283fd5b8551945060208601519350604086015192506060860151915060808601516133c1816138f9565b809150509295509295909350565b6000602082840312156133e0578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114612b15578182fd5b600060208284031215613420578081fd5b813567ffffffffffffffff811115613436578182fd5b61227584828501612fab565b600060208284031215613453578081fd5b815167ffffffffffffffff811115613469578182fd5b61227584828501612ff7565b6000815180845260208085019450808401835b838110156134a457815187529582019590820190600101613488565b509495945050505050565b600081518084526134c7816020860160208601613836565b601f01601f19169290920160200192915050565b600084825283516134f3816020850160208801613836565b60209201918201929092526040019392505050565b60006001600160a01b03808916835280881660208401525060c0604083015261353460c0830187613475565b82810360608401526135468187613475565b9050828103608084015261355a8186613475565b905082810360a084015261246681856134af565b60006001600160a01b03841682526040602083015261227560408301846134af565b60006001600160a01b038716825285602083015284604083015283606083015260a060808301526135c460a08301846134af565b979650505050505050565b6000858252846020830152836040830152608060608301526135f460808301846134af565b9695505050505050565b604051601f8201601f1916810167ffffffffffffffff81118282101715613627576136276138e3565b604052919050565b600067ffffffffffffffff821115613649576136496138e3565b5060209081020190565b600067ffffffffffffffff82111561366d5761366d6138e3565b50601f01601f191660200190565b6000821982111561368e5761368e6138b7565b500190565b6000826136a2576136a26138cd565b500490565b600060ff8316806136ba576136ba6138cd565b8060ff84160491505092915050565b80825b60018086116136db5750613706565b8187048211156136ed576136ed6138b7565b808616156136fa57918102915b9490941c9380026136cc565b94509492505050565b6000612b15600019848460008261372857506001612b15565b8161373557506000612b15565b816001811461374b576002811461375557613782565b6001915050612b15565b60ff841115613766576137666138b7565b6001841b91508482111561377c5761377c6138b7565b50612b15565b5060208310610133831016604e8410600b84101617156137b5575081810a838111156137b0576137b06138b7565b612b15565b6137c284848460016136c9565b8086048211156137d4576137d46138b7565b02949350505050565b60008160001904831182151516156137f7576137f76138b7565b500290565b60008282101561380e5761380e6138b7565b500390565b600060ff821660ff84168082101561382d5761382d6138b7565b90039392505050565b60005b83811015613851578181015183820152602001613839565b83811115613860576000848401525b50505050565b600060001982141561387a5761387a6138b7565b5060010190565b600082613890576138906138cd565b500690565b600060ff8316806138a8576138a86138cd565b8060ff84160691505092915050565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052601260045260246000fd5b634e487b7160e01b600052604160045260246000fd5b6001600160a01b0381168114610dc357600080fdfea2646970667358221220fa2c8a5747ef10f8d0da852344bcd3d910dbf45e7a89d502834f1c36484f13cc64736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "onERC721BatchReceived(address,address,uint256[],bytes)": {
+        "details": "called on ERC721 batch trasnfer to this contract",
+        "params": {
+          "operator": "address of the one sending the ERC721 Token"
+        },
+        "returns": {
+          "_0": "onERC721BatchReceived function selector"
+        }
+      },
+      "onERC721Received(address,address,uint256,bytes)": {
+        "details": "called on ERC721 trasnfer to this contract",
+        "params": {
+          "operator": "address of the one sending the ERC721 Token"
+        },
+        "returns": {
+          "_0": "onERC721Received function selector"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "pause()": {
+        "details": "Pauses all token transfers across bridge"
+      },
+      "paused()": {
+        "details": "Returns true if the contract is paused, and false otherwise."
+      },
+      "receiveMessage(bytes)": {
+        "details": "This function verifies if the transaction actually happened on child chain",
+        "params": {
+          "inputData": "RLP encoded data of the reference tx containing following list of fields  0 - headerNumber - Checkpoint header block number containing the reference tx  1 - blockProof - Proof that the block header (in the child chain) is a leaf in the submitted merkle root  2 - blockNumber - Block number containing the reference tx on child chain  3 - blockTime - Reference tx block time  4 - txRoot - Transactions root of block  5 - receiptRoot - Receipts root of block  6 - receipt - Receipt of the reference transaction  7 - receiptProof - Merkle proof of the reference receipt  8 - branchMask - 32 bits denoting the path of receipt in merkle tree  9 - receiptLogIndex - Log Index to read from the receipt"
+        }
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "setTrustedForwarder(address)": {
+        "details": "Change the address of the trusted forwarder for meta-TX",
+        "params": {
+          "trustedForwarder": "The new trustedForwarder"
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      },
+      "unpause()": {
+        "details": "Unpauses all token transfers across bridge"
+      }
+    },
+    "title": "LAND bridge on L1",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "receiveMessage(bytes)": {
+        "notice": "receive message from  L2 to L1, validated by proof"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 1979,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "fxRoot",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IFxStateSender)1929"
+      },
+      {
+        "astId": 1982,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "checkpointManager",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(ICheckpointManager)1947"
+      },
+      {
+        "astId": 1984,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "fxChildTunnel",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 1988,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "processedExits",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 3006,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 2887,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "_trustedForwarder",
+        "offset": 0,
+        "slot": "54",
+        "type": "t_address"
+      },
+      {
+        "astId": 2413,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "_initialized",
+        "offset": 20,
+        "slot": "54",
+        "type": "t_bool"
+      },
+      {
+        "astId": 2416,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "_initializing",
+        "offset": 21,
+        "slot": "54",
+        "type": "t_bool"
+      },
+      {
+        "astId": 2881,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "55",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 2291,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "105",
+        "type": "t_address"
+      },
+      {
+        "astId": 2405,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "106",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 2501,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "_paused",
+        "offset": 0,
+        "slot": "155",
+        "type": "t_bool"
+      },
+      {
+        "astId": 2592,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "156",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 3158,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "rootToken",
+        "offset": 0,
+        "slot": "205",
+        "type": "t_contract(ILandTokenV2)3136"
+      },
+      {
+        "astId": 3160,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "transferringToL2",
+        "offset": 20,
+        "slot": "205",
+        "type": "t_bool"
+      },
+      {
+        "astId": 3555,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelV2.sol:LandTunnelV2",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "206",
+        "type": "t_array(t_uint256)50_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(ICheckpointManager)1947": {
+        "encoding": "inplace",
+        "label": "contract ICheckpointManager",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IFxStateSender)1929": {
+        "encoding": "inplace",
+        "label": "contract IFxStateSender",
+        "numberOfBytes": "20"
+      },
+      "t_contract(ILandTokenV2)3136": {
+        "encoding": "inplace",
+        "label": "contract ILandTokenV2",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

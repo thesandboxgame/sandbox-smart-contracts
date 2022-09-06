@@ -2116,16 +2116,16 @@ describe('MockLandWithMint.sol', function () {
     });
 
     it('cannot fetch x and y values of given non existing quad id', async function () {
-      const {PolygonLand} = await setupLand();
+      const {MockLandWithMint} = await setupTest();
 
       const id =
         0x0000000000000000000000000000000000000000000000000000000000000000 +
         (3 + 6 * 408);
 
-      await expect(PolygonLand.getX(id)).to.be.revertedWith(
+      await expect(MockLandWithMint.getX(id)).to.be.revertedWith(
         'token does not exist'
       );
-      await expect(PolygonLand.getY(id)).to.be.revertedWith(
+      await expect(MockLandWithMint.getY(id)).to.be.revertedWith(
         'token does not exist'
       );
     });

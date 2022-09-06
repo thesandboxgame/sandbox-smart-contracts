@@ -9,7 +9,7 @@ import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
+import {createClaimMerkleTree} from '../data/giveaways/getClaims';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 
 const {calculateMultiClaimHash} = helpers;

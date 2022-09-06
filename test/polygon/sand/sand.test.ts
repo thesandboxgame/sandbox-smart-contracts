@@ -13,9 +13,9 @@ describe('PolygonSand.sol', function () {
     it('should update the child chain manager', async function () {
       const polygon = await setupPolygonSand();
 
-      await polygon.deployer.sand.updateChildChainManager(
-        polygon.childChainManager.address
-      );
+      await polygon.sand
+        .connect(await ethers.getSigner(await polygon.sand.getAdmin()))
+        .updateChildChainManager(polygon.childChainManager.address);
     });
     it('should fail if not owner when updating the child chain manager', async function () {
       const polygon = await setupPolygonSand();
@@ -28,9 +28,11 @@ describe('PolygonSand.sol', function () {
       const polygon = await setupPolygonSand();
 
       await expect(
-        polygon.deployer.sand.updateChildChainManager(
-          ethers.utils.getAddress(constants.AddressZero)
-        )
+        polygon.sand
+          .connect(await ethers.getSigner(await polygon.sand.getAdmin()))
+          .updateChildChainManager(
+            ethers.utils.getAddress(constants.AddressZero)
+          )
       ).to.be.revertedWith('Bad ChildChainManagerProxy address');
     });
     it('should be able to transfer SAND: L1 to L2', async function () {

@@ -17,7 +17,7 @@ const func: DeployFunction = async function (
     );
     await deployments.deploy(`CatalystRewardPool_${cat.symbol}`, {
       from: deployer,
-      contract: 'ERC20RewardPool',
+      contract: 'ERC20RewardPoolV2',
       args: [Sand.address, CatDeployment.address, TRUSTED_FORWARDER_V2.address],
       log: true,
       // skipIfAlreadyDeployed: true,
@@ -28,7 +28,7 @@ const func: DeployFunction = async function (
     const GemDeployment = await deployments.get(`PolygonGem_${gem.symbol}`);
     await deployments.deploy(`GemRewardPool_${gem.symbol}`, {
       from: deployer,
-      contract: 'ERC20RewardPool',
+      contract: 'ERC20RewardPoolV2',
       args: [Sand.address, GemDeployment.address, TRUSTED_FORWARDER_V2.address],
       log: true,
       // skipIfAlreadyDeployed: true,

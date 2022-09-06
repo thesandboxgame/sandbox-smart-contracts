@@ -1,8 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.6.5; // TODO: update once upgrade is complete
+pragma solidity 0.6.5;
 
-import "../common/Libraries/SigUtil.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
+import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "../common/BaseWithStorage/Admin.sol";
 
 contract AuthValidator is Admin {
@@ -11,6 +10,8 @@ contract AuthValidator is Admin {
     event SigningWallet(address indexed signingWallet);
 
     constructor(address adminWallet, address initialSigningWallet) public {
+        require(adminWallet != address(0), "AuthValidator: zero address");
+
         _admin = adminWallet;
         _updateSigningAuthWallet(initialSigningWallet);
     }
@@ -20,13 +21,13 @@ contract AuthValidator is Admin {
     }
 
     function _updateSigningAuthWallet(address newSigningWallet) internal {
-        require(newSigningWallet != address(0), "INVALID_SIGNING_WALLET");
+        require(newSigningWallet != address(0), "AuthValidator: INVALID_SIGNING_WALLET");
         _signingAuthWallet = newSigningWallet;
         emit SigningWallet(newSigningWallet);
     }
 
     function isAuthValid(bytes memory signature, bytes32 hashedData) public view returns (bool) {
-        address signer = SigUtil.recover(keccak256(SigUtil.prefixed(hashedData)), signature);
+        address signer = ECDSA.recover(ECDSA.toEthSignedMessageHash(hashedData), signature);
         return signer == _signingAuthWallet;
     }
 }

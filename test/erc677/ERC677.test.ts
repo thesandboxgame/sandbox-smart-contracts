@@ -69,7 +69,7 @@ describe('ERC677Token', function () {
     const fromBalanceBefore = await gemToken.balanceOf(accounts.deployer);
 
     const amount = BigNumber.from('100000000000000000');
-    gemToken
+    await gemToken
       .connect(ethers.provider.getSigner(accounts.deployer))
       .transferAndCall(fallbackContract.address, amount, Buffer.from('data'));
     const fromBalanceAfter = await gemToken.balanceOf(accounts.deployer);

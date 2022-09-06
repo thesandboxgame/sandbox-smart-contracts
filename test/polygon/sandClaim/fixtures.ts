@@ -32,7 +32,7 @@ export const setupPolygonSandClaim = withSnapshot(
 
     await waitFor(
       polygonSand
-        .connect(ethers.provider.getSigner(deployer))
+        .connect(ethers.provider.getSigner(await polygonSand.getAdmin()))
         .updateChildChainManager(deployer)
     );
 
