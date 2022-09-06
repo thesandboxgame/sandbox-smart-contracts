@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@maticnetwork/fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
+import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 
 abstract contract FxBaseChildTunnelUpgradeable is FxBaseChildTunnel {
     // solhint-disable-next-line no-empty-blocks
