@@ -1,6 +1,7 @@
 import {BigNumber} from '@ethersproject/bignumber';
+import {constants} from 'ethers';
 import {expect} from '../../../chai-setup';
-import {waitFor, withSnapshot} from '../../../utils';
+import {waitFor, withSnapshot, expectEventWithArgs} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {deployments} from 'hardhat';
@@ -89,7 +90,17 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
-    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
+    const receipt = await waitFor(
+      gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance()
+    );
+
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'SetGemsAndCatalystsAllowance'
+    );
+    expect(event.args[0]).to.be.equal(user3);
+    expect(event.args[1]).to.be.equal(constants.MaxUint256);
 
     expect(
       await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
@@ -388,7 +399,7 @@ describe('GemsCatalystsRegistry', function () {
       gemExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [gemExample.address],
         []
@@ -396,6 +407,12 @@ describe('GemsCatalystsRegistry', function () {
     );
     const gemId = await gemExample.gemId();
     expect(await gemsCatalystsRegistry.doesGemExist(gemId)).to.equal(true);
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[0][0]).to.be.equal(gemExample.address);
   });
 
   it('addGemsAndCatalysts should add catalystExample', async function () {
@@ -404,7 +421,7 @@ describe('GemsCatalystsRegistry', function () {
       catalystExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [],
         [catalystExample.address]
@@ -414,6 +431,12 @@ describe('GemsCatalystsRegistry', function () {
     expect(await gemsCatalystsRegistry.doesCatalystExist(catalystId)).to.equal(
       true
     );
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[1][0]).to.be.equal(catalystExample.address);
   });
 
   it('addGemsAndCatalysts should fail for gem id not in order', async function () {
