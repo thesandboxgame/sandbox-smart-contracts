@@ -10,12 +10,13 @@ import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
 
-
-contract PolygonLandTunnelV2 is FxBaseChildTunnelUpgradeable,
+contract PolygonLandTunnelV2 is
+    FxBaseChildTunnelUpgradeable,
     IERC721MandatoryTokenReceiver,
     ERC2771Handler,
     OwnableUpgradeable,
-    PausableUpgradeable{
+    PausableUpgradeable
+{
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
@@ -58,14 +59,14 @@ contract PolygonLandTunnelV2 is FxBaseChildTunnelUpgradeable,
         _setLimit(24, limits[4]);
     }
 
-      function initialize(
+    function initialize(
         address _fxChild,
         IPolygonLand _childToken,
         address _trustedForwarder,
         uint32 _maxGasLimit,
         uint256 _maxAllowedQuads,
         uint32[5] memory limits
-    )public initializer {
+    ) public initializer {
         __Ownable_init();
         __Pausable_init();
         childToken = _childToken;
