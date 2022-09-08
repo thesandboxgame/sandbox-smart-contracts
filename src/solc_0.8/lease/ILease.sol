@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {ILeaseImpl} from "./ILeaseImpl.sol";
 
-interface ILease is IERC721 {
+interface ILease {
     struct Agreement {
         ILeaseImpl impl;
         address owner;

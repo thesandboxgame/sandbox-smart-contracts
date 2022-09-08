@@ -23,6 +23,51 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         uint256 cancellationPenalty;
     }
 
+    event AgreementProposed(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 nonce,
+        address user,
+        address owner
+    );
+    event AgreementAccepted(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 nonce,
+        uint256 oldExpiration,
+        uint256 newExpiration
+    );
+    event AgreementRenewed(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 nonce,
+        uint256 oldExpiration,
+        uint256 newExpiration
+    );
+    event CancellationProposed(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 nonce,
+        address user,
+        address owner,
+        uint256 expiration,
+        uint256 cancelationPenalty
+    );
+    event CancellationAccepted(
+        uint256 agreementId,
+        uint256 rentalPrice,
+        uint256 rentalPeriod,
+        uint256 nonce,
+        address user,
+        address owner,
+        uint256 expiration,
+        uint256 cancelationPenalty
+    );
+
     IERC20 public sandToken;
     ILease public leaseContract;
     mapping(uint256 => LeaseData) public leases;
@@ -46,24 +91,39 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.owner, "invalid user");
+        uint256 nonce = leases[agreementId].leaseProposal.nonce + 1;
         leases[agreementId].leaseProposal = LeaseProposal({
             rentalPrice: rentalPrice,
             rentalPeriod: rentalPeriod,
-            nonce: leases[agreementId].leaseProposal.nonce++
+            nonce: nonce
         });
-        // emit
+        emit AgreementProposed(agreementId, rentalPrice, rentalPeriod, nonce, agreement.user, agreement.owner);
     }
 
     /// @dev called by user to accept a lease (and pay for it).
     function accept(uint256 agreementId, uint256 nonce) external {
-        _accept(agreementId, nonce);
-        // emit
+        (LeaseData memory oldData, LeaseData storage newData) = _accept(agreementId, nonce);
+        emit AgreementAccepted(
+            agreementId,
+            oldData.leaseProposal.rentalPrice,
+            oldData.leaseProposal.rentalPeriod,
+            oldData.leaseProposal.nonce,
+            oldData.expiration,
+            newData.expiration
+        );
     }
 
     /// @dev called by user to renew a lease (and pay for it).
     function renew(uint256 agreementId, uint256 nonce) external {
-        _accept(agreementId, nonce);
-        // emit
+        (LeaseData memory oldData, LeaseData storage newData) = _accept(agreementId, nonce);
+        emit AgreementRenewed(
+            agreementId,
+            oldData.leaseProposal.rentalPrice,
+            oldData.leaseProposal.rentalPeriod,
+            oldData.leaseProposal.nonce,
+            oldData.expiration,
+            newData.expiration
+        );
     }
 
     /// @dev called by user to give the owner an opportunity to cancel a lease.
@@ -71,8 +131,18 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.user, "invalid user");
-        leases[agreementId].cancellationPenalty = cancellationAmount;
-        // emit
+        LeaseData storage data = leases[agreementId];
+        data.cancellationPenalty = cancellationAmount;
+        emit CancellationProposed(
+            agreementId,
+            data.leaseProposal.rentalPrice,
+            data.leaseProposal.rentalPeriod,
+            data.leaseProposal.nonce,
+            agreement.user,
+            agreement.owner,
+            data.expiration,
+            data.cancellationPenalty
+        );
     }
 
     /// @dev called by the owner to cancel a lease (and pay the penalty).
@@ -91,8 +161,18 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
             balances[msg.sender] -= amount;
         }
         balances[agreement.user] += amount;
+        LeaseData memory data = leases[agreementId];
         delete leases[agreementId];
-        // emit
+        emit CancellationAccepted(
+            agreementId,
+            data.leaseProposal.rentalPrice,
+            data.leaseProposal.rentalPeriod,
+            data.leaseProposal.nonce,
+            agreement.user,
+            agreement.owner,
+            data.expiration,
+            data.cancellationPenalty
+        );
     }
 
     /// @notice called by owner to claim his earnings
@@ -101,7 +181,7 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         require(balances[msg.sender] >= amount, "not enough");
         balances[msg.sender] -= amount;
         require(sandToken.transfer(msg.sender, amount), "transfer error");
-        // emit?
+        // emit?, we can user the sand token transfer event
     }
 
     function clean(uint256 agreementId) external override {
@@ -110,7 +190,11 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     }
 
     function isLeased(uint256 agreementId) external view override returns (bool) {
-        return leases[agreementId].expiration != 0 && leases[agreementId].expiration < block.timestamp;
+        return leases[agreementId].expiration != 0 && leases[agreementId].expiration >= block.timestamp;
+    }
+
+    function getAgreement(uint256 agreementId) external view returns (LeaseData memory) {
+        return leases[agreementId];
     }
 
     /// @notice return the balance of staked tokens for a user
@@ -120,27 +204,32 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         return balances[account];
     }
 
-    function _accept(uint256 agreementId, uint256 nonce) internal {
+    function _accept(uint256 agreementId, uint256 nonce)
+        internal
+        returns (LeaseData memory oldData, LeaseData storage newData)
+    {
         ILease.Agreement memory agreement = leaseContract.getAgreement(agreementId);
         require(address(this) == address(agreement.impl), "invalid agreement");
         require(msg.sender == agreement.user, "invalid user");
 
-        LeaseData storage data = leases[agreementId];
-        require(data.leaseProposal.nonce == nonce, "nothing to accept");
-
+        oldData = leases[agreementId];
+        require(oldData.leaseProposal.nonce == nonce, "nothing to accept");
         require(
-            sandToken.transferFrom(agreement.user, address(this), data.leaseProposal.rentalPrice),
+            sandToken.transferFrom(agreement.user, address(this), oldData.leaseProposal.rentalPrice),
             "transfer error"
         );
-        balances[agreement.owner] += data.leaseProposal.rentalPrice;
-        if (data.expiration == 0) {
-            data.expiration = block.timestamp;
+        if (oldData.expiration == 0) {
+            oldData.expiration = block.timestamp;
         }
-        data.expiration += data.leaseProposal.rentalPeriod;
-        leases[agreementId].leaseProposal = LeaseProposal({
+
+        balances[agreement.owner] += oldData.leaseProposal.rentalPrice;
+        newData = leases[agreementId];
+        newData.expiration = oldData.expiration + oldData.leaseProposal.rentalPeriod;
+        newData.leaseProposal = LeaseProposal({
             rentalPrice: 0,
             rentalPeriod: 0,
-            nonce: leases[agreementId].leaseProposal.nonce++
+            nonce: oldData.leaseProposal.nonce + 1
         });
+        return (oldData, newData);
     }
 }
