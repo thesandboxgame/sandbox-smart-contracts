@@ -10,6 +10,7 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
+    uint256 private constant MAX_WITHDRAWAL = 100;
 
     address internal immutable _sand;
     address internal immutable _registry;
@@ -112,13 +113,13 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param to The destination address for the purchased Catalysts and Gems
     /// @param catalystIds The IDs of the catalysts to be transferred
     /// @param gemIds The IDs of the gems to be transferred
-    /// @dev The sum length of catalystIds + gemIds must be <= 100
+    /// @dev The sum length of catalystIds + gemIds must be <= MAX_WITHDRAWAL
     function withdrawAll(
         address to,
         uint256[] calldata catalystIds,
         uint256[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(catalystIds.length + gemIds.length <= 100, "TOO_MANY_IDS");
+        require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
@@ -360,13 +361,25 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }
 
-    /// @dev this override is required; two or more base classes define function
+    /// @dev this override is required
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+        if (isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return msg.sender;
+        }
     }
 
-    /// @dev this override is required; two or more base classes define function
+    /// @dev this override is required
     function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+        if (isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return msg.data;
+        }
     }
 }
