@@ -32,7 +32,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
 
     event ReceivingWallet(address indexed newReceivingWallet);
 
-    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
+    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
 
     event SetPrices(
         uint256[] catalystIds,
@@ -42,7 +42,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256 priceChangeTimestamp
     );
 
-    event WithdrawAll(address to, uint256[] catalystIds, uint256[] gemIds);
+    event WithdrawAll(address indexed to, uint256[] catalystIds, uint256[] gemIds);
 
     event SandEnabled(bool enabled);
 
