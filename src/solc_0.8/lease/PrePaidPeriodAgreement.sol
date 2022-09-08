@@ -49,8 +49,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     );
     event CancellationProposed(
         uint256 agreementId,
-        uint256 rentalPrice,
-        uint256 rentalPeriod,
         uint256 nonce,
         address user,
         address owner,
@@ -59,8 +57,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
     );
     event CancellationAccepted(
         uint256 agreementId,
-        uint256 rentalPrice,
-        uint256 rentalPeriod,
         uint256 nonce,
         address user,
         address owner,
@@ -135,8 +131,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         data.cancellationPenalty = cancellationAmount;
         emit CancellationProposed(
             agreementId,
-            data.leaseProposal.rentalPrice,
-            data.leaseProposal.rentalPeriod,
             data.leaseProposal.nonce,
             agreement.user,
             agreement.owner,
@@ -165,8 +159,6 @@ contract PrePaidPeriodAgreement is ILeaseImpl {
         delete leases[agreementId];
         emit CancellationAccepted(
             agreementId,
-            data.leaseProposal.rentalPrice,
-            data.leaseProposal.rentalPeriod,
             data.leaseProposal.nonce,
             agreement.user,
             agreement.owner,

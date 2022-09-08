@@ -7,8 +7,7 @@ import {
 import {withSnapshot} from '../utils';
 
 export const setupLease = withSnapshot([], async function () {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
   const [other, owner, user] = await getUnnamedAccounts();
 
   await deployments.deploy('ERC721Mintable', {
@@ -40,8 +39,7 @@ export const setupLease = withSnapshot([], async function () {
 });
 
 export const setaupPrePaidPeriodAgreement = withSnapshot([], async function () {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
   const [other, owner, user] = await getUnnamedAccounts();
 
   await deployments.deploy('ERC20Mintable', {
@@ -84,3 +82,12 @@ export const setaupPrePaidPeriodAgreement = withSnapshot([], async function () {
     user,
   };
 });
+type ReturnedPromiseResolvedType<T> = T extends (
+  ...args: unknown[]
+) => Promise<infer R>
+  ? R
+  : never;
+
+export type SetaupPrePaidPeriodAgreement = ReturnedPromiseResolvedType<
+  typeof setaupPrePaidPeriodAgreement
+>;
