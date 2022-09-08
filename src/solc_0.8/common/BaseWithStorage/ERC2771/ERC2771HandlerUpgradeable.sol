@@ -9,7 +9,7 @@ pragma solidity 0.8.2;
 
 contract ERC2771HandlerUpgradeable {
     address internal _trustedForwarder;
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 
     function __ERC2771Handler_initialize(address forwarder) internal {
         _trustedForwarder = forwarder;
