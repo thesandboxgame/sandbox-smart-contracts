@@ -9,6 +9,8 @@ import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
 /// @notice This contract manages claims for multiple token types
+/// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, MULTIGIVEAWAY_ROLE
+/// @notice DEFAULT_ADMIN_ROLE is intended for setup / emergency, MULTIGIVEAWAY_ROLE is provided for business purposes
 /// @dev The contract implements ERC2771 to ensure that users do not pay gas
 contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler, Pausable {
     /// @dev `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
@@ -26,15 +28,23 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     mapping(address => mapping(bytes32 => bool)) public claimed;
     mapping(bytes32 => uint256) private _expiryTime;
 
+    /// @dev MULTIGIVEAWAY_ROLE is provided for business-related admin functions
+    bytes32 public constant MULTIGIVEAWAY_ROLE = keccak256("MULTIGIVEAWAY_ROLE");
+
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
     event NewTrustedForwarder(address indexed trustedForwarder);
 
     /// @notice Constructor with the admin & trusted forwarder
     /// @param admin Admin of the contract
     /// @param trustedForwarder Trusted forwarder for ERC2771
-    constructor(address admin, address trustedForwarder) {
+    constructor(
+        address admin,
+        address multigiveawayAdmin,
+        address trustedForwarder
+    ) {
         require(admin != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(MULTIGIVEAWAY_ROLE, multigiveawayAdmin);
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
@@ -43,7 +53,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(MULTIGIVEAWAY_ROLE)
         whenNotPaused()
     {
         require(expiryTime > block.timestamp, "MULTIGIVEAWAY_INVALID_INPUT");
@@ -185,16 +195,5 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @return calldata data of the meta-tx
     function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
-    }
-
-    /// @dev Prevent the renunciation of the DEFAULT_ADMIN_ROLE
-    /// @param role the role to revoke
-    /// @param account the address being revoked
-    function _revokeRole(bytes32 role, address account) internal virtual override {
-        if (role == DEFAULT_ADMIN_ROLE) {
-            revert("MULTIGIVEAWAY_PREVENT_REVOKE");
-        }
-
-        super._revokeRole(role, account);
     }
 }

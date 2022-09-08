@@ -98,7 +98,7 @@ export const setupTestGiveaway = withSnapshot(
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
       contract: 'MultiGiveaway',
-      args: [multiGiveawayAdmin, trustedForwarder.address],
+      args: [sandAdmin, multiGiveawayAdmin, trustedForwarder.address],
     });
 
     const giveawayContract = await ethers.getContract(
@@ -106,7 +106,15 @@ export const setupTestGiveaway = withSnapshot(
       deployer
     );
 
+    // Contract setup admin is DEFAULT_ADMIN_ROLE
     const giveawayContractAsAdmin = await ethers.getContract(
+      'Test_Multi_Giveaway_1_with_ERC20',
+      sandAdmin
+    );
+
+    // Business-related admin is MULTIGIVEAWAY_ROLE (can call addNewGiveaway)
+    const multiGiveawayRole = await await giveawayContract.MULTIGIVEAWAY_ROLE();
+    const giveawayContractAsMultiGiveawayAdmin = await ethers.getContract(
       'Test_Multi_Giveaway_1_with_ERC20',
       multiGiveawayAdmin
     );
@@ -375,7 +383,10 @@ export const setupTestGiveaway = withSnapshot(
 
     // Single giveaway
     const hashArray = createDataArrayMultiClaim(claims0);
-    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, expiryTime);
+    await giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
+      merkleRootHash0,
+      expiryTime
+    );
     allMerkleRoots.push(merkleRootHash0);
     allTrees.push(new MerkleTree(hashArray));
 
@@ -389,7 +400,7 @@ export const setupTestGiveaway = withSnapshot(
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
       allTrees.push(new MerkleTree(hashArray2));
-      await giveawayContractAsAdmin.addNewGiveaway(
+      await giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
         merkleRootHash1,
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       ); // no expiry
@@ -411,7 +422,7 @@ export const setupTestGiveaway = withSnapshot(
       allMerkleRoots.push(badMerkleRootHash0);
       const hashArray2 = createDataArrayMultiClaim(badClaims0);
       allTrees.push(new MerkleTree(hashArray2));
-      await giveawayContractAsAdmin.addNewGiveaway(
+      await giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
         badMerkleRootHash0,
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       ); // no expiry
@@ -419,7 +430,8 @@ export const setupTestGiveaway = withSnapshot(
 
     return {
       giveawayContract,
-      giveawayContractAsAdmin,
+      giveawayContractAsAdmin, // DEFAULT_ADMIN_ROLE
+      giveawayContractAsMultiGiveawayAdmin, // MULTIGIVEAWAY_ROLE
       sandContract,
       assetContract,
       landContract,
@@ -431,6 +443,8 @@ export const setupTestGiveaway = withSnapshot(
       allMerkleRoots,
       trustedForwarder,
       multiGiveawayAdmin,
+      sandAdmin,
+      multiGiveawayRole,
     };
   }
 );

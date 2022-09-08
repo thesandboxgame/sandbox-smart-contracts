@@ -5,7 +5,7 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, multiGiveawayAdmin} = await getNamedAccounts();
 
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
 
@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [deployer, TRUSTED_FORWARDER_V2.address], // admin, trustedForwarder
+    args: [deployer, multiGiveawayAdmin, TRUSTED_FORWARDER_V2.address], // DEFAULT_ADMIN_ROLE, MULTIGIVEAWAY_ROLE, trustedForwarder
   });
 };
 export default func;

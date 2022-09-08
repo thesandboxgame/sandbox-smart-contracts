@@ -30,28 +30,25 @@ const randomMerkleTree =
 
 describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
+    it('Default admin has the correct role', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, sandAdmin} = setUp;
+      const defaultRole = emptyBytes32;
+      expect(await giveawayContract.hasRole(defaultRole, sandAdmin)).to.be.true;
+    });
     it('Admin has the correct role', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, multiGiveawayAdmin} = setUp;
-      const defaultRole = emptyBytes32;
-      expect(await giveawayContract.hasRole(defaultRole, multiGiveawayAdmin)).to
-        .be.true;
+      const {giveawayContract, multiGiveawayAdmin, multiGiveawayRole} = setUp;
+      expect(
+        await giveawayContract.hasRole(multiGiveawayRole, multiGiveawayAdmin)
+      ).to.be.true;
     });
-    it("Admin can't revoke admin role", async function () {
+    it('Default admin can add a new giveaway (but only because same address is being currently used)', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsAdmin, multiGiveawayAdmin} = setUp;
-      const defaultRole = emptyBytes32;
-
-      await expect(
-        giveawayContractAsAdmin.revokeRole(defaultRole, multiGiveawayAdmin)
-      ).to.be.revertedWith('MULTIGIVEAWAY_PREVENT_REVOKE');
-    });
-    it('Admin can add a new giveaway', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsAdmin} = setUp;
+      const {giveawayContractAsAdmin} = setUp; // default admin = sandAdmin
 
       const receipt = await waitFor(
         giveawayContractAsAdmin.addNewGiveaway(
@@ -66,18 +63,36 @@ describe('Multi_Giveaway', function () {
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       );
     });
+    it('Multigiveaway admin can add a new giveaway', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContractAsMultiGiveawayAdmin} = setUp; // multigiveaway admin
+
+      const receipt = await waitFor(
+        giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
+          randomMerkleTree,
+          '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // does not expire
+        )
+      );
+
+      const event = await expectReceiptEventWithArgs(receipt, 'NewGiveaway');
+      expect(event.args[0]).to.equal(randomMerkleTree);
+      expect(event.args[1]).to.equal(
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+      );
+    });
     it("Admin can't add the same giveaway twice", async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsAdmin} = setUp;
+      const {giveawayContractAsMultiGiveawayAdmin} = setUp;
 
-      await giveawayContractAsAdmin.addNewGiveaway(
+      await giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
         randomMerkleTree,
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       );
 
       await expect(
-        giveawayContractAsAdmin.addNewGiveaway(
+        giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
           randomMerkleTree,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
         )
@@ -1120,7 +1135,7 @@ describe('Multi_Giveaway', function () {
       };
       const setUp = await setupTestGiveaway(options);
       const {
-        giveawayContractAsAdmin,
+        giveawayContractAsMultiGiveawayAdmin,
         allTrees,
         allClaims,
         allMerkleRoots,
@@ -1142,7 +1157,10 @@ describe('Multi_Giveaway', function () {
       userMerkleRoots.push(allMerkleRoots[0]);
 
       await expect(
-        giveawayContractAsAdmin.addNewGiveaway(allMerkleRoots[0], periodFinish)
+        giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
+          allMerkleRoots[0],
+          periodFinish
+        )
       ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
     });
   });
