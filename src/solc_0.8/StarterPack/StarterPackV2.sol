@@ -13,9 +13,19 @@ contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
     uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
     uint256 private constant MAX_WITHDRAWAL = 100;
+    // The delay between calling setPrices() and when the new prices come into effect
+    // Minimizes the effect of price changes on pending TXs
+    uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
+
+    // The timestamp of the last price change
+    uint256 private _priceChangeTimestamp;
+
+    // The following role is provided for business-related admin functions
+    bytes32 public constant STARTERPACK_ROLE = keccak256("STARTERPACK_ROLE");
 
     address internal immutable _sand;
     address internal immutable _registry;
+    address payable internal _wallet;
     bool public _sandEnabled;
 
     // Mapping catalyst and gem ids to their prices
@@ -24,22 +34,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
     mapping(uint16 => uint256) private _gemPrices;
     mapping(uint16 => uint256) private _gemPreviousPrices;
 
-    // The timestamp of the last price change
-    uint256 private _priceChangeTimestamp;
-
-    address payable internal _wallet;
-
-    // The delay between calling setPrices() and when the new prices come into effect
-    // Minimizes the effect of price changes on pending TXs
-    uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
-
-    // The following role is provided for business-related admin functions
-    bytes32 public constant STARTERPACK_ROLE = keccak256("STARTERPACK_ROLE");
-
     event ReceivingWallet(address indexed newReceivingWallet);
-
     event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
-
+    event WithdrawAll(address indexed to, uint16[] catalystIds, uint16[] gemIds);
+    event SandEnabled(bool enabled);
     event SetPrices(
         uint16[] catalystIds,
         uint256[] catalystPrices,
@@ -47,10 +45,6 @@ contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
         uint256[] gemPrices,
         uint256 priceChangeTimestamp
     );
-
-    event WithdrawAll(address indexed to, uint16[] catalystIds, uint16[] gemIds);
-
-    event SandEnabled(bool enabled);
 
     struct Message {
         address buyer;

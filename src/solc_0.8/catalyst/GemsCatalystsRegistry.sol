@@ -210,22 +210,6 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
         _setGemsAndCatalystsAllowance(MAX_UINT256);
     }
 
-    // //////////////////// INTERNALS ////////////////////
-
-    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
-        for (uint256 i = 0; i < _gems.length; i++) {
-            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), "GEM_ALLOWANCE_NOT_APPROVED");
-        }
-
-        for (uint256 i = 0; i < _catalysts.length; i++) {
-            require(
-                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),
-                "CATALYST_ALLOWANCE_NOT_APPROVED"
-            );
-        }
-        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
-    }
-
     /// @dev Get the catalyst contract corresponding to the id.
     /// @param catalystId The catalyst id to use to retrieve the contract.
     /// @return The requested Catalyst contract.
@@ -253,6 +237,20 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     modifier checkAuthorization(address from) {
         require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
         _;
+    }
+
+    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
+        for (uint256 i = 0; i < _gems.length; i++) {
+            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), "GEM_ALLOWANCE_NOT_APPROVED");
+        }
+
+        for (uint256 i = 0; i < _catalysts.length; i++) {
+            require(
+                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),
+                "CATALYST_ALLOWANCE_NOT_APPROVED"
+            );
+        }
+        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
     }
 
     function _msgSender()
