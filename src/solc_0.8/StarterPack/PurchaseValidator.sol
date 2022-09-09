@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
+import {AccessControl, Context} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import {EIP712, ECDSA} from "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
 
 /// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles with EIP712
 /// @notice This contract manages the validation of purchases
@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
 contract PurchaseValidator is AccessControl, EIP712 {
     address private _signingWallet;
 
-    // A parallel-queue mapping to nonces.
+    // A parallel-queue mapping to nonces: user => (queueID => nonce)
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
     bytes32 public constant PURCHASE_TYPEHASH =

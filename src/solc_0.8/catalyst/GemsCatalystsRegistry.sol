@@ -1,12 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./interfaces/IGem.sol";
-import "./interfaces/ICatalyst.sol";
-import "../common/interfaces/IERC20Extended.sol";
-import "./interfaces/IGemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IGem} from "./interfaces/IGem.sol";
+import {ICatalyst, IAssetAttributesRegistry} from "./interfaces/ICatalyst.sol";
+import {IERC20Extended, IERC20} from "../common/interfaces/IERC20Extended.sol";
+import {IGemsCatalystsRegistry} from "./interfaces/IGemsCatalystsRegistry.sol";
+import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
@@ -200,28 +203,14 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
         number = _gems.length;
     }
 
+    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance
     function revokeGemsandCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(0);
     }
 
+    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance
     function setGemsAndCatalystsMaxAllowance() external {
         _setGemsAndCatalystsAllowance(MAX_UINT256);
-    }
-
-    // //////////////////// INTERNALS ////////////////////
-
-    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
-        for (uint256 i = 0; i < _gems.length; i++) {
-            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), "GEM_ALLOWANCE_NOT_APPROVED");
-        }
-
-        for (uint256 i = 0; i < _catalysts.length; i++) {
-            require(
-                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),
-                "CATALYST_ALLOWANCE_NOT_APPROVED"
-            );
-        }
-        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
     }
 
     /// @dev Get the catalyst contract corresponding to the id.
@@ -251,6 +240,20 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     modifier checkAuthorization(address from) {
         require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
         _;
+    }
+
+    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
+        for (uint256 i = 0; i < _gems.length; i++) {
+            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), "GEM_ALLOWANCE_NOT_APPROVED");
+        }
+
+        for (uint256 i = 0; i < _catalysts.length; i++) {
+            require(
+                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),
+                "CATALYST_ALLOWANCE_NOT_APPROVED"
+            );
+        }
+        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
     }
 
     function _msgSender()
