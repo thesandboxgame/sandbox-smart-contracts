@@ -30,7 +30,7 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     constructor() initializer {}
 
     function initV1(address trustedForwarder, address admin) external initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
         __AccessControl_init();
     }
