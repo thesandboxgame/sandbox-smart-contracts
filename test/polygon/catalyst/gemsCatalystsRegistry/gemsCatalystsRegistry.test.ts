@@ -4,6 +4,7 @@ import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {deployments} from 'hardhat';
+import {zeroAddress} from '../../../land/fixtures';
 
 const setupGemsAndCatalysts = withSnapshot(
   [
@@ -380,6 +381,20 @@ describe('GemsCatalystsRegistry', function () {
         [commonCatalyst.address]
       )
     ).to.be.revertedWith('CATALYST_ID_NOT_IN_ORDER');
+  });
+
+  it('addGemsAndCatalysts should fail for catalyst with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([], [zeroAddress])
+    ).to.be.revertedWith('CATALYST_ZERO_ADDRESS');
+  });
+
+  it('addGemsAndCatalysts should fail for gem with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([zeroAddress], [])
+    ).to.be.revertedWith('GEM_ZERO_ADDRESS');
   });
 
   it('addGemsAndCatalysts should add gemExample', async function () {
@@ -774,5 +789,17 @@ describe('GemsCatalystsRegistry', function () {
         trustedForwarder.address
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+  it('cannot set trustedForwarder to zero address', async function () {
+    const {
+      gemsCatalystsRegistryAsDeployer,
+      trustedForwarder,
+    } = await setupGemsAndCatalysts();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+
+    await expect(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(zeroAddress)
+    ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });

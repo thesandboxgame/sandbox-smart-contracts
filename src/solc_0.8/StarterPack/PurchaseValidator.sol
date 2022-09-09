@@ -15,6 +15,7 @@ contract PurchaseValidator is AccessControl {
     event SigningWallet(address newSigningWallet);
 
     constructor(address initialSigningWallet) {
+        require(initialSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
         _signingWallet = initialSigningWallet;
     }
 
