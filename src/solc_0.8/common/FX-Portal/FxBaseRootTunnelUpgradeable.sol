@@ -11,4 +11,6 @@ abstract contract FxBaseRootTunnelUpgradeable is FxBaseRootTunnel {
         checkpointManager = ICheckpointManager(_checkpointManager);
         fxRoot = IFxStateSender(_fxRoot);
     }
+
+    uint256[50] private __gap;
 }

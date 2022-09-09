@@ -10,4 +10,6 @@ abstract contract FxBaseChildTunnelUpgradeable is FxBaseChildTunnel {
     function __FxBaseChildTunnelUpgradeable_initialize(address _fxChild) internal {
         fxChild = _fxChild;
     }
+
+    uint256[50] private __gap;
 }
