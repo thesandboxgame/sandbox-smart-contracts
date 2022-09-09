@@ -817,14 +817,14 @@ describe('GemsCatalystsRegistry', function () {
   });
   it('cannot set trustedForwarder to zero address', async function () {
     const {
-      gemsCatalystsRegistryAsDeployer,
+      gemsCatalystsRegistryAsRegAdmin,
       trustedForwarder,
     } = await setupGemsAndCatalysts();
-    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
 
     await expect(
-      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(zeroAddress)
+      gemsCatalystsRegistryAsRegAdmin.setTrustedForwarder(zeroAddress)
     ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });
