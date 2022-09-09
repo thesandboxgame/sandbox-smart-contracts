@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
@@ -59,6 +60,11 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address initialSigningWallet,
         address registry
     ) PurchaseValidator(initialSigningWallet) {
+        require(admin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
+        require(trustedForwarder != address(0), "FORWARDER_ZERO_ADDRESS");
+        require(initialWalletAddress != address(0), "WALLET_ZERO_ADDRESS");
+        require(registry != address(0), "REGISTRY_ZERO_ADDRESS");
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
@@ -118,8 +124,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address to,
         uint256[] calldata catalystIds,
         uint256[] calldata gemIds
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) 
         require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
+        require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");

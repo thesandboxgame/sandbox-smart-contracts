@@ -23,7 +23,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
-    function initV1(address trustedForwarder, address admin) public initializer {
+    function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
         __Ownable_init();
@@ -151,6 +151,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < gems.length; i++) {
             IGem gem = gems[i];
+            require(address(gem) != address(0), "GEM_ZERO_ADDRESS");
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
             _gems.push(gem);
@@ -158,6 +159,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < catalysts.length; i++) {
             ICatalyst catalyst = catalysts[i];
+            require(address(catalyst) != address(0), "CATALYST_ZERO_ADDRESS");
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);
@@ -266,6 +268,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        require(trustedForwarder != address(0), "ZERO_ADDRESS");
         _trustedForwarder = trustedForwarder;
 
         emit TrustedForwarderChanged(trustedForwarder);
