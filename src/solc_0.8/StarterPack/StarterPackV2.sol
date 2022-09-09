@@ -11,6 +11,7 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
+    uint256 private constant MAX_WITHDRAWAL = 100;
 
     address internal immutable _sand;
     address internal immutable _registry;
@@ -118,11 +119,13 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param to The destination address for the purchased Catalysts and Gems
     /// @param catalystIds The IDs of the catalysts to be transferred
     /// @param gemIds The IDs of the gems to be transferred
+    /// @dev The sum length of catalystIds + gemIds must be <= MAX_WITHDRAWAL
     function withdrawAll(
         address to,
         uint256[] calldata catalystIds,
         uint256[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
         require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
