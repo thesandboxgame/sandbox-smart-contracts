@@ -559,7 +559,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(addresses, [])
     ).to.be.revertedWith('GEM_ID_NOT_IN_ORDER');
   });
-  it('burnDifferentGems reverts on gemsIds and amounts length mismatch', async function () {
+  it('batchBurnGems reverts on gemsIds and amounts length mismatch', async function () {
     const {
       gemsCatalystsRegistryAsGemOwner,
       powerGem,
@@ -574,7 +574,7 @@ describe('GemsCatalystsRegistry', function () {
     await gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await expect(
-      gemsCatalystsRegistryAsGemOwner.burnDifferentGems(
+      gemsCatalystsRegistryAsGemOwner.batchBurnGems(
         gemOwner,
         [defenseGemId, powerGemId],
         [burnAmount]
@@ -583,7 +583,7 @@ describe('GemsCatalystsRegistry', function () {
       'GemsCatalystsRegistry: gemsIds and amounts length mismatch'
     );
   });
-  it('burnDifferentGems for two different gem tokens', async function () {
+  it('batchBurnGems for two different gem tokens', async function () {
     const {
       gemsCatalystsRegistryAsGemOwner,
       powerGem,
@@ -625,30 +625,6 @@ describe('GemsCatalystsRegistry', function () {
       totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
     );
   });
-  it('burnDifferentCatalysts reverts on catalystIds and amounts length mismatch', async function () {
-    const {
-      gemsCatalystsRegistryAsCatalystOwner,
-      rareCatalyst,
-      commonCatalyst,
-      catalystOwner,
-    } = await setupGemsAndCatalysts();
-    const rareCatalystId = await rareCatalyst.catalystId();
-    const commonCatalystId = await commonCatalyst.catalystId();
-    const burnAmount = BigNumber.from('100');
-
-    //approving
-    await gemsCatalystsRegistryAsCatalystOwner.setGemsAndCatalystsMaxAllowance();
-
-    await expect(
-      gemsCatalystsRegistryAsCatalystOwner.burnDifferentCatalysts(
-        catalystOwner,
-        [rareCatalystId, commonCatalystId],
-        [burnAmount]
-      )
-    ).to.revertedWith(
-      'GemsCatalystsRegistry: catalystIds and amounts length mismatch'
-    );
-  });
   it('batchBurnCatalysts reverts on catalystIds and amounts length mismatch', async function () {
     const {
       gemsCatalystsRegistryAsCatalystOwner,
@@ -673,7 +649,7 @@ describe('GemsCatalystsRegistry', function () {
       'GemsCatalystsRegistry: catalystIds and amounts length mismatch'
     );
   });
-  it('burnDifferentCatalysts for two different catalyst tokens', async function () {
+  it('batchBurnCatalysts for two different catalyst tokens', async function () {
     const {
       gemsCatalystsRegistryAsCatalystOwner,
       rareCatalyst,
@@ -721,30 +697,6 @@ describe('GemsCatalystsRegistry', function () {
     );
     expect(totalSupplyAfterBurningDefenseGem).to.equal(
       totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
-    );
-  });
-  it('batchBurnGems reverts on gemsIds and amounts length mismatch', async function () {
-    const {
-      gemsCatalystsRegistryAsGemOwner,
-      powerGem,
-      defenseGem,
-      gemOwner,
-    } = await setupGemsAndCatalysts();
-    const powerGemId = await powerGem.gemId();
-    const defenseGemId = await defenseGem.gemId();
-    const burnAmounts = [BigNumber.from('4')];
-
-    //approving
-    gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
-
-    await expect(
-      gemsCatalystsRegistryAsGemOwner.batchBurnGems(
-        gemOwner,
-        [defenseGemId, powerGemId],
-        burnAmounts
-      )
-    ).to.revertedWith(
-      'GemsCatalystsRegistry: gemsIds and amounts length mismatch'
     );
   });
   it('batchBurnGems for two different gem tokens and two different amounts', async function () {
