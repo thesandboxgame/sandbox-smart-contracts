@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
@@ -10,6 +11,7 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 private constant DECIMAL_PLACES = 1 ether;
+    uint256 private constant MAX_WITHDRAWAL = 100;
 
     address internal immutable _sand;
     address internal immutable _registry;
@@ -30,9 +32,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
-    event ReceivingWallet(address newReceivingWallet);
+    event ReceivingWallet(address indexed newReceivingWallet);
 
-    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
+    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
 
     event SetPrices(
         uint256[] catalystIds,
@@ -41,6 +43,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] gemPrices,
         uint256 priceChangeTimestamp
     );
+
+    event WithdrawAll(address indexed to, uint256[] catalystIds, uint256[] gemIds);
+
+    event SandEnabled(bool enabled);
 
     struct Message {
         address buyer;
@@ -59,6 +65,11 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address initialSigningWallet,
         address registry
     ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") {
+        require(admin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
+        require(trustedForwarder != address(0), "FORWARDER_ZERO_ADDRESS");
+        require(initialWalletAddress != address(0), "WALLET_ZERO_ADDRESS");
+        require(registry != address(0), "REGISTRY_ZERO_ADDRESS");
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
@@ -70,6 +81,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param newReceivingWallet Address of the new receiving wallet
     function setReceivingWallet(address payable newReceivingWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newReceivingWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newReceivingWallet != _wallet, "WALLET_ALREADY_SET");
         _wallet = newReceivingWallet;
         emit ReceivingWallet(newReceivingWallet);
     }
@@ -78,6 +90,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param enabled Whether to enable or disable
     function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _sandEnabled = enabled;
+        emit SandEnabled(enabled);
     }
 
     /// @notice Enables admin to change the prices (in SAND) of the catalysts and gems in the StarterPack bundle
@@ -113,11 +126,14 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param to The destination address for the purchased Catalysts and Gems
     /// @param catalystIds The IDs of the catalysts to be transferred
     /// @param gemIds The IDs of the gems to be transferred
+    /// @dev The sum length of catalystIds + gemIds must be <= MAX_WITHDRAWAL
     function withdrawAll(
         address to,
         uint256[] calldata catalystIds,
         uint256[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
+        require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = uint16(catalystIds[i]);
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
@@ -132,6 +148,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
             uint256 balance = gem.balanceOf(address(this));
             _executeRegistryTransferGem(gem, address(this), to, balance);
         }
+        emit WithdrawAll(to, catalystIds, gemIds);
     }
 
     /// @notice Purchase StarterPacks with SAND

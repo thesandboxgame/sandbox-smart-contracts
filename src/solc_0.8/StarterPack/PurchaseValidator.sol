@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
@@ -17,13 +18,14 @@ contract PurchaseValidator is AccessControl, EIP712 {
             "Purchase(address buyer,uint256[] catalystIds,uint256[] catalystQuantities,uint256[] gemIds,uint256[] gemQuantities,uint256 nonce)"
         );
 
-    event SigningWallet(address newSigningWallet);
+    event SigningWallet(address indexed newSigningWallet);
 
     constructor(
         address initialSigningWallet,
         string memory name,
         string memory version
     ) EIP712(name, version) {
+        require(initialSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
         _signingWallet = initialSigningWallet;
     }
 
@@ -31,6 +33,7 @@ contract PurchaseValidator is AccessControl, EIP712 {
     /// @param newSigningWallet The new address of the signing wallet
     function setSigningWallet(address newSigningWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newSigningWallet != _signingWallet, "WALLET_ALREADY_SET");
         _signingWallet = newSigningWallet;
         emit SigningWallet(newSigningWallet);
     }
