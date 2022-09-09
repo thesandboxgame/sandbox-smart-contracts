@@ -41,13 +41,14 @@ describe('PrePaidPeriodAgreement', function () {
       expect(await contract.isLeased(agreementId)).to.be.false;
     });
     it('accept', async function () {
-      const {contractAsUser, mintableERC20AsUser, contract} = fixtures;
+      const {contractAsUser, mintableERC20AsUser, contract, owner} = fixtures;
       await mintableERC20AsUser.approve(contractAsUser.address, rentalPrice);
       await expect(
         contractAsUser.accept(agreementId, rentalPrice, rentalPeriod)
       )
         .to.emit(contractAsUser, 'AgreementAccepted')
         .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
+      expect(await contract.balanceOf(owner)).to.be.equal(rentalPrice);
       expect(await contract.isLeased(agreementId)).to.be.true;
       await increaseTime(rentalPeriod + 10);
       expect(await contract.isLeased(agreementId)).to.be.false;
@@ -74,6 +75,7 @@ describe('PrePaidPeriodAgreement', function () {
       )
         .to.emit(contractAsUser, 'AgreementAccepted')
         .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
+      expect(await contract.balanceOf(owner)).to.be.equal(rentalPrice.mul(2));
       expect(await contract.isLeased(agreementId)).to.be.true;
       await increaseTime(rentalPeriod + 10);
       expect(await contract.isLeased(agreementId)).to.be.false;
@@ -100,6 +102,7 @@ describe('PrePaidPeriodAgreement', function () {
       )
         .to.emit(contractAsUser, 'AgreementAccepted')
         .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
+      expect(await contract.balanceOf(owner)).to.be.equal(rentalPrice.mul(3));
       expect(await contract.isLeased(agreementId)).to.be.true;
     });
     it('and then cancel', async function () {
@@ -113,6 +116,7 @@ describe('PrePaidPeriodAgreement', function () {
       await expect(contractAsOwner.acceptCancellation(agreementId, rentalPrice))
         .to.emit(contractAsOwner, 'CancellationAccepted')
         .withArgs(agreementId, user, owner, [], rentalPrice);
+      expect(await contract.balanceOf(owner)).to.be.equal(rentalPrice.mul(2));
       expect(await contract.isLeased(agreementId)).to.be.false;
     });
   });
