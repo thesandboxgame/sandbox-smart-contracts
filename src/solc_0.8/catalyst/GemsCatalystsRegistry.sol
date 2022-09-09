@@ -29,7 +29,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Access
     // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
 
-    function initV1(address trustedForwarder, address admin) public initializer {
+    function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
     }
