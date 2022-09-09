@@ -7,6 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {
     deployer,
+    sandAdmin,
     starterPackAdmin,
     starterPackSaleBeneficiary,
     backendMessageSigner,
@@ -26,7 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
     args: [
-      starterPackAdmin,
+      sandAdmin, // DEFAULT_ADMIN_ROLE
+      starterPackAdmin, // STARTERPACK_ROLE
       sandContract.address,
       TRUSTED_FORWARDER_V2?.address,
       starterPackSaleBeneficiary,

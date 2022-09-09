@@ -8,6 +8,8 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 
 /// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
 /// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
+/// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, STARTERPACK_ROLE
+/// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, STARTERPACK_ROLE is provided for business purposes
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 internal constant MAX_UINT16 = type(uint16).max;
@@ -32,6 +34,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // The delay between calling setPrices() and when the new prices come into effect
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
+
+    // The following role is provided for business-related admin functions
+    bytes32 public constant STARTERPACK_ROLE = keccak256("STARTERPACK_ROLE");
 
     event ReceivingWallet(address indexed newReceivingWallet);
 
@@ -59,19 +64,22 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     }
 
     constructor(
-        address admin,
+        address defaultAdmin,
+        address starterPackAdmin,
         address sandContractAddress,
         address trustedForwarder,
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
     ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") {
-        require(admin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(defaultAdmin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(starterPackAdmin != address(0), "STARTERPACK_ADMIN_ZERO_ADDRESS");
         require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
         require(trustedForwarder != address(0), "FORWARDER_ZERO_ADDRESS");
         require(initialWalletAddress != address(0), "WALLET_ZERO_ADDRESS");
         require(registry != address(0), "REGISTRY_ZERO_ADDRESS");
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(STARTERPACK_ROLE, starterPackAdmin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
@@ -89,7 +97,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
 
     /// @dev Enable / disable the specific SAND payment for StarterPacks
     /// @param enabled Whether to enable or disable
-    function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setSANDEnabled(bool enabled) external onlyRole(STARTERPACK_ROLE) {
         _sandEnabled = enabled;
         emit SandEnabled(enabled);
     }
@@ -104,7 +112,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] calldata catalystPrices,
         uint16[] calldata gemIds,
         uint256[] calldata gemPrices
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(STARTERPACK_ROLE) {
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
         require(catalystPrices.length <= MAX_UINT16, "TOO_MANY_CATALYST_PRICES");

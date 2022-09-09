@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
 
 /// @title Purchase Validator contract that validates the purchase of catalysts and gems bundles with EIP712
 /// @notice This contract manages the validation of purchases
+/// @notice The following privileged roles are used in PurchaseValidator: DEFAULT_ADMIN_ROLE
 /// @dev It is intended that this contract is inherited by StarterPack
 contract PurchaseValidator is AccessControl, EIP712 {
     address private _signingWallet;

@@ -150,11 +150,20 @@ describe('PolygonStarterPack.sol', function () {
     it('default admin should be set', async function () {
       const {
         PolygonStarterPack,
-        starterPackAdmin,
+        sandAdmin,
         defaultAdminRole,
       } = await setupPolygonStarterPack();
+      expect(await PolygonStarterPack.hasRole(defaultAdminRole, sandAdmin)).to
+        .be.true;
+    });
+    it('starterpack admin should be set', async function () {
+      const {
+        PolygonStarterPack,
+        starterPackAdmin,
+        starterPackRole,
+      } = await setupPolygonStarterPack();
       expect(
-        await PolygonStarterPack.hasRole(defaultAdminRole, starterPackAdmin)
+        await PolygonStarterPack.hasRole(starterPackRole, starterPackAdmin)
       ).to.be.true;
     });
   });
@@ -251,7 +260,14 @@ describe('PolygonStarterPack.sol', function () {
     });
   });
   describe('setSANDEnabled', function () {
-    it('default admin can set SAND enabled', async function () {
+    it('STARTERPACK_ROLE can set SAND enabled', async function () {
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
+      await expect(PolygonStarterPackAsStarterPackAdmin.setSANDEnabled(true)).to
+        .not.be.reverted;
+    });
+    it('DEFAULT_ADMIN_ROLE can set SAND enabled/disabled (but only because sandAdmin is currently the same as starterPackAdmin)', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsAdmin.setSANDEnabled(true)).to.not.be
         .reverted;
@@ -287,30 +303,45 @@ describe('PolygonStarterPack.sol', function () {
       );
       expect(event.args[0]).to.be.false;
     });
-    it('if not default admin cannot set SAND enabled', async function () {
+    it('if not STARTERPACK_ROLE cannot set SAND enabled', async function () {
       const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setSANDEnabled(true)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
       );
     });
-    it('default admin can disable SAND', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
-      await expect(PolygonStarterPackAsAdmin.setSANDEnabled(false)).to.not.be
-        .reverted;
+    it('STARTERPACK_ROLE can disable SAND', async function () {
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
+      await expect(PolygonStarterPackAsStarterPackAdmin.setSANDEnabled(false))
+        .to.not.be.reverted;
     });
-    it('if not default admin cannot disable SAND', async function () {
+    it('if not STARTERPACK_ROLE cannot disable SAND', async function () {
       const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setSANDEnabled(false)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
       );
     });
   });
   describe('setPrices', function () {
-    it('default admin can set the prices for all cats and gems', async function () {
+    it('STARTERPACK_ROLE can set the prices for all cats and gems', async function () {
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
+      await expect(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.not.be.reverted;
+    });
+    it('DEFAULT_ADMIN_ROLE can set the prices (but only because sandAdmin is currently the same as starterPackAdmin)', async function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsAdmin.setPrices(
@@ -322,9 +353,11 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('an individual catalyst price can be updated', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           [1],
           ['10000000000000000000'],
           [],
@@ -333,9 +366,11 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('an individual gem price can be updated', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           [],
           [],
           [1],
@@ -343,7 +378,7 @@ describe('PolygonStarterPack.sol', function () {
         )
       ).to.not.be.reverted;
     });
-    it('if not default admin cannot set prices', async function () {
+    it('if not STARTERPACK_ROLE cannot set prices', async function () {
       const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setPrices(
@@ -353,13 +388,15 @@ describe('PolygonStarterPack.sol', function () {
           gemPrices
         )
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
       );
     });
     it('cannot set prices for cat that does not exist', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           badCatIds,
           catPrices,
           gemIds,
@@ -368,9 +405,11 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CAT_ID');
     });
     it('cannot set prices for gem that does not exist', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
           catPrices,
           badGemIds,
@@ -379,9 +418,11 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('cannot set prices for cat 0', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           zeroCatId,
           catPrices,
           gemIds,
@@ -390,9 +431,11 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CAT_ID');
     });
     it('cannot set prices for gem id 0', async function () {
-      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      const {
+        PolygonStarterPackAsStarterPackAdmin,
+      } = await setupPolygonStarterPack();
       await expect(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
           catPrices,
           zeroGemId,
@@ -402,12 +445,12 @@ describe('PolygonStarterPack.sol', function () {
     });
     it('SetPrices event is emitted when prices are updated', async function () {
       const {
-        PolygonStarterPackAsAdmin,
+        PolygonStarterPackAsStarterPackAdmin,
         PolygonStarterPack,
       } = await setupPolygonStarterPack();
 
       const receipt = await waitFor(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
           catPrices,
           gemIds,
@@ -452,12 +495,12 @@ describe('PolygonStarterPack.sol', function () {
     });
     it('SetPrices event is emitted when a single price is updated', async function () {
       const {
-        PolygonStarterPackAsAdmin,
+        PolygonStarterPackAsStarterPackAdmin,
         PolygonStarterPack,
       } = await setupPolygonStarterPack();
 
       const receipt = await waitFor(
-        PolygonStarterPackAsAdmin.setPrices(
+        PolygonStarterPackAsStarterPackAdmin.setPrices(
           [],
           [],
           [1],

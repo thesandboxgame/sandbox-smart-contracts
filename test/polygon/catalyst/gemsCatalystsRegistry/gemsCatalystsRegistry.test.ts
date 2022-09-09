@@ -790,39 +790,41 @@ describe('GemsCatalystsRegistry', function () {
     );
   });
 
-  it('Change trusted forwarder ', async function () {
+  it('only DEFAULT_ADMIN_ROLE can set trusted forwarder', async function () {
     const {
-      gemsCatalystsRegistryAsCatalystMinter,
-      gemsCatalystsRegistryAsDeployer,
+      gemsCatalystsRegistryAsRegAdmin,
       trustedForwarder,
       powerGem,
+      gemsCatalystsRegistryAsDeployer,
     } = await setupGemsAndCatalysts();
-    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
 
     await waitFor(
-      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(powerGem.address)
+      gemsCatalystsRegistryAsRegAdmin.setTrustedForwarder(powerGem.address)
     );
 
-    const newTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const newTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(newTrustedForwarder).to.equal(powerGem.address);
 
     await expect(
-      gemsCatalystsRegistryAsCatalystMinter.setTrustedForwarder(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(
         trustedForwarder.address
       )
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      'AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+    );
   });
   it('cannot set trustedForwarder to zero address', async function () {
     const {
-      gemsCatalystsRegistryAsDeployer,
+      gemsCatalystsRegistryAsRegAdmin,
       trustedForwarder,
     } = await setupGemsAndCatalysts();
-    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
 
     await expect(
-      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(zeroAddress)
+      gemsCatalystsRegistryAsRegAdmin.setTrustedForwarder(zeroAddress)
     ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });
