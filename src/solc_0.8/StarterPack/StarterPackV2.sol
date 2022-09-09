@@ -32,9 +32,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
-    event ReceivingWallet(address newReceivingWallet);
+    event ReceivingWallet(address indexed newReceivingWallet);
 
-    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
+    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
 
     event SetPrices(
         uint256[] catalystIds,
@@ -43,6 +43,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] gemPrices,
         uint256 priceChangeTimestamp
     );
+
+    event WithdrawAll(address indexed to, uint256[] catalystIds, uint256[] gemIds);
+
+    event SandEnabled(bool enabled);
 
     struct Message {
         uint256[] catalystIds;
@@ -76,6 +80,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param newReceivingWallet Address of the new receiving wallet
     function setReceivingWallet(address payable newReceivingWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newReceivingWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newReceivingWallet != _wallet, "WALLET_ALREADY_SET");
         _wallet = newReceivingWallet;
         emit ReceivingWallet(newReceivingWallet);
     }
@@ -84,6 +89,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param enabled Whether to enable or disable
     function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _sandEnabled = enabled;
+        emit SandEnabled(enabled);
     }
 
     /// @notice Enables admin to change the prices (in SAND) of the catalysts and gems in the StarterPack bundle
@@ -141,6 +147,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
             uint256 balance = gem.balanceOf(address(this));
             _executeRegistryTransferGem(gem, address(this), to, balance);
         }
+        emit WithdrawAll(to, catalystIds, gemIds);
     }
 
     /// @notice Purchase StarterPacks with SAND

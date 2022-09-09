@@ -15,13 +15,15 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
-    uint256 internal constant MAX_UINT256 = ~uint256(0);
+    uint256 internal constant MAX_UINT256 = type(uint256).max;
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     IGem[] internal _gems;
     ICatalyst[] internal _catalysts;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event AddGemsAndCatalysts(IGem[] gems, ICatalyst[] catalysts);
+    event SetGemsAndCatalystsAllowance(address owner, uint256 allowanceValue);
 
     function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
@@ -164,6 +166,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);
         }
+        emit AddGemsAndCatalysts(gems, catalysts);
     }
 
     /// @notice Query whether a given gem exists.
@@ -234,6 +237,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         for (uint256 i = 0; i < _catalysts.length; i++) {
             _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
         }
+        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
     }
 
     /// @dev Get the catalyst contract corresponding to the id.

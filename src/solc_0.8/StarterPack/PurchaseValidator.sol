@@ -13,7 +13,7 @@ contract PurchaseValidator is AccessControl {
     // A parallel-queue mapping to nonces.
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
-    event SigningWallet(address newSigningWallet);
+    event SigningWallet(address indexed newSigningWallet);
 
     constructor(address initialSigningWallet) {
         require(initialSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
@@ -24,6 +24,7 @@ contract PurchaseValidator is AccessControl {
     /// @param newSigningWallet The new address of the signing wallet
     function setSigningWallet(address newSigningWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newSigningWallet != _signingWallet, "WALLET_ALREADY_SET");
         _signingWallet = newSigningWallet;
         emit SigningWallet(newSigningWallet);
     }
