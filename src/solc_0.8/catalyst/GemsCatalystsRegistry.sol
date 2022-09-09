@@ -32,6 +32,7 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
+        __AccessControl_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
