@@ -1,9 +1,11 @@
 import {BigNumber} from '@ethersproject/bignumber';
+import {constants} from 'ethers';
 import {expect} from '../../../chai-setup';
-import {waitFor, withSnapshot} from '../../../utils';
+import {waitFor, withSnapshot, expectEventWithArgs} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {deployments} from 'hardhat';
+import {zeroAddress} from '../../../land/fixtures';
 
 const setupGemsAndCatalysts = withSnapshot(
   [
@@ -89,7 +91,17 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
-    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
+    const receipt = await waitFor(
+      gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance()
+    );
+
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'SetGemsAndCatalystsAllowance'
+    );
+    expect(event.args[0]).to.be.equal(user3);
+    expect(event.args[1]).to.be.equal(constants.MaxUint256);
 
     expect(
       await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
@@ -382,13 +394,27 @@ describe('GemsCatalystsRegistry', function () {
     ).to.be.revertedWith('CATALYST_ID_NOT_IN_ORDER');
   });
 
+  it('addGemsAndCatalysts should fail for catalyst with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([], [zeroAddress])
+    ).to.be.revertedWith('CATALYST_ZERO_ADDRESS');
+  });
+
+  it('addGemsAndCatalysts should fail for gem with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([zeroAddress], [])
+    ).to.be.revertedWith('GEM_ZERO_ADDRESS');
+  });
+
   it('addGemsAndCatalysts should add gemExample', async function () {
     const {
       gemsCatalystsRegistry,
       gemExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [gemExample.address],
         []
@@ -396,6 +422,12 @@ describe('GemsCatalystsRegistry', function () {
     );
     const gemId = await gemExample.gemId();
     expect(await gemsCatalystsRegistry.doesGemExist(gemId)).to.equal(true);
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[0][0]).to.be.equal(gemExample.address);
   });
 
   it('addGemsAndCatalysts should add catalystExample', async function () {
@@ -404,7 +436,7 @@ describe('GemsCatalystsRegistry', function () {
       catalystExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [],
         [catalystExample.address]
@@ -414,6 +446,12 @@ describe('GemsCatalystsRegistry', function () {
     expect(await gemsCatalystsRegistry.doesCatalystExist(catalystId)).to.equal(
       true
     );
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[1][0]).to.be.equal(catalystExample.address);
   });
 
   it('addGemsAndCatalysts should fail for gem id not in order', async function () {
@@ -521,7 +559,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(addresses, [])
     ).to.be.revertedWith('GEM_ID_NOT_IN_ORDER');
   });
-  it('burnDifferentGems reverts on gemsIds and amounts length mismatch', async function () {
+  it('batchBurnGems reverts on gemsIds and amounts length mismatch', async function () {
     const {
       gemsCatalystsRegistryAsGemOwner,
       powerGem,
@@ -536,7 +574,7 @@ describe('GemsCatalystsRegistry', function () {
     await gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
 
     await expect(
-      gemsCatalystsRegistryAsGemOwner.burnDifferentGems(
+      gemsCatalystsRegistryAsGemOwner.batchBurnGems(
         gemOwner,
         [defenseGemId, powerGemId],
         [burnAmount]
@@ -545,7 +583,7 @@ describe('GemsCatalystsRegistry', function () {
       'GemsCatalystsRegistry: gemsIds and amounts length mismatch'
     );
   });
-  it('burnDifferentGems for two different gem tokens', async function () {
+  it('batchBurnGems for two different gem tokens', async function () {
     const {
       gemsCatalystsRegistryAsGemOwner,
       powerGem,
@@ -587,30 +625,6 @@ describe('GemsCatalystsRegistry', function () {
       totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
     );
   });
-  it('burnDifferentCatalysts reverts on catalystIds and amounts length mismatch', async function () {
-    const {
-      gemsCatalystsRegistryAsCatalystOwner,
-      rareCatalyst,
-      commonCatalyst,
-      catalystOwner,
-    } = await setupGemsAndCatalysts();
-    const rareCatalystId = await rareCatalyst.catalystId();
-    const commonCatalystId = await commonCatalyst.catalystId();
-    const burnAmount = BigNumber.from('100');
-
-    //approving
-    await gemsCatalystsRegistryAsCatalystOwner.setGemsAndCatalystsMaxAllowance();
-
-    await expect(
-      gemsCatalystsRegistryAsCatalystOwner.burnDifferentCatalysts(
-        catalystOwner,
-        [rareCatalystId, commonCatalystId],
-        [burnAmount]
-      )
-    ).to.revertedWith(
-      'GemsCatalystsRegistry: catalystIds and amounts length mismatch'
-    );
-  });
   it('batchBurnCatalysts reverts on catalystIds and amounts length mismatch', async function () {
     const {
       gemsCatalystsRegistryAsCatalystOwner,
@@ -635,7 +649,7 @@ describe('GemsCatalystsRegistry', function () {
       'GemsCatalystsRegistry: catalystIds and amounts length mismatch'
     );
   });
-  it('burnDifferentCatalysts for two different catalyst tokens', async function () {
+  it('batchBurnCatalysts for two different catalyst tokens', async function () {
     const {
       gemsCatalystsRegistryAsCatalystOwner,
       rareCatalyst,
@@ -685,30 +699,6 @@ describe('GemsCatalystsRegistry', function () {
       totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
     );
   });
-  it('batchBurnGems reverts on gemsIds and amounts length mismatch', async function () {
-    const {
-      gemsCatalystsRegistryAsGemOwner,
-      powerGem,
-      defenseGem,
-      gemOwner,
-    } = await setupGemsAndCatalysts();
-    const powerGemId = await powerGem.gemId();
-    const defenseGemId = await defenseGem.gemId();
-    const burnAmounts = [BigNumber.from('4')];
-
-    //approving
-    gemsCatalystsRegistryAsGemOwner.setGemsAndCatalystsMaxAllowance();
-
-    await expect(
-      gemsCatalystsRegistryAsGemOwner.batchBurnGems(
-        gemOwner,
-        [defenseGemId, powerGemId],
-        burnAmounts
-      )
-    ).to.revertedWith(
-      'GemsCatalystsRegistry: gemsIds and amounts length mismatch'
-    );
-  });
   it('batchBurnGems for two different gem tokens and two different amounts', async function () {
     const {
       gemsCatalystsRegistryAsGemOwner,
@@ -752,27 +742,41 @@ describe('GemsCatalystsRegistry', function () {
     );
   });
 
-  it('Change trusted forwarder ', async function () {
+  it('only DEFAULT_ADMIN_ROLE can set trusted forwarder', async function () {
     const {
-      gemsCatalystsRegistryAsCatalystMinter,
-      gemsCatalystsRegistryAsDeployer,
+      gemsCatalystsRegistryAsRegAdmin,
       trustedForwarder,
       powerGem,
+      gemsCatalystsRegistryAsDeployer,
     } = await setupGemsAndCatalysts();
-    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
 
     await waitFor(
-      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(powerGem.address)
+      gemsCatalystsRegistryAsRegAdmin.setTrustedForwarder(powerGem.address)
     );
 
-    const newTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    const newTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(newTrustedForwarder).to.equal(powerGem.address);
 
     await expect(
-      gemsCatalystsRegistryAsCatalystMinter.setTrustedForwarder(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(
         trustedForwarder.address
       )
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      'AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+    );
+  });
+  it('cannot set trustedForwarder to zero address', async function () {
+    const {
+      gemsCatalystsRegistryAsRegAdmin,
+      trustedForwarder,
+    } = await setupGemsAndCatalysts();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
+    expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.setTrustedForwarder(zeroAddress)
+    ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });
