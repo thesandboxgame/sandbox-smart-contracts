@@ -1,4 +1,9 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {withSnapshot, setupUser} from '../../utils';
 import {gemsAndCatalystsFixtures} from '../../common/fixtures/gemAndCatalysts';
 import {BigNumber} from 'ethers';
@@ -13,7 +18,7 @@ export const setupPolygonStarterPack = withSnapshot(
     'PolygonGems',
     'PolygonGemsCatalystsRegistry_setup',
   ],
-  async function () {
+  async function (hre) {
     // Reuse existing cats & gems fixture
     const {
       sandContract,
@@ -38,6 +43,8 @@ export const setupPolygonStarterPack = withSnapshot(
       starterPackAdmin,
       starterPackSaleBeneficiary,
       backendMessageSigner,
+      upgradeAdmin,
+      gemsCatalystsRegistryAdmin,
     } = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
 
@@ -115,6 +122,90 @@ export const setupPolygonStarterPack = withSnapshot(
 
     const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER_V2');
 
+    const deployManyGemContracts = async (amount: number) => {
+      const gemsToAdd = [];
+      // IDs 1-5 already taken by Gems so start at ID 6
+      for (let i = 6; i < amount + 6; i++) {
+        await deployments.deploy(`TestPolygonGem_${i}`, {
+          contract: 'GemV1',
+          from: gemOwner,
+          log: true,
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: 'OptimizedTransparentProxy',
+            execute: {
+              methodName: '__GemV1_init',
+              args: [
+                `TestPolygonGem_${i}`,
+                `TestPolygonGem_${i}`,
+                trustedForwarder.address,
+                gemMinter,
+                i,
+                gemsCatalystsRegistry.address,
+              ],
+            },
+          },
+        });
+        // Mint gems to StarterPack
+        const contract = await ethers.getContract(`TestPolygonGem_${i}`);
+        await contract
+          .connect(ethers.provider.getSigner(catalystMinter))
+          .mint(PolygonStarterPack.address, mintingAmount);
+
+        // Add to registry
+        const {address} = await deployments.get(`TestPolygonGem_${i}`);
+        gemsToAdd.push(address);
+      }
+      const registry = await ethers.getContract(`PolygonGemsCatalystsRegistry`);
+      await registry
+        .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
+        .addGemsAndCatalysts(gemsToAdd, []);
+    };
+
+    const DefaultAttributes = await deployments.get(`PolygonDefaultAttributes`);
+
+    const deployManyCatalystContracts = async (amount: number) => {
+      const catalystsToAdd = [];
+      // IDs 1-4 already taken by Cats so start at ID 5
+      for (let i = 5; i < amount + 5; i++) {
+        await deployments.deploy(`TestPolygonCatalyst_${i}`, {
+          contract: 'CatalystV1',
+          from: catalystOwner,
+          log: true,
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: 'OptimizedTransparentProxy',
+            execute: {
+              methodName: '__CatalystV1_init',
+              args: [
+                `TestPolygonCatalyst_${i}`,
+                `TestPolygonCatalyst_${i}`,
+                trustedForwarder.address,
+                catalystMinter,
+                5,
+                i,
+                DefaultAttributes.address,
+                gemsCatalystsRegistry.address,
+              ],
+            },
+          },
+        });
+        // Mint gems to StarterPack
+        const contract = await ethers.getContract(`TestPolygonCatalyst_${i}`);
+        await contract
+          .connect(ethers.provider.getSigner(catalystMinter))
+          .mint(PolygonStarterPack.address, mintingAmount);
+
+        // Add to registry
+        const {address} = await deployments.get(`TestPolygonCatalyst_${i}`);
+        catalystsToAdd.push(address);
+      }
+      const registry = await ethers.getContract(`PolygonGemsCatalystsRegistry`);
+      await registry
+        .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
+        .addGemsAndCatalysts([], catalystsToAdd);
+    };
+
     return {
       PolygonStarterPack,
       PolygonStarterPackAsAdmin,
@@ -138,6 +229,9 @@ export const setupPolygonStarterPack = withSnapshot(
       buyer, // [3]
       other,
       trustedForwarder,
+      hre,
+      deployManyGemContracts,
+      deployManyCatalystContracts,
     };
   }
 );

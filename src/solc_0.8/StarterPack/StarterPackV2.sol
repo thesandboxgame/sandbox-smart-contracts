@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
@@ -5,12 +6,13 @@ import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
-/// @title StarterPack contract that supports SAND as payment
-/// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
+/// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
+/// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
 contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     using SafeMathWithRequire for uint256;
     uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
+    uint256 private constant MAX_WITHDRAWAL = 100;
 
     address internal immutable _sand;
     address internal immutable _registry;
@@ -31,9 +33,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
-    event ReceivingWallet(address newReceivingWallet);
+    event ReceivingWallet(address indexed newReceivingWallet);
 
-    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
+    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
 
     event SetPrices(
         uint16[] catalystIds,
@@ -43,7 +45,12 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256 priceChangeTimestamp
     );
 
+    event WithdrawAll(address indexed to, uint16[] catalystIds, uint16[] gemIds);
+
+    event SandEnabled(bool enabled);
+
     struct Message {
+        address buyer;
         uint16[] catalystIds;
         uint256[] catalystQuantities;
         uint16[] gemIds;
@@ -58,7 +65,12 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
-    ) PurchaseValidator(initialSigningWallet) {
+    ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") {
+        require(admin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
+        require(trustedForwarder != address(0), "FORWARDER_ZERO_ADDRESS");
+        require(initialWalletAddress != address(0), "WALLET_ZERO_ADDRESS");
+        require(registry != address(0), "REGISTRY_ZERO_ADDRESS");
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _sand = sandContractAddress;
         __ERC2771Handler_initialize(trustedForwarder);
@@ -70,6 +82,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param newReceivingWallet Address of the new receiving wallet
     function setReceivingWallet(address payable newReceivingWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newReceivingWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newReceivingWallet != _wallet, "WALLET_ALREADY_SET");
         _wallet = newReceivingWallet;
         emit ReceivingWallet(newReceivingWallet);
     }
@@ -78,6 +91,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param enabled Whether to enable or disable
     function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _sandEnabled = enabled;
+        emit SandEnabled(enabled);
     }
 
     /// @notice Enables admin to change the prices (in SAND) of the catalysts and gems in the StarterPack bundle
@@ -115,11 +129,14 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param to The destination address for the purchased Catalysts and Gems
     /// @param catalystIds The IDs of the catalysts to be transferred
     /// @param gemIds The IDs of the gems to be transferred
+    /// @dev The sum length of catalystIds + gemIds must be <= MAX_WITHDRAWAL
     function withdrawAll(
         address to,
         uint16[] calldata catalystIds,
         uint16[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
+        require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = catalystIds[i];
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
@@ -134,22 +151,18 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
             uint256 balance = gem.balanceOf(address(this));
             _executeRegistryTransferGem(gem, address(this), to, balance);
         }
+        emit WithdrawAll(to, catalystIds, gemIds);
     }
 
     /// @notice Purchase StarterPacks with SAND
-    /// @param buyer The destination address for the purchased Catalysts and Gems and the address that will pay for the purchase; if not metaTx then buyer must be equal to msg.sender
-    /// @param message A message containing information about the Catalysts and Gems to be purchased together with a nonce
+    /// @param message A message containing information about the Catalysts and Gems to be purchased together with the destination (buyer) and a nonce
     /// @param signature A signed message specifying tx details
-    function purchaseWithSAND(
-        address buyer,
-        Message calldata message,
-        bytes calldata signature
-    ) external {
-        require(buyer == _msgSender(), "INVALID_SENDER");
+    function purchaseWithSAND(Message calldata message, bytes calldata signature) external {
+        require(message.buyer == _msgSender(), "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(
             _isPurchaseValid(
-                buyer,
+                message.buyer,
                 message.catalystIds,
                 message.catalystQuantities,
                 message.gemIds,
@@ -167,10 +180,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
                 message.gemIds,
                 message.gemQuantities
             );
-        _transferSANDPayment(buyer, _wallet, amountInSAND);
-        _transferCatalysts(message.catalystIds, message.catalystQuantities, buyer);
-        _transferGems(message.gemIds, message.gemQuantities, buyer);
-        emit Purchase(buyer, message, amountInSAND, _sand);
+        _transferSANDPayment(message.buyer, _wallet, amountInSAND);
+        _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
+        _transferGems(message.gemIds, message.gemQuantities, message.buyer);
+        emit Purchase(message.buyer, message, amountInSAND, _sand);
     }
 
     /// @notice Get current StarterPack prices for catalysts and gems by id

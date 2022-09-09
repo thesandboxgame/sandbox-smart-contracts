@@ -8,40 +8,12 @@ import {
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
-import {Wallet, constants, utils} from 'ethers';
+import {constants, utils} from 'ethers';
+import {defaultAbiCoder, keccak256, toUtf8Bytes} from 'ethers/lib/utils';
 import {sendMetaTx} from '../../sendMetaTx';
-const {solidityKeccak256, arrayify} = ethers.utils;
+import {starterPack712Signature} from './signature';
+import {zeroAddress} from '../../land/fixtures';
 
-const privateKey =
-  '0x4242424242424242424242424242424242424242424242424242424242424242';
-
-type Message = {
-  catalystIds: number[];
-  catalystQuantities: number[];
-  gemIds: number[];
-  gemQuantities: number[];
-  nonce: number | string;
-};
-
-function signPurchaseMessage(
-  privateKey: string,
-  message: Message,
-  buyer: string
-) {
-  const hashedData = solidityKeccak256(
-    ['uint256[]', 'uint256[]', 'uint256[]', 'uint256[]', 'address', 'uint256'],
-    [
-      message.catalystIds,
-      message.catalystQuantities,
-      message.gemIds,
-      message.gemQuantities,
-      buyer,
-      message.nonce,
-    ]
-  );
-  const wallet = new Wallet(privateKey);
-  return wallet.signMessage(arrayify(hashedData));
-}
 // Good test params
 const catalystIds = [1, 2, 3, 4];
 const catPrices = [
@@ -105,6 +77,7 @@ const zeroGemId = [0, 2, 4, 1, 5];
 
 // Test Message structure
 const TestMessage = {
+  buyer: '',
   catalystIds,
   catalystQuantities: [1, 1, 1, 1],
   gemIds,
@@ -195,6 +168,40 @@ describe('PolygonStarterPack.sol', function () {
         starterPackSaleBeneficiary
       );
     });
+    it('check the domain separator', async function () {
+      const {PolygonStarterPack} = await setupPolygonStarterPack();
+      const typeHash = keccak256(
+        toUtf8Bytes(
+          'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+        )
+      );
+      const hashedName = ethers.utils.keccak256(
+        toUtf8Bytes('Sandbox StarterPack')
+      );
+      const versionHash = ethers.utils.keccak256(toUtf8Bytes('1.0'));
+      const network = await PolygonStarterPack.provider.getNetwork();
+      const domainSeparator = ethers.utils.keccak256(
+        defaultAbiCoder.encode(
+          ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+          [
+            typeHash,
+            hashedName,
+            versionHash,
+            network.chainId,
+            PolygonStarterPack.address,
+          ]
+        )
+      );
+      expect(await PolygonStarterPack.domainSeparator()).to.be.equal(
+        domainSeparator
+      );
+    });
+    it('check the chainId', async function () {
+      const {PolygonStarterPack, hre} = await setupPolygonStarterPack();
+      expect(await PolygonStarterPack.getChainId()).to.be.equal(
+        hre.network.config.chainId || 31337 // Polygon || hardhat
+      );
+    });
   });
   describe('getReceivingWallet', function () {
     it('can view the receiving wallet', async function () {
@@ -248,6 +255,37 @@ describe('PolygonStarterPack.sol', function () {
       const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsAdmin.setSANDEnabled(true)).to.not.be
         .reverted;
+    });
+    it('SandEnabled event is emitted when SAND is enabled', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.setSANDEnabled(true)
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'SandEnabled'
+      );
+      expect(event.args[0]).to.be.true;
+    });
+    it('SandEnabled event is emitted when SAND is disabled', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.setSANDEnabled(false)
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'SandEnabled'
+      );
+      expect(event.args[0]).to.be.false;
     });
     it('if not default admin cannot set SAND enabled', async function () {
       const {other} = await setupPolygonStarterPack();
@@ -462,6 +500,16 @@ describe('PolygonStarterPack.sol', function () {
         )
       ).to.not.be.reverted;
     });
+    it('default admin cannot withdraw remaining cats and gems from contract to zeroAddress', async function () {
+      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      await expect(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          zeroAddress,
+          [1, 2, 3, 4],
+          [1, 2, 3, 4, 5]
+        )
+      ).to.be.revertedWith('ZERO_ADDRESS');
+    });
     it('default admin receives correct cats and gems balances upon withdrawal', async function () {
       const {
         PolygonStarterPackAsAdmin,
@@ -565,23 +613,23 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [100, 100, 100, 100],
         gemIds,
         gemQuantities: [100, 100, 100, 100, 100],
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
-      await buyer.PolygonStarterPack.purchaseWithSAND(
-        buyer.address,
-        Message,
-        signature
-      );
+      await buyer.PolygonStarterPack.purchaseWithSAND(Message, signature);
       await expect(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -590,22 +638,55 @@ describe('PolygonStarterPack.sol', function () {
         )
       ).to.not.be.reverted;
     });
+    it('withdrawAll event is emitted upon withdrawal', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        PolygonStarterPack,
+      } = await setupPolygonStarterPack();
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [1, 2, 3, 4],
+          [1, 2, 3, 4, 5]
+        )
+      );
+      const event = await expectEventWithArgs(
+        PolygonStarterPack,
+        receipt,
+        'WithdrawAll'
+      );
+      const to = event.args[0];
+      const catIds = event.args[1];
+      const gemIds = event.args[2];
+      expect(to).to.be.equal(other.address);
+      expect(catIds[0]).to.be.equal(1);
+      expect(catIds[1]).to.be.equal(2);
+      expect(catIds[2]).to.be.equal(3);
+      expect(catIds[3]).to.be.equal(4);
+      expect(gemIds[0]).to.be.equal(1);
+      expect(gemIds[1]).to.be.equal(2);
+      expect(gemIds[2]).to.be.equal(3);
+      expect(gemIds[3]).to.be.equal(4);
+      expect(gemIds[4]).to.be.equal(5);
+    });
   });
   describe('purchaseWithSAND', function () {
     it('can purchase bundle of cats and gems when SAND is enabled - zero prices', async function () {
       const {
         other,
         PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, other.address);
+      Message.buyer = other.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          Message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
     });
     it('can purchase bundle of cats and gems when SAND is enabled and prices are >0 with correct SAND amount', async function () {
@@ -634,7 +715,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       const balance = await sandContract.balanceOf(buyer.address);
       const totalSpend = calculateSpend();
       // approve SAND
@@ -643,11 +728,7 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -689,15 +770,15 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
     it('cannot purchase bundle of cats and gems when SAND is not enabled', async function () {
-      const {other} = await setupPolygonStarterPack();
+      const {other, PolygonStarterPack} = await setupPolygonStarterPack();
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, other.address);
+      Message.buyer = other.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          Message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('SAND_IS_NOT_ENABLED');
     });
     it('a successful purchase results in a Purchase event', async function () {
@@ -717,7 +798,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       const totalSpend = calculateSpend();
       // approve SAND
       await buyer.sandContract.approve(
@@ -725,11 +810,7 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       const receipt = await waitFor(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       );
       const event = await expectEventWithArgs(
         PolygonStarterPack,
@@ -742,33 +823,36 @@ describe('PolygonStarterPack.sol', function () {
       const amountPaidInSand = event.args[2];
       const sandTokenAddress = event.args[3];
 
-      expect(buyerAddress).to.be.equal(buyer.address);
+      expect(buyerAddress).to.be.equal(buyer.address); // indexed
       expect(amountPaidInSand).to.be.equal(totalSpend);
       expect(sandTokenAddress).to.be.equal(sandContract.address);
+      console.log(eventMessage, 'message');
 
-      expect(eventMessage[0][0]).to.be.equal(Message.catalystIds[0]);
-      expect(eventMessage[0][1]).to.be.equal(Message.catalystIds[1]);
-      expect(eventMessage[0][2]).to.be.equal(Message.catalystIds[2]);
-      expect(eventMessage[0][3]).to.be.equal(Message.catalystIds[3]);
+      expect(eventMessage[0]).to.be.equal(Message.buyer);
 
-      expect(eventMessage[1][0]).to.be.equal(Message.catalystQuantities[0]);
-      expect(eventMessage[1][1]).to.be.equal(Message.catalystQuantities[1]);
-      expect(eventMessage[1][2]).to.be.equal(Message.catalystQuantities[2]);
-      expect(eventMessage[1][3]).to.be.equal(Message.catalystQuantities[3]);
+      expect(eventMessage[1][0]).to.be.equal(Message.catalystIds[0]);
+      expect(eventMessage[1][1]).to.be.equal(Message.catalystIds[1]);
+      expect(eventMessage[1][2]).to.be.equal(Message.catalystIds[2]);
+      expect(eventMessage[1][3]).to.be.equal(Message.catalystIds[3]);
 
-      expect(eventMessage[2][0]).to.be.equal(Message.gemIds[0]);
-      expect(eventMessage[2][1]).to.be.equal(Message.gemIds[1]);
-      expect(eventMessage[2][2]).to.be.equal(Message.gemIds[2]);
-      expect(eventMessage[2][3]).to.be.equal(Message.gemIds[3]);
-      expect(eventMessage[2][4]).to.be.equal(Message.gemIds[4]);
+      expect(eventMessage[2][0]).to.be.equal(Message.catalystQuantities[0]);
+      expect(eventMessage[2][1]).to.be.equal(Message.catalystQuantities[1]);
+      expect(eventMessage[2][2]).to.be.equal(Message.catalystQuantities[2]);
+      expect(eventMessage[2][3]).to.be.equal(Message.catalystQuantities[3]);
 
-      expect(eventMessage[3][0]).to.be.equal(Message.gemQuantities[0]);
-      expect(eventMessage[3][1]).to.be.equal(Message.gemQuantities[1]);
-      expect(eventMessage[3][2]).to.be.equal(Message.gemQuantities[2]);
-      expect(eventMessage[3][3]).to.be.equal(Message.gemQuantities[3]);
-      expect(eventMessage[3][4]).to.be.equal(Message.gemQuantities[4]);
+      expect(eventMessage[3][0]).to.be.equal(Message.gemIds[0]);
+      expect(eventMessage[3][1]).to.be.equal(Message.gemIds[1]);
+      expect(eventMessage[3][2]).to.be.equal(Message.gemIds[2]);
+      expect(eventMessage[3][3]).to.be.equal(Message.gemIds[3]);
+      expect(eventMessage[3][4]).to.be.equal(Message.gemIds[4]);
 
-      expect(eventMessage[4]).to.be.equal(Message.nonce);
+      expect(eventMessage[4][0]).to.be.equal(Message.gemQuantities[0]);
+      expect(eventMessage[4][1]).to.be.equal(Message.gemQuantities[1]);
+      expect(eventMessage[4][2]).to.be.equal(Message.gemQuantities[2]);
+      expect(eventMessage[4][3]).to.be.equal(Message.gemQuantities[3]);
+      expect(eventMessage[4][4]).to.be.equal(Message.gemQuantities[4]);
+
+      expect(eventMessage[5]).to.be.equal(Message.nonce);
     });
     it('cannot purchase bundle of cats and gems without enough SAND', async function () {
       const {
@@ -786,24 +870,25 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, other.address);
+      Message.buyer = other.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await other.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          Message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INSUFFICIENT_FUNDS');
     });
     it('cannot purchase bundle of cats and gems if have not approved the StarterPack contract', async function () {
       const {
         buyer,
         PolygonStarterPackAsAdmin,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
@@ -815,13 +900,13 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('NOT_AUTHORIZED_ALLOWANCE');
     });
     it('cannot purchase bundle of cats and gems if StarterPack contract does not have any', async function () {
@@ -841,7 +926,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
@@ -854,72 +943,71 @@ describe('PolygonStarterPack.sol', function () {
         [1, 2, 3, 4, 5]
       ); // empty the contract
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INSUFFICIENT_FUNDS'); // ERC20BaseTokenUpgradeable error message in Catalyst and Gem contracts
     });
-    it('purchase fails with incorrect backend signature param', async function () {
+    it('purchase fails with incorrect backend signature', async function () {
       const {
-        other,
         PolygonStarterPackAsAdmin,
         buyer,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, other.address); // incorrect buyer address
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message,
+        true // use BAD_KEY in signature
+      );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_PURCHASE');
     });
     it('purchase fails with bad message params - catalyst lengths', async function () {
       const {
         PolygonStarterPackAsAdmin,
         buyer,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1], // bad param
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_CAT_INPUT');
     });
     it('purchase fails with bad message params - gem lengths', async function () {
       const {
         PolygonStarterPackAsAdmin,
         buyer,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2], // bad param
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_GEM_INPUT');
     });
     it('purchase invalidates the nonce after 1 use', async function () {
@@ -938,25 +1026,21 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_NONCE');
     });
     it('cannot purchase cats that do not exist', async function () {
@@ -975,24 +1059,24 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {
+        buyer: buyer.address,
         catalystIds: badCatIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_CATALYST_ID');
     });
     it('cannot purchase gems that do not exist', async function () {
@@ -1011,24 +1095,24 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds: badGemIds,
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('cannot purchase if not msgSender()', async function () {
@@ -1048,18 +1132,18 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = other.address; // bad param
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       // approve SAND
       await buyer.sandContract.approve(
         PolygonStarterPack.address,
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          other.address, // bad param
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_SENDER');
     });
     it('purchase occurs with old prices if price change has not yet taken effect', async function () {
@@ -1079,7 +1163,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward <1 hour so the new prices are not yet in effect
       await increaseTime(3000);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       const balance = await sandContract.balanceOf(buyer.address);
       const totalSpend = calculateSpend();
       // approve SAND
@@ -1088,11 +1176,7 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1129,7 +1213,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward 1 hour so the new prices are in effect
       await increaseTime(3600);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       const balance = await sandContract.balanceOf(buyer.address);
       const totalSpend = calculateSpend2();
       // approve SAND
@@ -1138,11 +1226,7 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1180,7 +1264,11 @@ describe('PolygonStarterPack.sol', function () {
       // fast forward <1 hour so the new prices are not yet in effect
       await increaseTime(2900);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
       const balance = await sandContract.balanceOf(buyer.address);
       const totalSpend = calculateSpend();
       // approve SAND
@@ -1189,11 +1277,7 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          Message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1246,13 +1330,17 @@ describe('PolygonStarterPack.sol', function () {
 
       // for the default queueId=0, we can just pass the nonce
       const message = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
-        nonce: nonceForqueueId0,
+        nonce: nonceForqueueId0.toString(),
       };
-      let signature = signPurchaseMessage(privateKey, message, buyer.address);
+      let signature = await starterPack712Signature(
+        PolygonStarterPack,
+        message
+      );
 
       // approve SAND
       await buyer.sandContract.approve(
@@ -1262,11 +1350,7 @@ describe('PolygonStarterPack.sol', function () {
 
       // To get the nonce, we simply pass the buyer address & queueID
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          message,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(message, signature)
       ).to.not.be.reverted;
 
       let nonce = 0;
@@ -1274,39 +1358,38 @@ describe('PolygonStarterPack.sol', function () {
 
       // for any other queueId, we need to pack the values
       const messageQueue2 = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
-        nonce: getPackedNonce(nonce, queueId),
+        nonce: getPackedNonce(nonce, queueId).toString(),
       };
-      signature = signPurchaseMessage(privateKey, messageQueue2, buyer.address);
+      signature = await starterPack712Signature(
+        PolygonStarterPack,
+        messageQueue2
+      );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
-          messageQueue2,
-          signature
-        )
+        buyer.PolygonStarterPack.purchaseWithSAND(messageQueue2, signature)
       ).to.not.be.reverted;
 
       // Now we can simply increment the nonce in the new queue (with packing)
       nonce = 1;
       const updatedNonceQueue2 = getPackedNonce(nonce, queueId); // 0x000000000000000000000000000001c600000000000000000000000000000001
       const updatedMessageQueue2 = {
+        buyer: buyer.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
-        nonce: updatedNonceQueue2,
+        nonce: updatedNonceQueue2.toString(),
       };
-      signature = signPurchaseMessage(
-        privateKey,
-        updatedMessageQueue2,
-        buyer.address
+      signature = await starterPack712Signature(
+        PolygonStarterPack,
+        updatedMessageQueue2
       );
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(
-          buyer.address,
           updatedMessageQueue2,
           signature
         )
@@ -1316,64 +1399,58 @@ describe('PolygonStarterPack.sol', function () {
       const {
         PolygonStarterPackAsAdmin,
         other,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const message = {
+        buyer: other.address,
         catalystIds: [3, 4, 2, 1],
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      let signature = signPurchaseMessage(privateKey, message, other.address);
+      let signature = await starterPack712Signature(
+        PolygonStarterPack,
+        message
+      );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(message, signature)
       ).to.not.be.reverted;
       message.catalystIds = [4, 3, 2, 1];
       message.nonce++;
-      signature = signPurchaseMessage(privateKey, message, other.address);
+      signature = await starterPack712Signature(PolygonStarterPack, message);
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(message, signature)
       ).to.not.be.reverted;
     });
     it('order of gem IDs should not matter', async function () {
       const {
         PolygonStarterPackAsAdmin,
         other,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const message = {
+        buyer: other.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds: [3, 4, 5, 2, 1],
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      let signature = signPurchaseMessage(privateKey, message, other.address);
+      let signature = await starterPack712Signature(
+        PolygonStarterPack,
+        message
+      );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(message, signature)
       ).to.not.be.reverted;
       message.gemIds = [5, 4, 3, 2, 1];
       message.nonce++;
-      signature = signPurchaseMessage(privateKey, message, other.address);
+      signature = await starterPack712Signature(PolygonStarterPack, message);
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(message, signature)
       ).to.not.be.reverted;
     });
     it('can get nonce for a buyer', async function () {
@@ -1389,27 +1466,24 @@ describe('PolygonStarterPack.sol', function () {
       const {
         PolygonStarterPackAsAdmin,
         other,
+        PolygonStarterPack,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
+        buyer: other.address,
         catalystIds,
         catalystQuantities: [1, 1, 1, 1],
         gemIds,
         gemQuantities: [2, 2, 2, 2, 2],
         nonce: 0,
       };
-      const signature = signPurchaseMessage(privateKey, Message, other.address);
-      await other.PolygonStarterPack.purchaseWithSAND(
-        other.address,
-        Message,
-        signature
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
       );
+      await other.PolygonStarterPack.purchaseWithSAND(Message, signature);
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(
-          other.address,
-          Message,
-          signature
-        )
+        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.be.revertedWith('INVALID_NONCE');
     });
   });
@@ -1529,13 +1603,16 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
-      const signature = signPurchaseMessage(privateKey, Message, buyer.address);
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
 
       const {
         to,
         data,
       } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
-        buyer.address,
         Message,
         signature
       );
@@ -1580,6 +1657,600 @@ describe('PolygonStarterPack.sol', function () {
       expect(await legendaryCatalyst.balanceOf(buyer.address)).to.be.eq(
         BigNumber.from(Message.catalystQuantities[3])
       );
+    });
+  });
+  describe('test array lengths for withdrawAll', function () {
+    it('can withdraw 20 types of gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(15);
+      await PolygonStarterPackAsAdmin.withdrawAll(
+        other.address,
+        [1, 2, 3, 4],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      );
+    });
+    it('can withdraw 20 types of cats and gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(15);
+      await deployManyCatalystContracts(16);
+      await PolygonStarterPackAsAdmin.withdrawAll(
+        other.address,
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      );
+    });
+    it('cannot withdraw more than the limit of catalysts and gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      await deployManyGemContracts(25);
+      await deployManyCatalystContracts(26);
+      await expect(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+          ]
+        )
+      ).to.be.revertedWith('TOO_MANY_IDS');
+    });
+  });
+  describe('GAS:PolygonStarterPack-PurchaseWithSAND', function () {
+    it('WithdrawAll gas used for 100 each of 20 cats and 100 each of 20 gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(15);
+      await deployManyCatalystContracts(16);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ]
+        )
+      );
+      record(
+        'Gas - WithdrawAll 100 each of 20 cats and 100 each of 20 gems - ',
+        receipt.gasUsed
+      );
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 30 cats and 100 each of 30 gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(25);
+      await deployManyCatalystContracts(26);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+          ]
+        )
+      );
+      record(
+        'Gas - WithdrawAll 100 each of 30 cats and 100 each of 30 gems - ',
+        receipt.gasUsed
+      );
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 50 cats and 100 each of 50 gems', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(45);
+      await deployManyCatalystContracts(46);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ]
+        )
+      );
+      record(
+        'Gas - WithdrawAll 100 each of 50 cats and 100 each of 50 gems - ',
+        receipt.gasUsed
+      );
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 50 cats only', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(45);
+      await deployManyCatalystContracts(46);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ],
+          []
+        )
+      );
+      record('Gas - WithdrawAll 100 each of 50 cats - ', receipt.gasUsed);
+      console.log(JSON.stringify(gasReport, null, '  '));
+    });
+    it('WithdrawAll gas used for 100 each of 50 gems only', async function () {
+      const {
+        PolygonStarterPackAsAdmin,
+        other,
+        deployManyGemContracts,
+        deployManyCatalystContracts,
+      } = await setupPolygonStarterPack();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasReport: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function record(name: any, gasUsed: any) {
+        gasReport[name] = gasUsed.toNumber();
+      }
+      await deployManyGemContracts(45);
+      await deployManyCatalystContracts(46);
+      const receipt = await waitFor(
+        PolygonStarterPackAsAdmin.withdrawAll(
+          other.address,
+          [],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+          ]
+        )
+      );
+      record('Gas - WithdrawAll 100 each of 50 gems - ', receipt.gasUsed);
+      console.log(JSON.stringify(gasReport, null, '  '));
     });
   });
 });

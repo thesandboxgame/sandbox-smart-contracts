@@ -1,9 +1,11 @@
 import {BigNumber} from '@ethersproject/bignumber';
+import {constants} from 'ethers';
 import {expect} from '../../../chai-setup';
-import {waitFor, withSnapshot} from '../../../utils';
+import {waitFor, withSnapshot, expectEventWithArgs} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {deployments} from 'hardhat';
+import {zeroAddress} from '../../../land/fixtures';
 
 const setupGemsAndCatalysts = withSnapshot(
   [
@@ -89,7 +91,17 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
-    await gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance();
+    const receipt = await waitFor(
+      gemsCatalystsRegistryAsUser3.setGemsAndCatalystsMaxAllowance()
+    );
+
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'SetGemsAndCatalystsAllowance'
+    );
+    expect(event.args[0]).to.be.equal(user3);
+    expect(event.args[1]).to.be.equal(constants.MaxUint256);
 
     expect(
       await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
@@ -382,13 +394,27 @@ describe('GemsCatalystsRegistry', function () {
     ).to.be.revertedWith('CATALYST_ID_NOT_IN_ORDER');
   });
 
+  it('addGemsAndCatalysts should fail for catalyst with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([], [zeroAddress])
+    ).to.be.revertedWith('CATALYST_ZERO_ADDRESS');
+  });
+
+  it('addGemsAndCatalysts should fail for gem with address zero', async function () {
+    const {gemsCatalystsRegistryAsRegAdmin} = await setupGemsAndCatalysts();
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts([zeroAddress], [])
+    ).to.be.revertedWith('GEM_ZERO_ADDRESS');
+  });
+
   it('addGemsAndCatalysts should add gemExample', async function () {
     const {
       gemsCatalystsRegistry,
       gemExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [gemExample.address],
         []
@@ -396,6 +422,12 @@ describe('GemsCatalystsRegistry', function () {
     );
     const gemId = await gemExample.gemId();
     expect(await gemsCatalystsRegistry.doesGemExist(gemId)).to.equal(true);
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[0][0]).to.be.equal(gemExample.address);
   });
 
   it('addGemsAndCatalysts should add catalystExample', async function () {
@@ -404,7 +436,7 @@ describe('GemsCatalystsRegistry', function () {
       catalystExample,
       gemsCatalystsRegistryAsRegAdmin,
     } = await setupGemsAndCatalysts();
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(
         [],
         [catalystExample.address]
@@ -414,6 +446,12 @@ describe('GemsCatalystsRegistry', function () {
     expect(await gemsCatalystsRegistry.doesCatalystExist(catalystId)).to.equal(
       true
     );
+    const event = await expectEventWithArgs(
+      gemsCatalystsRegistry,
+      receipt,
+      'AddGemsAndCatalysts'
+    );
+    expect(event.args[1][0]).to.be.equal(catalystExample.address);
   });
 
   it('addGemsAndCatalysts should fail for gem id not in order', async function () {
@@ -774,5 +812,17 @@ describe('GemsCatalystsRegistry', function () {
         trustedForwarder.address
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+  it('cannot set trustedForwarder to zero address', async function () {
+    const {
+      gemsCatalystsRegistryAsDeployer,
+      trustedForwarder,
+    } = await setupGemsAndCatalysts();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+
+    await expect(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(zeroAddress)
+    ).to.be.revertedWith('ZERO_ADDRESS');
   });
 });
