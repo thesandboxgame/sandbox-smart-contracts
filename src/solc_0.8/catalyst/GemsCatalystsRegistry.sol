@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IGem.sol";
 import "./interfaces/ICatalyst.sol";
 import "../common/interfaces/IERC20Extended.sol";
@@ -13,15 +12,19 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, OwnableUpgradeable, AccessControlUpgradeable {
+/// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
+/// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes
+contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
-    uint256 internal constant MAX_UINT256 = ~uint256(0);
+    uint256 internal constant MAX_UINT256 = type(uint256).max;
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     IGem[] internal _gems;
     ICatalyst[] internal _catalysts;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event AddGemsAndCatalysts(IGem[] gems, ICatalyst[] catalysts);
+    event SetGemsAndCatalystsAllowance(address owner, uint256 allowanceValue);
 
     // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
@@ -29,7 +32,6 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     function initV1(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
-        __Ownable_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
@@ -154,6 +156,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < gems.length; i++) {
             IGem gem = gems[i];
+            require(address(gem) != address(0), "GEM_ZERO_ADDRESS");
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
             _gems.push(gem);
@@ -161,10 +164,21 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
         for (uint256 i = 0; i < catalysts.length; i++) {
             ICatalyst catalyst = catalysts[i];
+            require(address(catalyst) != address(0), "CATALYST_ZERO_ADDRESS");
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);
         }
+        emit AddGemsAndCatalysts(gems, catalysts);
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "ZERO_ADDRESS");
+        _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     /// @notice Query whether a given gem exists.
@@ -229,12 +243,16 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
         for (uint256 i = 0; i < _gems.length; i++) {
-            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);
+            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), "GEM_ALLOWANCE_NOT_APPROVED");
         }
 
         for (uint256 i = 0; i < _catalysts.length; i++) {
-            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
+            require(
+                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),
+                "CATALYST_ALLOWANCE_NOT_APPROVED"
+            );
         }
+        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);
     }
 
     /// @dev Get the catalyst contract corresponding to the id.
@@ -264,14 +282,6 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     modifier checkAuthorization(address from) {
         require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
         _;
-    }
-
-    /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
-        _trustedForwarder = trustedForwarder;
-
-        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
