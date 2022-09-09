@@ -26,6 +26,9 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Access
     event AddGemsAndCatalysts(IGem[] gems, ICatalyst[] catalysts);
     event SetGemsAndCatalystsAllowance(address owner, uint256 allowanceValue);
 
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
+
     function initV1(address trustedForwarder, address admin) external initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
