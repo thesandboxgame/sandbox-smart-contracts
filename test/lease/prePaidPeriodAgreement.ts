@@ -32,9 +32,8 @@ describe('PrePaidPeriodAgreement', function () {
         contractAsOwner.propose(agreementId, rentalPrice, rentalPeriod)
       )
         .to.emit(contractAsOwner, 'AgreementProposed')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 1, user, owner);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, user, owner);
       const agreement = await contract.getAgreement(agreementId);
-      expect(agreement.leaseProposal.nonce).to.be.equal(1);
       expect(agreement.leaseProposal.rentalPrice).to.be.equal(rentalPrice);
       expect(agreement.leaseProposal.rentalPeriod).to.be.equal(rentalPeriod);
       expect(agreement.expiration).to.be.equal(0);
@@ -44,9 +43,11 @@ describe('PrePaidPeriodAgreement', function () {
     it('accept', async function () {
       const {contractAsUser, mintableERC20AsUser, contract} = fixtures;
       await mintableERC20AsUser.approve(contractAsUser.address, rentalPrice);
-      await expect(contractAsUser.accept(agreementId, 1))
+      await expect(
+        contractAsUser.accept(agreementId, rentalPrice, rentalPeriod)
+      )
         .to.emit(contractAsUser, 'AgreementAccepted')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 1, [], []);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
       expect(await contract.isLeased(agreementId)).to.be.true;
       await increaseTime(rentalPeriod + 10);
       expect(await contract.isLeased(agreementId)).to.be.false;
@@ -64,13 +65,15 @@ describe('PrePaidPeriodAgreement', function () {
         contractAsOwner.propose(agreementId, rentalPrice, rentalPeriod)
       )
         .to.emit(contractAsOwner, 'AgreementProposed')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 3, user, owner);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, user, owner);
       expect(await contract.isLeased(agreementId)).to.be.false;
 
       await mintableERC20AsUser.approve(contractAsUser.address, rentalPrice);
-      await expect(contractAsUser.accept(agreementId, 3))
+      await expect(
+        contractAsUser.accept(agreementId, rentalPrice, rentalPeriod)
+      )
         .to.emit(contractAsUser, 'AgreementAccepted')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 3, [], []);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
       expect(await contract.isLeased(agreementId)).to.be.true;
       await increaseTime(rentalPeriod + 10);
       expect(await contract.isLeased(agreementId)).to.be.false;
@@ -88,26 +91,28 @@ describe('PrePaidPeriodAgreement', function () {
         contractAsOwner.propose(agreementId, rentalPrice, rentalPeriod)
       )
         .to.emit(contractAsOwner, 'AgreementProposed')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 5, user, owner);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, user, owner);
       expect(await contract.isLeased(agreementId)).to.be.false;
 
       await mintableERC20AsUser.approve(contractAsUser.address, rentalPrice);
-      await expect(contractAsUser.accept(agreementId, 5))
+      await expect(
+        contractAsUser.accept(agreementId, rentalPrice, rentalPeriod)
+      )
         .to.emit(contractAsUser, 'AgreementAccepted')
-        .withArgs(agreementId, rentalPrice, rentalPeriod, 5, [], []);
+        .withArgs(agreementId, rentalPrice, rentalPeriod, [], []);
       expect(await contract.isLeased(agreementId)).to.be.true;
     });
     it('and then cancel', async function () {
       const {user, owner, contractAsOwner, contractAsUser, contract} = fixtures;
       await expect(contractAsUser.proposeCancellation(agreementId, rentalPrice))
         .to.emit(contractAsUser, 'CancellationProposed')
-        .withArgs(agreementId, 6, user, owner, [], rentalPrice);
+        .withArgs(agreementId, user, owner, [], rentalPrice);
       expect(await contract.isLeased(agreementId)).to.be.true;
       const agreement = await contract.getAgreement(agreementId);
       expect(agreement.cancellationPenalty).to.be.equal(rentalPrice);
-      await expect(contractAsOwner.acceptCancellation(agreementId))
+      await expect(contractAsOwner.acceptCancellation(agreementId, rentalPrice))
         .to.emit(contractAsOwner, 'CancellationAccepted')
-        .withArgs(agreementId, 6, user, owner, [], rentalPrice);
+        .withArgs(agreementId, user, owner, [], rentalPrice);
       expect(await contract.isLeased(agreementId)).to.be.false;
     });
   });
