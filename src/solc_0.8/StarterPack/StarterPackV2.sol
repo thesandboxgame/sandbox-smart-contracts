@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./PurchaseValidator.sol";
-import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
+import {PurchaseValidator, Context} from "./PurchaseValidator.sol";
+import {GemsCatalystsRegistry, ICatalyst, IGem, IERC20} from "../catalyst/GemsCatalystsRegistry.sol";
+import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
 
 /// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
 /// @notice This contract enables purchases with SAND when the backend authorizes it via message signing

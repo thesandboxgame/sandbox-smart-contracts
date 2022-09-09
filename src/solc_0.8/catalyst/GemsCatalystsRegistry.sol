@@ -1,12 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./interfaces/IGem.sol";
-import "./interfaces/ICatalyst.sol";
-import "../common/interfaces/IERC20Extended.sol";
-import "./interfaces/IGemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IGem} from "./interfaces/IGem.sol";
+import {ICatalyst, IAssetAttributesRegistry} from "./interfaces/ICatalyst.sol";
+import {IERC20Extended, IERC20} from "../common/interfaces/IERC20Extended.sol";
+import {IGemsCatalystsRegistry} from "./interfaces/IGemsCatalystsRegistry.sol";
+import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
