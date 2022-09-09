@@ -49,9 +49,9 @@ export const starterPack712Signature = async function (
       ],
       Purchase: [
         {name: 'buyer', type: 'address'},
-        {name: 'catalystIds', type: 'uint256[]'},
+        {name: 'catalystIds', type: 'uint16[]'},
         {name: 'catalystQuantities', type: 'uint256[]'},
-        {name: 'gemIds', type: 'uint256[]'},
+        {name: 'gemIds', type: 'uint16[]'},
         {name: 'gemQuantities', type: 'uint256[]'},
         {name: 'nonce', type: 'uint256'},
       ],

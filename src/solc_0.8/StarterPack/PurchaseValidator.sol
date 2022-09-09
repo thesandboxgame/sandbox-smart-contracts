@@ -16,7 +16,7 @@ contract PurchaseValidator is AccessControl, EIP712 {
 
     bytes32 public constant PURCHASE_TYPEHASH =
         keccak256(
-            "Purchase(address buyer,uint256[] catalystIds,uint256[] catalystQuantities,uint256[] gemIds,uint256[] gemQuantities,uint256 nonce)"
+            "Purchase(address buyer,uint16[] catalystIds,uint256[] catalystQuantities,uint16[] gemIds,uint256[] gemQuantities,uint256 nonce)"
         );
 
     event SigningWallet(address indexed newSigningWallet);
