@@ -528,6 +528,53 @@ describe('PolygonStarterPack.sol', function () {
       const block = await ethers.provider.getBlock(receipt.blockHash);
       expect(priceChangeTimestamp).to.be.eq(block.timestamp); // price change timestamp, when setPrices was called
     });
+    it('default admin cannot set prices within delay period', async function () {
+      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.not.be.reverted;
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.be.revertedWith('DELAY_PERIOD_IN_EFFECT');
+    });
+    it('default admin can set the prices again after the delay period', async function () {
+      const {PolygonStarterPackAsAdmin} = await setupPolygonStarterPack();
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.not.be.reverted;
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.be.revertedWith('DELAY_PERIOD_IN_EFFECT');
+      await increaseTime(3600);
+      await expect(
+        PolygonStarterPackAsAdmin.setPrices(
+          catalystIds,
+          catPrices,
+          gemIds,
+          gemPrices
+        )
+      ).to.not.be.reverted;
+    });
   });
   describe('withdrawAll', function () {
     it('default admin can withdraw remaining cats and gems from contract', async function () {

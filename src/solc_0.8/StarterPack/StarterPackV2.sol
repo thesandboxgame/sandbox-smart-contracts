@@ -112,6 +112,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
         uint16[] calldata gemIds,
         uint256[] calldata gemPrices
     ) external onlyRole(STARTERPACK_ROLE) {
+        require(block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY, "DELAY_PERIOD_IN_EFFECT");
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
         require(catalystPrices.length <= MAX_UINT16, "TOO_MANY_CATALYST_PRICES");
