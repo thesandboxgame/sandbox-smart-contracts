@@ -5,16 +5,16 @@ import "./interfaces/IGem.sol";
 import "./interfaces/ICatalyst.sol";
 import "../common/interfaces/IERC20Extended.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
-/// Each Gems and Catalyst must be registered here.
-/// Each new Gem get assigned a new id (starting at 1)
-/// Each new Catalyst get assigned a new id (starting at 1)
 /// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
+/// @dev Each Gems and Catalyst must be registered here.
+/// @dev Each new Gem get assigned a new id (starting at 1)
+/// @dev Each new Catalyst get assigned a new id (starting at 1)
 /// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes
-contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, AccessControlUpgradeable {
+contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegistry, AccessControlUpgradeable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = type(uint256).max;
     bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
@@ -284,11 +284,16 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Access
         _;
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }

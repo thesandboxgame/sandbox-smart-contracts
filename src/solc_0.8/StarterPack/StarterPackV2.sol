@@ -3,14 +3,14 @@ pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
 /// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
 /// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
 /// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, STARTERPACK_ROLE
 /// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, STARTERPACK_ROLE is provided for business purposes
-contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
+contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
     using SafeMathWithRequire for uint256;
     uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
@@ -71,7 +71,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
-    ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") {
+    ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") ERC2771HandlerV2(trustedForwarder) {
         require(defaultAdmin != address(0), "ADMIN_ZERO_ADDRESS");
         require(starterPackAdmin != address(0), "STARTERPACK_ADMIN_ZERO_ADDRESS");
         require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
@@ -81,7 +81,6 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(STARTERPACK_ROLE, starterPackAdmin);
         _sand = sandContractAddress;
-        __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
         _registry = registry;
     }
@@ -382,25 +381,13 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }
 
-    /// @dev this override is required
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return msg.sender;
-        }
+    /// @dev this override is required; two or more base classes define function
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    /// @dev this override is required
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
-            return msg.data[:msg.data.length - 20];
-        } else {
-            return msg.data;
-        }
+    /// @dev this override is required; two or more base classes define function
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
