@@ -1,15 +1,20 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "./PurchaseValidator.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
-/// @title StarterPack contract that supports SAND as payment
-/// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
-contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
+/// @title StarterPack contract for the purchase of StarterPacks (bundles of Catalysts and Gems) with EIP712
+/// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
+/// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, STARTERPACK_ROLE
+/// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, STARTERPACK_ROLE is provided for business purposes
+contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
     using SafeMathWithRequire for uint256;
+    uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
+    uint256 private constant MAX_WITHDRAWAL = 100;
 
     address internal immutable _sand;
     address internal immutable _registry;
@@ -30,37 +35,52 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     // Minimizes the effect of price changes on pending TXs
     uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
-    event ReceivingWallet(address newReceivingWallet);
+    // The following role is provided for business-related admin functions
+    bytes32 public constant STARTERPACK_ROLE = keccak256("STARTERPACK_ROLE");
 
-    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address token);
+    event ReceivingWallet(address indexed newReceivingWallet);
+
+    event Purchase(address indexed buyer, Message message, uint256 amountPaid, address indexed token);
 
     event SetPrices(
-        uint256[] catalystIds,
+        uint16[] catalystIds,
         uint256[] catalystPrices,
-        uint256[] gemIds,
+        uint16[] gemIds,
         uint256[] gemPrices,
         uint256 priceChangeTimestamp
     );
 
+    event WithdrawAll(address indexed to, uint16[] catalystIds, uint16[] gemIds);
+
+    event SandEnabled(bool enabled);
+
     struct Message {
-        uint256[] catalystIds;
+        address buyer;
+        uint16[] catalystIds;
         uint256[] catalystQuantities;
-        uint256[] gemIds;
+        uint16[] gemIds;
         uint256[] gemQuantities;
         uint256 nonce;
     }
 
     constructor(
-        address admin,
+        address defaultAdmin,
+        address starterPackAdmin,
         address sandContractAddress,
         address trustedForwarder,
         address payable initialWalletAddress,
         address initialSigningWallet,
         address registry
-    ) PurchaseValidator(initialSigningWallet) {
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    ) PurchaseValidator(initialSigningWallet, "Sandbox StarterPack", "1.0") ERC2771HandlerV2(trustedForwarder) {
+        require(defaultAdmin != address(0), "ADMIN_ZERO_ADDRESS");
+        require(starterPackAdmin != address(0), "STARTERPACK_ADMIN_ZERO_ADDRESS");
+        require(sandContractAddress != address(0), "SAND_ZERO_ADDRESS");
+        require(trustedForwarder != address(0), "FORWARDER_ZERO_ADDRESS");
+        require(initialWalletAddress != address(0), "WALLET_ZERO_ADDRESS");
+        require(registry != address(0), "REGISTRY_ZERO_ADDRESS");
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(STARTERPACK_ROLE, starterPackAdmin);
         _sand = sandContractAddress;
-        __ERC2771Handler_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
         _registry = registry;
     }
@@ -69,14 +89,16 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param newReceivingWallet Address of the new receiving wallet
     function setReceivingWallet(address payable newReceivingWallet) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newReceivingWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(newReceivingWallet != _wallet, "WALLET_ALREADY_SET");
         _wallet = newReceivingWallet;
         emit ReceivingWallet(newReceivingWallet);
     }
 
     /// @dev Enable / disable the specific SAND payment for StarterPacks
     /// @param enabled Whether to enable or disable
-    function setSANDEnabled(bool enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setSANDEnabled(bool enabled) external onlyRole(STARTERPACK_ROLE) {
         _sandEnabled = enabled;
+        emit SandEnabled(enabled);
     }
 
     /// @notice Enables admin to change the prices (in SAND) of the catalysts and gems in the StarterPack bundle
@@ -85,21 +107,23 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param gemIds Array of gem IDs for which new prices will take effect after a delay period
     /// @param gemPrices Array of new gems prices that will take effect after a delay period
     function setPrices(
-        uint256[] calldata catalystIds,
+        uint16[] calldata catalystIds,
         uint256[] calldata catalystPrices,
-        uint256[] calldata gemIds,
+        uint16[] calldata gemIds,
         uint256[] calldata gemPrices
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(STARTERPACK_ROLE) {
         require(catalystIds.length == catalystPrices.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemPrices.length, "INVALID_GEM_INPUT");
+        require(catalystPrices.length <= MAX_UINT16, "TOO_MANY_CATALYST_PRICES");
+        require(gemPrices.length <= MAX_UINT16, "TOO_MANY_GEM_PRICES");
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = uint16(catalystIds[i]);
+            uint16 id = catalystIds[i];
             require(_isValidCatalyst(id), "INVALID_CAT_ID");
             _catalystPreviousPrices[id] = _catalystPrices[id];
             _catalystPrices[id] = catalystPrices[i];
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = uint16(gemIds[i]);
+            uint16 id = gemIds[i];
             require(_isValidGem(id), "INVALID_GEM_ID");
             _gemPreviousPrices[id] = _gemPrices[id];
             _gemPrices[id] = gemPrices[i];
@@ -112,41 +136,40 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param to The destination address for the purchased Catalysts and Gems
     /// @param catalystIds The IDs of the catalysts to be transferred
     /// @param gemIds The IDs of the gems to be transferred
+    /// @dev The sum length of catalystIds + gemIds must be <= MAX_WITHDRAWAL
     function withdrawAll(
         address to,
-        uint256[] calldata catalystIds,
-        uint256[] calldata gemIds
+        uint16[] calldata catalystIds,
+        uint16[] calldata gemIds
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystIds.length + gemIds.length <= MAX_WITHDRAWAL, "TOO_MANY_IDS");
+        require(to != address(0), "ZERO_ADDRESS");
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = uint16(catalystIds[i]);
+            uint16 id = catalystIds[i];
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
             ICatalyst catalyst = _getCatalyst(id);
             uint256 balance = catalyst.balanceOf(address(this));
             _executeRegistryTransferCatalyst(catalyst, address(this), to, balance);
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = uint16(gemIds[i]);
+            uint16 id = gemIds[i];
             require(_isValidGem(id), "INVALID_GEM_ID");
             IGem gem = _getGem(id);
             uint256 balance = gem.balanceOf(address(this));
             _executeRegistryTransferGem(gem, address(this), to, balance);
         }
+        emit WithdrawAll(to, catalystIds, gemIds);
     }
 
     /// @notice Purchase StarterPacks with SAND
-    /// @param buyer The destination address for the purchased Catalysts and Gems and the address that will pay for the purchase; if not metaTx then buyer must be equal to msg.sender
-    /// @param message A message containing information about the Catalysts and Gems to be purchased together with a nonce
+    /// @param message A message containing information about the Catalysts and Gems to be purchased together with the destination (buyer) and a nonce
     /// @param signature A signed message specifying tx details
-    function purchaseWithSAND(
-        address buyer,
-        Message calldata message,
-        bytes calldata signature
-    ) external {
-        require(buyer == _msgSender(), "INVALID_SENDER");
+    function purchaseWithSAND(Message calldata message, bytes calldata signature) external {
+        require(message.buyer == _msgSender(), "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(
             _isPurchaseValid(
-                buyer,
+                message.buyer,
                 message.catalystIds,
                 message.catalystQuantities,
                 message.gemIds,
@@ -164,10 +187,10 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
                 message.gemIds,
                 message.gemQuantities
             );
-        _transferSANDPayment(buyer, _wallet, amountInSAND);
-        _transferCatalysts(message.catalystIds, message.catalystQuantities, buyer);
-        _transferGems(message.gemIds, message.gemQuantities, buyer);
-        emit Purchase(buyer, message, amountInSAND, _sand);
+        _transferSANDPayment(message.buyer, _wallet, amountInSAND);
+        _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
+        _transferGems(message.gemIds, message.gemQuantities, message.buyer);
+        emit Purchase(message.buyer, message, amountInSAND, _sand);
     }
 
     /// @notice Get current StarterPack prices for catalysts and gems by id
@@ -178,7 +201,7 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @return gemPricesBeforeSwitch Gem prices before price change
     /// @return gemPricesAfterSwitch Gem prices after price change
     /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
-    function getPrices(uint256[] calldata catalystIds, uint256[] calldata gemIds)
+    function getPrices(uint16[] calldata catalystIds, uint16[] calldata gemIds)
         external
         view
         returns (
@@ -198,12 +221,12 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         uint256[] memory gemPricesBeforeSwitch = new uint256[](gemIds.length);
         uint256[] memory gemPricesAfterSwitch = new uint256[](gemIds.length);
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = uint16(catalystIds[i]);
+            uint16 id = catalystIds[i];
             catalystPricesBeforeSwitch[i] = _catalystPreviousPrices[id];
             catalystPricesAfterSwitch[i] = _catalystPrices[id];
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = uint16(gemIds[i]);
+            uint16 id = gemIds[i];
             gemPricesBeforeSwitch[i] = _gemPreviousPrices[id];
             gemPricesAfterSwitch[i] = _gemPrices[id];
         }
@@ -235,33 +258,33 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
     /// @param gemQuantities An array of gem amounts to be purchased
     /// @return the total price to pay in SAND for the cats and gems in the bundle
     function calculateTotalPriceInSAND(
-        uint256[] memory catalystIds,
+        uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
-        uint256[] memory gemIds,
+        uint16[] memory gemIds,
         uint256[] memory gemQuantities
     ) external returns (uint256) {
         return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities);
     }
 
     function _transferCatalysts(
-        uint256[] memory catalystIds,
+        uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
         address buyer
     ) internal {
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = uint16(catalystIds[i]);
+            uint16 id = catalystIds[i];
             require(_isValidCatalyst(id), "INVALID_CATALYST_ID");
             _executeRegistryTransferCatalyst(_getCatalyst(id), address(this), buyer, catalystQuantities[i]);
         }
     }
 
     function _transferGems(
-        uint256[] memory gemIds,
+        uint16[] memory gemIds,
         uint256[] memory gemQuantities,
         address buyer
     ) internal {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = uint16(gemIds[i]);
+            uint16 id = gemIds[i];
             require(_isValidGem(id), "INVALID_GEM_ID");
             _executeRegistryTransferGem(_getGem(id), address(this), buyer, gemQuantities[i]);
         }
@@ -303,9 +326,9 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
 
     /// @dev Function to calculate the total price in SAND of the StarterPacks to be purchased
     function _calculateTotalPriceInSAND(
-        uint256[] memory catalystIds,
+        uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
-        uint256[] memory gemIds,
+        uint16[] memory gemIds,
         uint256[] memory gemQuantities
     ) internal returns (uint256) {
         require(catalystIds.length == catalystQuantities.length, "INVALID_CAT_INPUT");
@@ -313,14 +336,14 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         bool useCurrentPrices = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = uint16(catalystIds[i]);
+            uint16 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
             totalPrice =
                 totalPrice +
                 (useCurrentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = uint16(gemIds[i]);
+            uint16 id = gemIds[i];
             uint256 quantity = gemQuantities[i];
             totalPrice =
                 totalPrice +
@@ -358,25 +381,13 @@ contract StarterPackV2 is PurchaseValidator, ERC2771Handler {
         require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }
 
-    /// @dev this override is required
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return msg.sender;
-        }
+    /// @dev this override is required; two or more base classes define function
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
     }
 
-    /// @dev this override is required
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
-            return msg.data[:msg.data.length - 20];
-        } else {
-            return msg.data;
-        }
+    /// @dev this override is required; two or more base classes define function
+    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
