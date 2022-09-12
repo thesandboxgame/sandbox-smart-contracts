@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 /// @title ASSETERC1155 bridge on L1
 contract AssetERC1155Tunnel is
+    Initializable,
     FxBaseRootTunnelUpgradeable,
     ERC1155Receiver,
     ERC2771Handler,

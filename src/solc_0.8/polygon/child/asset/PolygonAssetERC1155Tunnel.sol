@@ -13,6 +13,7 @@ import "./PolygonAssetERC1155.sol";
 
 /// @title ASSETERC1155 bridge on L2
 contract PolygonAssetERC1155Tunnel is
+    Initializable,
     FxBaseChildTunnelUpgradeable,
     ERC1155Receiver,
     ERC2771Handler,
