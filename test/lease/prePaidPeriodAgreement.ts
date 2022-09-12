@@ -34,8 +34,8 @@ describe('PrePaidPeriodAgreement', function () {
         .to.emit(contractAsOwner, 'AgreementProposed')
         .withArgs(agreementId, rentalPrice, rentalPeriod, user, owner);
       const agreement = await contract.getAgreement(agreementId);
-      expect(agreement.leaseProposal.rentalPrice).to.be.equal(rentalPrice);
-      expect(agreement.leaseProposal.rentalPeriod).to.be.equal(rentalPeriod);
+      expect(agreement.rentalPrice).to.be.equal(rentalPrice.add(1));
+      expect(agreement.rentalPeriod).to.be.equal(rentalPeriod);
       expect(agreement.expiration).to.be.equal(0);
       expect(agreement.cancellationPenalty).to.be.equal(0);
       expect(await contract.isLeased(agreementId)).to.be.false;
@@ -112,10 +112,10 @@ describe('PrePaidPeriodAgreement', function () {
         .withArgs(agreementId, user, owner, [], rentalPrice);
       expect(await contract.isLeased(agreementId)).to.be.true;
       const agreement = await contract.getAgreement(agreementId);
-      expect(agreement.cancellationPenalty).to.be.equal(rentalPrice);
+      expect(agreement.cancellationPenalty).to.be.equal(rentalPrice.add(1));
       await expect(contractAsOwner.acceptCancellation(agreementId, rentalPrice))
         .to.emit(contractAsOwner, 'CancellationAccepted')
-        .withArgs(agreementId, user, owner, [], rentalPrice);
+        .withArgs(agreementId, user, owner, rentalPrice);
       expect(await contract.balanceOf(owner)).to.be.equal(rentalPrice.mul(2));
       expect(await contract.isLeased(agreementId)).to.be.false;
     });
