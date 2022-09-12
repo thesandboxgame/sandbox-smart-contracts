@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import assetMinterCatalystAmounts from '../../data/assetMinterCatalystAmounts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -46,6 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       assetQuantitiesByTypeId,
     ],
     contract: 'AssetMinter',
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;

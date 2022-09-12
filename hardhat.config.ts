@@ -250,6 +250,8 @@ const config: HardhatUserConfig = {
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
+      mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     backendCashbackWallet: {
       // default is computed from private key:
@@ -434,7 +436,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY_MUMBAI || '',
+      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
     },
   },
 };
