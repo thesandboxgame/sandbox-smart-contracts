@@ -32,25 +32,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'fxRootTunnel'
     );
 
-    if (
-      fxRootTunnel !== PolygonAssetERC1155Tunnel.address &&
-      fxRootTunnel == constants.AddressZero
-    ) {
+    if (fxRootTunnel == constants.AddressZero) {
       await deployments.execute(
         'PolygonAssetERC1155Tunnel',
-        {from: deployer},
+        {from: deployer, log: true},
         'setFxRootTunnel',
         AssetERC1155Tunnel.address
       );
     }
 
-    if (
-      fxChildTunnel !== PolygonAssetERC1155Tunnel.address &&
-      fxChildTunnel == constants.AddressZero
-    ) {
+    if (fxChildTunnel == constants.AddressZero) {
       await hre.companionNetworks['l1'].deployments.execute(
         'AssetERC1155Tunnel',
-        {from: deployerOnL1},
+        {from: deployerOnL1, log: true},
         'setFxChildTunnel',
         PolygonAssetERC1155Tunnel.address
       );

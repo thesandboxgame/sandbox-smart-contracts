@@ -19,6 +19,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ].getNamedAccounts();
 
   if (PolygonAssetERC721Tunnel) {
+    const fxChildTunnel = await deployments.read(
+      'AssetERC721Tunnel',
+      'fxChildTunnel'
+    );
     const fxRootTunnel = await hre.companionNetworks['l2'].deployments.read(
       'PolygonAssetERC721Tunnel',
       'fxRootTunnel'
@@ -26,22 +30,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     if (fxRootTunnel == constants.AddressZero) {
       await hre.companionNetworks['l2'].deployments.execute(
         'PolygonAssetERC721Tunnel',
-        {from: deployerOnL2},
+        {from: deployerOnL2, log: true},
         'setFxRootTunnel',
         AssetERC721Tunnel.address
       );
     }
-    await deployments.execute(
-      'AssetERC721Tunnel',
-      {from: deployer},
-      'setFxChildTunnel',
-      PolygonAssetERC721Tunnel.address
-    );
+    if (fxChildTunnel == constants.AddressZero) {
+      await deployments.execute(
+        'AssetERC721Tunnel',
+        {from: deployer, log: true},
+        'setFxChildTunnel',
+        PolygonAssetERC721Tunnel.address
+      );
+    }
   }
 };
 
 export default func;
-func.tags = ['AssetERC721Tunnel_setup', 'L1'];
+func.tags = ['AssetERC721Tunnel', 'AssetERC721Tunnel_setup', 'L1'];
 func.dependencies = ['AssetERC721Tunnel_deploy'];
 func.skip = skipUnlessTestnet;
 func.runAtTheEnd = true;
