@@ -1,6 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
 import {BigNumber} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -66,3 +67,5 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['ERC20RewardPool', 'ERC20RewardPool_setup'];
 func.dependencies = ['ERC20RewardPool_deploy'];
+func.skip = skipUnlessTestnet;
+

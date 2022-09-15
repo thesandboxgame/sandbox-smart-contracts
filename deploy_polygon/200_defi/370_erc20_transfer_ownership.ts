@@ -1,11 +1,11 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts, ethers} = hre;
-  const {sandAdmin, deployer} = await getNamedAccounts();
+  const {operationsAdmin, deployer} = await getNamedAccounts();
 
   const rewardsCalculator = await ethers.getContract('ERC20RewardCalculator');
   const contributionRules = await ethers.getContract('ContributionRules');
@@ -15,13 +15,13 @@ const func: DeployFunction = async function (
   const sandPoolAdmin = await sandPool.owner();
 
   // transferOwner from deployer to sandAdmin
-  if (sandPoolAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
+  if (sandPoolAdmin.toLowerCase() !== operationsAdmin.toLowerCase()) {
     await deployments.catchUnknownSigner(
       deployments.execute(
         'ERC20RewardPool',
         {from: sandPoolAdmin, log: true},
         'transferOwnership',
-        sandAdmin
+        operationsAdmin
       )
     );
   }
@@ -30,13 +30,13 @@ const func: DeployFunction = async function (
   const contribRulesAdmin = await contributionRules.owner();
 
   // transferOwner from deployer to sandAdmin
-  if (contribRulesAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
+  if (contribRulesAdmin.toLowerCase() !== operationsAdmin.toLowerCase()) {
     await deployments.catchUnknownSigner(
       deployments.execute(
         'ContributionRules',
         {from: contribRulesAdmin, log: true},
         'transferOwnership',
-        sandAdmin
+        operationsAdmin
       )
     );
   }
@@ -44,17 +44,17 @@ const func: DeployFunction = async function (
   const ADMIN_ROLE = await rewardsCalculator.DEFAULT_ADMIN_ROLE();
 
   if (await rewardsCalculator.hasRole(ADMIN_ROLE, deployer)) {
-    if (!(await rewardsCalculator.hasRole(ADMIN_ROLE, sandAdmin))) {
+    if (!(await rewardsCalculator.hasRole(ADMIN_ROLE, operationsAdmin))) {
       await deployments.execute(
         'ERC20RewardCalculator',
         {from: deployer, log: true},
         'grantRole',
         ADMIN_ROLE,
-        sandAdmin
+        operationsAdmin
       );
     }
     // we need to ensure that sandAdmin has role before renounce deployer
-    if (await rewardsCalculator.hasRole(ADMIN_ROLE, sandAdmin)) {
+    if (await rewardsCalculator.hasRole(ADMIN_ROLE, operationsAdmin)) {
       await deployments.execute(
         'ERC20RewardCalculator',
         {from: deployer, log: true},
