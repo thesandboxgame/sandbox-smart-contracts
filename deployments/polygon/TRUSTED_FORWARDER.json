@@ -475,5 +475,9 @@
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
+  "receipt": {
+    "transactionHash": "0xb86d3ff75acd05e23562e748846b2731ea3a09e0731ad637acce8e7f612581ca",
+    "blockNumber": 12381067
+  }
 }

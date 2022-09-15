@@ -59,6 +59,7 @@ const func: DeployFunction = async function (hre) {
       deployer,
       deployer,
     ],
+    skipIfAlreadyDeployed: true,
   });
   async function addCatalysts(
     catalystData: {
@@ -87,6 +88,7 @@ const func: DeployFunction = async function (hre) {
           `Sandbox's ${tokenSymbol} Catalysts`,
           tokenSymbol,
         ],
+        skipIfAlreadyDeployed: true,
       });
       erc20s.push(result.address);
       data.push({

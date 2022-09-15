@@ -18,5 +18,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['CHILD_CHAIN_MANAGER'];
+func.tags = ['CHILD_CHAIN_MANAGER', 'L2'];
 func.skip = skipUnlessTestOrL2;

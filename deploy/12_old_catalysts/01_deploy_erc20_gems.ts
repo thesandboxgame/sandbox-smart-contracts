@@ -18,6 +18,7 @@ const func: DeployFunction = async function (hre) {
       deployer,
       deployer,
     ],
+    skipIfAlreadyDeployed: true,
   });
   async function addGems(names: string[]) {
     const gems = [];
@@ -35,6 +36,7 @@ const func: DeployFunction = async function (hre) {
           `Sandbox's ${tokenSymbol} Gems`,
           tokenSymbol,
         ],
+        skipIfAlreadyDeployed: true,
       });
       gems.push(result.address);
     }

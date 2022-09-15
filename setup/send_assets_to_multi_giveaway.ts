@@ -9,7 +9,8 @@ import fs from 'fs-extra';
 import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {MultiClaim, AssetHash} from '../lib/merkleTreeHelper';
+import {AssetHash, MultiClaim} from '../lib/merkleTreeHelper';
+
 const {deployments, getNamedAccounts} = hre;
 const {execute, catchUnknownSigner, read} = deployments;
 
@@ -83,22 +84,25 @@ const func: DeployFunction = async function () {
     );
   }
   const erc20Hash = getERC20(json);
-  const sandContract = await (hre.network.tags.L1
-    ? deployments.get('Sand')
-    : deployments.get('PolygonSand'));
+  const sandContractName = hre.network.tags.L1 ? 'Sand' : 'PolygonSand';
+  const sandContract = await deployments.get(sandContractName);
+
   for (const address in erc20Hash) {
     if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
       continue;
     const amount = erc20Hash[address];
+    console.log(sandContract.address);
     console.log('sand rewards');
     console.log(amount.toString());
     console.log('foundation balance');
     console.log(
-      (await read('Sand', {}, 'balanceOf', sandboxFoundation)).toString()
+      (
+        await read(sandContractName, {}, 'balanceOf', sandboxFoundation)
+      ).toString()
     );
     await catchUnknownSigner(
       execute(
-        'Sand',
+        sandContractName,
         {from: sandboxFoundation, log: true},
         'transfer',
         MultiGiveaway.address,
@@ -110,5 +114,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

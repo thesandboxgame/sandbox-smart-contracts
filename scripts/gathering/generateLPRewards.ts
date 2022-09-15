@@ -46,4 +46,4 @@ async function main() {
   fs.writeFileSync('result.json', JSON.stringify(addList, null, '  '));
 }
 
-main();
+main().catch((err) => console.error(err));

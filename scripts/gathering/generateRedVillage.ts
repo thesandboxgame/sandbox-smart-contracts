@@ -23,7 +23,7 @@ type ERC1155data = {
   contractAddress: string;
 };
 
-(async () => {
+void (async () => {
   const assetContract = await ethers.getContract('Asset');
 
   const csvFilePath = path.resolve(

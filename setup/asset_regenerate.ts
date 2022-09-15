@@ -1,4 +1,4 @@
-import {BigNumber, Event} from 'ethers';
+import {BigNumber} from 'ethers';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -49,8 +49,8 @@ const func: DeployFunction = async function () {
 
   const Asset = await ethers.getContract('Asset');
 
-  const {batchMints, extractions} = JSON.parse(
-    fs.readFileSync('tmp/asset_regenerations.json').toString()
+  const {batchMints, extractions} = fs.readJSONSync(
+    'tmp/asset_regenerations.json'
   );
 
   type MintBatch = {
@@ -102,14 +102,6 @@ const func: DeployFunction = async function () {
     for (const batch of batchBatch) {
       const {creator, packID, supplies, ipfsHash, rarities} = batch;
       const raritiesPack = generateRaritiesPack(rarities);
-      console.log(JSON.stringify(batch));
-      // console.log({
-      //   creator,
-      //   packID,
-      //   ipfsHash,
-      //   supplies,
-      //   raritiesPack,
-      // });
       const {data} = await Asset.populateTransaction.mintMultiple(
         creator,
         packID,
@@ -136,14 +128,7 @@ const func: DeployFunction = async function () {
         receipt.blockNumber
       );
       console.log({
-        TransferBatchEvents: TransferBatchEvents.map((e: Event) => {
-          return JSON.stringify({
-            to: e.args?.to,
-            from: e.args?.from,
-            ids: e.args?.ids.map((bn: BigNumber) => bn.toString()),
-            values: e.args?.[4].map((bn: BigNumber) => bn.toString()),
-          });
-        }),
+        TransferBatchEvents: TransferBatchEvents.length,
       });
       const gasUsed = receipt.gasUsed;
       totalGasUsed = totalGasUsed.add(gasUsed);
@@ -190,7 +175,6 @@ const func: DeployFunction = async function () {
   for (const extractionBatch of extractionBatches) {
     const datas = [];
     for (const extraction of extractionBatch) {
-      console.log(JSON.stringify(extraction));
       const {data} = await Asset.populateTransaction.extractERC721(
         extraction.id,
         extraction.extractTo
@@ -219,5 +203,5 @@ const func: DeployFunction = async function () {
 export default func;
 
 if (require.main === module) {
-  func(hre);
+  func(hre).catch((err) => console.error(err));
 }

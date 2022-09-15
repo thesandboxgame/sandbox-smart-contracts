@@ -1,8 +1,10 @@
-import {Contract, Event} from 'ethers';
 import BN from 'bn.js';
+import {Contract, Event} from 'ethers';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {Deployment} from 'hardhat-deploy/types';
+import {queryEvents} from '../utils/query-events';
+
 const {ethers} = hre;
 
 type Land = {
@@ -11,50 +13,6 @@ type Land = {
   size: BN;
   tokenId: string;
 };
-
-async function queryEvents(
-  filterFunc: (startBlock: number, endBlock: number) => Promise<Event[]>,
-  startBlock: number,
-  endBlock?: number
-) {
-  if (!endBlock) {
-    endBlock = await ethers.provider.getBlockNumber();
-  }
-  let consecutiveSuccess = 0;
-  const successes: Record<number, boolean> = {};
-  const failures: Record<number, boolean> = {};
-  const events = [];
-  let blockRange = 100000;
-  let fromBlock = startBlock;
-  let toBlock = Math.min(fromBlock + blockRange, endBlock);
-  while (fromBlock <= endBlock) {
-    try {
-      const moreEvents = await filterFunc(fromBlock, toBlock);
-      successes[blockRange] = true;
-      consecutiveSuccess++;
-      if (consecutiveSuccess > 6) {
-        const newBlockRange = blockRange * 2;
-        if (!failures[newBlockRange] || successes[newBlockRange]) {
-          blockRange = newBlockRange;
-        }
-      }
-
-      fromBlock = toBlock + 1;
-      toBlock = Math.min(fromBlock + blockRange, endBlock);
-      events.push(...moreEvents);
-    } catch (e) {
-      failures[blockRange] = true;
-      consecutiveSuccess = 0;
-      blockRange /= 2;
-      toBlock = Math.min(fromBlock + blockRange, endBlock);
-
-      console.log({fromBlock, toBlock, numEvents: 'ERROR'});
-      console.log({blockRange});
-      console.error(e);
-    }
-  }
-  return events;
-}
 
 const gridSize = new BN(408);
 
@@ -89,10 +47,8 @@ async function getPreSaleLandQuadPurchasedEvents(
 ) {
   const presaleContract = await ethers.getContract(presaleDeploymentName);
   return queryEvents(
-    presaleContract.queryFilter.bind(
-      presaleContract,
-      presaleContract.filters.LandQuadPurchased()
-    ),
+    presaleContract,
+    presaleContract.filters.LandQuadPurchased(),
     presaleDeployment.receipt?.blockNumber || 0
   );
 }
@@ -146,7 +102,7 @@ async function getOwner(landContracts: Contract[], event: Event) {
   return currentLandOwner || '0x0000000000000000000000000000000000000000';
 }
 
-(async () => {
+void (async () => {
   const presaleDeployments = await getLandPreSales();
   const networkName = hre.network.name;
   const exportFilePath = `tmp/${networkName}-landOwners.json`;

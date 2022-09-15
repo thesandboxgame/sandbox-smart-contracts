@@ -1,3 +1,5 @@
+const path = require('path');
+const tsconfigPath = path.join(__dirname, './tsconfig.json');
 module.exports = {
   root: true,
   extends: ['eslint:recommended', 'plugin:mocha/recommended', 'prettier'],
@@ -15,6 +17,7 @@ module.exports = {
       files: ['*.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
+        project: [tsconfigPath],
         ecmaVersion: 2020,
         sourceType: 'module',
       },
@@ -26,6 +29,10 @@ module.exports = {
         'prettier',
         'prettier/@typescript-eslint',
       ],
+      rules: {
+        '@typescript-eslint/no-misused-promises': 'error',
+        '@typescript-eslint/no-floating-promises': 'error',
+      },
     },
   ],
 };

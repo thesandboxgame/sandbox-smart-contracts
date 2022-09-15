@@ -2,8 +2,11 @@
 const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
 const {BigNumber, utils} = require('ethers');
 const Prando = require('prando');
-const {supplyAssets} = require('./assets');
-const {expectEventWithArgs, withSnapshot} = require('../utils');
+const {
+  expectEventWithArgs,
+  expectEventWithArgsFromReceipt,
+  withSnapshot,
+} = require('../utils');
 const {toUtf8Bytes} = require('ethers/lib/utils');
 
 const rng = new Prando('GameToken ERC721 tests');
@@ -12,17 +15,47 @@ async function getRandom() {
   return rng.nextInt(1, 1000000000);
 }
 
-const creation = {
+let packId = 100;
+let i = 0;
+
+const dummyHash =
+  '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e'; // Should not be empty
+
+const creation1155 = {
   assetIdsToRemove: [],
   assetAmountsToRemove: [],
   assetIdsToAdd: [],
-  assetAmountsToAdd: [1],
+  assetAmountsToAdd: [5, 5, 5, 5, 5, 5],
+};
+
+const creation721 = {
+  assetIdsToRemove: [],
+  assetIdsToAdd: [],
+};
+
+const creation = {
+  gameData1155: creation1155,
+  gameData721: creation721,
   uri: utils.keccak256(toUtf8Bytes('My GAME token URI!')),
 };
 
+const newCreationAdd1155 = (creation, assetIdsToAdd1155) => {
+  return {
+    ...creation,
+    gameData1155: {
+      ...creation.gameData1155,
+      assetIdsToAdd: assetIdsToAdd1155,
+    },
+  };
+};
+
 const erc721Tests = require('../erc721')(
-  withSnapshot(['ChildGameToken'], async () => {
-    const {gameTokenAdmin} = await getNamedAccounts();
+  withSnapshot(['Asset', 'AssetERC721', 'ChildGameToken'], async () => {
+    const {
+      gameTokenAdmin,
+      assetBouncerAdmin,
+      assetAdmin,
+    } = await getNamedAccounts();
     const others = await getUnnamedAccounts();
 
     const contract = await ethers.getContract('ChildGameToken');
@@ -32,18 +65,55 @@ const erc721Tests = require('../erc721')(
     );
     await gameAsAdmin.changeMinter(gameTokenAdmin);
 
+    const assetContract1155 = await ethers.getContract('Asset');
+    const assetContract721 = await ethers.getContract('AssetERC721');
+
+    await [...others].map(async (user) => {
+      const assetContract1155AsUser = await assetContract1155.connect(
+        ethers.provider.getSigner(user)
+      );
+      await assetContract1155AsUser.setApprovalForAll(contract.address, true);
+      const assetContract721AsUser = await assetContract721.connect(
+        ethers.provider.getSigner(user)
+      );
+      await assetContract721AsUser.setApprovalForAll(contract.address, true);
+    });
+
+    const assetAsAdmin = await assetContract1155.connect(
+      ethers.provider.getSigner(assetAdmin)
+    );
+
+    const assetAsBouncerAdmin = await assetContract1155.connect(
+      ethers.provider.getSigner(assetBouncerAdmin)
+    );
+
+    await assetAsBouncerAdmin.setBouncer(assetAdmin, true);
+
     async function mint(to) {
-      const assets = await supplyAssets(to, [1]);
+      const assets = [];
+      async function supplyAssets(to) {
+        for (i; i < 6; i++) {
+          const tx = await assetAsAdmin[
+            'mint(address,uint40,bytes32,uint256,address,bytes)'
+          ](to, packId, dummyHash, 100, to, '0x');
+          const receipt = tx.wait();
+          const event = await expectEventWithArgsFromReceipt(
+            assetContract1155,
+            receipt,
+            'TransferSingle'
+          );
+          const id = event.args[3];
+          assets.push(id);
+          packId++;
+        }
+      }
+      await supplyAssets(to);
       const randomId = await getRandom();
 
       const receipt = await gameAsAdmin.createGame(
         to,
         to,
-        {
-          ...creation,
-          assetIdsToAdd: assets,
-          exactNumOfLandsRequired: 1,
-        },
+        newCreationAdd1155(creation, assets),
         ethers.constants.AddressZero,
         randomId
       );

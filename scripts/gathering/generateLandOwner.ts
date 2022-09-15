@@ -50,7 +50,7 @@ query($blockNumber: Int! $first: Int! $x_gte: Int! $x_lt: Int!) {
 const args = process.argv.slice(2);
 const blockNumber = parseInt(args[0]);
 
-(async () => {
+void (async () => {
   console.log('Fetching data..');
   const landOwners: {id: string; owner: string}[] = await query(
     queryString,

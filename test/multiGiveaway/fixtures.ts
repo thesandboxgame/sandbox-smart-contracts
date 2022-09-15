@@ -1,23 +1,24 @@
+import {BigNumber} from 'ethers';
 import {
   deployments,
   ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {BigNumber} from 'ethers';
-import {expect} from '../chai-setup';
-import MerkleTree from '../../lib/merkleTree';
-import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
-import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
+import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
+import MerkleTree from '../../lib/merkleTree';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
+import {expect} from '../chai-setup';
+import {zeroAddress} from '../land-sale/fixtures';
+import {depositViaChildChainManager} from '../polygon/sand/fixtures';
 import {
   expectReceiptEventWithArgs,
   sequentially,
   waitFor,
   withSnapshot,
 } from '../utils';
-import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
 
@@ -34,10 +35,14 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  ['Multi_Giveaway_1', 'Asset', 'Gems', 'Sand', 'Catalysts'],
+  [
+    'Multi_Giveaway_1',
+    'PolygonAssetERC1155',
+    'PolygonGems',
+    'PolygonSand',
+    'PolygonCatalysts',
+  ],
   async function (hre, options?: Options) {
-    const {network, getChainId} = hre;
-    const chainId = await getChainId();
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
       options || {};
     const {
@@ -49,16 +54,20 @@ export const setupTestGiveaway = withSnapshot(
       gemMinter,
       multiGiveawayAdmin,
     } = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
-    const sandContract = await ethers.getContract('Sand');
-    const assetContract = await ethers.getContract('Asset');
-    const speedGemContract = await ethers.getContract('Gem_SPEED');
-    const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
+    const otherAccounts = await getUnnamedAccounts();
+    const others = otherAccounts;
+    const sandContract = await ethers.getContract('PolygonSand');
+    const assetContract = await ethers.getContract('PolygonAssetERC1155');
+    const speedGemContract = await ethers.getContract('PolygonGem_SPEED');
+    const rareCatalystContract = await ethers.getContract(
+      'PolygonCatalyst_RARE'
+    );
 
     await deployments.deploy('TestMetaTxForwarder', {
       from: deployer,
     });
     const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
     await deployments.deploy('MockLand', {
       from: deployer,
@@ -71,6 +80,12 @@ export const setupTestGiveaway = withSnapshot(
     );
 
     const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
+
+    await depositViaChildChainManager(
+      {sand: sandContract, childChainManager},
+      sandAdmin,
+      SAND_AMOUNT
+    );
 
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
@@ -103,7 +118,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
-      'Asset',
+      'PolygonAssetERC1155',
       assetBouncerAdmin
     );
 
@@ -113,7 +128,6 @@ export const setupTestGiveaway = withSnapshot(
       const packId = id;
       const hash = ipfsHashString;
       const supply = value;
-      const rarity = 1;
       const owner = giveawayContract.address;
       const data = '0x';
 
@@ -124,15 +138,9 @@ export const setupTestGiveaway = withSnapshot(
       );
 
       const receipt = await waitFor(
-        assetContractAsCreator.mint(
-          creator,
-          packId,
-          hash,
-          supply,
-          rarity,
-          owner,
-          data
-        )
+        assetContractAsCreator[
+          'mint(address,uint40,bytes32,uint256,address,bytes)'
+        ](creator, packId, hash, supply, owner, data)
       );
 
       const transferEvent = await expectReceiptEventWithArgs(
@@ -342,12 +350,7 @@ export const setupTestGiveaway = withSnapshot(
     const {
       claims: claims0,
       merkleRootHash: merkleRootHash0,
-    } = createClaimMerkleTree(
-      network.live,
-      chainId,
-      dataWithIds0,
-      'Multi_Giveaway_1'
-    );
+    } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
 
     const allMerkleRoots = [];
     const allClaims = [claims0];
@@ -367,12 +370,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: claims1,
         merkleRootHash: merkleRootHash1,
-      } = createClaimMerkleTree(
-        network.live,
-        chainId,
-        dataWithIds1,
-        'Multi_Giveaway_1'
-      );
+      } = createClaimMerkleTree(hre, dataWithIds1, 'Multi_Giveaway_1');
       allClaims.push(claims1);
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
@@ -394,12 +392,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: badClaims0,
         merkleRootHash: badMerkleRootHash0,
-      } = createClaimMerkleTree(
-        network.live,
-        chainId,
-        dataWithIds0,
-        'Multi_Giveaway_1'
-      );
+      } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
       allClaims.push(badClaims0);
       allMerkleRoots.push(badMerkleRootHash0);
       const hashArray2 = createDataArrayMultiClaim(badClaims0);

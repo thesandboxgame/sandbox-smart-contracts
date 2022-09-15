@@ -1,31 +1,37 @@
-import {getNamedAccounts, ethers, network} from 'hardhat';
+import {deployments, getNamedAccounts} from 'hardhat';
 
-const args = process.argv.slice(2);
+const {read, execute, catchUnknownSigner} = deployments;
 
-(async () => {
-  if (network.name !== 'rinkeby') {
-    throw new Error('only for rinkeby');
+void (async () => {
+  const {sandAdmin, sandboxAccount} = await getNamedAccounts();
+
+  if (!(await read('OldGems', {}, 'isMinter', sandAdmin))) {
+    console.log('SandAdmin is not a minter of OldGems');
+    return;
   }
-  const {deployer, gemMinter, catalystMinter} = await getNamedAccounts();
-
-  let to = deployer;
-  if (args.length > 0) {
-    to = args[0];
+  if (!(await read('OldCatalysts', {}, 'isMinter', sandAdmin))) {
+    console.log('SandAdmin is not a minter of OldCatalysts');
+    return;
   }
 
-  const gems = await ethers.getContract('Gem', gemMinter);
-
-  let tx = await gems.batchMint(to, [0, 1, 2, 3, 4], [100, 100, 100, 100, 100]);
-
-  console.log({txHash: tx.hash});
-
-  await tx.wait();
-
-  const catalysts = await ethers.getContract('Catalyst', catalystMinter);
-
-  tx = await catalysts.batchMint(to, [0, 1, 2, 3], [100, 100, 100, 100]);
-
-  console.log({txHash: tx.hash});
-
-  await tx.wait();
+  await catchUnknownSigner(
+    execute(
+      'OldGems',
+      {from: sandAdmin},
+      'batchMint',
+      sandboxAccount,
+      [0, 1, 2, 3, 4],
+      [10000, 10000, 10000, 10000, 10000]
+    )
+  );
+  await catchUnknownSigner(
+    execute(
+      'OldCatalysts',
+      {from: sandAdmin},
+      'batchMint',
+      sandboxAccount,
+      [0, 1, 2, 3],
+      [1000, 1000, 1000, 1000]
+    )
+  );
 })();

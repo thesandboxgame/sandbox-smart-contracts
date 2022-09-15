@@ -2,10 +2,19 @@ import {getAssetChainIndex, waitFor, withSnapshot} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
 import {assetFixtures} from '../common/fixtures/asset';
+import {ethers} from 'hardhat';
 
-const setupAsset = withSnapshot(['Asset'], assetFixtures);
+const setupAsset = withSnapshot(
+  [
+    'Asset',
+    'PolygonAssetERC1155',
+    'AssetERC1155Tunnel',
+    'PolygonAssetERC1155Tunnel',
+  ],
+  assetFixtures
+);
 
-describe('Asset.sol', function () {
+describe('AssetERC1155.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
@@ -22,9 +31,22 @@ describe('Asset.sol', function () {
       users[0].address,
       tokenId
     );
+    console.log(balance.toString());
     expect(balance).to.be.equal(20);
   });
-
+  it('mintMultiple reverts when ids and amounts length mismatch', async function () {
+    const {Asset, minter} = await setupAsset();
+    const ids = [
+      '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000005000',
+      '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001005001',
+    ];
+    const amounts = [2];
+    await expect(
+      Asset.connect(ethers.provider.getSigner(minter))[
+        'mintMultiple(address,uint256[],uint256[],bytes)'
+      ](minter, ids, amounts, '0x')
+    ).to.revertedWith('AssetERC1155: ids and amounts length mismatch');
+  });
   it('can transfer assets', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
@@ -96,17 +118,27 @@ describe('Asset.sol', function () {
     ).to.be.revertedWith(`BALANCE_TOO_LOW`);
   });
 
-  it('can get the chainIndex from the tokenId', async function () {
+  it('can get the chainIndex from the tokenId, supply > 1', async function () {
     const {users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
     const chainIndex = getAssetChainIndex(tokenId);
-    expect(chainIndex).to.be.equal(0);
+    expect(chainIndex).to.be.equal(1); // Note: token was minted on L2 and bridged so chainId is 1
   });
 
-  it('can get the URI for an NFT', async function () {
+  it('can get the chainIndex from the tokenId, supply 1', async function () {
+    const {users, mintAsset} = await setupAsset();
+    const tokenId1 = await mintAsset(users[1].address, 1);
+    const chainIndex = getAssetChainIndex(tokenId1);
+    expect(chainIndex).to.be.equal(1); // Note: token was minted on L2 and bridged so chainId is 1
+  });
+
+  it('can get the URI for an asset of amount 1', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 1);
-    const URI = await Asset.callStatic.tokenURI(tokenId);
+    const URI = await Asset.callStatic.uri(tokenId);
+    // const hash =
+    //   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+    // getHash2Base32(hash) ==> dyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy
     expect(URI).to.be.equal(
       'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
     );
@@ -115,7 +147,10 @@ describe('Asset.sol', function () {
   it('can get the URI for a FT', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
-    const URI = await Asset.callStatic.tokenURI(tokenId);
+    const URI = await Asset.callStatic.uri(tokenId);
+    // const hash =
+    //   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+    // getHash2Base32(hash) ==> dyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy
     expect(URI).to.be.equal(
       'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
     );
@@ -124,46 +159,12 @@ describe('Asset.sol', function () {
   it('fails get the URI for an invalid tokeId', async function () {
     const {Asset} = await setupAsset();
     const tokenId = 42;
-    await expect(Asset.callStatic.tokenURI(tokenId)).to.be.revertedWith(
+    await expect(Asset.callStatic.uri(tokenId)).to.be.revertedWith(
       'NFT_!EXIST_||_FT_!MINTED'
     );
   });
 
-  it('can burn ERC1155 asset', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
-    const tokenId = await mintAsset(users[0].address, 20);
-    await waitFor(
-      users[0].Asset['burnFrom(address,uint256,uint256)'](
-        users[0].address,
-        tokenId,
-        10
-      )
-    );
-    const balance = await Asset['balanceOf(address,uint256)'](
-      users[0].address,
-      tokenId
-    );
-    expect(balance).to.be.equal(10);
-  });
-
-  it('can burn ERC721 asset', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
-    const tokenId = await mintAsset(users[0].address, 1);
-    await waitFor(
-      users[0].Asset['burnFrom(address,uint256,uint256)'](
-        users[0].address,
-        tokenId,
-        1
-      )
-    );
-    const balance = await Asset['balanceOf(address,uint256)'](
-      users[0].address,
-      tokenId
-    );
-    expect(balance).to.be.equal(0);
-  });
-
-  describe('Asset: MetaTransactions', function () {
+  describe('AssetERC1155: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
       const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
       const tokenId = await mintAsset(users[1].address, 11);

@@ -7,7 +7,7 @@
 import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
-import {AssetHash, AssetClaim} from '../lib/merkleTreeHelper';
+import {AssetClaim, AssetHash} from '../lib/merkleTreeHelper';
 
 const {deployments} = hre;
 const {read, execute, catchUnknownSigner} = deployments;
@@ -28,7 +28,7 @@ function getAssets(giveawayName: string, networkName: string): AssetHash {
   return assetIdsCount;
 }
 
-(async () => {
+void (async () => {
   const networkName = hre.network.name;
   const giveawayName = `Asset_Giveaway_${giveawaySuffix}`;
   const assetIdsCount = await getAssets(

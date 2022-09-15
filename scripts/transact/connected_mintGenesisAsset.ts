@@ -1,10 +1,10 @@
-import {getNamedAccounts, ethers, network, deployments} from 'hardhat';
+import {deployments, ethers, getNamedAccounts, network} from 'hardhat';
 
 const {read} = deployments;
 
 const args = process.argv.slice(2);
 
-(async () => {
+void (async () => {
   if (network.name !== 'rinkeby') {
     throw new Error('only for rinkeby');
   }

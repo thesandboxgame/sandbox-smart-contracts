@@ -29,6 +29,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_15'},
   {name: 'LandPreSale_16'},
   {name: 'LandPreSale_17'},
+  {name: 'LandPreSale_18'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -134,3 +135,4 @@ func.dependencies = [
   'Asset_deploy',
   'AuthValidator_deploy',
 ];
+func.skip = skipUnlessTest;

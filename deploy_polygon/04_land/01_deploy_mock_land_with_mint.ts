@@ -14,5 +14,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['MockLandWithMint', 'MockLandWithMint_deploy'];
+func.tags = ['MockLandWithMint', 'MockLandWithMint_deploy', 'L2'];
 func.skip = skipUnlessTestOrL2;

@@ -25,7 +25,7 @@ type ClaimData = {
   assetValues: number[];
 };
 
-(async () => {
+void (async () => {
   const claims: {
     id: string;
     assetIDs: string[];

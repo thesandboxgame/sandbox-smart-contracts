@@ -17,7 +17,6 @@ const mintOptions = {
   catalystId: catalysts[1].catalystId,
   gemIds: [gems[0].gemId],
   quantity: NFT_SUPPLY,
-  rarity: 0,
   to: ethers.constants.AddressZero,
   data: Buffer.from(''),
 };
@@ -40,8 +39,18 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       metadataHash: mintOptions.metaDataHash,
       data: mintOptions.data,
     };
+    const numberOfGemsBurnPerAsset = await minter.numberOfGemsBurnPerAsset();
+    const numberOfCatalystBurnPerAsset = await minter.numberOfCatalystBurnPerAsset();
+    const quantitiesByCatalystId = await minter.quantitiesByCatalystId(catId);
 
-    return await minter.mintWithCatalyst(mintData, catId, gemIds);
+    return await minter.mintWithCatalyst(
+      mintData,
+      catId,
+      gemIds,
+      quantitiesByCatalystId,
+      numberOfCatalystBurnPerAsset,
+      numberOfGemsBurnPerAsset
+    );
   }
 
   async function getCatEvents(
@@ -89,7 +98,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         assetMinterAsUser0,
         catalystOwner,
       } = await setupAssetAttributesRegistryGemsAndCatalysts();
-
       const {id: assetId, receipt: mintReceipt} = await getAssetId(
         catalystOwner,
         assetAttributesRegistry,

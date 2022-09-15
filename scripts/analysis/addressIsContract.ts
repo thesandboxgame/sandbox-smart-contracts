@@ -3,17 +3,18 @@
  * How to use:
  *  - yarn execute <NETWORK> ./scripts/analysis/addressIsContract.ts
  */
-import {ethers} from 'hardhat';
 import fs from 'fs-extra';
+import {isContract} from '../../utils/address';
 
-(async () => {
-  const wallets: string[] = fs.readJSONSync('tmp/addressList.json');
+void (async () => {
+  const addresses: string[] = fs
+    .readJSONSync('tmp/addressList.json')
+    .map((a: string) => a.toLowerCase());
   const contracts: string[] = [];
-  const scanned: string[] = [];
   let promises = [];
-  for (let i = 0; i < wallets.length; i++) {
-    log(i, contracts, scanned);
-    promises.push(scan(contracts, scanned, wallets[i]));
+  for (let i = 0; i < addresses.length; i++) {
+    log(i, contracts);
+    promises.push(scan(contracts, addresses[i]));
     if (promises.length >= 50) {
       await Promise.all(promises);
       promises = [];
@@ -23,32 +24,15 @@ import fs from 'fs-extra';
   fs.outputJSONSync('tmp/mainnet-addressIsContract.json', contracts);
 })();
 
-function log(i: number, contracts: string[], scanned: string[]): void {
-  if (i % 100 == 0) {
+function log(i: number, contracts: string[]): void {
+  if (i % 100 === 0) {
     console.log('--------------------------------------------------');
     console.log('current', i);
     console.log('contracts', contracts.length);
-    console.log('scanned', scanned.length);
   }
 }
 
-async function scan(contracts: string[], scanned: string[], address: string) {
-  if (scanned.includes(address)) return;
-  scanned.push(address);
+async function scan(contracts: string[], address: string) {
   const result = await isContract(address);
   if (result) contracts.push(address);
-}
-
-async function isContract(address: string, retries = 3): Promise<boolean> {
-  try {
-    const result = await ethers.provider.getCode(address);
-    return result !== '0x';
-  } catch (err) {
-    console.log(err);
-    if (retries > 0) {
-      console.log('retry for', address, retries);
-      return isContract(address, retries - 1);
-    }
-    return false;
-  }
 }

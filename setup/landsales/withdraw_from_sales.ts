@@ -8,19 +8,20 @@ const {execute, catchUnknownSigner, read} = deployments;
 const args = process.argv.slice(2);
 const landSalePrefix = args[0];
 
-(async () => {
+void (async () => {
   const networkName = hre.network.name;
   const {landSaleAdmin} = await getNamedAccounts();
 
-  const bundleInfo: {[bundleId: string]: string[]} = fs.readJSONSync(
-    `data/landSales/${landSalePrefix}/bundles.${networkName}.json`
-  );
-  const sectors: SectorData[] = fs.readJSONSync(
-    `data/landSales/${landSalePrefix}/sectors.${networkName}.json`
-  );
+  const basePath = `data/landSales/${landSalePrefix}`;
+  const bundleInfo: {[bundleId: string]: string[]} = fs
+    .readJSONSync(`${basePath}/bundles.${networkName}.json`)
+    .catch(() => fs.readJSONSync(`${basePath}/bundles.testnet.json`));
+  const sectors: SectorData[] = fs
+    .readJSONSync(`${basePath}/sectors.${networkName}.json`)
+    .catch(() => fs.readJSONSync(`${basePath}/sectors.testnet.json`));
 
   for (const sector of sectors) {
-    const landSaleName = `${landSalePrefix}_${sector.sector}`;
+    const landSaleName = `LandPreSale_${sector.sector}`;
     const LandSale = await deployments.get(landSaleName);
     const assetIds: {[id: string]: boolean} = {};
     for (const bundleId in bundleInfo) {
