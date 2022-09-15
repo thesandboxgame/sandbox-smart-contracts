@@ -940,10 +940,10 @@
   resolved "https://registry.npmjs.org/@graphql-typed-document-node/core/-/core-3.1.0.tgz"
   integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
 
-"@maticnetwork/fx-portal@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@maticnetwork/fx-portal/-/fx-portal-1.0.4.tgz#2274b02d4600b8ca40b06a0c9f7f1a788fff0496"
-  integrity sha512-z7K7blFgDJWCCaXTtqgqI20GDB0b4QIE8bmtxzijlbpSEziJsQMulJVZYVubAB2f/HNDObXE+i/jkpqSDxkC2A==
+"@maticnetwork/fx-portal@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@maticnetwork/fx-portal/-/fx-portal-1.0.5.tgz#c26bc0bdf979985f22223d2f1170171a10fa0764"
+  integrity sha512-kDob22IkLLrh+OmjpgM0r2jNboW+8cTwGL7sSEvmMcqujlun3Dw7+o741qWeubLovCEw0n2nxhYWLwt8iNVecQ==
   dependencies:
     "@openzeppelin/contracts" "^4.2.0"
 
