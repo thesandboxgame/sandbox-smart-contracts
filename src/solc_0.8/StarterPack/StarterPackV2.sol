@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {PurchaseValidator, Context} from "./PurchaseValidator.sol";
+import {PurchaseValidator, Context, AccessControl} from "./PurchaseValidator.sol";
 import {GemsCatalystsRegistry, ICatalyst, IGem, IERC20} from "../catalyst/GemsCatalystsRegistry.sol";
 import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerV2.sol";
 
@@ -9,7 +9,7 @@ import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771/ERC2771Handler
 /// @notice This contract enables purchases with SAND when the backend authorizes it via message signing
 /// @notice The following privileged roles are used in StarterPackV2: DEFAULT_ADMIN_ROLE, STARTERPACK_ROLE
 /// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, STARTERPACK_ROLE is provided for business purposes
-contract StarterPackV2 is PurchaseValidator, ERC2771HandlerV2 {
+contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     uint256 internal constant MAX_UINT16 = type(uint16).max;
     uint256 private constant DECIMAL_PLACES = 1 ether;
     uint256 private constant MAX_WITHDRAWAL = 100;
