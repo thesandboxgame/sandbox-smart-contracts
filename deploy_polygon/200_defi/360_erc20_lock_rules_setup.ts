@@ -68,4 +68,3 @@ export default func;
 func.tags = ['ERC20RewardPool', 'ERC20RewardPool_setup'];
 func.dependencies = ['ERC20RewardPool_deploy'];
 func.skip = skipUnlessTestnet;
-

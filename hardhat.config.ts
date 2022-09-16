@@ -125,7 +125,7 @@ const config: HardhatUserConfig = {
     operationsAdmin: {
       default: 2,
       mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
-      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531'
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     },
 
     upgradeAdmin: 'sandAdmin',
