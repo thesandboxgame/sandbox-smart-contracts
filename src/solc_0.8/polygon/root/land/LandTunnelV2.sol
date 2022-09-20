@@ -17,7 +17,6 @@ contract LandTunnelV2 is
     PausableUpgradeable
 {
     address public rootToken;
-    bool internal transferringToL2;
 
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -40,8 +39,7 @@ contract LandTunnelV2 is
         address, /* from */
         uint256, /* tokenId */
         bytes calldata /* data */
-    ) external view override returns (bytes4) {
-        require(transferringToL2, "LandTunnel: !BRIDGING");
+    ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
     }
 
@@ -50,8 +48,7 @@ contract LandTunnelV2 is
         address, /* from */
         uint256[] calldata, /* ids */
         bytes calldata /* data */
-    ) external view override returns (bytes4) {
-        require(transferringToL2, "LandTunnel: !BRIDGING");
+    ) external pure override returns (bytes4) {
         return this.onERC721BatchReceived.selector;
     }
 
@@ -67,9 +64,7 @@ contract LandTunnelV2 is
         bytes memory data
     ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
-        transferringToL2 = true;
         ILandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
-        transferringToL2 = false;
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
             _sendMessageToChild(message);
