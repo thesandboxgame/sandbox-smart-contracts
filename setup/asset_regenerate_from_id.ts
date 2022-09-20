@@ -4,8 +4,8 @@ import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {isContract} from '../utils/address';
 import {toHash} from '../utils/asset-uri-to-hash';
-import setupBatchDeployerAsAssetBouncer from '../deploy/10_helpers/04_asset_bouncer_enable_deployer_batch_and_predicate';
-import removeBatchDeployerAsAssetBouncer from '../deploy/10_helpers/05_asset_bouncer_disable_deployer_batch_and_predicate';
+import setupBatchDeployerAsAssetBouncerAndPredicate from '../deploy/10_helpers/04_asset_bouncer_enable_deployer_batch_and_predicate';
+import removeBatchDeployerAsAssetBouncerAndPredicate from '../deploy/10_helpers/05_asset_bouncer_disable_deployer_batch_and_predicate';
 
 const abiCoder = new AbiCoder();
 
@@ -71,6 +71,7 @@ const func: DeployFunction = async function () {
       // Encoded bytes32 metadata hash must be provided as data
       // Hash must have length for tx to succeed
       const metadata = abiCoder.encode(['bytes32'], [toHash(uri)]);
+
       currentBatch.push({
         to: batch.owner,
         id: batch.id,
@@ -89,15 +90,27 @@ const func: DeployFunction = async function () {
   if (batches.length === 0) return;
 
   // Set up BatchDeployer as bouncer and set predicate as DeployerBatch (only bridge is allowed to mint on L1)
-  await setupBatchDeployerAsAssetBouncer(hre);
+  await setupBatchDeployerAsAssetBouncerAndPredicate(hre);
 
+  // If metadatahash is not set in the new contract for a given ID, we can use the mint function
+  // Otherwise we should be able to use the mintDeficit function
   const datas = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const idsUsed: any = {};
   for (const batch of batches) {
     for (const {to, id, supply, data} of batch) {
-      const populatedTx = await Asset.populateTransaction[
-        'mint(address,uint256,uint256,bytes)'
-      ](to, id, supply, data);
-      datas.push(populatedTx.data);
+      if (idsUsed[id] == false) {
+        const populatedTx = await Asset.populateTransaction[
+          'mint(address,uint256,uint256,bytes)'
+        ](to, id, supply, data);
+        datas.push(populatedTx.data);
+        idsUsed[id] = true;
+      } else {
+        const populatedTx = await Asset.populateTransaction[
+          'mintDeficit(address,uint256,uint256)'
+        ](to, id, supply);
+        datas.push(populatedTx.data);
+      }
     }
     console.log({minting: batch.length});
     const tx = await execute(
@@ -112,8 +125,9 @@ const func: DeployFunction = async function () {
     });
   }
 
-  // Disable BatchDeployer as bouncer and set predicate as AssetERC1155Tunnel again (only bridge is allowed to mint on L1)
-  await removeBatchDeployerAsAssetBouncer(hre);
+  // Disable BatchDeployer as bouncer and reinstate predicate as AssetERC1155Tunnel again (only bridge is allowed to mint on L1)
+  // Must be able to find deployment for AssetERC1155Tunnel so make sure the tunnel has been deployed by this point
+  await removeBatchDeployerAsAssetBouncerAndPredicate(hre);
 };
 
 export default func;
