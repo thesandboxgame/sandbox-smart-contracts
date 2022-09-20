@@ -3,9 +3,10 @@ pragma solidity 0.8.2;
 
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IPolygonLandTunnel.sol";
+import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @title Tunnel migration on L2
-contract PolygonLandTunnelMigration {
+contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     uint256 private constant GRID_SIZE = 408;
 
     struct OwnerWithLandIds {
@@ -65,5 +66,27 @@ contract PolygonLandTunnelMigration {
             IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(_ownerWithLandIds[i].owner, sizes, x, y, "0x");
         }
         emit TunnelLandsMigratedWithWithdraw(_ownerWithLandIds);
+    }
+
+    function onERC721Received(
+        address, /* operator */
+        address, /* from */
+        uint256, /* tokenId */
+        bytes calldata /* data */
+    ) external pure override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    function onERC721BatchReceived(
+        address, /* operator */
+        address, /* from */
+        uint256[] calldata, /* ids */
+        bytes calldata /* data */
+    ) external pure override returns (bytes4) {
+        return this.onERC721BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0x5e8bf644;
     }
 }
