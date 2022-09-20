@@ -29,6 +29,9 @@ contract PolygonAssetERC721Tunnel is
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
 
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
+
     function initialize(
         address _fxChild,
         IPolygonAssetERC721 _childToken,

@@ -26,6 +26,9 @@ contract AssetERC721Tunnel is
     event Deposit(address indexed user, uint256 id, bytes indexed data);
     event Withdraw(address indexed user, uint256 id, bytes indexed data);
 
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
+
     function initialize(
         address _checkpointManager,
         address _fxRoot,

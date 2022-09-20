@@ -25,6 +25,9 @@ contract AssetERC1155Tunnel is
     event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
 
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
+
     function initialize(
         address _checkpointManager,
         address _fxRoot,
