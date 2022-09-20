@@ -68,17 +68,17 @@ void (async () => {
     await PolygonLandTunnelMigration.migrateToTunnel(arr);
   }
 
-  async function migrateLandToTunnelWithWithdraw({
-    ids,
-    owner,
-  }: {
-    ids: [];
-    owner: [];
-  }) {
-    await PolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
-      ids,
-      owner,
-    });
+  interface ownerWithLandID {
+    owner: string;
+    ids: Array<number>;
+  }
+
+  async function migrateLandToTunnelWithWithdraw(
+    ownerWithLandIdsArray: Array<ownerWithLandID>
+  ) {
+    await PolygonLandTunnelMigration.migrateToTunnelWithWithdraw(
+      ownerWithLandIdsArray
+    );
   }
 
   async function queryEvents(
@@ -174,10 +174,13 @@ void (async () => {
     await migrateLandToTunnel(argument);
   }
 
-  // const owners = Object.keys(ownerOfLands);
-  // for (let i = 0; i < owners.length; i++) {
-  //   const ids = ownerOfLands[owners[i]];
-  //   const owner = owners[i];
-  //   await migrateLandToTunnelWithWithdraw({ids, owner});
-  // }
+  const owners = Object.keys(ownerOfLands);
+  const ownerWithLandIdsArr = [];
+  for (let i = 0; i < owners.length; i++) {
+    const ids = ownerOfLands[owners[i]];
+    const owner = owners[i];
+    const ownerWithLandIdsObject = {owner, ids};
+    ownerWithLandIdsArr.push(ownerWithLandIdsObject);
+  }
+  await migrateLandToTunnelWithWithdraw(ownerWithLandIdsArr);
 })();
