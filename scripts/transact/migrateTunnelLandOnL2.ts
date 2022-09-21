@@ -1,6 +1,6 @@
 import {Contract, EventFilter} from 'ethers';
 import fs from 'fs-extra';
-import {ethers} from 'hardhat';
+import {ethers,getNamedAccounts} from 'hardhat';
 
 const args = process.argv.slice(2);
 const landTunnel = args[0];
@@ -17,10 +17,12 @@ void (async () => {
   const tokensSnapshotL2 = JSON.parse(
     fs.readFileSync('./tunnel-polygon.json').toString()
   );
+  const {deployer} = await getNamedAccounts();
 
   const PolygonLandTunnelMigration = await ethers.getContract(
     'PolygonLandTunnelMigration'
   );
+  const PolygonLandTunnelMigrationAsAdmin = PolygonLandTunnelMigration.connect(ethers.provider.getSigner(deployer));
   const endBlock = await ethers.provider.getBlockNumber();
 
   // fetch common IDs
@@ -65,7 +67,7 @@ void (async () => {
   }
 
   async function migrateLandToTunnel(arr: any) {
-    await PolygonLandTunnelMigration.migrateToTunnel(arr);
+    await PolygonLandTunnelMigrationAsAdmin.migrateToTunnel(arr);
   }
 
   interface ownerWithLandID {
@@ -76,7 +78,7 @@ void (async () => {
   async function migrateLandToTunnelWithWithdraw(
     ownerWithLandIdsArray: Array<ownerWithLandID>
   ) {
-    await PolygonLandTunnelMigration.migrateToTunnelWithWithdraw(
+    await PolygonLandTunnelMigrationAsAdmin.migrateToTunnelWithWithdraw(
       ownerWithLandIdsArray
     );
   }
