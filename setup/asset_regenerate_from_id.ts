@@ -2,6 +2,7 @@ import {AbiCoder} from 'ethers/lib/utils';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {BigNumber} from 'ethers';
 import {isContract} from '../utils/address';
 import {toHash} from '../utils/asset-uri-to-hash';
 import setupBatchDeployerAsAssetBouncerAndPredicate from '../deploy/10_helpers/04_asset_bouncer_enable_deployer_batch_and_predicate';
@@ -92,36 +93,66 @@ const func: DeployFunction = async function () {
   // Set up BatchDeployer as bouncer and set predicate as DeployerBatch (only bridge is allowed to mint on L1)
   await setupBatchDeployerAsAssetBouncerAndPredicate(hre);
 
-  // If metadatahash is not set in the new contract for a given ID, we can use the mint function
-  // Otherwise we should be able to use the mintDeficit function
-  const datas = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const idsUsed: any = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hashesUsed: any = {};
+
+  const mask =
+    '0xffffffffffffffffffffffffffffffffffffffff000000007ffffffffffff800';
+
   for (const batch of batches) {
+    // If metadatahash is not set in the new contract, we can use the mint function
+    // Otherwise we use the mintDeficit function
+    const datasForMint = [];
+    const datasForMintDeficit = [];
     for (const {to, id, supply, data} of batch) {
-      if (idsUsed[id] == false) {
+      const hash = await read('Asset', 'metadataHash', id);
+      const uriHelper = BigNumber.from(id).and(BigNumber.from(mask));
+      if (
+        idsUsed[id] === undefined && // id has not been used in batch
+        hashesUsed[uriHelper.toString()] === undefined && // uri has not been taken by a previous (same or different) id in batch
+        hash ==
+          '0x0000000000000000000000000000000000000000000000000000000000000000' // hash has not been minted in a previous batch
+      ) {
         const populatedTx = await Asset.populateTransaction[
           'mint(address,uint256,uint256,bytes)'
         ](to, id, supply, data);
-        datas.push(populatedTx.data);
+        datasForMint.push(populatedTx.data);
         idsUsed[id] = true;
+        hashesUsed[
+          BigNumber.from(id).and(BigNumber.from(mask)).toString()
+        ] = true;
       } else {
         const populatedTx = await Asset.populateTransaction[
           'mintDeficit(address,uint256,uint256)'
         ](to, id, supply);
-        datas.push(populatedTx.data);
+        datasForMintDeficit.push(populatedTx.data);
       }
     }
-    console.log({minting: batch.length});
-    const tx = await execute(
+
+    console.log(`mint: ${datasForMint.length}`);
+    const txA = await execute(
       'DeployerBatch',
       {from: deployer, gasPrice},
       'singleTargetAtomicBatch',
       Asset.address,
-      datas
+      datasForMint
     );
     console.log(`batchMint`, {
-      tx: tx.transactionHash,
+      tx: txA.transactionHash,
+    });
+
+    console.log(`mintDeficit: ${datasForMintDeficit.length}`);
+    const txB = await execute(
+      'DeployerBatch',
+      {from: deployer, gasPrice},
+      'singleTargetAtomicBatch',
+      Asset.address,
+      datasForMintDeficit
+    );
+    console.log(`batchMintDeficit`, {
+      tx: txB.transactionHash,
     });
   }
 
