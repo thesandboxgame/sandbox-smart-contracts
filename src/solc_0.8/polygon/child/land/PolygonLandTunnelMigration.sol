@@ -17,15 +17,23 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     IPolygonLand public polygonLand;
     address public newLandTunnel;
     address public oldLandTunnel;
+    address private admin;
 
     event TunnelLandsMigrated(address oldLandTunnel, address newLandTunnel, uint256[] ids);
     event TunnelLandsMigratedWithWithdraw(OwnerWithLandIds[] _ownerWithLandIds);
 
+    modifier isAdmin() {
+        require(admin == msg.sender, "!AUTHORISED");
+        _;
+    }
+
     constructor(
         address _polygonLand,
         address _newLandTunnel,
-        address _oldLandTunnel
+        address _oldLandTunnel,
+        address _admin
     ) {
+        admin = _admin;
         polygonLand = IPolygonLand(_polygonLand);
         newLandTunnel = _newLandTunnel;
         oldLandTunnel = _oldLandTunnel;
@@ -34,7 +42,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     /// @dev Transfers all the passed land ids from the old land tunnel to the new land tunnel
     /// @notice This method needs super operator role to execute
     /// @param ids of land tokens to be migrated
-    function migrateToTunnel(uint256[] memory ids) external {
+    function migrateToTunnel(uint256[] memory ids) external isAdmin {
         polygonLand.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, "0x");
         emit TunnelLandsMigrated(oldLandTunnel, newLandTunnel, ids);
     }
@@ -42,7 +50,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     /// @dev Fetches all locked land ids to this contract and withdraws again through the new tunnel
     /// @notice This method needs super operator role to execute
     /// @param _ownerWithLandIds array of struct containing token owners with their land ids
-    function migrateToTunnelWithWithdraw(OwnerWithLandIds[] memory _ownerWithLandIds) external {
+    function migrateToTunnelWithWithdraw(OwnerWithLandIds[] memory _ownerWithLandIds) external isAdmin {
         uint256 numOfOwners = _ownerWithLandIds.length;
 
         // check for gas limits based on the number of locked tokens
