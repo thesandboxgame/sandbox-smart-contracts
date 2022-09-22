@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/interfaces/IPolygonLand.sol";
+import "../../../common/interfaces/IPolygonLandWithSetApproval.sol";
 import "../../../common/interfaces/IPolygonLandTunnel.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
@@ -14,7 +14,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         uint256[] ids;
     }
 
-    IPolygonLand public polygonLand;
+    IPolygonLandWithSetApproval public polygonLand;
     address public newLandTunnel;
     address public oldLandTunnel;
     address private admin;
@@ -34,7 +34,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         address _admin
     ) {
         admin = _admin;
-        polygonLand = IPolygonLand(_polygonLand);
+        polygonLand = IPolygonLandWithSetApproval(_polygonLand);
         newLandTunnel = _newLandTunnel;
         oldLandTunnel = _oldLandTunnel;
     }
@@ -52,7 +52,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     /// @param _ownerWithLandIds array of struct containing token owners with their land ids
     function migrateToTunnelWithWithdraw(OwnerWithLandIds[] memory _ownerWithLandIds) external isAdmin {
         uint256 numOfOwners = _ownerWithLandIds.length;
-
+        polygonLand.setApprovalForAll(newLandTunnel, true);
         // check for gas limits based on the number of locked tokens
         for (uint256 i = 0; i < numOfOwners; i++) {
             // Fetch locked tokens to this contract address
@@ -64,7 +64,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             uint256[] memory x = new uint256[](numOfIds);
             uint256[] memory y = new uint256[](numOfIds);
             uint256[] memory sizes = new uint256[](numOfIds);
-            for (uint256 j; j <= ids.length; j++) {
+            for (uint256 j; j < ids.length; j++) {
                 x[i] = ids[j] % GRID_SIZE;
                 y[i] = ids[j] / GRID_SIZE;
                 sizes[i] = 1;
@@ -95,6 +95,6 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == 0x5e8bf644;
+        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 }
