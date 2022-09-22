@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import {ethers, getNamedAccounts} from 'hardhat';
 
-const tokensSnapshotL1 =JSON.parse(
+const tokensSnapshotL1 = JSON.parse(
   fs.readFileSync('./tunnel_mainnet.json').toString()
 );
 
