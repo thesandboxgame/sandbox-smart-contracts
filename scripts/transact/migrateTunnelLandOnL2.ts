@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {Contract, EventFilter} from 'ethers';
 import fs from 'fs-extra';
-import {ethers,getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 
 const args = process.argv.slice(2);
 const landTunnel = args[0];
@@ -22,11 +23,19 @@ void (async () => {
   const PolygonLandTunnelMigration = await ethers.getContract(
     'PolygonLandTunnelMigration'
   );
-  const PolygonLandTunnelMigrationAsAdmin = PolygonLandTunnelMigration.connect(ethers.provider.getSigner(deployer));
+  const PolygonLandTunnelMigrationAsAdmin = PolygonLandTunnelMigration.connect(
+    ethers.provider.getSigner(deployer)
+  );
   const endBlock = await ethers.provider.getBlockNumber();
 
+  interface TokenData{
+    id: string;
+    owner: {
+      id: string;
+    }
+  }
   // fetch common IDs
-  function getCommonElement(arr1: any, arr2: any) {
+  function getCommonElement(arr1: Array<TokenData>, arr2: Array<TokenData>) {
     let pointer = 0;
     const output = [];
     for (let i = 0; i < arr1.length; ++i) {
@@ -43,7 +52,7 @@ void (async () => {
   const commonIds = getCommonElement(tokensSnapshotL1, tokensSnapshotL2);
 
   // fetches owner from events
-  async function queryAndReturnOwnerOnL1(tokenId: any) {
+  async function queryAndReturnOwnerOnL1(tokenId: string) {
     const Land = await ethers.getContract('PolygonLand');
     const singleTransferEvents = await queryEvents(
       Land,
@@ -65,8 +74,9 @@ void (async () => {
 
     return withDrawLog.args[0];
   }
+  await queryAndReturnOwnerOnL1("0x");
 
-  async function migrateLandToTunnel(arr: any) {
+  async function migrateLandToTunnel(arr: Array<number>) {
     await PolygonLandTunnelMigrationAsAdmin.migrateToTunnel(arr);
   }
 
@@ -79,7 +89,7 @@ void (async () => {
     ownerWithLandIdsArray: Array<ownerWithLandID>
   ) {
     await PolygonLandTunnelMigrationAsAdmin.migrateToTunnelWithWithdraw(
-      ownerWithLandIdsArray
+      ownerWithLandIdsArray   
     );
   }
 
@@ -93,7 +103,7 @@ void (async () => {
     const successes: Record<number, boolean> = {};
     const failures: Record<number, boolean> = {};
     const events = [];
-    let blockRange = 25600000;
+    let blockRange = 2560000000;
     let fromBlock = startBlock;
     let toBlock = Math.min(fromBlock + blockRange, endBlock);
     while (fromBlock <= endBlock) {
@@ -156,7 +166,7 @@ void (async () => {
   }
   for (let i = 0; i < commonIds.length; i++) {
     remainingTokenOnL2 = remainingTokenOnL2.filter(
-      (element: any) => element != commonIds[i]
+      (element: number) => element != commonIds[i]
     );
   }
 
@@ -164,9 +174,9 @@ void (async () => {
   const maxIdInTransaction = 20;
   const remainingTokenOnL2Length = remainingTokenOnL2.length;
   const numberOfCalls =
-    remainingTokenOnL2Length / 20 == 0
-      ? remainingTokenOnL2Length / 20
-      : remainingTokenOnL2Length / 20 + 1;
+    remainingTokenOnL2Length / maxIdInTransaction == 0
+      ? remainingTokenOnL2Length / maxIdInTransaction
+      : Math.ceil(remainingTokenOnL2Length / maxIdInTransaction);
   for (let i = 0; i < numberOfCalls; i++) {
     const argument = remainingTokenOnL2.slice(
       index,
