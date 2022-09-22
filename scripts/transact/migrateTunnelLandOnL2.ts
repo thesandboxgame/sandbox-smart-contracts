@@ -28,11 +28,11 @@ void (async () => {
   );
   const endBlock = await ethers.provider.getBlockNumber();
 
-  interface TokenData{
+  interface TokenData {
     id: string;
     owner: {
       id: string;
-    }
+    };
   }
   // fetch common IDs
   function getCommonElement(arr1: Array<TokenData>, arr2: Array<TokenData>) {
@@ -74,7 +74,7 @@ void (async () => {
 
     return withDrawLog.args[0];
   }
-  await queryAndReturnOwnerOnL1("0x");
+  await queryAndReturnOwnerOnL1('0x');
 
   async function migrateLandToTunnel(arr: Array<number>) {
     await PolygonLandTunnelMigrationAsAdmin.migrateToTunnel(arr);
@@ -89,7 +89,7 @@ void (async () => {
     ownerWithLandIdsArray: Array<ownerWithLandID>
   ) {
     await PolygonLandTunnelMigrationAsAdmin.migrateToTunnelWithWithdraw(
-      ownerWithLandIdsArray   
+      ownerWithLandIdsArray
     );
   }
 

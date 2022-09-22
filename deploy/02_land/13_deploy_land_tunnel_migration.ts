@@ -14,10 +14,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('LandTunnelMigration', {
     from: deployer,
     contract: 'LandTunnelMigration',
-    args: [land.address,landTunnelV2.address,landTunnel.address,deployer],
+    args: [land.address, landTunnelV2.address, landTunnel.address, deployer],
     log: true,
   });
 };
 export default func;
 func.tags = ['LandTunnelMigration'];
-func.dependencies = ['LandTunnel','LandTunnelV2','Land'];
+func.dependencies = ['LandTunnel', 'LandTunnelV2', 'Land'];
