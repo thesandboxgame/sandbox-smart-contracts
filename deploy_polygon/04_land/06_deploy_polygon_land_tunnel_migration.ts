@@ -14,10 +14,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('PolygonLandTunnelMigration', {
     from: deployer,
     contract: 'PolygonLandTunnelMigration',
-    args: [polygonLand.address,polygonLandTunnelV2.address,polygonLandTunnel.address,deployer],
+    args: [
+      polygonLand.address,
+      polygonLandTunnelV2.address,
+      polygonLandTunnel.address,
+      deployer,
+    ],
     log: true,
   });
 };
 export default func;
 func.tags = ['PolygonLandTunnelMigration'];
-func.dependencies = ['PolygonLandTunnel','PolygonLandTunnelV2','PolygonLand'];
+func.dependencies = ['PolygonLandTunnel', 'PolygonLandTunnelV2', 'PolygonLand'];
