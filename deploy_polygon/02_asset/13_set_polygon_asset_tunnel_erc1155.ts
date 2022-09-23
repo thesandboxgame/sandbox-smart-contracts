@@ -53,7 +53,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PolygonAssetERC1155Tunnel_setup', 'L2', 'PolygonAsset'];
+func.tags = [
+  'PolygonAssetERC1155Tunnel',
+  'PolygonAssetERC1155Tunnel_setup',
+  'L2',
+  'PolygonAsset',
+];
 func.dependencies = ['PolygonAssetERC1155Tunnel_deploy'];
 func.skip = skipUnlessTestnet;
 func.runAtTheEnd = true;
