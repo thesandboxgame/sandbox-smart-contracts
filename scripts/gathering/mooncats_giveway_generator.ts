@@ -2,10 +2,10 @@
  * How to use:
  *  - yarn execute <NETWORK> ./scripts/gathering/connected_asset_transfers.ts [TOKEN_ID [TO_WALLET [START_BLOCK [END_BLOCK]]]]
  */
-import {Contract, EventFilter} from 'ethers';
 import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
 import {ethers} from 'hardhat';
+import {queryEvents} from '../utils/query-events';
 
 type ERC1155data = {
   ids: string[];
@@ -21,54 +21,6 @@ const startBlock = args[2] ? parseInt(args[2]) : 12065169;
 const endBlock = args[3] ? parseInt(args[3]) : undefined;
 const tokenIdToGive =
   '55464657044963196816950587289035428064568320970692304673817341489688277422081';
-
-async function queryEvents(
-  contract: Contract,
-  filter: EventFilter,
-  startBlock: number,
-  endBlock?: number
-) {
-  if (!endBlock) {
-    endBlock = await ethers.provider.getBlockNumber();
-  }
-  let consecutiveSuccess = 0;
-  const successes: Record<number, boolean> = {};
-  const failures: Record<number, boolean> = {};
-  const events = [];
-  let blockRange = 100000;
-  let fromBlock = startBlock;
-  let toBlock = Math.min(fromBlock + blockRange, endBlock);
-  while (fromBlock <= endBlock) {
-    try {
-      const moreEvents = await contract.queryFilter(filter, fromBlock, toBlock);
-
-      console.log({fromBlock, toBlock, numEvents: moreEvents.length});
-      successes[blockRange] = true;
-      consecutiveSuccess++;
-      if (consecutiveSuccess > 6) {
-        const newBlockRange = blockRange * 2;
-        if (!failures[newBlockRange] || successes[newBlockRange]) {
-          blockRange = newBlockRange;
-          console.log({blockRange});
-        }
-      }
-
-      fromBlock = toBlock + 1;
-      toBlock = Math.min(fromBlock + blockRange, endBlock);
-      events.push(...moreEvents);
-    } catch (e) {
-      failures[blockRange] = true;
-      consecutiveSuccess = 0;
-      blockRange /= 2;
-      toBlock = Math.min(fromBlock + blockRange, endBlock);
-
-      console.log({fromBlock, toBlock, numEvents: 'ERROR'});
-      console.log({blockRange});
-      console.error(e);
-    }
-  }
-  return events;
-}
 
 void (async () => {
   const Asset = await ethers.getContract('Asset');

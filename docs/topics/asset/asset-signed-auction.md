@@ -98,6 +98,6 @@ ERC1654 <|-- AssetSignedAuctionAuth
 
 | Feature                 | Link                                                                                                                                              |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Contract                | [AssetSignedAuctionAuth.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/asset/AssetSignedAuctionAuth.sol) |
+| Contract                | [AssetSignedAuctionAuth.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/asset/AssetSignedAuctionWithAuth.sol) |
 | MetaTransactionReceiver | Yes                                                                                                                                               |
 

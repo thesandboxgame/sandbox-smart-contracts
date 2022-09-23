@@ -1,14 +1,12 @@
 import 'dotenv/config';
 import fs from 'fs-extra';
+import hre from 'hardhat';
 import {TheGraph} from '../utils/thegraph';
 import {getBlockArgs} from '../utils/utils';
-
 const blockNumber = getBlockArgs(0);
-
-const theGraph = new TheGraph(
-  'https://api.thegraph.com/subgraphs/name/pixowl/the-sandbox'
-);
-
+const graphUrl =
+  process.env[`SANDBOX_GRAPH_URL_${hre.network.name.toUpperCase()}`] || '';
+const theGraph = new TheGraph(graphUrl);
 const queryString = `
 query($blockNumber: Int! $first: Int! $lastId: ID!) {
   assetCollections(first: $first where: {id_gt: $lastId}, block: {number: $blockNumber}) {
@@ -31,16 +29,8 @@ void (async () => {
   const assetCollections: {id: string}[] = await theGraph.query(
     queryString,
     'assetCollections',
-    {
-      blockNumber,
-    }
+    {blockNumber}
   );
   console.log(assetCollections.length);
-
-  // write to disk
-  fs.ensureDirSync('tmp');
-  fs.writeFileSync(
-    'tmp/asset_collections.json',
-    JSON.stringify(assetCollections, null, '  ')
-  );
+  fs.outputJSONSync('tmp/asset_collections.json', assetCollections);
 })();

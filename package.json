@@ -96,6 +96,8 @@
     "fork:test": "node ./scripts.js fork:test",
     "claim:add": "yarn execute mainnet ./setup/add_new_multi_giveaway.ts Multi_Giveaway_1",
     "claim:send": "yarn execute mainnet ./setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1",
+    "claim:add:polygon": "yarn execute polygon ./setup/add_new_multi_giveaway.ts PolygonMulti_Giveaway_1",
+    "claim:send:polygon": "yarn execute polygon ./setup/send_assets_to_multi_giveaway.ts PolygonMulti_Giveaway_1",
     "landsale:send": "yarn execute mainnet ./setup/landsales/send_assets_to_sales.ts",
     "landsale:withdraw": "yarn execute mainnet ./setup/landsales/withdraw_from_sales.ts",
     "hardhat": "hardhat"

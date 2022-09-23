@@ -13,4 +13,5 @@ module.exports = {
   ui: 'bdd',
   watch: false,
   'watch-files': ['src/**/*.sol', 'test/**/*.ts', 'test/**/*.js'],
+  ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
 };

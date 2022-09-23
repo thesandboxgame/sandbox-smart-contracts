@@ -1,7 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {gemAdditionFee, upgradeFee} from '../../data/assetUpgraderFees';
 import {skipUnlessTest} from '../../utils/network';
-import {upgradeFee, gemAdditionFee} from '../../data/assetUpgraderFees';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getChainId} = hre;
@@ -51,6 +51,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         BURN_ADDRESS,
         TRUSTED_FORWARDER.address,
       ],
+      skipIfAlreadyDeployed: true,
     });
 
     const upgraderFeeBurner = await deployments.get(

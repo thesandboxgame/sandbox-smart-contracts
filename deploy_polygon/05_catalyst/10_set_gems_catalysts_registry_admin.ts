@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -50,5 +50,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['PolygonGemsCatalystsRegistry_setup', 'L2'];
+func.tags = [
+  'PolygonGemsCatalystsRegistry',
+  'PolygonGemsCatalystsRegistry_setup',
+  'L2',
+];
 func.dependencies = ['PolygonGemsCatalystsRegistry_deploy'];

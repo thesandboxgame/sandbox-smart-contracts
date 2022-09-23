@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
@@ -20,10 +20,14 @@ const func: DeployFunction = async function (
 
   const assetHelperLib = await deploy('AssetHelper', {
     from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
   });
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
     from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
   });
 
   await deploy('PolygonAssetERC1155', {

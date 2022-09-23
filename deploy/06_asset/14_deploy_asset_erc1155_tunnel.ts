@@ -1,5 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {constants} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -38,18 +39,31 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ].getNamedAccounts();
 
   if (PolygonAssetERC1155Tunnel) {
-    await hre.companionNetworks['l2'].deployments.execute(
-      'PolygonAssetERC1155Tunnel',
-      {from: deployerOnL2},
-      'setFxRootTunnel',
-      AssetERC1155Tunnel.address
+    const fxChildTunnel = await deployments.read(
+      'AssetERC721Tunnel',
+      'fxChildTunnel'
     );
-    await deployments.execute(
-      'AssetERC1155Tunnel',
-      {from: deployer},
-      'setFxChildTunnel',
-      PolygonAssetERC1155Tunnel.address
+    const fxRootTunnel = await hre.companionNetworks['l2'].deployments.read(
+      'PolygonAssetERC721Tunnel',
+      'fxRootTunnel'
     );
+
+    if (fxRootTunnel == constants.AddressZero) {
+      await hre.companionNetworks['l2'].deployments.execute(
+        'PolygonAssetERC1155Tunnel',
+        {from: deployerOnL2, log: true},
+        'setFxRootTunnel',
+        AssetERC1155Tunnel.address
+      );
+    }
+    if (fxChildTunnel == constants.AddressZero) {
+      await deployments.execute(
+        'AssetERC1155Tunnel',
+        {from: deployer, log: true},
+        'setFxChildTunnel',
+        PolygonAssetERC1155Tunnel.address
+      );
+    }
   }
 };
 

@@ -19,6 +19,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
   solidity: {
     compilers: [
@@ -123,7 +124,11 @@ const config: HardhatUserConfig = {
 
     upgradeAdmin: 'sandAdmin',
 
-    multiGiveawayAdmin: 'sandAdmin',
+    multiGiveawayAdmin: {
+      default: 'sandAdmin',
+      mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
+    },
 
     liquidityRewardProvider: {
       default: 'sandBeneficiary',
@@ -245,6 +250,8 @@ const config: HardhatUserConfig = {
       rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
+      mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     backendCashbackWallet: {
       // default is computed from private key:
@@ -269,6 +276,7 @@ const config: HardhatUserConfig = {
     sandboxFoundation: {
       default: 4,
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
+      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', //'0xfe66Ec1B46494FE49F53733a098587bf5D12BD88',
     },
     extraCatalystAndGemMinter: {
       default: null,
@@ -333,6 +341,11 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
       accounts: accounts(),
       tags: ['testnet', 'L1', 'L2'],
+      deploy: ['deploy_polygon', 'deploy'],
+      companionNetworks: {
+        l1: 'localhost',
+        l2: 'localhost',
+      },
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
@@ -423,7 +436,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY_MUMBAI || '',
+      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
     },
   },
 };

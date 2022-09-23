@@ -1,7 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
 import {constants} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -44,25 +44,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     const fxRootTunnel = await read('PolygonAssetERC721Tunnel', 'fxRootTunnel');
 
-    if (
-      fxRootTunnel !== PolygonAssetERC721Tunnel.address &&
-      fxRootTunnel == constants.AddressZero
-    ) {
+    if (fxRootTunnel == constants.AddressZero) {
       await deployments.execute(
         'PolygonAssetERC721Tunnel',
-        {from: deployer},
+        {from: deployer, log: true},
         'setFxRootTunnel',
         AssetERC721Tunnel.address
       );
     }
 
-    if (
-      fxChildTunnel !== PolygonAssetERC721Tunnel.address &&
-      fxChildTunnel == constants.AddressZero
-    ) {
+    if (fxChildTunnel == constants.AddressZero) {
       await hre.companionNetworks['l1'].deployments.execute(
         'AssetERC721Tunnel',
-        {from: deployerOnL1},
+        {from: deployerOnL1, log: true},
         'setFxChildTunnel',
         PolygonAssetERC721Tunnel.address
       );
