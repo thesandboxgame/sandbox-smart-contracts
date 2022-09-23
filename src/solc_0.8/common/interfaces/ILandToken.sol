@@ -26,4 +26,6 @@ interface ILandToken {
         uint256[] calldata ids,
         bytes calldata data
     ) external;
+
+    function isSuperOperator(address who) external view returns (bool);
 }
