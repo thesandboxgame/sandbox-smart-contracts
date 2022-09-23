@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
+import "../../../common/interfaces/ILandToken.sol";
 
 abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721BaseTokenV2 {
     using AddressUpgradeable for address;
@@ -615,6 +616,10 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
                 }
             }
         }
+    }
+
+    function isSuperOperator(address who) public view override(ILandToken, WithSuperOperatorsV2) returns (bool) {
+        return _superOperators[who];
     }
 
     // Empty storage space in contracts for future enhancements
