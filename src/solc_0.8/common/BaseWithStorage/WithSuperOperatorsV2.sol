@@ -22,7 +22,7 @@ contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
     /// @notice check whether address `who` is given superOperator rights.
     /// @param who The address to query.
     /// @return whether the address has superOperator rights.
-    function isSuperOperator(address who) public view returns (bool) {
+    function isSuperOperator(address who) public view virtual returns (bool) {
         return _superOperators[who];
     }
 }
