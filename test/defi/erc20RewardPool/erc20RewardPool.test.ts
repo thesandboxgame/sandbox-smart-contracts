@@ -573,7 +573,7 @@ describe('ERC20RewardPool main contract tests', function () {
         );
       }
       // call computeContributionInBatch
-      const emitPromise = expect(
+      const emitPromise = await expect(
         contract.computeContributionInBatch(users.map((u) => u.address))
       ).to.emit(contract, 'ContributionUpdated');
       users.forEach((u) =>
@@ -841,7 +841,7 @@ describe('ERC20RewardPool main contract tests', function () {
     it('should fail to set the trusted forwarder if not admin', async function () {
       const {rewardToken, contractAsOther} = await setupERC20RewardPoolTest();
 
-      expect(
+      await expect(
         contractAsOther.setTrustedForwarder(rewardToken.address)
       ).to.be.revertedWith('ERC20RewardPool: not admin');
     });
@@ -850,11 +850,11 @@ describe('ERC20RewardPool main contract tests', function () {
 
       const user = await getUser();
 
-      expect(contract.setTrustedForwarder(user.address)).to.be.revertedWith(
-        'ERC20RewardPool: is not a contract'
-      );
+      await expect(
+        contract.setTrustedForwarder(user.address)
+      ).to.be.revertedWith('ERC20RewardPool: is not a contract');
 
-      expect(contract.setTrustedForwarder(rewardToken.address)).not.to.be
+      await expect(contract.setTrustedForwarder(rewardToken.address)).not.to.be
         .reverted;
 
       expect(await contract.getTrustedForwarder()).to.be.equal(
