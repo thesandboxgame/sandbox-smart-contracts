@@ -5,6 +5,8 @@ import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
+
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
@@ -18,6 +20,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard, ERC2771HandlerUpgradeable {
+    using Address for address;
     using Address for address;
     uint256 public maxSupply;
 
