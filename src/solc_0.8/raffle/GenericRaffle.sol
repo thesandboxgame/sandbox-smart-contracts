@@ -285,4 +285,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
     }
+
+    function renounceOwnership() public virtual override onlyOwner {
+        revert("Renounce ownership is not available");
+    }
 }
