@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
+
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
@@ -13,6 +15,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard {
+    using Address for address;
     uint256 public maxSupply;
 
     event TogglePaused(bool _pause);
@@ -51,7 +54,12 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         __ERC721_init(_name, _symbol);
         __Ownable_init_unchained();
         setBaseURI(baseURI);
-        require(_sandOwner != address(0), "Sand owner is zero address");
+        require(bytes(baseURI).length != 0, "baseURI is not set");
+        require(bytes(_name).length != 0, "_name is not set");
+        require(bytes(_symbol).length != 0, "_symbol is not set");
+        require(_signAddress != address(0x0), "Sign address is zero address");
+        require(_sandOwner != address(0x0), "Sand owner is zero address");
+        require(_maxSupply > 0, "Max supply should be more than 0");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
         maxSupply = _maxSupply;
@@ -65,9 +73,11 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         address _contractAddress,
         uint256 _erc1155Id
     ) external onlyOwner {
+        require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
         require(_waveType < 3 && _waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
         if (_waveType != 0) {
             require(_contractAddress != address(0x0), "Invalid contract address");
+            require(_contractAddress.isContract(), "Contract address must be that of a contract");
         }
         require(_waveMaxTokensToBuy <= _waveMaxTokens, "Invalid supply configuration");
 
@@ -76,7 +86,7 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         waveMaxTokensToBuy = _waveMaxTokensToBuy;
         waveSingleTokenPrice = _waveSingleTokenPrice;
         waveTotalMinted = 0;
-        contractAddress = _waveType == 0 ? address(0) : _contractAddress;
+        contractAddress = _waveType == 0 ? address(0x0) : _contractAddress;
         erc1155Id = _waveType == 2 ? _erc1155Id : 0;
         indexWave++;
     }
@@ -112,6 +122,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         require(indexWave > 0, "Contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "Not allowed");
         require(paused == 0, "Contract is paused");
+        require(_wallet != address(0x0), "Wallet is zero address");
+        require(_amount > 0, "Amount cannot be 0");
         require(signatureIds[_signatureId] == 0, "signatureId already used");
         require(
             checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
@@ -251,10 +263,12 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     }
 
     function setAllowedExecuteMint(address _address) external onlyOwner {
+        require(_address != address(0x0), "Address is zero address");
         allowedToExecuteMint = _address;
     }
 
     function setSandOwnerAddress(address _owner) external onlyOwner {
+        require(_owner != address(0x0), "Owner is zero address");
         sandOwner = _owner;
     }
 
@@ -263,10 +277,12 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner {
+        require(bytes(baseURI).length != 0, "baseURI is not set");
         baseTokenURI = baseURI;
     }
 
     function setSignAddress(address _signAddress) external onlyOwner {
+        require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
     }
 }
