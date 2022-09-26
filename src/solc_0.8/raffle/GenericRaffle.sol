@@ -20,6 +20,24 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
 
     event TogglePaused(bool _pause);
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);
+    event ContractInitialized(
+        string baseURI,
+        string _name,
+        string _symbol,
+        address _sandOwner,
+        address _signAddress,
+        uint256 _maxSupply
+    );
+    event WaveSetup(
+        uint256 _waveType,
+        uint256 _waveMaxTokens,
+        uint256 _waveMaxTokensToBuy,
+        uint256 _waveSingleTokenPrice
+    );
+    event AllowedExecuteMintSet(address _address);
+    event SandOwnerSet(address _owner);
+    event BaseURISet(string baseURI);
+    event SignAddressSet(address _signAddress);
 
     uint256 public waveType = 0;
     uint256 public waveMaxTokens;
@@ -63,6 +81,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         sandOwner = _sandOwner;
         signAddress = _signAddress;
         maxSupply = _maxSupply;
+
+        emit ContractInitialized(baseURI, _name, _symbol, _sandOwner, _signAddress, _maxSupply);
     }
 
     function setupWave(
@@ -89,6 +109,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         contractAddress = _waveType == 0 ? address(0x0) : _contractAddress;
         erc1155Id = _waveType == 2 ? _erc1155Id : 0;
         indexWave++;
+
+        emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
     function price(uint256 _count) public view virtual returns (uint256) {
@@ -265,11 +287,13 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     function setAllowedExecuteMint(address _address) external onlyOwner {
         require(_address != address(0x0), "Address is zero address");
         allowedToExecuteMint = _address;
+        emit AllowedExecuteMintSet(_address);
     }
 
     function setSandOwnerAddress(address _owner) external onlyOwner {
         require(_owner != address(0x0), "Owner is zero address");
         sandOwner = _owner;
+        emit SandOwnerSet(_owner);
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
@@ -279,11 +303,13 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     function setBaseURI(string memory baseURI) public onlyOwner {
         require(bytes(baseURI).length != 0, "baseURI is not set");
         baseTokenURI = baseURI;
+        emit BaseURISet(baseURI);
     }
 
     function setSignAddress(address _signAddress) external onlyOwner {
         require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
+        emit SignAddressSet(_signAddress);
     }
 
     function renounceOwnership() public virtual override onlyOwner {
