@@ -11,10 +11,11 @@ import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard {
+contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using Address for address;
     uint256 public maxSupply;
 
@@ -315,4 +316,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     function renounceOwnership() public virtual override onlyOwner {
         revert("Renounce ownership is not available");
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[50] private __gap;
 }
