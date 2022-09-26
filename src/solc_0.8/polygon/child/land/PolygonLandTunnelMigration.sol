@@ -65,9 +65,9 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             uint256[] memory y = new uint256[](numOfIds);
             uint256[] memory sizes = new uint256[](numOfIds);
             for (uint256 j; j < ids.length; j++) {
-                x[i] = ids[j] % GRID_SIZE;
-                y[i] = ids[j] / GRID_SIZE;
-                sizes[i] = 1;
+                x[j] = ids[j] % GRID_SIZE;
+                y[j] = ids[j] / GRID_SIZE;
+                sizes[j] = 1;
             }
 
             // Withdraw tokens to L1
