@@ -17,7 +17,7 @@ const {calculateMultiClaimHash} = helpers;
 const args = process.argv.slice(2);
 const claimContract = args[0];
 const claimFile = args[1];
-const DEFAULT_ADMIN_ROLE =
+const ADMIN_ROLE =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 const func: DeployFunction = async function () {
@@ -71,7 +71,7 @@ const func: DeployFunction = async function () {
   const isMultiGiveAwaySuperOperator = await read(
     claimContract,
     'hasRole',
-    DEFAULT_ADMIN_ROLE,
+    ADMIN_ROLE,
     multiGiveawayAdmin
   ).catch(() => null);
 
