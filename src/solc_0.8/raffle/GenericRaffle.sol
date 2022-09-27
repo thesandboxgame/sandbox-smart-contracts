@@ -3,6 +3,8 @@ pragma solidity 0.8.2;
 
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
+import "../common/BaseWithStorage/ERC2771Handler.sol";
+
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
@@ -15,7 +17,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard, ERC2771HandlerUpgradeable {
     using Address for address;
     uint256 public maxSupply;
 
@@ -68,9 +70,11 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         string memory _symbol,
         address payable _sandOwner,
         address _signAddress,
+        address _trustedForwarder,
         uint256 _maxSupply
     ) internal onlyInitializing {
         __ERC721_init(_name, _symbol);
+        __ERC2771Handler_initialize(_trustedForwarder);
         __Ownable_init_unchained();
         setBaseURI(baseURI);
         require(bytes(baseURI).length != 0, "baseURI is not set");
@@ -311,6 +315,28 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
         emit SignAddressSet(_signAddress);
+    }
+
+    /// @dev this override is required
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
+        if (isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return msg.sender;
+        }
+    }
+
+    /// @dev this override is required
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
+        if (isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return msg.data;
+        }
     }
 
     function renounceOwnership() public virtual override onlyOwner {
