@@ -5,20 +5,20 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
-import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
-import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
-import MerkleTree from '../../lib/merkleTree';
-import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
-import {expect} from '../chai-setup';
-import {zeroAddress} from '../land-sale/fixtures';
-import {depositViaChildChainManager} from '../polygon/sand/fixtures';
+import {default as testData0} from '../../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
+import {default as testData1} from '../../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
+import {createClaimMerkleTree} from '../../../data/giveaways/multi_giveaway_1/getClaims';
+import MerkleTree from '../../../lib/merkleTree';
+import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
+import {expect} from '../../chai-setup';
+import {zeroAddress} from '../../land-sale/fixtures';
+import {depositViaChildChainManager} from '../../polygon/sand/fixtures';
 import {
   expectReceiptEventWithArgs,
   sequentially,
   waitFor,
   withSnapshot,
-} from '../utils';
+} from '../../utils';
 
 const {createDataArrayMultiClaim} = helpers;
 
@@ -36,13 +36,7 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  [
-    'Multi_Giveaway_1',
-    'PolygonAssetERC1155',
-    'PolygonGems',
-    'PolygonSand',
-    'PolygonCatalysts',
-  ],
+  ['PolygonAssetERC1155', 'PolygonGems', 'PolygonSand', 'PolygonCatalysts'],
   async function (hre, options?: Options) {
     const {
       mint,
@@ -97,7 +91,7 @@ export const setupTestGiveaway = withSnapshot(
 
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
-      contract: 'MultiGiveaway',
+      contract: 'MultiGiveawayV2',
       args: [sandAdmin, multiGiveawayAdmin, trustedForwarder.address],
     });
 

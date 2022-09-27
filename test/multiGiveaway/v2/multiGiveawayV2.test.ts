@@ -8,17 +8,17 @@ import {
   findEvents,
   increaseTime,
   waitFor,
-} from '../utils';
-import {sendMetaTx} from '../sendMetaTx';
-import {expect} from '../chai-setup';
+} from '../../utils';
+import {sendMetaTx} from '../../sendMetaTx';
+import {expect} from '../../chai-setup';
 
-import helpers from '../../lib/merkleTreeHelper';
+import helpers from '../../../lib/merkleTreeHelper';
 import {
   testFinalAssetAndLandBalances,
   testInitialAssetAndLandBalances,
   testInitialERC20Balance,
   testUpdatedERC20Balance,
-} from './balanceHelpers';
+} from '../balanceHelpers';
 
 const {calculateMultiClaimHash} = helpers;
 
@@ -28,7 +28,7 @@ const emptyBytes32 =
 const randomMerkleTree =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
-describe('Multi_Giveaway', function () {
+describe('Multi_Giveaway_V2', function () {
   describe('Multi_Giveaway_common_functionality', function () {
     it('Default admin has the correct role', async function () {
       const options = {};

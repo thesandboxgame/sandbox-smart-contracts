@@ -1,10 +1,10 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
-import {waitFor} from '../utils';
-import helpers from '../../lib/merkleTreeHelper';
+import {waitFor} from '../../utils';
+import helpers from '../../../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
-describe('GAS:Multi_Giveaway_1:Claiming', function () {
+describe('GAS:Multi_Giveaway_V2_1:Claiming', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gasReport: any = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
