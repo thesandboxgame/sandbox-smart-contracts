@@ -4,12 +4,15 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
+
   const {
     deployer,
     upgradeAdmin,
     treasury,
     raffleSignWallet,
   } = await getNamedAccounts();
+
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
@@ -26,7 +29,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [metadataUrl, 'Steve Aoki', 'SA', treasury, raffleSignWallet],
+        args: [
+          metadataUrl,
+          'Steve Aoki',
+          'SA',
+          treasury,
+          raffleSignWallet,
+          TRUSTED_FORWARDER.address,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -36,3 +46,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['RaffleSteveAoki', 'RaffleSteveAoki_deploy'];
+func.dependencies = ['TRUSTED_FORWARDER'];
