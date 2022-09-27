@@ -2,28 +2,49 @@
 pragma solidity 0.8.2;
 
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
-import {ClaimERC1155ERC721ERC20} from "./ClaimERC1155ERC721ERC20.sol";
+import {ClaimERC1155ERC721ERC20V2} from "./ClaimERC1155ERC721ERC20V2.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
 /// @notice This contract manages claims for multiple token types
+/// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, MULTIGIVEAWAY_ROLE
+/// @notice DEFAULT_ADMIN_ROLE is intended for setup / emergency, MULTIGIVEAWAY_ROLE is provided for business purposes
 /// @dev The contract implements ERC2771 to ensure that users do not pay gas
-contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler, Pausable {
+contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Handler, Pausable {
+    /// @dev `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
+
+    /// @dev `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+
+    /// @dev `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
+
+    /// @dev `bytes4(keccak256("onERC721BatchReceived(address,address,uint256[],bytes)"))`
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
 
     mapping(address => mapping(bytes32 => bool)) public claimed;
-    mapping(bytes32 => uint256) internal _expiryTime;
+    mapping(bytes32 => uint256) private _expiryTime;
+
+    /// @dev MULTIGIVEAWAY_ROLE is provided for business-related admin functions
+    bytes32 public constant MULTIGIVEAWAY_ROLE = keccak256("MULTIGIVEAWAY_ROLE");
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
-    event NewTrustedForwarder(address trustedForwarder);
+    event NewTrustedForwarder(address indexed trustedForwarder);
 
-    constructor(address admin, address trustedForwarder) {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+    /// @notice Constructor with the admin & trusted forwarder
+    /// @param admin Admin of the contract
+    /// @param trustedForwarder Trusted forwarder for ERC2771
+    constructor(
+        address admin,
+        address multigiveawayAdmin,
+        address trustedForwarder
+    ) {
+        require(admin != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(MULTIGIVEAWAY_ROLE, multigiveawayAdmin);
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
@@ -32,9 +53,12 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(MULTIGIVEAWAY_ROLE)
         whenNotPaused()
     {
+        require(expiryTime > block.timestamp, "MULTIGIVEAWAY_INVALID_INPUT");
+        require(merkleRoot != 0, "MULTIGIVEAWAY_INVALID_INPUT");
+        require(_expiryTime[merkleRoot] == 0, "MULTIGIVEAWAY_ALREADY_EXISTS");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -42,6 +66,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "MULTIGIVEAWAY_INVALID_ZERO_ADDRESS");
         _trustedForwarder = trustedForwarder;
 
         emit NewTrustedForwarder(trustedForwarder);
@@ -96,6 +121,26 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }
 
+    /// @notice Get the expiry time for a merkle root
+    /// @param merkleRoot merkle root
+    function getExpiryTime(bytes32 merkleRoot) external view returns (uint256) {
+        return _expiryTime[merkleRoot];
+    }
+
+    /// @notice Pause the contract
+    /// @dev Only the role DEFAULT_ADMIN_ROLE can pause
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause the contract
+    /// @dev Only the role DEFAULT_ADMIN_ROLE can unpause
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /// @notice Handle the receipt of an NFT
+    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     function onERC721Received(
         address, /*operator*/
         address, /*from*/
@@ -105,6 +150,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         return ERC721_RECEIVED;
     }
 
+    /// @notice Handle the receipt of a batch of NFTs
+    /// @return `bytes4(keccak256("onERC721BatchReceived(address,address,uint256[],bytes)"))`
     function onERC721BatchReceived(
         address, /*operator*/
         address, /*from*/
@@ -114,6 +161,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         return ERC721_BATCH_RECEIVED;
     }
 
+    /// @notice Handle the receipt of a single ERC1155 token type.
+    /// @return `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     function onERC1155Received(
         address, /*operator*/
         address, /*from*/
@@ -124,6 +173,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         return ERC1155_RECEIVED;
     }
 
+    /// @notice Handle the receipt of a batch of ERC1155 tokens type.
+    /// @return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     function onERC1155BatchReceived(
         address, /*operator*/
         address, /*from*/
@@ -134,10 +185,14 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         return ERC1155_BATCH_RECEIVED;
     }
 
+    /// @dev Returns the real sender of meta-transactions
+    /// @return sender sender of the meta-tx
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
+    /// @dev Returns the real data of meta-transactions
+    /// @return calldata data of the meta-tx
     function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }

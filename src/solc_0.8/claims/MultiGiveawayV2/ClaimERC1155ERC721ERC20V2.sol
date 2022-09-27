@@ -7,7 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20
 import {MerkleProof} from "@openzeppelin/contracts-0.8/utils/cryptography/MerkleProof.sol";
 import {IERC721Extended} from "../../common/interfaces/IERC721Extended.sol";
 
-contract ClaimERC1155ERC721ERC20 {
+contract ClaimERC1155ERC721ERC20V2 {
     using SafeERC20 for IERC20;
 
     struct Claim {
@@ -41,7 +41,7 @@ contract ClaimERC1155ERC721ERC20 {
     /// @param erc20 The ERC20Claim struct containing the amounts and ERC20 contract addresses.
     /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
     event ClaimedMultipleTokens(
-        address to,
+        address indexed to,
         ERC1155Claim[] erc1155,
         ERC721Claim[] erc721,
         ERC20Claim erc20,
