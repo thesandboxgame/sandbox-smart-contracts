@@ -41,11 +41,6 @@ contract PolygonLandTunnelV2 is
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
 
-    function _setLimit(uint8 size, uint32 limit) internal {
-        gasLimits[size] = limit;
-        emit SetGasLimit(size, limit);
-    }
-
     function setLimit(uint8 size, uint32 limit) external onlyOwner {
         _setLimit(size, limit);
     }
@@ -120,6 +115,30 @@ contract PolygonLandTunnelV2 is
         _unpause();
     }
 
+    function onERC721Received(
+        address operator,
+        address, /* from */
+        uint256, /* tokenId */
+        bytes calldata /* data */
+    ) external view override returns (bytes4) {
+        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
+        return this.onERC721Received.selector;
+    }
+
+    function onERC721BatchReceived(
+        address operator,
+        address, /* from */
+        uint256[] calldata, /* ids */
+        bytes calldata /* data */
+    ) external view override returns (bytes4) {
+        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
+        return this.onERC721BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
+    }
+
     function _processMessageFromRoot(
         uint256, /* stateId */
         address sender,
@@ -144,27 +163,8 @@ contract PolygonLandTunnelV2 is
         return ERC2771Handler._msgData();
     }
 
-    function onERC721Received(
-        address operator,
-        address, /* from */
-        uint256, /* tokenId */
-        bytes calldata /* data */
-    ) external view override returns (bytes4) {
-        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
-        return this.onERC721Received.selector;
-    }
-
-    function onERC721BatchReceived(
-        address operator,
-        address, /* from */
-        uint256[] calldata, /* ids */
-        bytes calldata /* data */
-    ) external view override returns (bytes4) {
-        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
-        return this.onERC721BatchReceived.selector;
-    }
-
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
+    function _setLimit(uint8 size, uint32 limit) internal {
+        gasLimits[size] = limit;
+        emit SetGasLimit(size, limit);
     }
 }
