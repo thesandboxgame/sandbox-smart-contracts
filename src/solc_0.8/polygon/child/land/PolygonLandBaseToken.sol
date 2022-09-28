@@ -124,6 +124,10 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         _mintQuad(user, size, x, y, data);
     }
 
+    function isSuperOperator(address who) public view override(ILandToken, WithSuperOperatorsV2) returns (bool) {
+        return _superOperators[who];
+    }
+
     function _mintQuad(
         address to,
         uint256 size,
@@ -616,10 +620,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
                 }
             }
         }
-    }
-
-    function isSuperOperator(address who) public view override(ILandToken, WithSuperOperatorsV2) returns (bool) {
-        return _superOperators[who];
     }
 
     // Empty storage space in contracts for future enhancements
