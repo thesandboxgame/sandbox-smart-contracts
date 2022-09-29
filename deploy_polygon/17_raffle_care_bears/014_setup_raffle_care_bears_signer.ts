@@ -26,4 +26,4 @@ func.tags = [
   'RaffleCareBears_setup',
   'RaffleCareBears_setup_signer',
 ];
-func.dependencies = ['Sand_deploy', 'RaffleCareBears_deploy'];
+func.dependencies = ['SandBaseToken', 'RaffleCareBears_deploy'];

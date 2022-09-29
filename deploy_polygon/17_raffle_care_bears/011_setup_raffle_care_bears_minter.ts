@@ -5,7 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {get, read, execute, catchUnknownSigner} = deployments;
 
-  const sandContract = await get('Sand');
+  const sandContract = await get('PolygonSand');
   const minter = await read('RaffleCareBears', 'allowedToExecuteMint');
   if (minter !== sandContract.address) {
     const owner = await read('RaffleCareBears', 'owner');
@@ -26,4 +26,4 @@ func.tags = [
   'RaffleCareBears_setup',
   'RaffleCareBears_setup_minter',
 ];
-func.dependencies = ['Sand_deploy', 'RaffleCareBears_deploy'];
+func.dependencies = ['SandBaseToken', 'RaffleCareBears_deploy'];
