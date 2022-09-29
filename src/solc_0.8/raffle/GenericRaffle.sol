@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
-
-import "../common/BaseWithStorage/ERC2771Handler.sol";
-
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
@@ -12,12 +11,18 @@ import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC2771Handler {
+contract GenericRaffle is
+    ERC721EnumerableUpgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    ERC2771HandlerUpgradeable
+{
     using Address for address;
     uint256 public maxSupply;
 
@@ -317,12 +322,17 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         emit SignAddressSet(_signAddress);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 
     function renounceOwnership() public virtual override onlyOwner {
