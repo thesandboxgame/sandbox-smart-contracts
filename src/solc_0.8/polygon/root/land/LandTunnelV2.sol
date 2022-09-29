@@ -35,6 +35,9 @@ contract LandTunnelV2 is
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
+    /// @dev called on ERC721 trasnfer to this contract
+    /// @param operator address of the one sending the ERC721 Token
+    /// @return onERC721Received function selector
     function onERC721Received(
         address operator,
         address, /* from */
@@ -45,6 +48,9 @@ contract LandTunnelV2 is
         return this.onERC721Received.selector;
     }
 
+    /// @dev called on ERC721 batch trasnfer to this contract
+    /// @param operator address of the one sending the ERC721 Token
+    /// @return onERC721BatchReceived function selector
     function onERC721BatchReceived(
         address operator,
         address, /* from */
