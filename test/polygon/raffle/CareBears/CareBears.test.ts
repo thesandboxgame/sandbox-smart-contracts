@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {waitFor} from '../../utils';
+import {waitFor} from '../../../utils';
 
 import {
   raffleSignWallet,
@@ -182,7 +182,6 @@ describe('RaffleCareBears', function () {
         raffleCareBearsContract.filters.Transfer(),
         receipt.blockNumber
       );
-      console.log(transferEvents.length);
       assert.equal(transferEvents.length, amount);
 
       for (const transferEvent of transferEvents) {

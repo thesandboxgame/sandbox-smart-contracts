@@ -1,8 +1,9 @@
 import {assert} from 'chai';
-import {Contract, Wallet} from 'ethers';
+import {BigNumber, Contract, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, getNamedAccounts} from 'hardhat';
-import {withSnapshot, waitFor} from '../../utils';
+import {withSnapshot, waitFor} from '../../../utils';
+import {depositViaChildChainManager} from '../../sand/fixtures';
 
 export {assert};
 
@@ -14,8 +15,20 @@ export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const setupRaffle = withSnapshot(['RaffleCareBears'], async function (
   hre
 ) {
+  const {sandAdmin} = await getNamedAccounts();
+
   const raffleCareBearsContract = await ethers.getContract('RaffleCareBears');
-  const sandContract = await ethers.getContract('Sand');
+  const sandContract = await ethers.getContract('PolygonSand');
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+
+  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
+    SAND_AMOUNT
+  );
+
   return {
     raffleCareBearsContract,
     sandContract,
@@ -147,11 +160,13 @@ function signAuthMessageAs(
 }
 
 async function transferSand(address: string, amount: string) {
-  const sandContract = await ethers.getContract('Sand');
   const {sandBeneficiary} = await getNamedAccounts();
+  const sandContract = await ethers.getContract('PolygonSand');
+
   const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
+
   await sandContractAsSandBeneficiary.transfer(address, amount);
 }
 
