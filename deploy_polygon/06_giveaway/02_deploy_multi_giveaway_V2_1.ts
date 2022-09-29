@@ -23,4 +23,5 @@ func.tags = [
   'PolygonMulti_Giveaway_V2_1_deploy',
   'L2',
 ];
+func.dependencies = ['TRUSTED_FORWARDER_V2'];
 func.skip = skipUnlessTest;
