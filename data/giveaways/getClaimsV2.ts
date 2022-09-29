@@ -20,7 +20,6 @@ export function createClaimMerkleTreeV2(
     secret = fs.readFileSync(secretPath);
   } catch (e) {
     if (hre.network.live) {
-      console.log("YES")
       throw e;
     }
     secret =
