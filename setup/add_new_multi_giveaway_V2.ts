@@ -2,14 +2,14 @@
  * How to use:
  *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME>
  *
- * GIVEAWAY_CONTRACT: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway contract is: Multi_Giveaway_1
- * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
+ * GIVEAWAY_CONTRACT: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway contract is: PolygonMulti_Giveaway__V2_1
+ * GIVEAWAY_NAME: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway name is: detective_letty
  */
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
+import {createClaimMerkleTree} from '../data/giveaways/getClaims';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 
 const {calculateMultiClaimHash} = helpers;
@@ -100,7 +100,7 @@ const func: DeployFunction = async function () {
       proof: tree.getProof(calculateMultiClaimHash(claim)),
     });
   }
-  const basePath = `./secret/multi-giveaway/${network.name}`;
+  const basePath = `./secret/multi-giveaway-v2/${network.name}`;
   const proofPath = `${basePath}/.multi_claims_proofs_${claimFile}_${chainId}.json`;
   const rootHashPath = `${basePath}/.multi_claims_root_hash_${claimFile}_${chainId}.json`;
   fs.outputJSONSync(proofPath, claimsWithProofs);

@@ -7,7 +7,7 @@ import {
 } from 'hardhat';
 import {default as testData0} from '../../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
-import {createClaimMerkleTree} from '../../../data/giveaways/multi_giveaway_1/getClaims';
+import {createClaimMerkleTree} from '../../../data/giveaways/getClaims';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 import {expect} from '../../chai-setup';
