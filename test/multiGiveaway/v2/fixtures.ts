@@ -7,7 +7,7 @@ import {
 } from 'hardhat';
 import {default as testData0} from '../../../data/giveaways/polygonmulti_giveaway_v2_1/claims_0_hardhat.json';
 import {default as testData1} from '../../../data/giveaways/polygonmulti_giveaway_v2_1/claims_1_hardhat.json';
-import {createClaimMerkleTree} from '../../../data/giveaways/getClaims';
+import {createClaimMerkleTreeV2} from '../../../data/giveaways/getClaimsV2';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 import {expect} from '../../chai-setup';
@@ -360,7 +360,7 @@ export const setupTestGiveaway = withSnapshot(
     const {
       claims: claims0,
       merkleRootHash: merkleRootHash0,
-    } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
+    } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
 
     const allMerkleRoots = [];
     const allClaims = [claims0];
@@ -389,7 +389,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: claims1,
         merkleRootHash: merkleRootHash1,
-      } = createClaimMerkleTree(hre, dataWithIds1, 'Multi_Giveaway_1');
+      } = createClaimMerkleTreeV2(hre, dataWithIds1, 'Multi_Giveaway_V2_1');
       allClaims.push(claims1);
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
@@ -411,7 +411,7 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: badClaims0,
         merkleRootHash: badMerkleRootHash0,
-      } = createClaimMerkleTree(hre, dataWithIds0, 'Multi_Giveaway_1');
+      } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
       allClaims.push(badClaims0);
       allMerkleRoots.push(badMerkleRootHash0);
       const hashArray2 = createDataArrayMultiClaim(badClaims0);
