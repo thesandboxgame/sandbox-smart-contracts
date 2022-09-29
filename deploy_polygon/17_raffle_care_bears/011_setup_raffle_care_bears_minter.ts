@@ -26,4 +26,4 @@ func.tags = [
   'RaffleCareBears_setup',
   'RaffleCareBears_setup_minter',
 ];
-func.dependencies = ['SandBaseToken', 'RaffleCareBears_deploy'];
+func.dependencies = ['PolygonSand', 'RaffleCareBears_deploy'];
