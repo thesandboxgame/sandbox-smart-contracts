@@ -115,21 +115,27 @@ contract PolygonLandTunnelV2 is
         _unpause();
     }
 
+    /// @dev called on ERC721 trasnfer to this contract
+    /// @param operator address of the one sending the ERC721 Token
+    /// @return onERC721Received function selector
     function onERC721Received(
         address operator,
-        address, /* from */
-        uint256, /* tokenId */
-        bytes calldata /* data */
+        address,
+        uint256,
+        bytes calldata
     ) external view override returns (bytes4) {
         require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
+    /// @dev called on ERC721 batch trasnfer to this contract
+    /// @param operator address of the one sending the ERC721 Token
+    /// @return onERC721BatchReceived function selector
     function onERC721BatchReceived(
         address operator,
-        address, /* from */
-        uint256[] calldata, /* ids */
-        bytes calldata /* data */
+        address,
+        uint256[] calldata,
+        bytes calldata
     ) external view override returns (bytes4) {
         require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
         return this.onERC721BatchReceived.selector;
@@ -140,7 +146,7 @@ contract PolygonLandTunnelV2 is
     }
 
     function _processMessageFromRoot(
-        uint256, /* stateId */
+        uint256,
         address sender,
         bytes memory data
     ) internal override validateSender(sender) {
