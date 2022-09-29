@@ -1,6 +1,6 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME>
+ *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> GIVEAWAY_SALT>
  *
  * GIVEAWAY_CONTRACT: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway contract is: PolygonMulti_Giveaway__V2_1
  * GIVEAWAY_NAME: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway name is: detective_letty
