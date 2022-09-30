@@ -29,6 +29,7 @@ void (async () => {
 
   console.log('Fetching owner of LandIds');
   let ownerOfLands: any = {};
+  let withdrawEventArgsOfTransaction: any = {};
 
   // fetch the intended owners on L1 for common Lands on both L1 and L2
   for (let i = 0; i < commonIds.length; i++) {
@@ -48,11 +49,22 @@ void (async () => {
   }
 
   const owners = Object.keys(ownerOfLands);
+  const transactions = Object.keys(withdrawEventArgsOfTransaction);
   const ownerWithLandIdsArr = [];
   for (let i = 0; i < owners.length; i++) {
+    const sizes = [];
+    const x = [];
+    const y = [];
     const ids = ownerOfLands[owners[i]];
     const owner = owners[i];
-    const ownerWithLandIdsObject = {owner, ids};
+    for (let j = 0; j < transactions.length; j++) {
+      if (withdrawEventArgsOfTransaction[transactions[j]].to === owners[i]) {
+        sizes.push(withdrawEventArgsOfTransaction[transactions[j]].size);
+        x.push(withdrawEventArgsOfTransaction[transactions[j]].x);
+        y.push(withdrawEventArgsOfTransaction[transactions[j]].y);
+      }
+    }
+    const ownerWithLandIdsObject = {owner, ids, sizes, x, y};
     ownerWithLandIdsArr.push(ownerWithLandIdsObject);
   }
 
@@ -79,8 +91,24 @@ void (async () => {
     const iface = new ethers.utils.Interface(withdrawEventSignature);
     const length = transaction.logs.length;
     const withDrawLog = iface.parseLog(transaction.logs[length - 3]);
-
+    saveWithDrawEventArguments(transactionHash, withDrawLog);
     return withDrawLog.args[0];
+  }
+
+  // function to save withdraw event argument for a transaction
+  function saveWithDrawEventArguments(
+    transactionHash: string,
+    withDrawLog: any
+  ) {
+    withdrawEventArgsOfTransaction = {
+      ...withdrawEventArgsOfTransaction,
+      [transactionHash]: {
+        to: withDrawLog.args[0],
+        size: parseInt(withDrawLog.args[1]._hex),
+        x: parseInt(withDrawLog.args[2]._hex),
+        y: parseInt(withDrawLog.args[3]._hex),
+      },
+    };
   }
 
   // function to query event from startBlock to endBlock
@@ -135,9 +163,12 @@ void (async () => {
   interface ownerWithLandID {
     owner: string;
     ids: Array<number>;
+    sizes: Array<number>;
+    x: Array<number>;
+    y: Array<number>;
   }
 
-  //function to migrate and withdraw common Lands through Land migration contract on L2
+  // function to migrate and withdraw common Lands through Land migration contract on L2
   async function migrateLandToTunnelWithWithdraw(
     ownerWithLandIdsArray: Array<ownerWithLandID>
   ) {
