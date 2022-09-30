@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
-import "../common/BaseWithStorage/ERC2771Handler.sol";
+import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
@@ -10,15 +11,41 @@ import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, ReentrancyGuard, ERC2771Handler {
+contract GenericRaffle is
+    ERC721EnumerableUpgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    ERC2771HandlerUpgradeable
+{
+    using Address for address;
     uint256 public maxSupply;
 
     event TogglePaused(bool _pause);
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);
+    event ContractInitialized(
+        string baseURI,
+        string _name,
+        string _symbol,
+        address _sandOwner,
+        address _signAddress,
+        uint256 _maxSupply
+    );
+    event WaveSetup(
+        uint256 _waveType,
+        uint256 _waveMaxTokens,
+        uint256 _waveMaxTokensToBuy,
+        uint256 _waveSingleTokenPrice
+    );
+    event AllowedExecuteMintSet(address _address);
+    event SandOwnerSet(address _owner);
+    event BaseURISet(string baseURI);
+    event SignAddressSet(address _signAddress);
 
     uint256 public waveType = 0;
     uint256 public waveMaxTokens;
@@ -55,10 +82,17 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         __ERC2771Handler_initialize(_trustedForwarder);
         __Ownable_init_unchained();
         setBaseURI(baseURI);
-        require(_sandOwner != address(0), "Sand owner is zero address");
+        require(bytes(baseURI).length != 0, "baseURI is not set");
+        require(bytes(_name).length != 0, "_name is not set");
+        require(bytes(_symbol).length != 0, "_symbol is not set");
+        require(_signAddress != address(0x0), "Sign address is zero address");
+        require(_sandOwner != address(0x0), "Sand owner is zero address");
+        require(_maxSupply > 0, "Max supply should be more than 0");
         sandOwner = _sandOwner;
         signAddress = _signAddress;
         maxSupply = _maxSupply;
+
+        emit ContractInitialized(baseURI, _name, _symbol, _sandOwner, _signAddress, _maxSupply);
     }
 
     function setupWave(
@@ -69,9 +103,11 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         address _contractAddress,
         uint256 _erc1155Id
     ) external onlyOwner {
+        require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
         require(_waveType < 3 && _waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
         if (_waveType != 0) {
             require(_contractAddress != address(0x0), "Invalid contract address");
+            require(_contractAddress.isContract(), "Contract address must be that of a contract");
         }
         require(_waveMaxTokensToBuy <= _waveMaxTokens, "Invalid supply configuration");
 
@@ -80,9 +116,11 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         waveMaxTokensToBuy = _waveMaxTokensToBuy;
         waveSingleTokenPrice = _waveSingleTokenPrice;
         waveTotalMinted = 0;
-        contractAddress = _waveType == 0 ? address(0) : _contractAddress;
+        contractAddress = _waveType == 0 ? address(0x0) : _contractAddress;
         erc1155Id = _waveType == 2 ? _erc1155Id : 0;
         indexWave++;
+
+        emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
     function price(uint256 _count) public view virtual returns (uint256) {
@@ -116,6 +154,8 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
         require(indexWave > 0, "Contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "Not allowed");
         require(paused == 0, "Contract is paused");
+        require(_wallet != address(0x0), "Wallet is zero address");
+        require(_amount > 0, "Amount cannot be 0");
         require(signatureIds[_signatureId] == 0, "signatureId already used");
         require(
             checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
@@ -255,11 +295,15 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     }
 
     function setAllowedExecuteMint(address _address) external onlyOwner {
+        require(_address != address(0x0), "Address is zero address");
         allowedToExecuteMint = _address;
+        emit AllowedExecuteMintSet(_address);
     }
 
     function setSandOwnerAddress(address _owner) external onlyOwner {
+        require(_owner != address(0x0), "Owner is zero address");
         sandOwner = _owner;
+        emit SandOwnerSet(_owner);
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
@@ -267,32 +311,35 @@ contract GenericRaffle is ERC721EnumerableUpgradeable, OwnableUpgradeable, Reent
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner {
+        require(bytes(baseURI).length != 0, "baseURI is not set");
         baseTokenURI = baseURI;
+        emit BaseURISet(baseURI);
     }
 
     function setSignAddress(address _signAddress) external onlyOwner {
+        require(_signAddress != address(0x0), "Sign address is zero address");
         signAddress = _signAddress;
+        emit SignAddressSet(_signAddress);
     }
 
-    /// @dev this override is required
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return msg.sender;
-        }
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    /// @dev this override is required
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
-            return msg.data[:msg.data.length - 20];
-        } else {
-            return msg.data;
-        }
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
     }
+
+    function renounceOwnership() public virtual override onlyOwner {
+        revert("Renounce ownership is not available");
+    }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[50] private __gap;
 }
