@@ -12,6 +12,9 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     struct OwnerWithLandIds {
         address owner;
         uint256[] ids;
+        uint256[] sizes;
+        uint256[] x;
+        uint256[] y;
     }
 
     IPolygonLandWithSetApproval public polygonLand;
@@ -58,20 +61,14 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             // Fetch locked tokens to this contract address
             uint256[] memory ids = _ownerWithLandIds[i].ids;
             polygonLand.batchTransferFrom(oldLandTunnel, address(this), ids, "0x");
-
-            // Calculate x and y values for token ids
-            uint256 numOfIds = ids.length;
-            uint256[] memory x = new uint256[](numOfIds);
-            uint256[] memory y = new uint256[](numOfIds);
-            uint256[] memory sizes = new uint256[](numOfIds);
-            for (uint256 j; j < ids.length; j++) {
-                x[j] = ids[j] % GRID_SIZE;
-                y[j] = ids[j] / GRID_SIZE;
-                sizes[j] = 1;
-            }
-
             // Withdraw tokens to L1
-            IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(_ownerWithLandIds[i].owner, sizes, x, y, "0x");
+            IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(
+                _ownerWithLandIds[i].owner,
+                _ownerWithLandIds[i].sizes,
+                _ownerWithLandIds[i].x,
+                _ownerWithLandIds[i].y,
+                "0x"
+            );
         }
         emit TunnelLandsMigratedWithWithdraw(_ownerWithLandIds);
     }
