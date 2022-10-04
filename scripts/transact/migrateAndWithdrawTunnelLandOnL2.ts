@@ -8,7 +8,7 @@ const landTunnel = args[0];
 const startBlock = parseInt(args[1]);
 
 const withdrawEventSignature = [
-  'event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data)',
+  'event Withdraw(address indexed user,uint256 size,uint256 x,uint256 y,bytes data)',
 ];
 
 void (async () => {
@@ -28,51 +28,36 @@ void (async () => {
   );
 
   console.log('Fetching owner of LandIds');
-  let ownerOfLands: any = {};
+
   let withdrawEventArgsOfTransaction: any = {};
 
   // fetch the intended owners on L1 for common Lands on both L1 and L2
   for (let i = 0; i < commonIds.length; i++) {
-    const owner = await queryAndReturnOwnerOnL1(
+    await queryAndSaveWithdrawEventArguments(
       ethers.utils.hexlify(commonIds[i])
     );
-    let flag = true;
-    Object.keys(ownerOfLands).forEach((key) => {
-      if (key == owner) {
-        ownerOfLands[key].push(commonIds[i]);
-        flag = false;
-      }
-    });
-    if (flag) {
-      ownerOfLands = {...ownerOfLands, [owner]: [commonIds[i]]};
-    }
   }
 
-  const owners = Object.keys(ownerOfLands);
   const transactions = Object.keys(withdrawEventArgsOfTransaction);
-  const ownerWithLandIdsArr = [];
-  for (let i = 0; i < owners.length; i++) {
-    const sizes = [];
-    const x = [];
-    const y = [];
-    const ids = ownerOfLands[owners[i]];
-    const owner = owners[i];
-    for (let j = 0; j < transactions.length; j++) {
-      if (withdrawEventArgsOfTransaction[transactions[j]].to === owners[i]) {
-        sizes.push(withdrawEventArgsOfTransaction[transactions[j]].size);
-        x.push(withdrawEventArgsOfTransaction[transactions[j]].x);
-        y.push(withdrawEventArgsOfTransaction[transactions[j]].y);
-      }
-    }
-    const ownerWithLandIdsObject = {owner, ids, sizes, x, y};
-    ownerWithLandIdsArr.push(ownerWithLandIdsObject);
+  const ownerWithQuadSizeAndCoordinatesArr = [];
+
+  const sizes = [];
+  const x = [];
+  const y = [];
+  for (let j = 0; j < transactions.length; j++) {
+    const owner = withdrawEventArgsOfTransaction[transactions[j]].to;
+    sizes.push(withdrawEventArgsOfTransaction[transactions[j]].size);
+    x.push(withdrawEventArgsOfTransaction[transactions[j]].x);
+    y.push(withdrawEventArgsOfTransaction[transactions[j]].y);
+    const ownerWithLandIdsObject = {owner, sizes, x, y};
+    ownerWithQuadSizeAndCoordinatesArr.push(ownerWithLandIdsObject);
   }
 
   // function call to migrate and withdraw Land on L2
-  await migrateLandToTunnelWithWithdraw(ownerWithLandIdsArr);
+  await migrateLandToTunnelWithWithdraw(ownerWithQuadSizeAndCoordinatesArr);
 
   // function to get the owner of Land @tokenId
-  async function queryAndReturnOwnerOnL1(tokenId: string) {
+  async function queryAndSaveWithdrawEventArguments(tokenId: string) {
     const Land = await ethers.getContract('PolygonLand');
     const singleTransferEvents = await queryEvents(
       Land,
@@ -92,7 +77,6 @@ void (async () => {
     const length = transaction.logs.length;
     const withDrawLog = iface.parseLog(transaction.logs[length - 3]);
     saveWithDrawEventArguments(transactionHash, withDrawLog);
-    return withDrawLog.args[0];
   }
 
   // function to save withdraw event argument for a transaction
@@ -162,7 +146,6 @@ void (async () => {
 
   interface ownerWithLandID {
     owner: string;
-    ids: Array<number>;
     sizes: Array<number>;
     x: Array<number>;
     y: Array<number>;
