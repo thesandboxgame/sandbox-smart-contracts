@@ -5,7 +5,7 @@ import "../../../common/fx-portal/FxBaseChildTunnelUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-import "../../../common/interfaces/IPolygonLand.sol";
+import "../../../common/interfaces/IPolygonLandWithIsSuperOperator.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
@@ -17,7 +17,7 @@ contract PolygonLandTunnelV2 is
     OwnableUpgradeable,
     PausableUpgradeable
 {
-    IPolygonLand public childToken;
+    IPolygonLandWithIsSuperOperator public childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
     bool internal transferringToL1;
@@ -56,7 +56,7 @@ contract PolygonLandTunnelV2 is
 
     function initialize(
         address _fxChild,
-        IPolygonLand _childToken,
+        IPolygonLandWithIsSuperOperator _childToken,
         address _trustedForwarder,
         uint32 _maxGasLimit,
         uint256 _maxAllowedQuads,
