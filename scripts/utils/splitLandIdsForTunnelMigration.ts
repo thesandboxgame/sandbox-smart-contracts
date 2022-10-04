@@ -1,3 +1,7 @@
+/**
+ * How to use:
+ *  - npx ts-node ./scripts/utils/splitLandIdsForTunnelMigration.ts
+ */
 import fs from 'fs-extra';
 
 const tokensSnapshotL1 = JSON.parse(

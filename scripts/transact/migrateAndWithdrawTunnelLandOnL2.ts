@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/transact/migrateTunnelLandOnL2.ts <ADDRESS OF POLYGON LAND TUNNEL> <BLOCKNUMBER OF POLYGON LAND TUNNEL CREATION>
+ */
 import {Contract, EventFilter} from 'ethers';
 import fs from 'fs-extra';
 import {ethers, getNamedAccounts} from 'hardhat';
