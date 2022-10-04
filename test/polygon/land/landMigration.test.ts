@@ -3,8 +3,8 @@ import {waitFor} from '../../utils';
 import {setupLandMigration} from './fixtures';
 
 describe('Land Migration', function () {
-  describe('LandTunnel <> LandTunnelV2: Land Migartion', function () {
-    it('land Migartion from old land Tunnel to new land Tunnel', async function () {
+  describe('LandTunnel <> LandTunnelV2: Land Migration', function () {
+    it('land Migration from old land Tunnel to new land Tunnel', async function () {
       const {
         landMinter,
         users,
@@ -354,36 +354,36 @@ describe('Land Migration', function () {
         Land,
         PolygonLand,
         deployer,
-        getId,
         MockPolygonLandTunnelV2,
         MockPolygonLandTunnelMigration,
         MockPolygonLandTunnel,
       } = await setupLandMigration();
-      const numberOfLands = 5;
+      const numberOfQuads = 3;
+      const numberOfLands = 3 * 6 * 6;
       const landHolder = users[0];
-      const size = 1;
+      const size = 6;
       const x = 0;
       const y = 0;
       const bytes = '0x00';
-      const ids = [];
-      for (let i = 0; i < numberOfLands; i++) {
+
+      for (let i = 0; i < numberOfQuads; i++) {
         await landMinter.Land.mintQuad(
           landHolder.address,
           size,
-          x + i,
-          y + i,
+          x + i * size,
+          y + i * size,
           bytes
         );
-        ids.push(getId(x + i, y + i));
       }
+
       await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
 
       await waitFor(
         landHolder.MockLandTunnel.batchTransferQuadToL2(
           landHolder.address,
-          [size, size, size, size, size],
-          [x, x + 1, x + 2, x + 3, x + 4],
-          [y, y + 1, y + 2, y + 3, y + 4],
+          [size, size, size],
+          [x, x + 6, x + 12],
+          [y, y + 6, y + 12],
           bytes
         )
       );
@@ -399,9 +399,9 @@ describe('Land Migration', function () {
       );
       await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
         landHolder.address,
-        [size, size, size, size, size],
-        [x, x + 1, x + 2, x + 3, x + 4],
-        [y, y + 1, y + 2, y + 3, y + 4],
+        [size, size, size],
+        [x, x + 6, x + 12],
+        [y, y + 6, y + 12],
         bytes
       );
 
@@ -414,7 +414,12 @@ describe('Land Migration', function () {
       );
       await waitFor(
         deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {owner: landHolder.address, ids: ids},
+          {
+            owner: landHolder.address,
+            sizes: [size, size, size],
+            x: [x, x + 6, x + 12],
+            y: [y, y + 6, y + 12],
+          },
         ])
       );
       expect(
@@ -433,34 +438,33 @@ describe('Land Migration', function () {
         Land,
         PolygonLand,
         deployer,
-        getId,
         MockPolygonLandTunnelMigration,
       } = await setupLandMigration();
-      const numberOfLands = 5;
+      const numberOfQuads = 3;
+      const numberOfLands = 3 * 6 * 6;
       const landHolder = users[0];
-      const size = 1;
+      const size = 6;
       const x = 0;
       const y = 0;
       const bytes = '0x00';
-      const ids = [];
-      for (let i = 0; i < numberOfLands; i++) {
+
+      for (let i = 0; i < numberOfQuads; i++) {
         await landMinter.Land.mintQuad(
           landHolder.address,
           size,
-          x + i,
-          y + i,
+          x + i * size,
+          y + i * size,
           bytes
         );
-        ids.push(getId(x + i, y + i));
       }
       await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
 
       await waitFor(
         landHolder.MockLandTunnel.batchTransferQuadToL2(
           landHolder.address,
-          [size, size, size, size, size],
-          [x, x + 1, x + 2, x + 3, x + 4],
-          [y, y + 1, y + 2, y + 3, y + 4],
+          [size, size, size],
+          [x, x + 6, x + 12],
+          [y, y + 6, y + 12],
           bytes
         )
       );
@@ -477,9 +481,14 @@ describe('Land Migration', function () {
       );
       await expect(
         deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {owner: landHolder.address, ids: ids},
+          {
+            owner: landHolder.address,
+            sizes: [size, size, size],
+            x: [x, x + 6, x + 12],
+            y: [y, y + 6, y + 12],
+          },
         ])
-      ).to.be.revertedWith('BATCHTRANSFERFROM_NOT_OWNER');
+      ).to.be.revertedWith('not owner of all sub quads nor parent quads');
     });
 
     it('only deployer can Migrate and withdraw land from old polygon land tunnel to new land Tunnel', async function () {
@@ -490,35 +499,34 @@ describe('Land Migration', function () {
         Land,
         PolygonLand,
         deployer,
-        getId,
         MockPolygonLandTunnelMigration,
         MockPolygonLandTunnel,
       } = await setupLandMigration();
-      const numberOfLands = 5;
+      const numberOfQuads = 3;
+      const numberOfLands = 3 * 6 * 6;
       const landHolder = users[0];
-      const size = 1;
+      const size = 6;
       const x = 0;
       const y = 0;
       const bytes = '0x00';
-      const ids = [];
-      for (let i = 0; i < numberOfLands; i++) {
+
+      for (let i = 0; i < numberOfQuads; i++) {
         await landMinter.Land.mintQuad(
           landHolder.address,
           size,
-          x + i,
-          y + i,
+          x + i * size,
+          y + i * size,
           bytes
         );
-        ids.push(getId(x + i, y + i));
       }
       await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
 
       await waitFor(
         landHolder.MockLandTunnel.batchTransferQuadToL2(
           landHolder.address,
-          [size, size, size, size, size],
-          [x, x + 1, x + 2, x + 3, x + 4],
-          [y, y + 1, y + 2, y + 3, y + 4],
+          [size, size, size],
+          [x, x + 6, x + 12],
+          [y, y + 6, y + 12],
           bytes
         )
       );
@@ -534,9 +542,9 @@ describe('Land Migration', function () {
       );
       await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
         landHolder.address,
-        [size, size, size, size, size],
-        [x, x + 1, x + 2, x + 3, x + 4],
-        [y, y + 1, y + 2, y + 3, y + 4],
+        [size, size, size],
+        [x, x + 6, x + 12],
+        [y, y + 6, y + 12],
         bytes
       );
       expect(
@@ -548,7 +556,12 @@ describe('Land Migration', function () {
       );
       await expect(
         users[0].MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {owner: landHolder.address, ids: ids},
+          {
+            owner: landHolder.address,
+            sizes: [size, size, size],
+            x: [x, x + 6, x + 12],
+            y: [y, y + 6, y + 12],
+          },
         ])
       ).to.be.revertedWith('!AUTHORISED');
     });
