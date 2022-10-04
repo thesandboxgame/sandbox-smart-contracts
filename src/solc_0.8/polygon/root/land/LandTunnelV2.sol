@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
-import "../../../common/interfaces/ILandToken.sol";
+import "../../../common/interfaces/ILandTokenWithIsSuperOperator.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -44,7 +44,10 @@ contract LandTunnelV2 is
         uint256, /* tokenId */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferringToL2 || ILandToken(rootToken).isSuperOperator(operator), "LandTunnel: !BRIDGING");
+        require(
+            transferringToL2 || ILandTokenWithIsSuperOperator(rootToken).isSuperOperator(operator),
+            "LandTunnel: !BRIDGING"
+        );
         return this.onERC721Received.selector;
     }
 
@@ -57,7 +60,10 @@ contract LandTunnelV2 is
         uint256[] calldata, /* ids */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferringToL2 || ILandToken(rootToken).isSuperOperator(operator), "LandTunnel: !BRIDGING");
+        require(
+            transferringToL2 || ILandTokenWithIsSuperOperator(rootToken).isSuperOperator(operator),
+            "LandTunnel: !BRIDGING"
+        );
         return this.onERC721BatchReceived.selector;
     }
 

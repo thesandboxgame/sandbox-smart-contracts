@@ -11,7 +11,6 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
 
     struct OwnerWithLandIds {
         address owner;
-        uint256[] ids;
         uint256[] sizes;
         uint256[] x;
         uint256[] y;
@@ -59,8 +58,14 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         // check for gas limits based on the number of locked tokens
         for (uint256 i = 0; i < numOfOwners; i++) {
             // Fetch locked tokens to this contract address
-            uint256[] memory ids = _ownerWithLandIds[i].ids;
-            polygonLand.batchTransferFrom(oldLandTunnel, address(this), ids, "0x");
+            polygonLand.batchTransferQuad(
+                oldLandTunnel,
+                address(this),
+                _ownerWithLandIds[i].sizes,
+                _ownerWithLandIds[i].x,
+                _ownerWithLandIds[i].y,
+                "0x"
+            );
             // Withdraw tokens to L1
             IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(
                 _ownerWithLandIds[i].owner,
