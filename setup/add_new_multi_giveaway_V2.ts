@@ -16,7 +16,6 @@ import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
 const args = process.argv.slice(2);
-console.log(args);
 const claimContract = args[0];
 const claimFile = args[1];
 const claimSalt = args[2];
@@ -45,7 +44,9 @@ const func: DeployFunction = async function () {
     if (destinationAddressesUsed[claim.to] === undefined) {
       destinationAddressesUsed[claim.to] = true;
     } else {
-      console.log(`Error: address used more than once: ${claim.to}`);
+      console.log(
+        `Error: 'to' address used more than once in claim file: ${claim.to}`
+      );
       claimFileOk = false;
     }
   });
@@ -56,7 +57,9 @@ const func: DeployFunction = async function () {
     hre.network.live ? '.' + hre.network.name : ''
   }`;
   if (!claimSalt) {
-    console.log('Error: a random salt must be provided');
+    console.log(
+      'Error: a random salt must be provided to add this giveaway, usage: yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> GIVEAWAY_SALT>'
+    );
     return;
   }
   fs.outputFileSync(saltPath, claimSalt);
