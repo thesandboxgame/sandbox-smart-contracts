@@ -1,3 +1,7 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/transact/migrateTunnelLandOnL1.ts
+ */
 import fs from 'fs-extra';
 import {ethers, getNamedAccounts} from 'hardhat';
 
