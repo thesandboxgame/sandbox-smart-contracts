@@ -81,11 +81,13 @@ contract GenericRaffle is
         __ERC721_init(_name, _symbol);
         __ERC2771Handler_initialize(_trustedForwarder);
         __Ownable_init_unchained();
+        __ReentrancyGuard_init();
         setBaseURI(baseURI);
         require(bytes(baseURI).length != 0, "baseURI is not set");
         require(bytes(_name).length != 0, "_name is not set");
         require(bytes(_symbol).length != 0, "_symbol is not set");
         require(_signAddress != address(0x0), "Sign address is zero address");
+        require(_trustedForwarder != address(0x0), "Trusted forwarder is zero address");
         require(_sandOwner != address(0x0), "Sand owner is zero address");
         require(_maxSupply > 0, "Max supply should be more than 0");
         sandOwner = _sandOwner;
