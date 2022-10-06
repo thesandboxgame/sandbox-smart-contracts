@@ -60,7 +60,7 @@ Save also your JSON file in the _data/giveaways/multi_giveaway_1_ folder.
 
 example:
 
-`yarn execute mainnet /setup/add_new_multi_giveaway.ts Multi_Giveaway_1 multi_giveaway_moon_cats`
+`yarn execute mainnet setup/add_new_multi_giveaway.ts Multi_Giveaway_1 multi_giveaway_moon_cats`
 
 ### send asset
 
@@ -68,7 +68,7 @@ example:
 
 example:
 
-`yarn execute mainnet /setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1 giveaway_red_village`
+`yarn execute mainnet setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1 giveaway_red_village`
 
 ### Add reference in the _MultiGiveaway Template_ file
 
@@ -78,20 +78,24 @@ When indicated on the template file, add the root hash and also the resulting Js
 
 ### Setup your giveaway
 
-`yarn execute polygon setup/add_new_multi_giveaway.ts Polygon Multi_Giveaway_V2_ 1 <your_json_filename> <your_random_secret>`
+For V2, you also need to provide a random salt. This must be different for every giveaway added.
+
+The salt is saved in the .secret folder for later. It is used as the secret in data/getClaimsV2.ts.
+
+`yarn execute polygon setup/add_new_multi_giveaway_V2.ts PolygonMulti_Giveaway_V2_ 1 <your_json_filename> <your_random_salt>`
 
 example:
 
-`yarn execute polygon setup/add_new_multi_giveaway.ts Polygon Multi_Giveaway_V2_ 1 moon_cats myfirstgiveaway`
+`yarn execute polygon setup/add_new_multi_giveaway_V2.ts PolygonMulti_Giveaway_V2_ 1 moon_cats myfirstgiveaway`
 
 ### send asset
 
-`yarn execute polygon setup/send_assets_to_multi_giveaway.ts Polygon_Multi_Giveaway_V2_1 <multi_giveaway_name>`
+`yarn execute polygon setup/send_assets_to_multi_giveaway.ts PolygonMulti_Giveaway_V2_1 <multi_giveaway_name>`
 
 example:
 
-`yarn execute polygon /setup/send_assets_to_multi_giveaway.ts Polygon_Multi_Giveaway_V2_1 giveaway_red_village`
+`yarn execute polygon setup/send_assets_to_multi_giveaway.ts PolygonMulti_Giveaway_V2_1 giveaway_red_village`
 
-### Add reference in the _MultiGiveaway Template_ file
+### Add reference in the _PolygonMultiGiveaway V2 Template_ file
 
-When indicated on the template file, add the root hash and also the resulting Json file name found in the .secret folder. And copy these files in your google folder.
+When indicated on the template file, add the salt, the root hash and also the resulting Json file name found in the .secret folder. And copy these files in your google folder.

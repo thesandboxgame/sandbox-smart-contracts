@@ -1,8 +1,8 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> GIVEAWAY_SALT>
+ *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> <GIVEAWAY_SALT>
  *
- * GIVEAWAY_CONTRACT: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway contract is: PolygonMulti_Giveaway__V2_1
+ * GIVEAWAY_CONTRACT: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway contract is: PolygonMulti_Giveaway_V2_1
  * GIVEAWAY_NAME: from data/giveaways/polygonmulti_giveaway_v2_1/detective_letty.json then the giveaway name is: detective_letty
  * GIVEAWAY_SALT: a mandatory salt to differentiate this set of claims from previous claimFiles
  */
@@ -58,7 +58,7 @@ const func: DeployFunction = async function () {
   }`;
   if (!claimSalt) {
     console.log(
-      'Error: a random salt must be provided to add this giveaway, usage: yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> GIVEAWAY_SALT>'
+      'Error: a random salt must be provided to add this giveaway, usage: yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME> <GIVEAWAY_SALT>'
     );
     return;
   }
