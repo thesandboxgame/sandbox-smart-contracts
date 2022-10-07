@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
-import "@openzeppelin/contracts-0.8/utils/introspection/IERC165.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import "../../../common/fx-portal/FxBaseChildTunnelUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 
 import "../../../common/interfaces/IPolygonAssetERC721.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
@@ -14,37 +14,43 @@ import "./PolygonAssetERC721.sol";
 
 /// @title ASSETERC721 bridge on L2
 contract PolygonAssetERC721Tunnel is
-    FxBaseChildTunnel,
-    IERC165,
+    FxBaseChildTunnelUpgradeable,
+    IERC165Upgradeable,
     IERC721MandatoryTokenReceiver,
     ERC2771Handler,
-    Ownable,
-    Pausable
+    OwnableUpgradeable,
+    PausableUpgradeable
 {
     IPolygonAssetERC721 public childToken;
-    uint256 public maxTransferLimit = 20;
+    uint256 public maxTransferLimit;
     bool private fetchingAssets = false;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);
     event Withdraw(address user, uint256 id, bytes data);
 
-    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
-        require(_maxTransferLimit > 0, "PolygonAssetERC721Tunnel: _maxTransferLimit invalid");
-        maxTransferLimit = _maxTransferLimit;
-        emit SetTransferLimit(_maxTransferLimit);
-    }
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
 
-    constructor(
+    function initialize(
         address _fxChild,
         IPolygonAssetERC721 _childToken,
         address _trustedForwarder,
         uint256 _maxTransferLimit
-    ) FxBaseChildTunnel(_fxChild) {
+    ) public initializer {
         require(address(_childToken) != address(0), "PolygonAssetERC721Tunnel: _childToken can't be zero");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
+        __Ownable_init();
+        __Pausable_init();
         __ERC2771Handler_initialize(_trustedForwarder);
+        __FxBaseChildTunnelUpgradeable_initialize(_fxChild);
+    }
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        require(_maxTransferLimit > 0, "PolygonAssetERC721Tunnel: _maxTransferLimit invalid");
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
     }
 
     function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused {
@@ -98,11 +104,11 @@ contract PolygonAssetERC721Tunnel is
         }
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

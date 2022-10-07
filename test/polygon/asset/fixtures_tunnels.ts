@@ -165,6 +165,34 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       return tokenId;
     }
 
+    async function mintMultipleAssetOnL2(
+      to: string,
+      valueArray: number[],
+      hash = ipfsHashString
+    ) {
+      // Asset to be minted
+      const creator = to;
+      const packId = ++id;
+      const supplies = valueArray;
+      const rarity = '0x';
+      const owner = to;
+
+      const receipt = await waitFor(
+        PolygonAssetERC1155.connect(ethers.provider.getSigner(minter))[
+          'mintMultiple(address,uint40,bytes32,uint256[],bytes,address,bytes)'
+        ](creator, packId, hash, supplies, rarity, owner, data)
+      );
+
+      const transferEvent = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt,
+        'TransferBatch'
+      );
+      const tokenIds = transferEvent.args[3];
+
+      return tokenIds;
+    }
+
     return {
       users,
       deployer,
@@ -176,6 +204,7 @@ export const setupAssetERC1155Tunnels = deployments.createFixture(
       AssetERC1155Tunnel,
       mintAssetOnL1,
       mintAssetOnL2,
+      mintMultipleAssetOnL2,
       FxRoot,
       FxChild,
       CheckpointManager,

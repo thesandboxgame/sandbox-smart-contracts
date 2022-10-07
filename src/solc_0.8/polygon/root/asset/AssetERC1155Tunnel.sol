@@ -1,39 +1,52 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
+import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
 import "../../../common/interfaces/IAssetERC1155.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "../../common/ERC1155Receiver.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/security/Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 /// @title ASSETERC1155 bridge on L1
-contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
+contract AssetERC1155Tunnel is
+    Initializable,
+    FxBaseRootTunnelUpgradeable,
+    ERC1155Receiver,
+    ERC2771Handler,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
     IAssetERC1155 public rootToken;
-    uint256 public maxTransferLimit = 20;
+    uint256 public maxTransferLimit;
     bool private fetchingAssets = false;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
 
-    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
-        maxTransferLimit = _maxTransferLimit;
-        emit SetTransferLimit(_maxTransferLimit);
-    }
+    // solhint-disable-next-line no-empty-blocks
+    constructor() initializer {}
 
-    constructor(
+    function initialize(
         address _checkpointManager,
         address _fxRoot,
         IAssetERC1155 _rootToken,
         address trustedForwarder,
         uint256 _maxTransferLimit
-    ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
+    ) public initializer {
         require(address(_rootToken) != address(0), "AssetERC1155Tunnel: _rootToken can't be zero");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
+        __Ownable_init();
+        __Pausable_init();
         __ERC2771Handler_initialize(trustedForwarder);
+        __FxBaseRootTunnelUpgradeable_initialize(_checkpointManager, _fxRoot);
+    }
+
+    function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        maxTransferLimit = _maxTransferLimit;
+        emit SetTransferLimit(_maxTransferLimit);
     }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
@@ -108,11 +121,11 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
         }
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

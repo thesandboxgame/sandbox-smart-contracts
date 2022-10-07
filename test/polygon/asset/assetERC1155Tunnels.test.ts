@@ -5,7 +5,7 @@ import {expect} from '../../chai-setup';
 import {AbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
-describe('PolygonAsset.sol', function () {
+describe('Asset_ERC1155_Tunnels', function () {
   describe('Asset <> PolygonAssetERC1155: Transfer', function () {
     it('cannot send asset directly to tunnel l2', async function () {
       const {
@@ -169,6 +169,246 @@ describe('PolygonAsset.sol', function () {
       expect(balance).to.be.equal(1);
     });
 
+    it('can transfer L2 minted assetIds from same packId: L2 to L1', async function () {
+      const {
+        AssetERC1155,
+        PolygonAssetERC1155,
+        MockPolygonAssetERC1155Tunnel,
+        users,
+        deployer,
+        mintMultipleAssetOnL2,
+      } = await setupAssetERC1155Tunnels();
+      const tokenIds = await mintMultipleAssetOnL2(users[0].address, [
+        10,
+        15,
+        100,
+      ]);
+
+      let balanceA = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceA).to.be.equal(10);
+
+      let balanceB = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[1]
+      );
+      expect(balanceB).to.be.equal(15);
+
+      let balanceC = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[2]
+      );
+      expect(balanceC).to.be.equal(100);
+
+      // Transfer A to L1 Tunnel
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(users[0].address)
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
+
+      const testMetadataHashArray = [];
+      testMetadataHashArray.push(
+        ethers.utils.formatBytes32String('metadataHash')
+      );
+      const MOCK_DATA = new AbiCoder().encode(
+        ['bytes32[]'],
+        [testMetadataHashArray]
+      );
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[0]], [1])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[0]], [1], MOCK_DATA]
+        )
+      );
+
+      balanceA = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceA).to.be.equal(1);
+
+      // Transfer B to L1 Tunnel
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[1]], [3])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[1]], [3], MOCK_DATA]
+        )
+      );
+
+      balanceB = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[1]
+      );
+      expect(balanceB).to.be.equal(3);
+
+      // Transfer C to L1 Tunnel
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[2]], [11])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[2]], [11], MOCK_DATA]
+        )
+      );
+
+      balanceC = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[2]
+      );
+      expect(balanceC).to.be.equal(11);
+    });
+    it('can transfer L2 minted assetIds from same packId more than once: L2 to L1', async function () {
+      const {
+        AssetERC1155,
+        PolygonAssetERC1155,
+        MockPolygonAssetERC1155Tunnel,
+        users,
+        deployer,
+        mintMultipleAssetOnL2,
+      } = await setupAssetERC1155Tunnels();
+      const tokenIds = await mintMultipleAssetOnL2(users[0].address, [
+        10,
+        15,
+        100,
+      ]);
+
+      let balanceA = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceA).to.be.equal(10);
+
+      let balanceB = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[1]
+      );
+      expect(balanceB).to.be.equal(15);
+
+      const balanceC = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[2]
+      );
+      expect(balanceC).to.be.equal(100);
+
+      // Transfer A to L1 Tunnel
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(users[0].address)
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
+
+      const testMetadataHashArray = [];
+      testMetadataHashArray.push(
+        ethers.utils.formatBytes32String('metadataHash')
+      );
+      const MOCK_DATA = new AbiCoder().encode(
+        ['bytes32[]'],
+        [testMetadataHashArray]
+      );
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[0]], [1])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[0]], [1], MOCK_DATA]
+        )
+      );
+
+      balanceA = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceA).to.be.equal(1);
+
+      // Transfer A to L1 Tunnel again
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[0]], [1])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[0]], [1], MOCK_DATA]
+        )
+      );
+
+      balanceA = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceA).to.be.equal(2);
+
+      // Transfer B to L1 Tunnel
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(users[0].address)
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[1]], [3])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[1]], [3], MOCK_DATA]
+        )
+      );
+
+      balanceB = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[1]
+      );
+      expect(balanceB).to.be.equal(3);
+
+      // Transfer B to L1 Tunnel again
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchWithdrawToRoot(users[0].address, [tokenIds[1]], [1])
+      );
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        new AbiCoder().encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [users[0].address, [tokenIds[1]], [3], MOCK_DATA]
+        )
+      );
+
+      balanceB = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[1]
+      );
+      expect(balanceB).to.be.equal(6);
+    });
+
     it('cannot transfer more than L2 minted assets: L2 to L1', async function () {
       const {
         PolygonAssetERC1155,
@@ -306,6 +546,98 @@ describe('PolygonAsset.sol', function () {
       const balanceL2Tunnel = await PolygonAssetERC1155[
         'balanceOf(address,uint256)'
       ](MockPolygonAssetERC1155Tunnel.address, tokenIds[0]);
+      expect(balanceL2Tunnel).to.be.equal(0);
+    });
+
+    it('transfer assets from L1 to L2 more than once', async function () {
+      const {
+        AssetERC1155,
+        PolygonAssetERC1155,
+        MockPolygonAssetERC1155Tunnel,
+        MockAssetERC1155Tunnel,
+        users,
+        mintAssetOnL1,
+      } = await setupAssetERC1155Tunnels();
+
+      const supplies = [20, 5, 10, 25];
+      const transferA = [10, 2, 5, 15];
+      const transferB = [10, 3, 5, 10];
+
+      // Note: tokenIds cannot be 0, 1, 2, 3... as will revert with 'ID_TAKEN'
+      // IDs on L1 must follow the precise format as generated on L2
+      const tokenIds = [
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000000800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000001000000',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd000000008000000001800800',
+        '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000',
+      ];
+
+      const testMetadataHashArray = [];
+      for (let i = 0; i < 4; i++) {
+        testMetadataHashArray.push(
+          ethers.utils.formatBytes32String('metadataHash')
+        );
+        await mintAssetOnL1(users[0].address, tokenIds[i], supplies[i]);
+      }
+
+      // Transfer to L1 Tunnel
+      await AssetERC1155.connect(
+        ethers.provider.getSigner(users[0].address)
+      ).setApprovalForAll(MockAssetERC1155Tunnel.address, true);
+
+      await waitFor(
+        MockAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchDepositToChild(users[0].address, tokenIds, transferA)
+      );
+
+      let balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceUserL1).to.be.equal(transferB[0]);
+      let balanceL1Tunnel = await AssetERC1155['balanceOf(address,uint256)'](
+        MockAssetERC1155Tunnel.address,
+        tokenIds[0]
+      );
+      expect(balanceL1Tunnel).to.be.equal(transferA[0]);
+
+      let balanceUserL2 = await PolygonAssetERC1155[
+        'balanceOf(address,uint256)'
+      ](users[0].address, tokenIds[0]);
+      expect(balanceUserL2).to.be.equal(transferA[0]);
+      let balanceL2Tunnel = await PolygonAssetERC1155[
+        'balanceOf(address,uint256)'
+      ](MockPolygonAssetERC1155Tunnel.address, tokenIds[0]);
+      expect(balanceL2Tunnel).to.be.equal(0);
+
+      // Transfer to L1 Tunnel again
+      await expect(
+        MockAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(users[0].address)
+        ).batchDepositToChild(users[0].address, tokenIds, transferB)
+      ).to.not.be.reverted;
+
+      balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceUserL1).to.be.equal(0);
+      balanceL1Tunnel = await AssetERC1155['balanceOf(address,uint256)'](
+        MockAssetERC1155Tunnel.address,
+        tokenIds[0]
+      );
+      expect(balanceL1Tunnel).to.be.equal(transferA[0] + transferB[0]);
+
+      balanceUserL2 = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        users[0].address,
+        tokenIds[0]
+      );
+      expect(balanceUserL2).to.be.equal(transferA[0] + transferB[0]);
+      balanceL2Tunnel = await PolygonAssetERC1155['balanceOf(address,uint256)'](
+        MockPolygonAssetERC1155Tunnel.address,
+        tokenIds[0]
+      );
       expect(balanceL2Tunnel).to.be.equal(0);
     });
 
