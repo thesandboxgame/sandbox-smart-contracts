@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -45,4 +44,3 @@ func.dependencies = [
   'PolygonSand',
   'PolygonGemsCatalystsRegistry',
 ];
-func.skip = skipUnlessTestnet;
