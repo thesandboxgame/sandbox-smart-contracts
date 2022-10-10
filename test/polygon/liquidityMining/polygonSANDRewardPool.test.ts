@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {BigNumber} from 'ethers';
 import {ethers} from 'hardhat';
 import {expectEventWithArgs} from '../../utils';

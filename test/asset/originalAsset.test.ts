@@ -199,7 +199,7 @@ describe('Test first Asset contract and upgrade process for splitting into ERC11
       const {Asset} = await setupOriginalAsset();
       const tokenId = 42;
       await expect(Asset.callStatic.tokenURI(tokenId)).to.be.revertedWith(
-        'NFT_!EXIST_||_FT_!MINTED'
+        'NFT does not exist'
       );
     });
   });

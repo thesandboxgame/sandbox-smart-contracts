@@ -9,7 +9,7 @@ import {transferSand} from '../polygon/catalyst/utils';
 import BN from 'bn.js';
 import crypto from 'crypto';
 import {BigNumber, constants} from 'ethers';
-import {assert, expect} from 'chai';
+import {assert, expect} from '../chai-setup';
 
 const zeroAddress = constants.AddressZero;
 

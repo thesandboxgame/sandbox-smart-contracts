@@ -5,7 +5,7 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {toWei, withSnapshot} from './utils';
-import {expect} from 'chai';
+import {expect} from './chai-setup';
 import {AddressZero} from '@ethersproject/constants';
 
 const withSnapshotSetup = withSnapshot([], async () => {

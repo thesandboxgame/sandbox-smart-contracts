@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {
   defaultAbiCoder,
   keccak256,

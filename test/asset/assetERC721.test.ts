@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {expect} from 'chai';
+import {expect} from '../chai-setup';
 import {solidityPack, AbiCoder} from 'ethers/lib/utils';
 import {setupAssetERC721Test} from './fixtures';
 

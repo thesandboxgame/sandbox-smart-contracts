@@ -9,7 +9,7 @@ import {
 } from './fixtures';
 import {BigNumber} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {toWei, waitFor} from '../../utils';
 import {ethers} from 'hardhat';
 import {defaultAbiCoder} from 'ethers/lib/utils';
