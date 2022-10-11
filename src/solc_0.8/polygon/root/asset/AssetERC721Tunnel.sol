@@ -47,6 +47,7 @@ contract AssetERC721Tunnel is
     }
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        require(_maxTransferLimit > 0, "AssetERC721Tunnel: _maxTransferLimit invalid");
         maxTransferLimit = _maxTransferLimit;
         emit SetTransferLimit(_maxTransferLimit);
     }
@@ -76,6 +77,7 @@ contract AssetERC721Tunnel is
     }
 
     function batchDepositToChild(address to, uint256[] memory ids) external whenNotPaused {
+        require(ids.length <= maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         string[] memory uris = new string[](ids.length);
         fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {

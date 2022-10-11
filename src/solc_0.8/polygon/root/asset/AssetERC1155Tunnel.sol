@@ -36,6 +36,7 @@ contract AssetERC1155Tunnel is
         uint256 _maxTransferLimit
     ) public initializer {
         require(address(_rootToken) != address(0), "AssetERC1155Tunnel: _rootToken can't be zero");
+        require(_maxTransferLimit > 0, "AssetERC1155Tunnel: _maxTransferLimit invalid");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
         __Ownable_init();
@@ -45,6 +46,7 @@ contract AssetERC1155Tunnel is
     }
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        require(_maxTransferLimit > 0, "AssetERC1155Tunnel: _maxTransferLimit invalid");
         maxTransferLimit = _maxTransferLimit;
         emit SetTransferLimit(_maxTransferLimit);
     }
@@ -61,7 +63,7 @@ contract AssetERC1155Tunnel is
         uint256[] memory values
     ) public whenNotPaused {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
-        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        require(ids.length <= maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
         fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {

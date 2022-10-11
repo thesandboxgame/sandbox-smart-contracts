@@ -163,6 +163,62 @@ describe('Asset_ERC721_Tunnels', function () {
         );
       });
 
+      it('should be able to transfer a single asset to L2', async function () {
+        const {
+          deployer,
+          AssetERC721,
+          assetMinter,
+          users,
+          MockAssetERC721Tunnel,
+          PolygonAssetERC721,
+        } = await setupAssetERC721Tunnels();
+
+        const abiCoder = new AbiCoder();
+        const uriBase = 'http://myMetadata.io';
+
+        const assetHolder = users[0];
+        const id = 1;
+
+        await deployer.MockAssetERC721Tunnel.setTransferLimit(
+          BigNumber.from('1')
+        );
+
+        const uniqueUri = `${uriBase}/${id}`;
+        const data = abiCoder.encode(['string'], [uniqueUri]);
+        await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
+          assetHolder.address,
+          id,
+          data
+        );
+
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(1);
+
+        // Transfer to L1 Tunnel
+        await assetHolder.AssetERC721.setApprovalForAll(
+          MockAssetERC721Tunnel.address,
+          true
+        );
+
+        await assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
+          assetHolder.address,
+          [id]
+        );
+
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(0);
+        expect(
+          await AssetERC721.balanceOf(MockAssetERC721Tunnel.address)
+        ).to.be.equal(1);
+        expect(
+          await PolygonAssetERC721.balanceOf(assetHolder.address)
+        ).to.be.equal(1);
+        expect(await PolygonAssetERC721.tokenUris(1)).to.be.equal(
+          `${uriBase}/${id}`
+        );
+        const uriL1 = await AssetERC721.tokenUris(1);
+        const uriL2 = await PolygonAssetERC721.tokenUris(1);
+        expect(uriL1).to.be.equal(uriL2);
+      });
+
       it('should be able to transfer multiple assets to L2', async function () {
         const {
           AssetERC721,
@@ -176,7 +232,7 @@ describe('Asset_ERC721_Tunnels', function () {
         const uriBase = 'http://myMetadata.io';
 
         const assetHolder = users[0];
-        const numberOfAssetERC721s = 25;
+        const numberOfAssetERC721s = 15;
         const startId = 1;
         const ids = [];
 
@@ -239,7 +295,7 @@ describe('Asset_ERC721_Tunnels', function () {
         const uriBase = 'http://myMetadata.io';
 
         const assetHolder = users[0];
-        const numberOfAssetERC721s = 25;
+        const numberOfAssetERC721s = 15;
         const startId = 10124;
         const ids = [];
 
@@ -287,6 +343,52 @@ describe('Asset_ERC721_Tunnels', function () {
           const uriL2 = await PolygonAssetERC721.tokenUris(i);
           expect(uriL1).to.be.equal(uriL2);
         }
+      });
+
+      it('should not be able to transfer if exceeds limit', async function () {
+        const {
+          AssetERC721,
+          assetMinter,
+          users,
+          MockAssetERC721Tunnel,
+        } = await setupAssetERC721Tunnels();
+
+        const abiCoder = new AbiCoder();
+        const uriBase = 'http://myMetadata.io';
+
+        const assetHolder = users[0];
+        const numberOfAssetERC721s = 25;
+        const startId = 1;
+        const ids = [];
+
+        // Set up arrays and mint on L1
+        for (let i = startId; i < startId + numberOfAssetERC721s; i++) {
+          ids.push(i);
+          const uniqueUri = `${uriBase}/${i}`;
+          const data = abiCoder.encode(['string'], [uniqueUri]);
+          await assetMinter.AssetERC721['mint(address,uint256,bytes)'](
+            assetHolder.address,
+            i,
+            data
+          );
+        }
+
+        expect(await AssetERC721.balanceOf(assetHolder.address)).to.be.equal(
+          numberOfAssetERC721s
+        );
+
+        // Transfer to L1 Tunnel
+        await assetHolder.AssetERC721.setApprovalForAll(
+          MockAssetERC721Tunnel.address,
+          true
+        );
+
+        await expect(
+          assetHolder.MockAssetERC721Tunnel.batchDepositToChild(
+            assetHolder.address,
+            ids
+          )
+        ).to.be.revertedWith('EXCEEDS_TRANSFER_LIMIT');
       });
     });
 
@@ -449,6 +551,10 @@ describe('Asset_ERC721_Tunnels', function () {
         const assetHolder = users[0];
         const Id = 1;
 
+        await deployer.MockPolygonAssetERC721Tunnel.setTransferLimit(
+          BigNumber.from('1')
+        );
+
         await assetMinter.PolygonAssetERC721['mint(address,uint256,bytes)'](
           assetHolder.address,
           Id,
@@ -491,7 +597,7 @@ describe('Asset_ERC721_Tunnels', function () {
         expect(uriL1).to.be.equal(uriL2);
       });
 
-      it('should should be able to transfer multiple assets', async function () {
+      it('should be able to transfer multiple assets', async function () {
         const {
           deployer,
           AssetERC721,

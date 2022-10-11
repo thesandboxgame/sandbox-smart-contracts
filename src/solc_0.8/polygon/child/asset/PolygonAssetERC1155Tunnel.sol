@@ -38,6 +38,7 @@ contract PolygonAssetERC1155Tunnel is
         uint256 _maxTransferLimit
     ) public initializer {
         require(address(_childToken) != address(0), "PolygonAssetERC1155Tunnel: _childToken can't be zero");
+        require(_maxTransferLimit > 0, "PolygonAssetERC1155Tunnel: _maxTransferLimit invalid");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
         __Ownable_init();
@@ -47,6 +48,7 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     function setTransferLimit(uint256 _maxTransferLimit) external onlyOwner {
+        require(_maxTransferLimit > 0, "PolygonAssetERC1155Tunnel: _maxTransferLimit invalid");
         maxTransferLimit = _maxTransferLimit;
         emit SetTransferLimit(_maxTransferLimit);
     }
@@ -58,7 +60,7 @@ contract PolygonAssetERC1155Tunnel is
     ) external whenNotPaused {
         require(to != address(0), "PolygonAssetERC1155Tunnel: to can't be zero");
         require(ids.length > 0, "MISSING_TOKEN_IDS");
-        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        require(ids.length <= maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
         fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {
