@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
 import "../../../common/interfaces/IAssetERC721.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import "../../../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeab
 contract AssetERC721Tunnel is
     FxBaseRootTunnelUpgradeable,
     IERC721MandatoryTokenReceiver,
-    ERC2771Handler,
+    ERC2771HandlerUpgradeable,
     OwnableUpgradeable,
     PausableUpgradeable,
     IERC165Upgradeable
@@ -123,11 +123,16 @@ contract AssetERC721Tunnel is
         }
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }
