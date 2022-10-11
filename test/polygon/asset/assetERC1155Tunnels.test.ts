@@ -558,8 +558,6 @@ describe('Asset_ERC1155_Tunnels', function () {
       const {
         deployer,
         AssetERC1155,
-        PolygonAssetERC1155,
-        MockPolygonAssetERC1155Tunnel,
         MockAssetERC1155Tunnel,
         users,
         mintAssetOnL1,
