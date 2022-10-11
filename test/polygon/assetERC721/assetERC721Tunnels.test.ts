@@ -3,6 +3,7 @@ import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupAssetERC721Tunnels} from './fixtures';
 import {BigNumber} from 'ethers';
+import {ethers} from 'hardhat';
 
 describe('Asset_ERC721_Tunnels', function () {
   describe('AssetERC721 <> PolygonAssetERC721: Transfer', function () {
@@ -43,6 +44,24 @@ describe('Asset_ERC721_Tunnels', function () {
         await expect(
           AssetERC721Tunnel.setTransferLimit(BigNumber.from('22'))
         ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+
+      it('cannot set Max Limit to 0', async function () {
+        const {deployer} = await setupAssetERC721Tunnels();
+        await expect(
+          deployer.AssetERC721Tunnel.setTransferLimit(BigNumber.from('0'))
+        ).to.be.revertedWith('AssetERC721Tunnel: _maxTransferLimit invalid');
+      });
+
+      it('cannot set trusted forwarder to 0', async function () {
+        const {deployer} = await setupAssetERC721Tunnels();
+        await expect(
+          deployer.AssetERC721Tunnel.setTrustedForwarder(
+            ethers.constants.AddressZero
+          )
+        ).to.be.revertedWith(
+          "AssetERC721Tunnel: trustedForwarder can't be zero"
+        );
       });
 
       it('should not be able to transfer AssetERC721 when paused', async function () {
@@ -717,6 +736,28 @@ describe('Asset_ERC721_Tunnels', function () {
             ids
           )
         ).to.be.revertedWith('EXCEEDS_TRANSFER_LIMIT');
+      });
+
+      it('cannot set Max Limit to 0', async function () {
+        const {deployer} = await setupAssetERC721Tunnels();
+        await expect(
+          deployer.PolygonAssetERC721Tunnel.setTransferLimit(
+            BigNumber.from('0')
+          )
+        ).to.be.revertedWith(
+          'PolygonAssetERC721Tunnel: _maxTransferLimit invalid'
+        );
+      });
+
+      it('cannot set trusted forwarder to 0', async function () {
+        const {deployer} = await setupAssetERC721Tunnels();
+        await expect(
+          deployer.PolygonAssetERC721Tunnel.setTrustedForwarder(
+            ethers.constants.AddressZero
+          )
+        ).to.be.revertedWith(
+          "PolygonAssetERC721Tunnel: trustedForwarder can't be zero"
+        );
       });
     });
     describe('Through meta Tx', function () {

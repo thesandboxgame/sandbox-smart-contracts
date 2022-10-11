@@ -1390,5 +1390,45 @@ describe('Asset_ERC1155_Tunnels', function () {
 
       expect(balanceUserL2).to.be.equal(5);
     });
+
+    it('cannot set Max Limit to 0 on L1', async function () {
+      const {deployer} = await setupAssetERC1155Tunnels();
+      await expect(
+        deployer.AssetERC1155Tunnel.setTransferLimit(BigNumber.from('0'))
+      ).to.be.revertedWith('AssetERC1155Tunnel: _maxTransferLimit invalid');
+    });
+
+    it('cannot set trusted forwarder to 0 on L1', async function () {
+      const {deployer} = await setupAssetERC1155Tunnels();
+      await expect(
+        deployer.AssetERC1155Tunnel.setTrustedForwarder(
+          ethers.constants.AddressZero
+        )
+      ).to.be.revertedWith(
+        "AssetERC1155Tunnel: trustedForwarder can't be zero"
+      );
+    });
+
+    it('cannot set Max Limit to 0 on L2', async function () {
+      const {deployer} = await setupAssetERC1155Tunnels();
+      await expect(
+        deployer.MockPolygonAssetERC1155Tunnel.setTransferLimit(
+          BigNumber.from('0')
+        )
+      ).to.be.revertedWith(
+        'PolygonAssetERC1155Tunnel: _maxTransferLimit invalid'
+      );
+    });
+
+    it('cannot set trusted forwarder to 0 on L2', async function () {
+      const {deployer} = await setupAssetERC1155Tunnels();
+      await expect(
+        deployer.MockPolygonAssetERC1155Tunnel.setTrustedForwarder(
+          ethers.constants.AddressZero
+        )
+      ).to.be.revertedWith(
+        "PolygonAssetERC1155Tunnel: trustedForwarder can't be zero"
+      );
+    });
   });
 });
