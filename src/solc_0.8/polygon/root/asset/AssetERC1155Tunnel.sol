@@ -19,7 +19,7 @@ contract AssetERC1155Tunnel is
 {
     IAssetERC1155 public rootToken;
     uint256 public maxTransferLimit;
-    bool private fetchingAssets = false;
+    bool private fetchingAssets;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, uint256 value, bytes data);

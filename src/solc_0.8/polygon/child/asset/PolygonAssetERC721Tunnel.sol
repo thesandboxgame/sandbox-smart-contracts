@@ -23,7 +23,7 @@ contract PolygonAssetERC721Tunnel is
 {
     IPolygonAssetERC721 public childToken;
     uint256 public maxTransferLimit;
-    bool private fetchingAssets = false;
+    bool private fetchingAssets;
 
     event SetTransferLimit(uint256 limit);
     event Deposit(address user, uint256 id, bytes data);

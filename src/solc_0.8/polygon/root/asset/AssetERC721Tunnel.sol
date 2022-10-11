@@ -20,7 +20,7 @@ contract AssetERC721Tunnel is
 {
     IAssetERC721 public rootToken;
     uint256 public maxTransferLimit;
-    bool private fetchingAssets = false;
+    bool private fetchingAssets;
 
     event SetTransferLimit(uint256 indexed limit);
     event Deposit(address indexed user, uint256 id, bytes indexed data);
