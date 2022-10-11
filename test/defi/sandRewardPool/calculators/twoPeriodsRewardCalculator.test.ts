@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../../../chai-setup';
 import {getTime} from '../../../utils';
 import {BigNumber, Contract} from 'ethers';
 import {doOnNextBlock, setBlockTime} from '../utils';

@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {setupAssetERC721Test} from './fixtures';
 import {BigNumber} from 'ethers';
 describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () {

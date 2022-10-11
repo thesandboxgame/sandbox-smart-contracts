@@ -1,5 +1,4 @@
-// import {expect} from 'chai';
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
 
 import {waitFor} from '../../utils';

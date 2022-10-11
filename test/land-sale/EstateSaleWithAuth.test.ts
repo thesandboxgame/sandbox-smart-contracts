@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../chai-setup';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {expectReceiptEventWithArgs, waitFor} from '../utils';
 import {

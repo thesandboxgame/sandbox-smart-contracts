@@ -137,7 +137,7 @@ describe('PolygonAssetERC1155.sol', function () {
       const tokenId = 42;
       await expect(
         PolygonAssetERC1155.callStatic.uri(tokenId)
-      ).to.be.revertedWith('NFT_!EXIST_||_FT_!MINTED');
+      ).to.be.revertedWith('INVALID_ID');
     });
 
     it('can burn ERC1155 asset', async function () {

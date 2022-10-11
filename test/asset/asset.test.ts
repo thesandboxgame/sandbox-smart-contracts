@@ -160,7 +160,7 @@ describe('AssetERC1155.sol', function () {
     const {Asset} = await setupAsset();
     const tokenId = 42;
     await expect(Asset.callStatic.uri(tokenId)).to.be.revertedWith(
-      'NFT_!EXIST_||_FT_!MINTED'
+      'INVALID_ID'
     );
   });
 
