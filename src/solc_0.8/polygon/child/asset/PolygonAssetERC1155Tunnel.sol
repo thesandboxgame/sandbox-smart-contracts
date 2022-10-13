@@ -23,10 +23,12 @@ contract PolygonAssetERC1155Tunnel is
     IPolygonAssetERC1155 public childToken;
     uint256 public maxTransferLimit;
     bool private fetchingAssets;
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
+    bytes4 internal constant ERC1155_IS_RECEIVER = 0x4e2312e0;
 
     event SetTransferLimit(uint256 limit);
-    event Deposit(address user, uint256 id, uint256 value, bytes data);
-    event Withdraw(address user, uint256 id, uint256 value, bytes data);
+    event Deposit(address indexed user, uint256 indexed id, uint256 value, bytes data);
+    event Withdraw(address indexed user, uint256 indexed id, uint256 value, bytes data);
 
     // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
@@ -84,12 +86,12 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() external onlyOwner {
+    function pause() external onlyOwner whenNotPaused {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() external onlyOwner {
+    function unpause() external onlyOwner whenPaused {
         _unpause();
     }
 
@@ -152,7 +154,7 @@ contract PolygonAssetERC1155Tunnel is
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC1155Tunnel: can't directly send Assets");
-        return 0xf23a6e61; //bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))
+        return this.onERC1155Received.selector; //bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))
     }
 
     function onERC1155BatchReceived(
@@ -163,12 +165,10 @@ contract PolygonAssetERC1155Tunnel is
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC1155Tunnel: can't directly send Assets");
-        return 0xbc197c81; //bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))
+        return this.onERC1155BatchReceived.selector; //bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))
     }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
-        return
-            interfaceId == 0x4e2312e0 || // ERC1155Receiver
-            interfaceId == 0x01ffc9a7; // ERC165
+        return interfaceId == ERC1155_IS_RECEIVER || interfaceId == ERC165ID;
     }
 }
