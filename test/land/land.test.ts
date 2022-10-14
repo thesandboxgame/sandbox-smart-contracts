@@ -30,6 +30,85 @@ describe('LandV2', function () {
       });
     });
 
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 >= size1) return;
+        it.only(`should return true for ${size2}x${size2} quad minited inside a ${size1}x${size1} quad`, async function () {
+          const {
+            landContract,
+            getNamedAccounts,
+            ethers,
+            mintQuad,
+            getId,
+          } = await setupLand();
+          const {deployer} = await getNamedAccounts();
+          const contract = landContract.connect(
+            ethers.provider.getSigner(deployer)
+          );
+          // minting the quad of size1 *size1 at x size1 and y size1
+          await mintQuad(deployer, size1, size1, size1);
+          let layer: number = 0;
+          sizes.map((size, i) => {
+            if (size == size2) layer = i;
+          });
+
+          // getting the id of minted quad of size2*size2 inside size1*size1 at x size1 and y size1
+          const quadIdUnminted = getId(layer, size1, size1);
+
+          expect(await contract.exists(quadIdUnminted)).to.be.equal(true);
+        });
+      });
+    });
+
+    sizes.forEach((quadSize) => {
+      it.only(`should return false for ${quadSize}x${quadSize} quad not minited`, async function () {
+        const {
+          landContract,
+          getNamedAccounts,
+          ethers,
+          getId,
+        } = await setupLand();
+        const {deployer} = await getNamedAccounts();
+        const contract = landContract.connect(
+          ethers.provider.getSigner(deployer)
+        );
+        let layer: number = 0;
+        sizes.map((size, i) => {
+          if (size == quadSize) layer = i;
+        });
+
+        // getting the id of unminted quad of size2*size2
+        const quadIdUnminted = getId(layer, quadSize, quadSize);
+
+        expect(await contract.exists(quadIdUnminted)).to.be.equal(false);
+      });
+    });
+
+    sizes.forEach((quadSize) => {
+      if(quadSize == 1) return;
+      it.only(`should revert for invalid ids`, async function () {
+        const {
+          landContract,
+          getNamedAccounts,
+          ethers,
+          getId,
+        } = await setupLand();
+        const {deployer} = await getNamedAccounts();
+        const contract = landContract.connect(
+          ethers.provider.getSigner(deployer)
+        );
+        let layer: number = 0;
+        sizes.map((size, i) => {
+          if (size == quadSize) layer = i;
+        });
+
+        // getting the id of unminted quad of size2*size2
+        const quadIdUnminted = getId(layer, quadSize + 1, quadSize + 1);
+
+        await expect(contract.exists(quadIdUnminted)).to.be.revertedWith("LandBaseTokenV2: Invalid Id");
+      });
+    });
+
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((size1) => {
       sizes.forEach((size2) => {
