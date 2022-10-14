@@ -85,7 +85,7 @@ describe('LandV2', function () {
     });
 
     sizes.forEach((quadSize) => {
-      if(quadSize == 1) return;
+      if (quadSize == 1) return;
       it.only(`should revert for invalid ids`, async function () {
         const {
           landContract,
@@ -105,7 +105,9 @@ describe('LandV2', function () {
         // getting the id of unminted quad of size2*size2
         const quadIdUnminted = getId(layer, quadSize + 1, quadSize + 1);
 
-        await expect(contract.exists(quadIdUnminted)).to.be.revertedWith("LandBaseTokenV2: Invalid Id");
+        await expect(contract.exists(quadIdUnminted)).to.be.revertedWith(
+          'LandBaseTokenV2: Invalid Id'
+        );
       });
     });
 
