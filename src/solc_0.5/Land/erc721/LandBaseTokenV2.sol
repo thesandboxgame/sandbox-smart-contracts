@@ -303,6 +303,73 @@ contract LandBaseTokenV2 is ERC721BaseTokenV2 {
         }
     }
 
+    function exists(uint256 _id) public view returns(bool){
+        uint256 quadType = uint8(_id >> 248);
+        if(quadType == 0){
+            return _exists1x1(_id);
+        }else if(quadType == 1){
+            require(getX(_id)%3 == 0 && getY(_id)%3 == 0, "LandBaseTokenV2: Invalid Id");
+            return _exists3x3(_id);
+        }else if(quadType == 2){
+            require(getX(_id)%6 == 0 && getY(_id)%6 == 0, "LandBaseTokenV2: Invalid Id");
+            return _exists6x6(_id);
+        }else if(quadType == 3){
+            require(getX(_id)%12 == 0 && getY(_id)%12 == 0, "LandBaseTokenV2: Invalid Id");
+            return _exists12x12(_id);
+        }else if(quadType == 4){
+            require(getX(_id)%24 == 0 && getY(_id)%24 == 0, "LandBaseTokenV2: Invalid Id");
+            return _exists24x24(_id);
+        }
+        revert("LandBaseTokenV2: Invalid Id");
+    }
+
+    function getX(uint256 _id) internal pure returns(uint256){
+        return ((_id << 8 )>> 8)%GRID_SIZE;
+    }
+
+    function getY(uint256 _id) internal pure returns(uint256){
+        return ((_id << 8 )>> 8)/GRID_SIZE;
+    }
+    function _exists1x1(uint256 _id) internal view returns(bool){
+        if(_owners[_id] != uint(address(0))){
+           return true;
+        }
+        uint256 parentQuad3x3 = LAYER_3x3 + (getX(_id) - (getX(_id)%3)) + (getY(_id) - (getY(_id)%3))* GRID_SIZE;
+        return _exists3x3(parentQuad3x3);
+    }
+
+    function _exists3x3(uint256 _id) internal view returns(bool){
+        if(_owners[_id] != uint(address(0))){
+           return true;
+        }
+        uint256 parentQuad6x6 = LAYER_6x6 + (getX(_id) - (getX(_id)%6)) + (getY(_id) - (getY(_id)%6))* GRID_SIZE;
+        return _exists6x6(parentQuad6x6);
+    }
+
+    function _exists6x6(uint256 _id) internal view returns(bool){
+        if(_owners[_id] != uint(address(0))){
+           return true;
+        }
+        uint256 parentQuad12x12 = LAYER_12x12 + (getX(_id) - (getX(_id)%12)) + (getY(_id) - (getY(_id)%12))* GRID_SIZE;
+        return _exists12x12(parentQuad12x12);
+    }
+
+    function _exists12x12(uint256 _id) internal view returns(bool){
+        if(_owners[_id] != uint(address(0))){
+           return true;
+        }
+        uint256 parentQuad24x24 = LAYER_24x24 + (getX(_id) - (getX(_id)%24)) + (getY(_id) - (getY(_id)%24))* GRID_SIZE;
+        return _exists24x24(parentQuad24x24);   
+    }
+
+    function _exists24x24(uint256 _id) internal view returns(bool){
+        if(_owners[_id] != uint(address(0))){
+           return true;
+        }else{
+            return false;
+        }
+    }
+
     function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_3x3 + id;
