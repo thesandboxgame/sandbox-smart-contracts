@@ -558,6 +558,8 @@ describe('Asset_ERC1155_Tunnels', function () {
       const {
         deployer,
         AssetERC1155,
+        PolygonAssetERC1155,
+        MockPolygonAssetERC1155Tunnel,
         MockAssetERC1155Tunnel,
         users,
         mintAssetOnL1,
@@ -592,7 +594,7 @@ describe('Asset_ERC1155_Tunnels', function () {
         ).batchDepositToChild(users[0].address, tokenIds, supplies)
       );
 
-      /*       const balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
+      const balanceUserL1 = await AssetERC1155['balanceOf(address,uint256)'](
         users[0].address,
         tokenIds[0]
       );
@@ -610,7 +612,7 @@ describe('Asset_ERC1155_Tunnels', function () {
       const balanceL2Tunnel = await PolygonAssetERC1155[
         'balanceOf(address,uint256)'
       ](MockPolygonAssetERC1155Tunnel.address, tokenIds[0]);
-      expect(balanceL2Tunnel).to.be.equal(0); */
+      expect(balanceL2Tunnel).to.be.equal(0);
     });
 
     it('transfer assets from L1 to L2 more than once', async function () {
