@@ -30,10 +30,11 @@ describe('LandV2', function () {
       });
     });
 
+    // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((size1) => {
       sizes.forEach((size2) => {
         if (size2 >= size1) return;
-        it.only(`should return true for ${size2}x${size2} quad minited inside a ${size1}x${size1} quad`, async function () {
+        it(`should return true for ${size2}x${size2} quad minited inside a ${size1}x${size1} quad`, async function () {
           const {
             landContract,
             getNamedAccounts,
@@ -47,7 +48,7 @@ describe('LandV2', function () {
           );
           // minting the quad of size1 *size1 at x size1 and y size1
           await mintQuad(deployer, size1, size1, size1);
-          let layer: number = 0;
+          let layer = 0;
           sizes.map((size, i) => {
             if (size == size2) layer = i;
           });
@@ -60,8 +61,9 @@ describe('LandV2', function () {
       });
     });
 
+    // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((quadSize) => {
-      it.only(`should return false for ${quadSize}x${quadSize} quad not minited`, async function () {
+      it(`should return false for ${quadSize}x${quadSize} quad not minited`, async function () {
         const {
           landContract,
           getNamedAccounts,
@@ -72,7 +74,7 @@ describe('LandV2', function () {
         const contract = landContract.connect(
           ethers.provider.getSigner(deployer)
         );
-        let layer: number = 0;
+        let layer = 0;
         sizes.map((size, i) => {
           if (size == quadSize) layer = i;
         });
@@ -84,9 +86,10 @@ describe('LandV2', function () {
       });
     });
 
+    // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((quadSize) => {
       if (quadSize == 1) return;
-      it.only(`should revert for invalid ids`, async function () {
+      it(`should revert for invalid ids`, async function () {
         const {
           landContract,
           getNamedAccounts,
@@ -97,7 +100,7 @@ describe('LandV2', function () {
         const contract = landContract.connect(
           ethers.provider.getSigner(deployer)
         );
-        let layer: number = 0;
+        let layer = 0;
         sizes.map((size, i) => {
           if (size == quadSize) layer = i;
         });

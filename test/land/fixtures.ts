@@ -37,7 +37,7 @@ export const setupLandV1 = withSnapshot(
   }
 );
 
-export function getId(layer: number, x: number, y: number) {
+export function getId(layer: number, x: number, y: number): string {
   const lengthOfId = 64;
   const lengthOfBasicId = BigNumber.from(x + y * 408)._hex.length - 2;
   const lengthOfLayerAppendment = lengthOfId - lengthOfBasicId - 2;
