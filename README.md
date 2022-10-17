@@ -13,7 +13,7 @@ Learn more:
 
 # Blockchain Features
 
-We’re adopting the best standards to reach to players who are not familiar with Blockchain and Web3 technologies, simplifying the UX and on-boarding
+We’re adopting the best standards to reach to players who are not familiar with Blockchain and Web3 technologies, simplifying the UX and onboarding
 
 - Dual token structure smart-contract: [ERC-721](https://eips.ethereum.org/EIPS/eip-721) / [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155)
 - Escrowless Auctions
@@ -47,7 +47,7 @@ The root of this repo contains a `example.env` file. You can copy this to your o
 
 # Technical Documentation
 
-You can explore here the documentation of our tokens and blockchain featurs:
+You can explore here the documentation of our tokens and blockchain features:
 
 - our ERC-20 token : [SAND](documentation/Sand.md)
 - Meta-Transaction implementation (EIP-1776) : [Meta-Transactions](documentation/meta_transactions.md)
@@ -76,5 +76,5 @@ So, in order to commit your changes to master you will have to
 - git checkout -b exampleFeature
 - git push --set-upstream origin exampleFeature
 
-Now you can write your code and push your changes to the exampleFeature branch, once your'e done you need to open
+Now you can write your code and push your changes to the exampleFeature branch, once you're done you need to open
 a pull request from exampleFeature to feat/exampleFeature, and then another pull request from feat/exampleFeature to master.
