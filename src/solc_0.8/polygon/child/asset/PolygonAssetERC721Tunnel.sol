@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeab
 
 import "../../../common/interfaces/IPolygonAssetERC721.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import "../../../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 
 import "./PolygonAssetERC721.sol";
 
@@ -17,7 +17,7 @@ contract PolygonAssetERC721Tunnel is
     FxBaseChildTunnelUpgradeable,
     IERC165Upgradeable,
     IERC721MandatoryTokenReceiver,
-    ERC2771Handler,
+    ERC2771HandlerUpgradeable,
     OwnableUpgradeable,
     PausableUpgradeable
 {
@@ -108,12 +108,17 @@ contract PolygonAssetERC721Tunnel is
         }
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 
     function onERC721Received(
