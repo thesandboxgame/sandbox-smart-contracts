@@ -37,6 +37,9 @@ contract AssetERC721Tunnel is
         uint256 _maxTransferLimit
     ) public initializer {
         require(address(_rootToken) != address(0), "AssetERC721Tunnel: _rootToken can't be zero");
+        require(_checkpointManager != address(0), "AssetERC721Tunnel: _checkpointManager can't be zero");
+        require(_fxRoot != address(0), "AssetERC721Tunnel: _fxRoot can't be zero");
+        require(trustedForwarder != address(0), "AssetERC721Tunnel: trustedForwarder can't be zero");
         require(_maxTransferLimit > 0, "AssetERC721Tunnel: _maxTransferLimit invalid");
         rootToken = _rootToken;
         maxTransferLimit = _maxTransferLimit;
@@ -96,6 +99,7 @@ contract AssetERC721Tunnel is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        require(trustedForwarder != address(0), "AssetERC721Tunnel: trustedForwarder can't be zero");
         _trustedForwarder = trustedForwarder;
     }
 

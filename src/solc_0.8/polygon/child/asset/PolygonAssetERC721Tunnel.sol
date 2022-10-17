@@ -39,6 +39,9 @@ contract PolygonAssetERC721Tunnel is
         uint256 _maxTransferLimit
     ) public initializer {
         require(address(_childToken) != address(0), "PolygonAssetERC721Tunnel: _childToken can't be zero");
+        require(_fxChild != address(0), "PolygonAssetERC721Tunnel: _fxChild can't be zero");
+        require(_trustedForwarder != address(0), "PolygonAssetERC721Tunnel: _trustedForwarder can't be zero");
+        require(_maxTransferLimit > 0, "PolygonAssetERC721Tunnel: _maxTransferLimit invalid");
         childToken = _childToken;
         maxTransferLimit = _maxTransferLimit;
         __Ownable_init();
@@ -73,6 +76,7 @@ contract PolygonAssetERC721Tunnel is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        require(trustedForwarder != address(0), "PolygonAssetERC721Tunnel: trustedForwarder can't be zero");
         _trustedForwarder = trustedForwarder;
     }
 
