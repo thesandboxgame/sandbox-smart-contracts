@@ -54,7 +54,7 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function batchWithdrawToRoot(address to, uint256[] calldata ids) external whenNotPaused {
-        require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
+        require(ids.length <= maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         string[] memory uris = new string[](ids.length);
         fetchingAssets = true;
         for (uint256 i = 0; i < ids.length; i++) {
