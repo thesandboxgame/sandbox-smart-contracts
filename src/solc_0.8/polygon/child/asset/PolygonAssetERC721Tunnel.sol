@@ -24,10 +24,12 @@ contract PolygonAssetERC721Tunnel is
     IPolygonAssetERC721 public childToken;
     uint256 public maxTransferLimit;
     bool private fetchingAssets;
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
+    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     event SetTransferLimit(uint256 limit);
-    event Deposit(address user, uint256 id, bytes data);
-    event Withdraw(address user, uint256 id, bytes data);
+    event Deposit(address indexed user, uint256 indexed id, bytes data);
+    event Withdraw(address indexed user, uint256 indexed id, bytes data);
 
     // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
@@ -81,12 +83,12 @@ contract PolygonAssetERC721Tunnel is
     }
 
     /// @dev Pauses all token transfers across bridge
-    function pause() external onlyOwner {
+    function pause() external onlyOwner whenNotPaused {
         _pause();
     }
 
     /// @dev Unpauses all token transfers across bridge
-    function unpause() external onlyOwner {
+    function unpause() external onlyOwner whenPaused {
         _unpause();
     }
 
@@ -142,6 +144,6 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
-        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
+        return interfaceId == ERC721_MANDATORY_RECEIVER || interfaceId == ERC165ID;
     }
 }
