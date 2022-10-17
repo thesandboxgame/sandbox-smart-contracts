@@ -3,6 +3,25 @@ import {waitFor, withSnapshot} from '../utils';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
+export const setupLandV2 = withSnapshot(
+  ['LandV2', 'Land_setup', 'Sand'],
+  async function (hre) {
+    const landContract = await ethers.getContract('Land');
+    const sandContract = await ethers.getContract('Sand');
+    const {landAdmin} = await getNamedAccounts();
+    await setMinter(landContract)(landAdmin, true);
+    return {
+      landContract,
+      sandContract,
+      hre,
+      ethers,
+      getNamedAccounts,
+      mintQuad: mintQuad(landContract),
+      getId,
+    };
+  }
+);
+
 export const setupLand = withSnapshot(['Land', 'Sand'], async function (hre) {
   const landContract = await ethers.getContract('Land');
   const sandContract = await ethers.getContract('Sand');
