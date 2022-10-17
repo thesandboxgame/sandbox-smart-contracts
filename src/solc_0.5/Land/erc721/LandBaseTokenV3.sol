@@ -307,11 +307,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         revert("LandBaseTokenV2: Invalid Id");
     }
 
-    function getX(uint256 _id) internal pure returns(uint256){
+    function getX(uint256 _id) public pure returns(uint256){
         return ((_id << 8 )>> 8)%GRID_SIZE;
     }
 
-    function getY(uint256 _id) internal pure returns(uint256){
+    function getY(uint256 _id) public pure returns(uint256){
         return ((_id << 8 )>> 8)/GRID_SIZE;
     }
     function _exists1x1(uint256 _id) internal view returns(bool){
