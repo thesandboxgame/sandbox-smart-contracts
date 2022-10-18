@@ -42,13 +42,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     /// @notice total width of the map
     /// @return width
-    function width() external returns(uint256) {
+    function width() external pure returns(uint256) {
         return GRID_SIZE;
     }
 
     /// @notice total height of the map
     /// @return height
-    function height() external returns(uint256) {
+    function height() external pure returns(uint256) {
         return GRID_SIZE;
     }
 
