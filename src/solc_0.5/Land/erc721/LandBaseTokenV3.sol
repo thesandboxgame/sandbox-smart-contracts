@@ -287,71 +287,44 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @notice checks if  Land or Quad has been minted or not
+    /// @param _id id of Land or Quad 
+    /// @return bool for if Land or Quad has been minted or not
     function exists(uint256 _id) public view returns(bool){
         uint256 quadType = uint8(_id >> 248);
-        if(quadType == 0){
-            return _exists1x1(_id);
-        }else if(quadType == 1){
+    
+        if(quadType == 0) {
+            if(_owners[_id] == uint(address(0)))return _ownerOfQuad(3, getX(_id),getY(_id)) != address(0);
+            return true;
+        } else if (quadType == 1) {
             require(getX(_id)%3 == 0 && getY(_id)%3 == 0, "LandBaseTokenV2: Invalid Id");
-            return _exists3x3(_id);
-        }else if(quadType == 2){
+            return _ownerOfQuad(3, getX(_id),getY(_id)) != address(0);
+        } else if (quadType == 2) {
             require(getX(_id)%6 == 0 && getY(_id)%6 == 0, "LandBaseTokenV2: Invalid Id");
-            return _exists6x6(_id);
-        }else if(quadType == 3){
+            return _ownerOfQuad(6, getX(_id),getY(_id)) != address(0);
+        } else if (quadType == 3) {
             require(getX(_id)%12 == 0 && getY(_id)%12 == 0, "LandBaseTokenV2: Invalid Id");
-            return _exists12x12(_id);
-        }else if(quadType == 4){
+            return _ownerOfQuad(12, getX(_id),getY(_id)) != address(0);
+        } else if (quadType == 4) {
             require(getX(_id)%24 == 0 && getY(_id)%24 == 0, "LandBaseTokenV2: Invalid Id");
-            return _exists24x24(_id);
+            return _owners[_id] != uint(address(0));
         }
+
         revert("LandBaseTokenV2: Invalid Id");
     }
 
+    /// @notice x coordinate of Land token
+    /// @param _id tokenId
+    /// @return the x coordinates
     function getX(uint256 _id) public pure returns(uint256){
-        return ((_id << 8 )>> 8)%GRID_SIZE;
+        return ((_id << 8)>> 8)%GRID_SIZE;
     }
 
+    /// @notice y coordinate of Land token
+    /// @param _id tokenId
+    /// @return the y coordinates
     function getY(uint256 _id) public pure returns(uint256){
-        return ((_id << 8 )>> 8)/GRID_SIZE;
-    }
-    function _exists1x1(uint256 _id) internal view returns(bool){
-        if(_owners[_id] != uint(address(0))){
-           return true;
-        }
-        uint256 parentQuad3x3 = LAYER_3x3 + (getX(_id) - (getX(_id)%3)) + (getY(_id) - (getY(_id)%3))* GRID_SIZE;
-        return _exists3x3(parentQuad3x3);
-    }
-
-    function _exists3x3(uint256 _id) internal view returns(bool){
-        if(_owners[_id] != uint(address(0))){
-           return true;
-        }
-        uint256 parentQuad6x6 = LAYER_6x6 + (getX(_id) - (getX(_id)%6)) + (getY(_id) - (getY(_id)%6))* GRID_SIZE;
-        return _exists6x6(parentQuad6x6);
-    }
-
-    function _exists6x6(uint256 _id) internal view returns(bool){
-        if(_owners[_id] != uint(address(0))){
-           return true;
-        }
-        uint256 parentQuad12x12 = LAYER_12x12 + (getX(_id) - (getX(_id)%12)) + (getY(_id) - (getY(_id)%12))* GRID_SIZE;
-        return _exists12x12(parentQuad12x12);
-    }
-
-    function _exists12x12(uint256 _id) internal view returns(bool){
-        if(_owners[_id] != uint(address(0))){
-           return true;
-        }
-        uint256 parentQuad24x24 = LAYER_24x24 + (getX(_id) - (getX(_id)%24)) + (getY(_id) - (getY(_id)%24))* GRID_SIZE;
-        return _exists24x24(parentQuad24x24);   
-    }
-
-    function _exists24x24(uint256 _id) internal view returns(bool){
-        if(_owners[_id] != uint(address(0))){
-           return true;
-        }else{
-            return false;
-        }
+        return ((_id << 8)>> 8)/GRID_SIZE;
     }
 
     function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
@@ -376,7 +349,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return ownerOfAll;
     }
 
-    function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal returns (address) {
+    function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         uint256 layer;
         uint256 parentSize = size * 2;
         if (size == 3) {
@@ -398,6 +371,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
         return address(0);
     }
+
     function _regroup6x6(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_6x6 + id;
