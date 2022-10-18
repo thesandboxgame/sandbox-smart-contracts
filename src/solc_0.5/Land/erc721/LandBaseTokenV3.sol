@@ -298,13 +298,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             return true;
         } else if (quadType == 1) {
             require(getX(_id)%3 == 0 && getY(_id)%3 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(3, getX(_id),getY(_id)) != address(0);
+            return _ownerOfQuad(3, getX(_id), getY(_id)) != address(0);
         } else if (quadType == 2) {
             require(getX(_id)%6 == 0 && getY(_id)%6 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(6, getX(_id),getY(_id)) != address(0);
+            return _ownerOfQuad(6, getX(_id), getY(_id)) != address(0);
         } else if (quadType == 3) {
             require(getX(_id)%12 == 0 && getY(_id)%12 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(12, getX(_id),getY(_id)) != address(0);
+            return _ownerOfQuad(12, getX(_id), getY(_id)) != address(0);
         } else if (quadType == 4) {
             require(getX(_id)%24 == 0 && getY(_id)%24 == 0, "LandBaseTokenV2: Invalid Id");
             return _owners[_id] != uint(address(0));
