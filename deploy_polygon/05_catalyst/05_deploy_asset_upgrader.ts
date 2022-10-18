@@ -1,6 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {gemAdditionFee, upgradeFee} from '../../data/assetUpgraderFees';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -47,3 +48,4 @@ func.dependencies = [
   'PolygonGemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
+func.skip = skipUnlessTestnet;

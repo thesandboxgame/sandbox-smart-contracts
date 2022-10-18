@@ -4,7 +4,11 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {deployer, gemsCatalystsRegistryAdmin} = await getNamedAccounts();
+  const {
+    deployer,
+    gemsCatalystsRegistryAdmin,
+    assetAttributesRegistryAdmin,
+  } = await getNamedAccounts();
 
   const sandCurrentAdmin = await read('PolygonSand', 'getAdmin');
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
@@ -75,6 +79,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       AssetUpgrader.address
     );
   }
+
+  // Asset Attributes Registry
+
+  const registryUpgrader = await read(
+    'PolygonAssetAttributesRegistry',
+    'getUpgrader'
+  );
+  if (AssetUpgrader) {
+    if (registryUpgrader !== AssetUpgrader.address) {
+      await execute(
+        'PolygonAssetAttributesRegistry',
+        {from: assetAttributesRegistryAdmin, log: true},
+        'changeUpgrader',
+        AssetUpgrader.address
+      );
+    }
+  }
 };
 export default func;
 func.tags = ['PolygonAssetUpgrader_setup', 'L2'];
@@ -83,4 +104,5 @@ func.dependencies = [
   'PolygonAssetUpgrader_deploy',
   'PolygonSand_deploy',
   'PolygonGemsCatalystsRegistry_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
 ];
