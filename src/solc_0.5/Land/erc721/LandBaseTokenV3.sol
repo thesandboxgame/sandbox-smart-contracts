@@ -52,6 +52,22 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return GRID_SIZE;
     }
 
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function getX(uint256 id) external view returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function getY(uint256 id) external view returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id / GRID_SIZE;
+    }
+
     /**
      * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
      * @param to The recipient of the new quad
@@ -295,20 +311,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function exists(uint256 size , uint256 x, uint256 y) public view returns(bool){
             require(x % size == 0 && y % size == 0, "LandBaseTokenV3: Invalid Id");
             return _ownerOfQuad(size, x, y) != address(0);
-    }
-
-    /// @notice x coordinate of Land token
-    /// @param _id tokenId
-    /// @return the x coordinates
-    function getX(uint256 _id) external pure returns(uint256){
-        return ((_id << 8) >> 8) % GRID_SIZE;
-    }
-
-    /// @notice y coordinate of Land token
-    /// @param _id tokenId
-    /// @return the y coordinates
-    function getY(uint256 _id) external pure returns(uint256){
-        return ((_id << 8) >> 8) / GRID_SIZE;
     }
 
     function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
