@@ -78,7 +78,7 @@ describe('LandV2', function () {
         );
         await expect(
           contract.exists(quadSize, quadSize + 1, quadSize + 1)
-        ).to.be.revertedWith('LandBaseTokenV2: Invalid Id');
+        ).to.be.revertedWith('LandBaseTokenV3: Invalid Id');
       });
     });
 
