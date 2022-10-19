@@ -293,13 +293,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param y y coordinate of the quad
     /// @return bool for if Land has been minted or not
     function exists(uint256 size , uint256 x, uint256 y) public view returns(bool){
-        if(size == 1) {
-            if (_owners[x + y * GRID_SIZE] == uint(address(0))) return _ownerOfQuad(3, x, y) != address(0);
-            return true;
-        } else {
-            require(x % size == 0 && y % size == 0, "LandBaseTokenV2: Invalid Id");
+            require(x % size == 0 && y % size == 0, "LandBaseTokenV3: Invalid Id");
             return _ownerOfQuad(size, x, y) != address(0);
-        } 
     }
 
     /// @notice x coordinate of Land token
@@ -341,7 +336,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         uint256 layer;
         uint256 parentSize = size * 2;
-        if (size == 3) {
+        if (size == 1) {
+            layer = LAYER;
+            parentSize = 3;
+        } else if (size == 3) {
             layer = LAYER_3x3;
         } else if (size == 6) {
             layer = LAYER_6x6;
