@@ -287,44 +287,33 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
-    /// @notice checks if  Land or Quad has been minted or not
-    /// @param _id id of Land or Quad 
-    /// @return bool for if Land or Quad has been minted or not
-    function exists(uint256 _id) public view returns(bool){
-        uint256 quadType = uint8(_id >> 248);
-    
-        if(quadType == 0) {
-            if(_owners[_id] == uint(address(0)))return _ownerOfQuad(3, getX(_id),getY(_id)) != address(0);
+    /// @notice checks if Land has been minted or not
+    /// @param size size of the  
+    /// @param x x coordinate of the quad
+    /// @param y y coordinate of the quad
+    /// @return bool for if Land has been minted or not
+    function exists(uint256 size , uint256 x, uint256 y) public view returns(bool){
+        if(size == 1) {
+            if (_owners[x + y * GRID_SIZE] == uint(address(0))) return _ownerOfQuad(3, x, y) != address(0);
             return true;
-        } else if (quadType == 1) {
-            require(getX(_id)%3 == 0 && getY(_id)%3 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(3, getX(_id), getY(_id)) != address(0);
-        } else if (quadType == 2) {
-            require(getX(_id)%6 == 0 && getY(_id)%6 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(6, getX(_id), getY(_id)) != address(0);
-        } else if (quadType == 3) {
-            require(getX(_id)%12 == 0 && getY(_id)%12 == 0, "LandBaseTokenV2: Invalid Id");
-            return _ownerOfQuad(12, getX(_id), getY(_id)) != address(0);
-        } else if (quadType == 4) {
-            require(getX(_id)%24 == 0 && getY(_id)%24 == 0, "LandBaseTokenV2: Invalid Id");
-            return _owners[_id] != uint(address(0));
-        }
-
-        revert("LandBaseTokenV2: Invalid Id");
+        } else {
+            require(x % size == 0 && y % size == 0, "LandBaseTokenV2: Invalid Id");
+            return _ownerOfQuad(size, x, y) != address(0);
+        } 
     }
 
     /// @notice x coordinate of Land token
     /// @param _id tokenId
     /// @return the x coordinates
-    function getX(uint256 _id) public pure returns(uint256){
-        return ((_id << 8)>> 8)%GRID_SIZE;
+    function getX(uint256 _id) external pure returns(uint256){
+        return ((_id << 8) >> 8) % GRID_SIZE;
     }
 
     /// @notice y coordinate of Land token
     /// @param _id tokenId
     /// @return the y coordinates
-    function getY(uint256 _id) public pure returns(uint256){
-        return ((_id << 8)>> 8)/GRID_SIZE;
+    function getY(uint256 _id) external pure returns(uint256){
+        return ((_id << 8) >> 8) / GRID_SIZE;
     }
 
     function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
