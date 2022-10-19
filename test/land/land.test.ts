@@ -40,7 +40,6 @@ describe('LandV2', function () {
             getNamedAccounts,
             ethers,
             mintQuad,
-            getId,
           } = await setupLand();
           const {deployer} = await getNamedAccounts();
           const contract = landContract.connect(
@@ -48,15 +47,7 @@ describe('LandV2', function () {
           );
           // minting the quad of size1 *size1 at x size1 and y size1
           await mintQuad(deployer, size1, size1, size1);
-          let layer = 0;
-          sizes.map((size, i) => {
-            if (size == size2) layer = i;
-          });
-
-          // getting the id of minted quad of size2*size2 inside size1*size1 at x size1 and y size1
-          const quadIdUnminted = getId(layer, size1, size1);
-
-          expect(await contract.exists(quadIdUnminted)).to.be.equal(true);
+          expect(await contract.exists(size1, size1, size1)).to.be.equal(true);
         });
       });
     });
@@ -64,54 +55,40 @@ describe('LandV2', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((quadSize) => {
       it(`should return false for ${quadSize}x${quadSize} quad not minited`, async function () {
-        const {
-          landContract,
-          getNamedAccounts,
-          ethers,
-          getId,
-        } = await setupLand();
+        const {landContract, getNamedAccounts, ethers} = await setupLand();
         const {deployer} = await getNamedAccounts();
         const contract = landContract.connect(
           ethers.provider.getSigner(deployer)
         );
-        let layer = 0;
-        sizes.map((size, i) => {
-          if (size == quadSize) layer = i;
-        });
 
-        // getting the id of unminted quad of size2*size2
-        const quadIdUnminted = getId(layer, quadSize, quadSize);
-
-        expect(await contract.exists(quadIdUnminted)).to.be.equal(false);
+        expect(await contract.exists(quadSize, quadSize, quadSize)).to.be.equal(
+          false
+        );
       });
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((quadSize) => {
       if (quadSize == 1) return;
-      it(`should revert for invalid ids`, async function () {
-        const {
-          landContract,
-          getNamedAccounts,
-          ethers,
-          getId,
-        } = await setupLand();
+      it(`should revert for invalid coordinates for size ${quadSize}`, async function () {
+        const {landContract, getNamedAccounts, ethers} = await setupLand();
         const {deployer} = await getNamedAccounts();
         const contract = landContract.connect(
           ethers.provider.getSigner(deployer)
         );
-        let layer = 0;
-        sizes.map((size, i) => {
-          if (size == quadSize) layer = i;
-        });
-
-        // getting the id of unminted quad of size2*size2
-        const quadIdUnminted = getId(layer, quadSize + 1, quadSize + 1);
-
-        await expect(contract.exists(quadIdUnminted)).to.be.revertedWith(
-          'LandBaseTokenV2: Invalid Id'
-        );
+        await expect(
+          contract.exists(quadSize, quadSize + 1, quadSize + 1)
+        ).to.be.revertedWith('LandBaseTokenV2: Invalid Id');
       });
+    });
+
+    it(`should revert for invalid size`, async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const contract = landContract.connect(
+        ethers.provider.getSigner(deployer)
+      );
+      await expect(contract.exists(5, 5, 5)).to.be.revertedWith('Invalid size');
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe

@@ -1,7 +1,6 @@
 import {Contract, ContractReceipt} from 'ethers';
 import {waitFor, withSnapshot} from '../utils';
 import {ethers, getNamedAccounts} from 'hardhat';
-import {BigNumber} from 'ethers';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const setupLandV2 = withSnapshot(
   ['LandV2', 'Land_setup', 'Sand'],
@@ -17,7 +16,6 @@ export const setupLandV2 = withSnapshot(
       ethers,
       getNamedAccounts,
       mintQuad: mintQuad(landContract),
-      getId,
     };
   }
 );
@@ -34,7 +32,6 @@ export const setupLand = withSnapshot(['Land', 'Sand'], async function (hre) {
     ethers,
     getNamedAccounts,
     mintQuad: mintQuad(landContract),
-    getId,
   };
 });
 
@@ -55,19 +52,6 @@ export const setupLandV1 = withSnapshot(
     };
   }
 );
-
-export function getId(layer: number, x: number, y: number): string {
-  const lengthOfId = 64;
-  const lengthOfBasicId = BigNumber.from(x + y * 408)._hex.length - 2;
-  const lengthOfLayerAppendment = lengthOfId - lengthOfBasicId - 2;
-  let layerAppendment = '';
-  for (let i = 0; i < lengthOfLayerAppendment; i++) {
-    layerAppendment = layerAppendment + '0';
-  }
-  return (
-    `0x0${layer}` + layerAppendment + BigNumber.from(x + y * 408)._hex.slice(2)
-  );
-}
 
 export function mintQuad(landContract: Contract) {
   return async (
