@@ -8,7 +8,7 @@ import {
 import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {ethers} from 'hardhat';
-import {constants} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 
 const zeroAddress = constants.AddressZero;
 
@@ -1356,6 +1356,199 @@ describe('PolygonAssetERC1155.sol', function () {
         tokenId
       );
       expect(collectionIndexOf).to.be.equal(0);
+    });
+  });
+
+  describe('PolygonAsset: Token id', function () {
+    it('should match the token id masks', async function () {
+      const {
+        PolygonAssetERC1155,
+        assetBouncerAdmin,
+        minter,
+        users,
+        helper,
+      } = await setupPolygonAsset();
+
+      const chainIndex = 1;
+      const packId = 12345;
+      const creator = users[1].address.toLowerCase();
+      const isNFT = [0, 0, 1, 1];
+      const supplies = [42, 28, 1, 1];
+      const hash =
+        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(assetBouncerAdmin)
+      ).setBouncer(minter, true);
+
+      const receipt = await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(minter)
+      )['mintMultiple(address,uint40,bytes32,uint256[],bytes,address,bytes)'](
+        users[1].address,
+        packId,
+        hash,
+        supplies,
+        '0x',
+        users[1].address,
+        '0x'
+      );
+
+      const transferEvent = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receipt,
+        'TransferBatch'
+      );
+
+      const URI_ID_MASK = await helper.URI_ID();
+      const CREATOR_MASK = BigNumber.from(
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000'
+      );
+      const CREATOR_OFFSET_MULTIPLIER = await helper.CREATOR_OFFSET_MULTIPLIER();
+      const PACK_ID_MASK = await helper.PACK_ID();
+      const PACK_ID_OFFSET_MULTIPLIER = await helper.PACK_ID_OFFSET_MULTIPLIER();
+      const IS_NFT_MASK = await helper.IS_NFT();
+      const IS_NFT_OFFSET_MULTIPLIER = await helper.IS_NFT_OFFSET_MULTIPLIER();
+      const CHAIN_INDEX_MASK = await helper.CHAIN_INDEX();
+      const CHAIN_INDEX_OFFSET_MULTIPLIER = await helper.CHAIN_INDEX_OFFSET_MULTIPLIER();
+      const NFT_INDEX_MASK = await helper.NFT_INDEX();
+      const NFT_INDEX_OFFSET_MULTIPLIER = BigNumber.from(2).pow(
+        await helper.NFT_INDEX_OFFSET()
+      );
+      const PACK_NUM_FT_TYPES_MASK = await helper.PACK_NUM_FT_TYPES();
+      const PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER = await helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER();
+
+      const tokenIds = transferEvent.args[3];
+
+      for (let index = 0; index < tokenIds.length; index++) {
+        const tokenId = BigNumber.from(tokenIds[index]);
+
+        expect(
+          tokenId
+            .and(CREATOR_MASK)
+            .div(CREATOR_OFFSET_MULTIPLIER)
+            .toHexString(),
+          'applying the creator mask on the token id should return the creator address'
+        ).to.be.equal(creator);
+
+        expect(
+          tokenId.and(IS_NFT_MASK).div(IS_NFT_OFFSET_MULTIPLIER).toNumber(),
+          'applying the NFT mask on the token id should return either if the asset has supply one or not'
+        ).to.be.equal(isNFT[index]);
+
+        expect(
+          tokenId
+            .and(CHAIN_INDEX_MASK)
+            .div(CHAIN_INDEX_OFFSET_MULTIPLIER)
+            .toNumber(),
+          'applying the chain index mask on the token id should return the chain id'
+        ).to.be.equal(chainIndex);
+
+        expect(
+          tokenId
+            .and(NFT_INDEX_MASK)
+            .div(NFT_INDEX_OFFSET_MULTIPLIER)
+            .toNumber(),
+          'applying the NFT index mask on the token id should return the index of the token if it has been extracted to a NFT'
+        ).to.be.equal(0);
+
+        expect(
+          tokenId
+            .and(PACK_ID_MASK.xor(CREATOR_MASK).xor(CHAIN_INDEX_MASK))
+            .div(PACK_ID_OFFSET_MULTIPLIER)
+            .toNumber(),
+          'applying the pack id mask on the token id should return the pack id'
+        ).to.be.equal(packId);
+
+        expect(
+          tokenId
+            .and(PACK_NUM_FT_TYPES_MASK)
+            .div(PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)
+            .toNumber(),
+          'applying the pack num ft mask on the token id should return the number of FT in the pack'
+        ).to.be.equal(supplies.filter((supply) => supply > 1).length);
+
+        expect(
+          tokenId.and(PACK_ID_MASK.xor(PACK_NUM_FT_TYPES_MASK)),
+          'applying the pack id + pack num ft masks on the token id should return the same than the uri id mask'
+        ).to.be.equal(tokenId.and(URI_ID_MASK));
+      }
+    });
+
+    it('masks composition & breakdown', async function () {
+      const {helper} = await setupPolygonAsset();
+
+      const URI_ID_MASK = await helper.URI_ID();
+      const PACK_ID_MASK = await helper.PACK_ID();
+      const PACK_NUM_FT_TYPES_MASK = await helper.PACK_NUM_FT_TYPES();
+      const IS_NFT_MASK = await helper.IS_NFT();
+      const NOT_IS_NFT_MASK = await helper.NOT_IS_NFT();
+      const CHAIN_INDEX_MASK = await helper.CHAIN_INDEX();
+      const NOT_CHAIN_INDEX_MASK = await helper.NOT_CHAIN_INDEX();
+
+      expect(
+        PACK_ID_MASK.xor(PACK_NUM_FT_TYPES_MASK),
+        'URI_ID mask equals to PACK_ID + PACK_NUM_FT_TYPES masks'
+      ).to.be.equal(URI_ID_MASK);
+
+      expect(
+        IS_NFT_MASK.xor(NOT_IS_NFT_MASK),
+        'NOT_IS_NFT_MASK mask is the inversion of IS_NFT_MASK'
+      ).to.be.equal(ethers.constants.MaxUint256);
+
+      expect(
+        URI_ID_MASK.xor(PACK_NUM_FT_TYPES_MASK),
+        'PACK_ID mask equals to URI_ID - PACK_NUM_FT_TYPES masks'
+      ).to.be.equal(PACK_ID_MASK);
+
+      expect(
+        CHAIN_INDEX_MASK.xor(NOT_CHAIN_INDEX_MASK),
+        'NOT_IS_NFT_MASK mask is the inversion of IS_NFT_MASK'
+      ).to.be.equal(ethers.constants.MaxUint256);
+    });
+
+    it('metadatahash should not exist for the same token id with a different chain index', async function () {
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+        helper,
+      } = await setupPolygonAsset();
+      const tokenId = BigNumber.from(await mintAsset(extractor, 2));
+
+      const chainIndex = 1;
+      const CHAIN_INDEX_MASK = await helper.CHAIN_INDEX();
+      const CHAIN_INDEX_OFFSET_MULTIPLIER = await helper.CHAIN_INDEX_OFFSET_MULTIPLIER();
+      const CHAIN_INDEX_OFFSET = 87;
+
+      expect(await PolygonAssetERC1155.doesHashExist(tokenId)).to.be.equal(
+        true
+      );
+
+      expect(
+        tokenId
+          .and(CHAIN_INDEX_MASK)
+          .div(CHAIN_INDEX_OFFSET_MULTIPLIER)
+          .toNumber(),
+        'token id should have the chain index 1'
+      ).to.be.equal(chainIndex);
+
+      const newTokenId = tokenId.add(
+        BigNumber.from(255 - chainIndex).mul(
+          BigNumber.from('2').pow(CHAIN_INDEX_OFFSET)
+        )
+      );
+
+      expect(
+        newTokenId
+          .and(CHAIN_INDEX_MASK)
+          .div(CHAIN_INDEX_OFFSET_MULTIPLIER)
+          .toNumber(),
+        'token id should have the chain index 255'
+      ).to.be.equal(255);
+
+      expect(await PolygonAssetERC1155.doesHashExist(newTokenId)).to.be.equal(
+        false
+      );
     });
   });
 });
