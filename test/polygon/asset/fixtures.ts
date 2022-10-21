@@ -173,6 +173,8 @@ const polygonAssetFixtures = async function () {
     'PolygonAuthValidator'
   );
 
+  const helper = await ethers.getContract('ERC1155ERC721Helper');
+
   return {
     Sand,
     Asset,
@@ -190,6 +192,7 @@ const polygonAssetFixtures = async function () {
     trustedForwarder,
     assetBouncerAdmin,
     authValidatorContract,
+    helper,
   };
 };
 
