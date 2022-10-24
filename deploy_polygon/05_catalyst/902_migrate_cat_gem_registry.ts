@@ -8,8 +8,10 @@ const func: DeployFunction = async function (hre) {
   const {read, execute} = deployments;
   const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
   const snapshot: string[][] = fs.readJsonSync(
-    'tmp/snapshot-cat-gem-OldCatalystRegistry-CatalystApplied.json'
+    'tmp/snapshot-cat-gem-OldCatalystRegistry-CatalystApplied.json',
+    {throws: false}
   );
+  if (!snapshot) return
 
   const PolygonAssetAttributesRegistry = await ethers.getContract(
     'PolygonAssetAttributesRegistry'
@@ -34,6 +36,7 @@ const func: DeployFunction = async function (hre) {
     );
   }
   const datas = [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const [assetId, catalystId, seed, gemIds, blockNumber] of snapshot) {
     const result = await read(
       'PolygonAssetAttributesRegistry',
