@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre) {
     'tmp/snapshot-cat-gem-OldCatalystRegistry-CatalystApplied.json',
     {throws: false}
   );
-  if (!snapshot) return
+  if (!snapshot) return;
 
   const PolygonAssetAttributesRegistry = await ethers.getContract(
     'PolygonAssetAttributesRegistry'
