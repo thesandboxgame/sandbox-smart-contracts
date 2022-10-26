@@ -1,6 +1,7 @@
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.5;
 
+import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
 import "../common/Interfaces/ERC1155.sol";
@@ -11,7 +12,7 @@ import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
+contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     event LandQuadPurchased(
@@ -48,7 +49,7 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         bytes32[] calldata proof,
         bytes calldata referral,
         bytes calldata signature
-    ) external {
+    ) external nonReentrant {
         _checkAddressesAndExpiryTime(buyer, reserved);
         _checkAuthAndProofValidity(to, reserved, info, salt, assetIds, proof, signature);
         _handleFeeAndReferral(buyer, info[PRICE_INDEX], referral);
