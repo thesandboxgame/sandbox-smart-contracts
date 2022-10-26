@@ -2,6 +2,7 @@
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
 import "../common/Interfaces/ERC1155.sol";
@@ -14,6 +15,7 @@ import "./AuthValidator.sol";
 /// @notice This contract manages the sale of our lands as Estates
 contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
+    using Address for address;
 
     event LandQuadPurchased(
         address indexed buyer,
@@ -258,6 +260,18 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         address feeDistributor,
         address authValidator
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
+        require(landAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(sandContractAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(initialMetaTx != address(0), "EstateSaleWithAuth: zero address");
+        require(admin != address(0), "EstateSaleWithAuth: zero address");
+        require(initialWalletAddress != address(0), "EstateSaleWithAuth: zero address");
+        require(estate.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(feeDistributor != address(0), "EstateSaleWithAuth: zero address");
+        require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
+
+        require(block.timestamp < expiryTime, "EstateSaleWithAuth: invalid expiryTime");
+
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);

@@ -1,6 +1,7 @@
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.5;
 
+import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/Interfaces/ERC20.sol";
@@ -9,6 +10,8 @@ import "../common/BaseWithStorage/Admin.sol";
 
 /// @dev This contract verifies if a referral is valid
 contract ReferralValidator is Admin {
+    using Address for address;
+
     address private _signingWallet;
     uint256 private _maxCommissionRate;
 
@@ -25,6 +28,8 @@ contract ReferralValidator is Admin {
     );
 
     constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
+        require(initialSigningWallet != address(0), "ReferralValidator: zero address");
+
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
     }
@@ -34,7 +39,8 @@ contract ReferralValidator is Admin {
      * @param newSigningWallet The new address of the signing wallet
      */
     function updateSigningWallet(address newSigningWallet) external {
-        require(_admin == msg.sender, "Sender not admin");
+        require(newSigningWallet != address(0), "ReferralValidator: zero address");
+        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
         _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;
         _signingWallet = newSigningWallet;
     }
@@ -60,7 +66,7 @@ contract ReferralValidator is Admin {
      * @param newMaxCommissionRate The new maximum commission rate
      */
     function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {
-        require(_admin == msg.sender, "Sender not admin");
+        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
         _maxCommissionRate = newMaxCommissionRate;
     }
 
@@ -73,6 +79,8 @@ contract ReferralValidator is Admin {
 
         if (referral.length > 0) {
             (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);
+
+            require(commissionRate < 10000, "ReferralValidator: invalid commisionRate");
 
             uint256 commission = 0;
 
@@ -114,11 +122,11 @@ contract ReferralValidator is Admin {
             }
 
             if (commission > 0) {
-                require(token.transferFrom(buyer, referrer, commission), "commision transfer failed");
+                require(token.transferFrom(buyer, referrer, commission), "ReferralValidator: commision transfer failed");
             }
         }
 
-        require(token.transferFrom(buyer, destination, amountForDestination), "payment transfer failed");
+        require(token.transferFrom(buyer, destination, amountForDestination), "ReferralValidator: payment transfer failed");
     }
 
     /**

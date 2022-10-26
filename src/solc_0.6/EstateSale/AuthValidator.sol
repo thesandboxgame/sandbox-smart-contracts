@@ -11,6 +11,9 @@ contract AuthValidator is Admin {
     event SigningWallet(address indexed signingWallet);
 
     constructor(address adminWallet, address initialSigningWallet) public {
+        require(adminWallet != address(0), "AuthValidator: zero address");
+        require(initialSigningWallet != address(0), "AuthValidator: zero address");
+
         _admin = adminWallet;
         _updateSigningAuthWallet(initialSigningWallet);
     }
@@ -20,7 +23,7 @@ contract AuthValidator is Admin {
     }
 
     function _updateSigningAuthWallet(address newSigningWallet) internal {
-        require(newSigningWallet != address(0), "INVALID_SIGNING_WALLET");
+        require(newSigningWallet != address(0), "AuthValidator: INVALID_SIGNING_WALLET");
         _signingAuthWallet = newSigningWallet;
         emit SigningWallet(newSigningWallet);
     }
