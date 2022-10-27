@@ -20,7 +20,7 @@ contract ReferralValidator is Admin {
     uint256 private _maxCommissionRate;
 
     mapping(address => uint256) private _previousSigningWallets;
-    uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;
+    uint256 constant private _previousSigningDelay = 10 days;
 
     event ReferralUsed(
         address indexed referrer,

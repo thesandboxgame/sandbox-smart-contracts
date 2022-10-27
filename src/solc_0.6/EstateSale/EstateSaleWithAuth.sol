@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
-import "./LandToken.sol";
+import "./ILandToken.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
@@ -85,7 +85,6 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         uint256[] calldata values
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        // require(block.timestamp > _expiryTime, "SALE_NOT_OVER"); // removed to recover in case of misconfigured sales
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
@@ -232,7 +231,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     IERC1155 internal immutable _asset;
-    LandToken internal immutable _land;
+    ILandToken internal immutable _land;
     IERC20 internal immutable _sand;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
@@ -274,7 +273,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
 
 
-        _land = LandToken(landAddress);
+        _land = ILandToken(landAddress);
         _sand = IERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
