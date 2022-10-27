@@ -1,4 +1,7 @@
 /* solhint-disable not-rely-on-time, func-order */
+
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
