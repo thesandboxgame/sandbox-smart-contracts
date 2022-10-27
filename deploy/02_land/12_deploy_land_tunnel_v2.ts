@@ -5,7 +5,7 @@ import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, execute, read, catchUnknownSigner} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const Land = await deployments.get('Land');
@@ -39,6 +39,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const PolygonLandTunnelV2 = await deploymentsL2.getOrNull(
     'PolygonLandTunnelV2'
   );
+
+  const isMinter = await read('Land', 'isMinter', LandTunnelV2.address);
+
+  if (!isMinter) {
+    const admin = await read('Land', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'Land',
+        {from: admin, log: true},
+        'setMinter',
+        LandTunnelV2.address,
+        true
+      )
+    );
+  }
 
   // get deployer on l2
   const {deployer: deployerOnL2} = await hreL2.getNamedAccounts();
