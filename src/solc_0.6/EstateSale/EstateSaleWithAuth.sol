@@ -222,7 +222,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
     function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {
         uint256 feeAmountInSand = priceInSand.mul(FEE).div(100);
-        require(_sand.safeTransferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
+        _sand.safeTransferFrom(buyer, address(_feeDistributor), feeAmountInSand);
         return priceInSand.sub(feeAmountInSand);
     }
 
