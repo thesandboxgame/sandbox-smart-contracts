@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
-import "../../../common/interfaces/ILandTokenWithIsSuperOperator.sol";
-import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
-import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "../../../common/fx-portal/FxBaseRootTunnelUpgradeable.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
+import "../../../common/interfaces/ILandTokenV2.sol";
+import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @title LAND bridge on L1
 contract LandTunnelV2 is
@@ -16,7 +16,7 @@ contract LandTunnelV2 is
     OwnableUpgradeable,
     PausableUpgradeable
 {
-    address public rootToken;
+    ILandTokenV2 public rootToken;
     bool internal transferringToL2;
 
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -25,7 +25,7 @@ contract LandTunnelV2 is
     function initialize(
         address _checkpointManager,
         address _fxRoot,
-        address _rootToken,
+        ILandTokenV2 _rootToken,
         address _trustedForwarder
     ) public initializer {
         rootToken = _rootToken;
@@ -44,10 +44,7 @@ contract LandTunnelV2 is
         uint256, /* tokenId */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(
-            transferringToL2 || ILandTokenWithIsSuperOperator(rootToken).isSuperOperator(operator),
-            "LandTunnel: !BRIDGING"
-        );
+        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnel: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -60,10 +57,7 @@ contract LandTunnelV2 is
         uint256[] calldata, /* ids */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(
-            transferringToL2 || ILandTokenWithIsSuperOperator(rootToken).isSuperOperator(operator),
-            "LandTunnel: !BRIDGING"
-        );
+        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnel: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 
@@ -80,7 +74,7 @@ contract LandTunnelV2 is
     ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         transferringToL2 = true;
-        ILandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
+        rootToken.batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
         transferringToL2 = false;
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
@@ -109,7 +103,9 @@ contract LandTunnelV2 is
         (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
         for (uint256 index = 0; index < x.length; index++) {
-            ILandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
+            if (rootToken.exists(size[index], x[index], y[index]))
+                rootToken.transferQuad(address(this), to, size[index], x[index], y[index], data);
+            else rootToken.mintQuad(to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }
