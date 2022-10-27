@@ -104,11 +104,15 @@ contract ReferralValidator is Admin {
             }
 
             if (commission > 0) {
-                payable(referrer).transfer(commission);
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool success, ) = payable(referrer).call{value:commission}("");
+                require(success, "ReferralValidator: Transfer failed.");
             }
         }
 
-        destination.transfer(amountForDestination);
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, ) = destination.call{value:amountForDestination}("");
+        require(success, "ReferralValidator: Transfer failed.");
     }
 
     function handleReferralWithERC20(
