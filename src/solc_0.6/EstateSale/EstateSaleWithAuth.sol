@@ -44,7 +44,11 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     /// @param to address that will own the purchased Land
     /// @param reserved the reserved address (if any)
     /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land
+    /// @param salt The salt submitted for verification.
+    /// @param assetIds asset ids (lands) that will be bought
     /// @param proof merkleProof for that particular Land
+    /// @param referral referral id
+    /// @param signature A signed message specifying tx details
     function buyLandWithSand(
         address buyer,
         address to,

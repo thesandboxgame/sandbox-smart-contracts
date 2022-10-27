@@ -74,10 +74,10 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice the max commision rate
-     * @return the maximum commision rate that a referral can give
+     * @notice the max commission rate
+     * @return the maximum commission rate that a referral can give
      */
-    function getMaxCommisionRate() external view returns (uint256) {
+    function getMaxCommissionRate() external view returns (uint256) {
         return _maxCommissionRate;
     }
 
