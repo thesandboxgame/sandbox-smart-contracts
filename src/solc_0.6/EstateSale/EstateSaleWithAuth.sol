@@ -27,7 +27,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         uint256 amountPaid
     );
 
-    event NewReceivingWallet(address newWallet);
+    event NewReceivingWallet(address indexed newWallet);
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet

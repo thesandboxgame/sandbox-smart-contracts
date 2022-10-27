@@ -28,8 +28,8 @@ contract ReferralValidator is Admin {
         uint256 commissionRate
     );
 
-    event SigningWalletUpdated(address newSigningWallet);
-    event MaxCommissionRateUpdated(uint256 newMaxCommissionRate);
+    event SigningWalletUpdated(address indexed newSigningWallet);
+    event MaxCommissionRateUpdated(uint256 indexed newMaxCommissionRate);
 
     constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
         require(initialSigningWallet != address(0), "ReferralValidator: zero address");
