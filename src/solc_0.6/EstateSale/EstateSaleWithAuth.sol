@@ -265,12 +265,10 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         require(initialMetaTx != address(0), "EstateSaleWithAuth: zero address");
         require(admin != address(0), "EstateSaleWithAuth: zero address");
         require(initialWalletAddress != address(0), "EstateSaleWithAuth: zero address");
-        require(estate.isContract(), "EstateSaleWithAuth: is not a contract");
         require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
         require(feeDistributor != address(0), "EstateSaleWithAuth: zero address");
         require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
 
-        require(block.timestamp < expiryTime, "EstateSaleWithAuth: invalid expiryTime");
 
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);

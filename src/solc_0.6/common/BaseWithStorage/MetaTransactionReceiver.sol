@@ -2,7 +2,6 @@ pragma solidity 0.6.5;
 
 import "./Admin.sol";
 
-
 contract MetaTransactionReceiver is Admin {
     mapping(address => bool) internal _metaTransactionContracts;
 
@@ -16,6 +15,7 @@ contract MetaTransactionReceiver is Admin {
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public {
         require(msg.sender == _admin, "only admin can setup metaTransactionProcessors");
+        require(metaTransactionProcessor != address(0), "MetaTransactionReceiver: zero address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
