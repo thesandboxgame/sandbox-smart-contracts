@@ -2,7 +2,7 @@
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
-import "../common/Libraries/SigUtil.sol";
+import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/Admin.sol";
@@ -151,7 +151,7 @@ contract ReferralValidator is Admin {
 
         bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));
 
-        address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
+        address signer = ECDSA.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
 
         if (_previousSigningWallets[signer] >= now) {
             return true;
