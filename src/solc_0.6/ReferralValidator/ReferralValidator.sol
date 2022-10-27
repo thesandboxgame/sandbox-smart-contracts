@@ -28,6 +28,9 @@ contract ReferralValidator is Admin {
         uint256 commissionRate
     );
 
+    event SigningWalletUpdated(address newSigningWallet);
+    event MaxCommissionRateUpdated(uint256 newMaxCommissionRate);
+
     constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
         require(initialSigningWallet != address(0), "ReferralValidator: zero address");
 
@@ -45,6 +48,8 @@ contract ReferralValidator is Admin {
         require(newSigningWallet != address(0), "ReferralValidator: zero address");
         _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;
         _signingWallet = newSigningWallet;
+
+        emit SigningWalletUpdated(newSigningWallet);
     }
 
      /**
@@ -79,6 +84,8 @@ contract ReferralValidator is Admin {
      */
     function updateMaxCommissionRate(uint256 newMaxCommissionRate) external onlyAdmin {
         _maxCommissionRate = newMaxCommissionRate;
+
+        emit MaxCommissionRateUpdated(newMaxCommissionRate);
     }
 
     function handleReferralWithETH(

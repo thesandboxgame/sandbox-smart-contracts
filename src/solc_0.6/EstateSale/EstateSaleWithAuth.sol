@@ -27,12 +27,16 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         uint256 amountPaid
     );
 
+    event NewReceivingWallet(address newWallet);
+
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "ZERO_ADDRESS");
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _wallet = newWallet;
+
+        emit NewReceivingWallet(newWallet);
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
