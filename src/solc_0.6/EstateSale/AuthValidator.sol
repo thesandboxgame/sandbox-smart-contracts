@@ -12,7 +12,6 @@ contract AuthValidator is Admin {
 
     constructor(address adminWallet, address initialSigningWallet) public {
         require(adminWallet != address(0), "AuthValidator: zero address");
-        require(initialSigningWallet != address(0), "AuthValidator: zero address");
 
         _admin = adminWallet;
         _updateSigningAuthWallet(initialSigningWallet);
