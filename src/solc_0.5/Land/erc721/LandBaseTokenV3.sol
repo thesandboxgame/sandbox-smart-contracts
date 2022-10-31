@@ -339,7 +339,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 layer;
         uint256 parentSize = size * 2;
         if (size == 1) {
-            layer = LAYER;
+            layer = LAYER_1x1;
             parentSize = 3;
         } else if (size == 3) {
             layer = LAYER_3x3;
