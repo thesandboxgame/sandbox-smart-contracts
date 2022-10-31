@@ -7,7 +7,7 @@ pragma solidity 0.6.5;
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
+import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "../common/BaseWithStorage/Admin.sol";
 
 
@@ -106,10 +106,10 @@ contract ReferralValidator is Admin {
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMath.div(SafeMath.mul(amount, commissionRate), 10000);
 
                 emit ReferralUsed(referrer, referee, address(0), amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                amountForDestination = SafeMath.sub(amountForDestination, commission);
             }
 
             if (commission > 0) {
@@ -140,10 +140,10 @@ contract ReferralValidator is Admin {
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMath.div(SafeMath.mul(amount, commissionRate), 10000);
 
                 emit ReferralUsed(referrer, referee, tokenAddress, amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                amountForDestination = SafeMath.sub(amountForDestination, commission);
             }
 
             if (commission > 0) {
