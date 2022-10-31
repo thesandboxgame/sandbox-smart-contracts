@@ -48,7 +48,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-
   const {deployer: deployerOnL2} = await hre.companionNetworks[
     'l2'
   ].getNamedAccounts();
