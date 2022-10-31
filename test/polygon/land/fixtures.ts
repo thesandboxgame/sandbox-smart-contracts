@@ -5,6 +5,7 @@ import {
   getNamedAccounts,
 } from 'hardhat';
 import {setupUsers, setupUser} from '../../utils';
+import {BigNumber} from 'ethers';
 
 export const setupLand = deployments.createFixture(async function () {
   await deployments.fixture([
@@ -147,15 +148,37 @@ export const setupLandTunnelV2 = deployments.createFixture(async function () {
     MockLandTunnelV2,
     MockPolygonLandTunnelV2,
   });
+
+  const polygonAdmin = await setupUser(namedAccounts.deployer, {PolygonLand});
   const landAdmin = await setupUser(namedAccounts.landAdmin, {Land});
-  const landMinter = await setupUser(minter, {Land});
+  const landMinter = await setupUser(minter, {Land, PolygonLand});
 
   await deployer.FxRoot.setFxChild(FxChild.address);
   await deployer.PolygonLand.setMinter(PolygonLandTunnelV2.address, true);
   await deployer.PolygonLand.setTrustedForwarder(trustedForwarder.address);
   await deployer.LandTunnelV2.setTrustedForwarder(trustedForwarder.address);
   await deployer.MockLandTunnelV2.setTrustedForwarder(trustedForwarder.address);
+  await deployer.PolygonLandTunnelV2.setTrustedForwarder(
+    trustedForwarder.address
+  );
+
   await landAdmin.Land.setMinter(landMinter.address, true);
+  await polygonAdmin.PolygonLand.setMinter(landMinter.address, true);
+
+  function getId(layer: number, x: number, y: number): string {
+    const lengthOfId = 64;
+    const lengthOfBasicId = BigNumber.from(x + y * 408)._hex.length - 2;
+    const lengthOfLayerAppendment = lengthOfId - lengthOfBasicId - 2;
+    let layerAppendment = '';
+    for (let i = 0; i < lengthOfLayerAppendment; i++) {
+      layerAppendment = layerAppendment + '0';
+    }
+    return (
+      `0x0${layer - 1}` +
+      layerAppendment +
+      BigNumber.from(x + y * 408)._hex.slice(2)
+    );
+  }
 
   return {
     users,
@@ -174,6 +197,7 @@ export const setupLandTunnelV2 = deployments.createFixture(async function () {
     trustedForwarder,
     getNamedAccounts,
     ethers,
+    getId,
   };
 });
 
