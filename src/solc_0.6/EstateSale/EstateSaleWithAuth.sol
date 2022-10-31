@@ -6,16 +6,38 @@ import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
+// import "../common/Libraries/SafeMathWithRequire.sol";
 import "./ILandToken.sol";
-import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
+// import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, ReferralValidator {
+contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValidator {
     using SafeMath for uint256;
     using Address for address;
+
+    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
+
+    IERC1155 internal immutable _asset;
+    ILandToken internal immutable _land;
+    IERC20 internal immutable _sand;
+    address internal immutable _estate;
+    address internal immutable _feeDistributor;
+
+    address payable internal _wallet;
+    AuthValidator internal _authValidator;
+    uint256 internal immutable _expiryTime;
+    bytes32 internal immutable _merkleRoot;
+
+    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
+    // buyLandWithSand info indexes
+    uint256 private constant X_INDEX = 0;
+    uint256 private constant Y_INDEX = 1;
+    uint256 private constant SIZE_INDEX = 2;
+    uint256 private constant PRICE_INDEX = 3;
 
     event LandQuadPurchased(
         address indexed buyer,
@@ -28,15 +50,65 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     );
 
     event NewReceivingWallet(address newWallet);
+    event NewTrustedForwarder(address trustedForwarder);
+
+    constructor(
+        address landAddress,
+        address sandContractAddress,
+        address trustedForwarder,
+        address admin,
+        address payable initialWalletAddress,
+        bytes32 merkleRoot,
+        uint256 expiryTime,
+        address initialSigningWallet,
+        uint256 initialMaxCommissionRate,
+        address estate,
+        address asset,
+        address feeDistributor,
+        address authValidator
+    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
+        require(landAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(sandContractAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(trustedForwarder != address(0), "EstateSaleWithAuth: zero address");
+        require(admin != address(0), "EstateSaleWithAuth: zero address");
+        require(initialWalletAddress != address(0), "EstateSaleWithAuth: zero address");
+        require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(feeDistributor != address(0), "EstateSaleWithAuth: zero address");
+        require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
+
+
+        _land = ILandToken(landAddress);
+        _sand = IERC20(sandContractAddress);
+        // _setMetaTransactionProcessor(initialMetaTx, true);
+        __ERC2771HandlerV2_initialize(trustedForwarder);
+        _wallet = initialWalletAddress;
+        _merkleRoot = merkleRoot;
+        _expiryTime = expiryTime;
+        _admin = admin;
+        _estate = estate;
+        _asset = IERC1155(asset);
+        _feeDistributor = feeDistributor;
+        _authValidator = AuthValidator(authValidator);
+    }
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
-        require(newWallet != address(0), "ZERO_ADDRESS");
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        require(newWallet != address(0), "EstateSaleWithAuth: ZERO_ADDRESS");
+        require(msg.sender == _admin, "EstateSaleWithAuth: NOT_AUTHORIZED");
         _wallet = newWallet;
 
         emit NewReceivingWallet(newWallet);
+    }
+
+    /// @notice set the trusted forwarder
+    /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
+    function setTrustedForwarder(address trustedForwarder) external {
+        require(trustedForwarder.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(_msgSender() == _admin, "EstateSaleWithAuth: NOT_AUTHORIZED");
+        _trustedForwarder = trustedForwarder;
+
+        emit NewTrustedForwarder(trustedForwarder);
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
@@ -123,9 +195,9 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
     function _checkAddressesAndExpiryTime(address buyer, address reserved) internal view {
         /* solium-disable-next-line security/no-block-members */
-        require(block.timestamp < _expiryTime, "SALE_IS_OVER");
-        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
-        require(reserved == address(0) || reserved == buyer, "RESERVED_LAND");
+        require(block.timestamp < _expiryTime, "EstateSaleWithAuth: SALE_IS_OVER");
+        require(buyer == _msgSender() /*|| _metaTransactionContracts[msg.sender]*/, "EstateSaleWithAuth: NOT_AUTHORIZED");
+        require(reserved == address(0) || reserved == buyer, "EstateSaleWithAuth: RESERVED_LAND");
     }
 
     // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
@@ -151,7 +223,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
                 keccak256(abi.encodePacked(proof))
             )
         );
-        require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
+        require(_authValidator.isAuthValid(signature, hashedData), "EstateSaleWithAuth: INVALID_AUTH");
 
         bytes32 leaf = _generateLandHash(
             info[X_INDEX],
@@ -162,7 +234,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
             salt,
             assetIds
         );
-        require(_verify(proof, leaf), "INVALID_LAND");
+        require(_verify(proof, leaf), "EstateSaleWithAuth: INVALID_LAND");
     }
 
     function _mint(
@@ -228,65 +300,15 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
     function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {
         uint256 feeAmountInSand = priceInSand.mul(FEE).div(100);
-        require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
+        require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "EstateSaleWithAuth: FEE_TRANSFER_FAILED");
         return priceInSand.sub(feeAmountInSand);
     }
 
-    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
+    function _msgSender() internal view override(ERC2771HandlerV2) returns (address sender) {
+        return ERC2771HandlerV2._msgSender();
+    }
 
-    IERC1155 internal immutable _asset;
-    ILandToken internal immutable _land;
-    IERC20 internal immutable _sand;
-    address internal immutable _estate;
-    address internal immutable _feeDistributor;
-
-    address payable internal _wallet;
-    AuthValidator internal _authValidator;
-    uint256 internal immutable _expiryTime;
-    bytes32 internal immutable _merkleRoot;
-
-    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
-    // buyLandWithSand info indexes
-    uint256 private constant X_INDEX = 0;
-    uint256 private constant Y_INDEX = 1;
-    uint256 private constant SIZE_INDEX = 2;
-    uint256 private constant PRICE_INDEX = 3;
-
-    constructor(
-        address landAddress,
-        address sandContractAddress,
-        address initialMetaTx,
-        address admin,
-        address payable initialWalletAddress,
-        bytes32 merkleRoot,
-        uint256 expiryTime,
-        address initialSigningWallet,
-        uint256 initialMaxCommissionRate,
-        address estate,
-        address asset,
-        address feeDistributor,
-        address authValidator
-    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
-        require(landAddress.isContract(), "EstateSaleWithAuth: is not a contract");
-        require(sandContractAddress.isContract(), "EstateSaleWithAuth: is not a contract");
-        require(initialMetaTx != address(0), "EstateSaleWithAuth: zero address");
-        require(admin != address(0), "EstateSaleWithAuth: zero address");
-        require(initialWalletAddress != address(0), "EstateSaleWithAuth: zero address");
-        require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
-        require(feeDistributor != address(0), "EstateSaleWithAuth: zero address");
-        require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
-
-
-        _land = ILandToken(landAddress);
-        _sand = IERC20(sandContractAddress);
-        _setMetaTransactionProcessor(initialMetaTx, true);
-        _wallet = initialWalletAddress;
-        _merkleRoot = merkleRoot;
-        _expiryTime = expiryTime;
-        _admin = admin;
-        _estate = estate;
-        _asset = IERC1155(asset);
-        _feeDistributor = feeDistributor;
-        _authValidator = AuthValidator(authValidator);
+    function _msgData() internal view override(ERC2771HandlerV2) returns (bytes calldata) {
+        return ERC2771HandlerV2._msgData();
     }
 }
