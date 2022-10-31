@@ -69,6 +69,26 @@ describe('LandV2', function () {
 
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((quadSize) => {
+      it(`should return true for ${quadSize}x${quadSize} quad  minited`, async function () {
+        const {
+          landContract,
+          getNamedAccounts,
+          ethers,
+          mintQuad,
+        } = await setupLand();
+        const {deployer} = await getNamedAccounts();
+        const contract = landContract.connect(
+          ethers.provider.getSigner(deployer)
+        );
+        await mintQuad(deployer, quadSize, quadSize, quadSize);
+        expect(await contract.exists(quadSize, quadSize, quadSize)).to.be.equal(
+          true
+        );
+      });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((quadSize) => {
       if (quadSize == 1) return;
       it(`should revert for invalid coordinates for size ${quadSize}`, async function () {
         const {landContract, getNamedAccounts, ethers} = await setupLand();
