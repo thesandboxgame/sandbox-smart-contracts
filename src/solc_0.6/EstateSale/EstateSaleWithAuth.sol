@@ -1,5 +1,5 @@
 /* solhint-disable not-rely-on-time, func-order */
-pragma solidity 0.6.9;
+pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
