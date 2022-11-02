@@ -342,16 +342,15 @@ function generateSecret(path: string) {
 }
 
 async function loadBundles(paths: string[]) {
-  let bundles;
   for (const path of paths) {
     try {
-      bundles = (await import(path)).default;
+      const bundles = (await import(path)).default;
+      return bundles;
     } catch {
       continue;
     }
   }
-  if (!bundles) throw new Error('Bundles not found');
-  return bundles;
+  throw new Error('Bundles not found');
 }
 
 export function getDeadline(
