@@ -5,7 +5,7 @@ import {
   getLandSales,
   LandSale,
   setAsLandMinter,
-  writeProofs,
+  writeProofs
 } from '../../data/landSales/getLandSales';
 import {skipUnlessTestnet} from '../../utils/network';
 
@@ -43,9 +43,7 @@ const func: DeployFunction = async function (hre) {
     const {lands, merkleRootHash, sector} = landSale;
     const landSaleName = `${name}_${sector}`;
     const deadline = getDeadline(hre, sector);
-    const newDeployment = await deployments.getOrNull(`LandPreSale_${sector}`);
-    if (newDeployment) return;
-    const landSaleDeployment = await deploy(`Polygon${landSaleName}`, {
+    const landSaleDeployment = await deploy(`PolygonLandPreSale_${sector}`, {
       from: deployer,
       linkedData: lands,
       contract: 'EstateSaleWithAuth',
