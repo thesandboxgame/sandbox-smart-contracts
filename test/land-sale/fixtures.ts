@@ -57,6 +57,14 @@ export const setupAuthValidator = withSnapshot(
 export const setupEstateSale = withSnapshot(
   ['EstateSaleWithAuth'],
   async function (hre) {
+    const {deployments} = hre;
+    const {deployer} = await getNamedAccounts();
+
+    await deployments.deploy('TestMetaTxForwarder', {
+      from: deployer,
+    });
+    const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+
     const authValidatorContract = await ethers.getContract('AuthValidator');
     const estateSaleWithAuthContract = await ethers.getContract(
       'EstateSaleWithAuth_0_0'
@@ -80,6 +88,7 @@ export const setupEstateSale = withSnapshot(
       estateSaleWithAuthContract,
       sandContract,
       approveSandForEstateSale,
+      trustedForwarder,
       proofs,
       hre,
       getNamedAccounts,

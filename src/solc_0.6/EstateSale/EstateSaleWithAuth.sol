@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.9;
 
@@ -6,9 +7,7 @@ import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
-// import "../common/Libraries/SafeMathWithRequire.sol";
 import "./ILandToken.sol";
-// import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
@@ -79,7 +78,6 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValida
 
         _land = ILandToken(landAddress);
         _sand = IERC20(sandContractAddress);
-        // _setMetaTransactionProcessor(initialMetaTx, true);
         __ERC2771HandlerV2_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
@@ -196,7 +194,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValida
     function _checkAddressesAndExpiryTime(address buyer, address reserved) internal view {
         /* solium-disable-next-line security/no-block-members */
         require(block.timestamp < _expiryTime, "EstateSaleWithAuth: SALE_IS_OVER");
-        require(buyer == _msgSender() /*|| _metaTransactionContracts[msg.sender]*/, "EstateSaleWithAuth: NOT_AUTHORIZED");
+        require(buyer == _msgSender(), "EstateSaleWithAuth: NOT_AUTHORIZED");
         require(reserved == address(0) || reserved == buyer, "EstateSaleWithAuth: RESERVED_LAND");
     }
 
