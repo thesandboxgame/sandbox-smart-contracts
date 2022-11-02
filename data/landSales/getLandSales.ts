@@ -296,7 +296,7 @@ export async function getLandSaleFiles(
 ): Promise<SectorFiles> {
   const networkNameMap: {[name: string]: string} = {
     mainnet: 'mainnet',
-    polygon: 'polygon',
+    polygon: 'mainnet',
     rinkeby: 'testnet',
     goerli: 'testnet',
     mumbai: 'testnet',
