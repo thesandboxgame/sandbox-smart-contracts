@@ -93,7 +93,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771Context, ReferralValidato
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "EstateSaleWithAuth: ZERO_ADDRESS");
-        require(msg.sender == _admin, "EstateSaleWithAuth: NOT_AUTHORIZED");
+        require(_msgSender() == _admin, "EstateSaleWithAuth: NOT_AUTHORIZED");
         _wallet = newWallet;
 
         emit NewReceivingWallet(newWallet);
@@ -158,7 +158,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771Context, ReferralValidato
         uint256[] calldata assetIds,
         uint256[] calldata values
     ) external {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        require(_msgSender() == _admin, "NOT_AUTHORIZED");
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
