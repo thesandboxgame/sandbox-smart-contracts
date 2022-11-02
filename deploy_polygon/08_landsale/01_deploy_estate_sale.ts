@@ -5,7 +5,7 @@ import {
   getLandSales,
   LandSale,
   setAsLandMinter,
-  writeProofs
+  writeProofs,
 } from '../../data/landSales/getLandSales';
 import {skipUnlessTestnet} from '../../utils/network';
 
