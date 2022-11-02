@@ -8,13 +8,13 @@ import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
 import "./ILandToken.sol";
-import "../common/BaseWithStorage/ERC2771HandlerV2.sol";
+import "../common/BaseWithStorage/ERC2771Context.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValidator {
+contract EstateSaleWithAuth is ReentrancyGuard, ERC2771Context, ReferralValidator {
     using SafeMath for uint256;
     using Address for address;
 
@@ -78,7 +78,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValida
 
         _land = ILandToken(landAddress);
         _sand = IERC20(sandContractAddress);
-        __ERC2771HandlerV2_initialize(trustedForwarder);
+        __ERC2771Context_initialize(trustedForwarder);
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
         _expiryTime = expiryTime;
@@ -302,11 +302,11 @@ contract EstateSaleWithAuth is ReentrancyGuard, ERC2771HandlerV2, ReferralValida
         return priceInSand.sub(feeAmountInSand);
     }
 
-    function _msgSender() internal view override(ERC2771HandlerV2) returns (address sender) {
-        return ERC2771HandlerV2._msgSender();
+    function _msgSender() internal view override(ERC2771Context) returns (address sender) {
+        return ERC2771Context._msgSender();
     }
 
-    function _msgData() internal view override(ERC2771HandlerV2) returns (bytes calldata) {
-        return ERC2771HandlerV2._msgData();
+    function _msgData() internal view override(ERC2771Context) returns (bytes calldata) {
+        return ERC2771Context._msgData();
     }
 }
