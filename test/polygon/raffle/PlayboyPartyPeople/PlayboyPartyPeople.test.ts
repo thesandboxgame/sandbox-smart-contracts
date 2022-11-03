@@ -23,7 +23,15 @@ describe('RafflePlayboyPartyPeople', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(rafflePlayboyPartyPeopleContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(
+      rafflePlayboyPartyPeopleContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
     await mint(
       raffleSignWallet,
       deployer,
@@ -211,7 +219,15 @@ describe('RafflePlayboyPartyPeople', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(rafflePlayboyPartyPeopleContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(
+      rafflePlayboyPartyPeopleContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
 
     await mint(
       raffleSignWallet,
@@ -275,7 +291,15 @@ describe('RafflePlayboyPartyPeople', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(rafflePlayboyPartyPeopleContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(
+      rafflePlayboyPartyPeopleContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
 
     await mint(
       raffleSignWallet,
@@ -325,7 +349,15 @@ describe('RafflePlayboyPartyPeople', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(rafflePlayboyPartyPeopleContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(
+      rafflePlayboyPartyPeopleContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
 
     const receipt1 = await mint(
       raffleSignWallet,
@@ -402,7 +434,15 @@ describe('RafflePlayboyPartyPeople', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(rafflePlayboyPartyPeopleContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(
+      rafflePlayboyPartyPeopleContract,
+      0,
+      20,
+      5,
+      '10',
+      zeroAddress,
+      0
+    );
 
     await mint(
       raffleSignWallet,

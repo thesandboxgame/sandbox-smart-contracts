@@ -12,43 +12,46 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(['RafflePlayboyPartyPeople'], async function (
-  hre
-) {
-  const {sandAdmin} = await getNamedAccounts();
+export const setupRaffle = withSnapshot(
+  ['RafflePlayboyPartyPeople'],
+  async function (hre) {
+    const {sandAdmin} = await getNamedAccounts();
 
-  const rafflePlayboyPartyPeopleContract = await ethers.getContract('RafflePlayboyPartyPeople');
-  const sandContract = await ethers.getContract('PolygonSand');
-  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+    const rafflePlayboyPartyPeopleContract = await ethers.getContract(
+      'RafflePlayboyPartyPeople'
+    );
+    const sandContract = await ethers.getContract('PolygonSand');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+    const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
 
-  await depositViaChildChainManager(
-    {sand: sandContract, childChainManager},
-    sandAdmin,
-    SAND_AMOUNT
-  );
+    await depositViaChildChainManager(
+      {sand: sandContract, childChainManager},
+      sandAdmin,
+      SAND_AMOUNT
+    );
 
-  return {
-    rafflePlayboyPartyPeopleContract,
-    sandContract,
-    hre,
-    getNamedAccounts,
-    setupWave,
-    signAuthMessageAs,
-    transferSand,
-    mint: mintSetup(rafflePlayboyPartyPeopleContract, sandContract),
-    personalizeSignature: validPersonalizeSignature,
-    personalize: personalizeSetup(
+    return {
       rafflePlayboyPartyPeopleContract,
-      validPersonalizeSignature
-    ),
-    personalizeInvalidSignature: personalizeSetup(
-      rafflePlayboyPartyPeopleContract,
-      invalidPersonalizeSignature
-    ),
-  };
-});
+      sandContract,
+      hre,
+      getNamedAccounts,
+      setupWave,
+      signAuthMessageAs,
+      transferSand,
+      mint: mintSetup(rafflePlayboyPartyPeopleContract, sandContract),
+      personalizeSignature: validPersonalizeSignature,
+      personalize: personalizeSetup(
+        rafflePlayboyPartyPeopleContract,
+        validPersonalizeSignature
+      ),
+      personalizeInvalidSignature: personalizeSetup(
+        rafflePlayboyPartyPeopleContract,
+        invalidPersonalizeSignature
+      ),
+    };
+  }
+);
 
 async function setupWave(
   raffle: Contract,
