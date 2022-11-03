@@ -1,10 +1,15 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/set_sand_disabled_polygon_starterpack.ts
+ *  - yarn execute <NETWORK> ./setup/starterPack/set_sand_enabled_or_disabled_polygon_starterpack.ts <bool>
+ *
+ * where <bool> is `true`, corresponding to setSANDEnabled(true), or `false`, corresponding to setSANDEnabled(false)
+ *
  */
 
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
+
+const bool = process.argv[2];
 
 const func: DeployFunction = async function () {
   const {deployments, getNamedAccounts} = hre;
@@ -33,17 +38,17 @@ const func: DeployFunction = async function () {
     return;
   }
 
-  // Set new prices
+  // Enable or disable SAND purchases
   await catchUnknownSigner(
     execute(
       'PolygonStarterPack',
       {from: starterPackAdmin, log: true},
       'setSANDEnabled',
-      false
+      bool
     )
   );
 
-  console.log(`SAND purchasing has been DISABLED`);
+  console.log(`SAND purchasing has been set to ${bool}`);
 };
 export default func;
 
