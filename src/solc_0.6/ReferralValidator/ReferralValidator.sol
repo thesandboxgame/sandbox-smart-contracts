@@ -98,6 +98,8 @@ contract ReferralValidator is Admin {
     ) internal {
         uint256 amountForDestination = amount;
 
+        require(msg.value >= amount, "ReferralValidator: insufficient funds");
+
         if (referral.length > 0) {
             (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);
 
