@@ -1,16 +1,16 @@
 import fs from 'fs-extra';
+import hre, {ethers} from 'hardhat';
+import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
 import MerkleTree from '../../lib/merkleTree';
-import addresses from '../addresses.json';
 import helpers, {
   SaleLandInfo,
   SaltedProofSaleLandInfo,
-  SaltedSaleLandInfo,
+  SaltedSaleLandInfo
 } from '../../lib/merkleTreeHelper';
-import deadlines from './deadlines';
-import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
 import {isTestnet} from '../../utils/network';
+import addresses from '../addresses.json';
+import deadlines from './deadlines';
 import prices from './prices';
-import {ethers} from 'hardhat';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
@@ -115,7 +115,8 @@ async function generateLandsForMerkleTree(
       throw new Error('assetIds cannot be undefined');
     }
 
-    const premium = assetIds.length > 0;
+    // Currently there are no assets on L2
+    const premium = landGroup.bundleId !== undefined;
     let priceId = '';
     if (size === 1) {
       num1x1Lands++;
@@ -142,14 +143,13 @@ async function generateLandsForMerkleTree(
 
     if (!(landGroup.x % size === 0 && landGroup.y % size === 0)) {
       reportError(
-        'invalid coordinates: ' +
-          JSON.stringify({
-            x: landGroup.x,
-            originalX: landGroup.originalX,
-            y: landGroup.y,
-            originalY: landGroup.originalY,
-            size,
-          })
+        'invalid coordinates: ' + JSON.stringify({
+          x: landGroup.x,
+          originalX: landGroup.originalX,
+          y: landGroup.y,
+          originalY: landGroup.originalY,
+          size,
+        })
       );
       return;
     }
@@ -296,8 +296,10 @@ export async function getLandSaleFiles(
 ): Promise<SectorFiles> {
   const networkNameMap: {[name: string]: string} = {
     mainnet: 'mainnet',
+    polygon: 'mainnet',
     rinkeby: 'testnet',
     goerli: 'testnet',
+    mumbai: 'testnet',
     hardhat: 'testnet',
     localhost: 'testnet',
   };
@@ -314,7 +316,7 @@ export async function getLandSaleFiles(
       '0x4467363716526536535425451427798982881775318563547751090997863683';
   } else {
     secret = loadSecret(secretPath);
-    if (!secret && networkName === 'mainnet')
+    if (!secret && hre.network.tags.mainnet)
       throw new Error('LandPreSale secret not found');
     else secret = generateSecret(secretPath);
   }
@@ -340,16 +342,15 @@ function generateSecret(path: string) {
 }
 
 async function loadBundles(paths: string[]) {
-  let bundles;
   for (const path of paths) {
     try {
-      bundles = (await import(path)).default;
+      const bundles = (await import(path)).default;
+      return bundles;
     } catch {
       continue;
     }
   }
-  if (!bundles) throw new Error('Bundles not found');
-  return bundles;
+  throw new Error('Bundles not found');
 }
 
 export function getDeadline(
@@ -361,8 +362,8 @@ export function getDeadline(
     throw new Error(`no deadline for sector ${sector}`);
   }
   if (isTestnet(hre)) {
-    hre.deployments.log('increasing deadline by 1 year');
-    deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
+    hre.deployments.log('increasing deadline by 10 year');
+    deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
   return deadline;
 }

@@ -183,18 +183,11 @@ const config: HardhatUserConfig = {
 
     treasury: {
       default: 'sandSaleBeneficiary',
-      rinkeby: 'sandSaleBeneficiary',
-      goerli: 'sandSaleBeneficiary',
-      goerli_test: 'sandSaleBeneficiary',
       mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
     },
 
     landSaleBeneficiary: {
       default: 'sandSaleBeneficiary',
-      rinkeby: 'sandSaleBeneficiary',
-      goerli: 'sandSaleBeneficiary',
-      goerli_test: 'sandSaleBeneficiary',
-
       mainnet: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
@@ -205,6 +198,7 @@ const config: HardhatUserConfig = {
       rinkeby: 5,
       goerli: 5,
       goerli_test: 5,
+      mumbai: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
@@ -243,9 +237,11 @@ const config: HardhatUserConfig = {
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
       mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
+      polygon: '0x3044719d139F866a44c988823513eCB93060bF1b',
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
     // To be used with AuthValidator only
     backendAuthWallet: {
