@@ -16,6 +16,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
+    struct Land{
+        uint256 x;
+        uint256 y;
+        uint256 size;
+    }
 
     /// @notice Enable or disable the ability of `minter` to mint tokens
     /// @param minter address that will be given/removed minter right.
@@ -152,6 +157,119 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+    }
+
+     /**
+     * @notice Checks if a parent quad has child quads already minted.
+     *  Then mints the rest child quads and transfers the parent quad.
+     *  Should only be called by the tunnel.
+     * @param to The recipient of the new quad
+     * @param size The size of the new quad
+     * @param x The top left x coordinate of the new quad
+     * @param y The top left y coordinate of the new quad
+     * @param data extra data to pass to the transfer
+     */
+    function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
+        require(to != address(0), "to is zero address");
+        require(
+            isMinter(msg.sender),
+            "Only a minter can mint"
+        );
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        uint256 quadId;
+        uint256 id = x + y * GRID_SIZE;
+
+        if (size == 1) {
+            quadId = id;
+        } else if (size == 3) {
+            quadId = LAYER_3x3 + id;
+        } else if (size == 6) {
+            quadId = LAYER_6x6 + id;
+        } else if (size == 12) {
+            quadId = LAYER_12x12 + id;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        Land[] memory mintedLand;
+
+        uint256 toX = x+size;
+        uint256 toY = y+size;
+
+        if(size == 12){
+            for (uint256 x6i = x; x6i < toX; x6i += 6) {
+                for (uint256 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
+                    address owner =  address(uint160(_owners[id6x6]));
+                    if(owner == msg.sender) {
+                        mintedLand[mintedLand.length] = Land(x6i,y6i,6);
+                        _owners[id6x6] = 0;
+                    } else {
+                       require(owner == address(0), "Already minted as 6x6");
+                    }
+                }
+            }
+        }
+
+        if(size >= 6){
+            for (uint256 x3i = x; x3i < toX; x3i += 3) {
+                for (uint256 y3i = y; y3i < toY; y3i += 3) {
+                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, x3i, y3i, 3);
+                    if(!isQuadChecked){
+                       uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                    address owner =  address(uint160(_owners[id3x3]));
+                    if(owner == msg.sender) {
+                        mintedLand[mintedLand.length] = Land(x3i,y3i,3);
+                        _owners[id3x3] = 0;
+                    } else {
+                       require(owner == address(0), "Already minted as 3x3");
+                    }
+                    }
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < size*size; i++) {
+            uint256 _id = _idInPath(i, size, x, y);
+            bool isAlreadyMinted = isLandMinted(mintedLand, _id);
+            if(isAlreadyMinted){
+                emit Transfer(msg.sender, to, _id);
+            } else {
+                require(_owners[id] == 0, "Already minted");
+                emit Transfer(address(0), to, _id);
+            }  
+        }
+
+        _owners[quadId] = uint256(to);
+        _numNFTPerAddress[to] += size * size;
+
+        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+    }
+
+    
+    function isQuadCheckedForOwner(Land[] memory mintedLand, uint256 x, uint256 y, uint256 size) internal pure returns(bool){
+        for(uint256 i = 0; i < mintedLand.length; i++){
+            Land memory land = mintedLand[i];
+            if(land.size > size){
+                if(x >= land.x && x < land.x + land.size){
+                    if(y >= land.y && y < land.y + land.size) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function isLandMinted(Land[] memory mintedLand,uint256 id) internal pure returns(bool){
+        for(uint256 i = 0; i < mintedLand.length; i++){
+            Land memory land = mintedLand[i];
+            for (uint256 j = 0; i < land.size*land.size; j++) {
+            uint256 _id = _idInPath(j, land.size, land.x, land.y);
+            if(_id == id) return true;     
+            }
+        }
+        return false;
     }
 
     function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns(uint256) {
