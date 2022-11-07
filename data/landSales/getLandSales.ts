@@ -117,7 +117,6 @@ async function generateLandsForMerkleTree(
 
     // Currently there are no assets on L2
     const premium = !!landGroup.bundleId;
-    console.log(premium, landGroup.bundleId)
     let priceId = '';
     if (size === 1) {
       num1x1Lands++;
