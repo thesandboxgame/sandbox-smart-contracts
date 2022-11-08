@@ -15,11 +15,11 @@ contract MetaTransactionReceiver is Admin {
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public {
         require(msg.sender == _admin, "only admin can setup metaTransactionProcessors");
-        require(metaTransactionProcessor != address(0), "MetaTransactionReceiver: zero address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
     function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {
+        require(metaTransactionProcessor != address(0), "MetaTransactionReceiver: zero address");
         _metaTransactionContracts[metaTransactionProcessor] = enabled;
         emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
