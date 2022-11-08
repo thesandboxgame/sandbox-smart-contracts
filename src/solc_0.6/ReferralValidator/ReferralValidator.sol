@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
-import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/Admin.sol";
 
 

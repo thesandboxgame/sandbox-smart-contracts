@@ -3,10 +3,10 @@ pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
-import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
-import "../common/Interfaces/ERC1155.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
@@ -228,7 +228,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
-    ERC1155 internal immutable _asset;
+    IERC1155 internal immutable _asset;
     LandToken internal immutable _land;
     IERC20 internal immutable _sand;
     address internal immutable _estate;
@@ -279,7 +279,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         _expiryTime = expiryTime;
         _admin = admin;
         _estate = estate;
-        _asset = ERC1155(asset);
+        _asset = IERC1155(asset);
         _feeDistributor = feeDistributor;
         _authValidator = AuthValidator(authValidator);
     }
