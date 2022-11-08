@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.6.5; // TODO: update once upgrade is complete
+pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";

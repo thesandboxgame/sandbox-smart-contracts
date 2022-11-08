@@ -1,4 +1,7 @@
 /* solhint-disable not-rely-on-time, func-order */
+
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
@@ -17,7 +20,7 @@ contract ReferralValidator is Admin {
     uint256 private _maxCommissionRate;
 
     mapping(address => uint256) private _previousSigningWallets;
-    uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;
+    uint256 constant private _previousSigningDelay = 10 days;
 
     event ReferralUsed(
         address indexed referrer,
@@ -71,10 +74,10 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice the max commision rate
-     * @return the maximum commision rate that a referral can give
+     * @notice the max commission rate
+     * @return the maximum commission rate that a referral can give
      */
-    function getMaxCommisionRate() external view returns (uint256) {
+    function getMaxCommissionRate() external view returns (uint256) {
         return _maxCommissionRate;
     }
 

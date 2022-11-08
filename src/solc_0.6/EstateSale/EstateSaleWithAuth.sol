@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
-import "./LandToken.sol";
+import "./ILandToken.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
@@ -45,7 +45,11 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     /// @param to address that will own the purchased Land
     /// @param reserved the reserved address (if any)
     /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land
+    /// @param salt The salt submitted for verification.
+    /// @param assetIds asset ids (lands) that will be bought
     /// @param proof merkleProof for that particular Land
+    /// @param referral referral id
+    /// @param signature A signed message specifying tx details
     function buyLandWithSand(
         address buyer,
         address to,
@@ -86,7 +90,6 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         uint256[] calldata values
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        // require(block.timestamp > _expiryTime, "SALE_NOT_OVER"); // removed to recover in case of misconfigured sales
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
@@ -233,7 +236,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     IERC1155 internal immutable _asset;
-    LandToken internal immutable _land;
+    ILandToken internal immutable _land;
     IERC20 internal immutable _sand;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
@@ -275,7 +278,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
 
 
-        _land = LandToken(landAddress);
+        _land = ILandToken(landAddress);
         _sand = IERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
