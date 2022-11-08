@@ -2,10 +2,10 @@
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
 import "./ILandToken.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
@@ -14,7 +14,7 @@ import "./AuthValidator.sol";
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
 contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, ReferralValidator {
-    using SafeMathWithRequire for uint256;
+    using SafeMath for uint256;
     using Address for address;
     using SafeERC20 for IERC20;
 
