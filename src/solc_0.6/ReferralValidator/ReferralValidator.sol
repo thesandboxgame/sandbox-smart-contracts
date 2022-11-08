@@ -36,6 +36,8 @@ contract ReferralValidator is Admin {
 
     /**
      * @dev Update the signing wallet
+     * The previous wallet is still valid for a grace period (_previousSigningDelay). If you want to
+     * disable the previous wallet, use the disablePreviousSigningWallet function.
      * @param newSigningWallet The new address of the signing wallet
      */
     function updateSigningWallet(address newSigningWallet) external {
@@ -43,6 +45,16 @@ contract ReferralValidator is Admin {
         require(_admin == msg.sender, "ReferralValidator: Sender not admin");
         _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;
         _signingWallet = newSigningWallet;
+    }
+
+     /**
+     * @dev Disable compromised signing wallet
+     * @param disableWallet The wallet address to be disabled
+     */
+    function disablePreviousSigningWallet(address disableWallet) external {
+        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
+        require(disableWallet != address(0), "ReferralValidator: zero address");
+        _previousSigningWallets[disableWallet] = 0;
     }
 
     /**
