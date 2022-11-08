@@ -16,7 +16,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
-    struct Land{
+    struct Land {
         uint256 x;
         uint256 y;
         uint256 size;
@@ -202,8 +202,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             for (uint256 x6i = x; x6i < toX; x6i += 6) {
                 for (uint256 y6i = y; y6i < toY; y6i += 6) {
                     uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
-                    address owner =  address(uint160(_owners[id6x6]));
-                    if(owner == msg.sender) {
+                    address owner = address(uint160(_owners[id6x6]));
+                    if ( owner == msg.sender) {
                         mintedLand[mintedLand.length] = Land(x6i,y6i,6);
                         _owners[id6x6] = 0;
                     } else {
@@ -217,15 +217,16 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             for (uint256 x3i = x; x3i < toX; x3i += 3) {
                 for (uint256 y3i = y; y3i < toY; y3i += 3) {
                     bool isQuadChecked = isQuadCheckedForOwner(mintedLand, x3i, y3i, 3);
-                    if(!isQuadChecked){
-                       uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
-                    address owner =  address(uint160(_owners[id3x3]));
-                    if(owner == msg.sender) {
-                        mintedLand[mintedLand.length] = Land(x3i,y3i,3);
-                        _owners[id3x3] = 0;
-                    } else {
-                       require(owner == address(0), "Already minted as 3x3");
-                    }
+                    if ( !isQuadChecked) {
+                        uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                        address owner = address(uint160(_owners[id3x3]));
+
+                        if (owner == msg.sender) {
+                            mintedLand[mintedLand.length] = Land(x3i,y3i,3);
+                            _owners[id3x3] = 0;
+                        } else {
+                            require(owner == address(0), "Already minted as 3x3");
+                        }
                     }
                 }
             }
@@ -234,7 +235,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         for (uint256 i = 0; i < size*size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
             bool isAlreadyMinted = isLandMinted(mintedLand, _id);
-            if(isAlreadyMinted){
+            if (isAlreadyMinted || _owners[_id] == uint256(msg.sender)) {
                 emit Transfer(msg.sender, to, _id);
             } else {
                 require(_owners[id] == 0, "Already minted");
@@ -249,11 +250,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     
-    function isQuadCheckedForOwner(Land[] memory mintedLand, uint256 x, uint256 y, uint256 size) internal pure returns(bool){
-        for(uint256 i = 0; i < mintedLand.length; i++){
+    function isQuadCheckedForOwner(Land[] memory mintedLand, uint256 x, uint256 y, uint256 size) internal pure returns(bool) {
+        for (uint256 i = 0; i < mintedLand.length; i++) {
             Land memory land = mintedLand[i];
-            if(land.size > size){
-                if(x >= land.x && x < land.x + land.size){
+            if (land.size > size) {
+                if (x >= land.x && x < land.x + land.size) {
                     if(y >= land.y && y < land.y + land.size) return true;
                 }
             }
@@ -261,12 +262,12 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return false;
     }
 
-    function isLandMinted(Land[] memory mintedLand,uint256 id) internal pure returns(bool){
-        for(uint256 i = 0; i < mintedLand.length; i++){
+    function isLandMinted(Land[] memory mintedLand,uint256 id) internal pure returns(bool) {
+        for (uint256 i = 0; i < mintedLand.length; i++) {
             Land memory land = mintedLand[i];
             for (uint256 j = 0; i < land.size*land.size; j++) {
-            uint256 _id = _idInPath(j, land.size, land.x, land.y);
-            if(_id == id) return true;     
+                uint256 _id = _idInPath(j, land.size, land.x, land.y);
+                if (_id == id) return true;     
             }
         }
         return false;
