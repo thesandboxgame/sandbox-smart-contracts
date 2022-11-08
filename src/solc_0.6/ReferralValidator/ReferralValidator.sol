@@ -41,9 +41,8 @@ contract ReferralValidator is Admin {
      * disable the previous wallet, use the disablePreviousSigningWallet function.
      * @param newSigningWallet The new address of the signing wallet
      */
-    function updateSigningWallet(address newSigningWallet) external {
+    function updateSigningWallet(address newSigningWallet) external onlyAdmin {
         require(newSigningWallet != address(0), "ReferralValidator: zero address");
-        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
         _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;
         _signingWallet = newSigningWallet;
     }
@@ -78,8 +77,7 @@ contract ReferralValidator is Admin {
      * @dev Update the maximum commission rate
      * @param newMaxCommissionRate The new maximum commission rate
      */
-    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {
-        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
+    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external onlyAdmin {
         _maxCommissionRate = newMaxCommissionRate;
     }
 
