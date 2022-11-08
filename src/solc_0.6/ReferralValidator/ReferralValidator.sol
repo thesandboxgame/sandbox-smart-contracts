@@ -3,6 +3,7 @@ pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/Admin.sol";
@@ -11,6 +12,7 @@ import "../common/BaseWithStorage/Admin.sol";
 /// @dev This contract verifies if a referral is valid
 contract ReferralValidator is Admin {
     using Address for address;
+    using SafeERC20 for IERC20;
 
     address private _signingWallet;
     uint256 private _maxCommissionRate;
@@ -124,7 +126,7 @@ contract ReferralValidator is Admin {
         address payable destination,
         address tokenAddress
     ) internal {
-        ERC20 token = ERC20(tokenAddress);
+        IERC20 token = IERC20(tokenAddress);
         uint256 amountForDestination = amount;
 
         if (referral.length > 0) {
@@ -140,11 +142,11 @@ contract ReferralValidator is Admin {
             }
 
             if (commission > 0) {
-                require(token.transferFrom(buyer, referrer, commission), "ReferralValidator: commision transfer failed");
+                token.safeTransferFrom(buyer, referrer, commission);
             }
         }
 
-        require(token.transferFrom(buyer, destination, amountForDestination), "ReferralValidator: payment transfer failed");
+        token.safeTransferFrom(buyer, destination, amountForDestination);
     }
 
     /**

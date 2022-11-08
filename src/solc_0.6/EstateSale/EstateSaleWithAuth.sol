@@ -3,10 +3,10 @@ pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
+import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
 import "../common/Interfaces/ERC1155.sol";
-import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
@@ -16,6 +16,7 @@ import "./AuthValidator.sol";
 contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
     using Address for address;
+    using SafeERC20 for IERC20;
 
     event LandQuadPurchased(
         address indexed buyer,
@@ -221,7 +222,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
     function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {
         uint256 feeAmountInSand = priceInSand.mul(FEE).div(100);
-        require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
+        _sand.safeTransferFrom(buyer, address(_feeDistributor), feeAmountInSand);
         return priceInSand.sub(feeAmountInSand);
     }
 
@@ -229,7 +230,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
     ERC1155 internal immutable _asset;
     LandToken internal immutable _land;
-    ERC20 internal immutable _sand;
+    IERC20 internal immutable _sand;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
 
@@ -271,7 +272,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
 
 
         _land = LandToken(landAddress);
-        _sand = ERC20(sandContractAddress);
+        _sand = IERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
