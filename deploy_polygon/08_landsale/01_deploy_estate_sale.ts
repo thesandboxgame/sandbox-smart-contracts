@@ -5,7 +5,7 @@ import {
   getLandSales,
   LandSale,
   setAsLandMinter,
-  writeProofs,
+  writeProofs
 } from '../../data/landSales/getLandSales';
 import {skipUnlessTestnet} from '../../utils/network';
 
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre) {
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
-  // const assetContract = await deployments.get('PolygonAsset');
+  const assetContract = await deployments.get('PolygonAssetERC1155');
   const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
@@ -58,7 +58,7 @@ const func: DeployFunction = async function (hre) {
         backendReferralWallet,
         2000,
         '0x0000000000000000000000000000000000000000',
-        '0x0000000000000000000000000000000000000000', // assetContract.address,
+        assetContract.address,
         landSaleFeeRecipient,
         authValidatorContract.address,
       ],
@@ -99,8 +99,7 @@ func.tags = ['PolygonEstateSaleWithAuth', 'PolygonEstateSaleWithAuth_deploy'];
 func.dependencies = [
   'PolygonSand_deploy',
   'PolygonLand_deploy',
-  // TODO: uncomment all asset contract lines once we are on L2
-  // 'PolygonAsset_deploy',
+  'PolygonAssetERC1155_deploy',
   'PolygonAuthValidator_deploy',
 ];
 func.skip = skipUnlessTestnet;
