@@ -1,7 +1,7 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import MerkleTree from '../../../lib/merkleTree';
-import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
+import MerkleTree from '../../lib/merkleTree';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 
 const {
   createDataArrayMultiClaim,
