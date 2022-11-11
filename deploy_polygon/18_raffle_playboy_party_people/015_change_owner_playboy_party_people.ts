@@ -21,5 +21,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['RafflePlayboyPartyPeople', 'RafflePlayboyPartyPeople_change_admin'];
+func.tags = [
+  'RafflePlayboyPartyPeople',
+  'RafflePlayboyPartyPeople_change_admin',
+];
 func.dependencies = ['RafflePlayboyPartyPeople_deploy'];
