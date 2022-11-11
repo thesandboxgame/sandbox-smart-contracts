@@ -7,7 +7,6 @@ import {
   setAsLandMinter,
   writeProofs,
 } from '../../data/landSales/getLandSales';
-import {skipUnlessTestnet} from '../../utils/network';
 
 type SaleDeployment = {
   name: string;
@@ -21,7 +20,7 @@ type SaleDeployment = {
 
 const sales: SaleDeployment[] = [
   // {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
-  {name: 'LandPreSale_18', skip: skipUnlessTestnet},
+  {name: 'LandPreSale_19'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -102,4 +101,3 @@ func.dependencies = [
   'PolygonAssetERC1155_deploy',
   'PolygonAuthValidator_deploy',
 ];
-func.skip = skipUnlessTestnet;
