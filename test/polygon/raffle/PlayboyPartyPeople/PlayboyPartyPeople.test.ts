@@ -49,7 +49,7 @@ describe('RafflePlayboyPartyPeople', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens', async function () {
+  it('should be able to mint 1_969 different tokens', async function () {
     const {
       rafflePlayboyPartyPeopleContract,
       transferSand,
@@ -63,14 +63,14 @@ describe('RafflePlayboyPartyPeople', function () {
     await setupWave(
       rafflePlayboyPartyPeopleContract,
       0,
-      10000,
-      10000,
+      1_969,
+      1_969,
       '1',
       zeroAddress,
       0
     );
     const tokens = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1_969; i++) {
       if (i % 10 === 0) console.log('minting token', i);
       const receipt = await mint(
         raffleSignWallet,
@@ -97,7 +97,7 @@ describe('RafflePlayboyPartyPeople', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens in 3 waves', async function () {
+  it('should be able to mint 1_969 different tokens in 3 waves', async function () {
     const {
       rafflePlayboyPartyPeopleContract,
       transferSand,
@@ -107,8 +107,8 @@ describe('RafflePlayboyPartyPeople', function () {
       mint,
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
-    await transferSand(deployer, '20000');
-    const waves = [50, 6950, 3000];
+    await transferSand(deployer, '1969');
+    const waves = [19, 950, 1000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -147,11 +147,11 @@ describe('RafflePlayboyPartyPeople', function () {
         }
       }
     }
-    assert.equal(tokens.length, 10000);
+    assert.equal(tokens.length, 1969);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 1_969 different tokens in 3 waves in 3 txs', async function () {
     const {
       rafflePlayboyPartyPeopleContract,
       transferSand,
@@ -162,8 +162,7 @@ describe('RafflePlayboyPartyPeople', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    // const waves = [50, 200, 500, 1000, 2000, 4000, 6750, 3000];
-    const waves = [50, 6950, 3000];
+    const waves = [19, 950, 1000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -202,7 +201,7 @@ describe('RafflePlayboyPartyPeople', function () {
         }
       }
     }
-    assert.equal(tokens.length, 20000);
+    assert.equal(tokens.length, 1969);
   });
 
   it('should be able to personalize with valid signature', async function () {

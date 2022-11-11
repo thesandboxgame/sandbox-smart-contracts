@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
@@ -26,4 +26,4 @@ func.tags = [
   'RafflePlayboyPartyPeople_setup',
   'RafflePlayboyPartyPeople_setup_minter',
 ];
-func.dependencies = ['PolygonSand', 'RafflePlayboyPartyPeople_deploy'];
+func.dependencies = ['PolygonSand_deploy', 'RafflePlayboyPartyPeople_deploy'];

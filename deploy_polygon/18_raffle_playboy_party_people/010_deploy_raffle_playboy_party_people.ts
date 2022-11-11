@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -12,13 +12,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     raffleSignWallet,
   } = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {
-    metadataUrl = 'https://contracts.sandbox.game/sa-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/ppp-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/sa-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/ppp-unrevealed/';
   }
 
   await deploy('RafflePlayboyPartyPeople', {
@@ -41,9 +41,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       upgradeIndex: 0,
     },
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 
 export default func;
 func.tags = ['RafflePlayboyPartyPeople', 'RafflePlayboyPartyPeople_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER'];
+func.dependencies = ['TRUSTED_FORWARDER_V2'];

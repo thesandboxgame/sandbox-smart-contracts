@@ -5,7 +5,7 @@ import "./GenericRaffle.sol";
 
 /* solhint-disable max-states-count */
 contract PlayboyPartyPeople is GenericRaffle {
-    uint256 public constant MAX_SUPPLY = 3_060;
+    uint256 public constant MAX_SUPPLY = 1_969;
 
     function initialize(
         string memory baseURI,
