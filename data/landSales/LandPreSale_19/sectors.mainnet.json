@@ -1,0 +1,68 @@
+[
+  {
+    "sector": 42,
+    "lands": [
+      {
+        "coordinateX": 75,
+        "coordinateY": -9,
+        "ownerAddress": "",
+        "bundleId": "129"
+      },
+      {
+        "coordinateX": -120,
+        "coordinateY": -196,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -119,
+        "coordinateY": -196,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -118,
+        "coordinateY": -196,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -118,
+        "coordinateY": -197,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -119,
+        "coordinateY": -197,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -120,
+        "coordinateY": -197,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -120,
+        "coordinateY": -198,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -119,
+        "coordinateY": -198,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -118,
+        "coordinateY": -198,
+        "ownerAddress": "",
+        "bundleId": ""
+      }
+    ],
+    "estates": []
+  }
+]
