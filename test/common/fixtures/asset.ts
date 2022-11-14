@@ -286,11 +286,15 @@ export const originalAssetFixtures = async function () {
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, bouncerAdmin} = await getNamedAccounts();
 
   // deployer is the original assetBouncerAdmin
   const originalAsset = await ethers.getContract('Asset', deployer);
-  await waitFor(originalAsset.setBouncer(minter, true));
+  const originalAssetAsBouncerAdmin = await ethers.getContract(
+    'Asset',
+    bouncerAdmin
+  );
+  await waitFor(originalAssetAsBouncerAdmin.setBouncer(minter, true));
 
   const Asset = await ethers.getContract('Asset', minter);
 
