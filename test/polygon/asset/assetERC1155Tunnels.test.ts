@@ -1,6 +1,6 @@
 import {setupAssetERC1155Tunnels} from './fixtures_tunnels';
 
-import {waitFor} from '../../utils';
+import {expectEventWithArgs, waitFor} from '../../utils';
 import {expect} from '../../chai-setup';
 import {AbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
@@ -1431,6 +1431,94 @@ describe('Asset_ERC1155_Tunnels', function () {
       ).to.be.revertedWith(
         "PolygonAssetERC1155Tunnel: trustedForwarder can't be zero"
       );
+    });
+
+    it('same asset minted on L2 and L1 should have a different metadatahash', async function () {
+      const {
+        AssetERC1155,
+        PolygonAssetERC1155,
+        users,
+        assetMinter,
+        assetAdmin,
+        MockPolygonAssetERC1155Tunnel,
+        deployer,
+      } = await setupAssetERC1155Tunnels();
+
+      const abiCoder = new AbiCoder();
+      await assetAdmin.AssetERC1155.setBouncer(assetMinter.address, true);
+
+      const packId = 12345;
+      const creator = users[0].address.toLowerCase();
+      const supply = 42;
+      const hashL1 =
+        '0x0000000000000000000000000000000000000000000000000000000000000001';
+      const hashL2 =
+        '0x0000000000000000000000000000000000000000000000000000000000000002';
+
+      const receiptL1 = await assetMinter.AssetERC1155[
+        'mint(address,uint40,bytes32,uint256,address,bytes)'
+      ](creator, packId, hashL1, supply, creator, '0x');
+
+      const transferEventL1 = await expectEventWithArgs(
+        AssetERC1155,
+        receiptL1,
+        'TransferSingle'
+      );
+
+      const tokenIdL1 = BigNumber.from(transferEventL1.args[3]);
+
+      expect(await AssetERC1155.doesHashExist(tokenIdL1)).to.be.equal(true);
+      expect(await AssetERC1155.metadataHash(tokenIdL1)).to.be.equal(hashL1);
+
+      const receiptL2 = await assetMinter.PolygonAssetERC1155[
+        'mint(address,uint40,bytes32,uint256,address,bytes)'
+      ](creator, packId, hashL2, supply, creator, '0x');
+
+      const transferEventL2 = await expectEventWithArgs(
+        PolygonAssetERC1155,
+        receiptL2,
+        'TransferSingle'
+      );
+
+      const tokenIdL2 = BigNumber.from(transferEventL2.args[3]);
+
+      expect(await PolygonAssetERC1155.doesHashExist(tokenIdL2)).to.be.equal(
+        true
+      );
+      expect(await PolygonAssetERC1155.metadataHash(tokenIdL2)).to.be.equal(
+        hashL2
+      );
+      expect(await AssetERC1155.doesHashExist(tokenIdL2)).to.be.equal(false);
+
+      await PolygonAssetERC1155.connect(
+        ethers.provider.getSigner(creator)
+      ).setApprovalForAll(MockPolygonAssetERC1155Tunnel.address, true);
+
+      await waitFor(
+        MockPolygonAssetERC1155Tunnel.connect(
+          ethers.provider.getSigner(creator)
+        ).batchWithdrawToRoot(creator, [tokenIdL2], [supply])
+      );
+
+      const metadata = new AbiCoder().encode(['bytes32[]'], [[hashL2]]);
+
+      await deployer.MockAssetERC1155Tunnel.receiveMessage(
+        abiCoder.encode(
+          ['address', 'uint256[]', 'uint256[]', 'bytes'],
+          [creator, [tokenIdL2], [supply], metadata]
+        )
+      );
+
+      expect(
+        await AssetERC1155['balanceOf(address,uint256)'](creator, tokenIdL1)
+      ).to.be.equal(supply);
+
+      expect(
+        await AssetERC1155['balanceOf(address,uint256)'](creator, tokenIdL2)
+      ).to.be.equal(supply);
+
+      expect(await AssetERC1155.doesHashExist(tokenIdL2)).to.be.equal(true);
+      expect(await AssetERC1155.metadataHash(tokenIdL2)).to.be.equal(hashL2);
     });
   });
 });
