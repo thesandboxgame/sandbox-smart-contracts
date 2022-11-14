@@ -14,7 +14,7 @@ const setupOriginalAsset = withSnapshot(
   originalAssetFixtures
 );
 
-describe('Test first Asset contract and upgrade process for splitting into ERC1155 and ERC721', function () {
+describe('AssetV1', function () {
   describe('transfer', function () {
     it('user sending asset to itself keep the same balance', async function () {
       const {Asset, users, mintAsset} = await setupOriginalAsset();
