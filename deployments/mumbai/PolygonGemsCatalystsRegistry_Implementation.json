@@ -1,0 +1,1053 @@
+{
+  "address": "0x3DEc27Ac88f18e4566f4dd606CCc3088E882Bef0",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "contract IGem[]",
+          "name": "gems",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "contract ICatalyst[]",
+          "name": "catalysts",
+          "type": "address[]"
+        }
+      ],
+      "name": "AddGemsAndCatalysts",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "allowanceValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetGemsAndCatalystsAllowance",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newTrustedForwarderAddress",
+          "type": "address"
+        }
+      ],
+      "name": "TrustedForwarderChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SUPER_OPERATOR_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IGem[]",
+          "name": "gems",
+          "type": "address[]"
+        },
+        {
+          "internalType": "contract ICatalyst[]",
+          "name": "catalysts",
+          "type": "address[]"
+        }
+      ],
+      "name": "addGemsAndCatalysts",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "catalystIds",
+          "type": "uint16[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "batchBurnCatalysts",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "gemIds",
+          "type": "uint16[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "batchBurnGems",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnCatalyst",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "gemId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnGem",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        }
+      ],
+      "name": "doesCatalystExist",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "gemId",
+          "type": "uint16"
+        }
+      ],
+      "name": "doesGemExist",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "assetId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint16[]",
+              "name": "gemIds",
+              "type": "uint16[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IAssetAttributesRegistry.GemEvent[]",
+          "name": "events",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "getAttributes",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "values",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        }
+      ],
+      "name": "getCatalyst",
+      "outputs": [
+        {
+          "internalType": "contract ICatalyst",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        }
+      ],
+      "name": "getCatalystDecimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "gemId",
+          "type": "uint16"
+        }
+      ],
+      "name": "getGem",
+      "outputs": [
+        {
+          "internalType": "contract IGem",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "gemId",
+          "type": "uint16"
+        }
+      ],
+      "name": "getGemDecimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "catalystId",
+          "type": "uint16"
+        }
+      ],
+      "name": "getMaxGems",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getNumberOfCatalystContracts",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "number",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getNumberOfGemContracts",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "number",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTrustedForwarder",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "trustedForwarder",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "trustedForwarder",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "initV1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "forwarder",
+          "type": "address"
+        }
+      ],
+      "name": "isTrustedForwarder",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "revokeGemsandCatalystsMaxAllowance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "setGemsAndCatalystsMaxAllowance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "trustedForwarder",
+          "type": "address"
+        }
+      ],
+      "name": "setTrustedForwarder",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xa70fdced81209e89401449e6331f54333b259f4c00f6ffafc53e29af4f06a712",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0x3DEc27Ac88f18e4566f4dd606CCc3088E882Bef0",
+    "transactionIndex": 12,
+    "gasUsed": "2224500",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000008000000000000000000000008000000000000000000000000000000000800000000000000000000100000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000200000200000000000000000080000000000000000000000000000000000000000004000000000000000000001000000000100000000000000000000108000000000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0xa80052b303f91d4d87806ffa76f4851a47102f87bebda6124381ee3471b3d42d",
+    "transactionHash": "0xa70fdced81209e89401449e6331f54333b259f4c00f6ffafc53e29af4f06a712",
+    "logs": [
+      {
+        "transactionIndex": 12,
+        "blockNumber": 29147359,
+        "transactionHash": "0xa70fdced81209e89401449e6331f54333b259f4c00f6ffafc53e29af4f06a712",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x0000000000000000000000003a22c8bc68e98b0faf40f349dd2b2890fae01484"
+        ],
+        "data": "0x000000000000000000000000000000000000000000000000000bdac1a6744c0000000000000000000000000000000000000000000000001cd59e7bd63b31533b0000000000000000000000000000000000000000000000000f5338f36764b64800000000000000000000000000000000000000000000001cd592a11494bd073b0000000000000000000000000000000000000000000000000f5f13b50dd90248",
+        "logIndex": 34,
+        "blockHash": "0xa80052b303f91d4d87806ffa76f4851a47102f87bebda6124381ee3471b3d42d"
+      }
+    ],
+    "blockNumber": 29147359,
+    "cumulativeGasUsed": "6360209",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "c6bcc3e7fc9b1399086cc28d40f8bc33",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contract IGem[]\",\"name\":\"gems\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"contract ICatalyst[]\",\"name\":\"catalysts\",\"type\":\"address[]\"}],\"name\":\"AddGemsAndCatalysts\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowanceValue\",\"type\":\"uint256\"}],\"name\":\"SetGemsAndCatalystsAllowance\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newTrustedForwarderAddress\",\"type\":\"address\"}],\"name\":\"TrustedForwarderChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SUPER_OPERATOR_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IGem[]\",\"name\":\"gems\",\"type\":\"address[]\"},{\"internalType\":\"contract ICatalyst[]\",\"name\":\"catalysts\",\"type\":\"address[]\"}],\"name\":\"addGemsAndCatalysts\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint16[]\",\"name\":\"catalystIds\",\"type\":\"uint16[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"batchBurnCatalysts\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"batchBurnGems\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"burnCatalyst\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"gemId\",\"type\":\"uint16\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"burnGem\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"}],\"name\":\"doesCatalystExist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"gemId\",\"type\":\"uint16\"}],\"name\":\"doesGemExist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"},{\"internalType\":\"uint256\",\"name\":\"assetId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint16[]\",\"name\":\"gemIds\",\"type\":\"uint16[]\"},{\"internalType\":\"bytes32\",\"name\":\"blockHash\",\"type\":\"bytes32\"}],\"internalType\":\"struct IAssetAttributesRegistry.GemEvent[]\",\"name\":\"events\",\"type\":\"tuple[]\"}],\"name\":\"getAttributes\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"values\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"}],\"name\":\"getCatalyst\",\"outputs\":[{\"internalType\":\"contract ICatalyst\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"}],\"name\":\"getCatalystDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"gemId\",\"type\":\"uint16\"}],\"name\":\"getGem\",\"outputs\":[{\"internalType\":\"contract IGem\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"gemId\",\"type\":\"uint16\"}],\"name\":\"getGemDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"catalystId\",\"type\":\"uint16\"}],\"name\":\"getMaxGems\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getNumberOfCatalystContracts\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getNumberOfGemContracts\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTrustedForwarder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"}],\"name\":\"initV1\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"forwarder\",\"type\":\"address\"}],\"name\":\"isTrustedForwarder\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"revokeGemsandCatalystsMaxAllowance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"setGemsAndCatalystsMaxAllowance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"}],\"name\":\"setTrustedForwarder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Each Gems and Catalyst must be registered here.Each new Gem get assigned a new id (starting at 1)Each new Catalyst get assigned a new id (starting at 1)DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes\",\"kind\":\"dev\",\"methods\":{\"addGemsAndCatalysts(address[],address[])\":{\"params\":{\"catalysts\":\"array of catalysts to be added\",\"gems\":\"array of gems to be added\"}},\"batchBurnCatalysts(address,uint16[],uint256[])\":{\"params\":{\"amounts\":\"list of amounts of units to burn\",\"catalystIds\":\"list of catalysts to burn catalyst units from each\",\"from\":\"address of the beneficiary to burn on behalf of\"}},\"batchBurnGems(address,uint16[],uint256[])\":{\"params\":{\"amounts\":\"list of amounts of units to burn\",\"from\":\"address of the beneficiary to burn on behalf of\",\"gemIds\":\"list of gems to burn gem units from each\"}},\"burnCatalyst(address,uint16,uint256)\":{\"params\":{\"amount\":\"The number of catalyst tokens to burn.\",\"catalystId\":\"The id of the catalyst to burn.\",\"from\":\"The signing address for the tx.\"}},\"burnGem(address,uint16,uint256)\":{\"params\":{\"amount\":\"The number of gem tokens to burn.\",\"from\":\"The signing address for the tx.\",\"gemId\":\"The id of the gem to burn.\"}},\"doesCatalystExist(uint16)\":{\"params\":{\"catalystId\":\"The catalyst being queried.\"},\"returns\":{\"_0\":\"Whether the catalyst exists.\"}},\"doesGemExist(uint16)\":{\"params\":{\"gemId\":\"The gem being queried.\"},\"returns\":{\"_0\":\"Whether the gem exists.\"}},\"getAttributes(uint16,uint256,(uint16[],bytes32)[])\":{\"params\":{\"assetId\":\"The asset tokenId.\",\"catalystId\":\"The catalyst identifier.\",\"events\":\"An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.\"},\"returns\":{\"values\":\"An array of values for each gem present in the asset.\"}},\"getCatalyst(uint16)\":{\"details\":\"Get the catalyst contract corresponding to the id.\",\"params\":{\"catalystId\":\"The catalyst id to use to retrieve the contract.\"},\"returns\":{\"_0\":\"The requested Catalyst contract.\"}},\"getCatalystDecimals(uint16)\":{\"params\":{\"catalystId\":\"catalyst identifier\"}},\"getGem(uint16)\":{\"details\":\"Get the gem contract corresponding to the id.\",\"params\":{\"gemId\":\"The gem id to use to retrieve the contract.\"},\"returns\":{\"_0\":\"The requested Gem contract.\"}},\"getGemDecimals(uint16)\":{\"params\":{\"gemId\":\"gem identifier\"}},\"getMaxGems(uint16)\":{\"params\":{\"catalystId\":\"catalyst identifier\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.\"},\"revokeGemsandCatalystsMaxAllowance()\":{\"details\":\"Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role.\"},\"setGemsAndCatalystsMaxAllowance()\":{\"details\":\"Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance\"},\"setTrustedForwarder(address)\":{\"details\":\"Change the address of the trusted forwarder for meta-TX\",\"params\":{\"trustedForwarder\":\"The new trustedForwarder\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"addGemsAndCatalysts(address[],address[])\":{\"notice\":\"Adds both arrays of gems and catalysts to registry\"},\"batchBurnCatalysts(address,uint16[],uint256[])\":{\"notice\":\"Burns few catalyst units from each catalyst id on behalf of a beneficiary\"},\"batchBurnGems(address,uint16[],uint256[])\":{\"notice\":\"Burns few gem units from each gem id on behalf of a beneficiary\"},\"burnCatalyst(address,uint16,uint256)\":{\"notice\":\"Burn a catalyst.\"},\"burnGem(address,uint16,uint256)\":{\"notice\":\"Burn a gem.\"},\"doesCatalystExist(uint16)\":{\"notice\":\"Query whether a giving catalyst exists.\"},\"doesGemExist(uint16)\":{\"notice\":\"Query whether a given gem exists.\"},\"getAttributes(uint16,uint256,(uint16[],bytes32)[])\":{\"notice\":\"Returns the values for each gem included in a given asset.\"},\"getCatalystDecimals(uint16)\":{\"notice\":\"Returns the decimals for a given catalyst\"},\"getGemDecimals(uint16)\":{\"notice\":\"Returns the decimals for a given gem\"},\"getMaxGems(uint16)\":{\"notice\":\"Returns the maximum number of gems for a given catalyst\"},\"setTrustedForwarder(address)\":{\"notice\":\"Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only\"}},\"notice\":\"Contract managing the Gems and CatalystsThe following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/catalyst/GemsCatalystsRegistry.sol\":\"GemsCatalystsRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (access/AccessControl.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IAccessControlUpgradeable.sol\\\";\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../utils/StringsUpgradeable.sol\\\";\\nimport \\\"../utils/introspection/ERC165Upgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it.\\n */\\nabstract contract AccessControlUpgradeable is Initializable, ContextUpgradeable, IAccessControlUpgradeable, ERC165Upgradeable {\\n    function __AccessControl_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n        __ERC165_init_unchained();\\n        __AccessControl_init_unchained();\\n    }\\n\\n    function __AccessControl_init_unchained() internal onlyInitializing {\\n    }\\n    struct RoleData {\\n        mapping(address => bool) members;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with a standardized message including the required role.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{40}) is missing role (0x[0-9a-f]{64})$/\\n     *\\n     * _Available since v4.1._\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role, _msgSender());\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view override returns (bool) {\\n        return _roles[role].members[account];\\n    }\\n\\n    /**\\n     * @dev Revert with a standard message if `account` is missing `role`.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{40}) is missing role (0x[0-9a-f]{64})$/\\n     */\\n    function _checkRole(bytes32 role, address account) internal view {\\n        if (!hasRole(role, account)) {\\n            revert(\\n                string(\\n                    abi.encodePacked(\\n                        \\\"AccessControl: account \\\",\\n                        StringsUpgradeable.toHexString(uint160(account), 20),\\n                        \\\" is missing role \\\",\\n                        StringsUpgradeable.toHexString(uint256(role), 32)\\n                    )\\n                )\\n            );\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view override returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) public virtual override {\\n        require(account == _msgSender(), \\\"AccessControl: can only renounce roles for self\\\");\\n\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event. Note that unlike {grantRole}, this function doesn't perform any\\n     * checks on the calling account.\\n     *\\n     * [WARNING]\\n     * ====\\n     * This function should only be called from the constructor when setting\\n     * up the initial roles for the system.\\n     *\\n     * Using this function in any other way is effectively circumventing the admin\\n     * system imposed by {AccessControl}.\\n     * ====\\n     *\\n     * NOTE: This function is deprecated in favor of {_grantRole}.\\n     */\\n    function _setupRole(bytes32 role, address account) internal virtual {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * Internal function without access restriction.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual {\\n        if (!hasRole(role, account)) {\\n            _roles[role].members[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n        }\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * Internal function without access restriction.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual {\\n        if (hasRole(role, account)) {\\n            _roles[role].members[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n        }\\n    }\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x64bb2dbe7ec4fcadb2f163f41edf6f2e1cd8f16162f7a56c2581894e6ba0747c\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControlUpgradeable {\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     *\\n     * _Available since v3.1._\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {AccessControl-_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) external;\\n}\\n\",\"keccak256\":\"0xb8f5302f12138c5561362e88a78d061573e6298b7a1a5afe84a1e2c8d4d5aeaa\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/AddressUpgradeable.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To initialize the implementation contract, you can either invoke the\\n * initializer manually, or you can include a constructor to automatically mark it as initialized when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() initializer {}\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     */\\n    bool private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Modifier to protect an initializer function from being invoked twice.\\n     */\\n    modifier initializer() {\\n        // If the contract is initializing we ignore whether _initialized is set in order to support multiple\\n        // inheritance patterns, but we only do this in the context of a constructor, because in other contexts the\\n        // contract may have been reentered.\\n        require(_initializing ? _isConstructor() : !_initialized, \\\"Initializable: contract is already initialized\\\");\\n\\n        bool isTopLevelCall = !_initializing;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n            _initialized = true;\\n        }\\n\\n        _;\\n\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} modifier, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    function _isConstructor() private view returns (bool) {\\n        return !AddressUpgradeable.isContract(address(this));\\n    }\\n}\\n\",\"keccak256\":\"0x68861bcc80cacbd498efde75aab6c74a486cc48262660d326c8d7530d9752097\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Address.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary AddressUpgradeable {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize, which returns 0 for contracts in\\n        // construction, since the code is only stored at the end of the\\n        // constructor execution.\\n\\n        uint256 size;\\n        assembly {\\n            size := extcodesize(account)\\n        }\\n        return size > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verifies that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x3f0f878c796dfc7feba6d3c4e3e526c14c7deae8b7bfc71088e3f38fab0d77b3\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x0b0d548f6381370d394f7a434f994dc678b3ef3e755de106109d61343a685ea7\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev String operations.\\n */\\nlibrary StringsUpgradeable {\\n    bytes16 private constant _HEX_SYMBOLS = \\\"0123456789abcdef\\\";\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` decimal representation.\\n     */\\n    function toString(uint256 value) internal pure returns (string memory) {\\n        // Inspired by OraclizeAPI's implementation - MIT licence\\n        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol\\n\\n        if (value == 0) {\\n            return \\\"0\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 digits;\\n        while (temp != 0) {\\n            digits++;\\n            temp /= 10;\\n        }\\n        bytes memory buffer = new bytes(digits);\\n        while (value != 0) {\\n            digits -= 1;\\n            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));\\n            value /= 10;\\n        }\\n        return string(buffer);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.\\n     */\\n    function toHexString(uint256 value) internal pure returns (string memory) {\\n        if (value == 0) {\\n            return \\\"0x00\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 length = 0;\\n        while (temp != 0) {\\n            length++;\\n            temp >>= 8;\\n        }\\n        return toHexString(value, length);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.\\n     */\\n    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {\\n        bytes memory buffer = new bytes(2 * length + 2);\\n        buffer[0] = \\\"0\\\";\\n        buffer[1] = \\\"x\\\";\\n        for (uint256 i = 2 * length + 1; i > 1; --i) {\\n            buffer[i] = _HEX_SYMBOLS[value & 0xf];\\n            value >>= 4;\\n        }\\n        require(value == 0, \\\"Strings: hex length insufficient\\\");\\n        return string(buffer);\\n    }\\n}\\n\",\"keccak256\":\"0x398d3323c1932a5986bf36be7c57593e121e69d5db5b6574b4ee0d031443de37\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165Upgradeable.sol\\\";\\nimport \\\"../../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165Upgradeable is Initializable, IERC165Upgradeable {\\n    function __ERC165_init() internal onlyInitializing {\\n        __ERC165_init_unchained();\\n    }\\n\\n    function __ERC165_init_unchained() internal onlyInitializing {\\n    }\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165Upgradeable).interfaceId;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0xcd98895383d51dc86669a76ae3ad4419fc5dc079d01faea23498e80c1cf9f78a\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165Upgradeable {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xc6cef87559d0aeffdf0a99803de655938a7779ec0a3cd5d4383483ad85565a09\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/GemsCatalystsRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport {IGem} from \\\"./interfaces/IGem.sol\\\";\\nimport {ICatalyst, IAssetAttributesRegistry} from \\\"./interfaces/ICatalyst.sol\\\";\\nimport {IERC20Extended, IERC20} from \\\"../common/interfaces/IERC20Extended.sol\\\";\\nimport {IGemsCatalystsRegistry} from \\\"./interfaces/IGemsCatalystsRegistry.sol\\\";\\nimport {ERC2771HandlerUpgradeable} from \\\"../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol\\\";\\nimport {\\n    AccessControlUpgradeable,\\n    ContextUpgradeable\\n} from \\\"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol\\\";\\n\\n/// @notice Contract managing the Gems and Catalysts\\n/// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE\\n/// @dev Each Gems and Catalyst must be registered here.\\n/// @dev Each new Gem get assigned a new id (starting at 1)\\n/// @dev Each new Catalyst get assigned a new id (starting at 1)\\n/// @dev DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes\\ncontract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegistry, AccessControlUpgradeable {\\n    uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;\\n    uint256 internal constant MAX_UINT256 = type(uint256).max;\\n    bytes32 public constant SUPER_OPERATOR_ROLE = keccak256(\\\"SUPER_OPERATOR_ROLE\\\");\\n\\n    IGem[] internal _gems;\\n    ICatalyst[] internal _catalysts;\\n\\n    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);\\n    event AddGemsAndCatalysts(IGem[] gems, ICatalyst[] catalysts);\\n    event SetGemsAndCatalystsAllowance(address owner, uint256 allowanceValue);\\n\\n    // solhint-disable-next-line no-empty-blocks\\n    constructor() initializer {}\\n\\n    function initV1(address trustedForwarder, address admin) external initializer {\\n        require(trustedForwarder != address(0), \\\"TRUSTED_FORWARDER_ZERO_ADDRESS\\\");\\n        require(admin != address(0), \\\"ADMIN_ZERO_ADDRESS\\\");\\n        _grantRole(DEFAULT_ADMIN_ROLE, admin);\\n        __ERC2771Handler_initialize(trustedForwarder);\\n        __AccessControl_init();\\n    }\\n\\n    /// @notice Returns the values for each gem included in a given asset.\\n    /// @param catalystId The catalyst identifier.\\n    /// @param assetId The asset tokenId.\\n    /// @param events An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.\\n    /// @return values An array of values for each gem present in the asset.\\n    function getAttributes(\\n        uint16 catalystId,\\n        uint256 assetId,\\n        IAssetAttributesRegistry.GemEvent[] calldata events\\n    ) external view override returns (uint32[] memory values) {\\n        ICatalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != ICatalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        return catalyst.getAttributes(assetId, events);\\n    }\\n\\n    /// @notice Returns the maximum number of gems for a given catalyst\\n    /// @param catalystId catalyst identifier\\n    function getMaxGems(uint16 catalystId) external view override returns (uint8) {\\n        ICatalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != ICatalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        return catalyst.getMaxGems();\\n    }\\n\\n    /// @notice Returns the decimals for a given catalyst\\n    /// @param catalystId catalyst identifier\\n    function getCatalystDecimals(uint16 catalystId) external view override returns (uint8) {\\n        ICatalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != ICatalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        return catalyst.getDecimals();\\n    }\\n\\n    /// @notice Returns the decimals for a given gem\\n    /// @param gemId gem identifier\\n    function getGemDecimals(uint16 gemId) external view override returns (uint8) {\\n        IGem gem = getGem(gemId);\\n        require(gem != IGem(address(0)), \\\"GEM_DOES_NOT_EXIST\\\");\\n        return gem.getDecimals();\\n    }\\n\\n    /// @notice Burns few gem units from each gem id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param gemIds list of gems to burn gem units from each\\n    /// @param amounts list of amounts of units to burn\\n    function batchBurnGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256[] calldata amounts\\n    ) external override {\\n        uint256 gemIdsLength = gemIds.length;\\n        require(gemIdsLength == amounts.length, \\\"GemsCatalystsRegistry: gemsIds and amounts length mismatch\\\");\\n        for (uint256 i = 0; i < gemIdsLength; i++) {\\n            if (gemIds[i] != 0 && amounts[i] != 0) {\\n                burnGem(from, gemIds[i], amounts[i]);\\n            }\\n        }\\n    }\\n\\n    /// @notice Burns few catalyst units from each catalyst id on behalf of a beneficiary\\n    /// @param from address of the beneficiary to burn on behalf of\\n    /// @param catalystIds list of catalysts to burn catalyst units from each\\n    /// @param amounts list of amounts of units to burn\\n    function batchBurnCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256[] calldata amounts\\n    ) external override {\\n        uint256 catalystIdsLength = catalystIds.length;\\n        require(catalystIdsLength == amounts.length, \\\"GemsCatalystsRegistry: catalystIds and amounts length mismatch\\\");\\n        for (uint256 i = 0; i < catalystIdsLength; i++) {\\n            if (catalystIds[i] != 0 && amounts[i] != 0) {\\n                burnCatalyst(from, catalystIds[i], amounts[i]);\\n            }\\n        }\\n    }\\n\\n    /// @notice Adds both arrays of gems and catalysts to registry\\n    /// @param gems array of gems to be added\\n    /// @param catalysts array of catalysts to be added\\n    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts)\\n        external\\n        override\\n        onlyRole(DEFAULT_ADMIN_ROLE)\\n    {\\n        require(\\n            uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,\\n            \\\"GemsCatalystsRegistry: Too many gem and catalyst contracts\\\"\\n        );\\n\\n        for (uint256 i = 0; i < gems.length; i++) {\\n            IGem gem = gems[i];\\n            require(address(gem) != address(0), \\\"GEM_ZERO_ADDRESS\\\");\\n            uint16 gemId = gem.gemId();\\n            require(gemId == _gems.length + 1, \\\"GEM_ID_NOT_IN_ORDER\\\");\\n            _gems.push(gem);\\n        }\\n\\n        for (uint256 i = 0; i < catalysts.length; i++) {\\n            ICatalyst catalyst = catalysts[i];\\n            require(address(catalyst) != address(0), \\\"CATALYST_ZERO_ADDRESS\\\");\\n            uint16 catalystId = catalyst.catalystId();\\n            require(catalystId == _catalysts.length + 1, \\\"CATALYST_ID_NOT_IN_ORDER\\\");\\n            _catalysts.push(catalyst);\\n        }\\n        emit AddGemsAndCatalysts(gems, catalysts);\\n    }\\n\\n    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only\\n    /// @dev Change the address of the trusted forwarder for meta-TX\\n    /// @param trustedForwarder The new trustedForwarder\\n    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {\\n        require(trustedForwarder != address(0), \\\"ZERO_ADDRESS\\\");\\n        _trustedForwarder = trustedForwarder;\\n        emit TrustedForwarderChanged(trustedForwarder);\\n    }\\n\\n    /// @notice Query whether a given gem exists.\\n    /// @param gemId The gem being queried.\\n    /// @return Whether the gem exists.\\n    function doesGemExist(uint16 gemId) external view override returns (bool) {\\n        return getGem(gemId) != IGem(address(0));\\n    }\\n\\n    /// @notice Query whether a giving catalyst exists.\\n    /// @param catalystId The catalyst being queried.\\n    /// @return Whether the catalyst exists.\\n    function doesCatalystExist(uint16 catalystId) external view returns (bool) {\\n        return getCatalyst(catalystId) != ICatalyst(address(0));\\n    }\\n\\n    /// @notice Burn a catalyst.\\n    /// @param from The signing address for the tx.\\n    /// @param catalystId The id of the catalyst to burn.\\n    /// @param amount The number of catalyst tokens to burn.\\n    function burnCatalyst(\\n        address from,\\n        uint16 catalystId,\\n        uint256 amount\\n    ) public override checkAuthorization(from) {\\n        ICatalyst catalyst = getCatalyst(catalystId);\\n        require(catalyst != ICatalyst(address(0)), \\\"CATALYST_DOES_NOT_EXIST\\\");\\n        catalyst.burnFor(from, amount);\\n    }\\n\\n    /// @notice Burn a gem.\\n    /// @param from The signing address for the tx.\\n    /// @param gemId The id of the gem to burn.\\n    /// @param amount The number of gem tokens to burn.\\n    function burnGem(\\n        address from,\\n        uint16 gemId,\\n        uint256 amount\\n    ) public override checkAuthorization(from) {\\n        IGem gem = getGem(gemId);\\n        require(gem != IGem(address(0)), \\\"GEM_DOES_NOT_EXIST\\\");\\n        gem.burnFor(from, amount);\\n    }\\n\\n    function getNumberOfCatalystContracts() external view returns (uint256 number) {\\n        number = _catalysts.length;\\n    }\\n\\n    function getNumberOfGemContracts() external view returns (uint256 number) {\\n        number = _gems.length;\\n    }\\n\\n    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance\\n    function revokeGemsandCatalystsMaxAllowance() external {\\n        _setGemsAndCatalystsAllowance(0);\\n    }\\n\\n    /// @dev Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance\\n    function setGemsAndCatalystsMaxAllowance() external {\\n        _setGemsAndCatalystsAllowance(MAX_UINT256);\\n    }\\n\\n    /// @dev Get the catalyst contract corresponding to the id.\\n    /// @param catalystId The catalyst id to use to retrieve the contract.\\n    /// @return The requested Catalyst contract.\\n    function getCatalyst(uint16 catalystId) public view returns (ICatalyst) {\\n        if (catalystId > 0 && catalystId <= _catalysts.length) {\\n            return _catalysts[catalystId - 1];\\n        } else {\\n            return ICatalyst(address(0));\\n        }\\n    }\\n\\n    /// @dev Get the gem contract corresponding to the id.\\n    /// @param gemId The gem id to use to retrieve the contract.\\n    /// @return The requested Gem contract.\\n    function getGem(uint16 gemId) public view returns (IGem) {\\n        if (gemId > 0 && gemId <= _gems.length) {\\n            return _gems[gemId - 1];\\n        } else {\\n            return IGem(address(0));\\n        }\\n    }\\n\\n    /// @dev verify that the caller is authorized for this function call.\\n    /// @param from The original signer of the transaction.\\n    modifier checkAuthorization(address from) {\\n        require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), \\\"AUTH_ACCESS_DENIED\\\");\\n        _;\\n    }\\n\\n    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {\\n        for (uint256 i = 0; i < _gems.length; i++) {\\n            require(_gems[i].approveFor(_msgSender(), address(this), allowanceValue), \\\"GEM_ALLOWANCE_NOT_APPROVED\\\");\\n        }\\n\\n        for (uint256 i = 0; i < _catalysts.length; i++) {\\n            require(\\n                _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue),\\n                \\\"CATALYST_ALLOWANCE_NOT_APPROVED\\\"\\n            );\\n        }\\n        emit SetGemsAndCatalystsAllowance(_msgSender(), allowanceValue);\\n    }\\n\\n    function _msgSender()\\n        internal\\n        view\\n        override(ContextUpgradeable, ERC2771HandlerUpgradeable)\\n        returns (address sender)\\n    {\\n        return ERC2771HandlerUpgradeable._msgSender();\\n    }\\n\\n    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {\\n        return ERC2771HandlerUpgradeable._msgData();\\n    }\\n}\\n\",\"keccak256\":\"0x0adfb6ecb8dd8b6cfb2c33d240cd42b0b1bad3fb1e6105f492f3b81e959c3116\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/interfaces/ICatalyst.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../../common/interfaces/IAssetAttributesRegistry.sol\\\";\\nimport \\\"../../common/interfaces/IAttributes.sol\\\";\\nimport \\\"../../common/interfaces/IERC20Extended.sol\\\";\\n\\ninterface ICatalyst is IERC20Extended, IAttributes {\\n    function catalystId() external returns (uint16);\\n\\n    function changeAttributes(IAttributes attributes) external;\\n\\n    function getMaxGems() external view returns (uint8);\\n\\n    function approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount\\n    ) external override returns (bool success);\\n\\n    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)\\n        external\\n        view\\n        override\\n        returns (uint32[] memory values);\\n\\n    function getDecimals() external pure returns (uint8);\\n}\\n\",\"keccak256\":\"0x0f9415fff82b9c189f2d02680efd61195e1ac7f5ed17a63094143b386fc6b177\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/interfaces/IGem.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../../common/interfaces/IERC20Extended.sol\\\";\\n\\ninterface IGem is IERC20Extended {\\n    function gemId() external returns (uint16);\\n\\n    function approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount\\n    ) external override returns (bool success);\\n\\n    function getDecimals() external pure returns (uint8);\\n}\\n\",\"keccak256\":\"0x5555669b35669429002d70f48abba62f8b03c47b4a256c56b13644e9b87ac94a\",\"license\":\"MIT\"},\"src/solc_0.8/catalyst/interfaces/IGemsCatalystsRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../../common/interfaces/IAssetAttributesRegistry.sol\\\";\\nimport \\\"./IGem.sol\\\";\\nimport \\\"./ICatalyst.sol\\\";\\n\\ninterface IGemsCatalystsRegistry {\\n    function getAttributes(\\n        uint16 catalystId,\\n        uint256 assetId,\\n        IAssetAttributesRegistry.GemEvent[] calldata events\\n    ) external view returns (uint32[] memory values);\\n\\n    function getMaxGems(uint16 catalystId) external view returns (uint8);\\n\\n    function batchBurnGems(\\n        address from,\\n        uint16[] calldata gemIds,\\n        uint256[] calldata amounts\\n    ) external;\\n\\n    function batchBurnCatalysts(\\n        address from,\\n        uint16[] calldata catalystIds,\\n        uint256[] calldata amounts\\n    ) external;\\n\\n    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts) external;\\n\\n    function doesGemExist(uint16 gemId) external view returns (bool);\\n\\n    function burnCatalyst(\\n        address from,\\n        uint16 catalystId,\\n        uint256 amount\\n    ) external;\\n\\n    function burnGem(\\n        address from,\\n        uint16 gemId,\\n        uint256 amount\\n    ) external;\\n\\n    function getCatalystDecimals(uint16 catalystId) external view returns (uint8);\\n\\n    function getGemDecimals(uint16 gemId) external view returns (uint8);\\n}\\n\",\"keccak256\":\"0x3de22bb2dbd63ffbace87e470c716fb1aad2b116c671e5cff7631af96d055e33\",\"license\":\"MIT\"},\"src/solc_0.8/common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\n/// @dev minimal ERC2771 handler to keep bytecode-size down\\n/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol\\n/// with an initializer for proxies and a mutable forwarder\\n/// @dev same as ERC2771Handler.sol but with gap\\n\\ncontract ERC2771HandlerUpgradeable {\\n    address internal _trustedForwarder;\\n    uint256[49] private __gap;\\n\\n    function __ERC2771Handler_initialize(address forwarder) internal {\\n        _trustedForwarder = forwarder;\\n    }\\n\\n    function isTrustedForwarder(address forwarder) public view returns (bool) {\\n        return forwarder == _trustedForwarder;\\n    }\\n\\n    function getTrustedForwarder() external view returns (address trustedForwarder) {\\n        return _trustedForwarder;\\n    }\\n\\n    function _msgSender() internal view virtual returns (address sender) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            // The assembly code is more direct than the Solidity version using `abi.decode`.\\n            // solhint-disable-next-line no-inline-assembly\\n            assembly {\\n                sender := shr(96, calldataload(sub(calldatasize(), 20)))\\n            }\\n        } else {\\n            return msg.sender;\\n        }\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        if (isTrustedForwarder(msg.sender)) {\\n            return msg.data[:msg.data.length - 20];\\n        } else {\\n            return msg.data;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xd0f91cd40c381f1d486f9906fd8002dd51308d74f28016ed89b17c3c169133e2\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IAssetAttributesRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\ninterface IAssetAttributesRegistry {\\n    struct GemEvent {\\n        uint16[] gemIds;\\n        bytes32 blockHash;\\n    }\\n\\n    struct AssetGemsCatalystData {\\n        uint256 assetId;\\n        uint16 catalystContractId;\\n        uint16[] gemContractIds;\\n    }\\n\\n    function getRecord(uint256 assetId)\\n        external\\n        view\\n        returns (\\n            bool exists,\\n            uint16 catalystId,\\n            uint16[] memory gemIds\\n        );\\n\\n    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values);\\n\\n    function setCatalyst(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external;\\n\\n    function setCatalystWhenDepositOnOtherLayer(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds\\n    ) external;\\n\\n    function setCatalystWithBlockNumber(\\n        uint256 assetId,\\n        uint16 catalystId,\\n        uint16[] calldata gemIds,\\n        uint64 blockNumber\\n    ) external;\\n\\n    function addGems(uint256 assetId, uint16[] calldata gemIds) external;\\n\\n    function setMigrationContract(address _migrationContract) external;\\n\\n    function getCatalystRegistry() external view returns (address);\\n}\\n\",\"keccak256\":\"0x7f12fa565160d7598f702dcae0e511943be9c6eaa4dc338f3439a36f0a6086c9\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IAttributes.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"../interfaces/IAssetAttributesRegistry.sol\\\";\\n\\ninterface IAttributes {\\n    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)\\n        external\\n        view\\n        returns (uint32[] memory values);\\n}\\n\",\"keccak256\":\"0x4cbdba9ad3fae8334fe614ae28fb3136454eada28f13f911ffce9c8c701c56a7\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\n/// @dev see https://eips.ethereum.org/EIPS/eip-20\\ninterface IERC20 {\\n    /// @notice emitted when tokens are transfered from one address to another.\\n    /// @param from address from which the token are transfered from (zero means tokens are minted).\\n    /// @param to destination address which the token are transfered to (zero means tokens are burnt).\\n    /// @param value amount of tokens transferred.\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /// @notice emitted when owner grant transfer rights to another address\\n    /// @param owner address allowing its token to be transferred.\\n    /// @param spender address allowed to spend on behalf of `owner`\\n    /// @param value amount of tokens allowed.\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /// @notice return the current total amount of tokens owned by all holders.\\n    /// @return supply total number of tokens held.\\n    function totalSupply() external view returns (uint256 supply);\\n\\n    /// @notice return the number of tokens held by a particular address.\\n    /// @param who address being queried.\\n    /// @return balance number of token held by that address.\\n    function balanceOf(address who) external view returns (uint256 balance);\\n\\n    /// @notice transfer tokens to a specific address.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transfer(address to, uint256 value) external returns (bool success);\\n\\n    /// @notice transfer tokens from one address to another.\\n    /// @param from address tokens will be sent from.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 value\\n    ) external returns (bool success);\\n\\n    /// @notice approve an address to spend on your behalf.\\n    /// @param spender address entitled to transfer on your behalf.\\n    /// @param value amount allowed to be transfered.\\n    /// @param success whether the approval succeeded.\\n    function approve(address spender, uint256 value) external returns (bool success);\\n\\n    /// @notice return the current allowance for a particular owner/spender pair.\\n    /// @param owner address allowing spender.\\n    /// @param spender address allowed to spend.\\n    /// @return amount number of tokens `spender` can spend on behalf of `owner`.\\n    function allowance(address owner, address spender) external view returns (uint256 amount);\\n}\\n\",\"keccak256\":\"0x9fe745d44fdcd7987682221d68b7a66d0784fbd81ae1d4e43a6c766347733a96\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IERC20Extended.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.2;\\n\\nimport \\\"./IERC20.sol\\\";\\n\\ninterface IERC20Extended is IERC20 {\\n    function burnFor(address from, uint256 amount) external;\\n\\n    function burn(uint256 amount) external;\\n\\n    function approveFor(\\n        address owner,\\n        address spender,\\n        uint256 amount\\n    ) external returns (bool success);\\n}\\n\",\"keccak256\":\"0xf02074902aff81db019aac8808c524d2ab77e1cb216f5327992ed7db95fee919\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60806040523480156200001157600080fd5b50603254610100900460ff166200002f5760325460ff161562000039565b62000039620000e7565b620000a15760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b606482015260840160405180910390fd5b603254610100900460ff16158015620000cd576032805460ff1961ff0019909116610100171660011790555b8015620000e0576032805461ff00191690555b506200010b565b6000620000ff306200010560201b620016631760201c565b15905090565b3b151590565b6126ec806200011b6000396000f3fe608060405234801561001057600080fd5b50600436106101cf5760003560e01c8063786325dd11610104578063aff5d1fa116100a2578063d547741f11610071578063d547741f14610422578063da74222814610435578063e8a0806614610448578063f96080a61461045b576101cf565b8063aff5d1fa146103e1578063c0569758146103f4578063ce1b815f14610407578063d0807d311461040f576101cf565b80638c4d91ed116100de5780638c4d91ed1461039057806391d1485414610398578063a217fddf146103d1578063aeb845d1146103d9576101cf565b8063786325dd1461032057806378bc8a191461034b5780637e8ee42f14610370576101cf565b8063362e7e8c11610171578063550d629c1161014b578063550d629c146102d0578063572b6c05146102e3578063590d0dce14610305578063645c5f9e14610318576101cf565b8063362e7e8c1461029757806336568abe146102aa57806352eea030146102bd576101cf565b8063184dfff5116101ad578063184dfff514610219578063248a9ca31461024e5780632a6a6451146102715780632f2ff15d14610284576101cf565b806301ffc9a7146101d4578063141376f9146101fc578063181896531461020f575b600080fd5b6101e76101e23660046121e8565b61046e565b60405190151581526020015b60405180910390f35b6101e761020a366004612228565b610509565b610217610526565b005b6102407fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb81565b6040519081526020016101f3565b61024061025c3660046121ac565b60009081526097602052604090206001015490565b61021761027f36600461201d565b610533565b6102176102923660046121c4565b6106b8565b6102176102a5366004611f9d565b6106ea565b6102176102b83660046121c4565b61085e565b6102176102cb366004611f9d565b6108fa565b6102176102de36600461205d565b610a65565b6101e76102f1366004611f49565b6000546001600160a01b0390811691161490565b61021761031336600461201d565b610f1b565b60ca54610240565b61033361032e366004612228565b611019565b6040516001600160a01b0390911681526020016101f3565b61035e610359366004612228565b61108c565b60405160ff90911681526020016101f3565b61038361037e366004612260565b611168565b6040516101f391906123d9565b60c954610240565b6101e76103a63660046121c4565b60009182526097602090815260408084206001600160a01b0393909316845291905290205460ff1690565b610240600081565b610217611274565b61035e6103ef366004612228565b61127e565b6101e7610402366004612228565b61131b565b610333611327565b61021761041d366004611f65565b611337565b6102176104303660046121c4565b6114f0565b610217610443366004611f49565b611518565b610333610456366004612228565b6115d2565b61035e610469366004612228565b6115ff565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b00000000000000000000000000000000000000000000000000000000148061050157507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b60008061051583611019565b6001600160a01b0316141592915050565b610531600019611669565b565b82806001600160a01b0316610546611950565b6001600160a01b0316148061058257506105827fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb6103a6611950565b6105d35760405162461bcd60e51b815260206004820152601260248201527f415554485f4143434553535f44454e494544000000000000000000000000000060448201526064015b60405180910390fd5b60006105de846115d2565b90506001600160a01b0381166106365760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b6040517f1dd319cb0000000000000000000000000000000000000000000000000000000081526001600160a01b03868116600483015260248201859052821690631dd319cb90604401600060405180830381600087803b15801561069957600080fd5b505af11580156106ad573d6000803e3d6000fd5b505050505050505050565b6000828152609760205260409020600101546106db816106d6611950565b61195f565b6106e583836119df565b505050565b828181146107605760405162461bcd60e51b815260206004820152603a60248201527f47656d73436174616c7973747352656769737472793a2067656d73496473206160448201527f6e6420616d6f756e7473206c656e677468206d69736d6174636800000000000060648201526084016105ca565b60005b818110156108555785858281811061078b57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906107a09190612228565b61ffff16158015906107d957508383828181106107cd57634e487b7160e01b600052603260045260246000fd5b90506020020135600014155b15610843576108438787878481811061080257634e487b7160e01b600052603260045260246000fd5b90506020020160208101906108179190612228565b86868581811061083757634e487b7160e01b600052603260045260246000fd5b90506020020135610f1b565b8061084d81612647565b915050610763565b50505050505050565b610866611950565b6001600160a01b0316816001600160a01b0316146108ec5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084016105ca565b6108f68282611a82565b5050565b828181146109705760405162461bcd60e51b815260206004820152603e60248201527f47656d73436174616c7973747352656769737472793a20636174616c7973744960448201527f647320616e6420616d6f756e7473206c656e677468206d69736d61746368000060648201526084016105ca565b60005b818110156108555785858281811061099b57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906109b09190612228565b61ffff16158015906109e957508383828181106109dd57634e487b7160e01b600052603260045260246000fd5b90506020020135600014155b15610a5357610a5387878784818110610a1257634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610a279190612228565b868685818110610a4757634e487b7160e01b600052603260045260246000fd5b90506020020135610533565b80610a5d81612647565b915050610973565b6000610a73816106d6611950565b60ca5460c9546101009184918791610a8a916125a6565b610a9491906125a6565b610a9e91906125a6565b10610b115760405162461bcd60e51b815260206004820152603a60248201527f47656d73436174616c7973747352656769737472793a20546f6f206d616e792060448201527f67656d20616e6420636174616c79737420636f6e74726163747300000000000060648201526084016105ca565b60005b84811015610cf3576000868683818110610b3e57634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610b539190611f49565b90506001600160a01b038116610bab5760405162461bcd60e51b815260206004820152601060248201527f47454d5f5a45524f5f414444524553530000000000000000000000000000000060448201526064016105ca565b6000816001600160a01b031663caafdcff6040518163ffffffff1660e01b8152600401602060405180830381600087803b158015610be857600080fd5b505af1158015610bfc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610c209190612244565b60c954909150610c319060016125a6565b8161ffff1614610c835760405162461bcd60e51b815260206004820152601360248201527f47454d5f49445f4e4f545f494e5f4f524445520000000000000000000000000060448201526064016105ca565b5060c980546001810182556000919091527f66be4f155c5ef2ebd3772b228f2f00681e4ed5826cdb3b1943cc11ad15ad1d2801805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b039290921691909117905580610ceb81612647565b915050610b14565b5060005b82811015610ed6576000848483818110610d2157634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610d369190611f49565b90506001600160a01b038116610d8e5760405162461bcd60e51b815260206004820152601560248201527f434154414c5953545f5a45524f5f41444452455353000000000000000000000060448201526064016105ca565b6000816001600160a01b031663c7165bbb6040518163ffffffff1660e01b8152600401602060405180830381600087803b158015610dcb57600080fd5b505af1158015610ddf573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e039190612244565b60ca54909150610e149060016125a6565b8161ffff1614610e665760405162461bcd60e51b815260206004820152601860248201527f434154414c5953545f49445f4e4f545f494e5f4f52444552000000000000000060448201526064016105ca565b5060ca80546001810182556000919091527f42d72674974f694b5f5159593243114d38a5c39c89d6b62fee061ff523240ee101805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b039290921691909117905580610ece81612647565b915050610cf7565b507fb7c303fa1bd01be5a1bc3817c2d2fa1f8342eab4fb74040ace8b64f6f5d193e185858585604051610f0c9493929190612350565b60405180910390a15050505050565b82806001600160a01b0316610f2e611950565b6001600160a01b03161480610f6a5750610f6a7fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb6103a6611950565b610fb65760405162461bcd60e51b815260206004820152601260248201527f415554485f4143434553535f44454e494544000000000000000000000000000060448201526064016105ca565b6000610fc184611019565b90506001600160a01b0381166106365760405162461bcd60e51b815260206004820152601260248201527f47454d5f444f45535f4e4f545f4558495354000000000000000000000000000060448201526064016105ca565b6000808261ffff16118015611034575060c95461ffff831611155b156110845760c96110466001846125dd565b61ffff168154811061106857634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b03169050610504565b506000610504565b600080611098836115d2565b90506001600160a01b0381166110f05760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b806001600160a01b03166309cba36b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561112957600080fd5b505afa15801561113d573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061116191906122ae565b9392505050565b60606000611175866115d2565b90506001600160a01b0381166111cd5760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b6040517f74903c860000000000000000000000000000000000000000000000000000000081526001600160a01b038216906374903c869061121690889088908890600401612456565b60006040518083038186803b15801561122e57600080fd5b505afa158015611242573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f1916820160405261126a91908101906120c6565b9695505050505050565b6105316000611669565b60008061128a836115d2565b90506001600160a01b0381166112e25760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b806001600160a01b031663f0141d846040518163ffffffff1660e01b815260040160206040518083038186803b15801561112957600080fd5b600080610515836115d2565b6000546001600160a01b03165b90565b603254610100900460ff166113525760325460ff1615611356565b303b155b6113c85760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a656400000000000000000000000000000000000060648201526084016105ca565b603254610100900460ff161580156113f3576032805460ff1961ff0019909116610100171660011790555b6001600160a01b0383166114495760405162461bcd60e51b815260206004820152601e60248201527f545255535445445f464f525741524445525f5a45524f5f41444452455353000060448201526064016105ca565b6001600160a01b03821661149f5760405162461bcd60e51b815260206004820152601260248201527f41444d494e5f5a45524f5f41444452455353000000000000000000000000000060448201526064016105ca565b6114aa6000836119df565b6000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0385161790556114da611b23565b80156106e5576032805461ff0019169055505050565b60008281526097602052604090206001015461150e816106d6611950565b6106e58383611a82565b6000611526816106d6611950565b6001600160a01b03821661157c5760405162461bcd60e51b815260206004820152600c60248201527f5a45524f5f41444452455353000000000000000000000000000000000000000060448201526064016105ca565b6000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038416908117825560405190917f871264f4293af7d2865ae7eae628b228f4991c57cb45b39c99f0b774ebe2901891a25050565b6000808261ffff161180156115ed575060ca5461ffff831611155b156110845760ca6110466001846125dd565b60008061160b83611019565b90506001600160a01b0381166112e25760405162461bcd60e51b815260206004820152601260248201527f47454d5f444f45535f4e4f545f4558495354000000000000000000000000000060448201526064016105ca565b3b151590565b60005b60c9548110156117b55760c9818154811061169757634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b0316632b9917466116b9611950565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101859052606401602060405180830381600087803b15801561171f57600080fd5b505af1158015611733573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611757919061218c565b6117a35760405162461bcd60e51b815260206004820152601a60248201527f47454d5f414c4c4f57414e43455f4e4f545f415050524f56454400000000000060448201526064016105ca565b806117ad81612647565b91505061166c565b5060005b60ca548110156119025760ca81815481106117e457634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b0316632b991746611806611950565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101859052606401602060405180830381600087803b15801561186c57600080fd5b505af1158015611880573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906118a4919061218c565b6118f05760405162461bcd60e51b815260206004820152601f60248201527f434154414c5953545f414c4c4f57414e43455f4e4f545f415050524f5645440060448201526064016105ca565b806118fa81612647565b9150506117b9565b507f8b0253e0089ae6c4a4943de863bb209720f3e2f1b5589ce9960287018b52688e61192c611950565b604080516001600160a01b039092168252602082018490520160405180910390a150565b600061195a611bb8565b905090565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff166108f65761199d816001600160a01b03166014611c00565b6119a8836020611c00565b6040516020016119b99291906122cf565b60408051601f198184030181529082905262461bcd60e51b82526105ca91600401612423565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff166108f65760008281526097602090815260408083206001600160a01b03851684529091529020805460ff19166001179055611a3e611950565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff16156108f65760008281526097602090815260408083206001600160a01b03851684529091529020805460ff19169055611adf611950565b6001600160a01b0316816001600160a01b0316837ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b60405160405180910390a45050565b603254610100900460ff16611ba05760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e6700000000000000000000000000000000000000000060648201526084016105ca565b611ba8611e6f565b611bb0611e6f565b610531611e6f565b600080546001600160a01b0316331415611bf957507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c611334565b5033611334565b60606000611c0f8360026125be565b611c1a9060026125a6565b67ffffffffffffffff811115611c4057634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611c6a576020820181803683370190505b5090507f300000000000000000000000000000000000000000000000000000000000000081600081518110611caf57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053507f780000000000000000000000000000000000000000000000000000000000000081600181518110611d2057634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506000611d5c8460026125be565b611d679060016125a6565b90505b6001811115611e20577f303132333435363738396162636465660000000000000000000000000000000085600f1660108110611db657634e487b7160e01b600052603260045260246000fd5b1a60f81b828281518110611dda57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535060049490941c93611e1981612630565b9050611d6a565b5083156111615760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e7460448201526064016105ca565b603254610100900460ff166105315760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e6700000000000000000000000000000000000000000060648201526084016105ca565b60008083601f840112611efd578081fd5b50813567ffffffffffffffff811115611f14578182fd5b6020830191508360208083028501011115611f2e57600080fd5b9250929050565b805163ffffffff8116811461050457600080fd5b600060208284031215611f5a578081fd5b81356111618161268e565b60008060408385031215611f77578081fd5b8235611f828161268e565b91506020830135611f928161268e565b809150509250929050565b600080600080600060608688031215611fb4578081fd5b8535611fbf8161268e565b9450602086013567ffffffffffffffff80821115611fdb578283fd5b611fe789838a01611eec565b90965094506040880135915080821115611fff578283fd5b5061200c88828901611eec565b969995985093965092949392505050565b600080600060608486031215612031578283fd5b833561203c8161268e565b9250602084013561204c816126a6565b929592945050506040919091013590565b60008060008060408587031215612072578384fd5b843567ffffffffffffffff80821115612089578586fd5b61209588838901611eec565b909650945060208701359150808211156120ad578384fd5b506120ba87828801611eec565b95989497509550505050565b600060208083850312156120d8578182fd5b825167ffffffffffffffff808211156120ef578384fd5b818501915085601f830112612102578384fd5b81518181111561211457612114612678565b838102604051601f19603f8301168101818110858211171561213857612138612678565b604052828152858101935084860182860187018a1015612156578788fd5b8795505b8386101561217f5761216b81611f35565b85526001959095019493860193860161215a565b5098975050505050505050565b60006020828403121561219d578081fd5b81518015158114611161578182fd5b6000602082840312156121bd578081fd5b5035919050565b600080604083850312156121d6578081fd5b823591506020830135611f928161268e565b6000602082840312156121f9578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114611161578182fd5b600060208284031215612239578081fd5b8135611161816126a6565b600060208284031215612255578081fd5b8151611161816126a6565b60008060008060608587031215612275578182fd5b8435612280816126a6565b935060208501359250604085013567ffffffffffffffff8111156122a2578283fd5b6120ba87828801611eec565b6000602082840312156122bf578081fd5b815160ff81168114611161578182fd5b60007f416363657373436f6e74726f6c3a206163636f756e742000000000000000000082528351612307816017850160208801612600565b7f206973206d697373696e6720726f6c65200000000000000000000000000000006017918401918201528351612344816028840160208801612600565b01602801949350505050565b6040808252810184905260008560608301825b878110156123935782356123768161268e565b6001600160a01b0316825260209283019290910190600101612363565b50838103602085810191909152858252915085908201835b8681101561217f5782356123be8161268e565b6001600160a01b0316825291830191908301906001016123ab565b6020808252825182820181905260009190848201906040850190845b8181101561241757835163ffffffff16835292840192918401916001016123f5565b50909695505050505050565b6000602082528251806020840152612442816040850160208701612600565b601f01601f19169190910160400192915050565b83815260406020808301829052828201849052600091906060908185018682028601830188865b89811015612596577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa089840301845281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc18c36030181126124dd578889fd5b8b018388018135368390037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1018112612514578a8bfd5b8201803567ffffffffffffffff81111561252c578b8cfd5b888102360384131561253c578b8cfd5b8a8752918290528701908a908987015b8183101561257757833561255f816126a6565b61ffff1681529289019260019290920191890161254c565b938901359689019690965250509385019392509084019060010161247d565b50909a9950505050505050505050565b600082198211156125b9576125b9612662565b500190565b60008160001904831182151516156125d8576125d8612662565b500290565b600061ffff838116908316818110156125f8576125f8612662565b039392505050565b60005b8381101561261b578181015183820152602001612603565b8381111561262a576000848401525b50505050565b60008161263f5761263f612662565b506000190190565b600060001982141561265b5761265b612662565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fd5b6001600160a01b03811681146126a357600080fd5b50565b61ffff811681146126a357600080fdfea2646970667358221220852fb039ee7d706808c2cfc985f65412d06ef537e541aea027e438fd5d2d3e7864736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101cf5760003560e01c8063786325dd11610104578063aff5d1fa116100a2578063d547741f11610071578063d547741f14610422578063da74222814610435578063e8a0806614610448578063f96080a61461045b576101cf565b8063aff5d1fa146103e1578063c0569758146103f4578063ce1b815f14610407578063d0807d311461040f576101cf565b80638c4d91ed116100de5780638c4d91ed1461039057806391d1485414610398578063a217fddf146103d1578063aeb845d1146103d9576101cf565b8063786325dd1461032057806378bc8a191461034b5780637e8ee42f14610370576101cf565b8063362e7e8c11610171578063550d629c1161014b578063550d629c146102d0578063572b6c05146102e3578063590d0dce14610305578063645c5f9e14610318576101cf565b8063362e7e8c1461029757806336568abe146102aa57806352eea030146102bd576101cf565b8063184dfff5116101ad578063184dfff514610219578063248a9ca31461024e5780632a6a6451146102715780632f2ff15d14610284576101cf565b806301ffc9a7146101d4578063141376f9146101fc578063181896531461020f575b600080fd5b6101e76101e23660046121e8565b61046e565b60405190151581526020015b60405180910390f35b6101e761020a366004612228565b610509565b610217610526565b005b6102407fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb81565b6040519081526020016101f3565b61024061025c3660046121ac565b60009081526097602052604090206001015490565b61021761027f36600461201d565b610533565b6102176102923660046121c4565b6106b8565b6102176102a5366004611f9d565b6106ea565b6102176102b83660046121c4565b61085e565b6102176102cb366004611f9d565b6108fa565b6102176102de36600461205d565b610a65565b6101e76102f1366004611f49565b6000546001600160a01b0390811691161490565b61021761031336600461201d565b610f1b565b60ca54610240565b61033361032e366004612228565b611019565b6040516001600160a01b0390911681526020016101f3565b61035e610359366004612228565b61108c565b60405160ff90911681526020016101f3565b61038361037e366004612260565b611168565b6040516101f391906123d9565b60c954610240565b6101e76103a63660046121c4565b60009182526097602090815260408084206001600160a01b0393909316845291905290205460ff1690565b610240600081565b610217611274565b61035e6103ef366004612228565b61127e565b6101e7610402366004612228565b61131b565b610333611327565b61021761041d366004611f65565b611337565b6102176104303660046121c4565b6114f0565b610217610443366004611f49565b611518565b610333610456366004612228565b6115d2565b61035e610469366004612228565b6115ff565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b00000000000000000000000000000000000000000000000000000000148061050157507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b60008061051583611019565b6001600160a01b0316141592915050565b610531600019611669565b565b82806001600160a01b0316610546611950565b6001600160a01b0316148061058257506105827fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb6103a6611950565b6105d35760405162461bcd60e51b815260206004820152601260248201527f415554485f4143434553535f44454e494544000000000000000000000000000060448201526064015b60405180910390fd5b60006105de846115d2565b90506001600160a01b0381166106365760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b6040517f1dd319cb0000000000000000000000000000000000000000000000000000000081526001600160a01b03868116600483015260248201859052821690631dd319cb90604401600060405180830381600087803b15801561069957600080fd5b505af11580156106ad573d6000803e3d6000fd5b505050505050505050565b6000828152609760205260409020600101546106db816106d6611950565b61195f565b6106e583836119df565b505050565b828181146107605760405162461bcd60e51b815260206004820152603a60248201527f47656d73436174616c7973747352656769737472793a2067656d73496473206160448201527f6e6420616d6f756e7473206c656e677468206d69736d6174636800000000000060648201526084016105ca565b60005b818110156108555785858281811061078b57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906107a09190612228565b61ffff16158015906107d957508383828181106107cd57634e487b7160e01b600052603260045260246000fd5b90506020020135600014155b15610843576108438787878481811061080257634e487b7160e01b600052603260045260246000fd5b90506020020160208101906108179190612228565b86868581811061083757634e487b7160e01b600052603260045260246000fd5b90506020020135610f1b565b8061084d81612647565b915050610763565b50505050505050565b610866611950565b6001600160a01b0316816001600160a01b0316146108ec5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084016105ca565b6108f68282611a82565b5050565b828181146109705760405162461bcd60e51b815260206004820152603e60248201527f47656d73436174616c7973747352656769737472793a20636174616c7973744960448201527f647320616e6420616d6f756e7473206c656e677468206d69736d61746368000060648201526084016105ca565b60005b818110156108555785858281811061099b57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906109b09190612228565b61ffff16158015906109e957508383828181106109dd57634e487b7160e01b600052603260045260246000fd5b90506020020135600014155b15610a5357610a5387878784818110610a1257634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610a279190612228565b868685818110610a4757634e487b7160e01b600052603260045260246000fd5b90506020020135610533565b80610a5d81612647565b915050610973565b6000610a73816106d6611950565b60ca5460c9546101009184918791610a8a916125a6565b610a9491906125a6565b610a9e91906125a6565b10610b115760405162461bcd60e51b815260206004820152603a60248201527f47656d73436174616c7973747352656769737472793a20546f6f206d616e792060448201527f67656d20616e6420636174616c79737420636f6e74726163747300000000000060648201526084016105ca565b60005b84811015610cf3576000868683818110610b3e57634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610b539190611f49565b90506001600160a01b038116610bab5760405162461bcd60e51b815260206004820152601060248201527f47454d5f5a45524f5f414444524553530000000000000000000000000000000060448201526064016105ca565b6000816001600160a01b031663caafdcff6040518163ffffffff1660e01b8152600401602060405180830381600087803b158015610be857600080fd5b505af1158015610bfc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610c209190612244565b60c954909150610c319060016125a6565b8161ffff1614610c835760405162461bcd60e51b815260206004820152601360248201527f47454d5f49445f4e4f545f494e5f4f524445520000000000000000000000000060448201526064016105ca565b5060c980546001810182556000919091527f66be4f155c5ef2ebd3772b228f2f00681e4ed5826cdb3b1943cc11ad15ad1d2801805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b039290921691909117905580610ceb81612647565b915050610b14565b5060005b82811015610ed6576000848483818110610d2157634e487b7160e01b600052603260045260246000fd5b9050602002016020810190610d369190611f49565b90506001600160a01b038116610d8e5760405162461bcd60e51b815260206004820152601560248201527f434154414c5953545f5a45524f5f41444452455353000000000000000000000060448201526064016105ca565b6000816001600160a01b031663c7165bbb6040518163ffffffff1660e01b8152600401602060405180830381600087803b158015610dcb57600080fd5b505af1158015610ddf573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e039190612244565b60ca54909150610e149060016125a6565b8161ffff1614610e665760405162461bcd60e51b815260206004820152601860248201527f434154414c5953545f49445f4e4f545f494e5f4f52444552000000000000000060448201526064016105ca565b5060ca80546001810182556000919091527f42d72674974f694b5f5159593243114d38a5c39c89d6b62fee061ff523240ee101805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b039290921691909117905580610ece81612647565b915050610cf7565b507fb7c303fa1bd01be5a1bc3817c2d2fa1f8342eab4fb74040ace8b64f6f5d193e185858585604051610f0c9493929190612350565b60405180910390a15050505050565b82806001600160a01b0316610f2e611950565b6001600160a01b03161480610f6a5750610f6a7fe43cbdacb5a27491c5b15dcd2ddf377fcc3cf337bd999d6a7acb8c882b5554cb6103a6611950565b610fb65760405162461bcd60e51b815260206004820152601260248201527f415554485f4143434553535f44454e494544000000000000000000000000000060448201526064016105ca565b6000610fc184611019565b90506001600160a01b0381166106365760405162461bcd60e51b815260206004820152601260248201527f47454d5f444f45535f4e4f545f4558495354000000000000000000000000000060448201526064016105ca565b6000808261ffff16118015611034575060c95461ffff831611155b156110845760c96110466001846125dd565b61ffff168154811061106857634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b03169050610504565b506000610504565b600080611098836115d2565b90506001600160a01b0381166110f05760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b806001600160a01b03166309cba36b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561112957600080fd5b505afa15801561113d573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061116191906122ae565b9392505050565b60606000611175866115d2565b90506001600160a01b0381166111cd5760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b6040517f74903c860000000000000000000000000000000000000000000000000000000081526001600160a01b038216906374903c869061121690889088908890600401612456565b60006040518083038186803b15801561122e57600080fd5b505afa158015611242573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f1916820160405261126a91908101906120c6565b9695505050505050565b6105316000611669565b60008061128a836115d2565b90506001600160a01b0381166112e25760405162461bcd60e51b815260206004820152601760248201527f434154414c5953545f444f45535f4e4f545f455849535400000000000000000060448201526064016105ca565b806001600160a01b031663f0141d846040518163ffffffff1660e01b815260040160206040518083038186803b15801561112957600080fd5b600080610515836115d2565b6000546001600160a01b03165b90565b603254610100900460ff166113525760325460ff1615611356565b303b155b6113c85760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a656400000000000000000000000000000000000060648201526084016105ca565b603254610100900460ff161580156113f3576032805460ff1961ff0019909116610100171660011790555b6001600160a01b0383166114495760405162461bcd60e51b815260206004820152601e60248201527f545255535445445f464f525741524445525f5a45524f5f41444452455353000060448201526064016105ca565b6001600160a01b03821661149f5760405162461bcd60e51b815260206004820152601260248201527f41444d494e5f5a45524f5f41444452455353000000000000000000000000000060448201526064016105ca565b6114aa6000836119df565b6000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0385161790556114da611b23565b80156106e5576032805461ff0019169055505050565b60008281526097602052604090206001015461150e816106d6611950565b6106e58383611a82565b6000611526816106d6611950565b6001600160a01b03821661157c5760405162461bcd60e51b815260206004820152600c60248201527f5a45524f5f41444452455353000000000000000000000000000000000000000060448201526064016105ca565b6000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b038416908117825560405190917f871264f4293af7d2865ae7eae628b228f4991c57cb45b39c99f0b774ebe2901891a25050565b6000808261ffff161180156115ed575060ca5461ffff831611155b156110845760ca6110466001846125dd565b60008061160b83611019565b90506001600160a01b0381166112e25760405162461bcd60e51b815260206004820152601260248201527f47454d5f444f45535f4e4f545f4558495354000000000000000000000000000060448201526064016105ca565b3b151590565b60005b60c9548110156117b55760c9818154811061169757634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b0316632b9917466116b9611950565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101859052606401602060405180830381600087803b15801561171f57600080fd5b505af1158015611733573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611757919061218c565b6117a35760405162461bcd60e51b815260206004820152601a60248201527f47454d5f414c4c4f57414e43455f4e4f545f415050524f56454400000000000060448201526064016105ca565b806117ad81612647565b91505061166c565b5060005b60ca548110156119025760ca81815481106117e457634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546001600160a01b0316632b991746611806611950565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101859052606401602060405180830381600087803b15801561186c57600080fd5b505af1158015611880573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906118a4919061218c565b6118f05760405162461bcd60e51b815260206004820152601f60248201527f434154414c5953545f414c4c4f57414e43455f4e4f545f415050524f5645440060448201526064016105ca565b806118fa81612647565b9150506117b9565b507f8b0253e0089ae6c4a4943de863bb209720f3e2f1b5589ce9960287018b52688e61192c611950565b604080516001600160a01b039092168252602082018490520160405180910390a150565b600061195a611bb8565b905090565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff166108f65761199d816001600160a01b03166014611c00565b6119a8836020611c00565b6040516020016119b99291906122cf565b60408051601f198184030181529082905262461bcd60e51b82526105ca91600401612423565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff166108f65760008281526097602090815260408083206001600160a01b03851684529091529020805460ff19166001179055611a3e611950565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b60008281526097602090815260408083206001600160a01b038516845290915290205460ff16156108f65760008281526097602090815260408083206001600160a01b03851684529091529020805460ff19169055611adf611950565b6001600160a01b0316816001600160a01b0316837ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b60405160405180910390a45050565b603254610100900460ff16611ba05760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e6700000000000000000000000000000000000000000060648201526084016105ca565b611ba8611e6f565b611bb0611e6f565b610531611e6f565b600080546001600160a01b0316331415611bf957507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c611334565b5033611334565b60606000611c0f8360026125be565b611c1a9060026125a6565b67ffffffffffffffff811115611c4057634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611c6a576020820181803683370190505b5090507f300000000000000000000000000000000000000000000000000000000000000081600081518110611caf57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053507f780000000000000000000000000000000000000000000000000000000000000081600181518110611d2057634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506000611d5c8460026125be565b611d679060016125a6565b90505b6001811115611e20577f303132333435363738396162636465660000000000000000000000000000000085600f1660108110611db657634e487b7160e01b600052603260045260246000fd5b1a60f81b828281518110611dda57634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535060049490941c93611e1981612630565b9050611d6a565b5083156111615760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e7460448201526064016105ca565b603254610100900460ff166105315760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e6700000000000000000000000000000000000000000060648201526084016105ca565b60008083601f840112611efd578081fd5b50813567ffffffffffffffff811115611f14578182fd5b6020830191508360208083028501011115611f2e57600080fd5b9250929050565b805163ffffffff8116811461050457600080fd5b600060208284031215611f5a578081fd5b81356111618161268e565b60008060408385031215611f77578081fd5b8235611f828161268e565b91506020830135611f928161268e565b809150509250929050565b600080600080600060608688031215611fb4578081fd5b8535611fbf8161268e565b9450602086013567ffffffffffffffff80821115611fdb578283fd5b611fe789838a01611eec565b90965094506040880135915080821115611fff578283fd5b5061200c88828901611eec565b969995985093965092949392505050565b600080600060608486031215612031578283fd5b833561203c8161268e565b9250602084013561204c816126a6565b929592945050506040919091013590565b60008060008060408587031215612072578384fd5b843567ffffffffffffffff80821115612089578586fd5b61209588838901611eec565b909650945060208701359150808211156120ad578384fd5b506120ba87828801611eec565b95989497509550505050565b600060208083850312156120d8578182fd5b825167ffffffffffffffff808211156120ef578384fd5b818501915085601f830112612102578384fd5b81518181111561211457612114612678565b838102604051601f19603f8301168101818110858211171561213857612138612678565b604052828152858101935084860182860187018a1015612156578788fd5b8795505b8386101561217f5761216b81611f35565b85526001959095019493860193860161215a565b5098975050505050505050565b60006020828403121561219d578081fd5b81518015158114611161578182fd5b6000602082840312156121bd578081fd5b5035919050565b600080604083850312156121d6578081fd5b823591506020830135611f928161268e565b6000602082840312156121f9578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114611161578182fd5b600060208284031215612239578081fd5b8135611161816126a6565b600060208284031215612255578081fd5b8151611161816126a6565b60008060008060608587031215612275578182fd5b8435612280816126a6565b935060208501359250604085013567ffffffffffffffff8111156122a2578283fd5b6120ba87828801611eec565b6000602082840312156122bf578081fd5b815160ff81168114611161578182fd5b60007f416363657373436f6e74726f6c3a206163636f756e742000000000000000000082528351612307816017850160208801612600565b7f206973206d697373696e6720726f6c65200000000000000000000000000000006017918401918201528351612344816028840160208801612600565b01602801949350505050565b6040808252810184905260008560608301825b878110156123935782356123768161268e565b6001600160a01b0316825260209283019290910190600101612363565b50838103602085810191909152858252915085908201835b8681101561217f5782356123be8161268e565b6001600160a01b0316825291830191908301906001016123ab565b6020808252825182820181905260009190848201906040850190845b8181101561241757835163ffffffff16835292840192918401916001016123f5565b50909695505050505050565b6000602082528251806020840152612442816040850160208701612600565b601f01601f19169190910160400192915050565b83815260406020808301829052828201849052600091906060908185018682028601830188865b89811015612596577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa089840301845281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc18c36030181126124dd578889fd5b8b018388018135368390037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1018112612514578a8bfd5b8201803567ffffffffffffffff81111561252c578b8cfd5b888102360384131561253c578b8cfd5b8a8752918290528701908a908987015b8183101561257757833561255f816126a6565b61ffff1681529289019260019290920191890161254c565b938901359689019690965250509385019392509084019060010161247d565b50909a9950505050505050505050565b600082198211156125b9576125b9612662565b500190565b60008160001904831182151516156125d8576125d8612662565b500290565b600061ffff838116908316818110156125f8576125f8612662565b039392505050565b60005b8381101561261b578181015183820152602001612603565b8381111561262a576000848401525b50505050565b60008161263f5761263f612662565b506000190190565b600060001982141561265b5761265b612662565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fd5b6001600160a01b03811681146126a357600080fd5b50565b61ffff811681146126a357600080fdfea2646970667358221220852fb039ee7d706808c2cfc985f65412d06ef537e541aea027e438fd5d2d3e7864736f6c63430008020033",
+  "devdoc": {
+    "details": "Each Gems and Catalyst must be registered here.Each new Gem get assigned a new id (starting at 1)Each new Catalyst get assigned a new id (starting at 1)DEFAULT_ADMIN_ROLE is intended for contract setup / emergency, SUPER_OPERATOR_ROLE is provided for business purposes",
+    "kind": "dev",
+    "methods": {
+      "addGemsAndCatalysts(address[],address[])": {
+        "params": {
+          "catalysts": "array of catalysts to be added",
+          "gems": "array of gems to be added"
+        }
+      },
+      "batchBurnCatalysts(address,uint16[],uint256[])": {
+        "params": {
+          "amounts": "list of amounts of units to burn",
+          "catalystIds": "list of catalysts to burn catalyst units from each",
+          "from": "address of the beneficiary to burn on behalf of"
+        }
+      },
+      "batchBurnGems(address,uint16[],uint256[])": {
+        "params": {
+          "amounts": "list of amounts of units to burn",
+          "from": "address of the beneficiary to burn on behalf of",
+          "gemIds": "list of gems to burn gem units from each"
+        }
+      },
+      "burnCatalyst(address,uint16,uint256)": {
+        "params": {
+          "amount": "The number of catalyst tokens to burn.",
+          "catalystId": "The id of the catalyst to burn.",
+          "from": "The signing address for the tx."
+        }
+      },
+      "burnGem(address,uint16,uint256)": {
+        "params": {
+          "amount": "The number of gem tokens to burn.",
+          "from": "The signing address for the tx.",
+          "gemId": "The id of the gem to burn."
+        }
+      },
+      "doesCatalystExist(uint16)": {
+        "params": {
+          "catalystId": "The catalyst being queried."
+        },
+        "returns": {
+          "_0": "Whether the catalyst exists."
+        }
+      },
+      "doesGemExist(uint16)": {
+        "params": {
+          "gemId": "The gem being queried."
+        },
+        "returns": {
+          "_0": "Whether the gem exists."
+        }
+      },
+      "getAttributes(uint16,uint256,(uint16[],bytes32)[])": {
+        "params": {
+          "assetId": "The asset tokenId.",
+          "catalystId": "The catalyst identifier.",
+          "events": "An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect."
+        },
+        "returns": {
+          "values": "An array of values for each gem present in the asset."
+        }
+      },
+      "getCatalyst(uint16)": {
+        "details": "Get the catalyst contract corresponding to the id.",
+        "params": {
+          "catalystId": "The catalyst id to use to retrieve the contract."
+        },
+        "returns": {
+          "_0": "The requested Catalyst contract."
+        }
+      },
+      "getCatalystDecimals(uint16)": {
+        "params": {
+          "catalystId": "catalyst identifier"
+        }
+      },
+      "getGem(uint16)": {
+        "details": "Get the gem contract corresponding to the id.",
+        "params": {
+          "gemId": "The gem id to use to retrieve the contract."
+        },
+        "returns": {
+          "_0": "The requested Gem contract."
+        }
+      },
+      "getGemDecimals(uint16)": {
+        "params": {
+          "gemId": "gem identifier"
+        }
+      },
+      "getMaxGems(uint16)": {
+        "params": {
+          "catalystId": "catalyst identifier"
+        }
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`."
+      },
+      "revokeGemsandCatalystsMaxAllowance()": {
+        "details": "Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance"
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "setGemsAndCatalystsMaxAllowance()": {
+        "details": "Only the owner, SUPER_OPERATOR_ROLE or APPROVER_ROLE may set the allowance"
+      },
+      "setTrustedForwarder(address)": {
+        "details": "Change the address of the trusted forwarder for meta-TX",
+        "params": {
+          "trustedForwarder": "The new trustedForwarder"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "addGemsAndCatalysts(address[],address[])": {
+        "notice": "Adds both arrays of gems and catalysts to registry"
+      },
+      "batchBurnCatalysts(address,uint16[],uint256[])": {
+        "notice": "Burns few catalyst units from each catalyst id on behalf of a beneficiary"
+      },
+      "batchBurnGems(address,uint16[],uint256[])": {
+        "notice": "Burns few gem units from each gem id on behalf of a beneficiary"
+      },
+      "burnCatalyst(address,uint16,uint256)": {
+        "notice": "Burn a catalyst."
+      },
+      "burnGem(address,uint16,uint256)": {
+        "notice": "Burn a gem."
+      },
+      "doesCatalystExist(uint16)": {
+        "notice": "Query whether a giving catalyst exists."
+      },
+      "doesGemExist(uint16)": {
+        "notice": "Query whether a given gem exists."
+      },
+      "getAttributes(uint16,uint256,(uint16[],bytes32)[])": {
+        "notice": "Returns the values for each gem included in a given asset."
+      },
+      "getCatalystDecimals(uint16)": {
+        "notice": "Returns the decimals for a given catalyst"
+      },
+      "getGemDecimals(uint16)": {
+        "notice": "Returns the decimals for a given gem"
+      },
+      "getMaxGems(uint16)": {
+        "notice": "Returns the maximum number of gems for a given catalyst"
+      },
+      "setTrustedForwarder(address)": {
+        "notice": "Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only"
+      }
+    },
+    "notice": "Contract managing the Gems and CatalystsThe following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 33770,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_trustedForwarder",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 33774,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 10217,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "50",
+        "type": "t_bool"
+      },
+      {
+        "astId": 10220,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "50",
+        "type": "t_bool"
+      },
+      {
+        "astId": 12276,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 13138,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 9622,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "151",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)9617_storage)"
+      },
+      {
+        "astId": 9909,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "152",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 29286,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_gems",
+        "offset": 0,
+        "slot": "201",
+        "type": "t_array(t_contract(IGem)30255)dyn_storage"
+      },
+      {
+        "astId": 29290,
+        "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+        "label": "_catalysts",
+        "offset": 0,
+        "slot": "202",
+        "type": "t_array(t_contract(ICatalyst)30208)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_contract(ICatalyst)30208)dyn_storage": {
+        "base": "t_contract(ICatalyst)30208",
+        "encoding": "dynamic_array",
+        "label": "contract ICatalyst[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_contract(IGem)30255)dyn_storage": {
+        "base": "t_contract(IGem)30255",
+        "encoding": "dynamic_array",
+        "label": "contract IGem[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(ICatalyst)30208": {
+        "encoding": "inplace",
+        "label": "contract ICatalyst",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IGem)30255": {
+        "encoding": "inplace",
+        "label": "contract IGem",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)9617_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)9617_storage"
+      },
+      "t_struct(RoleData)9617_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControlUpgradeable.RoleData",
+        "members": [
+          {
+            "astId": 9614,
+            "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+            "label": "members",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 9616,
+            "contract": "src/solc_0.8/catalyst/GemsCatalystsRegistry.sol:GemsCatalystsRegistry",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
