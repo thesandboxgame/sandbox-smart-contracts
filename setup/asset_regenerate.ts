@@ -30,7 +30,8 @@ function generateRaritiesPack(raritiesArr: number[]) {
 }
 
 const func: DeployFunction = async function () {
-  const {ethers, getNamedAccounts} = hre;
+  const {ethers, getNamedAccounts, deployments} = hre;
+  const {execute, read} = deployments;
 
   const gasPriceFromNode = await ethers.provider.getGasPrice();
   let gasPrice = gasPriceFromNode;
@@ -66,29 +67,37 @@ const func: DeployFunction = async function () {
   const batchBatches: MintBatch[][] = [];
 
   let currentBatch: MintBatch[] = [];
+  const invalidAddresses: string[] = [];
   for (const batch of batchMints) {
     if (currentBatch.length >= MINT_BATCH_SIZE) {
       batchBatches.push(currentBatch);
       currentBatch = [];
     }
     const {creator, packID, supplies, ipfsHash, rarities, numFTs} = batch;
-    const packIdUsed = await Asset.callStatic.isPackIdUsed(
-      creator,
-      packID,
-      numFTs
-    );
-    if (!packIdUsed) {
-      currentBatch.push({
+
+    // Check addresses pulled from The Graph in case any are invalid
+    if (ethers.utils.isAddress(creator)) {
+      const packIdUsed = await Asset.callStatic.isPackIdUsed(
         creator,
         packID,
-        ipfsHash,
-        supplies,
-        rarities,
-      });
-    } else {
-      console.log(
-        `creator (${creator}) packID ${packID} numFTs ${numFTs} already minted`
+        numFTs
       );
+      if (!packIdUsed) {
+        currentBatch.push({
+          creator,
+          packID,
+          ipfsHash,
+          supplies,
+          rarities,
+        });
+      } else {
+        console.log(
+          `creator (${creator}) packID ${packID} numFTs ${numFTs} already minted`
+        );
+      }
+    } else {
+      invalidAddresses.push(creator);
+      console.log(`creator (${creator}) is an invalid address, skipping`);
     }
   }
   if (currentBatch.length > 0) {
@@ -97,10 +106,35 @@ const func: DeployFunction = async function () {
 
   console.log({batchBatches: batchBatches.length});
 
+  let currentBouncerAdmin;
+  try {
+    currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
+  } catch (e) {
+    // no admin
+  }
+
+  // Add DeployerBatch as bouncer
+  let isBouncer;
+  try {
+    isBouncer = await read('Asset', 'isBouncer', DeployerBatch.address);
+  } catch (e) {
+    // error
+  }
+  if (!isBouncer && currentBouncerAdmin) {
+    await execute(
+      'Asset',
+      {from: currentBouncerAdmin, log: true},
+      'setBouncer',
+      DeployerBatch.address,
+      true
+    );
+  }
+
   for (const batchBatch of batchBatches) {
     const datas = [];
     for (const batch of batchBatch) {
       const {creator, packID, supplies, ipfsHash, rarities} = batch;
+
       const raritiesPack = generateRaritiesPack(rarities);
       const {data} = await Asset.populateTransaction.mintMultiple(
         creator,
@@ -199,6 +233,9 @@ const func: DeployFunction = async function () {
       console.log(`extracting`, datas.length);
     }
   }
+  fs.outputJSONSync('tmp/invalid_creator_addresses_from_snapshot.json', {
+    invalidAddresses,
+  });
 };
 export default func;
 
