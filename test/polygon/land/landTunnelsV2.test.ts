@@ -4,7 +4,6 @@ import {setupLandTunnelV2} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
 
 describe('PolygonLand', function () {
   describe('Land <> PolygonLand: Transfer', function () {
@@ -2140,7 +2139,7 @@ describe('PolygonLand', function () {
 
         const abiCoder = new AbiCoder();
 
-        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+        await deployer.MockLandTunnelV2.receiveMessage(
           abiCoder.encode(
             ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
             [landHolder.address, [12], [x], [y], bytes]
