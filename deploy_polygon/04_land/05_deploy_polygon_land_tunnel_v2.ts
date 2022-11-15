@@ -1,7 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {constants} from 'ethers';
-import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -36,16 +35,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  const LandTunnelV2 = await hre.companionNetworks['l1'].deployments.getOrNull(
-    'LandTunnelV2'
-  );
+
+  const deploymentsL1 = hre.companionNetworks['l1'].deployments;
+  const LandTunnelV2 = await deploymentsL1.getOrNull('LandTunnelV2');
+
+  const Land = await deploymentsL1.getOrNull('Land');
   // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l1'
   ].getNamedAccounts();
 
   if (LandTunnelV2) {
-    const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
+    const fxChildTunnel = await deploymentsL1.read(
       'LandTunnelV2',
       'fxChildTunnel'
     );
@@ -53,7 +54,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       fxChildTunnel !== PolygonLandTunnelV2.address &&
       fxChildTunnel == constants.AddressZero
     ) {
-      await hre.companionNetworks['l1'].deployments.execute(
+      await deploymentsL1.execute(
         'LandTunnelV2',
         {from: deployerOnL1, log: true},
         'setFxChildTunnel',
@@ -82,6 +83,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!isMinter) {
     const admin = await read('PolygonLand', 'getAdmin');
+
     await catchUnknownSigner(
       execute(
         'PolygonLand',
@@ -92,9 +94,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       )
     );
   }
+
+  if (Land && LandTunnelV2) {
+    const isMinter = await deploymentsL1.read(
+      'Land',
+      'isMinter',
+      LandTunnelV2.address
+    );
+
+    const admin = await deploymentsL1.read('Land', 'getAdmin');
+
+    if (!isMinter) {
+      await deploymentsL1.execute(
+        'Land',
+        {from: admin},
+        'setMinter',
+        LandTunnelV2.address,
+        true
+      );
+    }
+  }
 };
 
 export default func;
 func.tags = ['PolygonLandTunnelV2', 'PolygonLandTunnelV2_deploy', 'L2'];
 func.dependencies = ['PolygonLand', 'FXCHILD'];
-func.skip = skipUnlessTest;

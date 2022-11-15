@@ -44,7 +44,7 @@ export const periodicSetup = withSnapshot([], async function (hre) {
 });
 
 export const twoPeriodsSetup = withSnapshot([], async function (hre) {
-  const contractName = 'TwoPeriodsRewardCalculator';
+  const contractName = 'TwoPeriodsRewardCalculatorV2';
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
   const [

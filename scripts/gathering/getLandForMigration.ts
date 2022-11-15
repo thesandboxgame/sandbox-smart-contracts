@@ -18,7 +18,10 @@ const gridSize = new BN(408);
 
 function tokenIdToMapCoords(
   topCornerId: BN
-): {coordinateX: string; coordinateY: string} {
+): {
+  coordinateX: string;
+  coordinateY: string;
+} {
   const id = new BN(topCornerId.toString());
   const coordinateX = id
     .mod(gridSize) // x = id % 408

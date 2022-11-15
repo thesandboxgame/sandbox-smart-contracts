@@ -54,14 +54,18 @@ describe('PolygonSand.sol Meta TX', function () {
       const preAllowance = BigNumber.from(
         await fixtures.sand.allowance(sandBeneficiary, users[0])
       );
-      fixtures.sandBeneficiary.sand.approve(users[0], amount);
+      await fixtures.sandBeneficiary.sand.approve(users[0], amount);
       expect(
         await fixtures.sand.allowance(
           fixtures.sandBeneficiary.address,
           users[0]
         )
       ).to.be.equal(preAllowance.add(amount));
-      fixtures.users[0].sand.transferFrom(sandBeneficiary, users[0], amount);
+      await fixtures.users[0].sand.transferFrom(
+        sandBeneficiary,
+        users[0],
+        amount
+      );
       expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         preBalance.add(amount)
       );

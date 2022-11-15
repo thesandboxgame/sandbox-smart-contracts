@@ -3,13 +3,19 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "./WithSuperOperatorsV2.sol";
-import "../interfaces/IERC721MandatoryTokenReceiver.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {
+    IERC721ReceiverUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {WithSuperOperatorsV2} from "./WithSuperOperatorsV2.sol";
+import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
+/// @title ERC721BaseTokenV2
+/// @author The Sandbox
+/// @notice Basic functionalities of a NFT
+/// @dev ERC721 implementation that supports meta-transactions and super operators
 contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2 {
     using AddressUpgradeable for address;
 
@@ -25,6 +31,11 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     uint256 internal constant BURNED_FLAG = (2**160);
 
     mapping(address => uint256) internal _numNFTPerAddress;
+    /**
+     * @dev mapping to store owner of lands and quads.
+     * For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved.
+     * For burned 1x1 Land 160 bit is set to 1.
+     */
     mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
@@ -32,7 +43,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
-    function approve(address operator, uint256 id) external override {
+    function approve(address operator, uint256 id) public virtual override {
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
@@ -52,7 +63,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address sender,
         address operator,
         uint256 id
-    ) external {
+    ) public virtual {
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
@@ -74,7 +85,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address from,
         address to,
         uint256 id
-    ) external override {
+    ) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
@@ -83,14 +94,14 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     }
 
     /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer.
-    /// @param from The send of the token.
+    /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param id The id of the token.
     function safeTransferFrom(
         address from,
         address to,
         uint256 id
-    ) external override {
+    ) public virtual override {
         safeTransferFrom(from, to, id, "");
     }
 
@@ -119,7 +130,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external {
+    ) external virtual {
         _batchTransferFrom(from, to, ids, data, true);
     }
 
@@ -131,7 +142,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address sender,
         address operator,
         bool approved
-    ) external {
+    ) public virtual {
         require(sender != address(0), "Invalid sender address");
         address msgSender = _msgSender();
         require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
@@ -142,7 +153,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
     /// @param operator The address receiving the approval.
     /// @param approved The determination of the approval.
-    function setApprovalForAll(address operator, bool approved) external override {
+    function setApprovalForAll(address operator, bool approved) public virtual override {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
@@ -152,7 +163,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         _burn(_msgSender(), _ownerOf(id), id);
     }
 
-    /// @notice Burn token`id` from `from`.
+    /// @notice Burn token `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external virtual {
@@ -202,7 +213,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @param owner The address of the owner.
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
-    function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
+    function isApprovedForAll(address owner, address operator) external view override returns (bool) {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
@@ -216,7 +227,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address to,
         uint256 id,
         bytes memory data
-    ) public override {
+    ) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
@@ -352,7 +363,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @dev Check if receiving contract accepts erc721 transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
-    /// @param to The adddress we want to transfer to.
+    /// @param to The address we want to transfer to.
     /// @param tokenId The id of the token we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
     /// @return Whether the expected value of 0x150b7a02 is returned.
@@ -370,7 +381,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @dev Check if receiving contract accepts erc721 batch transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
-    /// @param to The adddress we want to transfer to.
+    /// @param to The address we want to transfer to.
     /// @param ids The ids of the tokens we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
     /// @return Whether the expected value of 0x4b808c46 is returned.
@@ -415,14 +426,13 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
 
     /// @dev Check whether a transfer is a meta Transaction or not.
     /// @param from The address who initiated the transfer (may differ from msg.sender).
-    /// @param to The address recieving the token.
+    /// @param to The address receiving the token.
     /// @param id The token being transferred.
-    /// @return isMetaTx Whether or not the transaction is a MetaTx.
     function _checkTransfer(
         address from,
         address to,
         uint256 id
-    ) internal view returns (bool isMetaTx) {
+    ) internal view {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -435,7 +445,6 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
                 (operatorEnabled && _operators[id] == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
-        return true;
     }
 
     /// @dev Check if there was enough gas.

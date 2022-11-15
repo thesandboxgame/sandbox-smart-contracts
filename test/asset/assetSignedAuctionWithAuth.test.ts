@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, config} from 'hardhat';
 import {
   assetFixtures,
   assetSignedAuctionFixtures,
@@ -772,7 +772,18 @@ describe('assetSignedAuctionWithAuth', function () {
       },
     ]);
 
-    const wrongBackendSig = new ethers.Wallet(users[0].address);
+    // eslint-disable-next-line
+    const accounts: any = config.networks.hardhat.accounts;
+    const index = 5;
+    const wallet = ethers.Wallet.fromMnemonic(
+      accounts.mnemonic,
+      accounts.path + `/${index}`
+    );
+
+    expect(wallet.address).to.be.equal(users[0].address);
+
+    const privateKey = wallet.privateKey;
+    const wrongBackendSig = new ethers.Wallet(privateKey);
 
     const backendSignature = await signAuthMessageAs(
       wrongBackendSig,

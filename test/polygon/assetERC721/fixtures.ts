@@ -4,7 +4,13 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {withSnapshot, setupUsers, setupUser} from '../../utils';
+import {
+  withSnapshot,
+  setupUsers,
+  setupUser,
+  expectEventWithArgs,
+  expectEventWithArgsFromReceipt,
+} from '../../utils';
 import {Contract} from 'ethers';
 
 const name = `The Sandbox's ASSETs ERC721`;
@@ -16,84 +22,94 @@ const symbol = 'ASSETERC721';
 // We also want to be able to have batch transfer functionality.
 // Minting with metadata must be implemented to retain the metadata hash.
 
-export const setupAssetERC721Test = withSnapshot([], async function () {
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const [
-    trustedForwarder,
-    adminRole,
-    minter,
-    other,
-    dest,
-  ] = await getUnnamedAccounts();
+export const setupAssetERC721Test = withSnapshot(
+  ['operatorFilterSubscription'],
+  async function () {
+    const {deployer, upgradeAdmin} = await getNamedAccounts();
+    const [
+      trustedForwarder,
+      adminRole,
+      minter,
+      other,
+      dest,
+    ] = await getUnnamedAccounts();
+    const OperatorFilterSubscription = await deployments.get(
+      'OperatorFilterSubscription'
+    );
 
-  await deployments.deploy('PolygonAssetERC721', {
-    from: deployer,
-    proxy: {
-      owner: upgradeAdmin,
-      proxyContract: 'OptimizedTransparentProxy',
-      execute: {
-        methodName: 'initialize',
-        args: [trustedForwarder, adminRole],
+    await deployments.deploy('PolygonAssetERC721', {
+      from: deployer,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [
+            trustedForwarder,
+            adminRole,
+            OperatorFilterSubscription.address,
+          ],
+        },
       },
-    },
-  });
-  const polygonAssetERC721 = await ethers.getContract(
-    'PolygonAssetERC721',
-    deployer
-  );
-  const polygonAssetERC721AsAdmin = await ethers.getContract(
-    'PolygonAssetERC721',
-    adminRole
-  );
-
-  // Grant roles
-  const minterRole = await polygonAssetERC721.MINTER_ROLE();
-  await polygonAssetERC721AsAdmin.grantRole(minterRole, minter);
-  const polygonAssetERC721AsMinter = await ethers.getContract(
-    'PolygonAssetERC721',
-    minter
-  );
-  const polygonAssetERC721AsOther = await ethers.getContract(
-    'PolygonAssetERC721',
-    other
-  );
-  const polygonAssetERC721AsTrustedForwarder = await ethers.getContract(
-    'PolygonAssetERC721',
-    trustedForwarder
-  );
-
-  const addMinter = async function (
-    adminRole: string,
-    assetERC721: Contract,
-    addr: string
-  ): Promise<void> {
-    const assetERC721AsAdmin = await ethers.getContract(
-      'AssetERC721',
+    });
+    const polygonAssetERC721 = await ethers.getContract(
+      'PolygonAssetERC721',
+      deployer
+    );
+    const polygonAssetERC721AsAdmin = await ethers.getContract(
+      'PolygonAssetERC721',
       adminRole
     );
-    const minterRole = await assetERC721.MINTER_ROLE();
-    await assetERC721AsAdmin.grantRole(minterRole, addr);
-  };
 
-  return {
-    symbol,
-    name,
-    polygonAssetERC721,
-    polygonAssetERC721AsAdmin,
-    polygonAssetERC721AsMinter,
-    polygonAssetERC721AsOther,
-    deployer,
-    upgradeAdmin,
-    trustedForwarder,
-    polygonAssetERC721AsTrustedForwarder,
-    adminRole,
-    minterRole,
-    minter,
-    other,
-    dest,
-    addMinter,
-  };
-});
+    // Grant roles
+    const minterRole = await polygonAssetERC721.MINTER_ROLE();
+    await polygonAssetERC721AsAdmin.grantRole(minterRole, minter);
+    const polygonAssetERC721AsMinter = await ethers.getContract(
+      'PolygonAssetERC721',
+      minter
+    );
+    const polygonAssetERC721AsOther = await ethers.getContract(
+      'PolygonAssetERC721',
+      other
+    );
+    const polygonAssetERC721AsTrustedForwarder = await ethers.getContract(
+      'PolygonAssetERC721',
+      trustedForwarder
+    );
+
+    const addMinter = async function (
+      adminRole: string,
+      assetERC721: Contract,
+      addr: string
+    ): Promise<void> {
+      const assetERC721AsAdmin = await ethers.getContract(
+        'AssetERC721',
+        adminRole
+      );
+      const minterRole = await assetERC721.MINTER_ROLE();
+      await assetERC721AsAdmin.grantRole(minterRole, addr);
+    };
+
+    return {
+      symbol,
+      name,
+      polygonAssetERC721,
+      polygonAssetERC721AsAdmin,
+      polygonAssetERC721AsMinter,
+      polygonAssetERC721AsOther,
+      deployer,
+      upgradeAdmin,
+      trustedForwarder,
+      polygonAssetERC721AsTrustedForwarder,
+      adminRole,
+      minterRole,
+      minter,
+      other,
+      dest,
+      addMinter,
+    };
+  }
+);
 
 // For AssetERC721Tunnel there is not a function called `setPolygonAssetERC721Tunnel` (as is the case for LAND).
 // Instead, the AssetERC721 contract and the PolygonAssetERC721 contract are setup to grant MINTER_ROLE to the relevant tunnel address.
@@ -244,6 +260,222 @@ export const setupAssetERC721Tunnels = deployments.createFixture(
       l1PredicateAsMinter,
       l2PredicateAsMinter,
       upgradeAdmin,
+    };
+  }
+);
+
+export const setupOperatorFilter = withSnapshot(
+  ['operatorFilterSubscription', 'TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'],
+  async function () {
+    const defaultSubscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
+    const ipfsHashString =
+      '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
+
+    const {
+      deployer,
+      upgradeAdmin,
+      assetAdmin,
+      assetBouncerAdmin,
+    } = await getNamedAccounts();
+
+    const otherAccounts = await getUnnamedAccounts();
+
+    const {deploy} = deployments;
+
+    await deploy('MockMarketPlace1', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    await deploy('MockMarketPlace2', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    await deploy('MockMarketPlace3', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    await deploy('MockMarketPlace4', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    const mockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
+    const mockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
+    const mockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
+    const mockMarketPlace4 = await ethers.getContract('MockMarketPlace4');
+
+    await deploy('MockOperatorFilterRegistry', {
+      from: deployer,
+      args: [
+        defaultSubscription,
+        [mockMarketPlace1.address, mockMarketPlace2.address],
+      ],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+    const operatorFilterRegistry = await ethers.getContract(
+      'MockOperatorFilterRegistry'
+    );
+
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+    const operatorFilterSubscription = await deployments.get(
+      'OperatorFilterSubscription'
+    );
+
+    const operatorFilterRegistryAsOwner = await operatorFilterRegistry.connect(
+      await ethers.getSigner(deployer)
+    );
+    await operatorFilterRegistryAsOwner.registerAndCopyEntries(
+      operatorFilterSubscription.address,
+      defaultSubscription
+    );
+
+    await deployments.deploy('MockPolygonAssetERC721', {
+      from: deployer,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [
+            TRUSTED_FORWARDER.address,
+            assetAdmin,
+            operatorFilterSubscription.address,
+          ],
+        },
+      },
+    });
+
+    const polygonAssetERC721 = await ethers.getContract(
+      'MockPolygonAssetERC721'
+    );
+
+    const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
+      from: deployer,
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    const assetHelperLib = await deploy('AssetHelper', {
+      from: deployer,
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
+
+    const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
+
+    await deploy('MockPolygonAssetERC1155', {
+      from: deployer,
+      libraries: {
+        ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
+        AssetHelper: assetHelperLib.address,
+      },
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [
+            TRUSTED_FORWARDER.address,
+            assetAdmin,
+            assetBouncerAdmin,
+            CHILD_CHAIN_MANAGER.address,
+            polygonAssetERC721.address,
+            1,
+            operatorFilterSubscription.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
+      log: true,
+    });
+
+    const polygonAssetERC1155 = await ethers.getContract(
+      'MockPolygonAssetERC1155'
+    );
+
+    async function mintAssetERC1155(
+      creator: string,
+      packId: number,
+      hash: string,
+      amount: number,
+      owner: string
+    ) {
+      const receipt = await polygonAssetERC1155.mintWithOutBouncerCheck(
+        creator,
+        packId,
+        hash,
+        amount,
+        owner,
+        '0x'
+      );
+
+      const transferEvent = await expectEventWithArgs(
+        polygonAssetERC1155,
+        receipt,
+        'TransferSingle'
+      );
+      const tokenId = transferEvent.args[3];
+      return tokenId;
+    }
+
+    async function mintAssetERC721(to: string, id: number) {
+      const receipt = await polygonAssetERC721.mintWithOutMinterCheck(to, id);
+      const event = await expectEventWithArgsFromReceipt(
+        polygonAssetERC721,
+        receipt,
+        'Transfer'
+      );
+      const tokenId = event.args[2];
+      return {receipt, tokenId};
+    }
+
+    const users = await setupUsers(otherAccounts, {
+      polygonAssetERC721,
+      polygonAssetERC1155,
+    });
+
+    await polygonAssetERC1155.setOperatorRegistry(
+      operatorFilterRegistry.address
+    );
+
+    await polygonAssetERC721.setOperatorRegistry(
+      operatorFilterRegistry.address
+    );
+
+    await polygonAssetERC1155.registerAndSubscribe(
+      operatorFilterSubscription.address
+    );
+
+    await polygonAssetERC721.registerAndSubscribe(
+      operatorFilterSubscription.address
+    );
+
+    return {
+      mockMarketPlace1,
+      mockMarketPlace2,
+      mockMarketPlace3,
+      mockMarketPlace4,
+      operatorFilterRegistry,
+      operatorFilterRegistryAsOwner,
+      operatorFilterSubscription,
+      polygonAssetERC721,
+      polygonAssetERC1155,
+      ipfsHashString,
+      users,
+      mintAssetERC1155,
+      mintAssetERC721,
     };
   }
 );

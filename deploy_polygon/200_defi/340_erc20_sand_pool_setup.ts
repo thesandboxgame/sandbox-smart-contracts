@@ -6,20 +6,20 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, ethers} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
-  const rewardsCalculator = await deployments.get('ERC20RewardCalculator');
-  const contributionRules = await deployments.get('ContributionRules');
+  const rewardsCalculator = await deployments.get('ERC20RewardCalculatorV2');
+  const contributionRules = await deployments.get('ContributionRulesV2');
 
   const rewardsCalculatorAddress = await deployments.read(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     'rewardCalculator'
   );
 
   const contributionRulesAddress = await deployments.read(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     'contributionRules'
   );
 
-  const sandPool = await ethers.getContract('ERC20RewardPool');
+  const sandPool = await ethers.getContract('ERC20RewardPoolV2');
 
   // get currentAdmin
   const currentAdmin = await sandPool.owner();
@@ -31,7 +31,7 @@ const func: DeployFunction = async function (
   ) {
     await deployments.catchUnknownSigner(
       deployments.execute(
-        'ERC20RewardPool',
+        'ERC20RewardPoolV2',
         {from: currentAdmin, log: true},
         'setRewardCalculator',
         rewardsCalculator.address,
@@ -47,7 +47,7 @@ const func: DeployFunction = async function (
   ) {
     await deployments.catchUnknownSigner(
       deployments.execute(
-        'ERC20RewardPool',
+        'ERC20RewardPoolV2',
         {from: currentAdmin, log: true},
         'setContributionRules',
         contributionRules.address
@@ -57,7 +57,7 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const isTrustedForwarder = await read(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     'isTrustedForwarder',
     TRUSTED_FORWARDER_V2.address
   );
@@ -65,7 +65,7 @@ const func: DeployFunction = async function (
     console.log('Setting TRUSTED_FORWARDER_V2 as trusted forwarder');
     await catchUnknownSigner(
       execute(
-        'ERC20RewardPool',
+        'ERC20RewardPoolV2',
         {from: currentAdmin, log: true},
         'setTrustedForwarder',
         TRUSTED_FORWARDER_V2.address

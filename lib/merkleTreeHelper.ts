@@ -260,7 +260,7 @@ function saltMultiClaim(
             .update(
               calculateMultiClaimHash(
                 claim,
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
+                '0x' + crypto.randomBytes(32).toString('hex')
               )
             )
             .digest('hex'),

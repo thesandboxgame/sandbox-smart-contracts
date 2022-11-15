@@ -348,7 +348,6 @@ describe('PolygonLand', function () {
           [y],
           bytes
         );
-        // .to.be.revertedWith('Exceeds max allowed quads');
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(plotCount);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
@@ -1729,7 +1728,7 @@ describe('PolygonLand', function () {
           trustedForwarder,
           data,
           landHolder.address,
-          '2000000'
+          '1000000000'
         );
 
         console.log('DUMMY CHECKPOINT. moving on...');

@@ -15,6 +15,7 @@ contract TestERC1155ERC721TokenReceiver {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
+    bytes4 private constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
 
     constructor(
         address _tokenContract,
@@ -76,7 +77,7 @@ contract TestERC1155ERC721TokenReceiver {
         pure
         returns (bool)
     {
-        return _interfaceId == 0x01ffc9a7 || _interfaceId == 0x4e2312e0;
+        return _interfaceId == 0x01ffc9a7 || _interfaceId == 0x4e2312e0 || _interfaceId == 0x5e8bf644;
     }
 
     function onERC1155BatchReceived(
@@ -93,6 +94,24 @@ contract TestERC1155ERC721TokenReceiver {
         require(allowBatchTokensReceived, "Receive not allowed");
         if (returnCorrectBytesOnBatch) {
             return ERC1155_BATCH_RECEIVED;
+        } else {
+            return 0x150b7a03;
+        }
+    }
+
+    function onERC721BatchReceived(
+        address, // operator,
+        address, // from,
+        uint256[] memory ids,
+        bytes memory // data
+    ) public returns (bytes4) {
+        require(
+            address(tokenContract) == msg.sender,
+            "only accept tokenContract as sender"
+        );
+        require(allowBatchTokensReceived, "Receive not allowed");
+        if (returnCorrectBytes) {
+            return _ERC721_BATCH_RECEIVED;
         } else {
             return 0x150b7a03;
         }
@@ -128,5 +147,13 @@ contract TestERC1155ERC721TokenReceiver {
     }
     function rejectBatchTokens() public onlyOwner {
         allowBatchTokensReceived = false;
+    }
+
+    function returnRightBytes() public onlyOwner {
+        returnCorrectBytes = true;
+    }
+
+    function returnWrongBytes() public onlyOwner {
+        returnCorrectBytes = false;
     }
 }

@@ -1,0 +1,310 @@
+{
+  "address": "0x27633EdC9D5fac08c80eecEDf4Ac1Bd0Da502bBF",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_landToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_newLandTunnel",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_oldLandTunnel",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_admin",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldLandTunnel",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newLandTunnel",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "TunnelLandsMigrated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldLandTunnel",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newLandTunnel",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "sizes",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "x",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "y",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "TunnelQuadsMigrated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "landToken",
+      "outputs": [
+        {
+          "internalType": "contract ILandToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "migrateLandsToTunnel",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "sizes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "x",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "y",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "migrateQuadsToTunnel",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "newLandTunnel",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "oldLandTunnel",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x0d0be28b1e187ec4cb7885edd741920000a849c73ea8c868dcd100a96a7ca55e",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x27633EdC9D5fac08c80eecEDf4Ac1Bd0Da502bBF",
+    "transactionIndex": 43,
+    "gasUsed": "577759",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x6f8b9cb6cf417597358b62610daadb3a1bdbb7d3a98bbcc0fa5ab0bec2c18a41",
+    "transactionHash": "0x0d0be28b1e187ec4cb7885edd741920000a849c73ea8c868dcd100a96a7ca55e",
+    "logs": [],
+    "blockNumber": 8524429,
+    "cumulativeGasUsed": "5768138",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x2758cD3703De78d11b4c05FcBe840BB824c80F00",
+    "0x136867B23064dc10A26F07eF999c0F74737618E0",
+    "0x13bF13A0768D56DAC0309EF991149F7E8C574580",
+    "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e"
+  ],
+  "numDeployments": 2,
+  "solcInputHash": "0bda727934a1d0a23f0d0298b7a388fc",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_landToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newLandTunnel\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_oldLandTunnel\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_admin\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldLandTunnel\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newLandTunnel\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"}],\"name\":\"TunnelLandsMigrated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldLandTunnel\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newLandTunnel\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"sizes\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"x\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"y\",\"type\":\"uint256[]\"}],\"name\":\"TunnelQuadsMigrated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"landToken\",\"outputs\":[{\"internalType\":\"contract ILandToken\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"}],\"name\":\"migrateLandsToTunnel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"sizes\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"x\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"y\",\"type\":\"uint256[]\"}],\"name\":\"migrateQuadsToTunnel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"newLandTunnel\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"oldLandTunnel\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"changeAdmin(address)\":{\"params\":{\"_newAdmin\":\"the new admin to be set\"}},\"migrateLandsToTunnel(uint256[])\":{\"details\":\"Transfers all the passed land ids from the old land tunnel to the new land tunnel\",\"params\":{\"ids\":\"of land tokens to be migrated\"}},\"migrateQuadsToTunnel(uint256[],uint256[],uint256[])\":{\"details\":\"Transfers all the passed quads from the old land tunnel to the new land tunnel\",\"params\":{\"sizes\":\"of land quads to be migrated\",\"x\":\"coordinate of land quads to be migrated\",\"y\":\"coordinate of land quads to be migrated\"}}},\"title\":\"Tunnel migration on L1\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"changeAdmin(address)\":{\"notice\":\"changes admin to new admin\"},\"migrateLandsToTunnel(uint256[])\":{\"notice\":\"This method needs super operator role to execute\"},\"migrateQuadsToTunnel(uint256[],uint256[],uint256[])\":{\"notice\":\"This method needs super operator role to execute\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/polygon/root/land/LandTunnelMigration.sol\":\"LandTunnelMigration\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"src/solc_0.8/common/interfaces/ILandToken.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface ILandToken {\\n    function batchTransferQuad(\\n        address from,\\n        address to,\\n        uint256[] calldata sizes,\\n        uint256[] calldata xs,\\n        uint256[] calldata ys,\\n        bytes calldata data\\n    ) external;\\n\\n    function transferQuad(\\n        address from,\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes calldata data\\n    ) external;\\n\\n    function batchTransferFrom(\\n        address from,\\n        address to,\\n        uint256[] calldata ids,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0xf1cb108c7274c973356adedb18230b18bdad992b946e0921cc3ebed04f59c92e\",\"license\":\"MIT\"},\"src/solc_0.8/polygon/root/land/LandTunnelMigration.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"../../../common/interfaces/ILandToken.sol\\\";\\n\\n/// @title Tunnel migration on L1\\ncontract LandTunnelMigration {\\n    uint256 private constant GRID_SIZE = 408;\\n\\n    ILandToken public landToken;\\n    address public newLandTunnel;\\n    address public oldLandTunnel;\\n    address private admin;\\n\\n    event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);\\n    event TunnelQuadsMigrated(\\n        address indexed oldLandTunnel,\\n        address indexed newLandTunnel,\\n        uint256[] sizes,\\n        uint256[] x,\\n        uint256[] y\\n    );\\n    event AdminChanged(address _newAdmin);\\n\\n    modifier isAdmin() {\\n        require(admin == msg.sender, \\\"!AUTHORISED\\\");\\n        _;\\n    }\\n\\n    /// @notice changes admin to new admin\\n    /// @param _newAdmin the new admin to be set\\n    function changeAdmin(address _newAdmin) external isAdmin {\\n        admin = _newAdmin;\\n        emit AdminChanged(_newAdmin);\\n    }\\n\\n    constructor(\\n        address _landToken,\\n        address _newLandTunnel,\\n        address _oldLandTunnel,\\n        address _admin\\n    ) {\\n        admin = _admin;\\n        landToken = ILandToken(_landToken);\\n        newLandTunnel = _newLandTunnel;\\n        oldLandTunnel = _oldLandTunnel;\\n    }\\n\\n    /// @dev Transfers all the passed land ids from the old land tunnel to the new land tunnel\\n    /// @notice This method needs super operator role to execute\\n    /// @param ids of land tokens to be migrated\\n    function migrateLandsToTunnel(uint256[] memory ids) external isAdmin {\\n        landToken.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, \\\"0x\\\");\\n        emit TunnelLandsMigrated(oldLandTunnel, newLandTunnel, ids);\\n    }\\n\\n    /// @dev Transfers all the passed quads from the old land tunnel to the new land tunnel\\n    /// @notice This method needs super operator role to execute\\n    /// @param sizes of land quads to be migrated\\n    /// @param x coordinate of land quads to be migrated\\n    /// @param y coordinate of land quads to be migrated\\n    function migrateQuadsToTunnel(\\n        uint256[] memory sizes,\\n        uint256[] memory x,\\n        uint256[] memory y\\n    ) external isAdmin {\\n        landToken.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, \\\"0x\\\");\\n        emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);\\n    }\\n}\\n\",\"keccak256\":\"0x887bb49fa40aeaf31b08aa31d54c4344d5da9fa5adda3c52e715a9a39d345693\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516108d33803806108d383398101604081905261002f9161009b565b600380546001600160a01b03199081166001600160a01b039384161790915560008054821695831695909517909455600180548516938216939093179092556002805490931691161790556100ee565b80516001600160a01b038116811461009657600080fd5b919050565b600080600080608085870312156100b0578384fd5b6100b98561007f565b93506100c76020860161007f565b92506100d56040860161007f565b91506100e36060860161007f565b905092959194509250565b6107d6806100fd6000396000f3fe608060405234801561001057600080fd5b50600436106100725760003560e01c80638f283970116100505780638f283970146100ce578063b44468fb146100e1578063ebe94834146100f457610072565b80633b2fd4581461007757806376926076146100a657806386f47792146100bb575b600080fd5b60015461008a906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100b96100b4366004610529565b610107565b005b60025461008a906001600160a01b031681565b6100b96100dc3660046104fb565b61023e565b60005461008a906001600160a01b031681565b6100b9610102366004610564565b610304565b6003546001600160a01b031633146101665760405162461bcd60e51b815260206004820152600b60248201527f21415554484f524953454400000000000000000000000000000000000000000060448201526064015b60405180910390fd5b6000546002546001546040517f15ddc5350000000000000000000000000000000000000000000000000000000081526001600160a01b03938416936315ddc535936101bc939082169291169086906004016106b8565b600060405180830381600087803b1580156101d657600080fd5b505af11580156101ea573d6000803e3d6000fd5b50506001546002546040516001600160a01b039283169450911691507ff3c8a06d9bf1d976109b76dbbd7e869f76aa4af071573fe465e2b3b8f5b421f490610233908590610725565b60405180910390a350565b6003546001600160a01b031633146102985760405162461bcd60e51b815260206004820152600b60248201527f21415554484f5249534544000000000000000000000000000000000000000000604482015260640161015d565b600380547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0383169081179091556040519081527f7ce7ec0b50378fb6c0186ffb5f48325f6593fcb4ca4386f21861af3129188f5c9060200160405180910390a150565b6003546001600160a01b0316331461035e5760405162461bcd60e51b815260206004820152600b60248201527f21415554484f5249534544000000000000000000000000000000000000000000604482015260640161015d565b6000546002546001546040517feaa5e0670000000000000000000000000000000000000000000000000000000081526001600160a01b039384169363eaa5e067936103b89390821692911690889088908890600401610622565b600060405180830381600087803b1580156103d257600080fd5b505af11580156103e6573d6000803e3d6000fd5b50506001546002546040516001600160a01b039283169450911691507f5925ea9cd1b8a825a990df684ca7e1da5ce4c4dfbc2271a8470b8f2a31dcc1279061043390879087908790610738565b60405180910390a3505050565b600082601f830112610450578081fd5b8135602067ffffffffffffffff8083111561046d5761046d610771565b8183026040517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f830116810181811084821117156104af576104af610771565b604052848152838101925086840182880185018910156104cd578687fd5b8692505b858310156104ef5780358452928401926001929092019184016104d1565b50979650505050505050565b60006020828403121561050c578081fd5b81356001600160a01b0381168114610522578182fd5b9392505050565b60006020828403121561053a578081fd5b813567ffffffffffffffff811115610550578182fd5b61055c84828501610440565b949350505050565b600080600060608486031215610578578182fd5b833567ffffffffffffffff8082111561058f578384fd5b61059b87838801610440565b945060208601359150808211156105b0578384fd5b6105bc87838801610440565b935060408601359150808211156105d1578283fd5b506105de86828701610440565b9150509250925092565b6000815180845260208085019450808401835b83811015610617578151875295820195908201906001016105fb565b509495945050505050565b60006001600160a01b03808816835280871660208401525060c0604083015261064e60c08301866105e8565b828103606084015261066081866105e8565b9050828103608084015261067481856105e8565b83810360a0850152600281527f3078000000000000000000000000000000000000000000000000000000000000602082015290506040810198975050505050505050565b60006001600160a01b038086168352808516602084015250608060408301526106e460808301846105e8565b8281036060840152600281527f30780000000000000000000000000000000000000000000000000000000000006020820152604081015b9695505050505050565b60006020825261052260208301846105e8565b60006060825261074b60608301866105e8565b828103602084015261075d81866105e8565b9050828103604084015261071b81856105e8565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fdfea26469706673582212205e5a3973e3380743cbedf396297dcda54c323967e1c121df0513898075da540964736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100725760003560e01c80638f283970116100505780638f283970146100ce578063b44468fb146100e1578063ebe94834146100f457610072565b80633b2fd4581461007757806376926076146100a657806386f47792146100bb575b600080fd5b60015461008a906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100b96100b4366004610529565b610107565b005b60025461008a906001600160a01b031681565b6100b96100dc3660046104fb565b61023e565b60005461008a906001600160a01b031681565b6100b9610102366004610564565b610304565b6003546001600160a01b031633146101665760405162461bcd60e51b815260206004820152600b60248201527f21415554484f524953454400000000000000000000000000000000000000000060448201526064015b60405180910390fd5b6000546002546001546040517f15ddc5350000000000000000000000000000000000000000000000000000000081526001600160a01b03938416936315ddc535936101bc939082169291169086906004016106b8565b600060405180830381600087803b1580156101d657600080fd5b505af11580156101ea573d6000803e3d6000fd5b50506001546002546040516001600160a01b039283169450911691507ff3c8a06d9bf1d976109b76dbbd7e869f76aa4af071573fe465e2b3b8f5b421f490610233908590610725565b60405180910390a350565b6003546001600160a01b031633146102985760405162461bcd60e51b815260206004820152600b60248201527f21415554484f5249534544000000000000000000000000000000000000000000604482015260640161015d565b600380547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0383169081179091556040519081527f7ce7ec0b50378fb6c0186ffb5f48325f6593fcb4ca4386f21861af3129188f5c9060200160405180910390a150565b6003546001600160a01b0316331461035e5760405162461bcd60e51b815260206004820152600b60248201527f21415554484f5249534544000000000000000000000000000000000000000000604482015260640161015d565b6000546002546001546040517feaa5e0670000000000000000000000000000000000000000000000000000000081526001600160a01b039384169363eaa5e067936103b89390821692911690889088908890600401610622565b600060405180830381600087803b1580156103d257600080fd5b505af11580156103e6573d6000803e3d6000fd5b50506001546002546040516001600160a01b039283169450911691507f5925ea9cd1b8a825a990df684ca7e1da5ce4c4dfbc2271a8470b8f2a31dcc1279061043390879087908790610738565b60405180910390a3505050565b600082601f830112610450578081fd5b8135602067ffffffffffffffff8083111561046d5761046d610771565b8183026040517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f830116810181811084821117156104af576104af610771565b604052848152838101925086840182880185018910156104cd578687fd5b8692505b858310156104ef5780358452928401926001929092019184016104d1565b50979650505050505050565b60006020828403121561050c578081fd5b81356001600160a01b0381168114610522578182fd5b9392505050565b60006020828403121561053a578081fd5b813567ffffffffffffffff811115610550578182fd5b61055c84828501610440565b949350505050565b600080600060608486031215610578578182fd5b833567ffffffffffffffff8082111561058f578384fd5b61059b87838801610440565b945060208601359150808211156105b0578384fd5b6105bc87838801610440565b935060408601359150808211156105d1578283fd5b506105de86828701610440565b9150509250925092565b6000815180845260208085019450808401835b83811015610617578151875295820195908201906001016105fb565b509495945050505050565b60006001600160a01b03808816835280871660208401525060c0604083015261064e60c08301866105e8565b828103606084015261066081866105e8565b9050828103608084015261067481856105e8565b83810360a0850152600281527f3078000000000000000000000000000000000000000000000000000000000000602082015290506040810198975050505050505050565b60006001600160a01b038086168352808516602084015250608060408301526106e460808301846105e8565b8281036060840152600281527f30780000000000000000000000000000000000000000000000000000000000006020820152604081015b9695505050505050565b60006020825261052260208301846105e8565b60006060825261074b60608301866105e8565b828103602084015261075d81866105e8565b9050828103604084015261071b81856105e8565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fdfea26469706673582212205e5a3973e3380743cbedf396297dcda54c323967e1c121df0513898075da540964736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "changeAdmin(address)": {
+        "params": {
+          "_newAdmin": "the new admin to be set"
+        }
+      },
+      "migrateLandsToTunnel(uint256[])": {
+        "details": "Transfers all the passed land ids from the old land tunnel to the new land tunnel",
+        "params": {
+          "ids": "of land tokens to be migrated"
+        }
+      },
+      "migrateQuadsToTunnel(uint256[],uint256[],uint256[])": {
+        "details": "Transfers all the passed quads from the old land tunnel to the new land tunnel",
+        "params": {
+          "sizes": "of land quads to be migrated",
+          "x": "coordinate of land quads to be migrated",
+          "y": "coordinate of land quads to be migrated"
+        }
+      }
+    },
+    "title": "Tunnel migration on L1",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "changeAdmin(address)": {
+        "notice": "changes admin to new admin"
+      },
+      "migrateLandsToTunnel(uint256[])": {
+        "notice": "This method needs super operator role to execute"
+      },
+      "migrateQuadsToTunnel(uint256[],uint256[],uint256[])": {
+        "notice": "This method needs super operator role to execute"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 62003,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelMigration.sol:LandTunnelMigration",
+        "label": "landToken",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(ILandToken)41481"
+      },
+      {
+        "astId": 62005,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelMigration.sol:LandTunnelMigration",
+        "label": "newLandTunnel",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      },
+      {
+        "astId": 62007,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelMigration.sol:LandTunnelMigration",
+        "label": "oldLandTunnel",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 62009,
+        "contract": "src/solc_0.8/polygon/root/land/LandTunnelMigration.sol:LandTunnelMigration",
+        "label": "admin",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_contract(ILandToken)41481": {
+        "encoding": "inplace",
+        "label": "contract ILandToken",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}

@@ -14,7 +14,7 @@ const func: DeployFunction = async function (
 
     await deployments.deploy(`${cat.symbol}_RewardCalculator`, {
       from: deployer,
-      contract: 'TwoPeriodsRewardCalculator',
+      contract: 'TwoPeriodsRewardCalculatorV2',
       args: [Pool.address],
       log: true,
       // skipIfAlreadyDeployed: true,
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (
 
     await deployments.deploy(`${gem.symbol}_RewardCalculator`, {
       from: deployer,
-      contract: 'TwoPeriodsRewardCalculator',
+      contract: 'TwoPeriodsRewardCalculatorV2',
       args: [Pool.address],
       log: true,
       // skipIfAlreadyDeployed: true,
