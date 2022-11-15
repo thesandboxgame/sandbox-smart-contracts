@@ -161,6 +161,7 @@ export const setupLandTunnelV2 = deployments.createFixture(async function () {
   await deployer.PolygonLandTunnelV2.setTrustedForwarder(
     trustedForwarder.address
   );
+  await deployer.PolygonLand.setMinter(MockPolygonLandTunnelV2.address, true);
 
   await landAdmin.Land.setMinter(landMinter.address, true);
   await polygonAdmin.PolygonLand.setMinter(landMinter.address, true);

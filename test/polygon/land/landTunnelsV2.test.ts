@@ -4,6 +4,7 @@ import {setupLandTunnelV2} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
+import { ethers } from 'hardhat';
 
 describe('PolygonLand', function () {
   describe('Land <> PolygonLand: Transfer', function () {
@@ -1860,6 +1861,7 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.exists(size, x, y)).to.be.equal(true);
       });
+
       it('should be able to transfer 6x6 Land', async function () {
         const {
           deployer,
@@ -1938,6 +1940,7 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.exists(size, x, y)).to.be.equal(true);
       });
+
       it('should be able to transfer 3x3 Land', async function () {
         const {
           deployer,
@@ -2016,6 +2019,7 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.exists(size, x, y)).to.be.equal(true);
       });
+
       it('should be able to transfer 1x1 Land', async function () {
         const {
           deployer,
@@ -2093,6 +2097,157 @@ describe('PolygonLand', function () {
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.exists(size, x, y)).to.be.equal(true);
+      });
+    });
+    describe("Minting quad on layer 2 with child quad minted on layer 1",function (){
+      it('should be able to transfer 12x12 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+
+
+        // Mint LAND on L1
+
+        await landMinter.Land.mintQuad(landHolder.address, 1, 0, 0, bytes);
+
+        await landMinter.Land.mintQuad(landHolder.address, 3, 6, 0, bytes);
+
+        await landMinter.Land.mintQuad(landHolder.address, 6, 0, 6, bytes);
+
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(46);
+        expect(await Land.exists(12, x, y)).to.be.equal(false);
+
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+
+        const tx = await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [1, 6, 3],
+          [0, 0, 6],
+          [0, 6, 0],
+          bytes
+        );
+        await tx.wait();
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+
+        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [12], [x], [y], bytes]
+          )
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(144);
+
+        expect(await Land.exists(12, x, y)).to.be.equal(true);
+      });
+
+      it('should be able to transfer 6x6 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, 1, 0, 0, bytes);
+
+        await landMinter.Land.mintQuad(landHolder.address, 3, 3, 0, bytes);
+
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(10);
+        expect(await Land.exists(6, x, y)).to.be.equal(false);
+
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+
+
+        const tx = await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [1,3],
+          [0,3],
+          [0,0],
+          bytes
+        );
+        await tx.wait();
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+       
+        await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [6], [x], [y], bytes]
+          )
+        );
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(36);
+        expect(await Land.exists(6, x, y)).to.be.equal(true);
+      });
+
+      it('should be able to transfer 3x3 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, 1, 0, 0, bytes);
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(1);
+        expect(await Land.exists(3, x, y)).to.be.equal(false);
+
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [1],
+          [0],
+          [0],
+          bytes
+        );
+      
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+
+        await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [3], [x], [y], bytes]
+          )
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(9);
+        expect(await Land.exists(3, x, y)).to.be.equal(true);
       });
     });
   });
