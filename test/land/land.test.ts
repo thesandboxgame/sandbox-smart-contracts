@@ -160,7 +160,7 @@ describe('LandV2', function () {
       await contract.burn(tokenId);
 
       await expect(mintQuad(deployer, 1, x, y)).to.be.revertedWith(
-        'Already minted as 3x3'
+        'Already minted'
       );
     });
 
