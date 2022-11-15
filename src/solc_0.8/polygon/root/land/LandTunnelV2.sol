@@ -105,7 +105,7 @@ contract LandTunnelV2 is
         for (uint256 index = 0; index < x.length; index++) {
             if (rootToken.exists(size[index], x[index], y[index]))
                 rootToken.transferQuad(address(this), to, size[index], x[index], y[index], data);
-            else rootToken.mintQuad(to, size[index], x[index], y[index], data);
+            else rootToken.mintAndTransferQuad(to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }
