@@ -7,6 +7,7 @@ import {
   getId,
   zeroAddress,
 } from './fixtures';
+
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
@@ -221,11 +222,11 @@ describe('LandV3', function () {
 
       await expect(
         contract.setMinter(ethers.constants.AddressZero, false)
-      ).to.be.revertedWith('address 0 is not allowed as minter');
+      ).to.be.revertedWith('invalid address');
 
       await expect(
         contract.setMinter(ethers.constants.AddressZero, true)
-      ).to.be.revertedWith('address 0 is not allowed as minter');
+      ).to.be.revertedWith('invalid address');
 
       expect(await landContract.isMinter(ethers.constants.AddressZero)).to.be
         .false;
@@ -242,7 +243,7 @@ describe('LandV3', function () {
       expect(await landContract.isMinter(deployer)).to.be.true;
 
       await expect(contract.setMinter(deployer, true)).to.be.revertedWith(
-        'the status should be different than the current one'
+        'invalid status'
       );
       await expect(contract.setMinter(deployer, false)).not.to.be.reverted;
     });
@@ -256,7 +257,7 @@ describe('LandV3', function () {
       expect(await landContract.isMinter(deployer)).to.be.false;
 
       await expect(contract.setMinter(deployer, false)).to.be.revertedWith(
-        'the status should be different than the current one'
+        'invalid status'
       );
       await expect(contract.setMinter(deployer, true)).not.to.be.reverted;
     });
@@ -413,7 +414,7 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(landAdmin))
           .batchTransferQuad(deployer, landAdmin, [6], [0], [0], '0x')
-      ).to.be.revertedWith('not authorized to transferMultiQuads');
+      ).to.be.revertedWith('not authorized');
     });
 
     it('should revert if signer is not approved', async function () {
@@ -497,7 +498,7 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(deployer))
           .mintAndTransferQuad(deployer, 3, 0, 0, '0x')
-      ).to.be.revertedWith('Only a minter can mint');
+      ).to.be.revertedWith('!AUTHORIZED');
     });
 
     it('should revert when coordinates are wrong', async function () {
@@ -725,7 +726,7 @@ describe('LandV3', function () {
 
       await expect(
         contract.setMetaTransactionProcessor(landAdmin, true)
-      ).to.be.revertedWith('only contracts can be meta transaction processor');
+      ).to.be.revertedWith('only contracts');
     });
 
     it('should only be the admin able to set a meta transaction processor', async function () {
@@ -832,11 +833,11 @@ describe('LandV3', function () {
 
       await expect(
         contract.setSuperOperator(ethers.constants.AddressZero, false)
-      ).to.be.revertedWith('address 0 is not allowed as super operator');
+      ).to.be.revertedWith('address 0 is not allowed');
 
       await expect(
         contract.setSuperOperator(ethers.constants.AddressZero, true)
-      ).to.be.revertedWith('address 0 is not allowed as super operator');
+      ).to.be.revertedWith('address 0 is not allowed');
 
       expect(await landContract.isSuperOperator(ethers.constants.AddressZero))
         .to.be.false;
@@ -852,7 +853,7 @@ describe('LandV3', function () {
       expect(await landContract.isSuperOperator(admin)).to.be.true;
 
       await expect(contract.setSuperOperator(admin, true)).to.be.revertedWith(
-        'the status should be different than the current one'
+        'the status should be different'
       );
       await expect(contract.setSuperOperator(admin, false)).not.to.be.reverted;
     });
@@ -865,7 +866,7 @@ describe('LandV3', function () {
       expect(await landContract.isSuperOperator(admin)).to.be.false;
 
       await expect(contract.setSuperOperator(admin, false)).to.be.revertedWith(
-        'the status should be different than the current one'
+        'the status should be different'
       );
       await expect(contract.setSuperOperator(admin, true)).not.to.be.reverted;
     });
@@ -930,7 +931,7 @@ describe('LandV3', function () {
 
       await deploy('Land', {
         from: deployer,
-        contract: 'LandV3',
+        contract: 'src/solc_0.5/LandV3.sol:LandV3',
         proxy: {
           owner: upgradeAdmin,
           proxyContract: 'OpenZeppelinTransparentProxy',

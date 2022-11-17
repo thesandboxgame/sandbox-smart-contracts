@@ -31,6 +31,7 @@ export function getArgParser(opts?: {
   addArgument(arg: string | string[], options?: any): void;
   addFlag(arg: string | string[], options?: any): void;
   parseArgs(args?: string[], ns?: any): any;
+  printHelp(): void;
 } {
   const parser = new ArgumentParser(opts);
   parser.exit = (status: number, msg: string) => {

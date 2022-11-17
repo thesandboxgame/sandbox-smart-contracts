@@ -37,7 +37,13 @@ export const setupLandOwnersSandRewardPool = withSnapshot(
         'LandOwnersAloneContributionCalculator',
         deployer
       );
-      await deployments.deploy('MockLandWithMint', {from: deployer});
+      const quadLib = await deployments.deploy('QuadLib', {from: deployer});
+      await deployments.deploy('MockLandWithMint', {
+        from: deployer,
+        libraries: {
+          QuadLib: quadLib.address,
+        },
+      });
       const mockLandWithMint = await ethers.getContract(
         'MockLandWithMint',
         deployer
@@ -51,6 +57,7 @@ export const setupLandOwnersSandRewardPool = withSnapshot(
       );
       return {mockLandWithMint, mockLandWithMintAsOther};
     }
+
     return {
       useMockInsteadOfL2Land,
       deployer,

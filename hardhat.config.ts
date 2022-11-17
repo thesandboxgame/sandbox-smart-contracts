@@ -290,6 +290,7 @@ const config: HardhatUserConfig = {
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
     landMigrationBatchExecutor: 'ozdRelayer',
+    mapDesigner: 'sandAdmin',
   },
   networks: {
     /**

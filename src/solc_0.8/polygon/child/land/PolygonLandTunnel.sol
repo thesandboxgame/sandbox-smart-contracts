@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
-import "./PolygonLandBaseToken.sol";
 
 /// @title LAND bridge on L2
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {

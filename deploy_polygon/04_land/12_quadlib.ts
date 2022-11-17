@@ -1,18 +1,18 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestOrL2} from '../../utils/network';
+import {skipUnlessL2} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
-
-  await deploy('MockLandV2WithMint', {
+  await deployments.deploy('QuadLib', {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
+
 export default func;
-func.tags = ['MockLandV2WithMint', 'MockLandV2WithMint_deploy', 'L2'];
-func.skip = skipUnlessTestOrL2;
+func.tags = ['QuadLib', 'QuadLib_deploy'];
+func.dependencies = [];
+func.skip = skipUnlessL2;

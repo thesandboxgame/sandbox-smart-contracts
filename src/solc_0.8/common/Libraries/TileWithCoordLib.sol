@@ -17,7 +17,6 @@ library TileWithCoordLib {
     /// @return An empty Tile that has the x,y and corresponding key value set
     function init(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
-        ret.tile.data[0] = (getKey(x, y)) << 224;
         ret.tile.data[1] = (x / 24) << 224;
         ret.tile.data[2] = (y / 24) << 224;
         return ret;
@@ -34,7 +33,6 @@ library TileWithCoordLib {
     ) internal pure returns (TileWithCoord memory) {
         TileWithCoord memory ret;
         ret.tile = ret.tile.init(pixelData1, pixelData2, pixelData3);
-        ret.tile.data[0] |= (getKey(x, y)) << 224;
         ret.tile.data[1] |= (x / 24) << 224;
         ret.tile.data[2] |= (y / 24) << 224;
         return ret;
@@ -142,13 +140,6 @@ library TileWithCoordLib {
         return self.tile.intersect(xi % 24, yi % 24, size);
     }
 
-    /// @notice return the key value stored in the TileWithCoord
-    /// @param self the TileWithCoord to get the key from
-    /// @return the key value
-    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
-        return self.tile.data[0] >> 224;
-    }
-
     /// @notice return the x coordinate value stored in the TileWithCoord
     /// @param self the TileWithCoord to get the x coordinate from
     /// @return the x value
@@ -161,6 +152,13 @@ library TileWithCoordLib {
     /// @return the y value
     function getY(TileWithCoord memory self) internal pure returns (uint256) {
         return self.tile.data[2] >> 224;
+    }
+
+    /// @notice return the key value stored in the TileWithCoord
+    /// @param self the TileWithCoord to get the key from
+    /// @return the key value
+    function getKey(TileWithCoord memory self) internal pure returns (uint256) {
+        return getX(self) | (getY(self) << 16);
     }
 
     /// @notice helper to calculate the key value given the x,y coordinates

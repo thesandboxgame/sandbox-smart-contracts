@@ -12,12 +12,12 @@ type User = {
 };
 
 const setupTest = withSnapshot(
-  ['MockLandV2WithMint'],
+  ['MockLandWithMint'],
   async (): Promise<{
     MockLandV2WithMint: Contract;
     landOwners: User[];
   }> => {
-    const MockLandV2WithMint = await ethers.getContract('MockLandV2WithMint');
+    const MockLandV2WithMint = await ethers.getContract('MockLandWithMint');
     const unnamedAccounts = await getUnnamedAccounts();
     const landOwners = await setupUsers(unnamedAccounts, {MockLandV2WithMint});
     return {MockLandV2WithMint, landOwners};

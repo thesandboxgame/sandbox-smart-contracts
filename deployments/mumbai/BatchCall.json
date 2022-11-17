@@ -1,0 +1,106 @@
+{
+  "address": "0xfd636395D582Df0e616c3D1F67D99B8DFe9EC8bd",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC721",
+          "name": "addr",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "owners",
+          "type": "address[]"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "balances",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC721",
+          "name": "addr",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "owners",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x3ba9ebadaf022850e48da4724612d4d84a5cb4e5452b318e328fcfbb07db7fe1",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0xfd636395D582Df0e616c3D1F67D99B8DFe9EC8bd",
+    "transactionIndex": 10,
+    "gasUsed": "381395",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000008000000000000000000000008000000000000000000000000000000000800000000000000000000100000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000200000200000000000000000080000000000000000000000000000000000000000004000000000000000000001000000000100000000000000000000108000000000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0xc20b92f8c323d541f04aad1b3a624fe408851ba229f2fb2aad380dc2b0ce3245",
+    "transactionHash": "0x3ba9ebadaf022850e48da4724612d4d84a5cb4e5452b318e328fcfbb07db7fe1",
+    "logs": [
+      {
+        "transactionIndex": 10,
+        "blockNumber": 29318643,
+        "transactionHash": "0x3ba9ebadaf022850e48da4724612d4d84a5cb4e5452b318e328fcfbb07db7fe1",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x0000000000000000000000003a22c8bc68e98b0faf40f349dd2b2890fae01484"
+        ],
+        "data": "0x0000000000000000000000000000000000000000000000000001c2f09350a4c200000000000000000000000000000000000000000000001cd327b3e63cefeafc000000000000000000000000000000000000000000000001a008073254b1811200000000000000000000000000000000000000000000001cd325f0f5a99f463a000000000000000000000000000000000000000000000001a009ca22e80225d4",
+        "logIndex": 28,
+        "blockHash": "0xc20b92f8c323d541f04aad1b3a624fe408851ba229f2fb2aad380dc2b0ce3245"
+      }
+    ],
+    "blockNumber": 29318643,
+    "cumulativeGasUsed": "1631354",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "3f55d370b7e8808c0d1fd1e01a564c35",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IERC721\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"owners\",\"type\":\"address[]\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"balances\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC721\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"owners\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"A contract to batch a lot of calls so we don't get rate limited by the node\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/registry/BatchCall.sol\":\"BatchCall\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC721 compliant contract.\\n */\\ninterface IERC721 is IERC165 {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be have been allowed to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(\\n        address from,\\n        address to,\\n        uint256 tokenId\\n    ) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Usage of this method is discouraged, use {safeTransferFrom} whenever possible.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 tokenId\\n    ) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the caller.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool _approved) external;\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(\\n        address from,\\n        address to,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0x516a22876c1fab47f49b1bc22b4614491cd05338af8bd2e7b382da090a079990\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"src/solc_0.8/registry/BatchCall.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport {IERC721} from \\\"@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol\\\";\\n\\n/// @notice A contract to batch a lot of calls so we don't get rate limited by the node\\ncontract BatchCall {\\n    function ownerOf(IERC721 addr, uint256[] calldata ids) external view returns (address[] memory owners) {\\n        uint256 l = ids.length;\\n        owners = new address[](l);\\n        for (uint256 i; i < l; i++) {\\n            try addr.ownerOf(ids[i]) returns (address result) {\\n                owners[i] = result;\\n            } catch {\\n                // The implementation of land ownerOf has flaws :(\\n            }\\n        }\\n    }\\n\\n    function balanceOf(IERC721 addr, address[] calldata owners) external view returns (uint256[] memory balances) {\\n        uint256 l = owners.length;\\n        balances = new uint256[](l);\\n        for (uint256 i; i < l; i++) {\\n            balances[i] = addr.balanceOf(owners[i]);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xa3676c09203222f89b7a4aa4384ce28b941e3f1e941df4950e960481ec3e6a7e\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506105f1806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80634aa3ab931461003b5780634d4ae27414610064575b600080fd5b61004e610049366004610440565b610084565b60405161005b9190610519565b60405180910390f35b610077610072366004610493565b610218565b60405161005b91906104bf565b6060818067ffffffffffffffff8111156100ae57634e487b7160e01b600052604160045260246000fd5b6040519080825280602002602001820160405280156100d7578160200160208202803683370190505b50915060005b8181101561020f578573ffffffffffffffffffffffffffffffffffffffff166370a0823186868481811061012157634e487b7160e01b600052603260045260246000fd5b90506020020160208101906101369190610401565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b16815273ffffffffffffffffffffffffffffffffffffffff909116600482015260240160206040518083038186803b15801561019a57600080fd5b505afa1580156101ae573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101d291906104a7565b8382815181106101f257634e487b7160e01b600052603260045260246000fd5b60209081029190910101528061020781610551565b9150506100dd565b50509392505050565b6060818067ffffffffffffffff81111561024257634e487b7160e01b600052604160045260246000fd5b60405190808252806020026020018201604052801561026b578160200160208202803683370190505b50915060005b8181101561020f578573ffffffffffffffffffffffffffffffffffffffff16636352211e8686848181106102b557634e487b7160e01b600052603260045260246000fd5b905060200201356040518263ffffffff1660e01b81526004016102da91815260200190565b60206040518083038186803b1580156102f257600080fd5b505afa925050508015610340575060408051601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016820190925261033d91810190610424565b60015b610349576103a6565b8084838151811061036a57634e487b7160e01b600052603260045260246000fd5b602002602001019073ffffffffffffffffffffffffffffffffffffffff16908173ffffffffffffffffffffffffffffffffffffffff1681525050505b806103b081610551565b915050610271565b60008083601f8401126103c9578182fd5b50813567ffffffffffffffff8111156103e0578182fd5b60208301915083602080830285010111156103fa57600080fd5b9250929050565b600060208284031215610412578081fd5b813561041d81610596565b9392505050565b600060208284031215610435578081fd5b815161041d81610596565b600080600060408486031215610454578182fd5b833561045f81610596565b9250602084013567ffffffffffffffff81111561047a578283fd5b610486868287016103b8565b9497909650939450505050565b600080600060408486031215610454578283fd5b6000602082840312156104b8578081fd5b5051919050565b6020808252825182820181905260009190848201906040850190845b8181101561050d57835173ffffffffffffffffffffffffffffffffffffffff16835292840192918401916001016104db565b50909695505050505050565b6020808252825182820181905260009190848201906040850190845b8181101561050d57835183529284019291840191600101610535565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82141561058f57634e487b7160e01b81526011600452602481fd5b5060010190565b73ffffffffffffffffffffffffffffffffffffffff811681146105b857600080fd5b5056fea2646970667358221220041054584fc0415f9cda4ba1f1bcf80d3190b775a86f040fa706a6f04198b3a664736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80634aa3ab931461003b5780634d4ae27414610064575b600080fd5b61004e610049366004610440565b610084565b60405161005b9190610519565b60405180910390f35b610077610072366004610493565b610218565b60405161005b91906104bf565b6060818067ffffffffffffffff8111156100ae57634e487b7160e01b600052604160045260246000fd5b6040519080825280602002602001820160405280156100d7578160200160208202803683370190505b50915060005b8181101561020f578573ffffffffffffffffffffffffffffffffffffffff166370a0823186868481811061012157634e487b7160e01b600052603260045260246000fd5b90506020020160208101906101369190610401565b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b16815273ffffffffffffffffffffffffffffffffffffffff909116600482015260240160206040518083038186803b15801561019a57600080fd5b505afa1580156101ae573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101d291906104a7565b8382815181106101f257634e487b7160e01b600052603260045260246000fd5b60209081029190910101528061020781610551565b9150506100dd565b50509392505050565b6060818067ffffffffffffffff81111561024257634e487b7160e01b600052604160045260246000fd5b60405190808252806020026020018201604052801561026b578160200160208202803683370190505b50915060005b8181101561020f578573ffffffffffffffffffffffffffffffffffffffff16636352211e8686848181106102b557634e487b7160e01b600052603260045260246000fd5b905060200201356040518263ffffffff1660e01b81526004016102da91815260200190565b60206040518083038186803b1580156102f257600080fd5b505afa925050508015610340575060408051601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016820190925261033d91810190610424565b60015b610349576103a6565b8084838151811061036a57634e487b7160e01b600052603260045260246000fd5b602002602001019073ffffffffffffffffffffffffffffffffffffffff16908173ffffffffffffffffffffffffffffffffffffffff1681525050505b806103b081610551565b915050610271565b60008083601f8401126103c9578182fd5b50813567ffffffffffffffff8111156103e0578182fd5b60208301915083602080830285010111156103fa57600080fd5b9250929050565b600060208284031215610412578081fd5b813561041d81610596565b9392505050565b600060208284031215610435578081fd5b815161041d81610596565b600080600060408486031215610454578182fd5b833561045f81610596565b9250602084013567ffffffffffffffff81111561047a578283fd5b610486868287016103b8565b9497909650939450505050565b600080600060408486031215610454578283fd5b6000602082840312156104b8578081fd5b5051919050565b6020808252825182820181905260009190848201906040850190845b8181101561050d57835173ffffffffffffffffffffffffffffffffffffffff16835292840192918401916001016104db565b50909695505050505050565b6020808252825182820181905260009190848201906040850190845b8181101561050d57835183529284019291840191600101610535565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82141561058f57634e487b7160e01b81526011600452602481fd5b5060010190565b73ffffffffffffffffffffffffffffffffffffffff811681146105b857600080fd5b5056fea2646970667358221220041054584fc0415f9cda4ba1f1bcf80d3190b775a86f040fa706a6f04198b3a664736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "A contract to batch a lot of calls so we don't get rate limited by the node",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

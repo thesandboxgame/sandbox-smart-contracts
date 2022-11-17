@@ -34,6 +34,16 @@ contract MapTester {
         maps[idx].set(maps[contained].values);
     }
 
+    function setTranslateResult(
+        uint256 idx,
+        TileLib.Tile calldata tile,
+        uint256 x,
+        uint256 y
+    ) external {
+        MapLib.TranslateResult memory s = MapLib.translate(tile, x, y);
+        maps[idx].set(s);
+    }
+
     function clearQuad(
         uint256 idx,
         uint256 x,
@@ -196,6 +206,14 @@ contract MapTester {
         return maps[idx].getMap();
     }
 
+    function getTileByCoord(
+        uint256 idx,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool, TileWithCoordLib.TileWithCoord memory) {
+        return maps[idx].get(x, y);
+    }
+
     function translate(
         TileLib.Tile calldata t,
         uint256 x,
@@ -206,6 +224,19 @@ contract MapTester {
 
     function getLandCount(uint256 idx) external view returns (uint256) {
         return maps[idx].getLandCount();
+    }
+
+    function getLandsInQuad(
+        uint256 idx,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) external view returns (uint256) {
+        return maps[idx].getLandCount(x, y, size);
+    }
+
+    function assign(uint256 idx, TileWithCoordLib.TileWithCoord memory tile) external {
+        maps[idx].assign(tile);
     }
 
     function setTileQuad(

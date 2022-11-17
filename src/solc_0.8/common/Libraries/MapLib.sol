@@ -197,6 +197,40 @@ library MapLib {
         delete self.values;
     }
 
+    /// @notice Given a TileWithCoord set the values of this tile in the map to the given one
+    /// @param self the Map in which the bits are set
+    /// @param tile the tile that is used to assign the bits inside the map
+    function assign(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {
+        uint256 key = tile.getKey();
+        uint256 idx = self.indexes[key];
+        if (tile.isEmpty()) {
+            if (idx == 0) {
+                // !contains
+                return;
+            }
+            _remove(self, idx, key);
+            return;
+        }
+        if (idx == 0) {
+            // !contains
+            // Add a new tile
+            self.values.push(tile);
+            self.indexes[key] = self.values.length;
+        } else {
+            self.values[idx - 1] = tile;
+        }
+    }
+
+    /// @notice Set the values of a list of TileWithCoord in the current one
+    /// @param self the Map in which the bits are set
+    /// @param tiles the list of TileWithCoord
+    function assign(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {
+        uint256 len = tiles.length;
+        for (uint256 i; i < len; i++) {
+            assign(self, tiles[i]);
+        }
+    }
+
     /// @notice given a tile, translate all the bits in the x and y direction
     /// @dev the result of the translation are four tiles
     /// @param deltaX the x distance to translate
@@ -486,6 +520,59 @@ library MapLib {
             ret += self.values[i].countBits();
         }
         return ret;
+    }
+
+    /// @notice count the amount of bits (lands) set inside a Map filtered by quad
+    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract
+    /// @param self the map
+    /// @param x the x coordinate of the square
+    /// @param y the y coordinate of the square
+    /// @param size the size of the square
+    /// @return the quantity of lands
+    function getLandCount(
+        Map storage self,
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) public view returns (uint256) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            return 0;
+        }
+        TileLib.Tile memory t;
+        return t.set(x, y, size).and(self.values[idx - 1].tile).countBits();
+    }
+
+    /// @notice count the amount of bits (lands) set inside a Map filtered by quad
+    /// @param tile thw tile with count to intersect with the map
+    /// @return the quantity of lands
+    function getLandCount(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (uint256) {
+        uint256 key = tile.getKey();
+        uint256 idx = self.indexes[key];
+        if (idx == 0) {
+            return 0;
+        }
+        return tile.tile.and(self.values[idx - 1].tile).countBits();
+    }
+
+    /// @notice return a tile from the Map by his coordinates
+    /// @param self the map
+    /// @param x the x coordinate of the square
+    /// @param y the y coordinate of the square
+    /// @return found true if the tile inside the map wad found
+    /// @return tile the tile with coords inside the map
+    function get(
+        Map storage self,
+        uint256 x,
+        uint256 y
+    ) public view returns (bool found, TileWithCoordLib.TileWithCoord memory tile) {
+        uint256 key = TileWithCoordLib.getKey(x, y);
+        uint256 idx = self.indexes[key];
+        if (idx != 0) {
+            tile = self.values[idx - 1];
+            found = true;
+        }
     }
 
     /// @notice check if a square is adjacent (4-connected component) to the current map.

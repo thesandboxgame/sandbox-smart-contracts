@@ -17,12 +17,16 @@ export const setupSandRewardPool = withSnapshot(
     } = await getNamedAccounts();
 
     const others = await getUnnamedAccounts();
+    const quadLib = await deployments.deploy('QuadLib', {from: deployer});
 
     // Taken from 01_deploy_mock_land_with_mint.ts
     await deployments.deploy('MockLandWithMint', {
       from: deployer,
       log: true,
       skipIfAlreadyDeployed: true,
+      libraries: {
+        QuadLib: quadLib.address,
+      },
     });
 
     // Taken from 00_deploy_fake_LP_MATICSAND_tokens_if_needed.ts

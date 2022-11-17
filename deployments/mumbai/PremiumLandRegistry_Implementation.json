@@ -1,0 +1,1237 @@
+{
+  "address": "0x773847Dbae0E64a57Fe0632e10252b6C3313c9F1",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "name": "PixelClear",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "name": "PixelSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "TileChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAP_DESIGNER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "PremiumLandRegistry_init",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "tiles",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "assign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "offset",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "at",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "at",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "name": "clear",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "xs",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ys",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "sizes",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "countPremium",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "xs",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ys",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "countPremium",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        }
+      ],
+      "name": "countPremium",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getLandCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMap",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        }
+      ],
+      "name": "isAdjacent",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        }
+      ],
+      "name": "isAllPremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord",
+          "name": "tile",
+          "type": "tuple"
+        }
+      ],
+      "name": "isAllPremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "tiles",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "isAllPremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "name": "isPremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord",
+          "name": "tile",
+          "type": "tuple"
+        }
+      ],
+      "name": "isSomePremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256[3]",
+                  "name": "data",
+                  "type": "uint256[3]"
+                }
+              ],
+              "internalType": "struct TileLib.Tile",
+              "name": "tile",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct TileWithCoordLib.TileWithCoord[]",
+          "name": "tiles",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "isSomePremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSomePremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "length",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "name": "set",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x08bf754834bfaffc5e6b1688ddd73f5c823fae89b079eda25b0cba805ba25d40",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0x773847Dbae0E64a57Fe0632e10252b6C3313c9F1",
+    "transactionIndex": 35,
+    "gasUsed": "1989918",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000010000000000002000000000020000000000000000000008000000000000000000000000000000000000000000000000000000000800000000000000000000100000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000200000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000108000001000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0xb9b552c16cbaa124ffd971067dc8e2dcee1b22b283a9f3708749b856f1028c1a",
+    "transactionHash": "0x08bf754834bfaffc5e6b1688ddd73f5c823fae89b079eda25b0cba805ba25d40",
+    "logs": [
+      {
+        "transactionIndex": 35,
+        "blockNumber": 29280819,
+        "transactionHash": "0x08bf754834bfaffc5e6b1688ddd73f5c823fae89b079eda25b0cba805ba25d40",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x000000000000000000000000f903ba9e006193c1527bfbe65fe2123704ea3f99"
+        ],
+        "data": "0x0000000000000000000000000000000000000000000000000009c6936a6cef3c00000000000000000000000000000000000000000000001cd47f5b72a7a787190000000000000000000000000000000000000000000008ce7d8020f11e6c9b1600000000000000000000000000000000000000000000001cd47594df3d3a97dd0000000000000000000000000000000000000000000008ce7d89e78488d98a52",
+        "logIndex": 117,
+        "blockHash": "0xb9b552c16cbaa124ffd971067dc8e2dcee1b22b283a9f3708749b856f1028c1a"
+      }
+    ],
+    "blockNumber": 29280819,
+    "cumulativeGasUsed": "4289021",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "4c06a45491642fde82be8c463b1bd17f",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"name\":\"PixelClear\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"name\":\"PixelSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"name\":\"TileChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAP_DESIGNER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"}],\"name\":\"PremiumLandRegistry_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"tiles\",\"type\":\"tuple[]\"}],\"name\":\"assign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"offset\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"at\",\"outputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"at\",\"outputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"name\":\"clear\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"xs\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"ys\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"sizes\",\"type\":\"uint256[]\"}],\"name\":\"countPremium\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"xs\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"ys\",\"type\":\"uint256[]\"}],\"name\":\"countPremium\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"}],\"name\":\"countPremium\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getLandCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMap\",\"outputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"}],\"name\":\"isAdjacent\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"}],\"name\":\"isAllPremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord\",\"name\":\"tile\",\"type\":\"tuple\"}],\"name\":\"isAllPremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"tiles\",\"type\":\"tuple[]\"}],\"name\":\"isAllPremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"name\":\"isPremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord\",\"name\":\"tile\",\"type\":\"tuple\"}],\"name\":\"isSomePremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256[3]\",\"name\":\"data\",\"type\":\"uint256[3]\"}],\"internalType\":\"struct TileLib.Tile\",\"name\":\"tile\",\"type\":\"tuple\"}],\"internalType\":\"struct TileWithCoordLib.TileWithCoord[]\",\"name\":\"tiles\",\"type\":\"tuple[]\"}],\"name\":\"isSomePremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"}],\"name\":\"isSomePremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"length\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"name\":\"set\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"PixelClear(uint256,uint256)\":{\"details\":\"Emitted when a tile is updated\"},\"PixelSet(uint256,uint256)\":{\"details\":\"Emitted when a tile is updated\"},\"TileChanged(((uint256[3]))[])\":{\"details\":\"Emitted when a tile is updated\"}},\"kind\":\"dev\",\"methods\":{\"assign(((uint256[3]))[])\":{\"params\":{\"tiles\":\"the list of TileWithCoord to be assigned\"}},\"at(uint256)\":{\"details\":\"used to iterate off-chain over the tiles.\",\"params\":{\"index\":\"the index of the tile\"},\"returns\":{\"_0\":\"the tile that is in the position index in the list\"}},\"at(uint256,uint256)\":{\"details\":\"used to iterate off-chain over the tiles.\",\"params\":{\"limit\":\"amount of tiles to get\",\"offset\":\"initial offset used to paginate\"},\"returns\":{\"_0\":\"the partial list of tiles\"}},\"clear(uint256,uint256)\":{\"details\":\"helper method that can be called by hand\",\"params\":{\"x\":\"coordinate\",\"y\":\"coordinate\"}},\"countPremium(uint256,uint256,uint256)\":{\"details\":\"the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\",\"params\":{\"size\":\"the size of the square\",\"x\":\"the x coordinate of the square\",\"y\":\"the y coordinate of the square\"},\"returns\":{\"_0\":\"the amount of premium lands\"}},\"countPremium(uint256[],uint256[])\":{\"params\":{\"xs\":\"the x coordinate\",\"ys\":\"the  coordinate\"},\"returns\":{\"_0\":\"the amount of premium lands\"}},\"countPremium(uint256[],uint256[],uint256[])\":{\"details\":\"the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\",\"params\":{\"sizes\":\"the size of the square\",\"xs\":\"the x coordinate of the square\",\"ys\":\"the y coordinate of the square\"},\"returns\":{\"_0\":\"the amount of premium lands\"}},\"getLandCount()\":{\"returns\":{\"_0\":\"the quantity of lands\"}},\"getMap()\":{\"details\":\"Use only for testing. This can be problematic if it grows too much !!!\",\"returns\":{\"_0\":\"the list of internal tiles\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"isAdjacent(uint256,uint256,uint256)\":{\"details\":\"used to add a quad to a map, it is cheaper than isAdjacent(map)\",\"params\":{\"size\":\"the size of the square\",\"x\":\"the x coordinate of the square\",\"y\":\"the y coordinate of the square\"},\"returns\":{\"_0\":\"true if the square is 4-connected to the map\"}},\"isAllPremium(((uint256[3])))\":{\"params\":{\"tile\":\"the TileWithCoord that must be included\"},\"returns\":{\"_0\":\"true if self contain tile TileWithCoord\"}},\"isAllPremium(((uint256[3]))[])\":{\"params\":{\"tiles\":\"the TileWithCoord that must be included\"},\"returns\":{\"_0\":\"true if self contain tiles TileWithCoord[]\"}},\"isAllPremium(uint256,uint256,uint256)\":{\"details\":\"the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\",\"params\":{\"size\":\"the size of the square\",\"x\":\"the x coordinate of the square\",\"y\":\"the y coordinate of the square\"},\"returns\":{\"_0\":\"true if al the bits are set or false if at least one bit is cleared\"}},\"isPremium(uint256,uint256)\":{\"params\":{\"x\":\"the x coordinate\",\"y\":\"the  coordinate\"},\"returns\":{\"_0\":\"true if the x,y coordinate bit is set or false if it is cleared\"}},\"isSomePremium(((uint256[3])))\":{\"params\":{\"tile\":\"the TileWithCoord to compare\"},\"returns\":{\"_0\":\"true if there is at least one bit set in both the Map and the TileWithCoord\"}},\"isSomePremium(((uint256[3]))[])\":{\"returns\":{\"_0\":\"true if there is at least one bit set in both the Map and the TileWithCoord[]\"}},\"isSomePremium(uint256,uint256,uint256)\":{\"details\":\"the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\",\"params\":{\"size\":\"the size of the square\",\"x\":\"the x coordinate of the square\",\"y\":\"the y coordinate of the square\"},\"returns\":{\"_0\":\"true if there is at least one bit set in both the Map and the square\"}},\"length()\":{\"details\":\"used to iterate off-chain over the tiles.\",\"returns\":{\"_0\":\"the length of the list\"}},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role.\"},\"set(uint256,uint256)\":{\"details\":\"helper method that can be called by hand\",\"params\":{\"x\":\"coordinate\",\"y\":\"coordinate\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"assign(((uint256[3]))[])\":{\"notice\":\"assign the bits of a premium map\"},\"at(uint256)\":{\"notice\":\"get the tile that is in certain position in the internal list of tiles\"},\"at(uint256,uint256)\":{\"notice\":\"get the internal list of tiles with pagination\"},\"clear(uint256,uint256)\":{\"notice\":\"clear a pixel in the premium map\"},\"countPremium(uint256,uint256,uint256)\":{\"notice\":\"Count the amount of premium lands inside the Map filtered by a quad\"},\"countPremium(uint256[],uint256[])\":{\"notice\":\"Count the amount of premium lands.\"},\"countPremium(uint256[],uint256[],uint256[])\":{\"notice\":\"Count the amount of premium lands inside the Map filtered by a quad\"},\"getLandCount()\":{\"notice\":\"count the amount of bits (lands) set inside a Map\"},\"getMap()\":{\"notice\":\"return the internal list of tiles\"},\"isAdjacent(uint256,uint256,uint256)\":{\"notice\":\"check if a square is adjacent (4-connected component) to the current map.\"},\"isAllPremium(((uint256[3])))\":{\"notice\":\"Check if a Map includes all the bits that are set in a TileWithCoord\"},\"isAllPremium(((uint256[3]))[])\":{\"notice\":\"Check if a Map includes all the bits that are set in a TileWithCoord[]\"},\"isAllPremium(uint256,uint256,uint256)\":{\"notice\":\"Check if the all the bits of a square inside the Map are set or not\"},\"isPremium(uint256,uint256)\":{\"notice\":\"Check if the bit in certain coordinate are set or not inside the map\"},\"isSomePremium(((uint256[3])))\":{\"notice\":\"Check if a map has at least one bit in common with some TileWithCoord\"},\"isSomePremium(uint256,uint256,uint256)\":{\"notice\":\"Check if a map has at least one bit in common with a square (x,y,size)\"},\"length()\":{\"notice\":\"return the length of the internal list of tiles\"},\"set(uint256,uint256)\":{\"notice\":\"set a pixel in the premium map\"}},\"notice\":\"A 408x408 matrix of bits, true means that the land is premium\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/registry/PremiumLandRegistry.sol\":\"PremiumLandRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (access/AccessControl.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IAccessControlUpgradeable.sol\\\";\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../utils/StringsUpgradeable.sol\\\";\\nimport \\\"../utils/introspection/ERC165Upgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it.\\n */\\nabstract contract AccessControlUpgradeable is Initializable, ContextUpgradeable, IAccessControlUpgradeable, ERC165Upgradeable {\\n    function __AccessControl_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n        __ERC165_init_unchained();\\n        __AccessControl_init_unchained();\\n    }\\n\\n    function __AccessControl_init_unchained() internal onlyInitializing {\\n    }\\n    struct RoleData {\\n        mapping(address => bool) members;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with a standardized message including the required role.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{40}) is missing role (0x[0-9a-f]{64})$/\\n     *\\n     * _Available since v4.1._\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role, _msgSender());\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view override returns (bool) {\\n        return _roles[role].members[account];\\n    }\\n\\n    /**\\n     * @dev Revert with a standard message if `account` is missing `role`.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{40}) is missing role (0x[0-9a-f]{64})$/\\n     */\\n    function _checkRole(bytes32 role, address account) internal view {\\n        if (!hasRole(role, account)) {\\n            revert(\\n                string(\\n                    abi.encodePacked(\\n                        \\\"AccessControl: account \\\",\\n                        StringsUpgradeable.toHexString(uint160(account), 20),\\n                        \\\" is missing role \\\",\\n                        StringsUpgradeable.toHexString(uint256(role), 32)\\n                    )\\n                )\\n            );\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view override returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) public virtual override {\\n        require(account == _msgSender(), \\\"AccessControl: can only renounce roles for self\\\");\\n\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event. Note that unlike {grantRole}, this function doesn't perform any\\n     * checks on the calling account.\\n     *\\n     * [WARNING]\\n     * ====\\n     * This function should only be called from the constructor when setting\\n     * up the initial roles for the system.\\n     *\\n     * Using this function in any other way is effectively circumventing the admin\\n     * system imposed by {AccessControl}.\\n     * ====\\n     *\\n     * NOTE: This function is deprecated in favor of {_grantRole}.\\n     */\\n    function _setupRole(bytes32 role, address account) internal virtual {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * Internal function without access restriction.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual {\\n        if (!hasRole(role, account)) {\\n            _roles[role].members[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n        }\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * Internal function without access restriction.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual {\\n        if (hasRole(role, account)) {\\n            _roles[role].members[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n        }\\n    }\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x64bb2dbe7ec4fcadb2f163f41edf6f2e1cd8f16162f7a56c2581894e6ba0747c\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControlUpgradeable {\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     *\\n     * _Available since v3.1._\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {AccessControl-_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) external;\\n}\\n\",\"keccak256\":\"0xb8f5302f12138c5561362e88a78d061573e6298b7a1a5afe84a1e2c8d4d5aeaa\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/AddressUpgradeable.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To initialize the implementation contract, you can either invoke the\\n * initializer manually, or you can include a constructor to automatically mark it as initialized when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() initializer {}\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     */\\n    bool private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Modifier to protect an initializer function from being invoked twice.\\n     */\\n    modifier initializer() {\\n        // If the contract is initializing we ignore whether _initialized is set in order to support multiple\\n        // inheritance patterns, but we only do this in the context of a constructor, because in other contexts the\\n        // contract may have been reentered.\\n        require(_initializing ? _isConstructor() : !_initialized, \\\"Initializable: contract is already initialized\\\");\\n\\n        bool isTopLevelCall = !_initializing;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n            _initialized = true;\\n        }\\n\\n        _;\\n\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} modifier, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    function _isConstructor() private view returns (bool) {\\n        return !AddressUpgradeable.isContract(address(this));\\n    }\\n}\\n\",\"keccak256\":\"0x68861bcc80cacbd498efde75aab6c74a486cc48262660d326c8d7530d9752097\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Address.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary AddressUpgradeable {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize, which returns 0 for contracts in\\n        // construction, since the code is only stored at the end of the\\n        // constructor execution.\\n\\n        uint256 size;\\n        assembly {\\n            size := extcodesize(account)\\n        }\\n        return size > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verifies that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x3f0f878c796dfc7feba6d3c4e3e526c14c7deae8b7bfc71088e3f38fab0d77b3\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n        __Context_init_unchained();\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x0b0d548f6381370d394f7a434f994dc678b3ef3e755de106109d61343a685ea7\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev String operations.\\n */\\nlibrary StringsUpgradeable {\\n    bytes16 private constant _HEX_SYMBOLS = \\\"0123456789abcdef\\\";\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` decimal representation.\\n     */\\n    function toString(uint256 value) internal pure returns (string memory) {\\n        // Inspired by OraclizeAPI's implementation - MIT licence\\n        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol\\n\\n        if (value == 0) {\\n            return \\\"0\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 digits;\\n        while (temp != 0) {\\n            digits++;\\n            temp /= 10;\\n        }\\n        bytes memory buffer = new bytes(digits);\\n        while (value != 0) {\\n            digits -= 1;\\n            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));\\n            value /= 10;\\n        }\\n        return string(buffer);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.\\n     */\\n    function toHexString(uint256 value) internal pure returns (string memory) {\\n        if (value == 0) {\\n            return \\\"0x00\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 length = 0;\\n        while (temp != 0) {\\n            length++;\\n            temp >>= 8;\\n        }\\n        return toHexString(value, length);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.\\n     */\\n    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {\\n        bytes memory buffer = new bytes(2 * length + 2);\\n        buffer[0] = \\\"0\\\";\\n        buffer[1] = \\\"x\\\";\\n        for (uint256 i = 2 * length + 1; i > 1; --i) {\\n            buffer[i] = _HEX_SYMBOLS[value & 0xf];\\n            value >>= 4;\\n        }\\n        require(value == 0, \\\"Strings: hex length insufficient\\\");\\n        return string(buffer);\\n    }\\n}\\n\",\"keccak256\":\"0x398d3323c1932a5986bf36be7c57593e121e69d5db5b6574b4ee0d031443de37\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165Upgradeable.sol\\\";\\nimport \\\"../../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165Upgradeable is Initializable, IERC165Upgradeable {\\n    function __ERC165_init() internal onlyInitializing {\\n        __ERC165_init_unchained();\\n    }\\n\\n    function __ERC165_init_unchained() internal onlyInitializing {\\n    }\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165Upgradeable).interfaceId;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0xcd98895383d51dc86669a76ae3ad4419fc5dc079d01faea23498e80c1cf9f78a\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165Upgradeable {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xc6cef87559d0aeffdf0a99803de655938a7779ec0a3cd5d4383483ad85565a09\",\"license\":\"MIT\"},\"src/solc_0.8/common/Libraries/MapLib.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n/* solhint-disable code-complexity */\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport {TileWithCoordLib} from \\\"./TileWithCoordLib.sol\\\";\\nimport {TileLib} from \\\"./TileLib.sol\\\";\\n\\n/// @title An iterable mapping of Tiles (24x24 bit set).\\n/// @notice Used to represent a the presence or absence of certain x,y coordinate in a map of lands\\n/// @dev The key of the mapping is a combination of x and y.\\n/// @dev This library try to reduce the gas consumption and to do that it accesses the internal structure of the Tiles\\nlibrary MapLib {\\n    using TileWithCoordLib for TileWithCoordLib.TileWithCoord;\\n    using TileLib for TileLib.Tile;\\n\\n    uint256 private constant LEFT_MASK = 0x000001000001000001000001000001000001000001000001;\\n    uint256 private constant LEFT_MASK_NEG = ~LEFT_MASK;\\n    uint256 private constant RIGHT_MASK = 0x800000800000800000800000800000800000800000800000;\\n    uint256 private constant RIGHT_MASK_NEG = ~RIGHT_MASK;\\n    uint256 private constant UP_MASK = 0x000000000000000000000000000000000000000000FFFFFF;\\n    uint256 private constant DOWN_MASK = 0xFFFFFF000000000000000000000000000000000000000000;\\n\\n    struct TranslateResult {\\n        TileWithCoordLib.TileWithCoord topLeft;\\n        TileWithCoordLib.TileWithCoord topRight;\\n        TileWithCoordLib.TileWithCoord bottomLeft;\\n        TileWithCoordLib.TileWithCoord bottomRight;\\n    }\\n\\n    // An iterable mapping of tiles (24x24 bit set).\\n    struct Map {\\n        TileWithCoordLib.TileWithCoord[] values;\\n        // Position of the value in the `values` array, plus 1 because index 0 means that the key is not found.\\n        mapping(uint256 => uint256) indexes;\\n    }\\n\\n    /// @notice Set the bits inside a square that has size x size in the x,y coordinates in the map\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param self the Map in which the bits are set\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    function set(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            // Add a new tile\\n            TileWithCoordLib.TileWithCoord memory t = TileWithCoordLib.init(x, y);\\n            self.values.push(t.set(x, y, size));\\n            self.indexes[key] = self.values.length;\\n        } else {\\n            // contains\\n            self.values[idx - 1] = self.values[idx - 1].set(x, y, size);\\n        }\\n    }\\n\\n    /// @notice Given a translation of a tile the corresponding bits are set in the current map\\n    /// @param self the Map in which the bits are set\\n    /// @param s translation result, the result of a translation of a tile are four tiles.\\n    function set(Map storage self, TranslateResult memory s) public {\\n        set(self, s.topLeft);\\n        set(self, s.topRight);\\n        set(self, s.bottomLeft);\\n        set(self, s.bottomRight);\\n    }\\n\\n    /// @notice Given a TileWithCoord (a tile that includes coordinates inside it) set the corresponding bits in the map\\n    /// @param self the Map in which the bits are set\\n    /// @param tile the tile that is used to set the bits inside the map\\n    function set(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {\\n        if (tile.isEmpty()) {\\n            return;\\n        }\\n        uint256 key = tile.getKey();\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            // Add a new tile\\n            self.values.push(tile);\\n            self.indexes[key] = self.values.length;\\n        } else {\\n            self.values[idx - 1] = self.values[idx - 1].merge(tile);\\n        }\\n    }\\n\\n    /// @notice Merge the bits of a list of TileWithCoord in the current one\\n    /// @param self the Map in which the bits are set\\n    /// @param tiles the list of TileWithCoord\\n    function set(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {\\n        uint256 len = tiles.length;\\n        for (uint256 i; i < len; i++) {\\n            set(self, tiles[i]);\\n        }\\n    }\\n\\n    /// @notice Merge the bits of another map in the current one\\n    /// @param self the Map in which the bits are set\\n    /// @param other the map that is used as source to set the bits in the current one\\n    function set(Map storage self, Map storage other) public {\\n        uint256 len = other.values.length;\\n        for (uint256 i; i < len; i++) {\\n            set(self, other.values[i]);\\n        }\\n    }\\n\\n    /// @notice Clear the bits inside a square that has size x size in the x,y coordinates in the map\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param self the Map, in which the bits will be cleared\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return false if the the coordinates are not found so the bits are already cleared\\n    function clear(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public returns (bool) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains, nothing to clear\\n            return false;\\n        }\\n        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clear(x, y, size);\\n        if (t.isEmpty()) {\\n            _remove(self, idx, key);\\n        } else {\\n            self.values[idx - 1] = t;\\n        }\\n        return true;\\n    }\\n\\n    /// @notice Given a translation of a tile the corresponding bits are cleared in the current map\\n    /// @param self the Map in which the bits are cleared\\n    /// @param s translation result, the result of a translation of a tile are four tiles.\\n    function clear(Map storage self, TranslateResult memory s) public {\\n        clear(self, s.topLeft);\\n        clear(self, s.topRight);\\n        clear(self, s.bottomLeft);\\n        clear(self, s.bottomRight);\\n    }\\n\\n    /// @notice Given a TileWithCoord (a tile that includes coordinates inside it) clear the corresponding bits in the map\\n    /// @param self the Map, in which the bits will be cleared\\n    /// @param tile the tile that is used to clear the bits inside the map\\n    /// @return false if the the coordinates are not found so the bits are already cleared\\n    function clear(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public returns (bool) {\\n        uint256 key = tile.getKey();\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            return false;\\n        }\\n        TileWithCoordLib.TileWithCoord memory t = self.values[idx - 1].clear(tile);\\n        if (t.isEmpty()) {\\n            _remove(self, idx, key);\\n        } else {\\n            self.values[idx - 1] = t;\\n        }\\n        return true;\\n    }\\n\\n    /// @notice Clear the bits of a list of TileWithCoord\\n    /// @param self the Map in which the bits are cleared\\n    /// @param tiles the list of TileWithCoord\\n    function clear(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {\\n        uint256 len = tiles.length;\\n        for (uint256 i; i < len; i++) {\\n            clear(self, tiles[i]);\\n        }\\n    }\\n\\n    /// @notice Clear the bits of another map in the current one\\n    /// @param self the Map in which the bits are cleared\\n    /// @param other the map that is used as source to clear the bits in the current one\\n    function clear(Map storage self, Map storage other) public {\\n        uint256 len = other.values.length;\\n        for (uint256 i; i < len; i++) {\\n            clear(self, other.values[i]);\\n        }\\n    }\\n\\n    /// @notice Clear the all the bits in the map\\n    /// @param self the Map in which the bits are cleared\\n    function clear(Map storage self) public {\\n        for (uint256 i; i < self.values.length; i++) {\\n            delete self.indexes[self.values[i].getKey()];\\n        }\\n        delete self.values;\\n    }\\n\\n    /// @notice Given a TileWithCoord set the values of this tile in the map to the given one\\n    /// @param self the Map in which the bits are set\\n    /// @param tile the tile that is used to assign the bits inside the map\\n    function assign(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public {\\n        uint256 key = tile.getKey();\\n        uint256 idx = self.indexes[key];\\n        if (tile.isEmpty()) {\\n            if (idx == 0) {\\n                // !contains\\n                return;\\n            }\\n            _remove(self, idx, key);\\n            return;\\n        }\\n        if (idx == 0) {\\n            // !contains\\n            // Add a new tile\\n            self.values.push(tile);\\n            self.indexes[key] = self.values.length;\\n        } else {\\n            self.values[idx - 1] = tile;\\n        }\\n    }\\n\\n    /// @notice Set the values of a list of TileWithCoord in the current one\\n    /// @param self the Map in which the bits are set\\n    /// @param tiles the list of TileWithCoord\\n    function assign(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public {\\n        uint256 len = tiles.length;\\n        for (uint256 i; i < len; i++) {\\n            assign(self, tiles[i]);\\n        }\\n    }\\n\\n    /// @notice given a tile, translate all the bits in the x and y direction\\n    /// @dev the result of the translation are four tiles\\n    /// @param deltaX the x distance to translate\\n    /// @param deltaY the y distance to translate\\n    /// @return four tiles with coords that are the result of the translation\\n    function translate(\\n        TileLib.Tile memory tile,\\n        uint256 deltaX,\\n        uint256 deltaY\\n    ) internal pure returns (TranslateResult memory) {\\n        (uint256[6] memory col1, uint256[6] memory col2) = tile.translate(deltaX % 24, deltaY % 24);\\n        return\\n            TranslateResult({\\n                topLeft: TileWithCoordLib.init(deltaX, deltaY, col1[0], col1[1], col1[2]),\\n                bottomLeft: TileWithCoordLib.init(deltaX, deltaY + 24, col1[3], col1[4], col1[5]),\\n                topRight: TileWithCoordLib.init(deltaX + 24, deltaY, col2[0], col2[1], col2[2]),\\n                bottomRight: TileWithCoordLib.init(deltaX + 24, deltaY + 24, col2[3], col2[4], col2[5])\\n            });\\n    }\\n\\n    /// @notice Check if the bit in certain coordinate are set or not inside the map\\n    /// @param self the Map where the check is done\\n    /// @param x the x coordinate\\n    /// @param y the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function contain(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y\\n    ) public view returns (bool) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            return false;\\n        }\\n        return self.values[idx - 1].contain(x, y);\\n    }\\n\\n    /// @notice Check if the all the bits of a square inside the Map are set or not\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param self the Map where the check is done\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if al the bits are set or false if at least one bit is cleared\\n    function contain(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public view returns (bool) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            return false;\\n        }\\n        return self.values[idx - 1].contain(x, y, size);\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in a TileWithCoord\\n    /// @param self the Map that is checked for inclusion\\n    /// @param tile the TileWithCoord that must be included\\n    /// @return true if self contain tile TileWithCoord\\n    function contain(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (bool) {\\n        if (tile.isEmpty()) {\\n            return true;\\n        }\\n        uint256 key = tile.getKey();\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            return false;\\n        }\\n        return self.values[idx - 1].tile.contain(tile.tile);\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in a TileWithCoord[]\\n    /// @param self the Map that is checked for inclusion\\n    /// @param tiles the TileWithCoord that must be included\\n    /// @return true if self contain tiles TileWithCoord[]\\n    function contain(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public view returns (bool) {\\n        uint256 len = tiles.length;\\n        for (uint256 i; i < len; i++) {\\n            if (!contain(self, tiles[i])) {\\n                return false;\\n            }\\n        }\\n        return true;\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in translation result\\n    /// @dev this routine is used to match an experience template after translation\\n    /// @param self the bigger Tile that is checked for inclusion\\n    /// @param s the translation result that must be included\\n    /// @return true if self contain all the bits in the translation result\\n    function contain(Map storage self, TranslateResult memory s) public view returns (bool) {\\n        return\\n            contain(self, s.topLeft) &&\\n            contain(self, s.topRight) &&\\n            contain(self, s.bottomLeft) &&\\n            contain(self, s.bottomRight);\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in another Map\\n    /// @dev self can be huge, but other must be small, we iterate over other values.\\n    /// @param self the Map that is checked for inclusion\\n    /// @param other the Map that must be included\\n    /// @return true if self contain other Map\\n    function contain(Map storage self, Map storage other) public view returns (bool) {\\n        uint256 len = other.values.length;\\n        for (uint256 i; i < len; i++) {\\n            if (!contain(self, other.values[i])) {\\n                return false;\\n            }\\n        }\\n        return true;\\n    }\\n\\n    /// @notice Check if a map has at least one bit in common with a square (x,y,size)\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param self the Map where the check is done\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if there is at least one bit set in both the Map and the square\\n    function intersect(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public view returns (bool) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !intersect\\n            return false;\\n        }\\n        return self.values[idx - 1].intersect(x, y, size);\\n    }\\n\\n    /// @notice Check if a map has at least one bit in common with some TileWithCoord\\n    /// @param self the Map to compare\\n    /// @param tile the TileWithCoord to compare\\n    /// @return true if there is at least one bit set in both the Map and the TileWithCoord\\n    function intersect(Map storage self, TileWithCoordLib.TileWithCoord memory tile) public view returns (bool) {\\n        if (tile.isEmpty()) {\\n            return false;\\n        }\\n        uint256 key = tile.getKey();\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            // !contains\\n            return false;\\n        }\\n        return self.values[idx - 1].tile.intersect(tile.tile);\\n    }\\n\\n    /// @notice Check if a Map has at least one of the bits that are set in a TileWithCoord[]\\n    /// @param self the Map that is checked for inclusion\\n    /// @param tiles the TileWithCoord that must be included\\n    /// @return true if there is at least one bit set in both the Map and the TileWithCoord[]\\n    function intersect(Map storage self, TileWithCoordLib.TileWithCoord[] memory tiles) public view returns (bool) {\\n        uint256 len = tiles.length;\\n        for (uint256 i; i < len; i++) {\\n            if (intersect(self, tiles[i])) {\\n                return true;\\n            }\\n        }\\n        return false;\\n    }\\n\\n    /// @notice Check if a map has at least one bit in common with some translation result\\n    /// @param self the Map to compare\\n    /// @param s the four tiles that are the result of a translation\\n    /// @return true if there is at least one bit set in both the Map and the TranslationResult\\n    function intersect(Map storage self, TranslateResult memory s) public view returns (bool) {\\n        return\\n            intersect(self, s.topLeft) ||\\n            intersect(self, s.topRight) ||\\n            intersect(self, s.bottomLeft) ||\\n            intersect(self, s.bottomRight);\\n    }\\n\\n    /// @notice Check if a Map includes any of the bits that are set in another Map\\n    /// @dev self can be huge, but other must be small, we iterate over other values.\\n    /// @param self the Map that is checked for inclusion\\n    /// @param other the Map that must be included\\n    /// @return true if there is at least one bit set in both Maps\\n    function intersect(Map storage self, Map storage other) public view returns (bool) {\\n        uint256 len = other.values.length;\\n        for (uint256 i; i < len; i++) {\\n            if (intersect(self, other.values[i])) {\\n                return true;\\n            }\\n        }\\n        return false;\\n    }\\n\\n    /// @notice Check if a map is empty (no bits are set)\\n    /// @param self the Map to check\\n    /// @return true if the map is empty\\n    function isEmpty(Map storage self) public view returns (bool) {\\n        // We remove the tiles when they are empty\\n        return self.values.length == 0;\\n    }\\n\\n    /// @notice Check if two maps are equal\\n    /// @param self the first Map to check\\n    /// @param other the second Map to check\\n    /// @return true if the two maps are equal\\n    function isEqual(Map storage self, Map storage other) public view returns (bool) {\\n        return isEqual(self, other.values);\\n    }\\n\\n    /// @notice Check if a map is equal to an array of TileWithCoord\\n    /// @param self the Map to check\\n    /// @param other the list of TileWithCoord to check\\n    /// @return true if the two are equal\\n    function isEqual(Map storage self, TileWithCoordLib.TileWithCoord[] memory other) public view returns (bool) {\\n        if (other.length != self.values.length) {\\n            return false;\\n        }\\n        uint256 cant = other.length;\\n        // Check that self contains the same set of tiles than other and they are equal\\n        for (uint256 i; i < cant; i++) {\\n            uint256 key = other[i].getKey();\\n            uint256 idx = self.indexes[key];\\n            if (idx == 0 || !self.values[idx - 1].isEqual(other[i])) {\\n                return false;\\n            }\\n        }\\n        return true;\\n    }\\n\\n    /// @notice return the length of the internal list of tiles\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @param self the Map\\n    /// @return the length of the list\\n    function length(Map storage self) public view returns (uint256) {\\n        return self.values.length;\\n    }\\n\\n    /// @notice get the tile that is in certain position in the internal list of tiles\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @param self the Map\\n    /// @param index the index of the tile\\n    /// @return the tile that is in the position index in the list\\n    function at(Map storage self, uint256 index) public view returns (TileWithCoordLib.TileWithCoord memory) {\\n        return self.values[index];\\n    }\\n\\n    /// @notice get the internal list of tiles with pagination\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @param self the Map\\n    /// @param offset initial offset used to paginate\\n    /// @param limit amount of tiles to get\\n    /// @return the partial list of tiles\\n    function at(\\n        Map storage self,\\n        uint256 offset,\\n        uint256 limit\\n    ) public view returns (TileWithCoordLib.TileWithCoord[] memory) {\\n        TileWithCoordLib.TileWithCoord[] memory ret = new TileWithCoordLib.TileWithCoord[](limit);\\n        for (uint256 i; i < limit; i++) {\\n            ret[i] = self.values[offset + i];\\n        }\\n        return ret;\\n    }\\n\\n    /// @notice return the internal list of tiles\\n    /// @dev Use only for testing. This can be problematic if it grows too much !!!\\n    /// @param self the map\\n    /// @return the list of internal tiles\\n    function getMap(Map storage self) public view returns (TileWithCoordLib.TileWithCoord[] memory) {\\n        return self.values;\\n    }\\n\\n    /// @notice count the amount of bits (lands) set inside a Map\\n    /// @param self the map\\n    /// @return the quantity of lands\\n    function getLandCount(Map storage self) public view returns (uint256) {\\n        uint256 ret;\\n        uint256 len = self.values.length;\\n        for (uint256 i; i < len; i++) {\\n            ret += self.values[i].countBits();\\n        }\\n        return ret;\\n    }\\n\\n    /// @notice count the amount of bits (lands) set inside a Map filtered by quad\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param self the map\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return the quantity of lands\\n    function getLandCount(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public view returns (uint256) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx == 0) {\\n            return 0;\\n        }\\n        TileLib.Tile memory t;\\n        return t.set(x, y, size).and(self.values[idx - 1].tile).countBits();\\n    }\\n\\n    /// @notice return a tile from the Map by his coordinates\\n    /// @param self the map\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @return found true if the tile inside the map wad found\\n    /// @return tile the tile with coords inside the map\\n    function get(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y\\n    ) public view returns (bool found, TileWithCoordLib.TileWithCoord memory tile) {\\n        uint256 key = TileWithCoordLib.getKey(x, y);\\n        uint256 idx = self.indexes[key];\\n        if (idx != 0) {\\n            tile = self.values[idx - 1];\\n            found = true;\\n        }\\n    }\\n\\n    /// @notice check if a square is adjacent (4-connected component) to the current map.\\n    /// @dev used to add a quad to a map, it is cheaper than isAdjacent(map)\\n    /// @param self the map\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if the square is 4-connected to the map\\n    function isAdjacent(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) public view returns (bool) {\\n        if (isEmpty(self)) {\\n            return true;\\n        }\\n\\n        uint256 idx;\\n        TileLib.Tile memory spot;\\n        spot = spot.set(x % 24, y % 24, size);\\n        // left\\n        if (x >= 24) {\\n            idx = _getIdx(self, x - 24, y);\\n            if (idx != 0 && !self.values[idx - 1].tile.and(_growLeft(spot)).isEmpty()) {\\n                return true;\\n            }\\n        }\\n        // up\\n        if (y >= 24) {\\n            idx = _getIdx(self, x, y - 24);\\n            if (idx != 0 && (self.values[idx - 1].tile.data[0] & ((spot.data[0] & UP_MASK) << (24 * 7))) != 0) {\\n                return true;\\n            }\\n        }\\n        // middle\\n        idx = _getIdx(self, x, y);\\n        if (idx != 0 && !self.values[idx - 1].tile.and(_growMiddle(spot)).isEmpty()) {\\n            return true;\\n        }\\n        // down\\n        idx = _getIdx(self, x, y + 24);\\n        if (idx != 0 && (self.values[idx - 1].tile.data[2] & ((spot.data[2] & DOWN_MASK) >> (24 * 7))) != 0) {\\n            return true;\\n        }\\n        // right\\n        idx = _getIdx(self, x + 24, y);\\n        if (idx != 0 && !self.values[idx - 1].tile.and(_growRight(spot)).isEmpty()) {\\n            return true;\\n        }\\n        return false;\\n    }\\n\\n    /// @notice check that the map has only one 4-connected component, aka everything is adjacent\\n    /// @dev Checks the full map to see if all the pixels are adjacent\\n    /// @param self the map\\n    /// @return ret true if all the bits (lands) are adjacent\\n    function isAdjacent(Map storage self) public view returns (bool ret) {\\n        if (isEmpty(self)) {\\n            // everything is adjacent to an empty map\\n            return true;\\n        }\\n\\n        TileLib.Tile[] memory spot = new TileLib.Tile[](self.values.length);\\n        // We assume that all self.values[] are non empty (we remove them if they are empty).\\n        spot[0] = self.values[0].tile.findAPixel();\\n        bool done;\\n        while (!done) {\\n            (spot, done) = floodStep(self, spot);\\n        }\\n        uint256 len = self.values.length;\\n        uint256 i;\\n        for (; i < len; i++) {\\n            // Check the tile ignoring coordinates\\n            if (!self.values[i].tile.isEqual(spot[i])) {\\n                return false;\\n            }\\n        }\\n        return true;\\n    }\\n\\n    /// @notice used to check adjacency. See: https://en.wikipedia.org/wiki/Flood_fill and isAdjacent.\\n    /// @param self the map\\n    /// @param current the current image\\n    /// @return next return the image with the extra pixels that correspond to the flooding process\\n    /// @return done true if the current image is the same as the next one so the algorithm is ready to stop flooding.\\n    function floodStep(Map storage self, TileLib.Tile[] memory current)\\n        public\\n        view\\n        returns (TileLib.Tile[] memory next, bool done)\\n    {\\n        uint256 len = self.values.length;\\n        uint256 i;\\n        uint256 x;\\n        uint256 y;\\n        uint256 idx;\\n        TileLib.Tile memory ci;\\n        next = new TileLib.Tile[](len);\\n        // grow\\n        for (i; i < len; i++) {\\n            ci = current[i];\\n            // isEmpty\\n            if ((ci.data[0] | ci.data[1] | ci.data[2]) == 0) {\\n                continue;\\n            }\\n            x = self.values[i].getX() * 24;\\n            y = self.values[i].getY() * 24;\\n\\n            // middle, always included\\n            next[i].data[0] |= _grow(ci.data[0]) | ((ci.data[1] & UP_MASK) << (24 * 7));\\n            next[i].data[1] |=\\n                _grow(ci.data[1]) |\\n                ((ci.data[2] & UP_MASK) << (24 * 7)) |\\n                ((ci.data[0] & DOWN_MASK) >> (24 * 7));\\n            next[i].data[2] |= _grow(ci.data[2]) | ((ci.data[1] & DOWN_MASK) >> (24 * 7));\\n            // left\\n            if (x >= 24) {\\n                idx = _getIdx(self, x - 24, y);\\n                if (idx != 0) {\\n                    next[idx - 1].data[0] |= (ci.data[0] & LEFT_MASK) << 23;\\n                    next[idx - 1].data[1] |= (ci.data[1] & LEFT_MASK) << 23;\\n                    next[idx - 1].data[2] |= (ci.data[2] & LEFT_MASK) << 23;\\n                }\\n            }\\n            // up\\n            if (y >= 24) {\\n                idx = _getIdx(self, x, y - 24);\\n                if (idx != 0) {\\n                    next[idx - 1].data[2] |= (ci.data[0] & UP_MASK) << (24 * 7);\\n                }\\n            }\\n            // down\\n            idx = _getIdx(self, x, y + 24);\\n            if (idx != 0) {\\n                next[idx - 1].data[0] |= (ci.data[2] & DOWN_MASK) >> (24 * 7);\\n            }\\n            // right\\n            idx = _getIdx(self, x + 24, y);\\n            if (idx != 0) {\\n                next[idx - 1].data[0] |= (ci.data[0] & RIGHT_MASK) >> 23;\\n                next[idx - 1].data[1] |= (ci.data[1] & RIGHT_MASK) >> 23;\\n                next[idx - 1].data[2] |= (ci.data[2] & RIGHT_MASK) >> 23;\\n            }\\n        }\\n        // Mask it.\\n        done = true;\\n        for (i = 0; i < len; i++) {\\n            // next[i] = next[i].and(self.values[i].tile);\\n            // done = done && next[i].isEqual(current[i]);\\n            next[i].data[0] &= self.values[i].tile.data[0];\\n            next[i].data[1] &= self.values[i].tile.data[1];\\n            next[i].data[2] &= self.values[i].tile.data[2];\\n            done =\\n                done &&\\n                next[i].data[0] == current[i].data[0] &&\\n                next[i].data[1] == current[i].data[1] &&\\n                next[i].data[2] == current[i].data[2];\\n        }\\n        return (next, done);\\n    }\\n\\n    /// @notice delete certain tile from the map\\n    /// @param self the Map where the tile is removed\\n    /// @param idx the index of the tile in the internal list\\n    /// @param key the key of the tile (combination of x,y)\\n    function _remove(\\n        Map storage self,\\n        uint256 idx,\\n        uint256 key\\n    ) private {\\n        uint256 toDeleteIndex = idx - 1;\\n        uint256 lastIndex = self.values.length - 1;\\n        if (lastIndex != toDeleteIndex) {\\n            TileWithCoordLib.TileWithCoord memory lastValue = self.values[lastIndex];\\n            self.values[toDeleteIndex] = lastValue;\\n            self.indexes[lastValue.getKey()] = idx;\\n        }\\n        self.values.pop();\\n        delete self.indexes[key];\\n    }\\n\\n    /// @notice given x and y return the index of the tile inside the internal list of tiles\\n    /// @param self the Map where the tile is removed\\n    /// @param x the x coordinate\\n    /// @param y the y coordinate\\n    /// @return the index in the list + 1 or zero if not found\\n    function _getIdx(\\n        Map storage self,\\n        uint256 x,\\n        uint256 y\\n    ) private view returns (uint256) {\\n        return self.indexes[TileWithCoordLib.getKey(x, y)];\\n    }\\n\\n    /// @notice grow (4-connected) the internal word that represent 8 lines of the tile adding pixels\\n    /// @param x the value of the internal work\\n    /// @return the internal work with the extra pixels from growing it\\n    function _grow(uint256 x) private pure returns (uint256) {\\n        return (x | ((x & RIGHT_MASK_NEG) << 1) | ((x & LEFT_MASK_NEG) >> 1) | (x << 24) | (x >> 24));\\n    }\\n\\n    /// @notice grow (4-connected) a tile adding pixels around those that exists\\n    /// @param self the tile to grow\\n    /// @return e the tile that results from adding all the 4-connected pixels\\n    function _growMiddle(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {\\n        e.data[0] = _grow(self.data[0]) | ((self.data[1] & UP_MASK) << (24 * 7));\\n        e.data[1] =\\n            _grow(self.data[1]) |\\n            ((self.data[2] & UP_MASK) << (24 * 7)) |\\n            ((self.data[0] & DOWN_MASK) >> (24 * 7));\\n        e.data[2] = _grow(self.data[2]) | ((self.data[1] & DOWN_MASK) >> (24 * 7));\\n        return e;\\n    }\\n\\n    /// @notice grow (4-connected) a tile adding pixels around those that exists\\n    /// @param self the tile to grow\\n    /// @return e the extra tile to the right that results from adding all the 4-connected pixels\\n    function _growRight(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {\\n        // for loop removed to save some gas.\\n        e.data[0] = (self.data[0] & RIGHT_MASK) >> 23;\\n        e.data[1] = (self.data[1] & RIGHT_MASK) >> 23;\\n        e.data[2] = (self.data[2] & RIGHT_MASK) >> 23;\\n        return e;\\n    }\\n\\n    /// @notice grow (4-connected) a tile adding pixels around those that exists\\n    /// @param self the tile to grow\\n    /// @return e the extra tile to the left that results from adding all the 4-connected pixels\\n    function _growLeft(TileLib.Tile memory self) internal pure returns (TileLib.Tile memory e) {\\n        e.data[0] = (self.data[0] & LEFT_MASK) << 23;\\n        e.data[1] = (self.data[1] & LEFT_MASK) << 23;\\n        e.data[2] = (self.data[2] & LEFT_MASK) << 23;\\n        return e;\\n    }\\n}\\n\",\"keccak256\":\"0x8cbeb83f383e5960af26a4b0982ca6e9fc1bd74a174641ec67c51ce7adcbb674\",\"license\":\"MIT\"},\"src/solc_0.8/common/Libraries/TileLib.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\n/// @title An optimized bitset of 24x24 bits (used to represent maps)\\n/// @notice see: http://\\n/// @dev We store 8 lines of 24 bits in each uint256 and leave some free space.\\nlibrary TileLib {\\n    uint256 public constant PIXEL_MASK = 0x0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;\\n    uint256 public constant PIXEL_MASK_INV = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;\\n\\n    struct Tile {\\n        uint256[3] data;\\n    }\\n\\n    /// @notice init the tile with the internal data directly\\n    /// @return A Tile that has the bit data set\\n    function init(\\n        Tile memory self,\\n        uint256 pixelData1,\\n        uint256 pixelData2,\\n        uint256 pixelData3\\n    ) internal pure returns (Tile memory) {\\n        self.data[0] = pixelData1 & PIXEL_MASK;\\n        self.data[1] = pixelData2 & PIXEL_MASK;\\n        self.data[2] = pixelData3 & PIXEL_MASK;\\n        return self;\\n    }\\n\\n    /// @notice Set the bits inside a square that has size x size in the x,y coordinates\\n    /// @dev can be optimized for the specific case of a 24x24 square\\n    /// @param self the Tile in which the bits are set\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return self with the corresponding bits set\\n    function set(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) internal pure returns (Tile memory) {\\n        require(x < 24 && y < 24, \\\"Invalid tile coordinates\\\");\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        uint256 mask = _quadMask(size);\\n        require(mask != 0, \\\"invalid size\\\");\\n        uint256 i;\\n        for (; i < size; i++) {\\n            uint256 idx = (y + i) / 8;\\n            self.data[idx] |= mask << (x + 24 * ((y + i) % 8));\\n        }\\n        return self;\\n    }\\n\\n    /// @notice Clear the bits inside a square that has size x size in the x,y coordinates\\n    /// @dev can be optimized for the specific case of a 24x24 square\\n    /// @param self the Tile in which the bits will be cleared\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return self with the corresponding cleared bits\\n    function clear(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) internal pure returns (Tile memory) {\\n        require(x < 24 && y < 24, \\\"Invalid tile coordinates\\\");\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        uint256 mask = _quadMask(size);\\n        require(mask != 0, \\\"invalid size\\\");\\n        uint256 i;\\n        for (; i < size; i++) {\\n            uint256 idx = (y + i) / 8;\\n            self.data[idx] &= ~(mask << (x + 24 * ((y + i) % 8)));\\n        }\\n        return self;\\n    }\\n\\n    /// @notice Check if the bit in certain coordinate inside the Tile is set or not, if not set it.\\n    /// @dev this routine is a combination of contains and set, used to save some gas\\n    /// @param self the Tile where the check is done\\n    /// @param x the x coordinate\\n    /// @param y the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function addIfNotContain(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y\\n    ) internal pure returns (bool, Tile memory) {\\n        require(x < 24 && y < 24, \\\"Invalid coordinates\\\");\\n        uint256 idx = y / 8;\\n        uint256 bitMask = 1 << (x + 24 * (y % 8));\\n        if (self.data[idx] & bitMask == bitMask) {\\n            return (false, self);\\n        }\\n        self.data[idx] |= bitMask;\\n        return (true, self);\\n    }\\n\\n    /// @notice Check if the bit in certain coordinate inside the Tile is set or not\\n    /// @param self the Tile where the check is done\\n    /// @param x the x coordinate\\n    /// @param y the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function contain(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y\\n    ) internal pure returns (bool) {\\n        require(x < 24 && y < 24, \\\"Invalid coordinates\\\");\\n        uint256 idx = y / 8;\\n        uint256 bitMask = 1 << (x + 24 * (y % 8));\\n        return (self.data[idx] & bitMask == bitMask);\\n    }\\n\\n    /// @notice Check if the all the bits of a square inside the Tile are set or not\\n    /// @param self the Tile where the check is done\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if al the bits are set or false if at least one bit is cleared\\n    function contain(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) internal pure returns (bool) {\\n        require(x < 24 && y < 24, \\\"Invalid tile coordinates\\\");\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        uint256 mask = _quadMask(size);\\n        require(mask != 0, \\\"invalid size\\\");\\n        uint256 i;\\n        for (; i < size; i++) {\\n            uint256 idx = (y + i) / 8;\\n            uint256 bitMask = mask << (x + 24 * ((y + i) % 8));\\n            if (self.data[idx] & bitMask != bitMask) {\\n                return false;\\n            }\\n        }\\n        return true;\\n    }\\n\\n    /// @notice Check if a Tile includes all the bits that are set in another Tile\\n    /// @param self the bigger Tile that is checked for inclusion\\n    /// @param contained the Tile that must be included\\n    /// @return true if self contain contained Tile\\n    function contain(Tile memory self, Tile memory contained) internal pure returns (bool) {\\n        uint256 d0 = contained.data[0] & PIXEL_MASK;\\n        uint256 d1 = contained.data[1] & PIXEL_MASK;\\n        uint256 d2 = contained.data[2] & PIXEL_MASK;\\n        return (self.data[0] & d0 == d0) && (self.data[1] & d1 == d1) && (self.data[2] & d2 == d2);\\n    }\\n\\n    /// @notice Check if the Tile has any bit in common with a square\\n    /// @param self the Tile where the check is done\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if there is at least one bit set in both Tiles\\n    function intersect(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) internal pure returns (bool) {\\n        require(x < 24 && y < 24, \\\"Invalid tile coordinates\\\");\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        uint256 mask = _quadMask(size);\\n        require(mask != 0, \\\"invalid size\\\");\\n        uint256 i;\\n        for (; i < size; i++) {\\n            uint256 idx = (y + i) / 8;\\n            uint256 bitMask = mask << (x + 24 * ((y + i) % 8));\\n            if (self.data[idx] & bitMask != 0) {\\n                return true;\\n            }\\n        }\\n        return false;\\n    }\\n\\n    /// @notice Check if two Tiles has any bit in common\\n    /// @param self first Tile to compare\\n    /// @param other second tile to compare\\n    /// @return true if there is at least one bit set in both Tiles\\n    function intersect(Tile memory self, Tile memory other) internal pure returns (bool) {\\n        return\\n            ((self.data[0] & other.data[0]) | (self.data[1] & other.data[1]) | (self.data[2] & other.data[2])) &\\n                PIXEL_MASK !=\\n            0;\\n    }\\n\\n    /// @notice Check if two Tiles has exactly the same bits set\\n    /// @param self first Tile to compare\\n    /// @param other second Tile to compare\\n    /// @return true if the two Tiles has the same bits set\\n    function isEqual(Tile memory self, Tile memory other) internal pure returns (bool) {\\n        return\\n            ((self.data[0] ^ other.data[0]) | (self.data[1] ^ other.data[1]) | (self.data[2] ^ other.data[2])) &\\n                PIXEL_MASK ==\\n            0;\\n    }\\n\\n    /// @notice return a Tile that is the union of two Tiles\\n    /// @dev this function destroys data outside the pixel data (we want to save some gas)\\n    /// @param self first Tile to compare\\n    /// @param other second Tile to compare\\n    /// @return a Tile that is the union of self and other\\n    function or(Tile memory self, Tile memory other) internal pure returns (Tile memory) {\\n        self.data[0] |= other.data[0] & PIXEL_MASK;\\n        self.data[1] |= other.data[1] & PIXEL_MASK;\\n        self.data[2] |= other.data[2] & PIXEL_MASK;\\n        return self;\\n    }\\n\\n    /// @notice return a Tile that is the intersection of two Tiles\\n    /// @dev this function destroys data outside the pixel data (we want to save some gas)\\n    /// @param self first Tile to compare\\n    /// @param other second Tile to compare\\n    /// @return a Tile that is the intersection of self and other\\n    function and(Tile memory self, Tile memory other) internal pure returns (Tile memory) {\\n        self.data[0] &= other.data[0] | PIXEL_MASK_INV;\\n        self.data[1] &= other.data[1] | PIXEL_MASK_INV;\\n        self.data[2] &= other.data[2] | PIXEL_MASK_INV;\\n        return self;\\n    }\\n\\n    /// @notice Calculates the subtraction of two Tile\\n    /// @param self the Tile to subtract from\\n    /// @param value the Tile subtracted\\n    /// @return the self with all the bits set in value cleared\\n    function subtract(Tile memory self, Tile memory value) internal pure returns (Tile memory) {\\n        self.data[0] &= ~(value.data[0] & PIXEL_MASK);\\n        self.data[1] &= ~(value.data[1] & PIXEL_MASK);\\n        self.data[2] &= ~(value.data[2] & PIXEL_MASK);\\n        return self;\\n    }\\n\\n    /// @notice check if a Tile is empty, doesn't have any bit set\\n    /// @param self first Tile to compare\\n    /// @return true if the Tile is empty\\n    function isEmpty(Tile memory self) internal pure returns (bool) {\\n        return (self.data[0] | self.data[1] | self.data[2]) & PIXEL_MASK == 0;\\n    }\\n\\n    /// @notice return a Tile that has only one of the pixels from the original Tile set\\n    /// @param self Tile in which one pixel is searched\\n    /// @return ret a Tile that has only one pixel set\\n    function findAPixel(Tile memory self) internal pure returns (Tile memory ret) {\\n        uint256 target;\\n        uint256 shift;\\n\\n        target = self.data[2] & PIXEL_MASK;\\n        if (target != 0) {\\n            shift = _findAPixel(target);\\n            ret.data[2] = (1 << shift);\\n            return ret;\\n        }\\n\\n        target = self.data[1] & PIXEL_MASK;\\n        if (target != 0) {\\n            shift = _findAPixel(target);\\n            ret.data[1] = (1 << shift);\\n            return ret;\\n        }\\n\\n        target = self.data[0] & PIXEL_MASK;\\n        if (target != 0) {\\n            shift = _findAPixel(target);\\n            ret.data[0] = (1 << shift);\\n        }\\n        return ret;\\n    }\\n\\n    /// @notice given a tile, translate all the bits in the x and y direction\\n    /// @param self the initial Tile to translate\\n    /// @param x the x distance to translate\\n    /// @param y the y distance to translate\\n    /// @return col1 first column that represents the four tiles that are the result of the translation\\n    /// @return col2 second column that represents the four tiles that are the result of the translation\\n    function translate(\\n        Tile memory self,\\n        uint256 x,\\n        uint256 y\\n    ) internal pure returns (uint256[6] memory col1, uint256[6] memory col2) {\\n        // Move right\\n        uint256 mask = _getTranslateXMask(x);\\n        col1[0] = (self.data[0] & mask) << x;\\n        col1[1] = (self.data[1] & mask) << x;\\n        col1[2] = (self.data[2] & mask) << x;\\n        if (x > 0) {\\n            mask = PIXEL_MASK - mask;\\n            col2[0] = (self.data[0] & mask) >> (24 - x);\\n            col2[1] = (self.data[1] & mask) >> (24 - x);\\n            col2[2] = (self.data[2] & mask) >> (24 - x);\\n        }\\n        // Move down\\n        uint256 rem = 24 * (y % 8);\\n        uint256 div = y / 8;\\n        mask = PIXEL_MASK - (2**(24 * 8 - rem) - 1);\\n        // TODO: optimization, remove the loop, check gas consumption\\n        for (uint256 i = 5; i > div; i--) {\\n            col1[i] = (col1[i - div] << rem) | ((col1[i - div - 1] & mask) >> (24 * 8 - rem));\\n            col2[i] = (col2[i - div] << rem) | ((col2[i - div - 1] & mask) >> (24 * 8 - rem));\\n        }\\n        col1[div] = col1[0] << rem;\\n        col2[div] = col2[0] << rem;\\n        if (div > 0) {\\n            col1[0] = 0;\\n            col2[0] = 0;\\n            if (div > 1) {\\n                col1[1] = 0;\\n                col2[1] = 0;\\n            }\\n        }\\n        return (col1, col2);\\n    }\\n\\n    uint256 private constant QUAD_MASK_1 = 1;\\n    uint256 private constant QUAD_MASK_3 = 2**3 - 1;\\n    uint256 private constant QUAD_MASK_6 = 2**6 - 1;\\n    uint256 private constant QUAD_MASK_12 = 2**12 - 1;\\n    uint256 private constant QUAD_MASK_24 = 2**24 - 1;\\n\\n    /// @notice return a bit mask used to set or clear a square of certain size in the Tile\\n    /// @param size the size of the square\\n    /// @return the bit mask or zero if the size is not supported\\n    function _quadMask(uint256 size) private pure returns (uint256) {\\n        if (size == 1) return 1;\\n        if (size == 3) return QUAD_MASK_3;\\n        if (size == 6) return QUAD_MASK_6;\\n        if (size == 12) return QUAD_MASK_12;\\n        if (size == 24) return QUAD_MASK_24;\\n        return 0;\\n    }\\n\\n    /// @notice count the amount of bits set inside the Tile\\n    /// @param self the Tile in which the bits are counted\\n    /// @return the count of bits that are set\\n    function countBits(Tile memory self) internal pure returns (uint256) {\\n        return _countBits(self.data[0]) + _countBits(self.data[1]) + _countBits(self.data[2]);\\n    }\\n\\n    /// @notice count the amount of bits set inside a word\\n    /// @dev see: https://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer\\n    /// @param x the word in which the bits are counted\\n    /// @return the count of bits that are set\\n    function _countBits(uint256 x) private pure returns (uint256) {\\n        x = x - ((x >> 1) & 0x0000000000000000555555555555555555555555555555555555555555555555);\\n        x =\\n            (x & 0x0000000000000000333333333333333333333333333333333333333333333333) +\\n            ((x >> 2) & 0x0000000000000000333333333333333333333333333333333333333333333333);\\n        x = (x + (x >> 4)) & 0x00000000000000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F;\\n        return\\n            ((((x >> 96) * 0x010101010101010101010101) +\\n                ((x & 0x0F0F0F0F0F0F0F0F0F0F0F0F) * 0x010101010101010101010101)) >> (11 * 8)) & 0xFF;\\n    }\\n\\n    /// @notice giving 8 lines of a Tile, find any bit that is set\\n    /// @dev we must search in 8 * 24 bits that correspond to 8 lines, so 2^6 * 3, we split in three and then do a binary search\\n    /// @param target the uint256 that has the 8 lines\\n    /// @return shift the amount of bits shift left so the choose bit is set in the resulting Tile\\n    function _findAPixel(uint256 target) private pure returns (uint256 shift) {\\n        uint256 mask = (2**64 - 1);\\n        // divide in 3 parts, then do a binary search\\n        if ((target & mask) == 0) {\\n            target = target >> 64;\\n            shift = 64;\\n            if ((target & mask) == 0) {\\n                target = target >> 64;\\n                shift = 128;\\n            }\\n        }\\n        for (uint256 i = 32; i > 0; i = i / 2) {\\n            mask = mask >> i;\\n            if ((target & mask) == 0) {\\n                target = target >> i;\\n                shift += i;\\n            }\\n        }\\n        return shift;\\n    }\\n\\n    /// @notice return a bit mask used translate a Tile data in the x direction\\n    /// @param x the x value to translate\\n    /// @return the bit mask\\n    function _getTranslateXMask(uint256 x) private pure returns (uint256) {\\n        uint256 mask = (2**24 - 1) >> x;\\n        mask |= mask << 24;\\n        mask |= mask << (24 * 2);\\n        mask |= mask << (24 * 4);\\n        return mask;\\n    }\\n}\\n\",\"keccak256\":\"0x597571a993575cf7f27e1313fab368b3d362d5539caaea46fb06546ccf883d63\",\"license\":\"MIT\"},\"src/solc_0.8/common/Libraries/TileWithCoordLib.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport {TileLib} from \\\"./TileLib.sol\\\";\\n\\n/// @title A Tile (24x24 map piece) that also stores x,y coordinates and a combination of the two called key\\n/// @dev Using a sparse array of TileWithCoords we build a bigger map covered with Tiles\\nlibrary TileWithCoordLib {\\n    using TileLib for TileLib.Tile;\\n\\n    struct TileWithCoord {\\n        TileLib.Tile tile;\\n    }\\n\\n    /// @notice initialize the TileWithCoord structure\\n    /// @return An empty Tile that has the x,y and corresponding key value set\\n    function init(uint256 x, uint256 y) internal pure returns (TileWithCoord memory) {\\n        TileWithCoord memory ret;\\n        ret.tile.data[1] = (x / 24) << 224;\\n        ret.tile.data[2] = (y / 24) << 224;\\n        return ret;\\n    }\\n\\n    /// @notice initialize the TileWithCoord structure\\n    /// @return An TileWithCoord that has the x,y, key and the Tile bit data set\\n    function init(\\n        uint256 x,\\n        uint256 y,\\n        uint256 pixelData1,\\n        uint256 pixelData2,\\n        uint256 pixelData3\\n    ) internal pure returns (TileWithCoord memory) {\\n        TileWithCoord memory ret;\\n        ret.tile = ret.tile.init(pixelData1, pixelData2, pixelData3);\\n        ret.tile.data[1] |= (x / 24) << 224;\\n        ret.tile.data[2] |= (y / 24) << 224;\\n        return ret;\\n    }\\n\\n    /// @notice Set the bits inside a square that has size x size in the x,y coordinates\\n    /// @param self the TileWithCoord in which the bits are set\\n    /// @param xi the x coordinate of the square\\n    /// @param yi the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return self with the corresponding bits set\\n    function set(\\n        TileWithCoord memory self,\\n        uint256 xi,\\n        uint256 yi,\\n        uint256 size\\n    ) internal pure returns (TileWithCoord memory) {\\n        require(getX(self) == xi / 24 && getY(self) == yi / 24, \\\"Invalid tile coordinates\\\");\\n        self.tile = self.tile.set(xi % 24, yi % 24, size);\\n        return self;\\n    }\\n\\n    /// @notice Calculates the union/addition of two TileWithCoord\\n    /// @dev to be able to merge the two TileWithCoord must have the same coordinates\\n    /// @param self one of the TileWithCoord to merge\\n    /// @param value the second TileWithCoord to merge\\n    /// @return the merge of the two TileWithCoord\\n    function merge(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {\\n        require(getX(self) == getX(value) && getY(self) == getY(value), \\\"Invalid tile coordinates\\\");\\n        self.tile = self.tile.or(value.tile);\\n        return self;\\n    }\\n\\n    /// @notice Clear the bits inside a square that has size x size in the x,y coordinates\\n    /// @param self the TileWithCoord, in which the bits will be cleared\\n    /// @param xi the x coordinate of the square\\n    /// @param yi the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return self with the corresponding cleared bits\\n    function clear(\\n        TileWithCoord memory self,\\n        uint256 xi,\\n        uint256 yi,\\n        uint256 size\\n    ) internal pure returns (TileWithCoord memory) {\\n        require(getX(self) == xi / 24 && getY(self) == yi / 24, \\\"Invalid tile coordinates\\\");\\n        self.tile = self.tile.clear(xi % 24, yi % 24, size);\\n        return self;\\n    }\\n\\n    /// @notice Calculates the subtraction of two TileWithCoord\\n    /// @dev to be able to subtract them the two TileWithCoord must have the same coordinates\\n    /// @param self the TileWithCoord to subtract from\\n    /// @param value the TileWithCoord subtracted\\n    /// @return the self with all the bits set in value cleared\\n    function clear(TileWithCoord memory self, TileWithCoord memory value) internal pure returns (TileWithCoord memory) {\\n        require(getX(self) == getX(value) && getY(self) == getY(value), \\\"Invalid tile coordinates\\\");\\n        self.tile = self.tile.subtract(value.tile);\\n        return self;\\n    }\\n\\n    /// @notice Check if the bit in certain coordinate are set or not in the TileWithCoord\\n    /// @param self the TileWithCoord where the check is done\\n    /// @param xi the x coordinate\\n    /// @param yi the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function contain(\\n        TileWithCoord memory self,\\n        uint256 xi,\\n        uint256 yi\\n    ) internal pure returns (bool) {\\n        require(getX(self) == xi / 24 && getY(self) == yi / 24, \\\"Invalid coordinates\\\");\\n        return self.tile.contain(xi % 24, yi % 24);\\n    }\\n\\n    /// @notice Check if the all the bits of a square inside the TileWithCoord are set or not\\n    /// @param self the TileWithCoord where the check is done\\n    /// @param xi the x coordinate of the square\\n    /// @param yi the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if al the bits are set or false if at least one bit is cleared\\n    function contain(\\n        TileWithCoord memory self,\\n        uint256 xi,\\n        uint256 yi,\\n        uint256 size\\n    ) internal pure returns (bool) {\\n        require(getX(self) == xi / 24 && getY(self) == yi / 24, \\\"Invalid tile coordinates\\\");\\n        return self.tile.contain(xi % 24, yi % 24, size);\\n    }\\n\\n    /// @notice Check if the TileWithCoord has any bit in common with a square\\n    /// @param self the TileWithCoord where the check is done\\n    /// @param xi the x coordinate of the square\\n    /// @param yi the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if there is at least one bit set in the TileWithCoords and the square\\n    function intersect(\\n        TileWithCoord memory self,\\n        uint256 xi,\\n        uint256 yi,\\n        uint256 size\\n    ) internal pure returns (bool) {\\n        require(getX(self) == xi / 24 && getY(self) == yi / 24, \\\"Invalid tile coordinates\\\");\\n        return self.tile.intersect(xi % 24, yi % 24, size);\\n    }\\n\\n    /// @notice return the x coordinate value stored in the TileWithCoord\\n    /// @param self the TileWithCoord to get the x coordinate from\\n    /// @return the x value\\n    function getX(TileWithCoord memory self) internal pure returns (uint256) {\\n        return self.tile.data[1] >> 224;\\n    }\\n\\n    /// @notice return the y coordinate value stored in the TileWithCoord\\n    /// @param self the TileWithCoord to get the y coordinate from\\n    /// @return the y value\\n    function getY(TileWithCoord memory self) internal pure returns (uint256) {\\n        return self.tile.data[2] >> 224;\\n    }\\n\\n    /// @notice return the key value stored in the TileWithCoord\\n    /// @param self the TileWithCoord to get the key from\\n    /// @return the key value\\n    function getKey(TileWithCoord memory self) internal pure returns (uint256) {\\n        return getX(self) | (getY(self) << 16);\\n    }\\n\\n    /// @notice helper to calculate the key value given the x,y coordinates\\n    /// @param x the x coordinate\\n    /// @param y the y coordinate\\n    /// @return the key value\\n    function getKey(uint256 x, uint256 y) internal pure returns (uint256) {\\n        return (x / 24) | ((y / 24) << 16);\\n    }\\n\\n    /// @notice count the amount of bits set inside the TileWithCoord\\n    /// @param self the TileWithCoord in which the bits are counted\\n    /// @return the count of bits that are set\\n    function countBits(TileWithCoord memory self) internal pure returns (uint256) {\\n        return self.tile.countBits();\\n    }\\n\\n    /// @notice check if a TileWithCoord is empty, none of the bits are set\\n    /// @param self the TileWithCoord to check\\n    /// @return true if none of the bits are set\\n    function isEmpty(TileWithCoord memory self) internal pure returns (bool) {\\n        return self.tile.isEmpty();\\n    }\\n\\n    /// @notice Check if two TileWithCoord has exactly the same coordinates and bits set\\n    /// @param self first TileWithCoord to compare\\n    /// @param other second TileWithCoord to compare\\n    /// @return true if the two TileWithCoord has the same coordinates and bits set\\n    function isEqual(TileWithCoord memory self, TileWithCoord memory other) internal pure returns (bool) {\\n        return\\n            self.tile.data[0] == other.tile.data[0] &&\\n            self.tile.data[1] == other.tile.data[1] &&\\n            self.tile.data[2] == other.tile.data[2];\\n    }\\n}\\n\",\"keccak256\":\"0x73a6af205778745e2b12d381818646e4b7efbca3ef914b776035cc247d62414e\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/IPremiumLandRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface IPremiumLandRegistry {\\n    /// @notice Check if the bit in certain coordinate are set or not inside the map\\n    /// @param x the x coordinate\\n    /// @param y the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function isPremium(uint256 x, uint256 y) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x4cd29d95b18dca6caecb95063af63dbb1c125151613c20fad322214488cec2a3\",\"license\":\"MIT\"},\"src/solc_0.8/registry/PremiumLandRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport {ContextUpgradeable} from \\\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\\\";\\nimport {AccessControlUpgradeable} from \\\"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol\\\";\\nimport {Initializable} from \\\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\\\";\\nimport {TileWithCoordLib} from \\\"../common/Libraries/TileWithCoordLib.sol\\\";\\nimport {MapLib} from \\\"../common/Libraries/MapLib.sol\\\";\\nimport {IPremiumLandRegistry} from \\\"../common/interfaces/IPremiumLandRegistry.sol\\\";\\n\\n/// @notice A 408x408 matrix of bits, true means that the land is premium\\ncontract PremiumLandRegistry is Initializable, ContextUpgradeable, AccessControlUpgradeable, IPremiumLandRegistry {\\n    using MapLib for MapLib.Map;\\n    using TileWithCoordLib for TileWithCoordLib.TileWithCoord;\\n\\n    // The following role is provided for business-related admin functions\\n    bytes32 public constant MAP_DESIGNER_ROLE = keccak256(\\\"MAP_DESIGNER_ROLE\\\");\\n\\n    struct PremiumLandRegistryStorage {\\n        MapLib.Map premiumLand;\\n    }\\n\\n    /// @dev Emitted when a tile is updated\\n    event TileChanged(TileWithCoordLib.TileWithCoord[]);\\n\\n    /// @dev Emitted when a tile is updated\\n    event PixelSet(uint256 x, uint256 y);\\n\\n    /// @dev Emitted when a tile is updated\\n    event PixelClear(uint256 x, uint256 y);\\n\\n    function PremiumLandRegistry_init(address admin) external initializer {\\n        require(admin != address(0), \\\"invalid admin address\\\");\\n        _grantRole(DEFAULT_ADMIN_ROLE, admin);\\n    }\\n\\n    /// @notice assign the bits of a premium map\\n    /// @param tiles the list of TileWithCoord to be assigned\\n    function assign(TileWithCoordLib.TileWithCoord[] memory tiles) external onlyRole(MAP_DESIGNER_ROLE) {\\n        _s().premiumLand.assign(tiles);\\n        emit TileChanged(tiles);\\n    }\\n\\n    /// @notice set a pixel in the premium map\\n    /// @dev helper method that can be called by hand\\n    /// @param x coordinate\\n    /// @param y coordinate\\n    function set(uint256 x, uint256 y) external onlyRole(MAP_DESIGNER_ROLE) {\\n        _s().premiumLand.set(x, y, 1);\\n        emit PixelSet(x, y);\\n    }\\n\\n    /// @notice clear a pixel in the premium map\\n    /// @dev helper method that can be called by hand\\n    /// @param x coordinate\\n    /// @param y coordinate\\n    function clear(uint256 x, uint256 y) external onlyRole(MAP_DESIGNER_ROLE) {\\n        _s().premiumLand.clear(x, y, 1);\\n        emit PixelClear(x, y);\\n    }\\n\\n    /// @notice Check if the bit in certain coordinate are set or not inside the map\\n    /// @param x the x coordinate\\n    /// @param y the  coordinate\\n    /// @return true if the x,y coordinate bit is set or false if it is cleared\\n    function isPremium(uint256 x, uint256 y) external view override returns (bool) {\\n        return _s().premiumLand.contain(x, y);\\n    }\\n\\n    /// @notice Count the amount of premium lands.\\n    /// @param xs the x coordinate\\n    /// @param ys the  coordinate\\n    /// @return the amount of premium lands\\n    function countPremium(uint256[] calldata xs, uint256[] calldata ys) external view returns (uint256) {\\n        uint256 len = xs.length;\\n        require(len == ys.length, \\\"invalid arguments\\\");\\n        MapLib.Map storage premiumLand = _s().premiumLand;\\n        uint256 count;\\n        for (uint256 i; i < len; i++) {\\n            if (premiumLand.contain(xs[i], ys[i])) count++;\\n        }\\n        return count;\\n    }\\n\\n    /// @notice Count the amount of premium lands inside the Map filtered by a quad\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return the amount of premium lands\\n    function countPremium(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) external view returns (uint256) {\\n        return _s().premiumLand.getLandCount(x, y, size);\\n    }\\n\\n    /// @notice Count the amount of premium lands inside the Map filtered by a quad\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param xs the x coordinate of the square\\n    /// @param ys the y coordinate of the square\\n    /// @param sizes the size of the square\\n    /// @return the amount of premium lands\\n    function countPremium(\\n        uint256[] calldata xs,\\n        uint256[] calldata ys,\\n        uint256[] calldata sizes\\n    ) external view returns (uint256) {\\n        uint256 len = xs.length;\\n        require(len == ys.length && len == sizes.length, \\\"invalid arguments\\\");\\n        MapLib.Map storage premiumLand = _s().premiumLand;\\n        uint256 count;\\n        for (uint256 i; i < len; i++) {\\n            count += premiumLand.getLandCount(xs[i], ys[i], sizes[i]);\\n        }\\n        return count;\\n    }\\n\\n    /// @notice Check if the all the bits of a square inside the Map are set or not\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if al the bits are set or false if at least one bit is cleared\\n    function isAllPremium(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) external view returns (bool) {\\n        return _s().premiumLand.contain(x, y, size);\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in a TileWithCoord\\n    /// @param tile the TileWithCoord that must be included\\n    /// @return true if self contain tile TileWithCoord\\n    function isAllPremium(TileWithCoordLib.TileWithCoord memory tile) external view returns (bool) {\\n        return _s().premiumLand.contain(tile);\\n    }\\n\\n    /// @notice Check if a Map includes all the bits that are set in a TileWithCoord[]\\n    /// @param tiles the TileWithCoord that must be included\\n    /// @return true if self contain tiles TileWithCoord[]\\n    function isAllPremium(TileWithCoordLib.TileWithCoord[] memory tiles) external view returns (bool) {\\n        return _s().premiumLand.contain(tiles);\\n    }\\n\\n    /// @notice Check if a map has at least one bit in common with a square (x,y,size)\\n    /// @dev the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if there is at least one bit set in both the Map and the square\\n    function isSomePremium(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) external view returns (bool) {\\n        return _s().premiumLand.intersect(x, y, size);\\n    }\\n\\n    /// @notice Check if a map has at least one bit in common with some TileWithCoord\\n    /// @param tile the TileWithCoord to compare\\n    /// @return true if there is at least one bit set in both the Map and the TileWithCoord\\n    function isSomePremium(TileWithCoordLib.TileWithCoord memory tile) external view returns (bool) {\\n        return _s().premiumLand.intersect(tile);\\n    }\\n\\n    /// @notice Check if a Map has at least one of the bits that are set in a TileWithCoord[]\\n    // @param tiles the TileWithCoord that must be included\\n    /// @return true if there is at least one bit set in both the Map and the TileWithCoord[]\\n    function isSomePremium(TileWithCoordLib.TileWithCoord[] memory tiles) external view returns (bool) {\\n        return _s().premiumLand.intersect(tiles);\\n    }\\n\\n    /// @notice return the length of the internal list of tiles\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @return the length of the list\\n    function length() external view returns (uint256) {\\n        return _s().premiumLand.length();\\n    }\\n\\n    /// @notice get the tile that is in certain position in the internal list of tiles\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @param index the index of the tile\\n    /// @return the tile that is in the position index in the list\\n    function at(uint256 index) external view returns (TileWithCoordLib.TileWithCoord memory) {\\n        return _s().premiumLand.at(index);\\n    }\\n\\n    /// @notice get the internal list of tiles with pagination\\n    /// @dev used to iterate off-chain over the tiles.\\n    /// @param offset initial offset used to paginate\\n    /// @param limit amount of tiles to get\\n    /// @return the partial list of tiles\\n    function at(uint256 offset, uint256 limit) external view returns (TileWithCoordLib.TileWithCoord[] memory) {\\n        return _s().premiumLand.at(offset, limit);\\n    }\\n\\n    /// @notice return the internal list of tiles\\n    /// @dev Use only for testing. This can be problematic if it grows too much !!!\\n    /// @return the list of internal tiles\\n    function getMap() external view returns (TileWithCoordLib.TileWithCoord[] memory) {\\n        return _s().premiumLand.getMap();\\n    }\\n\\n    /// @notice count the amount of bits (lands) set inside a Map\\n    /// @return the quantity of lands\\n    function getLandCount() external view returns (uint256) {\\n        return _s().premiumLand.getLandCount();\\n    }\\n\\n    /// @notice check if a square is adjacent (4-connected component) to the current map.\\n    /// @dev used to add a quad to a map, it is cheaper than isAdjacent(map)\\n    /// @param x the x coordinate of the square\\n    /// @param y the y coordinate of the square\\n    /// @param size the size of the square\\n    /// @return true if the square is 4-connected to the map\\n    function isAdjacent(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size\\n    ) external view returns (bool) {\\n        return _s().premiumLand.isAdjacent(x, y, size);\\n    }\\n\\n    function _s() internal pure returns (PremiumLandRegistryStorage storage ds) {\\n        bytes32 storagePosition = keccak256(\\\"PremiumLandRegistry.PremiumLandRegistryStorage\\\");\\n        assembly {\\n            ds.slot := storagePosition\\n        }\\n    }\\n\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x0c828e51eb8f6262a24a848acba3ad4c5f91317094933ef46e365419edcf90b7\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50612334806100206000396000f3fe608060405234801561001057600080fd5b50600436106101c45760003560e01c80635ceaa769116100f9578063b53ad8b711610097578063db7760a211610071578063db7760a2146103e1578063e0886f90146103f4578063e8d4ccd214610414578063fd7633c714610427576101c4565b8063b53ad8b714610394578063d305abc4146103a7578063d547741f146103ce576101c4565b806391d14854116100d357806391d1485414610338578063a0357e4b14610371578063a217fddf14610384578063ad3de14c1461038c576101c4565b80635ceaa7691461030a5780635de6a1d31461031257806372ac937114610325576101c4565b80632f2ff15d116101665780633d9972ec116101405780633d9972ec146102b157806341ee903e146102d157806343d41e66146102e4578063501a7032146102f7576101c4565b80632f2ff15d1461027857806336568abe1461028b5780633b4e3f781461029e576101c4565b8063248a9ca3116101a2578063248a9ca31461021c57806324cfdb211461023f5780632cb9eb64146102525780632dc84b3a14610265576101c4565b806301ffc9a7146101c95780631ab06ee5146101f15780631f7b6d3214610206575b600080fd5b6101dc6101d7366004611f63565b61043a565b60405190151581526020015b60405180910390f35b6102046101ff366004611ff1565b6104d5565b005b61020e6105f4565b6040519081526020016101e8565b61020e61022a366004611f20565b60009081526065602052604090206001015490565b61020461024d366004611cce565b6106b8565b6101dc610260366004612012565b6107c0565b6101dc610273366004611fa3565b61089e565b610204610286366004611f38565b610962565b610204610299366004611f38565b61098d565b6101dc6102ac366004611fa3565b610a1e565b6102c46102bf366004611ff1565b610a92565b6040516101e891906120eb565b6102046102df366004611ff1565b610b6d565b6102046102f2366004611cb4565b610ca2565b6101dc610305366004612012565b610dd4565b61020e610e5c565b6101dc610320366004611cce565b610ecf565b61020e610333366004611e6a565b610f43565b6101dc610346366004611f38565b60009182526065602090815260408084206001600160a01b0393909316845291905290205460ff1690565b6101dc61037f366004611ff1565b61110e565b61020e600081565b6102c46111dc565b61020e6103a2366004611e01565b6112a0565b61020e7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a381565b6102046103dc366004611f38565b61144e565b61020e6103ef366004612012565b611474565b610407610402366004611f20565b611549565b6040516101e891906121d6565b6101dc610422366004611cce565b611616565b6101dc610435366004612012565b61168a565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b0000000000000000000000000000000000000000000000000000000014806104cd57507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a361050181335b611712565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517ff9b9fec6000000000000000000000000000000000000000000000000000000008152600481019190915260248101849052604481018390526001606482015273058661Abb011d3E7C70475a5956856DFd81235C99063f9b9fec69060840160006040518083038186803b15801561059c57600080fd5b505af41580156105b0573d6000803e3d6000fd5b505060408051868152602081018690527f9dd19dd0ef54fcb0658a629e952840d8a2535b57a70181102424a0718dc4e5f093500190505b60405180910390a1505050565b6040517fac775cf80000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260009073058661Abb011d3E7C70475a5956856DFd81235C99063ac775cf8906024015b60206040518083038186803b15801561067b57600080fd5b505af415801561068f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106b39190611fd9565b905090565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a36106e381336104fc565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f5f72059200000000000000000000000000000000000000000000000000000000815273058661Abb011d3E7C70475a5956856DFd81235C991635f720592916107559190869060040161216c565b60006040518083038186803b15801561076d57600080fd5b505af4158015610781573d6000803e3d6000fd5b505050507fc068270503dcae9b1183e157c00a13eb70ab6203160c8ef0fa1142a20e4582a7826040516107b491906120eb565b60405180910390a15050565b6040517f515004380000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073058661Abb011d3E7C70475a5956856DFd81235C9906351500438906084015b60206040518083038186803b15801561085c57600080fd5b505af4158015610870573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108949190611f00565b90505b9392505050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f36fa623100000000000000000000000000000000000000000000000000000000815273058661Abb011d3E7C70475a5956856DFd81235C9916336fa623191610912919086906004016121c2565b60206040518083038186803b15801561092a57600080fd5b505af415801561093e573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104cd9190611f00565b60008281526065602052604090206001015461097e81336104fc565b6109888383611792565b505050565b6001600160a01b0381163314610a105760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084015b60405180910390fd5b610a1a8282611834565b5050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517ff480051900000000000000000000000000000000000000000000000000000000815273058661Abb011d3E7C70475a5956856DFd81235C99163f480051991610912919086906004016121c2565b60607fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f11c7db8e0000000000000000000000000000000000000000000000000000000081526004810191909152602481018490526044810183905273058661Abb011d3E7C70475a5956856DFd81235C9906311c7db8e9060640160006040518083038186803b158015610b2857600080fd5b505af4158015610b3c573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052610b649190810190611d71565b90505b92915050565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a3610b9881336104fc565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fe8485b07000000000000000000000000000000000000000000000000000000008152600481019190915260248101849052604481018390526001606482015273058661Abb011d3E7C70475a5956856DFd81235C99063e8485b079060840160206040518083038186803b158015610c3357600080fd5b505af4158015610c47573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610c6b9190611f00565b5060408051848152602081018490527f3f4d6d47f818ddf69bb0866dc712ab567cec9de8a8ce0023739787896d5841d691016105e7565b600054610100900460ff16610cbd5760005460ff1615610cc1565b303b155b610d335760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a65640000000000000000000000000000000000006064820152608401610a07565b600054610100900460ff16158015610d5e576000805460ff1961ff0019909116610100171660011790555b6001600160a01b038216610db45760405162461bcd60e51b815260206004820152601560248201527f696e76616c69642061646d696e206164647265737300000000000000000000006044820152606401610a07565b610dbf600083611792565b8015610a1a576000805461ff00191690555050565b6040517f8addfdc40000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073058661Abb011d3E7C70475a5956856DFd81235C990638addfdc490608401610844565b6040517f7c2c51480000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260009073058661Abb011d3E7C70475a5956856DFd81235C990637c2c514890602401610663565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f05a3338600000000000000000000000000000000000000000000000000000000815273058661Abb011d3E7C70475a5956856DFd81235C9916305a33386916109129190869060040161216c565b6000858481148015610f5457508083145b610fa05760405162461bcd60e51b815260206004820152601160248201527f696e76616c696420617267756d656e74730000000000000000000000000000006044820152606401610a07565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6000805b838110156111005773058661Abb011d3E7C70475a5956856DFd81235C9632b8790ab848d8d8581811061100857634e487b7160e01b600052603260045260246000fd5b905060200201358c8c8681811061102f57634e487b7160e01b600052603260045260246000fd5b905060200201358b8b8781811061105657634e487b7160e01b600052603260045260246000fd5b905060200201356040518563ffffffff1660e01b8152600401611092949392919093845260208401929092526040830152606082015260800190565b60206040518083038186803b1580156110aa57600080fd5b505af41580156110be573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110e29190611fd9565b6110ec9083612239565b9150806110f8816122b7565b915050610fc5565b509998505050505050505050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f3362c7cd0000000000000000000000000000000000000000000000000000000081526004810191909152602481018490526044810183905273058661Abb011d3E7C70475a5956856DFd81235C990633362c7cd9060640160206040518083038186803b1580156111a457600080fd5b505af41580156111b8573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b649190611f00565b60607fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fc853cffe000000000000000000000000000000000000000000000000000000008152600481019190915273058661Abb011d3E7C70475a5956856DFd81235C99063c853cffe9060240160006040518083038186803b15801561126457600080fd5b505af4158015611278573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526106b39190810190611d71565b6000838281146112f25760405162461bcd60e51b815260206004820152601160248201527f696e76616c696420617267756d656e74730000000000000000000000000000006044820152606401610a07565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6000805b838110156114425773058661Abb011d3E7C70475a5956856DFd81235C9633362c7cd848b8b8581811061135a57634e487b7160e01b600052603260045260246000fd5b905060200201358a8a8681811061138157634e487b7160e01b600052603260045260246000fd5b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e088901b168152600481019590955260248501939093525060209091020135604482015260640160206040518083038186803b1580156113e557600080fd5b505af41580156113f9573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061141d9190611f00565b15611430578161142c816122b7565b9250505b8061143a816122b7565b915050611317565b50979650505050505050565b60008281526065602052604090206001015461146a81336104fc565b6109888383611834565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f2b8790ab000000000000000000000000000000000000000000000000000000008152600481019190915260248101859052604481018490526064810183905273058661Abb011d3E7C70475a5956856DFd81235C990632b8790ab9060840160206040518083038186803b15801561151157600080fd5b505af4158015611525573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108949190611fd9565b611551611b26565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fdcedd4b000000000000000000000000000000000000000000000000000000000815260048101919091526024810183905273058661Abb011d3E7C70475a5956856DFd81235C99063dcedd4b09060440160606040518083038186803b1580156115de57600080fd5b505af41580156115f2573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104cd9190611fbe565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fcca0f3b700000000000000000000000000000000000000000000000000000000815273058661Abb011d3E7C70475a5956856DFd81235C99163cca0f3b7916109129190869060040161216c565b6040517f72ba78880000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073058661Abb011d3E7C70475a5956856DFd81235C9906372ba788890608401610844565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff16610a1a57611750816001600160a01b031660146118b7565b61175b8360206118b7565b60405160200161176c92919061206a565b60408051601f198184030181529082905262461bcd60e51b8252610a0791600401612139565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff16610a1a5760008281526065602090815260408083206001600160a01b03851684529091529020805460ff191660011790556117f03390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff1615610a1a5760008281526065602090815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b606060006118c6836002612251565b6118d1906002612239565b67ffffffffffffffff8111156118f757634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611921576020820181803683370190505b5090507f30000000000000000000000000000000000000000000000000000000000000008160008151811061196657634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053507f7800000000000000000000000000000000000000000000000000000000000000816001815181106119d757634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506000611a13846002612251565b611a1e906001612239565b90505b6001811115611ad7577f303132333435363738396162636465660000000000000000000000000000000085600f1660108110611a6d57634e487b7160e01b600052603260045260246000fd5b1a60f81b828281518110611a9157634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535060049490941c93611ad0816122a0565b9050611a21565b508315610b645760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e746044820152606401610a07565b6040518060200160405280611b39611b3e565b905290565b604080516080810190915280611b3960208201600381606080368337509192915050565b80356001600160a01b03811681146104d057600080fd5b60008083601f840112611b8a578182fd5b50813567ffffffffffffffff811115611ba1578182fd5b6020830191508360208083028501011115611bbb57600080fd5b9250929050565b600060608284031215611bd3578081fd5b6020611bde816121e4565b9150611be9816121e4565b84601f850112611bf857600080fd5b611c0260606121e4565b808587606088011115611c1457600080fd5b60005b6003811015611c3457813584529285019290850190600101611c17565b505082525082525092915050565b600060608284031215611c53578081fd5b6020611c5e816121e4565b9150611c69816121e4565b84601f850112611c7857600080fd5b611c8260606121e4565b808587606088011115611c9457600080fd5b60005b6003811015611c3457815184529285019290850190600101611c97565b600060208284031215611cc5578081fd5b610b6482611b62565b60006020808385031215611ce0578182fd5b823567ffffffffffffffff811115611cf6578283fd5b8301601f81018513611d06578283fd5b8035611d19611d1482612215565b6121e4565b818152838101908385016060808502860187018a1015611d37578788fd5b8795505b84861015611d6357611d4d8a83611bc2565b8452600195909501949286019290810190611d3b565b509098975050505050505050565b60006020808385031215611d83578182fd5b825167ffffffffffffffff811115611d99578283fd5b8301601f81018513611da9578283fd5b8051611db7611d1482612215565b818152838101908385016060808502860187018a1015611dd5578788fd5b8795505b84861015611d6357611deb8a83611c42565b8452600195909501949286019290810190611dd9565b60008060008060408587031215611e16578283fd5b843567ffffffffffffffff80821115611e2d578485fd5b611e3988838901611b79565b90965094506020870135915080821115611e51578384fd5b50611e5e87828801611b79565b95989497509550505050565b60008060008060008060608789031215611e82578182fd5b863567ffffffffffffffff80821115611e99578384fd5b611ea58a838b01611b79565b90985096506020890135915080821115611ebd578384fd5b611ec98a838b01611b79565b90965094506040890135915080821115611ee1578384fd5b50611eee89828a01611b79565b979a9699509497509295939492505050565b600060208284031215611f11578081fd5b81518015158114610b64578182fd5b600060208284031215611f31578081fd5b5035919050565b60008060408385031215611f4a578182fd5b82359150611f5a60208401611b62565b90509250929050565b600060208284031215611f74578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610b64578182fd5b600060608284031215611fb4578081fd5b610b648383611bc2565b600060608284031215611fcf578081fd5b610b648383611c42565b600060208284031215611fea578081fd5b5051919050565b60008060408385031215612003578182fd5b50508035926020909101359150565b600080600060608486031215612026578081fd5b505081359360208301359350604090920135919050565b8051518260005b6003811015612063578251825260209283019290910190600101612044565b5050505050565b60007f416363657373436f6e74726f6c3a206163636f756e7420000000000000000000825283516120a2816017850160208801612270565b7f206973206d697373696e6720726f6c652000000000000000000000000000000060179184019182015283516120df816028840160208801612270565b01602801949350505050565b6020808252825182820181905260009190848201906040850190845b8181101561212d5761211a83855161203d565b9284019260609290920191600101612107565b50909695505050505050565b6000602082528251806020840152612158816040850160208701612270565b601f01601f19169190910160400192915050565b6000604082018483526020604081850152818551808452606093508386019150828701855b828110156121b4576121a484835161203d565b9285019290840190600101612191565b509198975050505050505050565b82815260808101610897602083018461203d565b60608101610b67828461203d565b604051601f8201601f1916810167ffffffffffffffff8111828210171561220d5761220d6122e8565b604052919050565b600067ffffffffffffffff82111561222f5761222f6122e8565b5060209081020190565b6000821982111561224c5761224c6122d2565b500190565b600081600019048311821515161561226b5761226b6122d2565b500290565b60005b8381101561228b578181015183820152602001612273565b8381111561229a576000848401525b50505050565b6000816122af576122af6122d2565b506000190190565b60006000198214156122cb576122cb6122d2565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212208ab79e54768842554d2dabf5809eb182a911df696b4d1f07c81400700036155b64736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101c45760003560e01c80635ceaa769116100f9578063b53ad8b711610097578063db7760a211610071578063db7760a2146103e1578063e0886f90146103f4578063e8d4ccd214610414578063fd7633c714610427576101c4565b8063b53ad8b714610394578063d305abc4146103a7578063d547741f146103ce576101c4565b806391d14854116100d357806391d1485414610338578063a0357e4b14610371578063a217fddf14610384578063ad3de14c1461038c576101c4565b80635ceaa7691461030a5780635de6a1d31461031257806372ac937114610325576101c4565b80632f2ff15d116101665780633d9972ec116101405780633d9972ec146102b157806341ee903e146102d157806343d41e66146102e4578063501a7032146102f7576101c4565b80632f2ff15d1461027857806336568abe1461028b5780633b4e3f781461029e576101c4565b8063248a9ca3116101a2578063248a9ca31461021c57806324cfdb211461023f5780632cb9eb64146102525780632dc84b3a14610265576101c4565b806301ffc9a7146101c95780631ab06ee5146101f15780631f7b6d3214610206575b600080fd5b6101dc6101d7366004611f63565b61043a565b60405190151581526020015b60405180910390f35b6102046101ff366004611ff1565b6104d5565b005b61020e6105f4565b6040519081526020016101e8565b61020e61022a366004611f20565b60009081526065602052604090206001015490565b61020461024d366004611cce565b6106b8565b6101dc610260366004612012565b6107c0565b6101dc610273366004611fa3565b61089e565b610204610286366004611f38565b610962565b610204610299366004611f38565b61098d565b6101dc6102ac366004611fa3565b610a1e565b6102c46102bf366004611ff1565b610a92565b6040516101e891906120eb565b6102046102df366004611ff1565b610b6d565b6102046102f2366004611cb4565b610ca2565b6101dc610305366004612012565b610dd4565b61020e610e5c565b6101dc610320366004611cce565b610ecf565b61020e610333366004611e6a565b610f43565b6101dc610346366004611f38565b60009182526065602090815260408084206001600160a01b0393909316845291905290205460ff1690565b6101dc61037f366004611ff1565b61110e565b61020e600081565b6102c46111dc565b61020e6103a2366004611e01565b6112a0565b61020e7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a381565b6102046103dc366004611f38565b61144e565b61020e6103ef366004612012565b611474565b610407610402366004611f20565b611549565b6040516101e891906121d6565b6101dc610422366004611cce565b611616565b6101dc610435366004612012565b61168a565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b0000000000000000000000000000000000000000000000000000000014806104cd57507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b90505b919050565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a361050181335b611712565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517ff9b9fec6000000000000000000000000000000000000000000000000000000008152600481019190915260248101849052604481018390526001606482015273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9063f9b9fec69060840160006040518083038186803b15801561059c57600080fd5b505af41580156105b0573d6000803e3d6000fd5b505060408051868152602081018690527f9dd19dd0ef54fcb0658a629e952840d8a2535b57a70181102424a0718dc4e5f093500190505b60405180910390a1505050565b6040517fac775cf80000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260009073__$c8b13b5401e105a03ccb2d5c98950fab3b$__9063ac775cf8906024015b60206040518083038186803b15801561067b57600080fd5b505af415801561068f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106b39190611fd9565b905090565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a36106e381336104fc565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f5f72059200000000000000000000000000000000000000000000000000000000815273__$c8b13b5401e105a03ccb2d5c98950fab3b$__91635f720592916107559190869060040161216c565b60006040518083038186803b15801561076d57600080fd5b505af4158015610781573d6000803e3d6000fd5b505050507fc068270503dcae9b1183e157c00a13eb70ab6203160c8ef0fa1142a20e4582a7826040516107b491906120eb565b60405180910390a15050565b6040517f515004380000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073__$c8b13b5401e105a03ccb2d5c98950fab3b$__906351500438906084015b60206040518083038186803b15801561085c57600080fd5b505af4158015610870573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108949190611f00565b90505b9392505050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f36fa623100000000000000000000000000000000000000000000000000000000815273__$c8b13b5401e105a03ccb2d5c98950fab3b$__916336fa623191610912919086906004016121c2565b60206040518083038186803b15801561092a57600080fd5b505af415801561093e573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104cd9190611f00565b60008281526065602052604090206001015461097e81336104fc565b6109888383611792565b505050565b6001600160a01b0381163314610a105760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201527f20726f6c657320666f722073656c66000000000000000000000000000000000060648201526084015b60405180910390fd5b610a1a8282611834565b5050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517ff480051900000000000000000000000000000000000000000000000000000000815273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9163f480051991610912919086906004016121c2565b60607fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f11c7db8e0000000000000000000000000000000000000000000000000000000081526004810191909152602481018490526044810183905273__$c8b13b5401e105a03ccb2d5c98950fab3b$__906311c7db8e9060640160006040518083038186803b158015610b2857600080fd5b505af4158015610b3c573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052610b649190810190611d71565b90505b92915050565b7f273772c667b9d5fc18a3ee69d57f53c8af15de4b350c3fdd1747bef66aa900a3610b9881336104fc565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fe8485b07000000000000000000000000000000000000000000000000000000008152600481019190915260248101849052604481018390526001606482015273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9063e8485b079060840160206040518083038186803b158015610c3357600080fd5b505af4158015610c47573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610c6b9190611f00565b5060408051848152602081018490527f3f4d6d47f818ddf69bb0866dc712ab567cec9de8a8ce0023739787896d5841d691016105e7565b600054610100900460ff16610cbd5760005460ff1615610cc1565b303b155b610d335760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a65640000000000000000000000000000000000006064820152608401610a07565b600054610100900460ff16158015610d5e576000805460ff1961ff0019909116610100171660011790555b6001600160a01b038216610db45760405162461bcd60e51b815260206004820152601560248201527f696e76616c69642061646d696e206164647265737300000000000000000000006044820152606401610a07565b610dbf600083611792565b8015610a1a576000805461ff00191690555050565b6040517f8addfdc40000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073__$c8b13b5401e105a03ccb2d5c98950fab3b$__90638addfdc490608401610844565b6040517f7c2c51480000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260009073__$c8b13b5401e105a03ccb2d5c98950fab3b$__90637c2c514890602401610663565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f05a3338600000000000000000000000000000000000000000000000000000000815273__$c8b13b5401e105a03ccb2d5c98950fab3b$__916305a33386916109129190869060040161216c565b6000858481148015610f5457508083145b610fa05760405162461bcd60e51b815260206004820152601160248201527f696e76616c696420617267756d656e74730000000000000000000000000000006044820152606401610a07565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6000805b838110156111005773__$c8b13b5401e105a03ccb2d5c98950fab3b$__632b8790ab848d8d8581811061100857634e487b7160e01b600052603260045260246000fd5b905060200201358c8c8681811061102f57634e487b7160e01b600052603260045260246000fd5b905060200201358b8b8781811061105657634e487b7160e01b600052603260045260246000fd5b905060200201356040518563ffffffff1660e01b8152600401611092949392919093845260208401929092526040830152606082015260800190565b60206040518083038186803b1580156110aa57600080fd5b505af41580156110be573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110e29190611fd9565b6110ec9083612239565b9150806110f8816122b7565b915050610fc5565b509998505050505050505050565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f3362c7cd0000000000000000000000000000000000000000000000000000000081526004810191909152602481018490526044810183905273__$c8b13b5401e105a03ccb2d5c98950fab3b$__90633362c7cd9060640160206040518083038186803b1580156111a457600080fd5b505af41580156111b8573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b649190611f00565b60607fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fc853cffe000000000000000000000000000000000000000000000000000000008152600481019190915273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9063c853cffe9060240160006040518083038186803b15801561126457600080fd5b505af4158015611278573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526106b39190810190611d71565b6000838281146112f25760405162461bcd60e51b815260206004820152601160248201527f696e76616c696420617267756d656e74730000000000000000000000000000006044820152606401610a07565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6000805b838110156114425773__$c8b13b5401e105a03ccb2d5c98950fab3b$__633362c7cd848b8b8581811061135a57634e487b7160e01b600052603260045260246000fd5b905060200201358a8a8681811061138157634e487b7160e01b600052603260045260246000fd5b6040517fffffffff0000000000000000000000000000000000000000000000000000000060e088901b168152600481019590955260248501939093525060209091020135604482015260640160206040518083038186803b1580156113e557600080fd5b505af41580156113f9573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061141d9190611f00565b15611430578161142c816122b7565b9250505b8061143a816122b7565b915050611317565b50979650505050505050565b60008281526065602052604090206001015461146a81336104fc565b6109888383611834565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517f2b8790ab000000000000000000000000000000000000000000000000000000008152600481019190915260248101859052604481018490526064810183905273__$c8b13b5401e105a03ccb2d5c98950fab3b$__90632b8790ab9060840160206040518083038186803b15801561151157600080fd5b505af4158015611525573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108949190611fd9565b611551611b26565b7fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fdcedd4b000000000000000000000000000000000000000000000000000000000815260048101919091526024810183905273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9063dcedd4b09060440160606040518083038186803b1580156115de57600080fd5b505af41580156115f2573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104cd9190611fbe565b60007fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd6040517fcca0f3b700000000000000000000000000000000000000000000000000000000815273__$c8b13b5401e105a03ccb2d5c98950fab3b$__9163cca0f3b7916109129190869060040161216c565b6040517f72ba78880000000000000000000000000000000000000000000000000000000081527fa20a9ae32cf227a9909806d80726866eccc106fe3587cd22519ade23cbe219dd600482015260248101849052604481018390526064810182905260009073__$c8b13b5401e105a03ccb2d5c98950fab3b$__906372ba788890608401610844565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff16610a1a57611750816001600160a01b031660146118b7565b61175b8360206118b7565b60405160200161176c92919061206a565b60408051601f198184030181529082905262461bcd60e51b8252610a0791600401612139565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff16610a1a5760008281526065602090815260408083206001600160a01b03851684529091529020805460ff191660011790556117f03390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b60008281526065602090815260408083206001600160a01b038516845290915290205460ff1615610a1a5760008281526065602090815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b606060006118c6836002612251565b6118d1906002612239565b67ffffffffffffffff8111156118f757634e487b7160e01b600052604160045260246000fd5b6040519080825280601f01601f191660200182016040528015611921576020820181803683370190505b5090507f30000000000000000000000000000000000000000000000000000000000000008160008151811061196657634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053507f7800000000000000000000000000000000000000000000000000000000000000816001815181106119d757634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506000611a13846002612251565b611a1e906001612239565b90505b6001811115611ad7577f303132333435363738396162636465660000000000000000000000000000000085600f1660108110611a6d57634e487b7160e01b600052603260045260246000fd5b1a60f81b828281518110611a9157634e487b7160e01b600052603260045260246000fd5b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a90535060049490941c93611ad0816122a0565b9050611a21565b508315610b645760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e746044820152606401610a07565b6040518060200160405280611b39611b3e565b905290565b604080516080810190915280611b3960208201600381606080368337509192915050565b80356001600160a01b03811681146104d057600080fd5b60008083601f840112611b8a578182fd5b50813567ffffffffffffffff811115611ba1578182fd5b6020830191508360208083028501011115611bbb57600080fd5b9250929050565b600060608284031215611bd3578081fd5b6020611bde816121e4565b9150611be9816121e4565b84601f850112611bf857600080fd5b611c0260606121e4565b808587606088011115611c1457600080fd5b60005b6003811015611c3457813584529285019290850190600101611c17565b505082525082525092915050565b600060608284031215611c53578081fd5b6020611c5e816121e4565b9150611c69816121e4565b84601f850112611c7857600080fd5b611c8260606121e4565b808587606088011115611c9457600080fd5b60005b6003811015611c3457815184529285019290850190600101611c97565b600060208284031215611cc5578081fd5b610b6482611b62565b60006020808385031215611ce0578182fd5b823567ffffffffffffffff811115611cf6578283fd5b8301601f81018513611d06578283fd5b8035611d19611d1482612215565b6121e4565b818152838101908385016060808502860187018a1015611d37578788fd5b8795505b84861015611d6357611d4d8a83611bc2565b8452600195909501949286019290810190611d3b565b509098975050505050505050565b60006020808385031215611d83578182fd5b825167ffffffffffffffff811115611d99578283fd5b8301601f81018513611da9578283fd5b8051611db7611d1482612215565b818152838101908385016060808502860187018a1015611dd5578788fd5b8795505b84861015611d6357611deb8a83611c42565b8452600195909501949286019290810190611dd9565b60008060008060408587031215611e16578283fd5b843567ffffffffffffffff80821115611e2d578485fd5b611e3988838901611b79565b90965094506020870135915080821115611e51578384fd5b50611e5e87828801611b79565b95989497509550505050565b60008060008060008060608789031215611e82578182fd5b863567ffffffffffffffff80821115611e99578384fd5b611ea58a838b01611b79565b90985096506020890135915080821115611ebd578384fd5b611ec98a838b01611b79565b90965094506040890135915080821115611ee1578384fd5b50611eee89828a01611b79565b979a9699509497509295939492505050565b600060208284031215611f11578081fd5b81518015158114610b64578182fd5b600060208284031215611f31578081fd5b5035919050565b60008060408385031215611f4a578182fd5b82359150611f5a60208401611b62565b90509250929050565b600060208284031215611f74578081fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610b64578182fd5b600060608284031215611fb4578081fd5b610b648383611bc2565b600060608284031215611fcf578081fd5b610b648383611c42565b600060208284031215611fea578081fd5b5051919050565b60008060408385031215612003578182fd5b50508035926020909101359150565b600080600060608486031215612026578081fd5b505081359360208301359350604090920135919050565b8051518260005b6003811015612063578251825260209283019290910190600101612044565b5050505050565b60007f416363657373436f6e74726f6c3a206163636f756e7420000000000000000000825283516120a2816017850160208801612270565b7f206973206d697373696e6720726f6c652000000000000000000000000000000060179184019182015283516120df816028840160208801612270565b01602801949350505050565b6020808252825182820181905260009190848201906040850190845b8181101561212d5761211a83855161203d565b9284019260609290920191600101612107565b50909695505050505050565b6000602082528251806020840152612158816040850160208701612270565b601f01601f19169190910160400192915050565b6000604082018483526020604081850152818551808452606093508386019150828701855b828110156121b4576121a484835161203d565b9285019290840190600101612191565b509198975050505050505050565b82815260808101610897602083018461203d565b60608101610b67828461203d565b604051601f8201601f1916810167ffffffffffffffff8111828210171561220d5761220d6122e8565b604052919050565b600067ffffffffffffffff82111561222f5761222f6122e8565b5060209081020190565b6000821982111561224c5761224c6122d2565b500190565b600081600019048311821515161561226b5761226b6122d2565b500290565b60005b8381101561228b578181015183820152602001612273565b8381111561229a576000848401525b50505050565b6000816122af576122af6122d2565b506000190190565b60006000198214156122cb576122cb6122d2565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212208ab79e54768842554d2dabf5809eb182a911df696b4d1f07c81400700036155b64736f6c63430008020033",
+  "libraries": {
+    "MapLib": "0x058661Abb011d3E7C70475a5956856DFd81235C9"
+  },
+  "devdoc": {
+    "events": {
+      "PixelClear(uint256,uint256)": {
+        "details": "Emitted when a tile is updated"
+      },
+      "PixelSet(uint256,uint256)": {
+        "details": "Emitted when a tile is updated"
+      },
+      "TileChanged(((uint256[3]))[])": {
+        "details": "Emitted when a tile is updated"
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "assign(((uint256[3]))[])": {
+        "params": {
+          "tiles": "the list of TileWithCoord to be assigned"
+        }
+      },
+      "at(uint256)": {
+        "details": "used to iterate off-chain over the tiles.",
+        "params": {
+          "index": "the index of the tile"
+        },
+        "returns": {
+          "_0": "the tile that is in the position index in the list"
+        }
+      },
+      "at(uint256,uint256)": {
+        "details": "used to iterate off-chain over the tiles.",
+        "params": {
+          "limit": "amount of tiles to get",
+          "offset": "initial offset used to paginate"
+        },
+        "returns": {
+          "_0": "the partial list of tiles"
+        }
+      },
+      "clear(uint256,uint256)": {
+        "details": "helper method that can be called by hand",
+        "params": {
+          "x": "coordinate",
+          "y": "coordinate"
+        }
+      },
+      "countPremium(uint256,uint256,uint256)": {
+        "details": "the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract",
+        "params": {
+          "size": "the size of the square",
+          "x": "the x coordinate of the square",
+          "y": "the y coordinate of the square"
+        },
+        "returns": {
+          "_0": "the amount of premium lands"
+        }
+      },
+      "countPremium(uint256[],uint256[])": {
+        "params": {
+          "xs": "the x coordinate",
+          "ys": "the  coordinate"
+        },
+        "returns": {
+          "_0": "the amount of premium lands"
+        }
+      },
+      "countPremium(uint256[],uint256[],uint256[])": {
+        "details": "the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract",
+        "params": {
+          "sizes": "the size of the square",
+          "xs": "the x coordinate of the square",
+          "ys": "the y coordinate of the square"
+        },
+        "returns": {
+          "_0": "the amount of premium lands"
+        }
+      },
+      "getLandCount()": {
+        "returns": {
+          "_0": "the quantity of lands"
+        }
+      },
+      "getMap()": {
+        "details": "Use only for testing. This can be problematic if it grows too much !!!",
+        "returns": {
+          "_0": "the list of internal tiles"
+        }
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "isAdjacent(uint256,uint256,uint256)": {
+        "details": "used to add a quad to a map, it is cheaper than isAdjacent(map)",
+        "params": {
+          "size": "the size of the square",
+          "x": "the x coordinate of the square",
+          "y": "the y coordinate of the square"
+        },
+        "returns": {
+          "_0": "true if the square is 4-connected to the map"
+        }
+      },
+      "isAllPremium(((uint256[3])))": {
+        "params": {
+          "tile": "the TileWithCoord that must be included"
+        },
+        "returns": {
+          "_0": "true if self contain tile TileWithCoord"
+        }
+      },
+      "isAllPremium(((uint256[3]))[])": {
+        "params": {
+          "tiles": "the TileWithCoord that must be included"
+        },
+        "returns": {
+          "_0": "true if self contain tiles TileWithCoord[]"
+        }
+      },
+      "isAllPremium(uint256,uint256,uint256)": {
+        "details": "the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract",
+        "params": {
+          "size": "the size of the square",
+          "x": "the x coordinate of the square",
+          "y": "the y coordinate of the square"
+        },
+        "returns": {
+          "_0": "true if al the bits are set or false if at least one bit is cleared"
+        }
+      },
+      "isPremium(uint256,uint256)": {
+        "params": {
+          "x": "the x coordinate",
+          "y": "the  coordinate"
+        },
+        "returns": {
+          "_0": "true if the x,y coordinate bit is set or false if it is cleared"
+        }
+      },
+      "isSomePremium(((uint256[3])))": {
+        "params": {
+          "tile": "the TileWithCoord to compare"
+        },
+        "returns": {
+          "_0": "true if there is at least one bit set in both the Map and the TileWithCoord"
+        }
+      },
+      "isSomePremium(((uint256[3]))[])": {
+        "returns": {
+          "_0": "true if there is at least one bit set in both the Map and the TileWithCoord[]"
+        }
+      },
+      "isSomePremium(uint256,uint256,uint256)": {
+        "details": "the coordinates must be % size and size can be 1, 3, 6, 12 and 24 to match the Quads in the land contract",
+        "params": {
+          "size": "the size of the square",
+          "x": "the x coordinate of the square",
+          "y": "the y coordinate of the square"
+        },
+        "returns": {
+          "_0": "true if there is at least one bit set in both the Map and the square"
+        }
+      },
+      "length()": {
+        "details": "used to iterate off-chain over the tiles.",
+        "returns": {
+          "_0": "the length of the list"
+        }
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`."
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role."
+      },
+      "set(uint256,uint256)": {
+        "details": "helper method that can be called by hand",
+        "params": {
+          "x": "coordinate",
+          "y": "coordinate"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "assign(((uint256[3]))[])": {
+        "notice": "assign the bits of a premium map"
+      },
+      "at(uint256)": {
+        "notice": "get the tile that is in certain position in the internal list of tiles"
+      },
+      "at(uint256,uint256)": {
+        "notice": "get the internal list of tiles with pagination"
+      },
+      "clear(uint256,uint256)": {
+        "notice": "clear a pixel in the premium map"
+      },
+      "countPremium(uint256,uint256,uint256)": {
+        "notice": "Count the amount of premium lands inside the Map filtered by a quad"
+      },
+      "countPremium(uint256[],uint256[])": {
+        "notice": "Count the amount of premium lands."
+      },
+      "countPremium(uint256[],uint256[],uint256[])": {
+        "notice": "Count the amount of premium lands inside the Map filtered by a quad"
+      },
+      "getLandCount()": {
+        "notice": "count the amount of bits (lands) set inside a Map"
+      },
+      "getMap()": {
+        "notice": "return the internal list of tiles"
+      },
+      "isAdjacent(uint256,uint256,uint256)": {
+        "notice": "check if a square is adjacent (4-connected component) to the current map."
+      },
+      "isAllPremium(((uint256[3])))": {
+        "notice": "Check if a Map includes all the bits that are set in a TileWithCoord"
+      },
+      "isAllPremium(((uint256[3]))[])": {
+        "notice": "Check if a Map includes all the bits that are set in a TileWithCoord[]"
+      },
+      "isAllPremium(uint256,uint256,uint256)": {
+        "notice": "Check if the all the bits of a square inside the Map are set or not"
+      },
+      "isPremium(uint256,uint256)": {
+        "notice": "Check if the bit in certain coordinate are set or not inside the map"
+      },
+      "isSomePremium(((uint256[3])))": {
+        "notice": "Check if a map has at least one bit in common with some TileWithCoord"
+      },
+      "isSomePremium(uint256,uint256,uint256)": {
+        "notice": "Check if a map has at least one bit in common with a square (x,y,size)"
+      },
+      "length()": {
+        "notice": "return the length of the internal list of tiles"
+      },
+      "set(uint256,uint256)": {
+        "notice": "set a pixel in the premium map"
+      }
+    },
+    "notice": "A 408x408 matrix of bits, true means that the land is premium",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 10217,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 10220,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 12276,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 13138,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 9622,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)9617_storage)"
+      },
+      {
+        "astId": 9909,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "102",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 69026,
+        "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "151",
+        "type": "t_array(t_uint256)50_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)9617_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)9617_storage"
+      },
+      "t_struct(RoleData)9617_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControlUpgradeable.RoleData",
+        "members": [
+          {
+            "astId": 9614,
+            "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+            "label": "members",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 9616,
+            "contract": "src/solc_0.8/registry/PremiumLandRegistry.sol:PremiumLandRegistry",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

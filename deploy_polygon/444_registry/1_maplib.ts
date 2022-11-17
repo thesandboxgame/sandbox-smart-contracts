@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessL1, skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessL2} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -18,5 +18,4 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['MapLib', 'MapLib_deploy'];
 func.dependencies = [];
-func.skip = async (hre) =>
-  (await skipUnlessTestnet(hre)) && (await skipUnlessL1(hre));
+func.skip = skipUnlessL2;

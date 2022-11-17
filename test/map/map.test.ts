@@ -9,6 +9,7 @@ import {
   setRectangle,
   setTileQuads,
   setupMapTest,
+  tileWithCoordToJS,
   translateResultToArray,
 } from './fixtures';
 import {BigNumber} from 'ethers';
@@ -206,6 +207,27 @@ describe('MapLib main', function () {
       await tester.setQuad(0, 0, 60, 1);
       await tester.setQuad(0, 60, 0, 1);
       expect(await tester.getLandCount(0)).to.be.equal(4);
+      expect(await tester.getLandCount(0)).to.be.equal(4);
+      expect(await tester.getLandsInQuad(0, 0, 0, 3)).to.be.equal(1);
+    });
+
+    it('getTileByCoord', async function () {
+      const {tester} = await setupMapTest();
+      await tester.setQuad(0, 0, 0, 1);
+      await tester.setQuad(0, 60, 60, 1);
+      await tester.setQuad(0, 0, 60, 1);
+      await tester.setQuad(0, 60, 0, 1);
+      const t = await tester.getTileByCoord(0, 24, 24);
+      // not fund
+      expect(t[0]).to.be.false;
+      const t1 = await tester.getTileByCoord(0, 60, 60);
+      expect(t1[0]).to.be.true;
+      const jsTile = tileWithCoordToJS(t1[1]);
+      // 60 / 24 == 2
+      expect(jsTile.x).to.be.equal(2);
+      expect(jsTile.y).to.be.equal(2);
+      // 48 + 12 = 60
+      expect(jsTile.tile).to.be.eql(setRectangle(12, 12, 1, 1));
     });
 
     it('@skip-on-coverage gas usage of land count', async function () {
@@ -427,6 +449,37 @@ describe('MapLib main', function () {
   });
   it('for coverage', async function () {
     const {tester} = await setupMapTest();
-    await tester.getMap(0);
+    await tester.setTranslateResult(0, {data: [0, 0, 0]}, 12, 12);
+    await tester.setTileWithCoord(0, {tile: {data: [0, 0, 0]}});
+    expect(await tester.getMap(0)).to.be.eql([]);
+    expect(await tester.getLandsInQuad(1, 0, 0, 1)).to.be.equal(0);
+  });
+
+  it('assign', async function () {
+    const {tester, getMap} = await setupMapTest();
+    const emptyTileWithCoords = {tile: {data: [0, 0, 0]}};
+    // Map 1 one tile full
+    await tester.setQuad(1, 0, 0, 24);
+    const fullTileWithCoords = await tester.at(1, 0);
+    // Map 2 one 3x3 quad
+    await tester.setQuad(2, 0, 0, 3);
+    const someTileWithCoords = await tester.at(2, 0);
+
+    // Calling with a non existent empty tile does nothing
+    expect(await tester.length(3)).to.be.equal(0);
+    await tester.assign(3, emptyTileWithCoords);
+    expect(await tester.length(3)).to.be.equal(0);
+
+    // Adding a tile
+    await tester.assign(3, fullTileWithCoords);
+    expect(await getMap(3)).to.be.eql(await getMap(1));
+
+    // Replace the content
+    await tester.assign(3, someTileWithCoords);
+    expect(await getMap(3)).to.be.eql(await getMap(2));
+
+    // Calling with an empty tile deletes
+    await tester.assign(3, emptyTileWithCoords);
+    expect(await tester.length(3)).to.be.equal(0);
   });
 });
