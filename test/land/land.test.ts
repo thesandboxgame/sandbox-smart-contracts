@@ -1,6 +1,6 @@
 import {deployments, ethers} from 'hardhat';
 import {expect} from '../chai-setup';
-import {setupLand, setupLandV1} from './fixtures';
+import {setupLand, setupLandV1, setupLandV2} from './fixtures';
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
@@ -28,6 +28,67 @@ describe('LandV2', function () {
           ).to.be.reverted;
         });
       });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 >= size1) return;
+        it(`should return true for ${size2}x${size2} quad minited inside a ${size1}x${size1} quad`, async function () {
+          const {
+            landContract,
+            getNamedAccounts,
+            ethers,
+            mintQuad,
+          } = await setupLand();
+          const {deployer} = await getNamedAccounts();
+          const contract = landContract.connect(
+            ethers.provider.getSigner(deployer)
+          );
+          // minting the quad of size1 *size1 at x size1 and y size1
+          await mintQuad(deployer, size1, size1, size1);
+          expect(await contract.exists(size1, size1, size1)).to.be.equal(true);
+        });
+      });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((quadSize) => {
+      it(`should return false for ${quadSize}x${quadSize} quad not minited`, async function () {
+        const {landContract, getNamedAccounts, ethers} = await setupLand();
+        const {deployer} = await getNamedAccounts();
+        const contract = landContract.connect(
+          ethers.provider.getSigner(deployer)
+        );
+
+        expect(await contract.exists(quadSize, quadSize, quadSize)).to.be.equal(
+          false
+        );
+      });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((quadSize) => {
+      if (quadSize == 1) return;
+      it(`should revert for invalid coordinates for size ${quadSize}`, async function () {
+        const {landContract, getNamedAccounts, ethers} = await setupLand();
+        const {deployer} = await getNamedAccounts();
+        const contract = landContract.connect(
+          ethers.provider.getSigner(deployer)
+        );
+        await expect(
+          contract.exists(quadSize, quadSize + 1, quadSize + 1)
+        ).to.be.revertedWith('LandBaseTokenV3: Invalid Id');
+      });
+    });
+
+    it(`should revert for invalid size`, async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      const contract = landContract.connect(
+        ethers.provider.getSigner(deployer)
+      );
+      await expect(contract.exists(5, 5, 5)).to.be.revertedWith('Invalid size');
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -422,6 +483,50 @@ describe('LandV2', function () {
       await mintQuad(landAdmin, 24, 24, 0);
 
       expect(await landV2Contract.balanceOf(landAdmin)).to.be.equal(576 * 2);
+    });
+  });
+
+  describe('UpgradeV3', function () {
+    it('should upgrade to V3 and keep storage intact', async function () {
+      const {landContract, getNamedAccounts, mintQuad} = await setupLandV2();
+      const {landAdmin, deployer, upgradeAdmin} = await getNamedAccounts();
+      const {deploy} = deployments;
+
+      await mintQuad(landAdmin, 24, 0, 0);
+
+      expect(await landContract.balanceOf(landAdmin)).to.be.equal(576);
+      expect(await landContract.isMinter(landAdmin)).to.be.true;
+      expect(await landContract.getAdmin()).to.be.equal(landAdmin);
+      expect(await landContract.ownerOf(0)).to.be.equal(landAdmin);
+
+      await deploy('Land', {
+        from: deployer,
+        contract: 'LandV3',
+        proxy: {
+          owner: upgradeAdmin,
+          proxyContract: 'OpenZeppelinTransparentProxy',
+          upgradeIndex: 2,
+        },
+        log: true,
+      });
+
+      const landV3Contract = await ethers.getContract('Land');
+
+      expect(await landV3Contract.balanceOf(landAdmin)).to.be.equal(576);
+      expect(await landV3Contract.isMinter(landAdmin)).to.be.true;
+      expect(await landV3Contract.getAdmin()).to.be.equal(landAdmin);
+      expect(await landV3Contract.ownerOf(0)).to.be.equal(landAdmin);
+
+      const contract = landV3Contract.connect(
+        ethers.provider.getSigner(landAdmin)
+      );
+
+      await expect(contract.setMinter(ethers.constants.AddressZero, true)).to.be
+        .reverted;
+
+      await mintQuad(landAdmin, 24, 24, 0);
+
+      expect(await landV3Contract.balanceOf(landAdmin)).to.be.equal(576 * 2);
     });
   });
 });
