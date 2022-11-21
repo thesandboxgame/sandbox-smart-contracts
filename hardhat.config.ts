@@ -226,7 +226,7 @@ const config: HardhatUserConfig = {
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
       mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
-
+    kycAdmin: 'sandAdmin', // can set KYC minters
     landSaleAdmin: 'sandAdmin', // can enable currencies
     gameTokenAdmin: 'sandAdmin', // can set minter address
     gameTokenFeeBeneficiary: 'treasury', // receives fees from GAME token  minting / Mods
@@ -260,6 +260,13 @@ const config: HardhatUserConfig = {
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
       polygon: '0x564c8aADBd35b6175C0d18595cc335106AA250Dc',
+    },
+    // To be used with PolygonKYCToken:
+    backendKYCWallet: {
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      polygon: '',
     },
     raffleSignWallet: {
       // default is computed from private key:
