@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'getUpgrader'
   );
   const AssetMinter = await deployments.get('PolygonAssetMinter');
-  const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
+  const AssetUpgrader = await deployments.getOrNull('PolygonAssetUpgrader');
 
   if (registryMinter !== AssetMinter.address) {
     await execute(
@@ -26,14 +26,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       AssetMinter.address
     );
   }
-
-  if (registryUpgrader !== AssetUpgrader.address) {
-    await execute(
-      'PolygonAssetAttributesRegistry',
-      {from: assetAttributesRegistryAdmin, log: true},
-      'changeUpgrader',
-      AssetUpgrader.address
-    );
+  if (AssetUpgrader) {
+    if (registryUpgrader !== AssetUpgrader.address) {
+      await execute(
+        'PolygonAssetAttributesRegistry',
+        {from: assetAttributesRegistryAdmin, log: true},
+        'changeUpgrader',
+        AssetUpgrader.address
+      );
+    }
   }
 };
 export default func;
@@ -45,5 +46,4 @@ func.tags = [
 func.dependencies = [
   'PolygonAssetAttributesRegistry_deploy',
   'PolygonAssetMinter_deploy',
-  'PolygonAssetUpgrader_deploy',
 ];

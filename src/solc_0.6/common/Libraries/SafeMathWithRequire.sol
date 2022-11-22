@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.5;
 
 
@@ -34,8 +36,6 @@ library SafeMathWithRequire {
      */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b != 0, "divbyzero");
-        // uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return a / b;
     }
 
@@ -43,7 +43,7 @@ library SafeMathWithRequire {
      * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
      */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "undeflow");
+        require(b <= a, "underflow");
         return a - b;
     }
 
@@ -106,7 +106,6 @@ library SafeMathWithRequire {
         return c;
     }
 
-    // TODO test
     function rt6_3(uint256 a) internal pure returns (uint256 c) {
         a = a.mul(DECIMALS_18);
         uint256 tmp = a.add(5) / 6;

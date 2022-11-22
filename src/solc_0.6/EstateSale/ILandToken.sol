@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.5;
 
 
-interface LandToken {
+interface ILandToken {
     function mintQuad(
         address to,
         uint256 size,

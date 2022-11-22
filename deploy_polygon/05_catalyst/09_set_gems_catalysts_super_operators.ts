@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonAssetAttributesRegistry'
   );
   const AssetMinter = await deployments.get('PolygonAssetMinter');
-  const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
+  const AssetUpgrader = await deployments.getOrNull('PolygonAssetUpgrader');
 
   const {
     deployer,
@@ -118,21 +118,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         AssetMinter.address
       );
     }
-    const isAssetUpgraderSuperOperator = await read(
-      `PolygonCatalyst_${catalyst.symbol}`,
-      'hasRole',
-      superOperatorRole,
-      AssetUpgrader.address
-    );
 
-    if (!isAssetUpgraderSuperOperator) {
-      await execute(
+    // AssetUpgrader is being deployed later
+    if (AssetUpgrader) {
+      const isAssetUpgraderSuperOperator = await read(
         `PolygonCatalyst_${catalyst.symbol}`,
-        {from: catalystAdmin, log: true},
-        'grantRole',
+        'hasRole',
         superOperatorRole,
         AssetUpgrader.address
       );
+
+      if (!isAssetUpgraderSuperOperator) {
+        await execute(
+          `PolygonCatalyst_${catalyst.symbol}`,
+          {from: catalystAdmin, log: true},
+          'grantRole',
+          superOperatorRole,
+          AssetUpgrader.address
+        );
+      }
     }
   }
   // Set GemsCatalystsRegistry, AssetAttributesRegistry, AssetMinter and AssetUpgrader as gem superoperators
@@ -185,21 +189,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         AssetMinter.address
       );
     }
-    const isAssetUpgraderSuperOperator = await read(
-      `PolygonGem_${gem.symbol}`,
-      'hasRole',
-      superOperatorRole,
-      AssetUpgrader.address
-    );
 
-    if (!isAssetUpgraderSuperOperator) {
-      await execute(
+    // AssetUpgrader is being deployed later
+    if (AssetUpgrader) {
+      const isAssetUpgraderSuperOperator = await read(
         `PolygonGem_${gem.symbol}`,
-        {from: gemAdmin, log: true},
-        'grantRole',
+        'hasRole',
         superOperatorRole,
         AssetUpgrader.address
       );
+
+      if (!isAssetUpgraderSuperOperator) {
+        await execute(
+          `PolygonGem_${gem.symbol}`,
+          {from: gemAdmin, log: true},
+          'grantRole',
+          superOperatorRole,
+          AssetUpgrader.address
+        );
+      }
     }
   }
 };
@@ -215,6 +223,5 @@ func.dependencies = [
   'PolygonGems_deploy',
   'PolygonGemsCatalystsRegistry_deploy',
   'PolygonAssetMinter_deploy',
-  'PolygonAssetUpgrader_deploy',
   'PolygonAssetAttributesRegistry_deploy',
 ];

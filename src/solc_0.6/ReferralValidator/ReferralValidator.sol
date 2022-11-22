@@ -1,19 +1,26 @@
 /* solhint-disable not-rely-on-time, func-order */
+
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.5;
 
-import "../common/Libraries/SigUtil.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
-import "../common/Interfaces/ERC20.sol";
+import "@openzeppelin/contracts-0.6/utils/Address.sol";
+import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-0.6/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "../common/BaseWithStorage/Admin.sol";
 
 
 /// @dev This contract verifies if a referral is valid
 contract ReferralValidator is Admin {
+    using Address for address;
+    using SafeERC20 for IERC20;
+
     address private _signingWallet;
     uint256 private _maxCommissionRate;
 
     mapping(address => uint256) private _previousSigningWallets;
-    uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;
+    uint256 constant private _previousSigningDelay = 10 days;
 
     event ReferralUsed(
         address indexed referrer,
@@ -24,19 +31,38 @@ contract ReferralValidator is Admin {
         uint256 commissionRate
     );
 
+    event SigningWalletUpdated(address indexed newSigningWallet);
+    event MaxCommissionRateUpdated(uint256 indexed newMaxCommissionRate);
+
     constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
+        require(initialSigningWallet != address(0), "ReferralValidator: zero address");
+
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
     }
 
     /**
      * @dev Update the signing wallet
+     * The previous wallet is still valid for a grace period (_previousSigningDelay). If you want to
+     * disable the previous wallet, use the disablePreviousSigningWallet function.
      * @param newSigningWallet The new address of the signing wallet
      */
-    function updateSigningWallet(address newSigningWallet) external {
-        require(_admin == msg.sender, "Sender not admin");
+    function updateSigningWallet(address newSigningWallet) external onlyAdmin {
+        require(newSigningWallet != address(0), "ReferralValidator: zero address");
         _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;
         _signingWallet = newSigningWallet;
+
+        emit SigningWalletUpdated(newSigningWallet);
+    }
+
+     /**
+     * @dev Disable compromised signing wallet
+     * @param disableWallet The wallet address to be disabled
+     */
+    function disablePreviousSigningWallet(address disableWallet) external {
+        require(_admin == msg.sender, "ReferralValidator: Sender not admin");
+        require(disableWallet != address(0), "ReferralValidator: zero address");
+        _previousSigningWallets[disableWallet] = 0;
     }
 
     /**
@@ -48,10 +74,10 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice the max commision rate
-     * @return the maximum commision rate that a referral can give
+     * @notice the max commission rate
+     * @return the maximum commission rate that a referral can give
      */
-    function getMaxCommisionRate() external view returns (uint256) {
+    function getMaxCommissionRate() external view returns (uint256) {
         return _maxCommissionRate;
     }
 
@@ -59,9 +85,10 @@ contract ReferralValidator is Admin {
      * @dev Update the maximum commission rate
      * @param newMaxCommissionRate The new maximum commission rate
      */
-    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {
-        require(_admin == msg.sender, "Sender not admin");
+    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external onlyAdmin {
         _maxCommissionRate = newMaxCommissionRate;
+
+        emit MaxCommissionRateUpdated(newMaxCommissionRate);
     }
 
     function handleReferralWithETH(
@@ -71,24 +98,32 @@ contract ReferralValidator is Admin {
     ) internal {
         uint256 amountForDestination = amount;
 
+        require(msg.value >= amount, "ReferralValidator: insufficient funds");
+
         if (referral.length > 0) {
             (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);
+
+            require(commissionRate < 10000, "ReferralValidator: invalid commisionRate");
 
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMath.div(SafeMath.mul(amount, commissionRate), 10000);
 
                 emit ReferralUsed(referrer, referee, address(0), amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                amountForDestination = SafeMath.sub(amountForDestination, commission);
             }
 
             if (commission > 0) {
-                payable(referrer).transfer(commission);
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool success, ) = payable(referrer).call{value:commission}("");
+                require(success, "ReferralValidator: Transfer failed.");
             }
         }
 
-        destination.transfer(amountForDestination);
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, ) = destination.call{value:amountForDestination}("");
+        require(success, "ReferralValidator: Transfer failed.");
     }
 
     function handleReferralWithERC20(
@@ -98,7 +133,7 @@ contract ReferralValidator is Admin {
         address payable destination,
         address tokenAddress
     ) internal {
-        ERC20 token = ERC20(tokenAddress);
+        IERC20 token = IERC20(tokenAddress);
         uint256 amountForDestination = amount;
 
         if (referral.length > 0) {
@@ -107,18 +142,18 @@ contract ReferralValidator is Admin {
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMath.div(SafeMath.mul(amount, commissionRate), 10000);
 
                 emit ReferralUsed(referrer, referee, tokenAddress, amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                amountForDestination = SafeMath.sub(amountForDestination, commission);
             }
 
             if (commission > 0) {
-                require(token.transferFrom(buyer, referrer, commission), "commision transfer failed");
+                token.safeTransferFrom(buyer, referrer, commission);
             }
         }
 
-        require(token.transferFrom(buyer, destination, amountForDestination), "payment transfer failed");
+        token.safeTransferFrom(buyer, destination, amountForDestination);
     }
 
     /**
@@ -143,7 +178,7 @@ contract ReferralValidator is Admin {
 
         bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));
 
-        address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
+        address signer = ECDSA.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
 
         if (_previousSigningWallets[signer] >= now) {
             return true;

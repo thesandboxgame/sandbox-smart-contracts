@@ -1,0 +1,229 @@
+{
+  "address": "0x7804fb2AF15bB1323795A888B09913cEf629Ffda",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "adminWallet",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "initialSigningWallet",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldAdmin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signingWallet",
+          "type": "address"
+        }
+      ],
+      "name": "SigningWallet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "_signingAuthWallet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAdmin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hashedData",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isAuthValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newSigningWallet",
+          "type": "address"
+        }
+      ],
+      "name": "updateSigningAuthWallet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x5bd80c3f87afef42f314d30f6557c839afbef974c9c5e1eee648e0f9a665c15c",
+  "receipt": {
+    "to": null,
+    "from": "0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88",
+    "contractAddress": "0x7804fb2AF15bB1323795A888B09913cEf629Ffda",
+    "transactionIndex": 48,
+    "gasUsed": "497134",
+    "logsBloom": "0x0000000000000000000000000000000000000000000000000000000040000000000000000000804000000000000000000000a000000000000000000000000000000080000000000000000000000000800010000000000000000100000000000000000000002000000004000000000000000000000000000082000000000000000000000000000000000000000000001000000000000000000000000000080000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100000000000000000000000000000400000000000001000000800000100000000000000100000",
+    "blockHash": "0x5a4fcc4f80cd651d2609d29359dd899dd0bb094eb325d875159905f7cfa27f72",
+    "transactionHash": "0x5bd80c3f87afef42f314d30f6557c839afbef974c9c5e1eee648e0f9a665c15c",
+    "logs": [
+      {
+        "transactionIndex": 48,
+        "blockNumber": 35479552,
+        "transactionHash": "0x5bd80c3f87afef42f314d30f6557c839afbef974c9c5e1eee648e0f9a665c15c",
+        "address": "0x7804fb2AF15bB1323795A888B09913cEf629Ffda",
+        "topics": [
+          "0x48772ae5df5446cb5feef762e8204b7987ae4d5dd4a7082bc868da62cdafbdd8",
+          "0x000000000000000000000000061872dfd0cac4ec7a7c87eee9b950bb1fad2906"
+        ],
+        "data": "0x",
+        "logIndex": 193,
+        "blockHash": "0x5a4fcc4f80cd651d2609d29359dd899dd0bb094eb325d875159905f7cfa27f72"
+      },
+      {
+        "transactionIndex": 48,
+        "blockNumber": 35479552,
+        "transactionHash": "0x5bd80c3f87afef42f314d30f6557c839afbef974c9c5e1eee648e0f9a665c15c",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000007074bb056c53acc0b6091dd3fae591aa3a4acc88",
+          "0x000000000000000000000000f0245f6251bef9447a08766b9da2b07b28ad80b0"
+        ],
+        "data": "0x000000000000000000000000000000000000000000000000009c06926f6c91aa0000000000000000000000000000000000000000000000028f4935acb298cdd60000000000000000000000000000000000000000000006c16579bd81f724bed30000000000000000000000000000000000000000000000028ead2f1a432c3c2c0000000000000000000000000000000000000000000006c16615c4146691507d",
+        "logIndex": 194,
+        "blockHash": "0x5a4fcc4f80cd651d2609d29359dd899dd0bb094eb325d875159905f7cfa27f72"
+      }
+    ],
+    "blockNumber": 35479552,
+    "cumulativeGasUsed": "8446345",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x7A9fe22691c811ea339D9B73150e6911a5343DcA",
+    "0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "ec605981be9adfd04d88d4245397bb77",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.5+commit.f956cc89\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"adminWallet\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"initialSigningWallet\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"signingWallet\",\"type\":\"address\"}],\"name\":\"SigningWallet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"_signingAuthWallet\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"hashedData\",\"type\":\"bytes32\"}],\"name\":\"isAuthValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newSigningWallet\",\"type\":\"address\"}],\"name\":\"updateSigningAuthWallet\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"changeAdmin(address)\":{\"details\":\"change the administrator to be `newAdmin`.\",\"params\":{\"newAdmin\":\"address of the new administrator.\"}},\"getAdmin()\":{\"details\":\"gives the current administrator of this contract.\",\"returns\":{\"_0\":\"the current administrator of this contract.\"}}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"src/solc_0.6/EstateSale/AuthValidator.sol\":\"AuthValidator\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.6/cryptography/ECDSA.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.6.0;\\n\\n/**\\n * @dev Elliptic Curve Digital Signature Algorithm (ECDSA) operations.\\n *\\n * These functions can be used to verify that a message was signed by the holder\\n * of the private keys of a given address.\\n */\\nlibrary ECDSA {\\n    /**\\n     * @dev Returns the address that signed a hashed message (`hash`) with\\n     * `signature`. This address can then be used for verification purposes.\\n     *\\n     * The `ecrecover` EVM opcode allows for malleable (non-unique) signatures:\\n     * this function rejects them by requiring the `s` value to be in the lower\\n     * half order, and the `v` value to be either 27 or 28.\\n     *\\n     * IMPORTANT: `hash` _must_ be the result of a hash operation for the\\n     * verification to be secure: it is possible to craft signatures that\\n     * recover to arbitrary addresses for non-hashed data. A safe way to ensure\\n     * this is by receiving a hash of the original message (which may otherwise\\n     * be too long), and then calling {toEthSignedMessageHash} on it.\\n     */\\n    function recover(bytes32 hash, bytes memory signature) internal pure returns (address) {\\n        // Check the signature length\\n        if (signature.length != 65) {\\n            revert(\\\"ECDSA: invalid signature length\\\");\\n        }\\n\\n        // Divide the signature in r, s and v variables\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n\\n        // ecrecover takes the signature parameters, and the only way to get them\\n        // currently is to use assembly.\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            r := mload(add(signature, 0x20))\\n            s := mload(add(signature, 0x40))\\n            v := byte(0, mload(add(signature, 0x60)))\\n        }\\n\\n        // EIP-2 still allows signature malleability for ecrecover(). Remove this possibility and make the signature\\n        // unique. Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines\\n        // the valid range for s in (281): 0 < s < secp256k1n \\u00f7 2 + 1, and for v in (282): v \\u2208 {27, 28}. Most\\n        // signatures from current libraries generate a unique signature with an s-value in the lower half order.\\n        //\\n        // If your library generates malleable signatures, such as s-values in the upper range, calculate a new s-value\\n        // with 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - s1 and flip v from 27 to 28 or\\n        // vice versa. If your library also generates signatures with 0/1 for v instead 27/28, add 27 to v to accept\\n        // these malleable signatures as well.\\n        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {\\n            revert(\\\"ECDSA: invalid signature 's' value\\\");\\n        }\\n\\n        if (v != 27 && v != 28) {\\n            revert(\\\"ECDSA: invalid signature 'v' value\\\");\\n        }\\n\\n        // If the signature is valid (and not malleable), return the signer address\\n        address signer = ecrecover(hash, v, r, s);\\n        require(signer != address(0), \\\"ECDSA: invalid signature\\\");\\n\\n        return signer;\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Message, created from a `hash`. This\\n     * replicates the behavior of the\\n     * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign[`eth_sign`]\\n     * JSON-RPC method.\\n     *\\n     * See {recover}.\\n     */\\n    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32) {\\n        // 32 is the length in bytes of hash,\\n        // enforced by the type signature above\\n        return keccak256(abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hash));\\n    }\\n}\\n\",\"keccak256\":\"0x1efcb1ccef6b3bce65467c4b704cec8d0582e35ff48352269ba8cda4b54ae3da\"},\"src/solc_0.6/EstateSale/AuthValidator.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.6.5;\\n\\nimport \\\"@openzeppelin/contracts-0.6/cryptography/ECDSA.sol\\\";\\nimport \\\"../common/BaseWithStorage/Admin.sol\\\";\\n\\ncontract AuthValidator is Admin {\\n    address public _signingAuthWallet;\\n\\n    event SigningWallet(address indexed signingWallet);\\n\\n    constructor(address adminWallet, address initialSigningWallet) public {\\n        require(adminWallet != address(0), \\\"AuthValidator: zero address\\\");\\n\\n        _admin = adminWallet;\\n        _updateSigningAuthWallet(initialSigningWallet);\\n    }\\n\\n    function updateSigningAuthWallet(address newSigningWallet) external onlyAdmin {\\n        _updateSigningAuthWallet(newSigningWallet);\\n    }\\n\\n    function _updateSigningAuthWallet(address newSigningWallet) internal {\\n        require(newSigningWallet != address(0), \\\"AuthValidator: INVALID_SIGNING_WALLET\\\");\\n        _signingAuthWallet = newSigningWallet;\\n        emit SigningWallet(newSigningWallet);\\n    }\\n\\n    function isAuthValid(bytes memory signature, bytes32 hashedData) public view returns (bool) {\\n        address signer = ECDSA.recover(ECDSA.toEthSignedMessageHash(hashedData), signature);\\n        return signer == _signingAuthWallet;\\n    }\\n}\\n\",\"keccak256\":\"0x949c6063b3d90a8c53ca8d3c80a1097da05b7189e87d8c8825b97acc17dbd38e\"},\"src/solc_0.6/common/BaseWithStorage/Admin.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.6.5;\\n\\n\\ncontract Admin {\\n    address internal _admin;\\n\\n    /// @dev emitted when the contract administrator is changed.\\n    /// @param oldAdmin address of the previous administrator.\\n    /// @param newAdmin address of the new administrator.\\n    event AdminChanged(address oldAdmin, address newAdmin);\\n\\n    /// @dev gives the current administrator of this contract.\\n    /// @return the current administrator of this contract.\\n    function getAdmin() external view returns (address) {\\n        return _admin;\\n    }\\n\\n    /// @dev change the administrator to be `newAdmin`.\\n    /// @param newAdmin address of the new administrator.\\n    function changeAdmin(address newAdmin) external {\\n        require(msg.sender == _admin, \\\"only admin can change admin\\\");\\n        require(_admin != newAdmin, \\\"already admin\\\");\\n        emit AdminChanged(_admin, newAdmin);\\n        _admin = newAdmin;\\n    }\\n\\n    modifier onlyAdmin() {\\n        require(msg.sender == _admin, \\\"only admin allowed\\\");\\n        _;\\n    }\\n}\\n\",\"keccak256\":\"0xe1a95ec41b32e523a6fad060f90aa6d03a72a545857a91c2f51473b6072637dc\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516108a03803806108a08339818101604052604081101561003357600080fd5b5080516020909101516001600160a01b038216610097576040805162461bcd60e51b815260206004820152601b60248201527f4175746856616c696461746f723a207a65726f20616464726573730000000000604482015290519081900360640190fd5b600080546001600160a01b0319166001600160a01b0384161790556100bb816100c2565b5050610151565b6001600160a01b0381166101075760405162461bcd60e51b815260040180806020018281038252602581526020018061087b6025913960400191505060405180910390fd5b600180546001600160a01b0319166001600160a01b0383169081179091556040517f48772ae5df5446cb5feef762e8204b7987ae4d5dd4a7082bc868da62cdafbdd890600090a250565b61071b806101606000396000f3fe608060405234801561001057600080fd5b50600436106100675760003560e01c80638f283970116100505780638f2839701461014c578063947a2d1914610174578063cb0612eb1461017c57610067565b8063012847ed1461006c5780636e9960c314610128575b600080fd5b6101146004803603604081101561008257600080fd5b81019060208101813564010000000081111561009d57600080fd5b8201836020820111156100af57600080fd5b803590602001918460018302840111640100000000831117156100d157600080fd5b91908080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525092955050913592506101a2915050565b604080519115158252519081900360200190f35b6101306101d0565b604080516001600160a01b039092168252519081900360200190f35b6101726004803603602081101561016257600080fd5b50356001600160a01b03166101df565b005b610130610323565b6101726004803603602081101561019257600080fd5b50356001600160a01b0316610332565b6000806101b76101b18461039d565b856103ee565b6001546001600160a01b03908116911614949350505050565b6000546001600160a01b031690565b6000546001600160a01b0316331461023e576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b6000546001600160a01b03828116911614156102a1576040805162461bcd60e51b815260206004820152600d60248201527f616c72656164792061646d696e00000000000000000000000000000000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a1600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0392909216919091179055565b6001546001600160a01b031681565b6000546001600160a01b03163314610391576040805162461bcd60e51b815260206004820152601260248201527f6f6e6c792061646d696e20616c6c6f7765640000000000000000000000000000604482015290519081900360640190fd5b61039a816105d5565b50565b604080517f19457468657265756d205369676e6564204d6573736167653a0a333200000000602080830191909152603c8083019490945282518083039094018452605c909101909152815191012090565b60008151604114610446576040805162461bcd60e51b815260206004820152601f60248201527f45434453413a20696e76616c6964207369676e6174757265206c656e67746800604482015290519081900360640190fd5b60208201516040830151606084015160001a7f7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a08211156104b75760405162461bcd60e51b81526004018080602001828103825260228152602001806106a26022913960400191505060405180910390fd5b8060ff16601b141580156104cf57508060ff16601c14155b1561050b5760405162461bcd60e51b81526004018080602001828103825260228152602001806106c46022913960400191505060405180910390fd5b60408051600080825260208083018085528a905260ff85168385015260608301879052608083018690529251909260019260a080820193601f1981019281900390910190855afa158015610563573d6000803e3d6000fd5b5050604051601f1901519150506001600160a01b0381166105cb576040805162461bcd60e51b815260206004820152601860248201527f45434453413a20696e76616c6964207369676e61747572650000000000000000604482015290519081900360640190fd5b9695505050505050565b6001600160a01b03811661061a5760405162461bcd60e51b815260040180806020018281038252602581526020018061067d6025913960400191505060405180910390fd5b600180547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0383169081179091556040517f48772ae5df5446cb5feef762e8204b7987ae4d5dd4a7082bc868da62cdafbdd890600090a25056fe4175746856616c696461746f723a20494e56414c49445f5349474e494e475f57414c4c455445434453413a20696e76616c6964207369676e6174757265202773272076616c756545434453413a20696e76616c6964207369676e6174757265202776272076616c7565a2646970667358221220ddf8e4dcc31ba0fddbc21d0dd805f7bd335d5f2f2bd0609fcd8b5e8b8616ecf364736f6c634300060500334175746856616c696461746f723a20494e56414c49445f5349474e494e475f57414c4c4554",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100675760003560e01c80638f283970116100505780638f2839701461014c578063947a2d1914610174578063cb0612eb1461017c57610067565b8063012847ed1461006c5780636e9960c314610128575b600080fd5b6101146004803603604081101561008257600080fd5b81019060208101813564010000000081111561009d57600080fd5b8201836020820111156100af57600080fd5b803590602001918460018302840111640100000000831117156100d157600080fd5b91908080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525092955050913592506101a2915050565b604080519115158252519081900360200190f35b6101306101d0565b604080516001600160a01b039092168252519081900360200190f35b6101726004803603602081101561016257600080fd5b50356001600160a01b03166101df565b005b610130610323565b6101726004803603602081101561019257600080fd5b50356001600160a01b0316610332565b6000806101b76101b18461039d565b856103ee565b6001546001600160a01b03908116911614949350505050565b6000546001600160a01b031690565b6000546001600160a01b0316331461023e576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b6000546001600160a01b03828116911614156102a1576040805162461bcd60e51b815260206004820152600d60248201527f616c72656164792061646d696e00000000000000000000000000000000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a1600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0392909216919091179055565b6001546001600160a01b031681565b6000546001600160a01b03163314610391576040805162461bcd60e51b815260206004820152601260248201527f6f6e6c792061646d696e20616c6c6f7765640000000000000000000000000000604482015290519081900360640190fd5b61039a816105d5565b50565b604080517f19457468657265756d205369676e6564204d6573736167653a0a333200000000602080830191909152603c8083019490945282518083039094018452605c909101909152815191012090565b60008151604114610446576040805162461bcd60e51b815260206004820152601f60248201527f45434453413a20696e76616c6964207369676e6174757265206c656e67746800604482015290519081900360640190fd5b60208201516040830151606084015160001a7f7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a08211156104b75760405162461bcd60e51b81526004018080602001828103825260228152602001806106a26022913960400191505060405180910390fd5b8060ff16601b141580156104cf57508060ff16601c14155b1561050b5760405162461bcd60e51b81526004018080602001828103825260228152602001806106c46022913960400191505060405180910390fd5b60408051600080825260208083018085528a905260ff85168385015260608301879052608083018690529251909260019260a080820193601f1981019281900390910190855afa158015610563573d6000803e3d6000fd5b5050604051601f1901519150506001600160a01b0381166105cb576040805162461bcd60e51b815260206004820152601860248201527f45434453413a20696e76616c6964207369676e61747572650000000000000000604482015290519081900360640190fd5b9695505050505050565b6001600160a01b03811661061a5760405162461bcd60e51b815260040180806020018281038252602581526020018061067d6025913960400191505060405180910390fd5b600180547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0383169081179091556040517f48772ae5df5446cb5feef762e8204b7987ae4d5dd4a7082bc868da62cdafbdd890600090a25056fe4175746856616c696461746f723a20494e56414c49445f5349474e494e475f57414c4c455445434453413a20696e76616c6964207369676e6174757265202773272076616c756545434453413a20696e76616c6964207369676e6174757265202776272076616c7565a2646970667358221220ddf8e4dcc31ba0fddbc21d0dd805f7bd335d5f2f2bd0609fcd8b5e8b8616ecf364736f6c63430006050033",
+  "devdoc": {
+    "methods": {
+      "changeAdmin(address)": {
+        "details": "change the administrator to be `newAdmin`.",
+        "params": {
+          "newAdmin": "address of the new administrator."
+        }
+      },
+      "getAdmin()": {
+        "details": "gives the current administrator of this contract.",
+        "returns": {
+          "_0": "the current administrator of this contract."
+        }
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 14099,
+        "contract": "src/solc_0.6/EstateSale/AuthValidator.sol:AuthValidator",
+        "label": "_admin",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 6971,
+        "contract": "src/solc_0.6/EstateSale/AuthValidator.sol:AuthValidator",
+        "label": "_signingAuthWallet",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}
