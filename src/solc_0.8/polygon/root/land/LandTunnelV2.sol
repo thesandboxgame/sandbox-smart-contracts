@@ -103,9 +103,7 @@ contract LandTunnelV2 is
         (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
             abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
         for (uint256 index = 0; index < x.length; index++) {
-            if (rootToken.exists(size[index], x[index], y[index]))
-                rootToken.transferQuad(address(this), to, size[index], x[index], y[index], data);
-            else rootToken.mintAndTransferQuad(to, size[index], x[index], y[index], data);
+            rootToken.mintAndTransferQuad(to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }
