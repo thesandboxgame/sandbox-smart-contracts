@@ -90,28 +90,12 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
-        uint256 quadId;
         uint256 id = x + y * GRID_SIZE;
-
-        if (size == 1) {
-            quadId = id;
-        } else if (size == 3) {
-            quadId = LAYER_3x3 + id;
-        } else if (size == 6) {
-            quadId = LAYER_6x6 + id;
-        } else if (size == 12) {
-            quadId = LAYER_12x12 + id;
-        } else if (size == 24) {
-            quadId = LAYER_24x24 + id;
-        } else {
-            require(false, "Invalid size");
-        }
-
+        (uint256 quadId, , , ) = _getQuadInfo(size, id);
         require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
 
         checkOwner(size, x, y, 12);
-
-        for (uint256 i = 0; i < size*size; i++) {
+        for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
             require(_owners[id] == 0, "Already minted");
             emit Transfer(address(0), to, _id);
@@ -123,18 +107,36 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 
-
-    function checkOwner(uint256 size, uint256 x, uint256 y, uint256 quadCompareSize) internal view {
-        uint256 layer;
-        if (quadCompareSize == 3) {
+    function _getQuadInfo(uint256 size, uint256 id) internal pure returns(uint256 quadId, uint256 layer, uint256 parentSize, uint256 childLayer){
+        if (size == 1) {
+            quadId = id;
+            layer = LAYER_1x1;
+            parentSize = 3;
+        } else if (size == 3) {
+            quadId = LAYER_3x3 + id;
             layer = LAYER_3x3;
-        } else if (quadCompareSize == 6) {
+            parentSize = 6; 
+        } else if (size == 6) {
+            quadId = LAYER_6x6 + id;
             layer = LAYER_6x6;
-        } else if (quadCompareSize == 12) {
-            layer =  LAYER_12x12;
+            parentSize = 12;
+            childLayer = LAYER_3x3;
+        } else if (size == 12) {
+            quadId = LAYER_12x12 + id;
+            layer = LAYER_12x12;
+            parentSize = 24;
+            childLayer = LAYER_6x6;
+        } else if (size == 24) {
+            quadId = LAYER_24x24 + id;
+            layer = LAYER_24x24;
+            childLayer = LAYER_12x12;
         } else {
             require(false, "Invalid size");
         }
+    }
+
+    function checkOwner(uint256 size, uint256 x, uint256 y, uint256 quadCompareSize) internal view {
+        ( ,uint256 layer, , ) = _getQuadInfo(quadCompareSize, 0);
 
         if (size <= quadCompareSize) {
             require(
@@ -142,8 +144,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 "Already minted"
             );
         } else {
-            uint256 toX = x+size;
-            uint256 toY = y+size;
+            uint256 toX = x + size;
+            uint256 toY = y + size;
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
                     uint256 id = layer + xi + yi * GRID_SIZE;
@@ -153,7 +155,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
 
         quadCompareSize = quadCompareSize/ 2;
-        if(quadCompareSize >= 3)  checkOwner(size,x,y,quadCompareSize);
+        if(quadCompareSize >= 3)  checkOwner(size, x, y, quadCompareSize);
     }
 
      /**
@@ -167,6 +169,18 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
      * @param data extra data to pass to the transfer
      */
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
+        bool exist = exists(size, x, y);
+        if (exist == true) {
+            _transferQuad(msg.sender, to, size, x, y);
+            _numNFTPerAddress[msg.sender] -= size * size;
+            _numNFTPerAddress[to] += size * size;
+            _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
+        } else {
+            _mintAndTransferQuad(to, size, x, y, data);
+        }
+    }
+
+    function _mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
         require(to != address(0), "to is zero address");
         require(
             isMinter(msg.sender),
@@ -175,36 +189,29 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
-        uint256 quadId;
+        
         uint256 id = x + y * GRID_SIZE;
-
-        if (size == 1) {
-            quadId = id;
-        } else if (size == 3) {
-            quadId = LAYER_3x3 + id;
-        } else if (size == 6) {
-            quadId = LAYER_6x6 + id;
-        } else if (size == 12) {
-            quadId = LAYER_12x12 + id;
-        } else if(size == 24) {
-            quadId = LAYER_24x24 + id;
-        } else {
-            require(false, "Invalid size");
-        }
-
+        (uint256 quadId, , , ) = _getQuadInfo(size, id);
         Land[] memory mintedLand = new Land[](64);
         uint256 index;
 
-        checkAndClearOwner(size, x, y, mintedLand, index,12);
+        checkAndClearOwner(size, x, y, mintedLand, index, 12);
 
         for (uint256 i = 0; i < size*size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
-            bool isAlreadyMinted = isLandMinted(mintedLand, _id, index);
-            if (isAlreadyMinted || _owners[_id] == uint256(msg.sender)) {
-                emit Transfer(msg.sender, to, _id);
+            uint256 xi =  _id % GRID_SIZE;
+            uint256 yi = _id / GRID_SIZE;
+            bool isAlreadyMinted = isQuadCheckedForOwner(mintedLand, xi, yi, 1, index);
+            if (isAlreadyMinted) {
+                emit Transfer(msg.sender, to, _id);                
             } else {
-                require(_owners[_id] == 0, "Already minted");
-                emit Transfer(address(0), to, _id);
+                if (_owners[_id] == uint256(msg.sender)) {
+                    _owners[_id] = 0;
+                    emit Transfer(msg.sender, to, _id);
+                } else {
+                    require(_owners[_id] == 0, "Already minted");
+                    emit Transfer(address(0), to, _id);
+                }               
             }  
         }
 
@@ -215,33 +222,20 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     function checkAndClearOwner(uint256 size, uint256 x, uint256 y, Land[] memory mintedLand, uint256 index, uint256 quadCompareSize ) internal {
-        uint256 layer;
-        if (size == 1) {
-           layer = LAYER_1x1; 
-        } else if(size == 3){
-           layer = LAYER_3x3;
-        } else if(size == 6) {
-           layer = LAYER_6x6;
-        } else if(size == 12) {
-           layer = LAYER_12x12;
-        } else if( size == 24 ) {
-           layer = LAYER_24x24;
-        } else {
-           require(false, "Invalid size");
-        }
+        ( ,uint256 layer, , ) = _getQuadInfo(quadCompareSize, 0);
+        uint256 toX = x + size;
+        uint256 toY = y + size;
 
-        uint256 toX = x +size;
-        uint256 toY = y +size;
         if(size >= quadCompareSize){
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
                     bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, size, index);
-                    if ( !isQuadChecked) {
+                    if (!isQuadChecked) {
                         uint256 id = layer + xi + yi * GRID_SIZE;
                         address owner = address(uint160(_owners[id]));
 
                         if (owner == msg.sender) {
-                            mintedLand[index] = Land({x:xi,y:yi,size:size});
+                            mintedLand[index] = Land({x : xi ,y : yi, size : quadCompareSize});
                             index++;
                             _owners[id] = 0;
                         } else {
@@ -251,6 +245,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 }
             }
         }
+
         quadCompareSize = quadCompareSize/2;
         if (quadCompareSize >= 3) checkAndClearOwner(size,x,y,mintedLand,index,quadCompareSize);
     }
@@ -263,17 +258,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 if (x >= land.x && x < land.x + land.size) {
                     if(y >= land.y && y < land.y + land.size) return true;
                 }
-            }
-        }
-        return false;
-    }
-
-    function isLandMinted(Land[] memory mintedLand,uint256 id, uint256 index) internal pure returns(bool) {
-        for (uint256 i = 0; i <= index; i++) {
-            Land memory land = mintedLand[i];
-            for (uint256 j = 0; j < land.size*land.size; j++) {
-                uint256 _id = _idInPath(j, land.size, land.x, land.y);
-                if (_id == id) return true;     
             }
         }
         return false;
@@ -414,8 +398,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function _regroup(address from, address to, uint256 size, uint256 x, uint256 y) internal {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-        if (size == 3 || size == 6|| size == 12 || size == 24) {
-            regroupQuad(from, to, Land({x:x,y:y,size:size}), true, size/2);
+        if (size == 3 || size == 6 || size == 12 || size == 24) {
+            regroupQuad(from, to, Land({x : x, y : y, size : size}), true, size/2);
         } else {
             require(false, "Invalid size");
         }
@@ -433,24 +417,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
 
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
-        uint256 layer;
-        uint256 parentSize = size * 2;
-        if (size == 1) {
-            layer = LAYER_1x1;
-            parentSize = 3;
-        } else if (size == 3) {
-            layer = LAYER_3x3;
-        } else if (size == 6) {
-            layer = LAYER_6x6;
-        } else if (size == 12) {
-            layer = LAYER_12x12;
-        } else if (size == 24) {
-            layer = LAYER_24x24;
-        } else {
-            require(false, "Invalid size");
-        }
+        ( ,uint256 layer, uint256 parentSize, ) = _getQuadInfo(size, 0);
         address owner = address(_owners[layer + (x/size) * size + ((y/size) * size) * GRID_SIZE]);
-        if (owner != address(0)) {
+        if (owner != address(0)) {           
             return owner;
         } else if(size < 24) {
             return _ownerOfQuad(parentSize, x, y);
@@ -459,26 +428,31 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     function regroupQuad(address from, address to, Land memory land, bool set, uint256 childQuadSize) internal returns(bool){
-         uint256 layer;
-         uint256 childLayer;
-        if (land.size == 3) {
-            layer = LAYER_3x3;
-        } else if (land.size == 6) {
-            layer = LAYER_6x6;
-            childLayer = LAYER_3x3;
-        } else if (land.size == 12) {
-            layer = LAYER_12x12;
-            childLayer = LAYER_6x6;
-        } else if (land.size == 24) {
-            layer = LAYER_24x24;
-            childLayer = LAYER_12x12;
-        } else {
-            require(false, "Invalid size");
-        }
-        
         uint256 id = land.x + land.y * GRID_SIZE;
-        uint256 quadId = layer + id;
-        bool ownerOfAll = _regroupQuad(from,to,land,childQuadSize,childLayer);
+        (uint256 quadId, ,uint256 childLayer, ) = _getQuadInfo(land.size, id);
+        bool ownerOfAll = true;
+
+        {
+            for (uint256 xi = land.x; xi < land.x+land.size; xi += childQuadSize) {
+                for (uint256 yi = land.y; yi < land.y+land.size; yi += childQuadSize) {
+                    uint256 ownerChild;
+                    if (childQuadSize == 1) {
+                        ownerOfAll = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
+                    } else {
+                        ownerOfAll = regroupQuad(from, to, Land({x : xi, y : yi, size : childQuadSize}), false, childQuadSize/2);
+                        uint256 idChild = childLayer + xi + yi * GRID_SIZE;
+                        ownerChild = _owners[idChild];
+                        if (ownerChild != 0) {
+                            if(!ownerOfAll) {
+                                require(ownerChild == uint256(from), "not owner of child Quad");
+                            }
+                            _owners[idChild] = 0;
+                        }
+                    }
+                    ownerOfAll = (ownerOfAll || ownerChild != 0) && ownerOfAll;
+                }
+           }
+        }
 
         if(set) {
             if(!ownerOfAll) {
@@ -490,52 +464,29 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             _owners[quadId] = uint256(to);
             return true;
         }
-        return ownerOfAll;
-    }
 
-    function _regroupQuad(address from ,address to,Land memory land, uint256 childQuadSize, uint256 childLayer) internal returns(bool){
-        bool ownerOfAll = true;
-        for (uint256 xi = land.x; xi < land.x+land.size; xi += childQuadSize) {
-            for (uint256 yi = land.y; yi < land.y+land.size; yi += childQuadSize) {
-                uint256 ownerChild;
-                if (childQuadSize == 1) {
-                    ownerOfAll = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
-                } else {
-                    ownerOfAll = regroupQuad(from, to,Land({x:xi,y:yi,size:childQuadSize}),false,childQuadSize/2);
-                    uint256 idChild = childLayer + xi + yi * GRID_SIZE;
-                    ownerChild = _owners[idChild];
-                if (ownerChild != 0) {
-                    if(!ownerOfAll) {
-                        require(ownerChild == uint256(from), "not owner of child Quad");
-                    }
-                    _owners[idChild] = 0;
-                }
-                }
-                ownerOfAll = (ownerOfAll || ownerChild != 0) && ownerOfAll;
-            }
-        }
         return ownerOfAll;
     }
 
     function _ownerOf(uint256 id) internal view returns (address) {
-        require(id & LAYER == 0, "Invalid token id");
         uint256 size;
-        uint256 x = id % GRID_SIZE;
-        uint256 y = id / GRID_SIZE;
+        uint256 x = ((id << 8 ) >> 8) % GRID_SIZE;
+        uint256 y = ((id << 8 ) >> 8) / GRID_SIZE;
         uint256 layer = id & LAYER;
-        if(layer == 0){
-            size =1;
-        } else if(layer == 1) {
+        if(layer == LAYER_1x1){
+            size = 1;
+        } else if(layer == LAYER_3x3) {
             size = 3;
-        } else if(layer == 2) {
+        } else if(layer == LAYER_6x6) {
             size = 6;
-        } else if(layer == 3) {
+        } else if(layer == LAYER_12x12) {
             size = 12;
-        } else if (layer == 4) {
+        } else if (layer == LAYER_24x24) {
             size = 24;
         } else {
             require(false,"Invalid token id");
         }
+        require(x % size == 0 && y % size == 0, "Invalid token id");
         return _ownerOfQuad(size, x, y);
     }
 
