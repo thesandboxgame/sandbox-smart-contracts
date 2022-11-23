@@ -21,9 +21,17 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
     // TODO: constructor
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
-    function initialize(address admin) public initializer {
+    function initialize(
+        address admin,
+        address backendKYCWallet,
+        string memory uri
+    ) public initializer {
+        // TODO: grantRole ?
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(MINTER_ROLE, backendKYCWallet);
+        _setupRole(BURNER_ROLE, admin);
         __ERC721_init("Sandbox's KYC ERC721", "KYC");
+        _baseTokenURI = uri;
     }
 
     /// @notice Creates a new token for `to`.
@@ -31,6 +39,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
     /// @param to The address that will receive the new token.
     /// @param id The id of the new token.
     function mint(address to, uint256 id) public override(IERC721NonTransferable) onlyRole(MINTER_ROLE) {
+        require(balanceOf(to) == 0, "KYCERC721_ISSUED");
         _safeMint(to, id);
     }
 
@@ -44,6 +53,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
         uint256 id,
         bytes calldata data
     ) public override(IERC721NonTransferable) onlyRole(MINTER_ROLE) {
+        require(balanceOf(to) == 0, "KYCERC721_ISSUED");
         _safeMint(to, id, data);
     }
 

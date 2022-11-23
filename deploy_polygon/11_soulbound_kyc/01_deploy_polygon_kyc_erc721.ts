@@ -14,15 +14,17 @@ const func: DeployFunction = async function (
   } = await getNamedAccounts();
   const {deploy} = deployments;
 
-  await deploy('PolygonKYCToken', {
+  const BASE_TOKEN_URI = 'https://helloIamAbaseURI.game/';
+
+  await deploy('PolygonKYCERC721', {
     from: deployer,
-    contract: 'KYCToken',
+    contract: 'KYCERC721',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [kycAdmin, backendKYCWallet],
+        args: [kycAdmin, backendKYCWallet, BASE_TOKEN_URI],
       },
       upgradeIndex: 0,
     },
@@ -31,6 +33,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['PolygonKYCToken', 'PolygonKYCToken_deploy', 'L2'];
+func.tags = ['PolygonKYCERC721', 'PolygonKYCERC721_deploy', 'L2'];
 func.dependencies = [];
 func.skip = skipUnlessTestnet;
