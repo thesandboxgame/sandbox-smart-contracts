@@ -1,24 +1,25 @@
-import {deployments, getNamedAccounts, network} from 'hardhat';
+import {network} from 'hardhat';
+import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import 'dotenv/config';
 import catalysts from '../../data/catalysts';
 import gems from '../../data/gems';
 
-const {execute} = deployments;
-
 /**
  * How to use:
- *  - yarn run hardhat run --network mumbai_test ./scripts/faucet/mint_cats_gems_to_mumbai_faucet.ts
+ *  - Insert the recipient contract address on line 22
+ *  - yarn run hardhat run --network mumbai ./scripts/faucet/mint_cats_gems_to_mumbai_faucet.ts
  */
 void (async () => {
-  // Only for minting tokens on mumbai_test (local) network
-  // Note: change name from 'mumbai_test' to 'mumbai' for QA
-  if (network.name !== 'hardhat' && network.name !== 'mumbai_test') {
-    throw new Error('only for mumbai_test');
+  const {getNamedAccounts, deployments} = hre;
+  const {execute} = deployments;
+  // Only for minting tokens on mumbai network
+  if (network.name !== 'hardhat' && network.name !== 'mumbai') {
+    throw new Error('only for mumbai');
   }
 
-  // Fetching parameter
-  const faucetContractAddress = '0x8633EC659f26089287CF4fDf86a51Cc4aC08dC23';
+  // Insert recipient contract address here
+  const faucetContractAddress = '';
   const mintAmount = BigNumber.from(100).mul('1000000000000000000'); // decimals 18
 
   // User for contract interactions
@@ -33,7 +34,7 @@ void (async () => {
     // Mint each token type
     if (catalystContract && mintAmount > BigNumber.from('0')) {
       console.log(
-        `Minting PolygonCatalyst_${catalyst.symbol} to Faucet contract address ${faucetContractAddress}`
+        `Minting PolygonCatalyst_${catalyst.symbol} to contract address ${faucetContractAddress}`
       );
 
       await execute(
@@ -58,7 +59,7 @@ void (async () => {
     // Mint each token type
     if (gemContract && mintAmount > BigNumber.from('0')) {
       console.log(
-        `Minting PolygonGem_${gem.symbol} to Faucet contract address ${faucetContractAddress}`
+        `Minting PolygonGem_${gem.symbol} to contract address ${faucetContractAddress}`
       );
 
       await execute(
