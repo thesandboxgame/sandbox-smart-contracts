@@ -66,18 +66,19 @@ describe('PolygonKYCToken', function () {
         await expect(
           other.PolygonKYCToken['mint(address,uint256)'](other.address, 10)
         ).to.be.revertedWith(
-          'AccessControl: account 0xaa811001e7f63998eaa0aea18ed82f48c74273ae is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6'
+          `AccessControl: account ${other.address.toLowerCase()} is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6`
         );
       });
       it('default admin role cannot mint', async function () {
         const {
           contractAsDefaultAdmin,
           other,
+          kycAdmin,
         } = await setupTestPolygonKYCToken();
         await expect(
           contractAsDefaultAdmin['mint(address,uint256)'](other.address, 10)
         ).to.be.revertedWith(
-          'AccessControl: account 0x99f00e3cb2b9da9486a905cddfd25263bdb47fb6 is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6'
+          `AccessControl: account ${kycAdmin.toLowerCase()} is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6`
         );
       });
       it('cannot mint to the same address twice', async function () {
@@ -167,7 +168,7 @@ describe('PolygonKYCToken', function () {
         await expect(
           other.PolygonKYCToken.burnFrom(otherB.address, 5)
         ).to.be.revertedWith(
-          'AccessControl: account 0xaa811001e7f63998eaa0aea18ed82f48c74273ae is missing role 0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848'
+          `AccessControl: account ${other.address.toLowerCase()} is missing role 0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848`
         );
       });
       it('default admin can burn a token belonging to another', async function () {
@@ -363,7 +364,7 @@ describe('PolygonKYCToken', function () {
         await expect(
           other.PolygonKYCToken.setBaseURI(newURI)
         ).to.be.revertedWith(
-          'AccessControl: account 0xaa811001e7f63998eaa0aea18ed82f48c74273ae is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+          `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
         );
       });
     });
