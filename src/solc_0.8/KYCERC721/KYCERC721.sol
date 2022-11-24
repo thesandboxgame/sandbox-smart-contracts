@@ -4,12 +4,15 @@ pragma solidity 0.8.2;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IERC721NonTransferable} from "../common/interfaces/IERC721NonTransferable.sol";
+import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 /// @title This contract is for a NON-TRANSFERABLE KYCERC721 token which can be minted by admin with a minter role.
 /// @dev The following roles are used in this contract: DEFAULT_ADMIN_ROLE, MINTER_ROLE, BURNER_ROLE.
 /// @dev KYCERC721 will be minted only on L2.
 /// @dev This contract is final, don't inherit from it.
 contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTransferable {
+    using StringsUpgradeable for uint256;
+
     uint256[50] private __gap1; // In case
 
     // Roles
@@ -18,7 +21,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
 
     string internal _baseTokenURI;
 
-    // TODO: constructor
+    constructor() initializer {}
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(
@@ -26,10 +29,9 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
         address backendKYCWallet,
         string memory uri
     ) public initializer {
-        // TODO: grantRole ?
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(MINTER_ROLE, backendKYCWallet);
-        _setupRole(BURNER_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(MINTER_ROLE, backendKYCWallet);
+        _grantRole(BURNER_ROLE, admin);
         __ERC721_init("Sandbox's KYC ERC721", "KYC");
         _baseTokenURI = uri;
     }
@@ -58,18 +60,25 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
-    /// @param id The token to get the uri of.
+    /// @param tokenId The tokenId to get the uri of.
     /// @return URI The token's full URI string.
-    function tokenURI(uint256 id) public view override(ERC721Upgradeable) returns (string memory) {
-        require(ownerOf(id) != address(0), "ZERO_ADDRESS");
-        super.tokenURI(id);
+    function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
+        require(ownerOf(tokenId) != address(0), "ZERO_ADDRESS");
+        require(_exists(tokenId), "INVALID_TOKEN");
+        string memory uri = _baseURI();
+        return bytes(uri).length > 0 ? string(abi.encodePacked(uri, tokenId.toString())) : "";
     }
 
-    /// @notice The base for the token URI.
+    /// @notice Set the base for the token URI.
     /// @dev It is intended that only admin may set the base token URI.
     /// @param uri The string for the base URI.
     function setBaseURI(string memory uri) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _baseTokenURI = uri;
+    }
+
+    /// @notice View the base for the token URI.
+    function baseURI() external view returns (string memory) {
+        return _baseURI();
     }
 
     /// @notice Query if a contract implements interface `id`.
@@ -95,6 +104,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
     /// @dev Intended that users can burn their own tokens.
     /// @param id The id of the token to be burned.
     function burn(uint256 id) public override(IERC721NonTransferable) {
+        require(_msgSender() == ERC721Upgradeable.ownerOf(id), "NOT_OWNER");
         _burn(id);
     }
 
@@ -107,7 +117,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
         _burn(id);
     }
 
-    /// @notice Internal function for setting the baseURI.
+    /// @notice Internal function for viewing the baseURI.
     /// @dev Overrides ERC721Upgradeable which returns "".
     function _baseURI() internal view override(ERC721Upgradeable) returns (string memory) {
         return _baseTokenURI;
