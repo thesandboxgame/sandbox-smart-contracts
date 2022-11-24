@@ -21,6 +21,7 @@ contract KYCERC721 is AccessControlUpgradeable, ERC721Upgradeable, IERC721NonTra
 
     string internal _baseTokenURI;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
