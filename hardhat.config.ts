@@ -184,11 +184,13 @@ const config: HardhatUserConfig = {
     treasury: {
       default: 'sandSaleBeneficiary',
       mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
+      polygon: '0x1b47567CBE36e63293A7A2018F79687f942aB24C',
     },
 
     landSaleBeneficiary: {
       default: 'sandSaleBeneficiary',
       mainnet: 'treasury',
+      polygon: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
     catalystAssetFeeRecipient: 'treasury',
@@ -200,6 +202,7 @@ const config: HardhatUserConfig = {
       goerli_test: 5,
       mumbai: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
+      polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
     landAdmin: {
@@ -277,7 +280,7 @@ const config: HardhatUserConfig = {
       goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     sandboxFoundation: {
-      default: 4,
+      default: 'sandAdmin',
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', //'0xfe66Ec1B46494FE49F53733a098587bf5D12BD88',
     },
