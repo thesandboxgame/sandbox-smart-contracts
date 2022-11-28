@@ -5,9 +5,8 @@ import {
   getLandSales,
   LandSale,
   setAsLandMinter,
-  writeProofs,
+  writeProofs
 } from '../../data/landSales/getLandSales';
-import {skipUnlessTestnet} from '../../utils/network';
 
 type SaleDeployment = {
   name: string;
@@ -22,7 +21,7 @@ type SaleDeployment = {
 const sales: SaleDeployment[] = [
   // {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
   {name: 'LandPreSale_19'},
-  {name: 'LandPreSale_20', skip: skipUnlessTestnet},
+  {name: 'LandPreSale_20'},
 ];
 
 const func: DeployFunction = async function (hre) {
