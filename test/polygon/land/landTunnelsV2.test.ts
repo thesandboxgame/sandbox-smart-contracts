@@ -2403,5 +2403,449 @@ describe('PolygonLand', function () {
         );
       });
     });
+    describe('Minting quad on layer 1 with child quad minted on layer 2', function () {
+      it('should be able to transfer 12x12 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          PolygonLand,
+          MockPolygonLandTunnelV2,
+          getId,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const mintedLandIds = [];
+        const sizes = [];
+        const xs = [];
+        const ys = [];
+
+        // Minting  1x1 land on L1.
+
+        for (let i = 0; i < 12; i = i + 6) {
+          for (let j = 0; j < 12; j = j + 6) {
+            if (i == 6 && j == 6) break;
+            await landMinter.PolygonLand.mintQuad(
+              landHolder.address,
+              6,
+              i,
+              j,
+              bytes
+            );
+            mintedLandIds.push(getId(3, i, j));
+            sizes.push(6);
+            xs.push(i);
+            ys.push(j);
+          }
+        }
+
+        for (let i = 6; i < 12; i = i + 3) {
+          for (let j = 6; j < 12; j = j + 3) {
+            if (i == 9 && j == 9) break;
+            await landMinter.PolygonLand.mintQuad(
+              landHolder.address,
+              3,
+              i,
+              j,
+              bytes
+            );
+            mintedLandIds.push(getId(2, i, j));
+            sizes.push(3);
+            xs.push(i);
+            ys.push(j);
+          }
+        }
+
+        for (let i = 9; i < 12; i++) {
+          for (let j = 9; j < 12; j++) {
+            if (i == 11 && j == 11) break;
+            await landMinter.PolygonLand.mintQuad(
+              landHolder.address,
+              1,
+              i,
+              j,
+              bytes
+            );
+            mintedLandIds.push(getId(1, i, j));
+            sizes.push(1);
+            xs.push(i);
+            ys.push(j);
+          }
+        }
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          143
+        );
+        expect(await PolygonLand.exists(12, x, y)).to.be.equal(false);
+
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          sizes,
+          xs,
+          ys,
+          bytes
+        );
+        await tx.wait();
+
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            MockPolygonLandTunnelV2.address
+          );
+        }
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, sizes, xs, ys, bytes]
+          )
+        );
+        await tnx.wait();
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(143);
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        await landMinter.Land.mintQuad(landHolder.address, 1, 11, 11, bytes);
+
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [12],
+          [0],
+          [0],
+          bytes
+        );
+
+        expect(await PolygonLand.ownerOf(getId(4, x, y))).to.be.equal(
+          landHolder.address
+        );
+        expect(await PolygonLand.exists(12, x, y)).to.be.equal(true);
+      });
+      it('should be able to transfer 12x12 Land with child quads already minted : worst case', async function () {
+        const {
+          deployer,
+          Land,
+          PolygonLand,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
+          getId,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const mintedLandIds = [];
+        const sizes = [];
+        const xs = [];
+        const ys = [];
+
+        // Minting all the 1x1 land on L1 in an 12x12 Land quad except 1 for the worst case
+        for (let i = 0; i < 12; i = i + 1) {
+          for (let j = 0; j < 12; j = j + 1) {
+            if (i == 11 && j == 11) break;
+            await landMinter.PolygonLand.mintQuad(
+              landHolder.address,
+              1,
+              i,
+              j,
+              bytes
+            );
+            mintedLandIds.push(getId(1, i, j));
+            sizes.push(1);
+            xs.push(i);
+            ys.push(j);
+          }
+        }
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          143
+        );
+        expect(await PolygonLand.exists(12, x, y)).to.be.equal(false);
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        for (let i = 0; i <= 100; i += 50) {
+          const endIndex = i == 100 ? i + 43 : i + 50;
+          const tx = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+            landHolder.address,
+            sizes.slice(i, endIndex),
+            xs.slice(i, endIndex),
+            ys.slice(i, endIndex),
+            bytes
+          );
+          await tx.wait();
+        }
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            MockPolygonLandTunnelV2.address
+          );
+        }
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, sizes, xs, ys, bytes]
+          )
+        );
+        await tnx.wait();
+
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        await landMinter.Land.mintQuad(landHolder.address, 1, 11, 11, bytes);
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [12],
+          [0],
+          [0],
+          bytes
+        );
+
+        expect(await PolygonLand.ownerOf(getId(4, x, y))).to.be.equal(
+          landHolder.address
+        );
+        expect(await PolygonLand.exists(12, x, y)).to.be.equal(true);
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          144
+        );
+      });
+      it('should be able to transfer 6x6 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          Land,
+          PolygonLand,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
+          getId,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const mintedLandIds = [];
+
+        // Mint LAND on L1
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          1,
+          0,
+          0,
+          bytes
+        );
+        mintedLandIds.push(getId(1, 0, 0));
+
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          3,
+          3,
+          0,
+          bytes
+        );
+        mintedLandIds.push(getId(2, 3, 0));
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(10);
+        expect(await PolygonLand.exists(6, x, y)).to.be.equal(false);
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [1, 3],
+          [0, 3],
+          [0, 0],
+          bytes
+        );
+        await tx.wait();
+
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
+            MockPolygonLandTunnelV2.address
+          );
+        }
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+
+        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [1, 3], [0, 3], [0, 0], bytes]
+          )
+        );
+        await tnx.wait();
+        for (let i = 0; i < mintedLandIds.length; i++) {
+          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+            landHolder.address
+          );
+        }
+
+        for (let i = 0; i < 3; i = i + 1) {
+          for (let j = 0; j < 3; j = j + 1) {
+            if (!(i == 0 && j == 0)) {
+              await landMinter.Land.mintQuad(
+                landHolder.address,
+                1,
+                i,
+                j,
+                bytes
+              );
+            }
+          }
+        }
+        await landMinter.Land.mintQuad(landHolder.address, 3, 0, 3, bytes);
+        await landMinter.Land.mintQuad(landHolder.address, 3, 3, 3, bytes);
+
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [6],
+          [0],
+          [0],
+          bytes
+        );
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(36);
+        expect(await PolygonLand.exists(6, x, y)).to.be.equal(true);
+        expect(await PolygonLand.ownerOf(getId(3, x, y))).to.be.equal(
+          landHolder.address
+        );
+      });
+
+      it('should be able to transfer 3x3 Land with child quads already minted', async function () {
+        const {
+          deployer,
+          PolygonLand,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
+          getId,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+
+        // Mint LAND on L1
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          1,
+          0,
+          0,
+          bytes
+        );
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(1);
+        expect(await PolygonLand.exists(3, x, y)).to.be.equal(false);
+
+        // Transfer to L1 Tunnel
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [1],
+          [0],
+          [0],
+          bytes
+        );
+
+        console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
+
+        const tnx = await deployer.MockLandTunnelV2.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [1], [0], [0], bytes]
+          )
+        );
+        await tnx.wait();
+
+        for (let i = 0; i < 3; i = i + 1) {
+          for (let j = 0; j < 3; j = j + 1) {
+            if (!(i == 0 && j == 0)) {
+              await landMinter.Land.mintQuad(
+                landHolder.address,
+                1,
+                i,
+                j,
+                bytes
+              );
+            }
+          }
+        }
+
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [3],
+          [0],
+          [0],
+          bytes
+        );
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(9);
+        expect(await PolygonLand.exists(3, x, y)).to.be.equal(true);
+        expect(await PolygonLand.ownerOf(getId(2, x, y))).to.be.equal(
+          landHolder.address
+        );
+      });
+    });
   });
 });
