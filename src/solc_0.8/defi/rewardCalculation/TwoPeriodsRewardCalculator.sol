@@ -32,6 +32,8 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         uint256 rate2
     );
 
+    event SavedRewardsSet(uint256 indexed reward);
+
     // This role is in charge of configuring reward distribution
     bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
     // Each time a parameter that affects the reward distribution is changed the rewards are distributed by the reward
@@ -93,6 +95,8 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         savedRewards = reward;
         lastUpdateTime = block.timestamp;
+
+        emit SavedRewardsSet(reward);
     }
 
     // This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly

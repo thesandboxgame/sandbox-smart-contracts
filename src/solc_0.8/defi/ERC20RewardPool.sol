@@ -39,6 +39,12 @@ contract ERC20RewardPool is
     using SafeERC20 for IERC20;
     using Address for address;
 
+    event RewardTokenSet(address indexed contractAddress);
+    event StakeTokenSet(address indexed contractAddress);
+    event TrustedForwarderSet(address indexed trustedForwarder);
+    event ContributionRulesSet(address indexed contractAddress);
+    event RewardCalculatorSet(address indexed contractAddress, bool restartRewards_);
+    event FundsRecovered(address indexed receiver);
     event Staked(address indexed account, uint256 stakeAmount);
     event Withdrawn(address indexed account, uint256 stakeAmount);
     event Exit(address indexed account);
@@ -102,6 +108,8 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         rewardToken = _newRewardToken;
+
+        emit RewardTokenSet(contractAddress);
     }
 
     /// @notice set the stake token
@@ -117,12 +125,16 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         _stakeToken = _newStakeToken;
+
+        emit StakeTokenSet(contractAddress);
     }
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external isContractAndAdmin(trustedForwarder) {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @notice set contract that contains all the contribution rules
@@ -132,6 +144,8 @@ contract ERC20RewardPool is
         isValidAddress(contractAddress)
     {
         contributionRules = IContributionRules(contractAddress);
+
+        emit ContributionRulesSet(contractAddress);
     }
 
     /// @notice set the reward calculator
@@ -147,6 +161,8 @@ contract ERC20RewardPool is
             _restartRewards();
         }
         rewardCalculator = IRewardCalculator(contractAddress);
+
+        emit RewardCalculatorSet(contractAddress, restartRewards_);
     }
 
     /// @notice the admin recover is able to recover reward funds
@@ -163,6 +179,8 @@ contract ERC20RewardPool is
         }
 
         rewardToken.safeTransfer(receiver, recoverAmount);
+
+        emit FundsRecovered(receiver);
     }
 
     /// @notice return the total supply of staked tokens
