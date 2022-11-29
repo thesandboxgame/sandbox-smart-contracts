@@ -157,7 +157,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     /// @notice Purchase StarterPacks with SAND
     /// @dev The buyer param is duplicated outside the message so the function is compatible with Sand approveAndCall
     /// @dev The buyer param is included inside the message so it is clear it is part of the message to be signed
-    /// @dev We check message.buyer == _msgSender() for ERC2771, otherwise we check _msgSender() == _sand for Sand approveAndCall
+    /// @dev If Sand amount is not approved then Sand amount will fail in Sand transferFrom
     /// @param buyer The recipient of the Catalysts and Gems to be purchased
     /// @param message A message containing information about the Catalysts and Gems to be purchased together with the destination (buyer) and a nonce
     /// @param signature A signed message specifying tx details
@@ -167,7 +167,6 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         bytes calldata signature
     ) external {
         require(buyer == message.buyer, "INVALID_BUYER");
-        require(message.buyer == _msgSender() || _msgSender() == _sand, "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(
             _isPurchaseValid(

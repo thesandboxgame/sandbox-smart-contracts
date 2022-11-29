@@ -1244,41 +1244,41 @@ describe('PolygonStarterPack.sol', function () {
         )
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
-    it('cannot purchase if not msgSender()', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
-      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
-      await PolygonStarterPackAsAdmin.setPrices(
-        catalystIds,
-        catPrices,
-        gemIds,
-        gemPrices
-      );
-      // fast forward 1 hour so the new prices are in effect
-      await increaseTime(3600);
-      const Message = {...TestMessage};
-      Message.buyer = other.address; // bad param
-      const signature = await starterPack712Signature(
-        PolygonStarterPack,
-        Message
-      );
-      // approve SAND
-      await buyer.sandContract.approve(
-        PolygonStarterPack.address,
-        constants.MaxUint256
-      );
-      await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(
-          Message.buyer,
-          Message,
-          signature
-        )
-      ).to.be.revertedWith('INVALID_SENDER');
-    });
+    // it('cannot purchase if not msgSender()', async function () {
+    //   const {
+    //     buyer,
+    //     PolygonStarterPackAsAdmin,
+    //     PolygonStarterPack,
+    //     other,
+    //   } = await setupPolygonStarterPack();
+    //   await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+    //   await PolygonStarterPackAsAdmin.setPrices(
+    //     catalystIds,
+    //     catPrices,
+    //     gemIds,
+    //     gemPrices
+    //   );
+    //   // fast forward 1 hour so the new prices are in effect
+    //   await increaseTime(3600);
+    //   const Message = {...TestMessage};
+    //   Message.buyer = other.address; // bad param
+    //   const signature = await starterPack712Signature(
+    //     PolygonStarterPack,
+    //     Message
+    //   );
+    //   // approve SAND
+    //   await buyer.sandContract.approve(
+    //     PolygonStarterPack.address,
+    //     constants.MaxUint256
+    //   );
+    //   await expect(
+    //     buyer.PolygonStarterPack.purchaseWithSAND(
+    //       Message.buyer,
+    //       Message,
+    //       signature
+    //     )
+    //   ).to.be.revertedWith('INVALID_SENDER');
+    // });
     it('cannot purchase if buyer is different from message.buyer', async function () {
       const {
         buyer,
