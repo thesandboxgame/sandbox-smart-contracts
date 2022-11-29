@@ -1870,7 +1870,7 @@ describe('PolygonStarterPack.sol', function () {
     });
   });
   describe('sand approveAndCall', function () {
-    it('can purchase with just one call using approveAndCall', async function () {
+    it('can purchase with just one call using approveAndCall if prices are not zero', async function () {
       const {
         buyer,
         powerGem,
@@ -1885,6 +1885,14 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPack,
         PolygonStarterPackAsAdmin,
       } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setPrices(
+        catalystIds,
+        catPrices,
+        gemIds,
+        gemPrices
+      );
+      // fast forward 1 hour so the new prices are in effect
+      await increaseTime(3600);
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
       Message.buyer = buyer.address;
@@ -1907,14 +1915,15 @@ describe('PolygonStarterPack.sol', function () {
         Message.gemIds,
         Message.gemQuantities
       );
+      expect(price).not.to.be.eq(0);
 
-      await expect(
-        buyer.sandContract.approveAndCall(
-          PolygonStarterPack.address,
-          price,
-          data
-        )
-      ).to.not.be.reverted;
+      console.log(price.toString()); // 1361
+
+      const tx = await buyer.sandContract.approveAndCall(
+        PolygonStarterPack.address,
+        price,
+        data
+      );
     });
     it('cannot purchase with just one call using approveAndCall if msgSender is not the buyer', async function () {
       const {
