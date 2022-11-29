@@ -1869,6 +1869,89 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
   });
+  describe('sand approveAndCall', function () {
+    it('can purchase with just one call using approveAndCall', async function () {
+      const {
+        buyer,
+        powerGem,
+        defenseGem,
+        speedGem,
+        magicGem,
+        luckGem,
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+        legendaryCatalyst,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const {
+        data,
+      } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+
+      await expect(
+        buyer.sandContract.approveAndCall(
+          PolygonStarterPack.address,
+          price,
+          data
+        )
+      ).to.not.be.reverted;
+    });
+    it('cannot purchase with just one call using approveAndCall if msgSender is not the buyer', async function () {
+      const {
+        buyer,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+        sandContract,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const {
+        data,
+      } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+
+      await expect(
+        sandContract.approveAndCall(PolygonStarterPack.address, price, data)
+      ).to.be.revertedWith('FIRST_PARAM_NOT_SENDER');
+    });
+  });
+
   describe('test array lengths for withdrawAll', function () {
     it('can withdraw 20 types of gems', async function () {
       const {
