@@ -2,6 +2,7 @@
 pragma solidity 0.5.9;
 
 import "./ERC721BaseTokenV2.sol";
+import "hardhat/console.sol";
 
 contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
@@ -83,7 +84,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         bytes calldata data
     ) external {
         require(to != address(0), "to is zero address");
-        require(isMinter(msg.sender), "Only a minter can mint");
+        require(
+            isMinter(msg.sender),
+            "mintQOnly a minter can mint"
+        );
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
@@ -499,17 +503,18 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 childQuadSize
     ) internal returns (bool) {
         uint256 id = land.x + land.y * GRID_SIZE;
-        (uint256 quadId, , uint256 childLayer, ) = _getQuadInfo(land.size, id);
+        (uint256 quadId, , , uint256 childLayer) = _getQuadInfo(land.size, id);
         bool ownerOfAll = true;
 
         {
             for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
                 for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
                     uint256 ownerChild;
-                    if (childQuadSize == 1) {
-                        ownerOfAll = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
+                    bool ownAllIndividual;
+                    if (childQuadSize < 3) {
+                        ownAllIndividual = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
                     } else {
-                        ownerOfAll = regroupQuad(
+                        ownAllIndividual = regroupQuad(
                             from,
                             to,
                             Land({x: xi, y: yi, size: childQuadSize}),
@@ -525,7 +530,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                             _owners[idChild] = 0;
                         }
                     }
-                    ownerOfAll = (ownerOfAll || ownerChild != 0) && ownerOfAll;
+                    ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
             }
         }
