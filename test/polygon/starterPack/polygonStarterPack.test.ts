@@ -4,6 +4,7 @@ import {
   expectEventWithArgs,
   expectEventWithArgsFromReceipt,
   increaseTime,
+  toWei,
 } from '../../utils';
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
@@ -1870,7 +1871,7 @@ describe('PolygonStarterPack.sol', function () {
     });
   });
   describe('sand approveAndCall', function () {
-    it('can purchase with just one call using approveAndCall if prices are not zero', async function () {
+    it('can purchase with just one call using approveAndCall (prices set)', async function () {
       const {
         buyer,
         powerGem,
@@ -1901,9 +1902,7 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
 
-      const {
-        data,
-      } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
         Message.buyer,
         Message,
         signature
@@ -1917,12 +1916,116 @@ describe('PolygonStarterPack.sol', function () {
       );
       expect(price).not.to.be.eq(0);
 
-      console.log(price.toString()); // 1361
+      const txValue = toWei(0);
 
-      const tx = await buyer.sandContract.approveAndCall(
+      const returnData = await buyer.sandContract.approveAndCall(
         PolygonStarterPack.address,
         price,
-        data
+        encodedABI.data,
+        {value: txValue}
+      );
+
+      expect(await powerGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[0])
+      );
+      expect(await defenseGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[1])
+      );
+      expect(await speedGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[2])
+      );
+      expect(await magicGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[3])
+      );
+      expect(await luckGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[4])
+      );
+      expect(await commonCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[0])
+      );
+      expect(await rareCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[1])
+      );
+      expect(await epicCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[2])
+      );
+      expect(await legendaryCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[3])
+      );
+    });
+    it('can purchase with just one call using approveAndCall (prices zero)', async function () {
+      const {
+        buyer,
+        powerGem,
+        defenseGem,
+        speedGem,
+        magicGem,
+        luckGem,
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+        legendaryCatalyst,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+      } = await setupPolygonStarterPack();
+
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+      expect(price).to.be.eq(0);
+
+      const txValue = toWei(0);
+
+      await buyer.sandContract.approveAndCall(
+        PolygonStarterPack.address,
+        price,
+        encodedABI.data,
+        {value: txValue}
+      );
+
+      expect(await powerGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[0])
+      );
+      expect(await defenseGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[1])
+      );
+      expect(await speedGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[2])
+      );
+      expect(await magicGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[3])
+      );
+      expect(await luckGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[4])
+      );
+      expect(await commonCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[0])
+      );
+      expect(await rareCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[1])
+      );
+      expect(await epicCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[2])
+      );
+      expect(await legendaryCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[3])
       );
     });
     it('cannot purchase with just one call using approveAndCall if msgSender is not the buyer', async function () {
@@ -1940,9 +2043,7 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
 
-      const {
-        data,
-      } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
         Message.buyer,
         Message,
         signature
@@ -1956,7 +2057,11 @@ describe('PolygonStarterPack.sol', function () {
       );
 
       await expect(
-        sandContract.approveAndCall(PolygonStarterPack.address, price, data)
+        sandContract.approveAndCall(
+          PolygonStarterPack.address,
+          price,
+          encodedABI.data
+        )
       ).to.be.revertedWith('FIRST_PARAM_NOT_SENDER');
     });
   });
