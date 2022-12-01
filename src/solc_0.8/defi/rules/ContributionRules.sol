@@ -107,6 +107,7 @@ contract ContributionRules is Ownable, IContributionRules {
     ) external onlyOwner isContract(contractERC1155) {
         require(ids.length > 0 && ids.length <= idsLimit, "ContributionRules: invalid array of ids");
         require(multipliers.length > 0, "ContributionRules: invalid array of multipliers");
+        require(multipliers.length == ids.length, "ContributionRules: multipliers array != ids array");
 
         IERC1155 multContract = IERC1155(contractERC1155);
 
