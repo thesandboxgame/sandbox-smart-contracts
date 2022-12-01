@@ -451,7 +451,7 @@ contract ERC20RewardPool is
         _unpause();
     }
 
-    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
+    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address) {
         return ERC2771HandlerV2._msgSender();
     }
 

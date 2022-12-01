@@ -19,7 +19,7 @@ abstract contract ERC2771HandlerV2 {
     }
 
     /// @notice return trusted forwarder address
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
+    function getTrustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
 
