@@ -4,7 +4,6 @@ import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 const readOnly = false;
 const BATCH_SIZE = 50;
-
 let totalGasUsed = BigNumber.from(0);
 
 const func: DeployFunction = async function () {
@@ -41,11 +40,15 @@ const func: DeployFunction = async function () {
   type Transfer = {
     index: number;
     to: string;
-    ids: string[];
-    values: string[];
+    ids?: string[];
+    safeIds: string[];
+    values?: string[];
+    safeValues: string[];
   };
   console.log({transfers: transfers.length});
   const suppliesRequired: Record<string, number> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const balances: any = {};
   for (const transfer of transfers) {
     const {ids, values} = transfer;
     for (let i = 0; i < ids.length; i++) {
@@ -56,15 +59,20 @@ const func: DeployFunction = async function () {
     }
   }
   for (const tokenId of Object.keys(suppliesRequired)) {
-    const supplyRequired = suppliesRequired[tokenId];
-    const balance = await Asset.callStatic['balanceOf(address,uint256)'](
-      DeployerBatch.address,
-      tokenId
-    );
-    if (balance.toNumber() < supplyRequired) {
-      console.log(
-        `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
+    const validId = await Asset.callStatic['doesHashExist(uint256)'](tokenId);
+    console.log('TokenId: ', tokenId);
+    if (validId) {
+      const supplyRequired = suppliesRequired[tokenId];
+      const balance = await Asset.callStatic['balanceOf(address,uint256)'](
+        DeployerBatch.address,
+        tokenId
       );
+      if (balance.toNumber() < supplyRequired) {
+        console.log(
+          `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
+        );
+      }
+      balances[tokenId] = balance;
     }
   }
   const batches: Transfer[][] = [];
@@ -90,15 +98,33 @@ const func: DeployFunction = async function () {
       console.log(index);
     }
     const toIsContract = recordedContract === 'yes';
+    const safeIds = [];
+    const safeValues = [];
     if (toIsContract) {
       console.log(`contract at ${to}`);
     } else if (!performed) {
-      currentBatch.push({
-        index,
-        to,
-        ids,
-        values,
-      });
+      for (let i = 0; i < ids.length; i++) {
+        const validId = await Asset.callStatic['doesHashExist(uint256)'](
+          ids[i]
+        );
+        if (validId) {
+          const amountToTransfer =
+            values[i] > balances[ids[i]] ? balances[ids[i]] : values[i];
+          if (amountToTransfer > 0) {
+            safeIds.push(ids[i]);
+            safeValues.push(amountToTransfer);
+            balances[ids[i]] -= amountToTransfer;
+          }
+        }
+      }
+      if (safeIds.length) {
+        currentBatch.push({
+          index,
+          to,
+          safeIds,
+          safeValues,
+        });
+      }
     } else {
       console.log(
         `already being transfered in batch (${performed.hash})  nonce :${performed.nonce}`
@@ -112,10 +138,12 @@ const func: DeployFunction = async function () {
   for (const batch of batches) {
     const datas = [];
     for (const transfer of batch) {
-      const {to, ids, values} = transfer;
+      console.log(transfer, 'transfer');
+      const {to, safeIds, safeValues} = transfer;
+
       const {data} = await Asset.populateTransaction[
         'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
-      ](DeployerBatch.address, to, ids, values, '0x');
+      ](DeployerBatch.address, to, safeIds, safeValues, '0x');
       datas.push(data);
     }
     if (!readOnly) {
@@ -123,7 +151,7 @@ const func: DeployFunction = async function () {
         const tx = await DeployerBatch.singleTargetAtomicBatch(
           Asset.address,
           datas,
-          {gasPrice}
+          {gasPrice: 6000000000}
         );
         saveTransfersTransaction(
           batch.map((b) => b.index),
