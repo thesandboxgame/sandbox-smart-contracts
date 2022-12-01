@@ -19,9 +19,9 @@ contract ContributionRules is Ownable, IContributionRules {
     // LIMITS
     // we limited the number of Ids and contracts that we can have in the lists
     // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
-    uint256 public constant idsLimit = 64;
-    uint256 public constant contractsLimit = 4;
-    uint256 public constant maxMultiplier = 1000;
+    uint256 public constant IDS_LIMIT = 64;
+    uint256 public constant CONTRACTS_LIMIT = 4;
+    uint256 public constant MAX_MULTIPLIER = 1000;
     uint256 public multiplierLimitERC721 = 1000;
     uint256 public multiplierLimitERC1155 = 1000;
 
@@ -95,7 +95,7 @@ contract ContributionRules is Ownable, IContributionRules {
     /// @notice set a Multiplier limit a user can reach by having ERC721 tokens
     /// @param _newLimit new limit value - should be less then the max limit allowed by the system.
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
-        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+        require(_newLimit <= MAX_MULTIPLIER, "ContributionRules: invalid newLimit");
 
         multiplierLimitERC721 = _newLimit;
 
@@ -105,7 +105,7 @@ contract ContributionRules is Ownable, IContributionRules {
     /// @notice set a Multiplier limit a user can reach by having ERC1155 tokens
     /// @param _newLimit new limit value - should be less then the max limit allowed by the system.
     function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
-        require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
+        require(_newLimit <= MAX_MULTIPLIER, "ContributionRules: invalid newLimit");
 
         multiplierLimitERC1155 = _newLimit;
 
@@ -122,7 +122,7 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256[] memory multipliers
     ) external onlyOwner isContract(contractERC1155) {
         require(ids.length > 0, "ContributionRules: ids <= 0");
-        require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
+        require(ids.length <= IDS_LIMIT, "ContributionRules: invalid array of ids");
         require(multipliers.length > 0, "ContributionRules: invalid array of multipliers");
         require(multipliers.length == ids.length, "ContributionRules: multipliers array != ids array");
 
@@ -131,7 +131,7 @@ contract ContributionRules is Ownable, IContributionRules {
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberMultiplierList(multContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(contractsLimit > _listERC1155Index.length, "ContributionRules: contractsLimit exceeded");
+            require(CONTRACTS_LIMIT > _listERC1155Index.length, "ContributionRules: CONTRACTS_LIMIT exceeded");
             _listERC1155Index.push(multContract);
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
         }
@@ -158,14 +158,14 @@ contract ContributionRules is Ownable, IContributionRules {
             balanceOf == true || (ids.length > 0 && multipliers.length == ids.length),
             "ContributionRules: invalid list"
         );
-        require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
+        require(ids.length <= IDS_LIMIT, "ContributionRules: invalid array of ids");
 
         IERC721 multContract = IERC721(contractERC721);
 
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberMultiplierList(multContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(contractsLimit > _listERC721Index.length, "ContributionRules: contractsLimit exceeded");
+            require(CONTRACTS_LIMIT > _listERC721Index.length, "ContributionRules: CONTRACTS_LIMIT exceeded");
             _listERC721Index.push(multContract);
             _listERC721[multContract].index = _listERC721Index.length - 1;
         }
