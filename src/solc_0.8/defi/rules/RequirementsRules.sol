@@ -16,8 +16,8 @@ contract RequirementsRules is Ownable {
 
     // we limited the number of Ids and contracts that we can have in the lists
     // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
-    uint256 public idsLimit = 64;
-    uint256 public contractsLimit = 4;
+    uint256 public constant idsLimit = 64;
+    uint256 public constant contractsLimit = 4;
 
     // maxStake amount allowed if user has no ERC721 or ERC1155
     uint256 public maxStakeOverall;
