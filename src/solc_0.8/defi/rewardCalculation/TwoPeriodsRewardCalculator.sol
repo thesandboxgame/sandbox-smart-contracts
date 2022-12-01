@@ -73,7 +73,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
-    // For the UI
+    /// @notice For the UI
     function getRate() external view returns (uint256) {
         if (block.timestamp >= finish2) {
             return rate1;
@@ -82,7 +82,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         }
     }
 
-    // For the UI
+    /// @notice For the UI
     function getFinish() external view returns (uint256) {
         if (block.timestamp >= finish2) {
             return finish1;
@@ -91,19 +91,19 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         }
     }
 
-    // At any point in time this function must return the accumulated rewards from last call to restartRewards
+    /// @notice At any point in time this function must return the accumulated rewards from last call to restartRewards
     function getRewards() external view override returns (uint256) {
         return savedRewards + _getRewards();
     }
 
-    // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
+    /// @notice The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
     function restartRewards() external override {
         require(msg.sender == rewardPool, "not reward pool");
         lastUpdateTime = block.timestamp;
         savedRewards = 0;
     }
 
-    // Useful when switching reward calculators to set an initial reward.
+    /// @notice Useful when switching reward calculators to set an initial reward.
     function setSavedRewards(uint256 reward) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         savedRewards = reward;
@@ -112,7 +112,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         emit SavedRewardsSet(reward);
     }
 
-    // This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly
+    /// @notice This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly
     function runCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         if (block.timestamp >= finish2) {
@@ -122,35 +122,35 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         }
     }
 
-    // Start an initial campaign, set the period1 of reward distribution, period2 rate is zero
+    /// @notice Start an initial campaign, set the period1 of reward distribution, period2 rate is zero
     function setInitialCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp >= finish2, "initial campaign running");
         _initialCampaign(reward, duration);
     }
 
-    // Update the period2 of rate distribution, must be called after an initial campaign is set
-    // If period1 is running, period2 is set with the rate reward/duration.
-    // If period1 is finished it is updated with the values of period2 and period2 is set with the rate reward/duration.
+    /// @notice Update the period2 of rate distribution, must be called after an initial campaign is set
+    /// If period1 is running, period2 is set with the rate reward/duration.
+    /// If period1 is finished it is updated with the values of period2 and period2 is set with the rate reward/duration.
     function updateNextCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp < finish2, "initial campaign not running");
         _updateNextCampaign(reward, duration);
     }
 
-    // Update the period1 (current campaign) of rate distribution, must be called after an initial campaign is set
+    /// @notice Update the period1 (current campaign) of rate distribution, must be called after an initial campaign is set
     function updateCurrentCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp < finish2, "initial campaign not running");
         _updateCurrentCampaign(reward, duration);
     }
 
-    // Check if both periods already ended => campaign is finished
+    /// @notice Check if both periods already ended => campaign is finished
     function isCampaignFinished() external view returns (bool) {
         return (block.timestamp >= finish2);
     }
 
-    // Check if some of the periods are still running
+    /// @notice Check if some of the periods are still running
     function isCampaignRunning() external view returns (bool) {
         return (block.timestamp < finish2);
     }
