@@ -151,7 +151,7 @@ const func: DeployFunction = async function () {
         const tx = await DeployerBatch.singleTargetAtomicBatch(
           Asset.address,
           datas,
-          {gasPrice: 6000000000}
+          {gasPrice}
         );
         saveTransfersTransaction(
           batch.map((b) => b.index),
