@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Context.sol";
-import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
 /// @title Token wrapper contract to be used by the staking pools
