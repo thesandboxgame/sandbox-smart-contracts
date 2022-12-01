@@ -296,8 +296,6 @@ contract ERC20RewardPool is
             timeLockClaim.lastClaim[_msgSender()] = block.timestamp;
         }
 
-        lockDeposit.lastDeposit[_msgSender()] = block.timestamp;
-
         uint256 earlierRewards = 0;
 
         if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
@@ -349,7 +347,6 @@ contract ERC20RewardPool is
 
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
-        lockWithdraw.lastWithdraw[_msgSender()] = block.timestamp;
         super._withdraw(amount);
         emit Withdrawn(account, amount);
     }
