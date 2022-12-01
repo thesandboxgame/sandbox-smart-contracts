@@ -6,6 +6,11 @@ import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IRewardCalculator} from "../interfaces/IRewardCalculator.sol";
 
+/// @notice This contract has two periods and two corresponding rates and durations. After an initial call
+/// that sets the first period duration and rate another call can be done to set the duration and rate
+/// for the next period. When the first period finishes, the next period becomes the current one, and
+/// then the parameters for the future next period can be set again. This way the rate for the next
+/// period can be set at any moment.
 contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     event InitialCampaign(
         uint256 reward,
@@ -54,7 +59,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     //                   |    ****    |            |            |*
     //                   |****        |            |            |*
     // zero -> **********|            |            |            |********************
-    //                   |<-perido1-> |<-period2-> |<-restart-> |
+    //                   |<-period1-> |<-period2-> |<-restart-> |
     uint256 public finish1;
     uint256 public rate1;
     uint256 public finish2;
@@ -125,6 +130,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         _updateNextCampaign(reward, duration);
     }
 
+    // Update the period1 (current campaign) of rate distribution, must be called after an initial campaign is set
     function updateCurrentCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp < finish2, "initial campaign not running");

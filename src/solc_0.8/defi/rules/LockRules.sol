@@ -7,6 +7,12 @@ import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 // Note: this contract is meant to be inherited by ERC20RewardPool.
 // we should override the renounceOwnership() method otherwise.
+
+/// @notice The base contract (ERC20RewardPool) also inherits from this one. In this contract,
+/// we handle all the rules related to: Deposit, withdrawal, and claim. Basically, we have time locks for each action,
+/// where we can force the user to wait for a specific amount of time (lockPeriodInSecs) to re-do any of these actions.
+/// For the claim action, we also have the amountLockClaim(amount, bool). With this requirement,
+/// we can set a minimum amount to claim and also constrain the claim to an integer.
 contract LockRules is Context, Ownable {
     // limits
     uint256 public constant timeLockLimit = 180 days;
@@ -88,6 +94,9 @@ contract LockRules is Context, Ownable {
         emit TimelockClaimSet(_lockPeriodInSecs);
     }
 
+    /// @notice set a new time lock for the deposit
+    /// user will only be able to stake again, after that time.
+    /// @param _newTimeDeposit amount of time the user must wait between deposits/stake
     function setTimelockDeposit(uint256 _newTimeDeposit) external onlyOwner {
         require(_newTimeDeposit <= timeLockLimit, "LockRules: invalid lockPeriodInSecs");
         lockDeposit.lockPeriodInSecs = _newTimeDeposit;
@@ -95,6 +104,9 @@ contract LockRules is Context, Ownable {
         emit TimelockDepositSet(_newTimeDeposit);
     }
 
+    /// @notice set a new time lock for the withdrawn/unstake
+    /// user will only be able to withdrawn/unstake again, after that time.
+    /// @param _newTimeWithdraw amount of time the user must wait between withdrawn/unstake
     function setTimeLockWithdraw(uint256 _newTimeWithdraw) external onlyOwner {
         require(_newTimeWithdraw <= timeLockLimit, "LockRules: invalid lockPeriodInSecs");
         lockWithdraw.lockPeriodInSecs = _newTimeWithdraw;
@@ -102,6 +114,10 @@ contract LockRules is Context, Ownable {
         emit TimeLockWithdrawSet(_newTimeWithdraw);
     }
 
+    /// @notice set a new oamount lock for the claim
+    /// user will only be able to claim rewards if the value is higher then the lock.
+    /// @param _newAmountLockClaim min amount user should have to claim the rewards
+    /// @param _isEnabled if true, the lock is enabled
     function setAmountLockClaim(uint256 _newAmountLockClaim, bool _isEnabled) external onlyOwner {
         require(_newAmountLockClaim <= amountLockLimit, "LockRules: invalid newAmountLockClaim");
         amountLockClaim.amount = _newAmountLockClaim;
@@ -110,6 +126,7 @@ contract LockRules is Context, Ownable {
         emit AmountLockClaimSet(_newAmountLockClaim, _isEnabled);
     }
 
+    /// @notice return the remaining time for the user to be able to claim again
     function getRemainingTimelockClaim() external view returns (uint256) {
         uint256 timeLock = (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
 
@@ -120,6 +137,7 @@ contract LockRules is Context, Ownable {
         }
     }
 
+    /// @notice return the remaining time for the user to be able to withdrawn/unstake again
     function getRemainingTimelockWithdraw() external view returns (uint256) {
         uint256 timeLock = (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
 
@@ -130,6 +148,7 @@ contract LockRules is Context, Ownable {
         }
     }
 
+    /// @notice return the remaining time for the user to be able to deposit/stake again
     function getRemainingTimelockDeposit() external view returns (uint256) {
         uint256 timeLock = (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
 
