@@ -173,7 +173,7 @@ contract ERC20RewardPool is
         uint256 recoverAmount;
 
         if (rewardToken == _stakeToken) {
-            recoverAmount = rewardToken.balanceOf(address(this)) - _totalSupply;
+            recoverAmount = _stakeToken.balanceOf(address(this)) - _totalSupply;
         } else {
             recoverAmount = rewardToken.balanceOf(address(this));
         }
