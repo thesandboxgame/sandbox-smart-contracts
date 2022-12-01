@@ -145,7 +145,7 @@ contract RequirementsRules is Ownable {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberRequirementList(newContract) == false) {
-            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            // Limiting the size of the array (iterations) to avoid the risk of DoS.
             require(contractsLimit > _listERC721Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
@@ -184,7 +184,7 @@ contract RequirementsRules is Ownable {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberRequirementList(newContract) == false) {
-            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            // Limiting the size of the array (iterations) to avoid the risk of DoS.
             require(contractsLimit > _listERC1155Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC1155Index.push(newContract);
             _listERC1155[newContract].index = _listERC1155Index.length - 1;

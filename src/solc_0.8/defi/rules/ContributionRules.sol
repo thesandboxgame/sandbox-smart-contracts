@@ -80,7 +80,7 @@ contract ContributionRules is Ownable, IContributionRules {
         uint256 multiplierERC721 = multiplierBalanceOfERC721(account);
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
 
-        // check if the calculated multipliers exceeds the limit
+        // check if the calculated multipliers exceed the limit
         if (multiplierLimitERC721 < multiplierERC721) {
             multiplierERC721 = multiplierLimitERC721;
         }
@@ -130,7 +130,7 @@ contract ContributionRules is Ownable, IContributionRules {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberMultiplierList(multContract) == false) {
-            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            // Limiting the size of the array (iterations) to avoid the risk of DoS.
             require(CONTRACTS_LIMIT > _listERC1155Index.length, "ContributionRules: CONTRACTS_LIMIT exceeded");
             _listERC1155Index.push(multContract);
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
@@ -164,7 +164,7 @@ contract ContributionRules is Ownable, IContributionRules {
 
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberMultiplierList(multContract) == false) {
-            // Limiting the size of the array (interations) to avoid the risk of DoS.
+            // Limiting the size of the array (iterations) to avoid the risk of DoS.
             require(CONTRACTS_LIMIT > _listERC721Index.length, "ContributionRules: CONTRACTS_LIMIT exceeded");
             _listERC721Index.push(multContract);
             _listERC721[multContract].index = _listERC721Index.length - 1;
