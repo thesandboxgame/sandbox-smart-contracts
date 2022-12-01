@@ -75,12 +75,20 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
 
     // For the UI
     function getRate() external view returns (uint256) {
-        return rate1;
+        if (block.timestamp >= finish2) {
+            return rate1;
+        } else {
+            return rate2;
+        }
     }
 
     // For the UI
     function getFinish() external view returns (uint256) {
-        return finish1;
+        if (block.timestamp >= finish2) {
+            return finish1;
+        } else {
+            return finish2;
+        }
     }
 
     // At any point in time this function must return the accumulated rewards from last call to restartRewards
