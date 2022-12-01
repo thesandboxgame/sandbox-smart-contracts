@@ -33,6 +33,4 @@ abstract contract StakeTokenWrapper is Context {
         _balances[_msgSender()] = _balances[_msgSender()] - amount;
         _stakeToken.safeTransfer(_msgSender(), amount);
     }
-
-    uint256[50] private __gap;
 }
