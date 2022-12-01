@@ -51,7 +51,7 @@ contract ERC20RewardPool is
     event RewardPaid(address indexed account, uint256 rewardAmount);
     event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
-    uint256 internal constant DECIMALS_18 = 1 ether;
+    uint256 private constant DECIMALS_18 = 1 ether;
 
     // This value multiplied by the user contribution is the share of accumulated rewards (from the start of time
     // until the last call to restartRewards) for the user taking into account the value of totalContributions.
