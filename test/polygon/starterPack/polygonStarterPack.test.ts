@@ -283,11 +283,11 @@ describe('PolygonStarterPack.sol', function () {
       expect(event.args[0]).to.be.false;
     });
     it('if not STARTERPACK_ROLE cannot set SAND enabled', async function () {
-      const {other, starterPackRole} = await setupPolygonStarterPack();
+      const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setSANDEnabled(true)
       ).to.be.revertedWith(
-        `AccessControl: account ${other.address.toLowerCase()} is missing role ${starterPackRole}`
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('STARTERPACK_ROLE can disable SAND', async function () {
@@ -298,11 +298,11 @@ describe('PolygonStarterPack.sol', function () {
         .to.not.be.reverted;
     });
     it('if not STARTERPACK_ROLE cannot disable SAND', async function () {
-      const {other, starterPackRole} = await setupPolygonStarterPack();
+      const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setSANDEnabled(false)
       ).to.be.revertedWith(
-        `AccessControl: account ${other.address.toLowerCase()} is missing role ${starterPackRole}`
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
   });
@@ -358,7 +358,7 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('if not STARTERPACK_ROLE cannot set prices', async function () {
-      const {other, starterPackRole} = await setupPolygonStarterPack();
+      const {other} = await setupPolygonStarterPack();
       await expect(
         other.PolygonStarterPack.setPrices(
           catalystIds,
@@ -367,7 +367,7 @@ describe('PolygonStarterPack.sol', function () {
           gemPrices
         )
       ).to.be.revertedWith(
-        `AccessControl: account ${other.address.toLowerCase()} is missing role ${starterPackRole}`
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('cannot set prices for cat that does not exist', async function () {
@@ -2018,7 +2018,7 @@ describe('PolygonStarterPack.sol', function () {
 
       const txValue = toWei(0);
 
-      const returnData = await buyer.sandContract.approveAndCall(
+      await buyer.sandContract.approveAndCall(
         PolygonStarterPack.address,
         price,
         encodedABI.data,
