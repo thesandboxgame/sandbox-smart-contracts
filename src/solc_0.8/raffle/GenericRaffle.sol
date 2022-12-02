@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.3;
+pragma solidity ^0.8.2;
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-
-import {
-    DefaultOperatorFiltererUpgradeable
-} from "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable";
 
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
@@ -16,6 +12,8 @@ import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -26,7 +24,7 @@ contract GenericRaffle is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC2771HandlerUpgradeable,
-    DefaultOperatorFiltererUpgradeable
+    OperatorFiltererUpgradeable
 {
     using Address for address;
     uint256 public maxSupply;
