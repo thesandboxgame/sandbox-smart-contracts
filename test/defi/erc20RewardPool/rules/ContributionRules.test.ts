@@ -59,7 +59,7 @@ describe('ContributionRules', function () {
           [],
           true
         )
-      ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
+      ).to.be.revertedWith('ContributionRules: CONTRACTS_LIMIT exceeded');
     });
     it('admin should be able to call setERC1155MultiplierList', async function () {
       const {
@@ -117,7 +117,7 @@ describe('ContributionRules', function () {
           ids,
           multipliers
         )
-      ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
+      ).to.be.revertedWith('ContributionRules: CONTRACTS_LIMIT exceeded');
     });
     it('admin should be able to call deleteERC721MultiplierList', async function () {
       const {

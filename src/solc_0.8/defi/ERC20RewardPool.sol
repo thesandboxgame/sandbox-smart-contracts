@@ -265,13 +265,15 @@ contract ERC20RewardPool is
     /// @dev see: computeContribution
     function computeContributionInBatch(address[] calldata accounts) external {
         _restartRewards();
-        for (uint256 i = 0; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; ) {
             address account = accounts[i];
             if (account == address(0)) {
                 continue;
             }
             _processAccountRewards(account);
             _updateContribution(account);
+
+            unchecked {i++;}
         }
     }
 
@@ -287,52 +289,60 @@ contract ERC20RewardPool is
     {
         require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
+        address _sender = _msgSender();
+
         // The first time a user stakes he cannot remove his rewards immediately.
-        if (timeLockClaim.lastClaim[_msgSender()] == 0) {
-            timeLockClaim.lastClaim[_msgSender()] = block.timestamp;
+        if (timeLockClaim.lastClaim[_sender] == 0) {
+            timeLockClaim.lastClaim[_sender] = block.timestamp;
         }
 
-        uint256 earlierRewards = 0;
+        uint256 earlierRewards;
 
         if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
             earlierRewards = rewardCalculator.getRewards();
         }
 
-        _processRewards(_msgSender());
+        _processRewards(_sender);
         super._stake(amount);
-        _updateContribution(_msgSender());
-        require(_contributions[_msgSender()] > 0, "ERC20RewardPool: not enough contributions");
+        _updateContribution(_sender);
+        require(_contributions[_sender] > 0, "ERC20RewardPool: not enough contributions");
 
         if (earlierRewards != 0) {
-            rewards[_msgSender()] = rewards[_msgSender()] + earlierRewards;
+            rewards[_sender] = rewards[_sender] + earlierRewards;
         }
-        emit Staked(_msgSender(), amount);
+        emit Staked(_sender, amount);
     }
 
     /// @notice withdraw the stake from the contract
     /// @param amount the amount of tokens to withdraw
     /// @dev the user can withdraw his stake independently from the rewards
     function withdraw(uint256 amount) external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawStake(_msgSender(), amount);
-        _updateContribution(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawStake(_sender, amount);
+        _updateContribution(_sender);
     }
 
     /// @notice withdraw the stake and the rewards from the contract
     function exit() external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawStake(_msgSender(), _balances[_msgSender()]);
-        _withdrawRewards(_msgSender());
-        _updateContribution(_msgSender());
-        emit Exit(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawStake(_sender, _balances[_sender]);
+        _withdrawRewards(_sender);
+        _updateContribution(_sender);
+        emit Exit(_sender);
     }
 
     /// @notice withdraw the rewards from the contract
     /// @dev the user can withdraw his stake independently from the rewards
     function getReward() external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawRewards(_msgSender());
-        _updateContribution(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawRewards(_sender);
+        _updateContribution(_sender);
     }
 
     /// @notice as admin powers are really important in this contract
@@ -349,7 +359,7 @@ contract ERC20RewardPool is
 
     function _withdrawRewards(address account) internal timeLockClaimCheck(account) {
         uint256 reward = rewards[account];
-        uint256 mod = 0;
+        uint256 mod;
         if (reward > 0) {
             if (amountLockClaim.claimLockEnabled == true) {
                 // constrain the reward amount to the integer allowed
@@ -368,9 +378,9 @@ contract ERC20RewardPool is
 
     function _updateContribution(address account) internal {
         uint256 oldContribution = _contributions[account];
-        _totalContributions = _totalContributions - oldContribution;
+        _totalContributions -= oldContribution;
         uint256 contribution = _computeContribution(account);
-        _totalContributions = _totalContributions + contribution;
+        _totalContributions += contribution;
         _contributions[account] = contribution;
         emit ContributionUpdated(account, contribution, oldContribution);
     }

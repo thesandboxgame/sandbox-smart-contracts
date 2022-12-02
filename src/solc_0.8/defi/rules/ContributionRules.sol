@@ -260,21 +260,27 @@ contract ContributionRules is Ownable, IContributionRules {
     /// @notice calculate and return the ERC721 multiplier for a given user
     /// @param account user address to calculate the multiplier
     function multiplierBalanceOfERC721(address account) public view returns (uint256) {
-        uint256 _multiplier = 0;
+        uint256 _multiplier;
+        uint256 _indexLength = _listERC721Index.length;
 
-        for (uint256 i = 0; i < _listERC721Index.length; i++) {
+        for (uint256 i; i < _indexLength; ) {
             IERC721 reqContract = _listERC721Index[i];
 
             if (_listERC721[reqContract].balanceOf == true) {
                 _multiplier = _multiplier + multiplierLogarithm(account, reqContract);
             } else {
-                for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
+                uint256 _listIdsLength = _listERC721[reqContract].ids.length;
+                for (uint256 j; j < _listIdsLength; ) {
                     address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
                     if (owner == account) {
                         _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
                     }
+
+                    unchecked {j++;}
                 }
             }
+
+            unchecked {i++;}
         }
 
         return _multiplier;
@@ -283,17 +289,24 @@ contract ContributionRules is Ownable, IContributionRules {
     /// @notice calculate and return the ERC1155 multiplier for a given user
     /// @param account user address to calculate the multiplier
     function multiplierBalanceOfERC1155(address account) public view returns (uint256) {
-        uint256 _multiplier = 0;
-        for (uint256 i = 0; i < _listERC1155Index.length; i++) {
-            IERC1155 reqContract = _listERC1155Index[i];
+        uint256 _multiplier;
+        uint256 _indexLength = _listERC1155Index.length;
 
-            for (uint256 j = 0; j < _listERC1155[reqContract].ids.length; j++) {
+        for (uint256 i; i < _indexLength; ) {
+            IERC1155 reqContract = _listERC1155Index[i];
+            uint256 _listIdsLength = _listERC1155[reqContract].ids.length;
+
+            for (uint256 j; j < _listIdsLength; ) {
                 uint256 _bal = reqContract.balanceOf(account, _listERC1155[reqContract].ids[j]);
 
                 if (_bal > 0) {
                     _multiplier = _multiplier + _listERC1155[reqContract].multipliers[j];
                 }
+
+                unchecked {j++;}
             }
+
+            unchecked {i++;}
         }
 
         return _multiplier;

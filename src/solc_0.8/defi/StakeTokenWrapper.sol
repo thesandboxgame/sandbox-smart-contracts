@@ -22,15 +22,21 @@ abstract contract StakeTokenWrapper is Context {
 
     function _stake(uint256 amount) internal virtual {
         require(amount > 0, "StakeTokenWrapper: amount > 0");
-        _totalSupply = _totalSupply + amount;
-        _balances[_msgSender()] = _balances[_msgSender()] + amount;
-        _stakeToken.safeTransferFrom(_msgSender(), address(this), amount);
+
+        address _sender = _msgSender();
+
+        _totalSupply += amount;
+        _balances[_sender] += amount;
+        _stakeToken.safeTransferFrom(_sender, address(this), amount);
     }
 
     function _withdraw(uint256 amount) internal virtual {
         require(amount > 0, "StakeTokenWrapper: amount > 0");
-        _totalSupply = _totalSupply - amount;
-        _balances[_msgSender()] = _balances[_msgSender()] - amount;
-        _stakeToken.safeTransfer(_msgSender(), amount);
+
+        address _sender = _msgSender();
+
+        _totalSupply -= amount;
+        _balances[_sender] -= amount;
+        _stakeToken.safeTransfer(_sender, amount);
     }
 }
