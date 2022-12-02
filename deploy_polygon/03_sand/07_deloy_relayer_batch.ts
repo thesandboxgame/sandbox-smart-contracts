@@ -14,7 +14,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  await catchUnknownSigner(execute("PolygonSand", {from: sandAdmin, log: true}, "setSuperOperator", Batch.address, false));
+  await catchUnknownSigner(
+    execute(
+      'PolygonSand',
+      {from: sandAdmin, log: true},
+      'setSuperOperator',
+      Batch.address,
+      false
+    )
+  );
 };
 
 export default func;

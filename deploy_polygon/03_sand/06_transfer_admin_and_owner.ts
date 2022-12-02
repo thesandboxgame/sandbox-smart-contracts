@@ -19,12 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const admin = await read('PolygonSand', 'getAdmin');
   if (admin != sandAdmin) {
     await catchUnknownSigner(
-      execute(
-        'PolygonSand',
-        {from: admin, log: true},
-        'changeAdmin',
-        sandAdmin
-      )
+      execute('PolygonSand', {from: admin, log: true}, 'changeAdmin', sandAdmin)
     );
   }
 };
