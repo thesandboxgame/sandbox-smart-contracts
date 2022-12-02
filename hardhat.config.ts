@@ -113,7 +113,7 @@ const config: HardhatUserConfig = {
     sandAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
-      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
@@ -284,15 +284,12 @@ const config: HardhatUserConfig = {
     gemsCatalystsRegistryAdmin: 'sandAdmin',
     ozdRelayer: {
       default: 1,
+      mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
       polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
+      goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
-    // OZ Defender relay
-    landMigrationBatchExecutor: {
-      default: 1,
-      mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
-      goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
-    },
+    landMigrationBatchExecutor: 'ozdRelayer',
   },
   networks: {
     /**
