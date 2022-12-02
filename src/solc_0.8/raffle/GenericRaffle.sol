@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
+import "operator-filter-registry/DefaultOperatorFilterer.sol";
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -21,7 +22,8 @@ contract GenericRaffle is
     ERC721EnumerableUpgradeable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
-    ERC2771HandlerUpgradeable
+    ERC2771HandlerUpgradeable,
+    DefaultOperatorFilterer
 {
     using Address for address;
     uint256 public maxSupply;
@@ -339,6 +341,41 @@ contract GenericRaffle is
 
     function renounceOwnership() public virtual override onlyOwner {
         revert("Renounce ownership is not available");
+    }
+
+    // Override the ERC721 transfer
+    // and approval methods (modifiers are overridable as needed)
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    function approve(address operator, uint256 tokenId) public override onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, tokenId);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public override onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     // Empty storage space in contracts for future enhancements
