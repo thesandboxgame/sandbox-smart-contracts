@@ -3,6 +3,10 @@ pragma solidity 0.8.3;
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable";
+
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
@@ -10,7 +14,6 @@ import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
-import "operator-filter-registry/src/DefaultOperatorFilterer.sol";
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -23,7 +26,7 @@ contract GenericRaffle is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC2771HandlerUpgradeable,
-    DefaultOperatorFilterer
+    DefaultOperatorFiltererUpgradeable
 {
     using Address for address;
     uint256 public maxSupply;
