@@ -373,7 +373,7 @@ contract ERC20RewardPool is
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
                 );
             }
-            require(reward < getRewardsAvailable(), "ERC20RewardPool: not enough rewards");
+            require(reward <= getRewardsAvailable(), "ERC20RewardPool: not enough rewards");
             rewards[account] = mod;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
