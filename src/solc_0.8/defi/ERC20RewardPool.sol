@@ -14,6 +14,8 @@ import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
+
+import {IERC20RewardPool} from "./interfaces/IERC20RewardPool.sol";
 import {LockRules} from "./rules/LockRules.sol";
 import {RequirementsRules} from "./rules/RequirementsRules.sol";
 
@@ -32,6 +34,7 @@ contract ERC20RewardPool is
     StakeTokenWrapper,
     LockRules,
     RequirementsRules,
+    IERC20RewardPool,
     ReentrancyGuard,
     ERC2771HandlerV2,
     Pausable
@@ -202,7 +205,7 @@ contract ERC20RewardPool is
     /// @return the total amount of deposited rewards
     /// @dev this function can be called by a reward calculator to throw if a campaign doesn't have
     /// @dev enough rewards to start
-    function getRewardsAvailable() external view returns (uint256) {
+    function getRewardsAvailable() public view override returns (uint256) {
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
         }
@@ -370,6 +373,7 @@ contract ERC20RewardPool is
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
                 );
             }
+            require(reward < getRewardsAvailable(), "ERC20RewardPool: not enough rewards");
             rewards[account] = mod;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
