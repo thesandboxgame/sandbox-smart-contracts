@@ -64,7 +64,7 @@ contract RequirementsRules is Ownable {
     event ERC721RequirementListDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
-        require(account.isContract(), "RequirementsRules: is not contract");
+        require(account.isContract(), "RequirementsRules: is not a contract");
 
         _;
     }
