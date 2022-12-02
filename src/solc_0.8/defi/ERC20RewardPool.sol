@@ -364,7 +364,7 @@ contract ERC20RewardPool is
             if (amountLockClaim.claimLockEnabled == true) {
                 // constrain the reward amount to the integer allowed
                 mod = reward % DECIMALS_18;
-                reward = reward - mod;
+                reward -= mod;
                 require(
                     amountLockClaim.amount <= reward,
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
