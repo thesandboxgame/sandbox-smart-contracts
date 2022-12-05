@@ -266,6 +266,7 @@ const config: HardhatUserConfig = {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       polygon: '',
     },
     raffleSignWallet: {
