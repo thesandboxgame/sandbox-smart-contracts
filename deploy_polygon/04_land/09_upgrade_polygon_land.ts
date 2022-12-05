@@ -18,4 +18,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonLand', 'PolygonLandV2', 'PolygonLand_deploy', 'L2'];
+func.tags = ['PolygonLand', 'PolygonLandV2', 'L2'];
+func.dependencies = ['PolygonLand_deploy'];
