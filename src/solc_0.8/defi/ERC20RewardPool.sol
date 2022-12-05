@@ -44,7 +44,7 @@ contract ERC20RewardPool is
     event TrustedForwarderSet(address indexed trustedForwarder);
     event ContributionRulesSet(address indexed contractAddress);
     event RewardCalculatorSet(address indexed contractAddress, bool restartRewards_);
-    event FundsRecovered(address indexed receiver);
+    event FundsRecovered(address indexed receiver, uint256 recoverAmount);
     event Staked(address indexed account, uint256 stakeAmount);
     event Withdrawn(address indexed account, uint256 stakeAmount);
     event Exit(address indexed account);
@@ -180,7 +180,7 @@ contract ERC20RewardPool is
 
         rewardToken.safeTransfer(receiver, recoverAmount);
 
-        emit FundsRecovered(receiver);
+        emit FundsRecovered(receiver, recoverAmount);
     }
 
     /// @notice return the total supply of staked tokens
