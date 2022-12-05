@@ -126,8 +126,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 x,
         uint256 y,
         bytes calldata data
-    ) external validQuad(size, x, y) {
-        require(isMinter(msg.sender), "Only a minter can mint");
+    ) external virtual {
+        require(isMinter(msg.sender), "!AUTHORIZED");
         bool exist = exists(size, x, y);
 
         if (exist == true) {
@@ -195,7 +195,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         if (size >= quadCompareSize) {
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, size, index);
+                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, quadCompareSize, index);
                     if (!isQuadChecked) {
                         uint256 id = layer + xi + yi * GRID_SIZE;
                         address owner = address(uint160(_owners[id]));
@@ -264,12 +264,12 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
 
         uint256 id = x + y * GRID_SIZE;
         (uint256 quadId, , , ) = _getQuadInfo(size, id);
-        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
+        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted");
 
         checkOwner(size, x, y, 12);
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
-            require(_owners[id] == 0, "Already minted");
+            require(_owners[_id] == 0, "Already minted");
             emit Transfer(address(0), to, _id);
         }
 
@@ -536,7 +536,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                         uint256 idChild = childLayer + xi + yi * GRID_SIZE;
                         ownerChild = _owners[idChild];
                         if (ownerChild != 0) {
-                            if (!ownerOfAll) {
+                            if (!ownAllIndividual) {
                                 require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                             }
                             _owners[idChild] = 0;

@@ -2,7 +2,6 @@
 pragma solidity 0.5.9;
 
 import "./ERC721BaseTokenV2.sol";
-import "hardhat/console.sol";
 
 contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
@@ -57,7 +56,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @return the x coordinates
     function getX(uint256 id) external view returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
-        return id % GRID_SIZE;
+        return ((id << 8) >> 8) % GRID_SIZE;
     }
 
     /// @notice y coordinate of Land token
@@ -65,7 +64,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @return the y coordinates
     function getY(uint256 id) external view returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
-        return id / GRID_SIZE;
+        return ((id << 8) >> 8) / GRID_SIZE;
     }
 
     /**
@@ -86,14 +85,14 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         require(to != address(0), "to is zero address");
         require(
             isMinter(msg.sender),
-            "mintQOnly a minter can mint"
+            "Only a minter can mint"
         );
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
         uint256 id = x + y * GRID_SIZE;
         (uint256 quadId, , , ) = _getQuadInfo(size, id);
-        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
+        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted");
 
         checkOwner(size, x, y, 12);
         for (uint256 i = 0; i < size * size; i++) {
@@ -216,8 +215,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) internal {
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+        
 
         uint256 id = x + y * GRID_SIZE;
         (uint256 quadId, , , ) = _getQuadInfo(size, id);
@@ -265,7 +263,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         if (size >= quadCompareSize) {
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, size, index);
+                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, quadCompareSize, index);
                     if (!isQuadChecked) {
                         uint256 id = layer + xi + yi * GRID_SIZE;
                         address owner = address(uint160(_owners[id]));
@@ -476,7 +474,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) public view returns (bool) {
-        require(x % size == 0 && y % size == 0, "LandBaseTokenV3: Invalid Id");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
         return _ownerOfQuad(size, x, y) != address(0);
     }
 
@@ -524,7 +523,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                         uint256 idChild = childLayer + xi + yi * GRID_SIZE;
                         ownerChild = _owners[idChild];
                         if (ownerChild != 0) {
-                            if (!ownerOfAll) {
+                            if (!ownAllIndividual) {
                                 require(ownerChild == uint256(from), "not owner of child Quad");
                             }
                             _owners[idChild] = 0;
