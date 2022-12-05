@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract OperatorFilterer {
-
+abstract contract OperatorFiltererUpgradeable {
     IOperatorFilterRegistry constant operatorFilterRegistry =
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
@@ -36,10 +36,8 @@ abstract contract OperatorFilterer {
                 return;
             }
             if (
-                !(
-                    operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)
-                        && operatorFilterRegistry.isOperatorAllowed(address(this), from)
-                )
+                !(operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender) &&
+                    operatorFilterRegistry.isOperatorAllowed(address(this), from))
             ) {
                 revert("Operator Not Allowed");
             }
