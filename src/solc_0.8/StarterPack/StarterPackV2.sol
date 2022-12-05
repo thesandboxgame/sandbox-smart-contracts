@@ -267,52 +267,6 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities);
     }
 
-    /// @notice Read-only version of calculateTotalPriceInSAND
-    /// @dev This function is view only and does not set _priceChangeTimestamp to 0 (built-in _priceSelector)
-    /// @param catalystIds An array of catalyst IDs to be purchased
-    /// @param catalystQuantities An array of catalyst amounts to be purchased
-    /// @param gemIds An array of gem IDs to be purchased
-    /// @param gemQuantities An array of gem amounts to be purchased
-    /// @return the total price to pay in SAND for the cats and gems in the bundle
-    function viewTotalPriceInSAND(
-        uint16[] memory catalystIds,
-        uint256[] memory catalystQuantities,
-        uint16[] memory gemIds,
-        uint256[] memory gemQuantities
-    ) public view returns (uint256) {
-        require(catalystIds.length == catalystQuantities.length, "INVALID_CAT_INPUT");
-        require(gemIds.length == gemQuantities.length, "INVALID_GEM_INPUT");
-        bool useCurrentPrices;
-        // No price change
-        if (_priceChangeTimestamp == 0) {
-            useCurrentPrices = true;
-        } else {
-            // Price change delay has expired: use current prices
-            if (block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
-                useCurrentPrices = true;
-            } else {
-                // Price change has recently occured: use previous prices until price change takes effect
-                useCurrentPrices = false;
-            }
-        }
-        uint256 totalPrice;
-        for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint16 id = catalystIds[i];
-            uint256 quantity = catalystQuantities[i];
-            totalPrice =
-                totalPrice +
-                (useCurrentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
-        }
-        for (uint256 i = 0; i < gemIds.length; i++) {
-            uint16 id = gemIds[i];
-            uint256 quantity = gemQuantities[i];
-            totalPrice =
-                totalPrice +
-                (useCurrentPrices ? _gemPrices[id] * (quantity) : _gemPreviousPrices[id] * (quantity));
-        }
-        return totalPrice;
-    }
-
     function _transferCatalysts(
         uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
