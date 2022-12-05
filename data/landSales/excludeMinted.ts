@@ -38,7 +38,6 @@ async function getMintedLands({minX, minY, maxX, maxY}: {minX: number, minY: num
     l1 = "MAINNET"
     l2 = "POLYGON"
   }
-  console.log(l1, l2)
   console.log({minX, minY, maxX, maxY})
   const query = `{
     landTokens(where: {x_gte: ${minX + 204} y_gte: ${minY + 204} x_lte:${maxX + 204} y_lte: ${maxY + 204}}) {
