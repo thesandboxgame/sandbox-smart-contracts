@@ -160,10 +160,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update an operator address for a registered address - when filtered is true, the operator is filtered.
      */
-    function updateOperator(address registrant, address operator, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperator(
+        address registrant,
+        address operator,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -190,10 +191,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update a codeHash for a registered address - when filtered is true, the codeHash is filtered.
      */
-    function updateCodeHash(address registrant, bytes32 codeHash, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHash(
+        address registrant,
+        bytes32 codeHash,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         if (codeHash == EOA_CODEHASH) {
             revert CannotFilterEOAs();
         }
@@ -223,10 +225,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates.
      */
-    function updateOperators(address registrant, address[] calldata operators, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperators(
+        address registrant,
+        address[] calldata operators,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -261,10 +264,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update multiple codeHashes for a registered address - when filtered is true, the codeHashes will be filtered. Reverts on duplicates.
      */
-    function updateCodeHashes(address registrant, bytes32[] calldata codeHashes, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHashes(
+        address registrant,
+        bytes32[] calldata codeHashes,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);

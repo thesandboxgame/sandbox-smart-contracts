@@ -11,14 +11,8 @@ import {BigNumberish} from 'ethers';
 export const setupSignedGiveway = withSnapshot([], async function () {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const [
-    trustedForwarder,
-    adminRole,
-    seller,
-    signer,
-    other,
-    dest,
-  ] = await getUnnamedAccounts();
+  const [trustedForwarder, adminRole, seller, signer, other, dest] =
+    await getUnnamedAccounts();
   await deployments.deploy('SandMock', {
     from: deployer,
     contract: ERC20Mock,

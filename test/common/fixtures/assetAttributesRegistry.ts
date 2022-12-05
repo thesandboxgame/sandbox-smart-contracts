@@ -14,11 +14,8 @@ export const assetAttributesRegistryFixture = async () => {
     'PolygonAssetUpgrader'
   );
   const assetMinter: Contract = await ethers.getContract('PolygonAssetMinter');
-  const {
-    assetAttributesRegistryAdmin,
-    sandBeneficiary,
-    sandAdmin,
-  } = await getNamedAccounts();
+  const {assetAttributesRegistryAdmin, sandBeneficiary, sandAdmin} =
+    await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const user0 = users[0];
   const mockedMigrationContractAddress = users[1];
@@ -86,18 +83,20 @@ export const assetAttributesRegistryFixture = async () => {
   const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
     ethers.provider.getSigner(user0)
   );
-  const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
-    ethers.provider.getSigner(assetAttributesRegistryAdmin)
-  );
+  const assetAttributesRegistryAsRegistryAdmin =
+    await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(assetAttributesRegistryAdmin)
+    );
   const assetUpgraderAsUser0 = await assetUpgrader.connect(
     ethers.provider.getSigner(user0)
   );
   const assetMinterAsUser0 = await assetMinter.connect(
     ethers.provider.getSigner(user0)
   );
-  const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
-    ethers.provider.getSigner(mockedMigrationContractAddress)
-  );
+  const assetAttributesRegistryAsmockedMigrationContract =
+    await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(mockedMigrationContractAddress)
+    );
 
   return {
     mockedMigrationContractAddress,

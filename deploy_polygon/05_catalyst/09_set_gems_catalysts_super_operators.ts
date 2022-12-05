@@ -15,12 +15,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const AssetMinter = await deployments.get('PolygonAssetMinter');
   const AssetUpgrader = await deployments.getOrNull('PolygonAssetUpgrader');
 
-  const {
-    deployer,
-    catalystAdmin,
-    gemAdmin,
-    gemsCatalystsRegistryAdmin,
-  } = await getNamedAccounts();
+  const {deployer, catalystAdmin, gemAdmin, gemsCatalystsRegistryAdmin} =
+    await getNamedAccounts();
 
   const superOperatorRole = await read(
     'PolygonGemsCatalystsRegistry',

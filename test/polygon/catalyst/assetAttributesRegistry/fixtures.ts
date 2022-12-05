@@ -58,9 +58,10 @@ export async function setCatalyst(
   }
   const record = await assetAttributesRegistry.getRecord(assetId);
 
-  const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
-    assetAttributesRegistry.filters.CatalystApplied()
-  );
+  const assetAttributesRegistryEvents =
+    await assetAttributesRegistry.queryFilter(
+      assetAttributesRegistry.filters.CatalystApplied()
+    );
   const event = assetAttributesRegistryEvents.filter(
     (e) => e.event === 'CatalystApplied'
   )[0];
