@@ -5,7 +5,7 @@ import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract OperatorFiltererUpgradeable {
-    IOperatorFilterRegistry constant operatorFilterRegistry =
+    IOperatorFilterRegistry public constant operatorFilterRegistry =
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     function __OperatorFilterer_initialize(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
