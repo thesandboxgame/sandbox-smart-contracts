@@ -210,7 +210,7 @@ contract ERC20RewardPool is
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
         }
-        return _stakeToken.balanceOf(address(this)) - _totalSupply;
+        return rewardToken.balanceOf(address(this)) - _totalSupply;
     }
 
     /// @notice return the sum of the values returned by the contribution calculator
