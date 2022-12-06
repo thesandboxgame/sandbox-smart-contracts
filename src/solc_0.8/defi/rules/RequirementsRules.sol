@@ -103,6 +103,9 @@ contract RequirementsRules is Ownable {
 
     /// @notice set a Max stake in case user has not ERC721 or ERC1155
     /// @param newMaxStake new max stake value
+    /// @dev we should always try setting this value to less than the lowest amount
+    /// @dev possible from meeting a requirement rule.
+    /// @dev That way we don't benefit those who do not have assets
     function setMaxStakeOverall(uint256 newMaxStake) external onlyOwner {
         uint256 oldMaxStake = maxStakeOverall;
         maxStakeOverall = newMaxStake;
