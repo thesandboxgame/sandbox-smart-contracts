@@ -180,13 +180,14 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
             ),
             "INVALID_PURCHASE"
         );
-
+        bool currentPrices = _priceSelector();
         uint256 amountInSAND =
             _calculateTotalPriceInSAND(
                 message.catalystIds,
                 message.catalystQuantities,
                 message.gemIds,
-                message.gemQuantities
+                message.gemQuantities,
+                currentPrices
             );
         _transferSANDPayment(message.buyer, _wallet, amountInSAND);
         _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
@@ -263,8 +264,20 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint256[] memory catalystQuantities,
         uint16[] memory gemIds,
         uint256[] memory gemQuantities
-    ) external returns (uint256) {
-        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities);
+    ) external view returns (uint256) {
+        bool currentPrices;
+        if (_priceChangeTimestamp == 0) {
+            currentPrices = true;
+        } else {
+            // Price change delay has expired: use current prices
+            if (block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
+                currentPrices = true;
+            } else {
+                // Price change has recently occured: use previous prices until price change takes effect
+                currentPrices = false;
+            }
+        }
+        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities, currentPrices);
     }
 
     function _transferCatalysts(
@@ -330,30 +343,30 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint16[] memory gemIds,
-        uint256[] memory gemQuantities
-    ) internal returns (uint256) {
+        uint256[] memory gemQuantities,
+        bool currentPrices
+    ) internal view returns (uint256) {
         require(catalystIds.length == catalystQuantities.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemQuantities.length, "INVALID_GEM_INPUT");
-        bool useCurrentPrices = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
             totalPrice =
                 totalPrice +
-                (useCurrentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
+                (currentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
             uint16 id = gemIds[i];
             uint256 quantity = gemQuantities[i];
             totalPrice =
                 totalPrice +
-                (useCurrentPrices ? _gemPrices[id] * (quantity) : _gemPreviousPrices[id] * (quantity));
+                (currentPrices ? _gemPrices[id] * (quantity) : _gemPreviousPrices[id] * (quantity));
         }
         return totalPrice;
     }
 
-    /// @dev Function to determine whether to use previous or current prices
+    /// @dev Function to determine whether to purchase with previous or current prices
     function _priceSelector() internal returns (bool) {
         bool useCurrentPrices;
         // No price change
