@@ -2,12 +2,12 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "../upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import "./upgradeable/MockDefaultOperatorFiltererUpgradeable.sol";
 
-contract ERC1155OperatorFilteredUpgradeable is ERC1155Upgradeable, DefaultOperatorFiltererUpgradeable {
-    function __ERC1155OperatorFiltered_init(string memory uri_) public initializer {
+contract ERC1155OperatorFilteredUpgradeable is ERC1155Upgradeable, MockDefaultOperatorFiltererUpgradeable {
+    function __ERC1155OperatorFiltered_init(string memory uri_, address _operatorFilterRegistry) public initializer {
         __ERC1155_init(uri_);
-        __DefaultOperatorFilterer_initialize(true);
+        __DefaultOperatorFilterer_init(true, _operatorFilterRegistry);
     }
 
     function safeTransferFrom(

@@ -19,12 +19,24 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
 
     /// @dev initialized accounts have a nonzero codehash (see https://eips.ethereum.org/EIPS/eip-1052)
     /// Note that this will also be a smart contract's codehash when making calls from its constructor.
-    bytes32 public constant EOA_CODEHASH = keccak256("");
+    bytes32 constant EOA_CODEHASH = keccak256("");
 
     mapping(address => EnumerableSet.AddressSet) private _filteredOperators;
     mapping(address => EnumerableSet.Bytes32Set) private _filteredCodeHashes;
     mapping(address => address) private _registrations;
     mapping(address => EnumerableSet.AddressSet) private _subscribers;
+
+
+    constructor(address _defaultSubscribtion, address[] memory _blacklistedAddresses) {
+        _registrations[_defaultSubscribtion] = _defaultSubscribtion;
+        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
+        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscribtion];
+        for(uint256 i; i < _blacklistedAddresses.length; i++){
+            filteredOperatorsRef.add(_blacklistedAddresses[i]);
+            bytes32 codeHash = _blacklistedAddresses[i].codehash;
+            filteredCodeHashesRef.add(codeHash);
+        }
+    }
 
     /**
      * @notice restricts method caller to the address or EIP-173 "owner()"
