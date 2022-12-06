@@ -4,7 +4,7 @@ import {Contract} from 'ethers';
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {setupLand, getId} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
-import { zeroAddress } from '../../land/fixtures';
+import {zeroAddress} from '../../land/fixtures';
 
 type User = {
   address: string;
@@ -565,20 +565,22 @@ describe('MockLandV2WithMint.sol', function () {
     });
   });
 
-  describe('testing mintQuad', function(){
+  describe('testing mintQuad', function () {
     it('should revert if to address zero', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
-      await expect(landOwners[0].MockLandV2WithMint.mintQuad(zeroAddress, 3, 3, 3, bytes)).to.be.revertedWith("to is zero address");
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintQuad(zeroAddress, 3, 3, 3, bytes)
+      ).to.be.revertedWith('to is zero address');
     });
 
     it('should revert if signer is not minter', async function () {
-        const {
-          users,
-        } = await setupLand();
+      const {users} = await setupLand();
 
-        await expect(users[0].PolygonLand.mintQuad(users[0].address, 3, 0, 0, "0x")).to.be.revertedWith("!AUTHORIZED");
+      await expect(
+        users[0].PolygonLand.mintQuad(users[0].address, 3, 0, 0, '0x')
+      ).to.be.revertedWith('!AUTHORIZED');
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -594,15 +596,17 @@ describe('MockLandV2WithMint.sol', function () {
             0,
             0,
             bytes
-          )
-  
-          await expect( landOwners[0].MockLandV2WithMint.mintQuad(
-            landOwners[0].address,
-            size1,
-            0,
-            0,
-            bytes
-          )).to.be.revertedWith("Already minted");
+          );
+
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
         });
       });
     });
@@ -620,87 +624,107 @@ describe('MockLandV2WithMint.sol', function () {
             0,
             0,
             bytes
-          )
-  
-          await expect( landOwners[0].MockLandV2WithMint.mintQuad(
-            landOwners[0].address,
-            size1,
-            0,
-            0,
-            bytes
-          )).to.be.revertedWith("Already minted");
+          );
+
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
         });
       });
     });
-  })
+  });
 
-  describe("testing mintAndTransferQuad", function(){
+  describe('testing mintAndTransferQuad', function () {
     it('should revert if signer is not minter', async function () {
-      const {
-        users,
-      } = await setupLand();
+      const {users} = await setupLand();
 
-      await expect(users[0].PolygonLand.mintAndTransferQuad(users[0].address, 3, 0, 0, "0x")).to.be.revertedWith("!AUTHORIZED");
+      await expect(
+        users[0].PolygonLand.mintAndTransferQuad(
+          users[0].address,
+          3,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('!AUTHORIZED');
     });
 
     it('should revert if to address zero', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
-      await expect(landOwners[0].MockLandV2WithMint.mintAndTransferQuad(zeroAddress, 3, 3, 3, bytes)).to.be.revertedWith("to is zero address");
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+          zeroAddress,
+          3,
+          3,
+          3,
+          bytes
+        )
+      ).to.be.revertedWith('to is zero address');
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((size1) => {
-    sizes.forEach((size2) => {
-      if (size2 >= size1) return;
-      it(`should NOT be able to mint and transfer ${size1}x${size1} quad if signer is not the owner of child ${size2}x${size2} quad`, async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-        await landOwners[0].MockLandV2WithMint.mintQuad(
-          landOwners[1].address,
-          size2,
-          0,
-          0,
-          bytes
-        )
+      sizes.forEach((size2) => {
+        if (size2 >= size1) return;
+        it(`should NOT be able to mint and transfer ${size1}x${size1} quad if signer is not the owner of child ${size2}x${size2} quad`, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[1].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
 
-        await expect( landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
-          landOwners[0].address,
-          size1,
-          0,
-          0,
-          bytes
-        )).to.be.revertedWith("Already minted");
-      });
-     });
-    });
-
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    sizes.forEach((size1) => {
-    sizes.forEach((size2) => {
-      if (size2 <= size1) return;
-      it(`should NOT be able to transfer child ${size1}x${size1} quad if signer is not the owner of  parent ${size2}x${size2} quad `, async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-        await landOwners[0].MockLandV2WithMint.mintQuad(
-          landOwners[1].address,
-          size2,
-          0,
-          0,
-          bytes
-        )
-        await expect( landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
-          landOwners[0].address,
-          size1,
-          0,
-          0,
-          bytes
-        )).to.be.reverted;
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
         });
       });
     });
-  })
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 <= size1) return;
+        it(`should NOT be able to transfer child ${size1}x${size1} quad if signer is not the owner of  parent ${size2}x${size2} quad `, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[1].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.reverted;
+        });
+      });
+    });
+  });
 
   it('supported interfaces', async function () {
     const {MockLandV2WithMint} = await setupTest();
@@ -709,7 +733,7 @@ describe('MockLandV2WithMint.sol', function () {
     expect(await MockLandV2WithMint.supportsInterface('0x5b5e139f')).to.be.true;
   });
 
-  it("should revert for incorrect id (wrong size)", async function () {
+  it('should revert for incorrect id (wrong size)', async function () {
     const {MockLandV2WithMint} = await setupTest();
 
     await expect(MockLandV2WithMint.ownerOf(getId(9, 0, 0))).to.be.revertedWith(
@@ -719,10 +743,16 @@ describe('MockLandV2WithMint.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   sizes.forEach((quadSize) => {
-    it("should return correct ownerOf ${quadSize}x${quadSize} quad  minted", async function () {
-      const {MockLandV2WithMint,landOwners} = await setupTest();
+    it('should return correct ownerOf ${quadSize}x${quadSize} quad  minted', async function () {
+      const {MockLandV2WithMint, landOwners} = await setupTest();
       const bytes = '0x3333';
-      await MockLandV2WithMint.mintQuad(landOwners[0].address, quadSize, quadSize, quadSize,bytes );
+      await MockLandV2WithMint.mintQuad(
+        landOwners[0].address,
+        quadSize,
+        quadSize,
+        quadSize,
+        bytes
+      );
       let layer;
       if (quadSize == 1) {
         layer = 1;

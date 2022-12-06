@@ -296,21 +296,14 @@ describe('LandV3', function () {
     });
 
     it('should revert when to address is zero', async function () {
-      const {
-        getNamedAccounts,
-        mintQuad
-      } = await setupLand();
-      const {deployer} = await getNamedAccounts();
+      const {mintQuad} = await setupLand();
       await expect(mintQuad(zeroAddress, 3, 0, 0)).to.be.revertedWith(
         'to is zero address'
       );
     });
 
     it('should revert when size wrong', async function () {
-      const {
-        getNamedAccounts,
-        mintQuad,
-      } = await setupLand();
+      const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await expect(mintQuad(deployer, 9, 0, 0)).to.be.revertedWith(
         'Invalid size'
@@ -318,17 +311,14 @@ describe('LandV3', function () {
     });
 
     it('should revert when to coordinates are wrong', async function () {
-      const {
-        getNamedAccounts,
-        mintQuad
-      } = await setupLand();
+      const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await expect(mintQuad(deployer, 3, 5, 5)).to.be.revertedWith(
         'Invalid coordinates'
       );
     });
 
-    it('should revert when quad is out of bounds', async function () {
+    it('should revert when quad is out of bounds (mintQuad)', async function () {
       const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await expect(mintQuad(deployer, 3, 441, 441)).to.be.revertedWith(
@@ -347,10 +337,7 @@ describe('LandV3', function () {
     });
 
     it('should revert when parent quad is already minted', async function () {
-      const {
-        getNamedAccounts,
-        mintQuad
-      } = await setupLand();
+      const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await mintQuad(deployer, 24, 0, 0);
       await expect(mintQuad(deployer, 3, 0, 0)).to.be.revertedWith(
@@ -368,10 +355,7 @@ describe('LandV3', function () {
     });
 
     it('should revert when  1x1 Land token is already minted', async function () {
-      const {
-        getNamedAccounts,
-        mintQuad
-      } = await setupLand();
+      const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await mintQuad(deployer, 1, 0, 0);
       await expect(mintQuad(deployer, 6, 0, 0)).to.be.revertedWith(
@@ -402,7 +386,7 @@ describe('LandV3', function () {
         ethers,
         mintQuad,
       } = await setupLand();
-      const {deployer, landAdmin} = await getNamedAccounts();
+      const {deployer} = await getNamedAccounts();
       await mintQuad(deployer, 6, 0, 0);
       await expect(
         landContract
@@ -475,7 +459,7 @@ describe('LandV3', function () {
       ).to.be.revertedWith('Invalid coordinates');
     });
 
-    it('should revert when quad is out of bounds', async function () {
+    it('should revert when quad is out of bounds (transferQuad)', async function () {
       const {
         landContract,
         getNamedAccounts,
@@ -537,7 +521,7 @@ describe('LandV3', function () {
       ).to.be.revertedWith('Invalid coordinates');
     });
 
-    it('should revert when quad is out of bounds', async function () {
+    it('should revert when quad is out of bounds (mintAndTransferQuad)', async function () {
       const {landContract, getNamedAccounts, ethers} = await setupLand();
       const {deployer, landAdmin} = await getNamedAccounts();
       await expect(
@@ -573,15 +557,14 @@ describe('LandV3', function () {
     sizes.forEach((size2) => {
       if (size2 >= size1) return;
       it(`should NOT be able to mint child ${size1}x${size1} quad if parent ${size2}x${size2} quad is already minted`, async function () {
-        const {
-          getNamedAccounts,
-          mintQuad,
-        } = await setupLand();
+        const {getNamedAccounts, mintQuad} = await setupLand();
         const {deployer} = await getNamedAccounts();
 
         await mintQuad(deployer, size1, 0, 0);
 
-        await expect(mintQuad(deployer, size2, 0, 0)).to.be.revertedWith("Already minted");
+        await expect(mintQuad(deployer, size2, 0, 0)).to.be.revertedWith(
+          'Already minted'
+        );
       });
     });
   });
@@ -591,15 +574,14 @@ describe('LandV3', function () {
     sizes.forEach((size2) => {
       if (size2 >= size1) return;
       it(`should NOT be able to mint parent ${size1}x${size1} quad if child ${size2}x${size2} quad is already minted`, async function () {
-        const {
-          getNamedAccounts,
-          mintQuad,
-        } = await setupLand();
+        const {getNamedAccounts, mintQuad} = await setupLand();
         const {deployer} = await getNamedAccounts();
 
         await mintQuad(deployer, size2, 0, 0);
 
-        await expect(mintQuad(deployer, size1, 0, 0)).to.be.revertedWith("Already minted");
+        await expect(mintQuad(deployer, size1, 0, 0)).to.be.revertedWith(
+          'Already minted'
+        );
       });
     });
   });
@@ -638,7 +620,7 @@ describe('LandV3', function () {
     });
   });
 
-  it("should revert for incorrect id (wrong size)", async function () {
+  it('should revert for incorrect id (wrong size)', async function () {
     const {landContract} = await setupLand();
 
     await expect(landContract.ownerOf(getId(9, 0, 0))).to.be.revertedWith(
@@ -665,7 +647,7 @@ describe('LandV3', function () {
           landContract
             .connect(ethers.provider.getSigner(landAdmin))
             .mintAndTransferQuad(landAdmin, size1, 0, 0, '0x')
-        ).to.be.revertedWith("Already minted");
+        ).to.be.revertedWith('Already minted');
       });
     });
   });

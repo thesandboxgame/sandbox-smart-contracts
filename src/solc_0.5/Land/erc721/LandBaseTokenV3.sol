@@ -7,12 +7,12 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
 
-    uint256 internal constant LAYER =          0xFF00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_1x1 =      0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_3x3 =      0x0100000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_6x6 =      0x0200000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_12x12 =    0x0300000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_24x24 =    0x0400000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
 
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
@@ -83,10 +83,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         bytes calldata data
     ) external {
         require(to != address(0), "to is zero address");
-        require(
-            isMinter(msg.sender),
-            "Only a minter can mint"
-        );
+        require(isMinter(msg.sender), "Only a minter can mint");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
@@ -215,7 +212,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) internal {
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
-        
 
         uint256 id = x + y * GRID_SIZE;
         (uint256 quadId, , , ) = _getQuadInfo(size, id);
