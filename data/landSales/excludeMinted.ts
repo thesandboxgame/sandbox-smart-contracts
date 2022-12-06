@@ -28,6 +28,7 @@ export async function excludeMinted({sector, lands}: SectorData): Promise<Sector
 }
 
 async function getMintedLands({minX, minY, maxX, maxY}: {minX: number, minY: number, maxX: number, maxY: number}): Promise<SectorLand[]> {
+  if (process.env.CI) return [];
   let l1, l2;
   if (hre.network.tags.testnet) {
     // l1 = "GOERLI"
