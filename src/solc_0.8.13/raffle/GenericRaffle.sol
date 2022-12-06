@@ -343,11 +343,19 @@ contract GenericRaffle is
         revert("Renounce ownership is not available");
     }
 
-    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
         super.setApprovalForAll(operator, approved);
     }
 
-    function approve(address operator, uint256 tokenId) public override onlyAllowedOperatorApproval(operator) {
+    function approve(address operator, uint256 tokenId)
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
         super.approve(operator, tokenId);
     }
 
@@ -355,7 +363,7 @@ contract GenericRaffle is
         address from,
         address to,
         uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -363,7 +371,7 @@ contract GenericRaffle is
         address from,
         address to,
         uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -372,7 +380,7 @@ contract GenericRaffle is
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override onlyAllowedOperator(from) {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
