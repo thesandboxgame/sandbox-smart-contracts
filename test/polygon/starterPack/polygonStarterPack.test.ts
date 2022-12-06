@@ -142,7 +142,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSigningWallet(other.address)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
   });
@@ -255,7 +255,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setReceivingWallet(other.address)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
   });
@@ -308,7 +308,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSANDEnabled(true)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('STARTERPACK_ROLE can disable SAND', async function () {
@@ -323,7 +323,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSANDEnabled(false)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
   });
@@ -388,7 +388,7 @@ describe('PolygonStarterPack.sol', function () {
           gemPrices
         )
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('cannot set prices for cat that does not exist', async function () {
@@ -657,7 +657,7 @@ describe('PolygonStarterPack.sol', function () {
           [1, 2, 3, 4, 5]
         )
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
     it('cannot withdraw cats that do not exist', async function () {
