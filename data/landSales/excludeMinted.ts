@@ -28,7 +28,6 @@ export async function excludeMinted({sector, lands}: SectorData): Promise<Sector
 }
 
 async function getMintedLands({minX, minY, maxX, maxY}: {minX: number, minY: number, maxX: number, maxY: number}): Promise<SectorLand[]> {
-  if (process.env.CI) return [];
   let l1, l2;
   if (hre.network.tags.testnet) {
     // l1 = "GOERLI"
@@ -49,10 +48,13 @@ async function getMintedLands({minX, minY, maxX, maxY}: {minX: number, minY: num
       owner { id }
     }
   }`
+  const graphUrlL1 = process.env[`SANDBOX_GRAPH_URL_${l1}`]
+  const graphUrlL2 = process.env[`SANDBOX_GRAPH_URL_${l2}`]
+  if (!graphUrlL1 || !graphUrlL2) return [];
   const landMap: {[id: string]: SectorLand} = {}
   const landChains = await Promise.all([
-    new TheGraph(process.env[`SANDBOX_GRAPH_URL_${l1}`]!).query<{id: string, x: number, y: number, owner: {id: string}}>(query, "landTokens", {}),
-    new TheGraph(process.env[`SANDBOX_GRAPH_URL_${l2}`]!).query<{id: string, x: number, y: number, owner: {id: string}}>(query, "landTokens", {})
+    new TheGraph(graphUrlL1).query<{id: string, x: number, y: number, owner: {id: string}}>(query, "landTokens", {}),
+    new TheGraph(graphUrlL2).query<{id: string, x: number, y: number, owner: {id: string}}>(query, "landTokens", {})
   ])
   landChains.forEach(lands => lands.forEach(land => {
     if (landMap[land.id]) return;
