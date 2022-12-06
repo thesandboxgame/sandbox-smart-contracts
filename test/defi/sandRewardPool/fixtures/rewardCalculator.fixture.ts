@@ -83,7 +83,7 @@ export const twoPeriodsSetup = withSnapshot([], async function (hre) {
 
   await rewardPool.setRewardCalculator(contract.address, false);
 
-  await stakeToken.mint(rewardPool.address, '10000000000000000000000');
+  await stakeToken.mint(rewardPool.address, '1000000000000000');
 
   return {
     contract,
