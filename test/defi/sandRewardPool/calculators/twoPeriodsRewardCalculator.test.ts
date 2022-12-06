@@ -162,7 +162,6 @@ describe('TwoPeriodsRewardCalculator', function () {
       }
       return getTime();
     }
-
     it('run an initial campaign alone', async function () {
       const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       const durationInSeconds = 28 * 24 * 60 * 60;
@@ -182,6 +181,18 @@ describe('TwoPeriodsRewardCalculator', function () {
       await setBlockTime(endTime + 10);
       expect(await contract.getRewards()).to.be.equal(rewards);
       expect(await contract.isCampaignRunning()).to.be.false;
+    });
+    it('run an initial campaign should fail if contract has not enough funds', async function () {
+      const {contractAsRewardDistribution} = await twoPeriodsSetup();
+      const durationInSeconds = 28 * 24 * 60 * 60;
+      const rewards = '10000000000000000';
+
+      await expect(
+        contractAsRewardDistribution.setInitialCampaign(
+          rewards,
+          durationInSeconds
+        )
+      ).to.revertedWith('RewardCalculator: not enough rewards');
     });
     it('run initial and next campaign', async function () {
       const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
