@@ -2106,6 +2106,7 @@ describe('PolygonLand', function () {
           landMinter,
           users,
           MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
           getId,
         } = await setupLandTunnelV2();
 
@@ -2178,7 +2179,28 @@ describe('PolygonLand', function () {
             MockLandTunnelV2.address
           );
         }
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          1,
+          11,
+          11,
+          bytes
+        );
+        mintedLandIds.push(getId(1, 11, 11));
 
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx2 = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [12],
+          [0],
+          [0],
+          bytes
+        );
+        await tx2.wait();
         console.log('DUMMY CHECKPOINT. moving on...');
 
         const abiCoder = new AbiCoder();
@@ -2208,6 +2230,7 @@ describe('PolygonLand', function () {
           landMinter,
           users,
           MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
           getId,
         } = await setupLandTunnelV2();
 
@@ -2257,6 +2280,29 @@ describe('PolygonLand', function () {
           );
         }
 
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          1,
+          11,
+          11,
+          bytes
+        );
+        mintedLandIds.push(getId(1, 11, 11));
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx2 = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [12],
+          [0],
+          [0],
+          bytes
+        );
+        await tx2.wait();
+
         console.log('DUMMY CHECKPOINT. moving on...');
 
         const abiCoder = new AbiCoder();
@@ -2287,6 +2333,7 @@ describe('PolygonLand', function () {
           landMinter,
           users,
           MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
           getId,
         } = await setupLandTunnelV2();
 
@@ -2328,6 +2375,53 @@ describe('PolygonLand', function () {
           );
         }
 
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (!(i == 0 && j == 0)) {
+              await landMinter.PolygonLand.mintQuad(
+                landHolder.address,
+                1,
+                i,
+                j,
+                bytes
+              );
+              mintedLandIds.push(getId(1, i, j));
+            }
+          }
+        }
+
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          3,
+          0,
+          3,
+          bytes
+        );
+        mintedLandIds.push(getId(2, 0, 3));
+
+        await landMinter.PolygonLand.mintQuad(
+          landHolder.address,
+          3,
+          3,
+          3,
+          bytes
+        );
+        mintedLandIds.push(getId(2, 3, 3));
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx2 = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [6],
+          [0],
+          [0],
+          bytes
+        );
+        await tx2.wait();
+
         console.log('DUMMY CHECKPOINT. moving on...');
 
         const abiCoder = new AbiCoder();
@@ -2360,6 +2454,7 @@ describe('PolygonLand', function () {
           landMinter,
           users,
           MockLandTunnelV2,
+          MockPolygonLandTunnelV2,
           getId,
         } = await setupLandTunnelV2();
 
@@ -2384,6 +2479,34 @@ describe('PolygonLand', function () {
           bytes
         );
 
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (!(i == 0 && j == 0)) {
+              await landMinter.PolygonLand.mintQuad(
+                landHolder.address,
+                1,
+                i,
+                j,
+                bytes
+              );
+            }
+          }
+        }
+
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+
+        const tx2 = await landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+          landHolder.address,
+          [3],
+          [0],
+          [0],
+          bytes
+        );
+        await tx2.wait();
+
         console.log('DUMMY CHECKPOINT. moving on...');
 
         const abiCoder = new AbiCoder();
@@ -2403,6 +2526,7 @@ describe('PolygonLand', function () {
         );
       });
     });
+
     describe('Minting quad on layer 1 with child quad minted on layer 2', function () {
       it('should be able to transfer 12x12 Land with child quads already minted', async function () {
         const {
