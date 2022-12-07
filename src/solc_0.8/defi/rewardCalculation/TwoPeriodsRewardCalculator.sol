@@ -75,12 +75,10 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
 
     // For the UI
     function getRate() external view returns (uint256) {
-        if (block.timestamp >= finish1) {
-            if (block.timestamp > finish2) {
-                return 0;
-            } else {
-                return rate2;
-            }
+        if (isCampaignFinished()) {
+            return 0;
+        } else if (block.timestamp >= finish1) {
+            return rate2;
         } else {
             return rate1;
         }
@@ -88,12 +86,10 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
 
     // For the UI
     function getFinish() external view returns (uint256) {
-        if (block.timestamp >= finish1) {
-            if (block.timestamp > finish2) {
-                return 0;
-            } else {
-                return finish2;
-            }
+        if (isCampaignFinished()) {
+            return 0;
+        } else if (block.timestamp >= finish1) {
+            return finish2;
         } else {
             return finish1;
         }
@@ -154,7 +150,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     // Check if both periods already ended => campaign is finished
-    function isCampaignFinished() external view returns (bool) {
+    function isCampaignFinished() public view returns (bool) {
         return (block.timestamp >= finish2);
     }
 
