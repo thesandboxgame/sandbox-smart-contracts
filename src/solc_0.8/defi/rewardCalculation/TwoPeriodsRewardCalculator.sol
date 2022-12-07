@@ -69,7 +69,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     address public immutable rewardPool;
 
     constructor(address rewardPool_) {
-        rewardPoolInterface = IERC20RewardPool(rewardPool_);
         rewardPool = rewardPool_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
