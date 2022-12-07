@@ -5,7 +5,6 @@ pragma solidity 0.8.2;
 import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IRewardCalculator} from "../interfaces/IRewardCalculator.sol";
-import {IERC20RewardPool} from "../interfaces/IERC20RewardPool.sol";
 
 /// @notice This contract has two periods and two corresponding rates and durations. After an initial call
 /// that sets the first period duration and rate another call can be done to set the duration and rate
@@ -39,8 +38,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     );
 
     event SavedRewardsSet(uint256 indexed reward);
-
-    IERC20RewardPool public rewardPoolInterface;
 
     // This role is in charge of configuring reward distribution
     bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
@@ -160,7 +157,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     function _initialCampaign(uint256 reward, uint256 duration) internal {
-        require(rewardPoolInterface.getRewardsAvailable() >= reward, "RewardCalculator: not enough rewards");
         // block.timestamp >= finish2
         _saveRewards();
         finish1 = block.timestamp + duration;
@@ -173,10 +169,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     function _updateNextCampaign(uint256 reward, uint256 duration) internal {
         // block.timestamp < finish2
         _saveRewards();
-        require(
-            rewardPoolInterface.getRewardsAvailable() >= reward + savedRewards,
-            "RewardCalculator: not enough rewards"
-        );
         if (block.timestamp >= finish1) {
             // The next campaign is new.
             finish1 = finish2;
@@ -191,10 +183,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     // TODO: Right now we restart the current campaign forgetting the old values and leaving next one untouched.
     function _updateCurrentCampaign(uint256 reward, uint256 duration) internal {
         _saveRewards();
-        require(
-            rewardPoolInterface.getRewardsAvailable() >= reward + savedRewards,
-            "RewardCalculator: not enough rewards"
-        );
         if (block.timestamp >= finish1) {
             // The next campaign is new.
             finish1 = finish2;
