@@ -7,8 +7,8 @@ import {twoPeriodsSetup} from '../fixtures/rewardCalculator.fixture';
 describe('TwoPeriodsRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
-      const {rewardPool} = await twoPeriodsSetup();
-      await expect(rewardPool.restartRewards()).not.to.be.reverted;
+      const {contractAsRewardPool} = await twoPeriodsSetup();
+      await expect(contractAsRewardPool.restartRewards()).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
       const {
@@ -39,12 +39,19 @@ describe('TwoPeriodsRewardCalculator', function () {
         }
       );
       it('other should fail to call ' + method, async function () {
-        const {contract, contractAsAdmin} = await twoPeriodsSetup();
+        const {
+          contract,
+          contractAsAdmin,
+          contractAsRewardPool,
+        } = await twoPeriodsSetup();
 
         await expect(method(contract)).to.be.revertedWith(
           'not reward distribution'
         );
         await expect(method(contractAsAdmin)).to.be.revertedWith(
+          'not reward distribution'
+        );
+        await expect(method(contractAsRewardPool)).to.be.revertedWith(
           'not reward distribution'
         );
       });
@@ -62,16 +69,16 @@ describe('TwoPeriodsRewardCalculator', function () {
   });
 
   it('startup', async function () {
-    const {contract, rewardPool} = await twoPeriodsSetup();
+    const {contract, contractAsRewardPool} = await twoPeriodsSetup();
     expect(await contract.getRewards()).to.be.equal(0);
     expect(await contract.finish1()).to.be.equal(0);
     expect(await contract.rate1()).to.be.equal(0);
     expect(await contract.finish2()).to.be.equal(0);
     expect(await contract.rate2()).to.be.equal(0);
-    await rewardPool.restartRewards();
-    expect(await contract.getRewards()).to.be.equal(0);
-    await rewardPool.restartRewards();
-    expect(await contract.getRewards()).to.be.equal(0);
+    await contractAsRewardPool.restartRewards();
+    expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
+    await contractAsRewardPool.restartRewards();
+    expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
   });
 
   describe('setup restrictions', function () {
@@ -293,7 +300,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       const {
         contract,
         contractAsRewardDistribution,
-        rewardPool,
+        contractAsRewardPool,
       } = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
@@ -305,7 +312,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       const rewards2 = BigNumber.from(duration2 * rate2);
 
       expect(await contract.getRewards()).to.be.equal(0);
-      await rewardPool.restartRewards();
+      await contractAsRewardPool.restartRewards();
       expect(await contract.getRewards()).to.be.equal(0);
 
       const startTime = await doOnNextBlock(async () => {
@@ -328,7 +335,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       const {
         contract,
         contractAsRewardDistribution,
-        rewardPool,
+        contractAsRewardPool,
       } = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
@@ -352,7 +359,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       });
 
       await doOnNextBlock(async () => {
-        await rewardPool.restartRewards();
+        await contractAsRewardPool.restartRewards();
       }, startTime + delta1);
       await setBlockTime(startTime + duration1 + duration2 + 10);
       expect(await contract.getRewards()).to.be.equal(
@@ -365,7 +372,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       const {
         contract,
         contractAsRewardDistribution,
-        rewardPool,
+        contractAsRewardPool,
       } = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
@@ -388,7 +395,7 @@ describe('TwoPeriodsRewardCalculator', function () {
         duration2
       );
       await doOnNextBlock(async () => {
-        await rewardPool.restartRewards();
+        await contractAsRewardPool.restartRewards();
       }, startTime + duration1 + delta2);
       await setBlockTime(startTime + duration1 + duration2 + 10);
       expect(await contract.getRewards()).to.be.equal(
@@ -401,7 +408,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       const {
         contract,
         contractAsRewardDistribution,
-        rewardPool,
+        contractAsRewardPool,
       } = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
@@ -426,7 +433,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       await setBlockTime(startTime + duration1 + duration2 + 1000);
 
       expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
-      await rewardPool.restartRewards();
+      await contractAsRewardPool.restartRewards();
       expect(await contract.getRewards()).to.be.equal(0);
       expect(await contract.isCampaignRunning()).to.be.false;
     });
@@ -434,9 +441,8 @@ describe('TwoPeriodsRewardCalculator', function () {
       const {
         contract,
         contractAsRewardDistribution,
-        rewardPool,
+        contractAsRewardPool,
       } = await twoPeriodsSetup();
-
       const duration1 = 28 * 24 * 60 * 60;
       const delta1 = duration1 / 3;
       const rate1 = 123;
@@ -463,7 +469,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(delta1 * rate1);
 
       await doOnNextBlock(async () => {
-        await rewardPool.restartRewards();
+        await contractAsRewardPool.restartRewards();
         expect(await contract.getRewards()).to.be.equal(0);
       }, startTime + 2 * delta1);
 
@@ -476,14 +482,14 @@ describe('TwoPeriodsRewardCalculator', function () {
       );
 
       await doOnNextBlock(async () => {
-        await rewardPool.restartRewards();
+        await contractAsRewardPool.restartRewards();
         expect(await contract.getRewards()).to.be.equal(0);
       }, startTime + duration1 + 2 * delta2);
 
       await setBlockTime(startTime + duration1 + duration2 + 1000);
       expect(await contract.getRewards()).to.be.equal(delta2 * rate2);
 
-      await rewardPool.restartRewards();
+      await contractAsRewardPool.restartRewards();
       expect(await contract.getRewards()).to.be.equal(0);
       expect(await contract.isCampaignRunning()).to.be.false;
     });
