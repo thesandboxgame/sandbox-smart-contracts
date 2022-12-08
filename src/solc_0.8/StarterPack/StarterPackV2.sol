@@ -215,6 +215,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         )
     {
         uint256 switchTime = 0;
+        // check whether any prices have been set; return switchTime = 0 if prices were never set
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + PRICE_CHANGE_DELAY;
         }
@@ -265,19 +266,8 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint16[] memory gemIds,
         uint256[] memory gemQuantities
     ) external view returns (uint256) {
-        bool currentPrices;
-        if (_priceChangeTimestamp == 0) {
-            currentPrices = true;
-        } else {
-            // Price change delay has expired: use current prices
-            if (block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
-                currentPrices = true;
-            } else {
-                // Price change has recently occured: use previous prices until price change takes effect
-                currentPrices = false;
-            }
-        }
-        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities, currentPrices);
+        bool useCurrentPrices = _priceSelector();
+        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities, useCurrentPrices);
     }
 
     function _transferCatalysts(
@@ -367,20 +357,14 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     }
 
     /// @dev Function to determine whether to purchase with previous or current prices
-    function _priceSelector() internal returns (bool) {
+    function _priceSelector() internal view returns (bool) {
         bool useCurrentPrices;
-        // No price change
-        if (_priceChangeTimestamp == 0) {
+        // Price change delay has expired: use current prices
+        if (block.timestamp >= _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
             useCurrentPrices = true;
         } else {
-            // Price change delay has expired: use current prices
-            if (block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
-                _priceChangeTimestamp = 0;
-                useCurrentPrices = true;
-            } else {
-                // Price change has recently occured: use previous prices until price change takes effect
-                useCurrentPrices = false;
-            }
+            // Price change has recently occured: use previous prices until price change takes effect
+            useCurrentPrices = false;
         }
         return (useCurrentPrices);
     }
