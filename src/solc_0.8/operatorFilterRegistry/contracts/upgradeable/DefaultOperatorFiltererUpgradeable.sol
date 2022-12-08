@@ -7,6 +7,6 @@ abstract contract DefaultOperatorFiltererUpgradeable is OperatorFiltererUpgradea
     address public constant DEFAULT_SUBSCRIPTION = address(0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6);
 
     function __DefaultOperatorFilterer_init(bool subscribe) internal {
-        __OperatorFilterer_initialize(DEFAULT_SUBSCRIPTION, subscribe);
+        __OperatorFilterer_init(DEFAULT_SUBSCRIPTION, subscribe);
     }
 }

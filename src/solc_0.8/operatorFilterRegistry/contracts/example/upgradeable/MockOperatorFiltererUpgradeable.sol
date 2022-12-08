@@ -5,14 +5,15 @@ import {IOperatorFilterRegistry} from "../../../interfaces/IOperatorFilterRegist
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract MockOperatorFiltererUpgradeable is Initializable {
-    IOperatorFilterRegistry  operatorFilterRegistry;
+    IOperatorFilterRegistry private operatorFilterRegistry;
 
-    function __MockOperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe, address _operatorFilterRegistry)
-        internal
-        onlyInitializing
-    {
+    function __MockOperatorFilterer_init(
+        address subscriptionOrRegistrantToCopy,
+        bool subscribe,
+        address _operatorFilterRegistry
+    ) internal onlyInitializing {
         operatorFilterRegistry = IOperatorFilterRegistry(_operatorFilterRegistry);
-        
+
         if (address(operatorFilterRegistry).code.length > 0) {
             if (!operatorFilterRegistry.isRegistered(address(this))) {
                 if (subscribe) {

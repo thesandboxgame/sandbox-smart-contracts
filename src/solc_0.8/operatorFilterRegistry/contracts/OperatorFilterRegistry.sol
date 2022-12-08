@@ -19,19 +19,18 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
 
     /// @dev initialized accounts have a nonzero codehash (see https://eips.ethereum.org/EIPS/eip-1052)
     /// Note that this will also be a smart contract's codehash when making calls from its constructor.
-    bytes32 constant EOA_CODEHASH = keccak256("");
+    bytes32 public constant EOA_CODEHASH = keccak256("");
 
     mapping(address => EnumerableSet.AddressSet) private _filteredOperators;
     mapping(address => EnumerableSet.Bytes32Set) private _filteredCodeHashes;
     mapping(address => address) private _registrations;
     mapping(address => EnumerableSet.AddressSet) private _subscribers;
 
-
     constructor(address _defaultSubscribtion, address[] memory _blacklistedAddresses) {
         _registrations[_defaultSubscribtion] = _defaultSubscribtion;
         EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
         EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscribtion];
-        for(uint256 i; i < _blacklistedAddresses.length; i++){
+        for (uint256 i; i < _blacklistedAddresses.length; i++) {
             filteredOperatorsRef.add(_blacklistedAddresses[i]);
             bytes32 codeHash = _blacklistedAddresses[i].codehash;
             filteredCodeHashesRef.add(codeHash);
@@ -172,10 +171,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update an operator address for a registered address - when filtered is true, the operator is filtered.
      */
-    function updateOperator(address registrant, address operator, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperator(
+        address registrant,
+        address operator,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -202,10 +202,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update a codeHash for a registered address - when filtered is true, the codeHash is filtered.
      */
-    function updateCodeHash(address registrant, bytes32 codeHash, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHash(
+        address registrant,
+        bytes32 codeHash,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         if (codeHash == EOA_CODEHASH) {
             revert CannotFilterEOAs();
         }
@@ -235,10 +236,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates.
      */
-    function updateOperators(address registrant, address[] calldata operators, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperators(
+        address registrant,
+        address[] calldata operators,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -273,10 +275,11 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
     /**
      * @notice Update multiple codeHashes for a registered address - when filtered is true, the codeHashes will be filtered. Reverts on duplicates.
      */
-    function updateCodeHashes(address registrant, bytes32[] calldata codeHashes, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHashes(
+        address registrant,
+        bytes32[] calldata codeHashes,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
