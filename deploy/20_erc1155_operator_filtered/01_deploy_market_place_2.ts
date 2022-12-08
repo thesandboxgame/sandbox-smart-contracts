@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  await deploy('OperatorFilterRegistry', {
+  await deploy('MockMarketPlace2', {
     from: deployer,
     args: [],
     log: true,
@@ -16,5 +16,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['OperatorFilterRegistry', 'OperatorFilterRegistry_deploy'];
+func.tags = ['MockMarketPlace2', 'MockMarketPlace2_deploy'];
 func.skip = skipUnlessTestnet;

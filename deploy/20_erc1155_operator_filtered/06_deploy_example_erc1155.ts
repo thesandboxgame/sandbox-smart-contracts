@@ -1,6 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
+import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -8,6 +9,7 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
+  const registry = await ethers.getContract('OperatorFilterRegistry');
 
   await deploy('ERC1155OperatorFilteredUpgradeable', {
     from: deployer,
@@ -17,7 +19,7 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: '__ERC1155OperatorFiltered_init',
-        args: ['testURI.com'],
+        args: ['testURI.com', registry.address],
       },
       upgradeIndex: 0,
     },
