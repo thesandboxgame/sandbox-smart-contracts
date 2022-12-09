@@ -180,14 +180,12 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
             ),
             "INVALID_PURCHASE"
         );
-        bool currentPrices = _priceSelector();
         uint256 amountInSAND =
             _calculateTotalPriceInSAND(
                 message.catalystIds,
                 message.catalystQuantities,
                 message.gemIds,
-                message.gemQuantities,
-                currentPrices
+                message.gemQuantities
             );
         _transferSANDPayment(message.buyer, _wallet, amountInSAND);
         _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
@@ -266,8 +264,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint16[] memory gemIds,
         uint256[] memory gemQuantities
     ) external view returns (uint256) {
-        bool useCurrentPrices = _priceSelector();
-        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities, useCurrentPrices);
+        return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities);
     }
 
     function _transferCatalysts(
@@ -333,40 +330,32 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint16[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint16[] memory gemIds,
-        uint256[] memory gemQuantities,
-        bool currentPrices
+        uint256[] memory gemQuantities
     ) internal view returns (uint256) {
         require(catalystIds.length == catalystQuantities.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemQuantities.length, "INVALID_GEM_INPUT");
         uint256 totalPrice;
+        bool useCurrentPrices = _priceSelector();
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
             totalPrice =
                 totalPrice +
-                (currentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
+                (useCurrentPrices ? _catalystPrices[id] * (quantity) : _catalystPreviousPrices[id] * (quantity));
         }
         for (uint256 i = 0; i < gemIds.length; i++) {
             uint16 id = gemIds[i];
             uint256 quantity = gemQuantities[i];
             totalPrice =
                 totalPrice +
-                (currentPrices ? _gemPrices[id] * (quantity) : _gemPreviousPrices[id] * (quantity));
+                (useCurrentPrices ? _gemPrices[id] * (quantity) : _gemPreviousPrices[id] * (quantity));
         }
         return totalPrice;
     }
 
     /// @dev Function to determine whether to purchase with previous or current prices
     function _priceSelector() internal view returns (bool) {
-        bool useCurrentPrices;
-        // Price change delay has expired: use current prices
-        if (block.timestamp >= _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
-            useCurrentPrices = true;
-        } else {
-            // Price change has recently occured: use previous prices until price change takes effect
-            useCurrentPrices = false;
-        }
-        return (useCurrentPrices);
+        return block.timestamp >= _priceChangeTimestamp + PRICE_CHANGE_DELAY;
     }
 
     /// @dev Function to handle purchase with SAND
