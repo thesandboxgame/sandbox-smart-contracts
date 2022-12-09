@@ -6,67 +6,73 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
-export const setupTestPolygonKYCToken = withSnapshot([], async function () {
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const unnamedAccounts = await getUnnamedAccounts();
-  const testURI = 'testURI/';
+export const setupTestPolygonKYCToken = withSnapshot(
+  ['TRUSTED_FORWARDER_V2', 'PolygonAuthValidator'],
+  async function () {
+    const {deployer, upgradeAdmin} = await getNamedAccounts();
+    const unnamedAccounts = await getUnnamedAccounts();
+    const testURI = 'testURI/';
 
-  // Deploy test version of contract
-  await deployments.deploy('TestPolygonKYCERC721', {
-    from: deployer,
-    contract: 'KYCERC721',
-    proxy: {
-      owner: upgradeAdmin,
-      proxyContract: 'OptimizedTransparentProxy',
-      execute: {
-        methodName: 'initialize',
-        args: [unnamedAccounts[0], unnamedAccounts[1], testURI],
+    const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER_V2');
+    const authValidator = await ethers.getContract('PolygonAuthValidator');
+
+    // Deploy test version of contract
+    await deployments.deploy('TestPolygonKYCERC721', {
+      from: deployer,
+      contract: 'KYCERC721',
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          // sandAdmin, kycAdmin, trustedForwarder, authValidator, baseUri
+          args: [
+            unnamedAccounts[0],
+            unnamedAccounts[1],
+            trustedForwarder.address,
+            authValidator.address,
+            testURI,
+          ],
+        },
       },
-    },
-  });
+    });
 
-  const PolygonKYCToken = await ethers.getContract('TestPolygonKYCERC721');
+    const PolygonKYCToken = await ethers.getContract('TestPolygonKYCERC721');
 
-  // ROLES
-  const defaultAdminRole = await PolygonKYCToken.DEFAULT_ADMIN_ROLE();
-  const minterRole = await PolygonKYCToken.MINTER_ROLE();
-  const burnerRole = await PolygonKYCToken.BURNER_ROLE();
+    // ROLES
+    const defaultAdminRole = await PolygonKYCToken.DEFAULT_ADMIN_ROLE();
+    const kycRole = await PolygonKYCToken.KYC_ROLE();
 
-  // DEFAULT_ADMIN_ROLE
-  const contractAsDefaultAdmin = await ethers.getContract(
-    'TestPolygonKYCERC721',
-    unnamedAccounts[0]
-  );
+    // DEFAULT_ADMIN_ROLE
+    const contractAsDefaultAdmin = await ethers.getContract(
+      'TestPolygonKYCERC721',
+      unnamedAccounts[0]
+    );
 
-  // MINTER_ROLE
-  const contractAsMinterRole = await ethers.getContract(
-    'TestPolygonKYCERC721',
-    unnamedAccounts[1]
-  );
+    // KYC_ROLE
+    const contractAsKycRole = await ethers.getContract(
+      'TestPolygonKYCERC721',
+      unnamedAccounts[1]
+    );
 
-  // BURNER_ROLE
-  const contractAsBurnerRole = contractAsDefaultAdmin;
+    const other = await setupUser(unnamedAccounts[2], {
+      PolygonKYCToken,
+    });
 
-  const other = await setupUser(unnamedAccounts[2], {
-    PolygonKYCToken,
-  });
+    const otherB = await setupUser(unnamedAccounts[3], {
+      PolygonKYCToken,
+    });
 
-  const otherB = await setupUser(unnamedAccounts[3], {
-    PolygonKYCToken,
-  });
-
-  return {
-    PolygonKYCToken,
-    contractAsDefaultAdmin,
-    contractAsMinterRole,
-    contractAsBurnerRole,
-    kycAdmin: unnamedAccounts[0],
-    backendKYCWallet: unnamedAccounts[1],
-    defaultAdminRole,
-    minterRole,
-    burnerRole,
-    other,
-    otherB,
-    testURI,
-  };
-});
+    return {
+      PolygonKYCToken,
+      contractAsDefaultAdmin,
+      contractAsKycRole,
+      kycAdmin: unnamedAccounts[0],
+      defaultAdminRole,
+      kycRole,
+      other,
+      otherB,
+      testURI,
+    };
+  }
+);
