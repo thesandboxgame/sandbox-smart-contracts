@@ -4,6 +4,7 @@ import {
   expectEventWithArgs,
   expectEventWithArgsFromReceipt,
   increaseTime,
+  toWei,
 } from '../../utils';
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
@@ -16,33 +17,11 @@ import {zeroAddress} from '../../land/fixtures';
 
 // Good test params
 const catalystIds = [1, 2, 3, 4];
-const catPrices = [
-  '5000000000000000000',
-  '10000000000000000000',
-  '15000000000000000000',
-  '100000000000000000000',
-];
-const catPrices2 = [
-  '5000000000000000000',
-  '17000000000000000000',
-  '15000000000000000000',
-  '200000000000000000000',
-];
+const catPrices = ['5', '1', '15', '10'];
+const catPrices2 = ['5', '17', '15', '20'];
 const gemIds = [1, 2, 3, 4, 5];
-const gemPrices = [
-  '5000000000000000000',
-  '10000000000000000000',
-  '5000000000000000000',
-  '10000000000000000000',
-  '5000000000000000000',
-];
-const gemPrices2 = [
-  '2000000000000000000',
-  '10000000000000000000',
-  '5000000000000000000',
-  '10000000000000000000',
-  '10000000000000000000',
-];
+const gemPrices = ['5', '10', '50', '100', '500'];
+const gemPrices2 = ['2', '10', '50', '100', '100'];
 
 // Helper examples for calculating spend
 function calculateSpend() {
@@ -142,7 +121,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSigningWallet(other.address)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
   });
@@ -255,7 +234,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setReceivingWallet(other.address)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
   });
@@ -308,7 +287,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSANDEnabled(true)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('STARTERPACK_ROLE can disable SAND', async function () {
@@ -323,7 +302,7 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         other.PolygonStarterPack.setSANDEnabled(false)
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
   });
@@ -388,7 +367,7 @@ describe('PolygonStarterPack.sol', function () {
           gemPrices
         )
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0xf0b465b2fd9a8eb309079c069118a26163974b82d09d2b1dafd9aef7692568e6`
       );
     });
     it('cannot set prices for cat that does not exist', async function () {
@@ -657,7 +636,7 @@ describe('PolygonStarterPack.sol', function () {
           [1, 2, 3, 4, 5]
         )
       ).to.be.revertedWith(
-        'AccessControl: account 0xbcd4042de499d14e55001ccbb24a551f3b954096 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+        `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       );
     });
     it('cannot withdraw cats that do not exist', async function () {
@@ -719,7 +698,11 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPack.address,
         constants.MaxUint256
       );
-      await buyer.PolygonStarterPack.purchaseWithSAND(Message, signature);
+      await buyer.PolygonStarterPack.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
       await expect(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -776,7 +759,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
     });
     it('can purchase bundle of cats and gems when SAND is enabled and prices are >0 with correct SAND amount', async function () {
@@ -818,7 +805,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -868,7 +859,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('SAND_IS_NOT_ENABLED');
     });
     it('a successful purchase results in a Purchase event', async function () {
@@ -900,7 +895,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       const receipt = await waitFor(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       );
       const event = await expectEventWithArgs(
         PolygonStarterPack,
@@ -971,7 +970,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INSUFFICIENT_FUNDS');
     });
     it('cannot purchase bundle of cats and gems if have not approved the StarterPack contract', async function () {
@@ -996,7 +999,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('NOT_AUTHORIZED_ALLOWANCE');
     });
     it('cannot purchase bundle of cats and gems if StarterPack contract does not have any', async function () {
@@ -1033,7 +1040,11 @@ describe('PolygonStarterPack.sol', function () {
         [1, 2, 3, 4, 5]
       ); // empty the contract
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INSUFFICIENT_FUNDS'); // ERC20BaseTokenUpgradeable error message in Catalyst and Gem contracts
     });
     it('purchase fails with incorrect backend signature', async function () {
@@ -1051,7 +1062,11 @@ describe('PolygonStarterPack.sol', function () {
         true // use BAD_KEY in signature
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_PURCHASE');
     });
     it('purchase fails with bad message params - catalyst lengths', async function () {
@@ -1074,7 +1089,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_CAT_INPUT');
     });
     it('purchase fails with bad message params - gem lengths', async function () {
@@ -1097,7 +1116,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_GEM_INPUT');
     });
     it('purchase invalidates the nonce after 1 use', async function () {
@@ -1127,10 +1150,18 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_NONCE');
     });
     it('cannot purchase cats that do not exist', async function () {
@@ -1166,7 +1197,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_CATALYST_ID');
     });
     it('cannot purchase gems that do not exist', async function () {
@@ -1202,15 +1237,55 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
-    it('cannot purchase if not msgSender()', async function () {
+    // it('cannot purchase if not msgSender()', async function () {
+    //   const {
+    //     buyer,
+    //     PolygonStarterPackAsAdmin,
+    //     PolygonStarterPack,
+    //     other,
+    //   } = await setupPolygonStarterPack();
+    //   await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+    //   await PolygonStarterPackAsAdmin.setPrices(
+    //     catalystIds,
+    //     catPrices,
+    //     gemIds,
+    //     gemPrices
+    //   );
+    //   // fast forward 1 hour so the new prices are in effect
+    //   await increaseTime(3600);
+    //   const Message = {...TestMessage};
+    //   Message.buyer = other.address; // bad param
+    //   const signature = await starterPack712Signature(
+    //     PolygonStarterPack,
+    //     Message
+    //   );
+    //   // approve SAND
+    //   await buyer.sandContract.approve(
+    //     PolygonStarterPack.address,
+    //     constants.MaxUint256
+    //   );
+    //   await expect(
+    //     buyer.PolygonStarterPack.purchaseWithSAND(
+    //       Message.buyer,
+    //       Message,
+    //       signature
+    //     )
+    //   ).to.be.revertedWith('INVALID_SENDER');
+    // });
+    it('cannot purchase if buyer is different from message.buyer', async function () {
       const {
         buyer,
         PolygonStarterPackAsAdmin,
         PolygonStarterPack,
         other,
+        gemOwner,
       } = await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
@@ -1233,8 +1308,8 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
-      ).to.be.revertedWith('INVALID_SENDER');
+        buyer.PolygonStarterPack.purchaseWithSAND(gemOwner, Message, signature)
+      ).to.be.revertedWith('INVALID_BUYER');
     });
     it('purchase occurs with old prices if price change has not yet taken effect', async function () {
       const {
@@ -1266,7 +1341,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1316,7 +1395,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1367,7 +1450,11 @@ describe('PolygonStarterPack.sol', function () {
         constants.MaxUint256
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.not.be.reverted;
       const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
         Message.catalystIds,
@@ -1440,7 +1527,11 @@ describe('PolygonStarterPack.sol', function () {
 
       // To get the nonce, we simply pass the buyer address & queueID
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(message, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          message.buyer,
+          message,
+          signature
+        )
       ).to.not.be.reverted;
 
       let nonce = 0;
@@ -1460,7 +1551,11 @@ describe('PolygonStarterPack.sol', function () {
         messageQueue2
       );
       await expect(
-        buyer.PolygonStarterPack.purchaseWithSAND(messageQueue2, signature)
+        buyer.PolygonStarterPack.purchaseWithSAND(
+          messageQueue2.buyer,
+          messageQueue2,
+          signature
+        )
       ).to.not.be.reverted;
 
       // Now we can simply increment the nonce in the new queue (with packing)
@@ -1480,6 +1575,7 @@ describe('PolygonStarterPack.sol', function () {
       );
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(
+          updatedMessageQueue2.buyer,
           updatedMessageQueue2,
           signature
         )
@@ -1505,13 +1601,21 @@ describe('PolygonStarterPack.sol', function () {
         message
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          message.buyer,
+          message,
+          signature
+        )
       ).to.not.be.reverted;
       message.catalystIds = [4, 3, 2, 1];
       message.nonce++;
       signature = await starterPack712Signature(PolygonStarterPack, message);
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          message.buyer,
+          message,
+          signature
+        )
       ).to.not.be.reverted;
     });
     it('order of gem IDs should not matter', async function () {
@@ -1534,13 +1638,21 @@ describe('PolygonStarterPack.sol', function () {
         message
       );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          message.buyer,
+          message,
+          signature
+        )
       ).to.not.be.reverted;
       message.gemIds = [5, 4, 3, 2, 1];
       message.nonce++;
       signature = await starterPack712Signature(PolygonStarterPack, message);
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          message.buyer,
+          message,
+          signature
+        )
       ).to.not.be.reverted;
     });
     it('can get nonce for a buyer', async function () {
@@ -1571,9 +1683,17 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPack,
         Message
       );
-      await other.PolygonStarterPack.purchaseWithSAND(Message, signature);
+      await other.PolygonStarterPack.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
       await expect(
-        other.PolygonStarterPack.purchaseWithSAND(Message, signature)
+        other.PolygonStarterPack.purchaseWithSAND(
+          Message.buyer,
+          Message,
+          signature
+        )
       ).to.be.revertedWith('INVALID_NONCE');
     });
   });
@@ -1668,6 +1788,7 @@ describe('PolygonStarterPack.sol', function () {
       expect(switchTime).to.be.equal(block.timestamp + 3600); // switchTime, which is 1 hour after a price change
     });
   });
+
   describe('isSANDEnabled', function () {
     it('can view whether SAND is enabled or not', async function () {
       const {PolygonStarterPack} = await setupPolygonStarterPack();
@@ -1703,6 +1824,7 @@ describe('PolygonStarterPack.sol', function () {
         to,
         data,
       } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
         Message,
         signature
       );
@@ -1749,6 +1871,202 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
   });
+  describe('sand approveAndCall', function () {
+    it('can purchase with just one call using approveAndCall (prices set)', async function () {
+      const {
+        buyer,
+        powerGem,
+        defenseGem,
+        speedGem,
+        magicGem,
+        luckGem,
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+        legendaryCatalyst,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setPrices(
+        catalystIds,
+        catPrices,
+        gemIds,
+        gemPrices
+      );
+      // fast forward 1 hour so the new prices are in effect
+      await increaseTime(3600);
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+      expect(price).not.to.be.eq(0);
+
+      const txValue = toWei(0);
+
+      await buyer.sandContract.approveAndCall(
+        PolygonStarterPack.address,
+        price,
+        encodedABI.data,
+        {value: txValue}
+      );
+
+      expect(await powerGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[0])
+      );
+      expect(await defenseGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[1])
+      );
+      expect(await speedGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[2])
+      );
+      expect(await magicGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[3])
+      );
+      expect(await luckGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[4])
+      );
+      expect(await commonCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[0])
+      );
+      expect(await rareCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[1])
+      );
+      expect(await epicCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[2])
+      );
+      expect(await legendaryCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[3])
+      );
+    });
+    it('can purchase with just one call using approveAndCall (prices zero)', async function () {
+      const {
+        buyer,
+        powerGem,
+        defenseGem,
+        speedGem,
+        magicGem,
+        luckGem,
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+        legendaryCatalyst,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+      } = await setupPolygonStarterPack();
+
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+      expect(price).to.be.eq(0);
+
+      const txValue = toWei(0);
+
+      await buyer.sandContract.approveAndCall(
+        PolygonStarterPack.address,
+        price,
+        encodedABI.data,
+        {value: txValue}
+      );
+
+      expect(await powerGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[0])
+      );
+      expect(await defenseGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[1])
+      );
+      expect(await speedGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[2])
+      );
+      expect(await magicGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[3])
+      );
+      expect(await luckGem.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.gemQuantities[4])
+      );
+      expect(await commonCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[0])
+      );
+      expect(await rareCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[1])
+      );
+      expect(await epicCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[2])
+      );
+      expect(await legendaryCatalyst.balanceOf(buyer.address)).to.be.eq(
+        BigNumber.from(Message.catalystQuantities[3])
+      );
+    });
+    it('cannot purchase with just one call using approveAndCall if msgSender is not the buyer', async function () {
+      const {
+        buyer,
+        PolygonStarterPack,
+        PolygonStarterPackAsAdmin,
+        sandContract,
+      } = await setupPolygonStarterPack();
+      await PolygonStarterPackAsAdmin.setSANDEnabled(true);
+      const Message = {...TestMessage};
+      Message.buyer = buyer.address;
+      const signature = await starterPack712Signature(
+        PolygonStarterPack,
+        Message
+      );
+
+      const encodedABI = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+        Message.buyer,
+        Message,
+        signature
+      );
+
+      const price = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+        Message.catalystIds,
+        Message.catalystQuantities,
+        Message.gemIds,
+        Message.gemQuantities
+      );
+
+      await expect(
+        sandContract.approveAndCall(
+          PolygonStarterPack.address,
+          price,
+          encodedABI.data
+        )
+      ).to.be.revertedWith('FIRST_PARAM_NOT_SENDER');
+    });
+  });
+
   describe('test array lengths for withdrawAll', function () {
     it('can withdraw 20 types of gems', async function () {
       const {

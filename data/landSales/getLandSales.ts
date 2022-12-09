@@ -10,6 +10,7 @@ import helpers, {
 import {isTestnet} from '../../utils/network';
 import addresses from '../addresses.json';
 import deadlines from './deadlines';
+import {excludeMinted} from './excludeMinted';
 import prices from './prices';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
@@ -262,8 +263,10 @@ export async function getLandSales(
 
   const landSales = [];
   for (const sectorData of sectors) {
+    const fixedSectorData = await excludeMinted(sectorData)
+    console.log(sectorData.lands.length, fixedSectorData.lands.length)
     const {lands} = await generateLandsForMerkleTree(
-      sectorData,
+      fixedSectorData,
       bundles,
       prices
     );
@@ -365,6 +368,7 @@ export function getDeadline(
     hre.deployments.log('increasing deadline by 10 year');
     deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
+  console.log(new Date(deadline*1000).toISOString())
   return deadline;
 }
 
