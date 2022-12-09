@@ -222,7 +222,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             uint256 _id = _idInPath(i, size, x, y);
             uint256 xi = _id % GRID_SIZE;
             uint256 yi = _id / GRID_SIZE;
-            bool isAlreadyMinted = isQuadCheckedForOwner(mintedLand, xi, yi, 1, index);
+            bool isAlreadyMinted = isQuadMinted(mintedLand, xi, yi, 1, index);
             if (isAlreadyMinted) {
                 emit Transfer(msg.sender, to, _id);
             } else {
@@ -257,7 +257,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         if (size >= quadCompareSize) {
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, quadCompareSize, index);
+                    bool isQuadChecked = isQuadMinted(mintedLand, xi, yi, quadCompareSize, index);
                     if (!isQuadChecked) {
                         uint256 id = _getQuadId(layer, xi, yi);
                         address owner = address(uint160(_owners[id]));
@@ -278,7 +278,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         if (quadCompareSize >= 3) checkAndClearOwner(size, x, y, mintedLand, index, quadCompareSize);
     }
 
-    function isQuadCheckedForOwner(
+    function isQuadMinted(
         Land[] memory mintedLand,
         uint256 x,
         uint256 y,
