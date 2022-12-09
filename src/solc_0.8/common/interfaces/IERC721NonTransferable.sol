@@ -2,13 +2,7 @@
 pragma solidity 0.8.2;
 
 interface IERC721NonTransferable {
-    function mint(address to, uint256 id) external;
-
-    function mint(
-        address to,
-        uint256 id,
-        bytes calldata data
-    ) external;
+    function mint(address to) external;
 
     function burn(uint256 id) external;
 
