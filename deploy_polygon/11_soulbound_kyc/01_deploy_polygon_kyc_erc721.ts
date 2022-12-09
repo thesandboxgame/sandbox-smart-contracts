@@ -9,10 +9,13 @@ const func: DeployFunction = async function (
   const {
     deployer,
     upgradeAdmin,
+    sandAdmin,
     kycAdmin,
-    backendKYCWallet,
   } = await getNamedAccounts();
   const {deploy} = deployments;
+
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   const BASE_TOKEN_URI = 'https://helloIamAbaseURI.game/';
 
@@ -24,7 +27,13 @@ const func: DeployFunction = async function (
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [kycAdmin, backendKYCWallet, BASE_TOKEN_URI],
+        args: [
+          sandAdmin,
+          kycAdmin,
+          TRUSTED_FORWARDER_V2.address,
+          authValidatorContract.address,
+          BASE_TOKEN_URI,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -34,5 +43,5 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['PolygonKYCERC721', 'PolygonKYCERC721_deploy', 'L2'];
-func.dependencies = [];
+func.dependencies = ['PolygonAuthValidator_deploy'];
 func.skip = skipUnlessTestnet;
