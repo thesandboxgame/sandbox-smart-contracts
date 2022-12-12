@@ -5,8 +5,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {constants, Wallet} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
+import {constants} from 'ethers';
 
 export const setupTestPolygonKYCToken = withSnapshot(
   ['TRUSTED_FORWARDER_V2', 'PolygonAuthValidator'],
@@ -94,6 +93,8 @@ export const setupTestPolygonKYCToken = withSnapshot(
       zeroAddress,
       backendAuthWallet,
       KYC_TYPEHASH,
+      trustedForwarder,
+      authValidator,
     };
   }
 );

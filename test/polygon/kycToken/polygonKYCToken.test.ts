@@ -3,6 +3,7 @@ import {expect} from '../../chai-setup';
 import {zeroAddress} from '../../land/fixtures';
 import {ethers} from 'hardhat';
 import {defaultAbiCoder, keccak256, toUtf8Bytes} from 'ethers/lib/utils';
+import {backendAuthWallet} from '../../land-sale/fixtures';
 
 describe('PolygonKYCToken', function () {
   describe('TestPolygonKYCToken', function () {
@@ -29,18 +30,26 @@ describe('PolygonKYCToken', function () {
       it('trusted forwarder is set', async function () {
         const {
           PolygonKYCToken,
-          sandAdmin,
-          defaultAdminRole,
+          trustedForwarder,
         } = await setupTestPolygonKYCToken();
-        //
+        const trustedForwarderAddress = await PolygonKYCToken.getTrustedForwarder();
+        expect(trustedForwarderAddress).to.be.equal(trustedForwarder.address);
       });
       it('name and symbol are set', async function () {
+        const {PolygonKYCToken} = await setupTestPolygonKYCToken();
+        const name = await PolygonKYCToken.name();
+        expect(name).to.be.equal("Sandbox's KYC ERC721");
+        const symbol = await PolygonKYCToken.symbol();
+        expect(symbol).to.be.equal('KYC');
+      });
+      it('authValidator is set', async function () {
         const {
           PolygonKYCToken,
-          kycRole,
-          kycAdmin,
+          authValidator,
         } = await setupTestPolygonKYCToken();
-        //
+        expect(await PolygonKYCToken.getAuthValidator()).to.be.equal(
+          authValidator.address
+        );
       });
       it('check the domain separator', async function () {
         const {PolygonKYCToken} = await setupTestPolygonKYCToken();
@@ -436,6 +445,455 @@ describe('PolygonKYCToken', function () {
 
         const bal = await PolygonKYCToken.balanceOf(other.address);
         expect(bal).to.eq(1);
+      });
+      it('tokenId counter increments correctly', async function () {
+        const {
+          other,
+          otherB,
+          backendAuthWallet,
+          KYC_TYPEHASH,
+          PolygonKYCToken,
+        } = await setupTestPolygonKYCToken();
+
+        const signatureA = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+        const signatureB = await ethers.provider.send('eth_signTypedData_v4', [
+          otherB.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: otherB.PolygonKYCToken.address,
+            },
+            message: {
+              to: otherB.address,
+            },
+          },
+        ]);
+
+        const hashedDataA = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const hashedDataB = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, otherB.address]
+          )
+        );
+
+        const backendSignatureA = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedDataA)
+        );
+
+        const backendSignatureB = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedDataB)
+        );
+
+        await other.PolygonKYCToken.claimKYCToken({
+          to: other.address,
+          signature: signatureA,
+          backendSignature: backendSignatureA,
+        });
+
+        await otherB.PolygonKYCToken.claimKYCToken({
+          to: otherB.address,
+          signature: signatureB,
+          backendSignature: backendSignatureB,
+        });
+
+        const counter = await PolygonKYCToken.getTokenIdCounter();
+        expect(counter).to.eq(2);
+      });
+      it('user cannot claim more than once', async function () {
+        const {
+          other,
+          backendAuthWallet,
+          KYC_TYPEHASH,
+          PolygonKYCToken,
+        } = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const backendSignature = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        const tokenId = await other.PolygonKYCToken.callStatic.claimKYCToken({
+          to: other.address,
+          signature: signature,
+          backendSignature: backendSignature,
+        });
+
+        expect(tokenId).to.eq(1);
+
+        await expect(
+          other.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.not.be.reverted;
+
+        const bal = await PolygonKYCToken.balanceOf(other.address);
+        expect(bal).to.eq(1);
+        await expect(
+          other.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.be.revertedWith('KYCERC721_ISSUED');
+      });
+      it('user cannot claim if signer is not `to`', async function () {
+        const {
+          other,
+          otherB,
+          backendAuthWallet,
+          KYC_TYPEHASH,
+        } = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          otherB.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const backendSignature = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        await expect(
+          otherB.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.be.revertedWith('NOT_TO');
+      });
+      it('user cannot claim with invalid backend sig', async function () {
+        const {other, otherB, KYC_TYPEHASH} = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const signer = await ethers.getSigner(otherB.address);
+
+        const badBackendSignature = await signer.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        await expect(
+          otherB.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: badBackendSignature,
+          })
+        ).to.be.revertedWith('INVALID_AUTH');
+      });
+      it('user cannot claim with a bad typehash', async function () {
+        const {other} = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+
+        const badTypehash = ethers.utils.solidityKeccak256(
+          ['string'],
+          ['BAD_HASH(address to)']
+        );
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [badTypehash, other.address]
+          )
+        );
+
+        const backendSignature = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        await expect(
+          other.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.be.revertedWith('INVALID_AUTH');
+      });
+      it('user cannot claim with a incorrect `to` in message params', async function () {
+        const {other, otherB, KYC_TYPEHASH} = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: otherB.address,
+            },
+          },
+        ]);
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const backendSignature = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        await expect(
+          other.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.be.revertedWith('NOT_SENDER');
       });
     });
   });
