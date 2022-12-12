@@ -16,6 +16,9 @@ export const setupTestPolygonKYCToken = withSnapshot(
     const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER_V2');
     const authValidator = await ethers.getContract('PolygonAuthValidator');
 
+    const sandAdmin = unnamedAccounts[0];
+    const kycAdmin = unnamedAccounts[1];
+
     // Deploy test version of contract
     await deployments.deploy('TestPolygonKYCERC721', {
       from: deployer,
@@ -27,8 +30,8 @@ export const setupTestPolygonKYCToken = withSnapshot(
           methodName: 'initialize',
           // sandAdmin, kycAdmin, trustedForwarder, authValidator, baseUri
           args: [
-            unnamedAccounts[0],
-            unnamedAccounts[1],
+            sandAdmin,
+            kycAdmin,
             trustedForwarder.address,
             authValidator.address,
             testURI,
@@ -46,13 +49,13 @@ export const setupTestPolygonKYCToken = withSnapshot(
     // DEFAULT_ADMIN_ROLE
     const contractAsDefaultAdmin = await ethers.getContract(
       'TestPolygonKYCERC721',
-      unnamedAccounts[0]
+      sandAdmin
     );
 
     // KYC_ROLE
     const contractAsKycRole = await ethers.getContract(
       'TestPolygonKYCERC721',
-      unnamedAccounts[1]
+      kycAdmin
     );
 
     const other = await setupUser(unnamedAccounts[2], {
@@ -67,7 +70,8 @@ export const setupTestPolygonKYCToken = withSnapshot(
       PolygonKYCToken,
       contractAsDefaultAdmin,
       contractAsKycRole,
-      kycAdmin: unnamedAccounts[0],
+      sandAdmin,
+      kycAdmin,
       defaultAdminRole,
       kycRole,
       other,
