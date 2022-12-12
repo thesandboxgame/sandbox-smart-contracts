@@ -7,7 +7,7 @@ import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
-import {accounts, node_url} from './utils/network';
+import {accounts, addGanacheForks, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -414,5 +414,4 @@ const config: HardhatUserConfig = {
     },
   },
 };
-
-export default config;
+export default addGanacheForks(config);

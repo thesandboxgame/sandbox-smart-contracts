@@ -1,6 +1,7 @@
 import 'dotenv/config';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {HardhatRuntimeEnvironment, HardhatUserConfig} from 'hardhat/types';
 import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
+import {HttpNetworkUserConfig} from 'hardhat/src/types/config';
 
 export function node_url(networkName: string): string {
   if (networkName) {
@@ -93,4 +94,71 @@ export function isTest(hre: HardhatRuntimeEnvironment): boolean {
     hre.network.name === 'localhost' ||
     !!process.env.HARDHAT_FORK
   );
+}
+
+export function addGanacheForks(initial: HardhatUserConfig): HardhatUserConfig {
+  const networks = initial.networks || {};
+  const namedAccounts = initial.namedAccounts || {};
+  return {
+    ...initial,
+    namedAccounts: {
+      ...Object.keys(namedAccounts).reduce(
+        (acc, accountName) => ({
+          ...acc,
+          ...{
+            [accountName]:
+              typeof namedAccounts[accountName] === 'string' ||
+              typeof namedAccounts[accountName] === 'number'
+                ? namedAccounts[accountName]
+                : {
+                    ...Object.entries(namedAccounts[accountName]).reduce(
+                      (acc2, [networkName, addr]) => ({
+                        ...acc2,
+                        [networkName]: addr,
+                        [networkName + '_ganache']: addr,
+                      }),
+                      {}
+                    ),
+                  },
+          },
+        }),
+        {}
+      ),
+    },
+    networks: {
+      ...networks,
+      ...Object.keys(networks).reduce(
+        (acc, val) => ({
+          ...acc,
+          [val + '_ganache']: {
+            gasPrice: 20000000000,
+            timeout: 10000000,
+            url:
+              (networks[val] as HttpNetworkUserConfig).url ||
+              'http://localhost:8545',
+            tags: networks[val]?.tags,
+            deploy: networks[val]?.deploy,
+            companionNetworks: networks[val]?.companionNetworks,
+          },
+        }),
+        {}
+      ),
+    },
+    external: {
+      ...initial.external,
+      deployments: {
+        ...initial.external?.deployments,
+        ...Object.keys(networks || {}).reduce(
+          (acc, val: string) => ({
+            ...acc,
+            [val + '_ganache']: [
+              'deployments/' + val + '_ganache',
+              'deployments/' + val,
+            ],
+          }),
+          {}
+        ),
+      },
+    },
+  };
 }
