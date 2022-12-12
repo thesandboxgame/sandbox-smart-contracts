@@ -1,6 +1,8 @@
 import {setupTestPolygonKYCToken} from './fixtures';
 import {expect} from '../../chai-setup';
 import {zeroAddress} from '../../land/fixtures';
+import {ethers} from 'hardhat';
+import {defaultAbiCoder, keccak256, toUtf8Bytes} from 'ethers/lib/utils';
 
 describe('PolygonKYCToken', function () {
   describe('TestPolygonKYCToken', function () {
@@ -21,6 +23,58 @@ describe('PolygonKYCToken', function () {
           kycAdmin,
         } = await setupTestPolygonKYCToken();
         expect(await PolygonKYCToken.hasRole(kycRole, kycAdmin)).to.be.true;
+      });
+    });
+    describe('initialization', function () {
+      it('trusted forwarder is set', async function () {
+        const {
+          PolygonKYCToken,
+          sandAdmin,
+          defaultAdminRole,
+        } = await setupTestPolygonKYCToken();
+        //
+      });
+      it('name and symbol are set', async function () {
+        const {
+          PolygonKYCToken,
+          kycRole,
+          kycAdmin,
+        } = await setupTestPolygonKYCToken();
+        //
+      });
+      it('check the domain separator', async function () {
+        const {PolygonKYCToken} = await setupTestPolygonKYCToken();
+        const typeHash = keccak256(
+          toUtf8Bytes(
+            'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+          )
+        );
+        const hashedName = ethers.utils.keccak256(
+          toUtf8Bytes('Sandbox KYC Token')
+        );
+        const versionHash = ethers.utils.keccak256(toUtf8Bytes('1.0'));
+        const network = await PolygonKYCToken.provider.getNetwork();
+        const domainSeparator = ethers.utils.keccak256(
+          defaultAbiCoder.encode(
+            ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+            [
+              typeHash,
+              hashedName,
+              versionHash,
+              network.chainId,
+              PolygonKYCToken.address,
+            ]
+          )
+        );
+        expect(await PolygonKYCToken.domainSeparator()).to.be.equal(
+          domainSeparator
+        );
+      });
+      it('check the chainId', async function () {
+        const {PolygonKYCToken, hre} = await setupTestPolygonKYCToken();
+        expect(await PolygonKYCToken.getChainId()).to.be.equal(
+          hre.network.config.chainId || 31337 // Polygon || hardhat
+        );
       });
     });
     describe('mint', function () {
@@ -305,6 +359,83 @@ describe('PolygonKYCToken', function () {
         ).to.be.revertedWith(
           `AccessControl: account ${other.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
         );
+      });
+    });
+    describe('claimKYCToken', function () {
+      it('user can claim a KYC token if they provide the correct parameters', async function () {
+        const {
+          other,
+          backendAuthWallet,
+          KYC_TYPEHASH,
+          PolygonKYCToken,
+        } = await setupTestPolygonKYCToken();
+
+        const signature = await ethers.provider.send('eth_signTypedData_v4', [
+          other.address,
+          {
+            types: {
+              EIP712Domain: [
+                {
+                  name: 'name',
+                  type: 'string',
+                },
+                {
+                  name: 'version',
+                  type: 'string',
+                },
+                {
+                  name: 'chainId',
+                  type: 'uint256',
+                },
+                {
+                  name: 'verifyingContract',
+                  type: 'address',
+                },
+              ],
+              KYC: [{name: 'to', type: 'address'}],
+            },
+            primaryType: 'KYC',
+            domain: {
+              name: 'Sandbox KYC Token',
+              version: '1.0',
+              chainId: 31337,
+              verifyingContract: other.PolygonKYCToken.address,
+            },
+            message: {
+              to: other.address,
+            },
+          },
+        ]);
+
+        const hashedData = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address'],
+            [KYC_TYPEHASH, other.address]
+          )
+        );
+
+        const backendSignature = await backendAuthWallet.signMessage(
+          ethers.utils.arrayify(hashedData)
+        );
+
+        const tokenId = await other.PolygonKYCToken.callStatic.claimKYCToken({
+          to: other.address,
+          signature: signature,
+          backendSignature: backendSignature,
+        });
+
+        expect(tokenId).to.eq(1);
+
+        await expect(
+          other.PolygonKYCToken.claimKYCToken({
+            to: other.address,
+            signature: signature,
+            backendSignature: backendSignature,
+          })
+        ).to.not.be.reverted;
+
+        const bal = await PolygonKYCToken.balanceOf(other.address);
+        expect(bal).to.eq(1);
       });
     });
   });

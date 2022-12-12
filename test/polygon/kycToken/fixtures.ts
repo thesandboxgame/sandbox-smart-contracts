@@ -5,10 +5,12 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
+import {constants, Wallet} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
 export const setupTestPolygonKYCToken = withSnapshot(
   ['TRUSTED_FORWARDER_V2', 'PolygonAuthValidator'],
-  async function () {
+  async function (hre) {
     const {deployer, upgradeAdmin} = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
     const testURI = 'testURI/';
@@ -66,6 +68,17 @@ export const setupTestPolygonKYCToken = withSnapshot(
       PolygonKYCToken,
     });
 
+    const zeroAddress = constants.AddressZero;
+
+    const backendAuthWallet = new ethers.Wallet(
+      '0x4242424242424242424242424242424242424242424242424242424242424242'
+    );
+
+    const KYC_TYPEHASH = ethers.utils.solidityKeccak256(
+      ['string'],
+      ['KYC(address to)']
+    );
+
     return {
       PolygonKYCToken,
       contractAsDefaultAdmin,
@@ -77,6 +90,10 @@ export const setupTestPolygonKYCToken = withSnapshot(
       other,
       otherB,
       testURI,
+      hre,
+      zeroAddress,
+      backendAuthWallet,
+      KYC_TYPEHASH,
     };
   }
 );

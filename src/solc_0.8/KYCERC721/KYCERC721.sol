@@ -67,27 +67,32 @@ contract KYCERC721 is
         _baseTokenURI = uri;
     }
 
-    // Modifier for checking backend signature to avoid front-running
+    // Modifier for checking backend signature
     modifier isAuthValid(bytes memory signature, bytes32 hashedData) {
         require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
         _;
     }
 
     /// @notice Claim KYC token using EIP712
+    /// @dev This function checks the backendSignature as well as the user signature
+    /// @dev Users can only claim their own token
     /// @param input ClaimKYCToken
+    /// @return tokenId tokenId that has been minted
     function claimKYCToken(ClaimKYCToken memory input)
         external
-        isAuthValid(input.backendSignature, _hashSig(input.to))
+        isAuthValid(input.backendSignature, _hashBackendSig(input.to))
+        returns (uint256)
     {
         _ensureCorrectSigner(input.signature, input.to);
-        _mintKYCToken(input.to);
+        return _mintKYCToken(input.to);
     }
 
     /// @notice Creates a new token for `to`.
     /// @dev Minting is only permitted to KYC_ROLE.
     /// @param to The address that will receive the new token.
-    function mint(address to) public override(IERC721NonTransferable) onlyRole(KYC_ROLE) {
-        _mintKYCToken(to);
+    /// @return tokenId tokenId that has been minted.
+    function mint(address to) public override(IERC721NonTransferable) onlyRole(KYC_ROLE) returns (uint256) {
+        return _mintKYCToken(to);
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
@@ -186,9 +191,11 @@ contract KYCERC721 is
     /// @notice Internal function to mint the KYC token
     /// @dev The recipient must have a balance of 0 in order for minting to work
     /// @dev No need to pass a tokenId, the tokenId counter is used
-    function _mintKYCToken(address to) internal {
+    /// @return tokenId tokenId that has been minted
+    function _mintKYCToken(address to) internal returns (uint256) {
         require(balanceOf(to) == 0, "KYCERC721_ISSUED");
         _safeMint(to, ++tokenId);
+        return tokenId;
     }
 
     /// @notice Internal function to ensure the user has signed the message
@@ -200,9 +207,14 @@ contract KYCERC721 is
         require(signer == to, "NOT_TO");
     }
 
-    /// @notice Internal function using ECDSAUpgradeable to hash the claim recipient
+    /// @notice Internal function using ECDSAUpgradeable to create a digest
     function _hashSig(address to) internal view returns (bytes32) {
         return _hashTypedDataV4(keccak256(abi.encode(KYC_TYPEHASH, to)));
+    }
+
+    /// @notice Internal function using ECDSAUpgradeable to create a digest
+    function _hashBackendSig(address to) internal pure returns (bytes32) {
+        return keccak256(abi.encode(KYC_TYPEHASH, to));
     }
 
     /// @dev this override is required; two or more base classes define function
