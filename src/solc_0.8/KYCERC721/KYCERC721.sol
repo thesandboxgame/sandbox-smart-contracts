@@ -45,7 +45,7 @@ contract KYCERC721 is
 
     string internal _baseTokenURI;
 
-    IAuthValidator public _authValidator;
+    IAuthValidator internal _authValidator;
 
     // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
@@ -115,6 +115,11 @@ contract KYCERC721 is
     /// @notice View the base for the token URI.
     function baseURI() external view returns (string memory) {
         return _baseURI();
+    }
+
+    /// @notice View the address for _authValidator.
+    function getAuthValidator() external view returns (address) {
+        return address(_authValidator);
     }
 
     /// @notice Query if a contract implements interface `id`.
@@ -212,7 +217,7 @@ contract KYCERC721 is
         return _hashTypedDataV4(keccak256(abi.encode(KYC_TYPEHASH, to)));
     }
 
-    /// @notice Internal function using ECDSAUpgradeable to create a digest
+    /// @notice Internal function to hash the backend signature
     function _hashBackendSig(address to) internal pure returns (bytes32) {
         return keccak256(abi.encode(KYC_TYPEHASH, to));
     }
