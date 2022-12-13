@@ -41,318 +41,13 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         _;
     }
 
-    /**
-     * @notice Return the name of the token contract
-     * @return The name of the token contract
-     */
-    function name() public pure returns (string memory) {
-        return "Sandbox's LANDs";
-    }
-
-    /**
-     * @notice Return the symbol of the token contract
-     * @return The symbol of the token contract
-     */
-    function symbol() public pure returns (string memory) {
-        return "LAND";
-    }
-
-    /// @notice total width of the map
-    /// @return width
-    function width() public pure returns (uint256) {
-        return GRID_SIZE;
-    }
-
-    /// @notice total height of the map
-    /// @return height
-    function height() public pure returns (uint256) {
-        return GRID_SIZE;
-    }
-
-    /// @notice x coordinate of Land token
-    /// @param id tokenId
-    /// @return the x coordinates
-    function getX(uint256 id) external view returns (uint256) {
-        require(_ownerOf(id) != address(0), "token does not exist");
-        return _getX(id);
-    }
-
-    /// @notice y coordinate of Land token
-    /// @param id tokenId
-    /// @return the y coordinates
-    function getY(uint256 id) external view returns (uint256) {
-        require(_ownerOf(id) != address(0), "token does not exist");
-        return _getY(id);
-    }
-
-    function _getX(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) % GRID_SIZE;
-    }
-
-    function _getY(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) / GRID_SIZE;
-    }
-
-    /**
-     * @notice Return the URI of a specific token
-     * @param id The id of the token
-     * @return The URI of the token
-     */
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "Id does not exist");
-        return
-            string(
-                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
-            );
-    }
-
-    /**
-     * @notice Check if the contract supports an interface
-     * 0x01ffc9a7 is ERC-165
-     * 0x80ac58cd is ERC-721
-     * 0x5b5e139f is ERC-721 metadata
-     * @param id The id of the interface
-     * @return True if the interface is supported
-     */
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
-    }
-
-    /**
-     * @notice Checks if a parent quad has child quads already minted.
-     *  Then mints the rest child quads and transfers the parent quad.
-     *  Should only be called by the tunnel.
-     * @param to The recipient of the new quad
-     * @param size The size of the new quad
-     * @param x The top left x coordinate of the new quad
-     * @param y The top left y coordinate of the new quad
-     * @param data extra data to pass to the transfer
-     */
-    function mintAndTransferQuad(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes calldata data
-    ) external virtual {
-        require(isMinter(msg.sender), "!AUTHORIZED");
-
-        if (exists(size, x, y) == true) {
-            _transferQuad(msg.sender, to, size, x, y);
-            _numNFTPerAddress[msg.sender] -= size * size;
-            _numNFTPerAddress[to] += size * size;
-            _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
-        } else {
-            _mintAndTransferQuad(to, size, x, y, data);
-        }
-    }
-
-    function _mintAndTransferQuad(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
-        require(to != address(0), "to is zero address");
-
-        (uint256 layer, , ) = _getQuadLayer(size);
-        uint256 quadId = _getQuadId(layer, x, y);
-        Land[] memory mintedLand = new Land[](64);
-        uint256 index;
-
-        checkAndClearOwner(size, x, y, mintedLand, index, 12);
-
-        for (uint256 i = 0; i < size * size; i++) {
-            uint256 _id = _idInPath(i, size, x, y);
-            uint256 xi = _getX(_id);
-            uint256 yi = _getY(_id);
-            bool isAlreadyMinted = isQuadCheckedForOwner(mintedLand, xi, yi, 1, index);
-            if (isAlreadyMinted) {
-                emit Transfer(msg.sender, to, _id);
-            } else {
-                if (_owners[_id] == uint256(uint160(msg.sender))) {
-                    _owners[_id] = 0;
-                    emit Transfer(msg.sender, to, _id);
-                } else {
-                    require(_owners[_id] == 0, "Already minted");
-                    emit Transfer(address(0), to, _id);
-                }
-            }
-        }
-
-        _owners[quadId] = uint256(uint160(to));
-        _numNFTPerAddress[to] += size * size;
-
-        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
-    }
-
-    function checkAndClearOwner(
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        Land[] memory mintedLand,
-        uint256 index,
-        uint256 quadCompareSize
-    ) internal {
-        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
-        uint256 toX = x + size;
-        uint256 toY = y + size;
-
-        if (size >= quadCompareSize) {
-            for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
-                for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    bool isQuadChecked = isQuadCheckedForOwner(mintedLand, xi, yi, quadCompareSize, index);
-                    if (!isQuadChecked) {
-                        uint256 id = _getQuadId(layer, xi, yi);
-                        address owner = address(uint160(_owners[id]));
-
-                        if (owner == msg.sender) {
-                            mintedLand[index] = Land({x: xi, y: yi, size: quadCompareSize});
-                            index++;
-                            _owners[id] = 0;
-                        } else {
-                            require(owner == address(0), "Already minted");
-                        }
-                    }
-                }
-            }
-        }
-
-        quadCompareSize = quadCompareSize / 2;
-        if (quadCompareSize >= 3) checkAndClearOwner(size, x, y, mintedLand, index, quadCompareSize);
-    }
-
-    function isQuadCheckedForOwner(
-        Land[] memory mintedLand,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 index
-    ) internal pure returns (bool) {
-        for (uint256 i = 0; i <= index; i++) {
-            Land memory land = mintedLand[i];
-            if (land.size != 0 && land.size > size) {
-                if (x >= land.x && x < land.x + land.size) {
-                    if (y >= land.y && y < land.y + land.size) return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
-     * @param user The recipient of the new quad
-     * @param size The size of the new quad
-     * @param x The top left x coordinate of the new quad
-     * @param y The top left y coordinate of the new quad
-     * @param data extra data to pass to the transfer
-     */
-    function mintQuad(
-        address user,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) external virtual override validQuad(size, x, y) {
-        require(isMinter(_msgSender()), "!AUTHORIZED");
-        _mintQuad(user, size, x, y, data);
-    }
-
-    function _mintQuad(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
-        require(to != address(0), "to is zero address");
-
-        (uint256 layer, , ) = _getQuadLayer(size);
-        uint256 quadId = _getQuadId(layer, x, y);
-
-        checkOwner(size, x, y, 24);
-        for (uint256 i = 0; i < size * size; i++) {
-            uint256 _id = _idInPath(i, size, x, y);
-            require(_owners[_id] == 0, "Already minted");
-            emit Transfer(address(0), to, _id);
-        }
-
-        _owners[quadId] = uint256(uint160(to));
-        _numNFTPerAddress[to] += size * size;
-
-        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
-    }
-
-    function _getQuadLayer(uint256 size)
-        internal
-        pure
-        returns (
-            uint256 layer,
-            uint256 parentSize,
-            uint256 childLayer
-        )
-    {
-        if (size == 1) {
-            layer = LAYER_1x1;
-            parentSize = 3;
-        } else if (size == 3) {
-            layer = LAYER_3x3;
-            parentSize = 6;
-        } else if (size == 6) {
-            layer = LAYER_6x6;
-            parentSize = 12;
-            childLayer = LAYER_3x3;
-        } else if (size == 12) {
-            layer = LAYER_12x12;
-            parentSize = 24;
-            childLayer = LAYER_6x6;
-        } else if (size == 24) {
-            layer = LAYER_24x24;
-            childLayer = LAYER_12x12;
-        } else {
-            require(false, "Invalid size");
-        }
-    }
-
-    function _getQuadId(
-        uint256 layer,
-        uint256 x,
-        uint256 y
-    ) internal pure returns (uint256 quadId) {
-        quadId = layer + x + y * GRID_SIZE;
-    }
-
-    function checkOwner(
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        uint256 quadCompareSize
-    ) internal view {
-        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
-
-        if (size <= quadCompareSize) {
-            require(
-                _owners[
-                    _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
-                ] == 0,
-                "Already minted"
-            );
-        } else {
-            uint256 toX = x + size;
-            uint256 toY = y + size;
-            for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
-                for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    require(_owners[_getQuadId(layer, xi, yi)] == 0, "Already minted");
-                }
-            }
-        }
-
-        quadCompareSize = quadCompareSize / 2;
-        if (quadCompareSize >= 3) checkOwner(size, x, y, quadCompareSize);
-    }
-
+    /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param sizes list of sizes for each quad
+    /// @param xs list of top left x coordinates for each quad
+    /// @param ys list of top left y coordinates for each quad
+    /// @param data additional data
     function batchTransferQuad(
         address from,
         address to,
@@ -396,6 +91,23 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         }
     }
 
+    /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(_msgSender() == _admin, "only admin is allowed to add minters");
+        require(minter != address(0), "PolygonLand: Invalid address");
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
+    /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param size size of the quad
+    /// @param x The top left x coordinate of the quad
+    /// @param y The top left y coordinate of the quad
+    /// @param data additional data
     function transferQuad(
         address from,
         address to,
@@ -419,6 +131,54 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
     }
 
+    /**
+     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
+     * @param user The recipient of the new quad
+     * @param size The size of the new quad
+     * @param x The top left x coordinate of the new quad
+     * @param y The top left y coordinate of the new quad
+     * @param data extra data to pass to the transfer
+     */
+    function mintQuad(
+        address user,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) external virtual override validQuad(size, x, y) {
+        require(isMinter(_msgSender()), "!AUTHORIZED");
+        _mintQuad(user, size, x, y, data);
+    }
+
+    /**
+     * @notice Checks if a parent quad has child quads already minted.
+     *  Then mints the rest child quads and transfers the parent quad.
+     *  Should only be called by the tunnel.
+     * @param to The recipient of the new quad
+     * @param size The size of the new quad
+     * @param x The top left x coordinate of the new quad
+     * @param y The top left y coordinate of the new quad
+     * @param data extra data to pass to the transfer
+     */
+    function mintAndTransferQuad(
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes calldata data
+    ) external virtual {
+        require(isMinter(msg.sender), "!AUTHORIZED");
+
+        if (exists(size, x, y) == true) {
+            _transferQuad(msg.sender, to, size, x, y);
+            _numNFTPerAddress[msg.sender] -= size * size;
+            _numNFTPerAddress[to] += size * size;
+            _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
+        } else {
+            _mintAndTransferQuad(to, size, x, y, data);
+        }
+    }
+
     function batchTransferFrom(
         address from,
         address to,
@@ -426,6 +186,47 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         bytes calldata data
     ) public override(ILandToken, ERC721BaseTokenV2) {
         super.batchTransferFrom(from, to, ids, data);
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function getX(uint256 id) external pure returns (uint256) {
+        return _getX(id);
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function getY(uint256 id) external pure returns (uint256) {
+        return _getY(id);
+    }
+
+    /**
+     * @notice Check if the contract supports an interface
+     * 0x01ffc9a7 is ERC-165
+     * 0x80ac58cd is ERC-721
+     * 0x5b5e139f is ERC-721 metadata
+     * @param id The id of the interface
+     * @return True if the interface is supported
+     */
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+    }
+
+    /**
+     * @notice Return the name of the token contract
+     * @return The name of the token contract
+     */
+    function name() public pure returns (string memory) {
+        return "Sandbox's LANDs";
+    }
+
+    /// @notice check whether address `who` is given minter rights.
+    /// @param who The address to query.
+    /// @return whether the address has minter rights.
+    function isMinter(address who) public view returns (bool) {
+        return _minters[who];
     }
 
     /// @notice checks if Land has been minted or not
@@ -441,21 +242,37 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         return _ownerOfQuad(size, x, y) != address(0);
     }
 
-    /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
-    /// @param minter address that will be given/removed minter right.
-    /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external {
-        require(_msgSender() == _admin, "only admin is allowed to add minters");
-        require(minter != address(0), "PolygonLand: Invalid address");
-        _minters[minter] = enabled;
-        emit Minter(minter, enabled);
+    /**
+     * @notice Return the symbol of the token contract
+     * @return The symbol of the token contract
+     */
+    function symbol() public pure returns (string memory) {
+        return "LAND";
     }
 
-    /// @notice check whether address `who` is given minter rights.
-    /// @param who The address to query.
-    /// @return whether the address has minter rights.
-    function isMinter(address who) public view returns (bool) {
-        return _minters[who];
+    /// @notice total width of the map
+    /// @return width
+    function width() public pure returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice total height of the map
+    /// @return height
+    function height() public pure returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /**
+     * @notice Return the URI of a specific token
+     * @param id The id of the token
+     * @return The URI of the token
+     */
+    function tokenURI(uint256 id) public view returns (string memory) {
+        require(_ownerOf(id) != address(0), "Id does not exist");
+        return
+            string(
+                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
+            );
     }
 
     function _transferQuad(
@@ -477,6 +294,242 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         for (uint256 i = 0; i < size * size; i++) {
             emit Transfer(from, to, _idInPath(i, size, x, y));
         }
+    }
+
+    function _mintQuad(
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        require(to != address(0), "to is zero address");
+
+        (uint256 layer, , ) = _getQuadLayer(size);
+        uint256 quadId = _getQuadId(layer, x, y);
+
+        _checkOwner(size, x, y, 24);
+        for (uint256 i = 0; i < size * size; i++) {
+            uint256 _id = _idInPath(i, size, x, y);
+            require(_owners[_id] == 0, "Already minted");
+            emit Transfer(address(0), to, _id);
+        }
+
+        _owners[quadId] = uint256(uint160(to));
+        _numNFTPerAddress[to] += size * size;
+
+        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+    }
+
+    function _mintAndTransferQuad(
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        require(to != address(0), "to is zero address");
+
+        (uint256 layer, , ) = _getQuadLayer(size);
+        uint256 quadId = _getQuadId(layer, x, y);
+
+        // Length of array is equal to number of 3x3 child quad a 24x24 quad can have
+        Land[] memory quadMinted = new Land[](64);
+        uint256 index;
+        uint256 landMinted;
+
+        if (size > 3)
+            (index, landMinted) = _checkAndClearOwner(
+                Land({x: x, y: y, size: size}),
+                quadMinted,
+                landMinted,
+                index,
+                size / 2
+            );
+
+        for (uint256 i = 0; i < size * size; i++) {
+            uint256 _id = _idInPath(i, size, x, y);
+            uint256 xi = _getX(_id);
+            uint256 yi = _getY(_id);
+            bool isAlreadyMinted = _isQuadMinted(quadMinted, xi, yi, 1, index);
+            if (isAlreadyMinted) {
+                emit Transfer(msg.sender, to, _id);
+            } else {
+                if (_owners[_id] == uint256(uint160(msg.sender))) {
+                    _owners[_id] = 0;
+                    landMinted += 1;
+                    emit Transfer(msg.sender, to, _id);
+                } else {
+                    require(_owners[_id] == 0, "Already minted");
+                    emit Transfer(address(0), to, _id);
+                }
+            }
+        }
+
+        _owners[quadId] = uint256(uint160(to));
+        _numNFTPerAddress[to] += size * size;
+        _numNFTPerAddress[msg.sender] -= landMinted;
+
+        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+    }
+
+    function _checkAndClearOwner(
+        Land memory land,
+        Land[] memory quadMinted,
+        uint256 landMinted,
+        uint256 index,
+        uint256 quadCompareSize
+    ) internal returns (uint256, uint256) {
+        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
+        uint256 toX = land.x + land.size;
+        uint256 toY = land.y + land.size;
+
+        for (uint256 xi = land.x; xi < toX; xi += quadCompareSize) {
+            for (uint256 yi = land.y; yi < toY; yi += quadCompareSize) {
+                bool isQuadChecked = _isQuadMinted(quadMinted, xi, yi, quadCompareSize, index);
+                if (!isQuadChecked) {
+                    uint256 id = _getQuadId(layer, xi, yi);
+                    address owner = address(uint160(_owners[id]));
+
+                    if (owner == msg.sender) {
+                        quadMinted[index] = Land({x: xi, y: yi, size: quadCompareSize});
+                        index++;
+                        landMinted += quadCompareSize * quadCompareSize;
+                        _owners[id] = 0;
+                    } else {
+                        require(owner == address(0), "Already minted");
+                    }
+                }
+            }
+        }
+
+        quadCompareSize = quadCompareSize / 2;
+        if (quadCompareSize >= 3)
+            (index, landMinted) = _checkAndClearOwner(land, quadMinted, landMinted, index, quadCompareSize);
+        return (index, landMinted);
+    }
+
+    function _checkAndClear(address from, uint256 id) internal returns (bool) {
+        uint256 owner = _owners[id];
+        if (owner != 0) {
+            require((owner & BURNED_FLAG) != BURNED_FLAG, "not owner");
+            require(address(uint160(owner)) == from, "not owner");
+            _owners[id] = 0;
+            return true;
+        }
+        return false;
+    }
+
+    function _checkBatchReceiverAcceptQuad(
+        address operator,
+        address from,
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            uint256[] memory ids = new uint256[](size * size);
+            for (uint256 i = 0; i < size * size; i++) {
+                ids[i] = _idInPath(i, size, x, y);
+            }
+            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
+        }
+    }
+
+    function _getX(uint256 id) internal pure returns (uint256) {
+        return ((id << 8) >> 8) % GRID_SIZE;
+    }
+
+    function _getY(uint256 id) internal pure returns (uint256) {
+        return ((id << 8) >> 8) / GRID_SIZE;
+    }
+
+    function _isQuadMinted(
+        Land[] memory mintedLand,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        uint256 index
+    ) internal pure returns (bool) {
+        for (uint256 i = 0; i <= index; i++) {
+            Land memory land = mintedLand[i];
+            if (land.size > size) {
+                if (x >= land.x && x < land.x + land.size) {
+                    if (y >= land.y && y < land.y + land.size) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function _getQuadLayer(uint256 size)
+        internal
+        pure
+        returns (
+            uint256 layer,
+            uint256 parentSize,
+            uint256 childLayer
+        )
+    {
+        if (size == 1) {
+            layer = LAYER_1x1;
+            parentSize = 3;
+        } else if (size == 3) {
+            layer = LAYER_3x3;
+            parentSize = 6;
+        } else if (size == 6) {
+            layer = LAYER_6x6;
+            parentSize = 12;
+            childLayer = LAYER_3x3;
+        } else if (size == 12) {
+            layer = LAYER_12x12;
+            parentSize = 24;
+            childLayer = LAYER_6x6;
+        } else if (size == 24) {
+            layer = LAYER_24x24;
+            childLayer = LAYER_12x12;
+        } else {
+            require(false, "Invalid size");
+        }
+    }
+
+    function _getQuadId(
+        uint256 layer,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (uint256 quadId) {
+        quadId = layer + x + y * GRID_SIZE;
+    }
+
+    function _checkOwner(
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        uint256 quadCompareSize
+    ) internal view {
+        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
+
+        if (size <= quadCompareSize) {
+            require(
+                _owners[
+                    _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
+                ] == 0,
+                "Already minted"
+            );
+        } else {
+            uint256 toX = x + size;
+            uint256 toY = y + size;
+            for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
+                for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
+                    require(_owners[_getQuadId(layer, xi, yi)] == 0, "Already minted");
+                }
+            }
+        }
+
+        quadCompareSize = quadCompareSize / 2;
+        if (quadCompareSize >= 3) _checkOwner(size, x, y, quadCompareSize);
     }
 
     function _idInPath(
@@ -504,13 +557,13 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
         if (size == 3 || size == 6 || size == 12 || size == 24) {
-            regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
+            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         } else {
             require(false, "Invalid size");
         }
     }
 
-    function regroupQuad(
+    function _regroupQuad(
         address from,
         address to,
         Land memory land,
@@ -529,7 +582,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                     if (childQuadSize < 3) {
                         ownAllIndividual = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
                     } else {
-                        ownAllIndividual = regroupQuad(
+                        ownAllIndividual = _regroupQuad(
                             from,
                             to,
                             Land({x: xi, y: yi, size: childQuadSize}),
@@ -611,35 +664,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             return (owner1x1 & BURNED_FLAG) == BURNED_FLAG ? address(0) : _ownerOfQuad(size, x, y);
         }
         return _ownerOfQuad(size, x, y);
-    }
-
-    function _checkAndClear(address from, uint256 id) internal returns (bool) {
-        uint256 owner = _owners[id];
-        if (owner != 0) {
-            require((owner & BURNED_FLAG) != BURNED_FLAG, "not owner");
-            require(address(uint160(owner)) == from, "not owner");
-            _owners[id] = 0;
-            return true;
-        }
-        return false;
-    }
-
-    function _checkBatchReceiverAcceptQuad(
-        address operator,
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            uint256[] memory ids = new uint256[](size * size);
-            for (uint256 i = 0; i < size * size; i++) {
-                ids[i] = _idInPath(i, size, x, y);
-            }
-            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
-        }
     }
 
     function _ownerAndOperatorEnabledOf(uint256 id)
