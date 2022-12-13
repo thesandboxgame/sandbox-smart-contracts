@@ -5,7 +5,7 @@ import {
   getLandSales,
   LandSale,
   setAsLandMinter,
-  writeProofs,
+  writeProofs
 } from '../../data/landSales/getLandSales';
 
 type SaleDeployment = {
