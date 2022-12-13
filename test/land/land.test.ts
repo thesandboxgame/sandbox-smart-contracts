@@ -284,17 +284,6 @@ describe('LandV3', function () {
       expect(y).to.be.equal(0);
     });
 
-    it('should revert if quad is not minted', async function () {
-      const {landContract} = await setupLand();
-      const id = getId(4, 0, 0);
-      await expect(landContract.getX(id)).to.be.revertedWith(
-        'token does not exist'
-      );
-      await expect(landContract.getY(id)).to.be.revertedWith(
-        'token does not exist'
-      );
-    });
-
     it('should revert when to address is zero', async function () {
       const {mintQuad} = await setupLand();
       await expect(mintQuad(zeroAddress, 3, 0, 0)).to.be.revertedWith(
