@@ -155,10 +155,18 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     }
 
     /// @notice Purchase StarterPacks with SAND
+    /// @dev The buyer param is duplicated outside the message so the function is compatible with Sand approveAndCall
+    /// @dev The buyer param is included inside the message so it is clear it is part of the message to be signed
+    /// @dev If Sand amount is not approved then Sand amount will fail in Sand transferFrom
+    /// @param buyer The recipient of the Catalysts and Gems to be purchased
     /// @param message A message containing information about the Catalysts and Gems to be purchased together with the destination (buyer) and a nonce
     /// @param signature A signed message specifying tx details
-    function purchaseWithSAND(Message calldata message, bytes calldata signature) external {
-        require(message.buyer == _msgSender(), "INVALID_SENDER");
+    function purchaseWithSAND(
+        address buyer,
+        Message calldata message,
+        bytes calldata signature
+    ) external {
+        require(buyer == message.buyer, "INVALID_BUYER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(
             _isPurchaseValid(
@@ -172,7 +180,6 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
             ),
             "INVALID_PURCHASE"
         );
-
         uint256 amountInSAND =
             _calculateTotalPriceInSAND(
                 message.catalystIds,
@@ -206,6 +213,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         )
     {
         uint256 switchTime = 0;
+        // check whether any prices have been set; return switchTime = 0 if prices were never set
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + PRICE_CHANGE_DELAY;
         }
@@ -255,7 +263,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint256[] memory catalystQuantities,
         uint16[] memory gemIds,
         uint256[] memory gemQuantities
-    ) external returns (uint256) {
+    ) external view returns (uint256) {
         return _calculateTotalPriceInSAND(catalystIds, catalystQuantities, gemIds, gemQuantities);
     }
 
@@ -323,11 +331,11 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         uint256[] memory catalystQuantities,
         uint16[] memory gemIds,
         uint256[] memory gemQuantities
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         require(catalystIds.length == catalystQuantities.length, "INVALID_CAT_INPUT");
         require(gemIds.length == gemQuantities.length, "INVALID_GEM_INPUT");
-        bool useCurrentPrices = _priceSelector();
         uint256 totalPrice;
+        bool useCurrentPrices = _priceSelector();
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint16 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
@@ -345,23 +353,9 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         return totalPrice;
     }
 
-    /// @dev Function to determine whether to use previous or current prices
-    function _priceSelector() internal returns (bool) {
-        bool useCurrentPrices;
-        // No price change
-        if (_priceChangeTimestamp == 0) {
-            useCurrentPrices = true;
-        } else {
-            // Price change delay has expired: use current prices
-            if (block.timestamp > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
-                _priceChangeTimestamp = 0;
-                useCurrentPrices = true;
-            } else {
-                // Price change has recently occured: use previous prices until price change takes effect
-                useCurrentPrices = false;
-            }
-        }
-        return (useCurrentPrices);
+    /// @dev Function to determine whether to purchase with previous or current prices
+    function _priceSelector() internal view returns (bool) {
+        return block.timestamp >= _priceChangeTimestamp + PRICE_CHANGE_DELAY;
     }
 
     /// @dev Function to handle purchase with SAND
