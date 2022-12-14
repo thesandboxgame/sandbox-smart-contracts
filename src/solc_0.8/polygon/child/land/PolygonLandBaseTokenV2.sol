@@ -453,7 +453,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size,
         uint256 index
     ) internal pure returns (bool) {
-        for (uint256 i = 0; i <= index; i++) {
+        for (uint256 i = 0; i < index; i++) {
             Land memory land = mintedLand[i];
             if (land.size > size) {
                 if (x >= land.x && x < land.x + land.size) {

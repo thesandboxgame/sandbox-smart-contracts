@@ -476,7 +476,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 size,
         uint256 index
     ) internal pure returns (bool) {
-        for (uint256 i = 0; i <= index; i++) {
+        for (uint256 i = 0; i < index; i++) {
             Land memory land = mintedLand[i];
             if (land.size > size) {
                 if (x >= land.x && x < land.x + land.size) {
