@@ -463,9 +463,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 row = i / size;
         if (row % 2 == 0) {
             // allow ids to follow a path in a quad
-            return (x + (i % size)) + ((y + row) * GRID_SIZE);
+             return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
         } else {
-            return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
+            return _getQuadId(LAYER_1x1,(x + size) - (1 + (i % size)),(y + row));
         }
     }
 
