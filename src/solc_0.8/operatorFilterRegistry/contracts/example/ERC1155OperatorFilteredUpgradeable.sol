@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "./upgradeable/MockDefaultOperatorFiltererUpgradeable.sol";
@@ -64,5 +64,9 @@ contract ERC1155OperatorFilteredUpgradeable is
 
     function setApprovalForAllWithOutFilter(address operator, bool approved) public virtual {
         _setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    function owner() public view override(MockOperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
     }
 }
