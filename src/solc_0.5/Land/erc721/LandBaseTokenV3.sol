@@ -420,7 +420,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                     uint256 ownerChild;
                     bool ownAllIndividual;
                     if (childQuadSize < 3) {
-                        ownAllIndividual = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;
+                        ownAllIndividual = _checkAndClear(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
                     } else {
                         ownAllIndividual = _regroupQuad(
                             from,
