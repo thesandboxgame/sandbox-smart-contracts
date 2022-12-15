@@ -34,6 +34,9 @@ const setupOperatorFilter = withSnapshot(
     const OperatorFilterRegistryAsOwner = await OperatorFilterRegistry.connect(
       await ethers.getSigner(deployer)
     );
+    const TestERC1155AsOwner = await TestERC1155.connect(
+      await ethers.getSigner(deployer)
+    );
 
     return {
       MockMarketPlace1,
@@ -43,6 +46,7 @@ const setupOperatorFilter = withSnapshot(
       GenerateCodeHash,
       OperatorFilterRegistry,
       TestERC1155,
+      TestERC1155AsOwner,
       OperatorFilterRegistryAsOwner,
       users,
     };
@@ -229,6 +233,39 @@ describe('Operator filterer', function () {
         await OperatorFilterRegistry.isRegistered(TestERC1155.address)
       ).to.be.equal(false);
     });
+
+    it('owner can set the operator registry address', async function () {
+      const {TestERC1155, TestERC1155AsOwner} = await setupOperatorFilter();
+
+      await TestERC1155AsOwner.updateOperatorFilterRegistryAddress(
+        TestERC1155.address
+      );
+
+      expect(await TestERC1155.operatorFilterRegistry()).to.be.equal(
+        TestERC1155.address
+      );
+    });
+
+    it('only owner can set the operator registry address', async function () {
+      const {TestERC1155} = await setupOperatorFilter();
+
+      await expect(
+        TestERC1155.updateOperatorFilterRegistryAddress(TestERC1155.address)
+      ).to.be.revertedWith('Only Owner');
+    });
+
+    it('owner can revoke the operator registry', async function () {
+      const {TestERC1155AsOwner, TestERC1155} = await setupOperatorFilter();
+
+      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
+
+      await expect(
+        TestERC1155AsOwner.updateOperatorFilterRegistryAddress(
+          TestERC1155.address
+        )
+      ).to.be.revertedWith('Registry has been revoked');
+    });
+
     it('owner can remove market places from Blacklist', async function () {
       const {
         MockMarketPlace1,
@@ -561,6 +598,124 @@ describe('Operator filterer', function () {
         MockMarketPlace1.address,
         false
       );
+
+      await MockMarketPlace1.transferToken(
+        TestERC1155.address,
+        users[0].address,
+        users[1].address,
+        1,
+        2,
+        '0x'
+      );
+
+      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
+    });
+
+    it('Should be able to approve after blacklisted Marketplaces operator registry is set to zero Address', async function () {
+      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
+        await setupOperatorFilter();
+
+      await expect(
+        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
+      ).to.be.reverted;
+
+      await TestERC1155AsOwner.updateOperatorFilterRegistryAddress(zeroAddress);
+
+      await users[0].TestERC1155.setApprovalForAll(
+        MockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await TestERC1155.isApprovedForAll(
+          users[0].address,
+          MockMarketPlace1.address
+        )
+      ).to.be.equals(true);
+    });
+
+    it('Should  be able to transfer Token through blacklisted marketplace after operator registry is revoked', async function () {
+      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
+        await setupOperatorFilter();
+
+      await TestERC1155.mint(users[0].address, 1, 2, '0x');
+
+      await users[0].TestERC1155.setApprovalForAllWithOutFilter(
+        MockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        MockMarketPlace1.transferToken(
+          TestERC1155.address,
+          users[0].address,
+          users[1].address,
+          1,
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+
+      await TestERC1155AsOwner.updateOperatorFilterRegistryAddress(zeroAddress);
+
+      await MockMarketPlace1.transferToken(
+        TestERC1155.address,
+        users[0].address,
+        users[1].address,
+        1,
+        2,
+        '0x'
+      );
+
+      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
+    });
+
+    it('Should be able to approve after blacklisted Marketplaces operator registry is revoked', async function () {
+      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
+        await setupOperatorFilter();
+
+      await expect(
+        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
+      ).to.be.reverted;
+
+      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
+
+      await users[0].TestERC1155.setApprovalForAll(
+        MockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await TestERC1155.isApprovedForAll(
+          users[0].address,
+          MockMarketPlace1.address
+        )
+      ).to.be.equals(true);
+    });
+
+    it('Should  be able to transfer Token through blacklisted marketplace after operator registry is set to zero Address', async function () {
+      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
+        await setupOperatorFilter();
+
+      await TestERC1155.mint(users[0].address, 1, 2, '0x');
+
+      await users[0].TestERC1155.setApprovalForAllWithOutFilter(
+        MockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        MockMarketPlace1.transferToken(
+          TestERC1155.address,
+          users[0].address,
+          users[1].address,
+          1,
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+
+      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
 
       await MockMarketPlace1.transferToken(
         TestERC1155.address,
