@@ -541,9 +541,9 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 row = i / size;
         if (row % 2 == 0) {
             // allow ids to follow a path in a quad
-            return (x + (i % size)) + ((y + row) * GRID_SIZE);
+            return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
         } else {
-            return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
+            return _getQuadId(LAYER_1x1, (x + size) - (1 + (i % size)), (y + row));
         }
     }
 
