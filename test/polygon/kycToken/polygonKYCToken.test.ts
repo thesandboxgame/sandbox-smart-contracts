@@ -334,7 +334,7 @@ describe('PolygonKYCToken', function () {
         const tokenID = 1;
         await contractAsKycRole['mint(address)'](other.address);
         const uri = await PolygonKYCToken.tokenURI(1);
-        expect(uri).to.be.equal(`${testURI}${tokenID}`);
+        expect(uri).to.be.equal(`${testURI}${tokenID}.json`);
       });
       it('cannot view token uri if token id does not exist', async function () {
         const {PolygonKYCToken} = await setupTestPolygonKYCToken();

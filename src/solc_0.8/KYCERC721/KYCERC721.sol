@@ -102,7 +102,7 @@ contract KYCERC721 is
         require(ownerOf(tokenId) != address(0), "ZERO_ADDRESS");
         require(_exists(tokenId), "INVALID_TOKEN");
         string memory uri = _baseURI();
-        return bytes(uri).length > 0 ? string(abi.encodePacked(uri, tokenId.toString())) : "";
+        return bytes(uri).length > 0 ? string(abi.encodePacked(uri, tokenId.toString(), ".json")) : "";
     }
 
     /// @notice Set the base for the token URI.
