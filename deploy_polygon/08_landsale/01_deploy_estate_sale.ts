@@ -20,8 +20,10 @@ type SaleDeployment = {
 
 const sales: SaleDeployment[] = [
   // {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
-  {name: 'LandPreSale_19'},
-  {name: 'LandPreSale_20'},
+  {name: 'LandPreSale_19', skip: async () => true},
+  {name: 'LandPreSale_20', skip: async () => true},
+  {name: 'LandPreSale_21', skip: async () => true},
+  {name: 'LandPreSale_22', skip: async () => false},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -43,29 +45,32 @@ const func: DeployFunction = async function (hre) {
     const {lands, merkleRootHash, sector} = landSale;
     const landSaleName = `${name}_${sector}`;
     const deadline = getDeadline(hre, sector);
-    const landSaleDeployment = await deploy(`PolygonLandPreSale_${sector}`, {
-      from: deployer,
-      linkedData: lands,
-      contract: 'EstateSaleWithAuth',
-      args: [
-        landContract.address,
-        sandContract.address,
-        sandContract.address,
-        landSaleAdmin,
-        landSaleBeneficiary,
-        merkleRootHash,
-        deadline,
-        backendReferralWallet,
-        2000,
-        '0x0000000000000000000000000000000000000000',
-        assetContract.address,
-        landSaleFeeRecipient,
-        authValidatorContract.address,
-      ],
-      skipIfAlreadyDeployed: true,
-      log: true,
-    });
-    writeProofs(hre, landSaleName, landSale);
+    const deployName = `PolygonLandPreSale_${sector}`;
+    let landSaleDeployment = await deployments.getOrNull(deployName);
+    if (!landSaleDeployment) {
+      landSaleDeployment = await deploy(deployName, {
+        from: deployer,
+        linkedData: lands,
+        contract: 'EstateSaleWithAuth',
+        args: [
+          landContract.address,
+          sandContract.address,
+          sandContract.address,
+          landSaleAdmin,
+          landSaleBeneficiary,
+          merkleRootHash,
+          deadline,
+          backendReferralWallet,
+          2000,
+          '0x0000000000000000000000000000000000000000',
+          assetContract.address,
+          landSaleFeeRecipient,
+          authValidatorContract.address,
+        ],
+        log: true,
+      });
+      writeProofs(hre, landSaleName, landSale);
+    }
     await setAsLandMinter(hre, landSaleDeployment.address, 'PolygonLand');
   }
 
