@@ -1762,7 +1762,7 @@ describe('PolygonLand', function () {
           trustedForwarder,
           data,
           landHolder.address,
-          '2000000'
+          '1000000000'
         );
 
         console.log('DUMMY CHECKPOINT. moving on...');
