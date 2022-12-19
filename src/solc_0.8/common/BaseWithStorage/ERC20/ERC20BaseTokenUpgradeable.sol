@@ -50,11 +50,7 @@ abstract contract ERC20BaseTokenUpgradeable is
     /// @param to The recipient address of the tokensbeing  transfered.
     /// @param amount The number of tokens transfered.
     /// @return success Whether or not the transfer succeeded.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external override returns (bool success) {
+    function transferFrom(address from, address to, uint256 amount) external override returns (bool success) {
         if (_msgSender() != from && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
@@ -161,11 +157,7 @@ abstract contract ERC20BaseTokenUpgradeable is
     }
 
     /// @dev See addAllowanceIfNeeded.
-    function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal virtual override {
+    function _addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) internal virtual override {
         if (amountNeeded > 0 && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -175,22 +167,14 @@ abstract contract ERC20BaseTokenUpgradeable is
     }
 
     /// @dev See approveFor.
-    function _approveFor(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual override {
+    function _approveFor(address owner, address spender, uint256 amount) internal virtual override {
         require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
     /// @dev See transfer.
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
+    function _transfer(address from, address to, uint256 amount) internal virtual override {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(to != address(this), "NOT_TO_THIS");
         uint256 currentBalance = _balances[from];

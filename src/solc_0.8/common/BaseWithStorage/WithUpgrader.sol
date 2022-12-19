@@ -24,7 +24,7 @@ contract WithUpgrader is WithAdmin {
 
     /// @dev Change the upgrader to be `newUpgrader`.
     /// @param newUpgrader The address of the new upgrader.
-    function changeUpgrader(address newUpgrader) external onlyAdmin() {
+    function changeUpgrader(address newUpgrader) external onlyAdmin {
         emit UpgraderChanged(_upgrader, newUpgrader);
         _upgrader = newUpgrader;
     }

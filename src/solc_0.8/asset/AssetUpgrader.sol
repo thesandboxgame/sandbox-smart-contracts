@@ -104,12 +104,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param assetId tokenId of the Asset to which the gems will be added to.
     /// @param gemIds list of gems to socket into the existing catalyst (burned).
     /// @param to destination address receiving the extracted and upgraded ERC721 Asset token.
-    function addGems(
-        address from,
-        uint256 assetId,
-        uint16[] calldata gemIds,
-        address to
-    ) external override {
+    function addGems(address from, uint256 assetId, uint16[] calldata gemIds, address to) external override {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _addGems(from, assetId, gemIds, to);
@@ -159,12 +154,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param assetId The asset to add gems to.
     /// @param gemIds An array of gemIds to add to the asset.
     /// @param to The address to transfer the asset to after adding gems.
-    function _addGems(
-        address from,
-        uint256 assetId,
-        uint16[] memory gemIds,
-        address to
-    ) internal {
+    function _addGems(address from, uint256 assetId, uint16[] memory gemIds, address to) internal {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
         _burnGems(from, gemIds);
         _chargeSand(from, gemAdditionFee);
@@ -176,12 +166,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param from The address to transfer the asset from.
     /// @param to The address to transfer the asset to.
     /// @param assetId The asset to transfer.
-    function _transfer(
-        address from,
-        address to,
-        uint256 assetId,
-        bool isERC1155
-    ) internal {
+    function _transfer(address from, address to, uint256 assetId, bool isERC1155) internal {
         if (isERC1155) {
             if (from != to) {
                 _assetERC1155.safeTransferFrom(from, to, assetId, 1, "");
@@ -203,7 +188,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     function _burnGems(address from, uint16[] memory gemIds) internal {
         uint256[] memory gemFactors = new uint256[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            gemFactors[i] = 10**_gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
+            gemFactors[i] = 10 ** _gemsCatalystsRegistry.getGemDecimals(gemIds[i]);
         }
         _gemsCatalystsRegistry.batchBurnGems(from, gemIds, gemFactors);
     }
@@ -212,7 +197,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param from The owner of the catalyst.
     /// @param catalystId The catalyst type to burn.
     function _burnCatalyst(address from, uint16 catalystId) internal {
-        uint256 catalystFactor = 10**_gemsCatalystsRegistry.getCatalystDecimals(catalystId);
+        uint256 catalystFactor = 10 ** _gemsCatalystsRegistry.getCatalystDecimals(catalystId);
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, catalystFactor);
     }
 

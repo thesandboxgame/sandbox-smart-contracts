@@ -6,12 +6,8 @@ export const periodicSetup = withSnapshot([], async function (hre) {
   const durationInSeconds = 28 * 24 * 60 * 60;
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
-  const [
-    admin,
-    rewardPool,
-    rewardDistribution,
-    other,
-  ] = await getUnnamedAccounts();
+  const [admin, rewardPool, rewardDistribution, other] =
+    await getUnnamedAccounts();
 
   // Taken from 01_deploy_mock_land_with_mint.ts
   await deployments.deploy(contractName, {
@@ -47,12 +43,8 @@ export const twoPeriodsSetup = withSnapshot([], async function (hre) {
   const contractName = 'TwoPeriodsRewardCalculator';
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
-  const [
-    admin,
-    rewardPool,
-    rewardDistribution,
-    other,
-  ] = await getUnnamedAccounts();
+  const [admin, rewardPool, rewardDistribution, other] =
+    await getUnnamedAccounts();
 
   // Taken from 01_deploy_mock_land_with_mint.ts
   await deployments.deploy(contractName, {

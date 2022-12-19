@@ -45,8 +45,8 @@ contract LandContributionCalculator is IContributionCalculator, Ownable {
         if (numLands == 0) {
             return amountStaked;
         }
-        uint256 nftContrib =
-            NFT_FACTOR_6 * (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((numLands - 1) * ROOT3_FACTOR) + 1)));
+        uint256 nftContrib = NFT_FACTOR_6 *
+            (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((numLands - 1) * ROOT3_FACTOR) + 1)));
         if (nftContrib > MIDPOINT_9) {
             nftContrib = MIDPOINT_9 + (nftContrib - MIDPOINT_9) / 10;
         }

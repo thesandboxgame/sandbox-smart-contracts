@@ -5,19 +5,9 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import {ERC1155Receiver} from "@openzeppelin/contracts-0.8/token/ERC1155/utils/ERC1155Receiver.sol";
 
 interface IMintableERC1155 is IERC1155 {
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes calldata data
-    ) external;
+    function mint(address account, uint256 id, uint256 amount, bytes calldata data) external;
 
-    function mintBatch(
-        address to,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata data
-    ) external;
+    function mintBatch(address to, uint256[] calldata ids, uint256[] calldata amounts, bytes calldata data) external;
 }
 
 /// @dev This is NOT a secure ChildChainManager contract implementation!
@@ -39,16 +29,13 @@ contract FakeERC1155Predicate is ERC1155Receiver {
         IMintableERC1155(asset).safeBatchTransferFrom(depositor, address(this), ids, amounts, data);
     }
 
-    function exitTokens(
-        address withdrawer,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public {
+    function exitTokens(address withdrawer, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public {
         IMintableERC1155 token = IMintableERC1155(asset);
         uint256[] memory balances = token.balanceOfBatch(makeArrayWithAddress(address(this), ids.length), ids);
-        (uint256[] memory toBeMinted, bool needMintStep, bool needTransferStep) =
-            calculateAmountsToBeMinted(balances, amounts);
+        (uint256[] memory toBeMinted, bool needMintStep, bool needTransferStep) = calculateAmountsToBeMinted(
+            balances,
+            amounts
+        );
         if (needMintStep) {
             token.mintBatch(
                 withdrawer,
@@ -68,15 +55,10 @@ contract FakeERC1155Predicate is ERC1155Receiver {
         }
     }
 
-    function calculateAmountsToBeMinted(uint256[] memory balances, uint256[] memory exitAmounts)
-        internal
-        pure
-        returns (
-            uint256[] memory,
-            bool,
-            bool
-        )
-    {
+    function calculateAmountsToBeMinted(
+        uint256[] memory balances,
+        uint256[] memory exitAmounts
+    ) internal pure returns (uint256[] memory, bool, bool) {
         uint256 count = balances.length;
         require(count == exitAmounts.length, "ChainExitERC1155Predicate: Array length mismatch found");
         uint256[] memory toBeMinted = new uint256[](count);

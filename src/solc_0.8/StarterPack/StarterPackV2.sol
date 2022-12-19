@@ -173,13 +173,12 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
             "INVALID_PURCHASE"
         );
 
-        uint256 amountInSAND =
-            _calculateTotalPriceInSAND(
-                message.catalystIds,
-                message.catalystQuantities,
-                message.gemIds,
-                message.gemQuantities
-            );
+        uint256 amountInSAND = _calculateTotalPriceInSAND(
+            message.catalystIds,
+            message.catalystQuantities,
+            message.gemIds,
+            message.gemQuantities
+        );
         _transferSANDPayment(message.buyer, _wallet, amountInSAND);
         _transferCatalysts(message.catalystIds, message.catalystQuantities, message.buyer);
         _transferGems(message.gemIds, message.gemQuantities, message.buyer);
@@ -194,17 +193,10 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     /// @return gemPricesBeforeSwitch Gem prices before price change
     /// @return gemPricesAfterSwitch Gem prices after price change
     /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
-    function getPrices(uint16[] calldata catalystIds, uint16[] calldata gemIds)
-        external
-        view
-        returns (
-            uint256[] memory,
-            uint256[] memory,
-            uint256[] memory,
-            uint256[] memory,
-            uint256
-        )
-    {
+    function getPrices(
+        uint16[] calldata catalystIds,
+        uint16[] calldata gemIds
+    ) external view returns (uint256[] memory, uint256[] memory, uint256[] memory, uint256[] memory, uint256) {
         uint256 switchTime = 0;
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + PRICE_CHANGE_DELAY;
@@ -271,11 +263,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         }
     }
 
-    function _transferGems(
-        uint16[] memory gemIds,
-        uint256[] memory gemQuantities,
-        address buyer
-    ) internal {
+    function _transferGems(uint16[] memory gemIds, uint256[] memory gemQuantities, address buyer) internal {
         for (uint256 i = 0; i < gemIds.length; i++) {
             uint16 id = gemIds[i];
             require(_isValidGem(id), "INVALID_GEM_ID");
@@ -283,21 +271,11 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
         }
     }
 
-    function _executeRegistryTransferCatalyst(
-        ICatalyst catalyst,
-        address from,
-        address to,
-        uint256 quantity
-    ) private {
+    function _executeRegistryTransferCatalyst(ICatalyst catalyst, address from, address to, uint256 quantity) private {
         require(catalyst.transferFrom(from, to, quantity), "CATALYST_TRANSFER_FAILED");
     }
 
-    function _executeRegistryTransferGem(
-        IGem gem,
-        address from,
-        address to,
-        uint256 quantity
-    ) private {
+    function _executeRegistryTransferGem(IGem gem, address from, address to, uint256 quantity) private {
         require(gem.transferFrom(from, to, quantity), "GEM_TRANSFER_FAILED");
     }
 
@@ -365,11 +343,7 @@ contract StarterPackV2 is AccessControl, PurchaseValidator, ERC2771HandlerV2 {
     }
 
     /// @dev Function to handle purchase with SAND
-    function _transferSANDPayment(
-        address buyer,
-        address payable paymentRecipient,
-        uint256 amount
-    ) internal {
+    function _transferSANDPayment(address buyer, address payable paymentRecipient, uint256 amount) internal {
         uint256 amountForDestination = amount;
         require(IERC20(_sand).transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
     }

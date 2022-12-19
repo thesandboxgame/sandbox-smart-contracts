@@ -155,13 +155,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -214,13 +209,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -377,13 +367,8 @@ describe('Multi_Giveaway_V2', function () {
         mint: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -540,13 +525,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       const userProofs = [];
       const userTrees = [];
@@ -664,13 +644,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.erc20.amounts[0] = 250; // bad param
@@ -705,13 +680,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       const userProofs = [];
       const userTrees = [];
@@ -752,13 +722,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.to = others[2]; // bad param
@@ -791,13 +756,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.to = zeroAddress; // bad param
@@ -830,13 +790,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.to = giveawayContract.address; // bad param
@@ -870,13 +825,8 @@ describe('Multi_Giveaway_V2', function () {
         badData: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -914,13 +864,8 @@ describe('Multi_Giveaway_V2', function () {
         badData: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -958,13 +903,8 @@ describe('Multi_Giveaway_V2', function () {
         badData: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1002,13 +942,8 @@ describe('Multi_Giveaway_V2', function () {
         badData: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1046,13 +981,8 @@ describe('Multi_Giveaway_V2', function () {
         badData: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1092,13 +1022,8 @@ describe('Multi_Giveaway_V2', function () {
         duration: duration,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       const userProofs = [];
       const userTrees = [];
@@ -1169,13 +1094,8 @@ describe('Multi_Giveaway_V2', function () {
     it('User cannot claim when test contract holds no tokens - multiple giveaways, 1 claim', async function () {
       const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1210,13 +1130,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1419,13 +1334,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1463,13 +1373,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1507,13 +1412,8 @@ describe('Multi_Giveaway_V2', function () {
         multi: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -1585,13 +1485,8 @@ describe('Multi_Giveaway_V2', function () {
         mint: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       const tree = allTrees[0];
       const claim = allClaims[0][0];
@@ -1660,13 +1555,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allClaims,
-        allTrees,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allClaims, allTrees, allMerkleRoots} =
+        setUp;
 
       const tree = allTrees[0];
       const claim = allClaims[0][0];
@@ -1726,13 +1616,8 @@ describe('Multi_Giveaway_V2', function () {
         sand: true,
       };
       const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+      const {giveawayContract, others, allTrees, allClaims, allMerkleRoots} =
+        setUp;
 
       const tree = allTrees[0];
       const claim = allClaims[0][0];
@@ -1816,14 +1701,12 @@ describe('Multi_Giveaway_V2', function () {
 
       // Action the claim metatx
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokens(
-        merkleRoot,
-        claim,
-        proof
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokens(
+          merkleRoot,
+          claim,
+          proof
+        );
 
       const receipt = await sendMetaTx(
         to,
@@ -1885,14 +1768,12 @@ describe('Multi_Giveaway_V2', function () {
         ethers.provider.getSigner(user)
       );
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokens(
-        merkleRoot,
-        claim,
-        proof
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokens(
+          merkleRoot,
+          claim,
+          proof
+        );
 
       const receipt1 = await sendMetaTx(
         to,
@@ -1975,14 +1856,12 @@ describe('Multi_Giveaway_V2', function () {
 
       // Action the claim metatx
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
-        userMerkleRoots,
-        userClaims,
-        userProofs
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        );
 
       const receipt = await sendMetaTx(
         to,
@@ -2054,14 +1933,12 @@ describe('Multi_Giveaway_V2', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
-        userMerkleRoots,
-        userClaims,
-        userProofs
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        );
 
       const receipt1 = await sendMetaTx(
         to,
@@ -2167,14 +2044,12 @@ describe('Multi_Giveaway_V2', function () {
 
       // Action the claim metatx
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
-        userMerkleRoots,
-        userClaims,
-        userProofs
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        );
 
       const receipt = await sendMetaTx(
         to,
@@ -2271,14 +2146,12 @@ describe('Multi_Giveaway_V2', function () {
       userMerkleRoots.push(allMerkleRoots[0]);
       userMerkleRoots.push(allMerkleRoots[1]);
 
-      const {
-        to,
-        data,
-      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
-        userMerkleRoots,
-        userClaims,
-        userProofs
-      );
+      const {to, data} =
+        await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        );
 
       const receipt1 = await sendMetaTx(
         to,

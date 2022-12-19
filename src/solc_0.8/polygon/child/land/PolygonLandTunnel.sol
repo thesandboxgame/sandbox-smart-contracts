@@ -75,7 +75,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes memory data
-    ) external whenNotPaused() {
+    ) external whenNotPaused {
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
 
         uint32 gasLimit = 0;
@@ -113,7 +113,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function _processMessageFromRoot(
-        uint256, /* stateId */
+        uint256 /* stateId */,
         address sender,
         bytes memory data
     ) internal override validateSender(sender) {
@@ -121,8 +121,10 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
-            abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
+        (address to, uint256 size, uint256 x, uint256 y, bytes memory data) = abi.decode(
+            syncData,
+            (address, uint256, uint256, uint256, bytes)
+        );
         if (!childToken.exists(size, x, y)) childToken.mintQuad(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
         emit Deposit(to, size, x, y, data);
@@ -137,9 +139,9 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function onERC721Received(
-        address, /* operator */
-        address, /* from */
-        uint256, /* tokenId */
+        address /* operator */,
+        address /* from */,
+        uint256 /* tokenId */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(transferringToL1, "PolygonLandTunnel: !BRIDGING");
@@ -147,9 +149,9 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     function onERC721BatchReceived(
-        address, /* operator */
-        address, /* from */
-        uint256[] calldata, /* ids */
+        address /* operator */,
+        address /* from */,
+        uint256[] calldata /* ids */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(transferringToL1, "PolygonLandTunnel: !BRIDGING");

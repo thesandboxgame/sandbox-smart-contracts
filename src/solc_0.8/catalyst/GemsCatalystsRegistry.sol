@@ -6,10 +6,7 @@ import {ICatalyst, IAssetAttributesRegistry} from "./interfaces/ICatalyst.sol";
 import {IERC20Extended, IERC20} from "../common/interfaces/IERC20Extended.sol";
 import {IGemsCatalystsRegistry} from "./interfaces/IGemsCatalystsRegistry.sol";
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// @notice The following privileged roles are used in this contract: DEFAULT_ADMIN_ROLE, SUPER_OPERATOR_ROLE
@@ -83,11 +80,7 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn gem units from each
     /// @param amounts list of amounts of units to burn
-    function batchBurnGems(
-        address from,
-        uint16[] calldata gemIds,
-        uint256[] calldata amounts
-    ) external override {
+    function batchBurnGems(address from, uint16[] calldata gemIds, uint256[] calldata amounts) external override {
         uint256 gemIdsLength = gemIds.length;
         require(gemIdsLength == amounts.length, "GemsCatalystsRegistry: gemsIds and amounts length mismatch");
         for (uint256 i = 0; i < gemIdsLength; i++) {
@@ -118,11 +111,10 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     /// @notice Adds both arrays of gems and catalysts to registry
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
-    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts)
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function addGemsAndCatalysts(
+        IGem[] calldata gems,
+        ICatalyst[] calldata catalysts
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
             "GemsCatalystsRegistry: Too many gem and catalyst contracts"
@@ -173,11 +165,7 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     /// @param from The signing address for the tx.
     /// @param catalystId The id of the catalyst to burn.
     /// @param amount The number of catalyst tokens to burn.
-    function burnCatalyst(
-        address from,
-        uint16 catalystId,
-        uint256 amount
-    ) public override checkAuthorization(from) {
+    function burnCatalyst(address from, uint16 catalystId, uint256 amount) public override checkAuthorization(from) {
         ICatalyst catalyst = getCatalyst(catalystId);
         require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
@@ -187,11 +175,7 @@ contract GemsCatalystsRegistry is ERC2771HandlerUpgradeable, IGemsCatalystsRegis
     /// @param from The signing address for the tx.
     /// @param gemId The id of the gem to burn.
     /// @param amount The number of gem tokens to burn.
-    function burnGem(
-        address from,
-        uint16 gemId,
-        uint256 amount
-    ) public override checkAuthorization(from) {
+    function burnGem(address from, uint16 gemId, uint256 amount) public override checkAuthorization(from) {
         IGem gem = getGem(gemId);
         require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);

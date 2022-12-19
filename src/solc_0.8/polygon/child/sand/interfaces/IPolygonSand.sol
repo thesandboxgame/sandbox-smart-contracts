@@ -32,11 +32,7 @@ interface IPolygonSand {
     /// @param to destination address receiving the tokens.
     /// @param amount number of tokens to transfer.
     /// @return success whether the transfer succeeded.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool success);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool success);
 
     function setTrustedForwarder(address trustedForwarder) external;
 }

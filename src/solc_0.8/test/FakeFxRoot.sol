@@ -9,12 +9,7 @@ import "../common/interfaces/IPolygonLand.sol";
 /// DO NOT USE in production.
 
 interface IFakeFxChild {
-    function onStateReceive(
-        uint256 stateId,
-        address receiver,
-        address rootMessageSender,
-        bytes memory data
-    ) external;
+    function onStateReceive(uint256 stateId, address receiver, address rootMessageSender, bytes memory data) external;
 }
 
 /**

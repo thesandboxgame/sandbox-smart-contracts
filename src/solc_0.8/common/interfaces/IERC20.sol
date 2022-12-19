@@ -36,11 +36,7 @@ interface IERC20 {
     /// @param to destination address receiving the tokens.
     /// @param value number of tokens to transfer.
     /// @return success whether the transfer succeeded.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external returns (bool success);
+    function transferFrom(address from, address to, uint256 value) external returns (bool success);
 
     /// @notice approve an address to spend on your behalf.
     /// @param spender address entitled to transfer on your behalf.

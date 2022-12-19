@@ -148,10 +148,10 @@ contract OperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegist
      * @notice Registers an address with the registry and copies the filtered operators and codeHashes from another
      *         address without subscribing.
      */
-    function registerAndCopyEntries(address registrant, address registrantToCopy)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function registerAndCopyEntries(
+        address registrant,
+        address registrantToCopy
+    ) external onlyAddressOrOwner(registrant) {
         if (registrantToCopy == registrant) {
             revert CannotCopyFromSelf();
         }

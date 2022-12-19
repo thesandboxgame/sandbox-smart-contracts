@@ -9,11 +9,7 @@ contract MockERC677Receiver is IERC677Receiver {
     /// @param _sender The address of the sender.
     /// @param _value The value sent with the tx.
     /// @param _data The data sent with the tx.
-    function onTokenTransfer(
-        address _sender,
-        uint256 _value,
-        bytes calldata _data
-    ) external override {
+    function onTokenTransfer(address _sender, uint256 _value, bytes calldata _data) external override {
         emit OnTokenTransferEvent(_sender, _value, _data);
     }
 }

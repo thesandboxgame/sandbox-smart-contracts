@@ -61,11 +61,9 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         return BaseERC721.supportsInterface(id);
     }
 
-    function setTrustedForwarder(address trustedForwarder)
-        public
-        override(BaseERC721, IERC721Base)
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setTrustedForwarder(
+        address trustedForwarder
+    ) public override(BaseERC721, IERC721Base) onlyRole(DEFAULT_ADMIN_ROLE) {
         BaseERC721.setTrustedForwarder(trustedForwarder);
     }
 
@@ -77,11 +75,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         BaseERC721.setApprovalForAllFor(from, operator, approved);
     }
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public override(BaseERC721, IERC721Base) {
+    function safeTransferFrom(address from, address to, uint256 tokenId) public override(BaseERC721, IERC721Base) {
         BaseERC721.safeTransferFrom(from, to, tokenId);
     }
 
@@ -122,11 +116,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         BaseERC721.batchTransferFrom(from, to, ids);
     }
 
-    function approveFor(
-        address from,
-        address operator,
-        uint256 id
-    ) public override(BaseERC721, IERC721Base) {
+    function approveFor(address from, address operator, uint256 id) public override(BaseERC721, IERC721Base) {
         BaseERC721.approveFor(from, operator, id);
     }
 }

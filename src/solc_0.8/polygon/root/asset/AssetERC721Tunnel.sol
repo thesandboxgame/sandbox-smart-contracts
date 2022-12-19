@@ -52,9 +52,9 @@ contract AssetERC721Tunnel is
     }
 
     function onERC721Received(
-        address, /* operator */
-        address, /* from */
-        uint256, /* tokenId */
+        address /* operator */,
+        address /* from */,
+        uint256 /* tokenId */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "AssetERC721Tunnel: can't directly send Assets");
@@ -62,9 +62,9 @@ contract AssetERC721Tunnel is
     }
 
     function onERC721BatchReceived(
-        address, /* operator */
-        address, /* from */
-        uint256[] calldata, /* ids */
+        address /* operator */,
+        address /* from */,
+        uint256[] calldata /* ids */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "AssetERC721Tunnel: can't directly send Assets");

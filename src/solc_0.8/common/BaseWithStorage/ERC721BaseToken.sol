@@ -20,9 +20,9 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
-    uint256 internal constant OPERATOR_FLAG = (2**255);
+    uint256 internal constant OPERATOR_FLAG = (2 ** 255);
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
-    uint256 internal constant BURNED_FLAG = (2**160);
+    uint256 internal constant BURNED_FLAG = (2 ** 160);
 
     mapping(address => uint256) internal _numNFTPerAddress;
     mapping(uint256 => uint256) internal _owners;
@@ -48,11 +48,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param sender The address giving the approval.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
-    function approveFor(
-        address sender,
-        address operator,
-        uint256 id
-    ) external {
+    function approveFor(address sender, address operator, uint256 id) external {
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
@@ -70,11 +66,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param id The id of the token.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external override {
+    function transferFrom(address from, address to, uint256 id) external override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
@@ -86,11 +78,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param from The send of the token.
     /// @param to The recipient of the token.
     /// @param id The id of the token.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external override {
+    function safeTransferFrom(address from, address to, uint256 id) external override {
         safeTransferFrom(from, to, id, "");
     }
 
@@ -99,12 +87,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param to The recipient of the token.
     /// @param ids The ids of the tokens.
     /// @param data Additional data.
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) public virtual {
+    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) public virtual {
         _batchTransferFrom(from, to, ids, data, false);
     }
 
@@ -114,12 +97,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param to The recipient of the token.
     /// @param ids The ids of the tokens.
     /// @param data Additional data.
-    function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external {
+    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
         _batchTransferFrom(from, to, ids, data, true);
     }
 
@@ -127,11 +105,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param sender The address giving the approval.
     /// @param operator The address receiving the approval.
     /// @param approved The determination of the approval.
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external {
+    function setApprovalForAllFor(address sender, address operator, bool approved) external {
         require(sender != address(0), "Invalid sender address");
         address msgSender = _msgSender();
         require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
@@ -211,12 +185,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param to The recipient of the token.
     /// @param id The id of the token.
     /// @param data Additional data.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) public override {
+    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
@@ -243,12 +212,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         return id;
     }
 
-    function _updateOwnerData(
-        uint256 id,
-        uint256 oldData,
-        address newOwner,
-        bool hasOperator
-    ) internal virtual {
+    function _updateOwnerData(uint256 id, uint256 oldData, address newOwner, bool hasOperator) internal virtual {
         if (hasOperator) {
             _owners[_storageId(id)] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner));
         } else {
@@ -256,11 +220,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         }
     }
 
-    function _transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) internal {
+    function _transferFrom(address from, address to, uint256 id) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
         _updateOwnerData(id, _owners[_storageId(id)], to, false);
@@ -268,11 +228,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     }
 
     /// @dev See approveFor.
-    function _approveFor(
-        uint256 ownerData,
-        address operator,
-        uint256 id
-    ) internal {
+    function _approveFor(uint256 ownerData, address operator, uint256 id) internal {
         address owner = _ownerOf(id);
         if (operator == address(0)) {
             _updateOwnerData(id, ownerData, owner, false);
@@ -284,13 +240,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     }
 
     /// @dev See batchTransferFrom.
-    function _batchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        bytes memory data,
-        bool safe
-    ) internal {
+    function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
         bool authorized = msgSender == from || _superOperators[msgSender] || _operatorsForAll[from][msgSender];
 
@@ -323,11 +273,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     }
 
     /// @dev See setApprovalForAll.
-    function _setApprovalForAll(
-        address sender,
-        address operator,
-        bool approved
-    ) internal {
+    function _setApprovalForAll(address sender, address operator, bool approved) internal {
         require(!_superOperators[operator], "INVALID_APPROVAL_CHANGE");
         _operatorsForAll[sender][operator] = approved;
 
@@ -335,11 +281,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     }
 
     /// @dev See burn.
-    function _burn(
-        address from,
-        address owner,
-        uint256 id
-    ) internal {
+    function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "NOT_OWNER");
         uint256 storageId = _storageId(id);
         _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
@@ -396,12 +338,9 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param id The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
-    function _ownerAndOperatorEnabledOf(uint256 id)
-        internal
-        view
-        virtual
-        returns (address owner, bool operatorEnabled)
-    {
+    function _ownerAndOperatorEnabledOf(
+        uint256 id
+    ) internal view virtual returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[_storageId(id)];
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
@@ -416,11 +355,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param to The address recieving the token.
     /// @param id The token being transferred.
     /// @return isMetaTx Whether or not the transaction is a MetaTx.
-    function _checkTransfer(
-        address from,
-        address to,
-        uint256 id
-    ) internal view returns (bool isMetaTx) {
+    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");

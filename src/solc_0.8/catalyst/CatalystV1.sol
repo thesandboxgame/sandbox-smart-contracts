@@ -44,12 +44,10 @@ contract CatalystV1 is ICatalyst, ERC20TokenUpgradeable {
     /// @notice Get the attributes for each gem in an asset.
     /// See DefaultAttributes.getAttributes for more.
     /// @return values An array of values representing the "level" of each gem. ie: Power=14, speed=45, etc...
-    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)
-        external
-        view
-        override
-        returns (uint32[] memory values)
-    {
+    function getAttributes(
+        uint256 assetId,
+        IAssetAttributesRegistry.GemEvent[] calldata events
+    ) external view override returns (uint32[] memory values) {
         return _attributes.getAttributes(assetId, events);
     }
 

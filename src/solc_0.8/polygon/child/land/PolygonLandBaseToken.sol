@@ -112,24 +112,12 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
      * @param y The top left y coordinate of the new quad
      * @param data extra data to pass to the transfer
      */
-    function mintQuad(
-        address user,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) external virtual override {
+    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
         require(isMinter(_msgSender()), "!AUTHORIZED");
         _mintQuad(user, size, x, y, data);
     }
 
-    function _mintQuad(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
+    function _mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
         require(to != address(0), "to is zero address");
         require(!exists(size, x, y), "Already minted");
 
@@ -233,11 +221,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         super.batchTransferFrom(from, to, ids, data);
     }
 
-    function exists(
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) public view override validQuad(size, x, y) returns (bool) {
+    function exists(uint256 size, uint256 x, uint256 y) public view override validQuad(size, x, y) returns (bool) {
         if (_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] != 0) return true;
         uint256 toX = x + size;
         uint256 toY = y + size;
@@ -319,12 +303,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
     }
 
-    function _idInPath(
-        uint256 i,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal pure returns (uint256) {
+    function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
         uint256 row = i / size;
         if (row % 2 == 0) {
             // allow ids to follow a path in a quad
@@ -334,13 +313,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
     }
 
-    function _regroup(
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal {
+    function _regroup(address from, address to, uint256 size, uint256 x, uint256 y) internal {
         if (size == 3) {
             _regroup3x3(from, to, x, y, true);
         } else if (size == 6) {
@@ -352,13 +325,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
     }
 
-    function _regroup3x3(
-        address from,
-        address to,
-        uint256 x,
-        uint256 y,
-        bool set
-    ) internal returns (bool) {
+    function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_3x3 + id;
         bool ownerOfAll = true;
@@ -377,13 +344,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         return ownerOfAll;
     }
 
-    function _regroup6x6(
-        address from,
-        address to,
-        uint256 x,
-        uint256 y,
-        bool set
-    ) internal returns (bool) {
+    function _regroup6x6(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_6x6 + id;
         bool ownerOfAll = true;
@@ -411,13 +372,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         return ownerOfAll;
     }
 
-    function _regroup12x12(
-        address from,
-        address to,
-        uint256 x,
-        uint256 y,
-        bool set
-    ) internal returns (bool) {
+    function _regroup12x12(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_12x12 + id;
         bool ownerOfAll = true;
@@ -445,13 +400,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         return ownerOfAll;
     }
 
-    function _regroup24x24(
-        address from,
-        address to,
-        uint256 x,
-        uint256 y,
-        bool set
-    ) internal returns (bool) {
+    function _regroup24x24(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_24x24 + id;
         bool ownerOfAll = true;
@@ -482,11 +431,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         return ownerOfAll || _owners[quadId] == uint256(uint160(address(from)));
     }
 
-    function _ownerOfQuad(
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal returns (address) {
+    function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal returns (address) {
         uint256 layer;
         uint256 parentSize = size * 2;
         if (size == 3) {
@@ -531,8 +476,9 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
                 if (owner6x6 != address(0)) {
                     return owner6x6;
                 } else {
-                    address owner12x12 =
-                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    address owner12x12 = address(
+                        uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE])
+                    );
                     if (owner12x12 != address(0)) {
                         return owner12x12;
                     } else {
@@ -572,12 +518,9 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
         }
     }
 
-    function _ownerAndOperatorEnabledOf(uint256 id)
-        internal
-        view
-        override
-        returns (address owner, bool operatorEnabled)
-    {
+    function _ownerAndOperatorEnabledOf(
+        uint256 id
+    ) internal view override returns (address owner, bool operatorEnabled) {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = id % GRID_SIZE;
         uint256 y = id / GRID_SIZE;
@@ -603,8 +546,9 @@ abstract contract PolygonLandBaseToken is IPolygonLand, Initializable, ERC721Bas
                     owner = owner6x6;
                     operatorEnabled = false;
                 } else {
-                    address owner12x12 =
-                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    address owner12x12 = address(
+                        uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE])
+                    );
                     if (owner12x12 != address(uint160(0))) {
                         owner = owner12x12;
                         operatorEnabled = false;

@@ -59,12 +59,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     /// @param id the id of the newly minted token.
     /// @param supply number of tokens minted for that token type.
     /// @param data token metadata.
-    function mint(
-        address owner,
-        uint256 id,
-        uint256 supply,
-        bytes calldata data
-    ) external {
+    function mint(address owner, uint256 id, uint256 supply, bytes calldata data) external {
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(data.length > 0, "METADATA_MISSING");
         require(owner != address(0), "TO==0");
@@ -105,11 +100,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     /// @param account address of the ownerof tokens.
     /// @param id id of the token to be minted.
     /// @param amount quantity of the token to be minted.
-    function mintDeficit(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function mintDeficit(address account, uint256 id, uint256 amount) external {
         require(isBouncer(_msgSender()), "!BOUNCER");
         _mintDeficit(account, id, amount);
     }
@@ -125,11 +116,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     /// @param from address whose token is to be burnt.
     /// @param id token type which will be burnt.
     /// @param amount amount of token to burn.
-    function burnFrom(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function burnFrom(address from, uint256 id, uint256 amount) external {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _burn(from, id, amount);
     }
@@ -143,8 +130,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
     function deposit(address user, bytes calldata depositData) external override {
         require(_msgSender() == _childChainManager, "!DEPOSITOR");
         require(user != address(0), "INVALID_DEPOSIT_USER");
-        (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
-            abi.decode(depositData, (uint256[], uint256[], bytes));
+        (uint256[] memory ids, uint256[] memory amounts, bytes memory data) = abi.decode(
+            depositData,
+            (uint256[], uint256[], bytes)
+        );
 
         _mintBatches(user, ids, amounts, data);
     }

@@ -11,12 +11,7 @@ contract ERC1155Mintable is ERC1155 {
     // solhint-disable-next-line no-empty-blocks
     constructor(string memory uri_) ERC1155(uri_) {}
 
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) external {
+    function mint(address to, uint256 id, uint256 amount, bytes memory data) external {
         _mint(to, id, amount, data);
     }
 
@@ -27,11 +22,7 @@ contract ERC1155Mintable is ERC1155 {
         return ERC1155.balanceOf(owner, id);
     }
 
-    function setFakeBalance(
-        address owner,
-        uint256 id,
-        uint256 balance
-    ) external {
+    function setFakeBalance(address owner, uint256 id, uint256 balance) external {
         fakeBalance[id][owner] = balance;
     }
 }

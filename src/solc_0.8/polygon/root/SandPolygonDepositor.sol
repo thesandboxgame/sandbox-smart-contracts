@@ -8,11 +8,7 @@ contract SandPolygonDepositor {
     address internal immutable _predicate;
     IRootChainManager internal immutable _rootChainManager;
 
-    constructor(
-        IERC20Extended sand,
-        address predicate,
-        IRootChainManager rootChainManager
-    ) {
+    constructor(IERC20Extended sand, address predicate, IRootChainManager rootChainManager) {
         _sand = sand;
         _predicate = predicate;
         _rootChainManager = rootChainManager;

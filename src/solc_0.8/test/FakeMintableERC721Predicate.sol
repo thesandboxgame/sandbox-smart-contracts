@@ -15,11 +15,7 @@ contract FakeMintableERC721Predicate is IERC721TokenReceiver {
      * @param rootToken Token which gets deposited
      * @param depositData ABI encoded tokenId(s). It's possible to deposit batch of tokens.
      */
-    function lockTokens(
-        address depositor,
-        address rootToken,
-        bytes calldata depositData
-    ) external {
+    function lockTokens(address depositor, address rootToken, bytes calldata depositData) external {
         // Locking single ERC721 token
         if (depositData.length == 32) {
             uint256 tokenId = abi.decode(depositData, (uint256));
@@ -57,11 +53,7 @@ contract FakeMintableERC721Predicate is IERC721TokenReceiver {
      * if token doesn't exit then it is minted
      * callable only by manager
      */
-    function exitTokens(
-        address rootToken,
-        address withdrawer,
-        uint256 tokenId
-    ) public {
+    function exitTokens(address rootToken, address withdrawer, uint256 tokenId) public {
         // If it's a simple exit ( with out metadata coming from L2 to L1 )
         IMintableERC721 token = IMintableERC721(rootToken);
 
@@ -73,11 +65,7 @@ contract FakeMintableERC721Predicate is IERC721TokenReceiver {
         }
     }
 
-    function exitTokens(
-        address rootToken,
-        address withdrawer,
-        uint256[] calldata tokenIds
-    ) public {
+    function exitTokens(address rootToken, address withdrawer, uint256[] calldata tokenIds) public {
         // topic0 is event sig
         // If it's a simple batch exit, where a set of
         // ERC721s were burnt in child chain with event signature
@@ -106,12 +94,7 @@ contract FakeMintableERC721Predicate is IERC721TokenReceiver {
         }
     }
 
-    function exitTokens(
-        address rootToken,
-        address withdrawer,
-        uint256 tokenId,
-        bytes calldata metadata
-    ) public {
+    function exitTokens(address rootToken, address withdrawer, uint256 tokenId, bytes calldata metadata) public {
         // If this is NFT exit with metadata i.e. URI 👆
         //
         // Note: If your token is only minted in L2, you can exit
@@ -137,12 +120,7 @@ contract FakeMintableERC721Predicate is IERC721TokenReceiver {
     /**
      * @notice accepts safe ERC721 transfer
      */
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes calldata
-    ) external pure override returns (bytes4) {
+    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
         return IERC721TokenReceiver.onERC721Received.selector;
     }
 }

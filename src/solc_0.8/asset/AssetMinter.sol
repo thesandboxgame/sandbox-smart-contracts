@@ -129,11 +129,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// - data extra data)
     /// @param quantity number of token to mint
     /// @return assetId The new token Id.
-    function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
-        external
-        override
-        returns (uint256 assetId)
-    {
+    function mintCustomNumberWithoutCatalyst(
+        MintData calldata mintData,
+        uint256 quantity
+    ) external override returns (uint256 assetId) {
         require(
             customMinterAllowance[_msgSender()] == true || _msgSender() == owner(),
             "AssetMinter: custom minting unauthorized"
@@ -349,14 +348,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @param from The original signer of the tx.
     /// @param gemIds The array of gems to burn.
     /// @param numTimes Amount of gems to burn.
-    function _burnGems(
-        address from,
-        uint16[] memory gemIds,
-        uint32 numTimes
-    ) internal {
+    function _burnGems(address from, uint16[] memory gemIds, uint32 numTimes) internal {
         uint256[] memory gemFactors = new uint256[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            gemFactors[i] = 10**(_gemsCatalystsRegistry.getGemDecimals(gemIds[i])) * numTimes;
+            gemFactors[i] = 10 ** (_gemsCatalystsRegistry.getGemDecimals(gemIds[i])) * numTimes;
         }
         _gemsCatalystsRegistry.batchBurnGems(from, gemIds, gemFactors);
     }
@@ -365,29 +360,23 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @param from The original signer of the tx.
     /// @param catalystId The type of catalyst to burn.
     /// @param numTimes Amount of catalysts of this type to burn.
-    function _burnCatalyst(
-        address from,
-        uint16 catalystId,
-        uint32 numTimes
-    ) internal {
+    function _burnCatalyst(address from, uint16 catalystId, uint32 numTimes) internal {
         _gemsCatalystsRegistry.burnCatalyst(
             from,
             catalystId,
-            numTimes * 10**(_gemsCatalystsRegistry.getCatalystDecimals(catalystId))
+            numTimes * 10 ** (_gemsCatalystsRegistry.getCatalystDecimals(catalystId))
         );
     }
 
     /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
     /// @param quantities The array of numbers to scale.
     /// @return scaledQuantities The scaled-up values.
-    function _scaleGemQuantities(uint256[] memory quantities)
-        internal
-        view
-        returns (uint256[] memory scaledQuantities)
-    {
+    function _scaleGemQuantities(
+        uint256[] memory quantities
+    ) internal view returns (uint256[] memory scaledQuantities) {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            uint256 gemFactor = 10**_gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
+            uint256 gemFactor = 10 ** _gemsCatalystsRegistry.getGemDecimals(uint16(i + 1));
             scaledQuantities[i] = quantities[i] * gemFactor * numberOfGemsBurnPerAsset;
         }
     }
@@ -395,14 +384,12 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
     /// @param quantities The array of numbers to scale.
     /// @return scaledQuantities The scaled-up values.
-    function _scaleCatalystQuantities(uint256[] memory quantities)
-        internal
-        view
-        returns (uint256[] memory scaledQuantities)
-    {
+    function _scaleCatalystQuantities(
+        uint256[] memory quantities
+    ) internal view returns (uint256[] memory scaledQuantities) {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            uint256 catalystFactor = 10**_gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
+            uint256 catalystFactor = 10 ** _gemsCatalystsRegistry.getCatalystDecimals(uint16(i + 1));
             scaledQuantities[i] = quantities[i] * catalystFactor * numberOfCatalystBurnPerAsset;
         }
     }
@@ -415,11 +402,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         return ERC2771Handler._msgData();
     }
 
-    function _mintRequirements(
-        address from,
-        uint256 quantity,
-        address to
-    ) internal view {
+    function _mintRequirements(address from, uint256 quantity, address to) internal view {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         require(quantity != 0, "AssetMinter: quantity cannot be 0");

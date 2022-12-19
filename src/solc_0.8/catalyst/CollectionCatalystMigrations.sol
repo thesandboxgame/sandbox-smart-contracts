@@ -23,12 +23,7 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
     /// @param registry: New AssetAttributesRegistry
     /// @param oldRegistry: Old CatalystRegistry
     /// @param admin: Contract admin
-    constructor(
-        IAssetToken asset,
-        IAssetAttributesRegistry registry,
-        IOldCatalystRegistry oldRegistry,
-        address admin
-    ) {
+    constructor(IAssetToken asset, IAssetAttributesRegistry registry, IOldCatalystRegistry oldRegistry, address admin) {
         _oldRegistry = oldRegistry;
         _asset = asset;
         _registry = registry;
@@ -53,11 +48,7 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
     }
 
     /// @dev Perform the migration of the catalyst. See `migrate(...)`
-    function _migrate(
-        uint256 assetId,
-        uint16[] memory oldGemIds,
-        uint64 blockNumber
-    ) internal {
+    function _migrate(uint256 assetId, uint16[] memory oldGemIds, uint64 blockNumber) internal {
         (bool oldExists, uint256 oldCatalystId) = _oldRegistry.getCatalyst(assetId);
         require(oldExists, "OLD_CATALYST_NOT_EXIST");
         (bool exists, , ) = _registry.getRecord(assetId);

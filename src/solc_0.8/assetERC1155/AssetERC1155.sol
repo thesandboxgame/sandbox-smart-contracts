@@ -53,12 +53,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
     /// @param id token which is being minted.
     /// @param amount amount of token being minted.
     /// @param data token metadata.
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes calldata data
-    ) external {
+    function mint(address account, uint256 id, uint256 amount, bytes calldata data) external {
         require(_msgSender() == _predicate, "!PREDICATE");
         require(data.length > 0, "METADATA_MISSING");
         require(account != address(0), "TO==0");
@@ -99,11 +94,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
     /// @param account address of the ownerof tokens.
     /// @param id id of the token to be minted.
     /// @param amount quantity of the token to be minted.
-    function mintDeficit(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function mintDeficit(address account, uint256 id, uint256 amount) external {
         require(_msgSender() == _predicate, "!PREDICATE");
         _mintDeficit(account, id, amount);
     }
@@ -127,11 +118,7 @@ contract AssetERC1155 is AssetBaseERC1155 {
     /// @param from address whose token is to be burnt.
     /// @param id token type which will be burnt.
     /// @param amount amount of token to burn.
-    function burnFrom(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function burnFrom(address from, uint256 id, uint256 amount) external {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _burn(from, id, amount);
     }

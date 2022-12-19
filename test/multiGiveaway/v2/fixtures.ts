@@ -357,10 +357,8 @@ export const setupTestGiveaway = withSnapshot(
     }
 
     // Set up tree with test assets for each applicable giveaway
-    const {
-      claims: claims0,
-      merkleRootHash: merkleRootHash0,
-    } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
+    const {claims: claims0, merkleRootHash: merkleRootHash0} =
+      createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
 
     const allMerkleRoots = [];
     const allClaims = [claims0];
@@ -386,10 +384,8 @@ export const setupTestGiveaway = withSnapshot(
 
     // Multi giveaway
     if (multi) {
-      const {
-        claims: claims1,
-        merkleRootHash: merkleRootHash1,
-      } = createClaimMerkleTreeV2(hre, dataWithIds1, 'Multi_Giveaway_V2_1');
+      const {claims: claims1, merkleRootHash: merkleRootHash1} =
+        createClaimMerkleTreeV2(hre, dataWithIds1, 'Multi_Giveaway_V2_1');
       allClaims.push(claims1);
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
@@ -408,10 +404,8 @@ export const setupTestGiveaway = withSnapshot(
       dataWithIds0[2].erc721[0].contractAddress = zeroAddress;
       dataWithIds0[4].erc20.contractAddresses[0] = zeroAddress;
 
-      const {
-        claims: badClaims0,
-        merkleRootHash: badMerkleRootHash0,
-      } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
+      const {claims: badClaims0, merkleRootHash: badMerkleRootHash0} =
+        createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
       allClaims.push(badClaims0);
       allMerkleRoots.push(badMerkleRootHash0);
       const hashArray2 = createDataArrayMultiClaim(badClaims0);

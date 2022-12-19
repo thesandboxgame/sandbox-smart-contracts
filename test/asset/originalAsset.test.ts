@@ -205,18 +205,10 @@ describe('Test first Asset contract and upgrade process for splitting into ERC11
   });
   describe('Upgrade and split Asset into ERC1155 and ERC1155', function () {
     it('should upgrade to AssetERC1155 and keep storage intact', async function () {
-      const {
-        Asset,
-        getNamedAccounts,
-        mintAsset,
-        users,
-      } = await setupOriginalAsset();
-      const {
-        assetAdmin,
-        deployer,
-        upgradeAdmin,
-        assetBouncerAdmin,
-      } = await getNamedAccounts();
+      const {Asset, getNamedAccounts, mintAsset, users} =
+        await setupOriginalAsset();
+      const {assetAdmin, deployer, upgradeAdmin, assetBouncerAdmin} =
+        await getNamedAccounts();
       const {deploy} = deployments;
 
       const tokenId = await mintAsset(users[0].address, 20);

@@ -53,20 +53,20 @@ contract AssetGiveaway is WithAdmin, ClaimERC1155 {
     }
 
     function onERC1155Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 
     function onERC1155BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_BATCH_RECEIVED;

@@ -65,11 +65,7 @@ contract ERC20RewardPool is
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
-    constructor(
-        IERC20 stakeToken_,
-        IERC20 rewardToken_,
-        address trustedForwarder
-    ) StakeTokenWrapper(stakeToken_) {
+    constructor(IERC20 stakeToken_, IERC20 rewardToken_, address trustedForwarder) StakeTokenWrapper(stakeToken_) {
         require(address(rewardToken_).isContract(), "ERC20RewardPool: is not a contract");
         rewardToken = rewardToken_;
         __ERC2771HandlerV2_initialize(trustedForwarder);
@@ -91,11 +87,9 @@ contract ERC20RewardPool is
 
     /// @notice set the reward token
     /// @param contractAddress address token used to pay rewards
-    function setRewardToken(address contractAddress)
-        external
-        isContractAndAdmin(contractAddress)
-        isValidAddress(contractAddress)
-    {
+    function setRewardToken(
+        address contractAddress
+    ) external isContractAndAdmin(contractAddress) isValidAddress(contractAddress) {
         IERC20 _newRewardToken = IERC20(contractAddress);
         require(
             rewardToken.balanceOf(address(this)) <= _newRewardToken.balanceOf(address(this)),
@@ -106,11 +100,9 @@ contract ERC20RewardPool is
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
-    function setStakeToken(address contractAddress)
-        external
-        isContractAndAdmin(contractAddress)
-        isValidAddress(contractAddress)
-    {
+    function setStakeToken(
+        address contractAddress
+    ) external isContractAndAdmin(contractAddress) isValidAddress(contractAddress) {
         IERC20 _newStakeToken = IERC20(contractAddress);
         require(
             _stakeToken.balanceOf(address(this)) <= _newStakeToken.balanceOf(address(this)),
@@ -126,22 +118,19 @@ contract ERC20RewardPool is
     }
 
     /// @notice set contract that contains all the contribution rules
-    function setContributionRules(address contractAddress)
-        external
-        isContractAndAdmin(contractAddress)
-        isValidAddress(contractAddress)
-    {
+    function setContributionRules(
+        address contractAddress
+    ) external isContractAndAdmin(contractAddress) isValidAddress(contractAddress) {
         contributionRules = IContributionRules(contractAddress);
     }
 
     /// @notice set the reward calculator
     /// @param contractAddress address of a plugin that calculates absolute rewards at any point in time
     /// @param restartRewards_ if true the rewards from the previous calculator are accumulated before changing it
-    function setRewardCalculator(address contractAddress, bool restartRewards_)
-        external
-        isContractAndAdmin(contractAddress)
-        isValidAddress(contractAddress)
-    {
+    function setRewardCalculator(
+        address contractAddress,
+        bool restartRewards_
+    ) external isContractAndAdmin(contractAddress) isValidAddress(contractAddress) {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards_) {
             _restartRewards();
@@ -153,7 +142,7 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyOwner whenPaused() isValidAddress(receiver) {
+    function recoverFunds(address receiver) external onlyOwner whenPaused isValidAddress(receiver) {
         uint256 recoverAmount;
 
         if (rewardToken == _stakeToken) {
@@ -264,10 +253,12 @@ contract ERC20RewardPool is
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
     /// @dev the user must approve in the stake token before calling this function
-    function stake(uint256 amount)
+    function stake(
+        uint256 amount
+    )
         external
         nonReentrant
-        whenNotPaused()
+        whenNotPaused
         antiDepositCheck(_msgSender())
         checkRequirements(_msgSender(), amount, _balances[_msgSender()])
     {
@@ -300,14 +291,14 @@ contract ERC20RewardPool is
     /// @notice withdraw the stake from the contract
     /// @param amount the amount of tokens to withdraw
     /// @dev the user can withdraw his stake independently from the rewards
-    function withdraw(uint256 amount) external nonReentrant whenNotPaused() {
+    function withdraw(uint256 amount) external nonReentrant whenNotPaused {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), amount);
         _updateContribution(_msgSender());
     }
 
     /// @notice withdraw the stake and the rewards from the contract
-    function exit() external nonReentrant whenNotPaused() {
+    function exit() external nonReentrant whenNotPaused {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), _balances[_msgSender()]);
         _withdrawRewards(_msgSender());
@@ -317,7 +308,7 @@ contract ERC20RewardPool is
 
     /// @notice withdraw the rewards from the contract
     /// @dev the user can withdraw his stake independently from the rewards
-    function getReward() external nonReentrant whenNotPaused() {
+    function getReward() external nonReentrant whenNotPaused {
         _processRewards(_msgSender());
         _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());

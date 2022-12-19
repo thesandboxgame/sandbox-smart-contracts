@@ -15,11 +15,7 @@ contract MockERC20BasicApprovalTarget {
         revert("REVERT_ON_CALL");
     }
 
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
         return IERC20(msg.sender).transferFrom(sender, recipient, amount);
     }
 }

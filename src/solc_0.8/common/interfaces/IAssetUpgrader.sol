@@ -19,10 +19,5 @@ interface IAssetUpgrader {
         address to
     ) external returns (uint256 tokenId);
 
-    function addGems(
-        address from,
-        uint256 assetId,
-        uint16[] calldata gemIds,
-        address to
-    ) external;
+    function addGems(address from, uint256 assetId, uint16[] calldata gemIds, address to) external;
 }

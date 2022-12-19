@@ -55,11 +55,7 @@ contract AssetERC1155Tunnel is
             interfaceId == 0x01ffc9a7; // ERC165
     }
 
-    function batchDepositToChild(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values
-    ) public whenNotPaused {
+    function batchDepositToChild(address to, uint256[] memory ids, uint256[] memory values) public whenNotPaused {
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
         bytes32[] memory metadataHashes = new bytes32[](ids.length);
@@ -92,8 +88,10 @@ contract AssetERC1155Tunnel is
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
-            abi.decode(message, (address, uint256[], uint256[], bytes));
+        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) = abi.decode(
+            message,
+            (address, uint256[], uint256[], bytes)
+        );
         bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             bytes memory metadata = abi.encode(metadataHashes[i]);
@@ -106,12 +104,7 @@ contract AssetERC1155Tunnel is
         }
     }
 
-    function _depositMinted(
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data
-    ) internal {
+    function _depositMinted(address to, uint256 id, uint256 value, bytes memory data) internal {
         uint256 balance = rootToken.balanceOf(address(this), id);
         if (balance >= value) {
             rootToken.safeTransferFrom(address(this), to, id, value, data);
@@ -130,10 +123,10 @@ contract AssetERC1155Tunnel is
     }
 
     function onERC1155Received(
-        address, /*_operator*/
-        address, /*_from*/
-        uint256, /*_id*/
-        uint256, /*_value*/
+        address /*_operator*/,
+        address /*_from*/,
+        uint256 /*_id*/,
+        uint256 /*_value*/,
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "AssetERC1155Tunnel: can't directly send Assets");
@@ -141,10 +134,10 @@ contract AssetERC1155Tunnel is
     }
 
     function onERC1155BatchReceived(
-        address, /*_operator*/
-        address, /*_from*/
-        uint256[] calldata, /*_ids*/
-        uint256[] calldata, /*_values*/
+        address /*_operator*/,
+        address /*_from*/,
+        uint256[] calldata /*_ids*/,
+        uint256[] calldata /*_values*/,
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "AssetERC1155Tunnel: can't directly send Assets");

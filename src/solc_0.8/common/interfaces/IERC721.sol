@@ -25,22 +25,9 @@ interface IERC721 is IERC165, IERC721Events {
 
     function isApprovedForAll(address owner, address operator) external view returns (bool);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
+    function transferFrom(address from, address to, uint256 tokenId) external;
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 tokenId) external;
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes calldata data
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;
 }

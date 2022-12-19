@@ -6,12 +6,8 @@ import {ethers} from 'hardhat';
 
 describe('PolygonSandClaim', function () {
   it('fetches the given amount of fake sand from user and transfers the same amount of new sand', async function () {
-    const {
-      sandAdmin,
-      polygonSand,
-      fakePolygonSand,
-      polygonSandClaim,
-    } = await setupPolygonSandClaim();
+    const {sandAdmin, polygonSand, fakePolygonSand, polygonSandClaim} =
+      await setupPolygonSandClaim();
 
     const userFakeSandBalanceBefore = await fakePolygonSand.balanceOf(
       sandAdmin
@@ -61,11 +57,8 @@ describe('PolygonSandClaim', function () {
   });
 
   it('reverts if claim amount is more than balance', async function () {
-    const {
-      sandAdmin,
-      polygonSand,
-      polygonSandClaim,
-    } = await setupPolygonSandClaim();
+    const {sandAdmin, polygonSand, polygonSandClaim} =
+      await setupPolygonSandClaim();
 
     const claimContractFakeSandBalance = await polygonSand.balanceOf(
       polygonSandClaim.address
@@ -81,12 +74,8 @@ describe('PolygonSandClaim', function () {
   // Getters
 
   it('returns the amount of sand which has been claimed', async function () {
-    const {
-      deployer,
-      sandAdmin,
-      fakePolygonSand,
-      polygonSandClaim,
-    } = await setupPolygonSandClaim();
+    const {deployer, sandAdmin, fakePolygonSand, polygonSandClaim} =
+      await setupPolygonSandClaim();
 
     await waitFor(
       polygonSandClaim

@@ -124,14 +124,8 @@ describe('PolygonLand', function () {
       });
 
       it('should not be able to transfer Land when paused', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {deployer, Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 1;
         const x = 0;
@@ -177,13 +171,8 @@ describe('PolygonLand', function () {
       });
 
       it('should be able to transfer 1x1 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 1;
         const x = 0;
@@ -215,13 +204,8 @@ describe('PolygonLand', function () {
         );
       });
       it('should be able to transfer 3x3 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 3;
         const x = 0;
@@ -250,13 +234,8 @@ describe('PolygonLand', function () {
         );
       });
       it('should be able to transfer 6x6 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 6;
         const x = 0;
@@ -285,13 +264,8 @@ describe('PolygonLand', function () {
         );
       });
       it('should be able to transfer 12x12 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 12;
         const x = 0;
@@ -320,13 +294,8 @@ describe('PolygonLand', function () {
         );
       });
       it('should be able to transfer 24x24 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel, PolygonLand} =
+          await setupLand();
         const landHolder = users[0];
         const size = 24;
         const x = 0;
@@ -629,12 +598,10 @@ describe('PolygonLand', function () {
             true
           );
           tx.wait();
-          const {
-            to,
-            data,
-          } = await landHolder.MockLandTunnel.populateTransaction[
-            'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
-          ](landHolder.address, ...mintingData, bytes);
+          const {to, data} =
+            await landHolder.MockLandTunnel.populateTransaction[
+              'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
+            ](landHolder.address, ...mintingData, bytes);
           await sendMetaTx(
             to,
             trustedForwarder,
@@ -1462,12 +1429,10 @@ describe('PolygonLand', function () {
           true
         );
 
-        const {
-          to,
-          data,
-        } = await landHolder.MockPolygonLandTunnel.populateTransaction[
-          'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
-        ](landHolder.address, [size], [x], [y], bytes);
+        const {to, data} =
+          await landHolder.MockPolygonLandTunnel.populateTransaction[
+            'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
+          ](landHolder.address, [size], [x], [y], bytes);
 
         await sendMetaTx(
           to,
@@ -1547,12 +1512,10 @@ describe('PolygonLand', function () {
           true
         );
 
-        const {
-          to,
-          data,
-        } = await landHolder.MockPolygonLandTunnel.populateTransaction[
-          'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
-        ](landHolder.address, [size], [x], [y], bytes);
+        const {to, data} =
+          await landHolder.MockPolygonLandTunnel.populateTransaction[
+            'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
+          ](landHolder.address, [size], [x], [y], bytes);
 
         await sendMetaTx(
           to,
@@ -1632,12 +1595,10 @@ describe('PolygonLand', function () {
           true
         );
 
-        const {
-          to,
-          data,
-        } = await landHolder.MockPolygonLandTunnel.populateTransaction[
-          'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
-        ](landHolder.address, [size], [x], [y], bytes);
+        const {to, data} =
+          await landHolder.MockPolygonLandTunnel.populateTransaction[
+            'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
+          ](landHolder.address, [size], [x], [y], bytes);
 
         await sendMetaTx(
           to,
@@ -1717,12 +1678,10 @@ describe('PolygonLand', function () {
           true
         );
 
-        const {
-          to,
-          data,
-        } = await landHolder.MockPolygonLandTunnel.populateTransaction[
-          'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
-        ](landHolder.address, [size], [x], [y], bytes);
+        const {to, data} =
+          await landHolder.MockPolygonLandTunnel.populateTransaction[
+            'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
+          ](landHolder.address, [size], [x], [y], bytes);
 
         await sendMetaTx(
           to,

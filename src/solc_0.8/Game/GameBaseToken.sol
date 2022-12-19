@@ -73,9 +73,9 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     }
 
     function onERC721Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
         bytes calldata /*data*/
     ) external view override returns (bytes4) {
         require(_msgSender() == address(_assetERC721), "WRONG_SENDER");
@@ -165,11 +165,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param gameOwner The address of a GAME token creator.
     /// @param editor The address of the editor to set.
     /// @param isEditor Add or remove the ability to edit.
-    function setGameEditor(
-        address gameOwner,
-        address editor,
-        bool isEditor
-    ) external override {
+    function setGameEditor(address gameOwner, address editor, bool isEditor) external override {
         require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
         _setGameEditor(gameOwner, editor, isEditor);
     }
@@ -178,11 +174,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param gameId The current id of the GAME token.
     /// @param sender The address of current registered creator.
     /// @param to The address to transfer the creatorship to
-    function transferCreatorship(
-        uint256 gameId,
-        address sender,
-        address to
-    ) external override notToZero(to) {
+    function transferCreatorship(uint256 gameId, address sender, address to) external override notToZero(to) {
         require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
         uint256 id = _storageId(gameId);
         address msgSender = _msgSender();
@@ -256,12 +248,10 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
-    function getERC1155AssetBalances(uint256 gameId, uint256[] calldata assetIds)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
+    function getERC1155AssetBalances(
+        uint256 gameId,
+        uint256[] calldata assetIds
+    ) external view override returns (uint256[] memory) {
         uint256 storageId = _storageId(gameId);
         require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
         uint256 length = assetIds.length;
@@ -276,12 +266,10 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
-    function getERC721AssetBalances(uint256 gameId, uint256[] calldata assetIds)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
+    function getERC721AssetBalances(
+        uint256 gameId,
+        uint256[] calldata assetIds
+    ) external view override returns (uint256[] memory) {
         uint256 storageId = _storageId(gameId);
         require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
         uint256 length = assetIds.length;
@@ -306,9 +294,9 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @return the bytes4 value 0xbc197c81.
     function onERC1155BatchReceived(
         address operator,
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
         bytes calldata /*data*/
     ) external view override returns (bytes4) {
         if (operator == address(this)) {
@@ -322,9 +310,9 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @return the bytes4 value 0xf23a6e61.
     function onERC1155Received(
         address operator,
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
         bytes calldata /*data*/
     ) external view override returns (bytes4) {
         if (operator == address(this)) {
@@ -405,12 +393,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param assetId The id of the asset to add to GAME.
     /// @param amount The amount to increase.
     /// @param isERC1155 If the asset is an ERC1155
-    function _increaseAmount(
-        uint256 strgId,
-        uint256 assetId,
-        uint256 amount,
-        bool isERC1155
-    ) internal {
+    function _increaseAmount(uint256 strgId, uint256 assetId, uint256 amount, bool isERC1155) internal {
         if (isERC1155) {
             require(amount != 0, "INVALID_ASSET_ADDITION");
             uint256 currentValue = _gameERC1155Assets[strgId][assetId];
@@ -427,12 +410,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param assetId The id of the asset to add to GAME.
     /// @param amount The amount to decrease.
     /// @param isERC1155 If the asset is an ERC1155
-    function _decreaseAmount(
-        uint256 strgId,
-        uint256 assetId,
-        uint256 amount,
-        bool isERC1155
-    ) internal {
+    function _decreaseAmount(uint256 strgId, uint256 assetId, uint256 amount, bool isERC1155) internal {
         if (isERC1155) {
             uint256 currentValue = _gameERC1155Assets[strgId][assetId];
             require(amount != 0 && currentValue >= amount, "INVALID_ASSET_REMOVAL");
@@ -592,11 +570,7 @@ contract GameBaseToken is IERC721Receiver, ImmutableERC721, WithMinter, Initiali
     /// @param gameCreator The address of a GAME creator,
     /// @param editor The address of the editor to set.
     /// @param isEditor Add or remove the ability to edit.
-    function _setGameEditor(
-        address gameCreator,
-        address editor,
-        bool isEditor
-    ) internal {
+    function _setGameEditor(address gameCreator, address editor, bool isEditor) internal {
         emit GameEditorSet(gameCreator, editor, isEditor);
         _gameEditors[gameCreator][editor] = isEditor;
     }

@@ -4,11 +4,11 @@ pragma solidity 0.8.2;
 library ERC1155ERC721Helper {
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
-    uint256 public constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 public constant IS_NFT_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1);
-    uint256 public constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 8);
-    uint256 public constant PACK_ID_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32 - 40);
-    uint256 public constant PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32 - 40 - 12);
+    uint256 public constant CREATOR_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160);
+    uint256 public constant IS_NFT_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160 - 1);
+    uint256 public constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160 - 1 - 8);
+    uint256 public constant PACK_ID_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160 - 1 - 32 - 40);
+    uint256 public constant PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160 - 1 - 32 - 40 - 12);
     uint256 public constant NFT_INDEX_OFFSET = 63;
 
     uint256 public constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
@@ -22,9 +22,9 @@ library ERC1155ERC721Helper {
     uint256 public constant CHAIN_INDEX = 0x00000000000000000000000000000000000000007F8000000000000000000000;
     uint256 public constant NOT_CHAIN_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF807FFFFFFFFFFFFFFFFFFFFF;
 
-    uint256 public constant MAX_SUPPLY = uint256(2)**32 - 1;
-    uint256 public constant MAX_PACK_SIZE = uint256(2)**11;
-    uint256 public constant MAX_NUM_FT = uint256(2)**12;
+    uint256 public constant MAX_SUPPLY = uint256(2) ** 32 - 1;
+    uint256 public constant MAX_PACK_SIZE = uint256(2) ** 11;
+    uint256 public constant MAX_NUM_FT = uint256(2) ** 12;
 
     function toFullURI(bytes32 hash, uint256 id) external pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));

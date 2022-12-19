@@ -36,13 +36,7 @@ interface IERC1155 {
         @param value   Transfer amount
         @param data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `to`
     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes calldata data) external;
 
     /**
         @notice Transfers `values` amount(s) of `ids` from the `from` address to the `to` address specified (with safety call).

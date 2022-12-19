@@ -52,11 +52,7 @@ contract ClaimERC1155ERC721ERC20V2 {
     /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
     /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
     /// @param proof The proof provided by the user performing the claim function.
-    function _claimERC1155ERC721ERC20(
-        bytes32 merkleRoot,
-        Claim memory claim,
-        bytes32[] calldata proof
-    ) internal {
+    function _claimERC1155ERC721ERC20(bytes32 merkleRoot, Claim memory claim, bytes32[] calldata proof) internal {
         _checkValidity(merkleRoot, claim, proof);
         for (uint256 i = 0; i < claim.erc1155.length; i++) {
             require(claim.erc1155[i].ids.length == claim.erc1155[i].values.length, "CLAIM_INVALID_INPUT");
@@ -76,11 +72,7 @@ contract ClaimERC1155ERC721ERC20V2 {
     /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
     /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
     /// @param proof The proof provided by the user performing the claim function.
-    function _checkValidity(
-        bytes32 merkleRoot,
-        Claim memory claim,
-        bytes32[] memory proof
-    ) private pure {
+    function _checkValidity(bytes32 merkleRoot, Claim memory claim, bytes32[] memory proof) private pure {
         bytes32 leaf = _generateClaimHash(claim);
         require(MerkleProof.verify(proof, merkleRoot, leaf), "CLAIM_INVALID");
     }
@@ -110,11 +102,7 @@ contract ClaimERC1155ERC721ERC20V2 {
     /// @param to The destination address for the claimed tokens.
     /// @param ids The array of ERC721 ids.
     /// @param contractAddress The ERC721 token contract address.
-    function _transferERC721(
-        address to,
-        uint256[] memory ids,
-        address contractAddress
-    ) private {
+    function _transferERC721(address to, uint256[] memory ids, address contractAddress) private {
         require(contractAddress != address(0), "CLAIM_INVALID_CONTRACT_ZERO_ADDRESS");
         IERC721Extended(contractAddress).safeBatchTransferFrom(address(this), to, ids, "");
     }
@@ -123,11 +111,7 @@ contract ClaimERC1155ERC721ERC20V2 {
     /// @param to The destination address for the claimed tokens.
     /// @param amounts The array of amounts of ERC20 tokens to be transferred.
     /// @param contractAddresses The array of ERC20 token contract addresses.
-    function _transferERC20(
-        address to,
-        uint256[] memory amounts,
-        address[] memory contractAddresses
-    ) private {
+    function _transferERC20(address to, uint256[] memory amounts, address[] memory contractAddresses) private {
         for (uint256 i = 0; i < amounts.length; i++) {
             address erc20ContractAddress = contractAddresses[i];
             uint256 erc20Amount = amounts[i];

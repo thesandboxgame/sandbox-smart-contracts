@@ -28,7 +28,8 @@ describe('AssetERC721.sol', function () {
     describe('admin', function () {
       it('admin role is set', async function () {
         const fixtures = await setupAssetERC721Test();
-        const defaultAdminRole = await fixtures.assetERC721.DEFAULT_ADMIN_ROLE();
+        const defaultAdminRole =
+          await fixtures.assetERC721.DEFAULT_ADMIN_ROLE();
         expect(
           await fixtures.assetERC721.hasRole(
             defaultAdminRole,
@@ -181,11 +182,12 @@ describe('AssetERC721.sol', function () {
         'AssetERC721',
         fixtures.trustedForwarder
       );
-      const txData = await assetERC721AsTrustedForwarder.populateTransaction.transferFrom(
-        fixtures.other,
-        fixtures.dest,
-        124
-      );
+      const txData =
+        await assetERC721AsTrustedForwarder.populateTransaction.transferFrom(
+          fixtures.other,
+          fixtures.dest,
+          124
+        );
       // The msg.sender goes at the end.
       txData.data = solidityPack(
         ['bytes', 'address'],

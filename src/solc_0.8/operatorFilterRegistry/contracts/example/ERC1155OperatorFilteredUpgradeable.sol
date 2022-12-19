@@ -44,21 +44,14 @@ contract ERC1155OperatorFilteredUpgradeable is
         _safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) external {
+    function mint(address to, uint256 id, uint256 amount, bytes memory data) external {
         _mint(to, id, amount, data);
     }
 
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override onlyAllowedOperatorApproval(operator) {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 

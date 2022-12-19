@@ -58,11 +58,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
     AntiCompound public antiCompound;
 
-    constructor(
-        IERC20 stakeToken_,
-        IERC20 rewardToken_,
-        address trustedForwarder
-    ) StakeTokenWrapper(stakeToken_) {
+    constructor(IERC20 stakeToken_, IERC20 rewardToken_, address trustedForwarder) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         __ERC2771Handler_initialize(trustedForwarder);
@@ -121,10 +117,10 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     /// @notice set the reward calculator
     /// @param contractAddress address of a plugin that calculates absolute rewards at any point in time
     /// @param restartRewards if true the rewards from the previous calculator are accumulated before changing it
-    function setRewardCalculator(address contractAddress, bool restartRewards)
-        external
-        isContractAndAdmin(contractAddress)
-    {
+    function setRewardCalculator(
+        address contractAddress,
+        bool restartRewards
+    ) external isContractAndAdmin(contractAddress) {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards) {
             _restartRewards();

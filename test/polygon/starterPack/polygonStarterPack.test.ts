@@ -98,28 +98,21 @@ const getPackedNonce = (nonce: number, queueId: number) => {
 describe('PolygonStarterPack.sol', function () {
   describe('PurchaseValidator.sol', function () {
     it('can get the backend signing wallet', async function () {
-      const {
-        PolygonStarterPack,
-        backendMessageSigner,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPack, backendMessageSigner} =
+        await setupPolygonStarterPack();
       expect(await PolygonStarterPack.getSigningWallet()).to.be.equal(
         backendMessageSigner
       );
     });
     it('default admin can set the backend signing wallet', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other} =
+        await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsAdmin.setSigningWallet(other.address)).to
         .not.be.reverted;
     });
     it('a SigningWallet event is emitted when the signing wallet is updated', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, PolygonStarterPack, other} =
+        await setupPolygonStarterPack();
       const receipt = await waitFor(
         PolygonStarterPackAsAdmin.setSigningWallet(other.address)
       );
@@ -148,20 +141,14 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('Roles', function () {
     it('default admin should be set', async function () {
-      const {
-        PolygonStarterPack,
-        sandAdmin,
-        defaultAdminRole,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPack, sandAdmin, defaultAdminRole} =
+        await setupPolygonStarterPack();
       expect(await PolygonStarterPack.hasRole(defaultAdminRole, sandAdmin)).to
         .be.true;
     });
     it('starterpack admin should be set', async function () {
-      const {
-        PolygonStarterPack,
-        starterPackAdmin,
-        starterPackRole,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPack, starterPackAdmin, starterPackRole} =
+        await setupPolygonStarterPack();
       expect(
         await PolygonStarterPack.hasRole(starterPackRole, starterPackAdmin)
       ).to.be.true;
@@ -169,10 +156,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('Setup', function () {
     it('correct receiving wallet has been implemented', async function () {
-      const {
-        PolygonStarterPack,
-        starterPackSaleBeneficiary,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPack, starterPackSaleBeneficiary} =
+        await setupPolygonStarterPack();
       expect(await PolygonStarterPack.getReceivingWallet()).to.be.equal(
         starterPackSaleBeneficiary
       );
@@ -220,19 +205,14 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('setReceivingWallet', function () {
     it('default admin can set the receiving wallet', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other} =
+        await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsAdmin.setReceivingWallet(other.address))
         .to.not.be.reverted;
     });
     it('a ReceivingWallet event is emitted when the receiving wallet is updated', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, PolygonStarterPack, other} =
+        await setupPolygonStarterPack();
       const receipt = await waitFor(
         PolygonStarterPackAsAdmin.setReceivingWallet(other.address)
       );
@@ -261,9 +241,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('setSANDEnabled', function () {
     it('STARTERPACK_ROLE can set SAND enabled', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsStarterPackAdmin.setSANDEnabled(true)).to
         .not.be.reverted;
     });
@@ -273,10 +252,8 @@ describe('PolygonStarterPack.sol', function () {
         .reverted;
     });
     it('SandEnabled event is emitted when SAND is enabled', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       const receipt = await waitFor(
         PolygonStarterPackAsAdmin.setSANDEnabled(true)
       );
@@ -288,10 +265,8 @@ describe('PolygonStarterPack.sol', function () {
       expect(event.args[0]).to.be.true;
     });
     it('SandEnabled event is emitted when SAND is disabled', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const receipt = await waitFor(
         PolygonStarterPackAsAdmin.setSANDEnabled(false)
@@ -312,9 +287,8 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
     it('STARTERPACK_ROLE can disable SAND', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(PolygonStarterPackAsStarterPackAdmin.setSANDEnabled(false))
         .to.not.be.reverted;
     });
@@ -329,9 +303,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('setPrices', function () {
     it('STARTERPACK_ROLE can set the prices for all cats and gems', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
@@ -353,9 +326,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('an individual catalyst price can be updated', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           [1],
@@ -366,9 +338,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('an individual gem price can be updated', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           [],
@@ -392,9 +363,8 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
     it('cannot set prices for cat that does not exist', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           badCatIds,
@@ -405,9 +375,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CAT_ID');
     });
     it('cannot set prices for gem that does not exist', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
@@ -418,9 +387,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('cannot set prices for cat 0', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           zeroCatId,
@@ -431,9 +399,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CAT_ID');
     });
     it('cannot set prices for gem id 0', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
           catalystIds,
@@ -444,10 +411,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('SetPrices event is emitted when prices are updated', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
 
       const receipt = await waitFor(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
@@ -494,10 +459,8 @@ describe('PolygonStarterPack.sol', function () {
       expect(priceChangeTimestamp).to.be.eq(block.timestamp);
     });
     it('SetPrices event is emitted when a single price is updated', async function () {
-      const {
-        PolygonStarterPackAsStarterPackAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsStarterPackAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
 
       const receipt = await waitFor(
         PolygonStarterPackAsStarterPackAdmin.setPrices(
@@ -578,10 +541,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('withdrawAll', function () {
     it('default admin can withdraw remaining cats and gems from contract', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -661,10 +622,8 @@ describe('PolygonStarterPack.sol', function () {
       );
     });
     it('cannot withdraw cats that do not exist', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -674,10 +633,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CATALYST_ID');
     });
     it('cannot withdraw gems that do not exist', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other} =
+        await setupPolygonStarterPack();
       await expect(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -687,12 +644,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('withdrawal does not fail for zero balances if id exists', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack, other} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -729,11 +682,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('withdrawAll event is emitted upon withdrawal', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       const receipt = await waitFor(
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
@@ -763,11 +713,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('purchaseWithSAND', function () {
     it('can purchase bundle of cats and gems when SAND is enabled - zero prices', async function () {
-      const {
-        other,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {other, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
       Message.buyer = other.address;
@@ -820,12 +767,13 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
-      const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities
-      );
+      const totalPriceToPay =
+        await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities
+        );
       expect(totalSpend).to.eq(totalPriceToPay);
       expect(await sandContract.balanceOf(buyer.address)).to.eq(
         balance.sub(totalSpend)
@@ -945,11 +893,8 @@ describe('PolygonStarterPack.sol', function () {
       expect(eventMessage[5]).to.be.equal(Message.nonce);
     });
     it('cannot purchase bundle of cats and gems without enough SAND', async function () {
-      const {
-        other,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {other, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -975,11 +920,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INSUFFICIENT_FUNDS');
     });
     it('cannot purchase bundle of cats and gems if have not approved the StarterPack contract', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1000,12 +942,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('NOT_AUTHORIZED_ALLOWANCE');
     });
     it('cannot purchase bundle of cats and gems if StarterPack contract does not have any', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack, other} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1037,11 +975,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INSUFFICIENT_FUNDS'); // ERC20BaseTokenUpgradeable error message in Catalyst and Gem contracts
     });
     it('purchase fails with incorrect backend signature', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        buyer,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, buyer, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {...TestMessage};
       Message.buyer = buyer.address;
@@ -1055,11 +990,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_PURCHASE');
     });
     it('purchase fails with bad message params - catalyst lengths', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        buyer,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, buyer, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
         buyer: buyer.address,
@@ -1078,11 +1010,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CAT_INPUT');
     });
     it('purchase fails with bad message params - gem lengths', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        buyer,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, buyer, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
         buyer: buyer.address,
@@ -1101,11 +1030,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_INPUT');
     });
     it('purchase invalidates the nonce after 1 use', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1134,11 +1060,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_NONCE');
     });
     it('cannot purchase cats that do not exist', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1170,11 +1093,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_CATALYST_ID');
     });
     it('cannot purchase gems that do not exist', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1206,12 +1126,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.be.revertedWith('INVALID_GEM_ID');
     });
     it('cannot purchase if not msgSender()', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-        other,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack, other} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1268,12 +1184,13 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
-      const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities
-      );
+      const totalPriceToPay =
+        await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities
+        );
       expect(totalSpend).not.to.eq(totalPriceToPay);
       expect(totalPriceToPay).to.eq(0);
       expect(await sandContract.balanceOf(buyer.address)).to.eq(balance);
@@ -1318,12 +1235,13 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
-      const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities
-      );
+      const totalPriceToPay =
+        await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities
+        );
       expect(totalSpend).to.eq(totalPriceToPay);
       expect(await sandContract.balanceOf(buyer.address)).to.eq(
         balance.sub(totalSpend)
@@ -1369,23 +1287,21 @@ describe('PolygonStarterPack.sol', function () {
       await expect(
         buyer.PolygonStarterPack.purchaseWithSAND(Message, signature)
       ).to.not.be.reverted;
-      const totalPriceToPay = await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities
-      );
+      const totalPriceToPay =
+        await PolygonStarterPack.callStatic.calculateTotalPriceInSAND(
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities
+        );
       expect(totalSpend).to.eq(totalPriceToPay);
       expect(await sandContract.balanceOf(buyer.address)).to.eq(
         balance.sub(totalSpend)
       );
     });
     it('allows multiple nonce queues for a given buyer', async function () {
-      const {
-        buyer,
-        PolygonStarterPackAsAdmin,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {buyer, PolygonStarterPackAsAdmin, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       await PolygonStarterPackAsAdmin.setPrices(
         catalystIds,
@@ -1486,11 +1402,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('order of cat IDs should not matter', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const message = {
         buyer: other.address,
@@ -1515,11 +1428,8 @@ describe('PolygonStarterPack.sol', function () {
       ).to.not.be.reverted;
     });
     it('order of gem IDs should not matter', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const message = {
         buyer: other.address,
@@ -1553,11 +1463,8 @@ describe('PolygonStarterPack.sol', function () {
       expect(nonce).to.be.equal(0);
     });
     it('cannot reuse nonce', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-        PolygonStarterPack,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other, PolygonStarterPack} =
+        await setupPolygonStarterPack();
       await PolygonStarterPackAsAdmin.setSANDEnabled(true);
       const Message = {
         buyer: other.address,
@@ -1595,10 +1502,8 @@ describe('PolygonStarterPack.sol', function () {
       expect(switchTime).to.be.equal(0);
     });
     it('cats and gems prices can be viewed after an update has been made', async function () {
-      const {
-        PolygonStarterPack,
-        PolygonStarterPackAsAdmin,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPack, PolygonStarterPackAsAdmin} =
+        await setupPolygonStarterPack();
       let receipt = await waitFor(
         PolygonStarterPackAsAdmin.setPrices(
           catalystIds,
@@ -1699,13 +1604,11 @@ describe('PolygonStarterPack.sol', function () {
         Message
       );
 
-      const {
-        to,
-        data,
-      } = await PolygonStarterPack.populateTransaction.purchaseWithSAND(
-        Message,
-        signature
-      );
+      const {to, data} =
+        await PolygonStarterPack.populateTransaction.purchaseWithSAND(
+          Message,
+          signature
+        );
 
       const forwarder = trustedForwarder;
       const signer = buyer.address;
@@ -1751,11 +1654,8 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('test array lengths for withdrawAll', function () {
     it('can withdraw 20 types of gems', async function () {
-      const {
-        PolygonStarterPackAsAdmin,
-        other,
-        deployManyGemContracts,
-      } = await setupPolygonStarterPack();
+      const {PolygonStarterPackAsAdmin, other, deployManyGemContracts} =
+        await setupPolygonStarterPack();
       await deployManyGemContracts(15);
       await PolygonStarterPackAsAdmin.withdrawAll(
         other.address,
@@ -1791,109 +1691,14 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
           ],
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
-            51,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
           ]
         )
       ).to.be.revertedWith('TOO_MANY_IDS');
@@ -1919,47 +1724,11 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20,
           ],
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20,
           ]
         )
@@ -1989,68 +1758,12 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
           ],
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
           ]
         )
       );
@@ -2079,108 +1792,14 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
           ],
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
           ]
         )
       );
@@ -2209,56 +1828,9 @@ describe('PolygonStarterPack.sol', function () {
         PolygonStarterPackAsAdmin.withdrawAll(
           other.address,
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
           ],
           []
         )
@@ -2286,56 +1858,9 @@ describe('PolygonStarterPack.sol', function () {
           other.address,
           [],
           [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49,
-            50,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
           ]
         )
       );

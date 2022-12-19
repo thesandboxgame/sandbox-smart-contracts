@@ -37,11 +37,7 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Constructor with the admin & trusted forwarder
     /// @param admin Admin of the contract
     /// @param trustedForwarder Trusted forwarder for ERC2771
-    constructor(
-        address admin,
-        address multigiveawayAdmin,
-        address trustedForwarder
-    ) {
+    constructor(address admin, address multigiveawayAdmin, address trustedForwarder) {
         require(admin != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(MULTIGIVEAWAY_ROLE, multigiveawayAdmin);
@@ -51,11 +47,10 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
-        external
-        onlyRole(MULTIGIVEAWAY_ROLE)
-        whenNotPaused()
-    {
+    function addNewGiveaway(
+        bytes32 merkleRoot,
+        uint256 expiryTime
+    ) external onlyRole(MULTIGIVEAWAY_ROLE) whenNotPaused {
         require(expiryTime > block.timestamp, "MULTIGIVEAWAY_INVALID_INPUT");
         require(merkleRoot != 0, "MULTIGIVEAWAY_INVALID_INPUT");
         require(_expiryTime[merkleRoot] == 0, "MULTIGIVEAWAY_ALREADY_EXISTS");
@@ -108,7 +103,7 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof
-    ) public whenNotPaused() {
+    ) public whenNotPaused {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
@@ -142,9 +137,9 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Handle the receipt of an NFT
     /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     function onERC721Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC721_RECEIVED;
@@ -153,9 +148,9 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Handle the receipt of a batch of NFTs
     /// @return `bytes4(keccak256("onERC721BatchReceived(address,address,uint256[],bytes)"))`
     function onERC721BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC721_BATCH_RECEIVED;
@@ -164,10 +159,10 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Handle the receipt of a single ERC1155 token type.
     /// @return `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     function onERC1155Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
@@ -176,10 +171,10 @@ contract MultiGiveawayV2 is AccessControl, ClaimERC1155ERC721ERC20V2, ERC2771Han
     /// @notice Handle the receipt of a batch of ERC1155 tokens type.
     /// @return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     function onERC1155BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_BATCH_RECEIVED;

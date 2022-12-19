@@ -22,11 +22,7 @@ contract FakeERC20Predicate {
         token = _token;
     }
 
-    function lockTokens(
-        address depositor,
-        address depositReceiver,
-        bytes calldata depositData
-    ) external {
+    function lockTokens(address depositor, address depositReceiver, bytes calldata depositData) external {
         uint256 amount = abi.decode(depositData, (uint256));
         emit LockedERC20(depositor, depositReceiver, token, amount);
         IERC20(token).safeTransferFrom(depositor, address(this), amount);

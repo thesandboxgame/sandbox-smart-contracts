@@ -35,7 +35,11 @@ contract AssetSignedAuctionWithAuth is
         bytes backendSignature;
     }
 
-    enum SignatureType {DIRECT, EIP1654, EIP1271}
+    enum SignatureType {
+        DIRECT,
+        EIP1654,
+        EIP1271
+    }
 
     bytes32 public constant BACKEND_TYPEHASH =
         keccak256(
@@ -127,7 +131,9 @@ contract AssetSignedAuctionWithAuth is
 
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
-    function claimSellerOffer(ClaimSellerOfferRequest memory input)
+    function claimSellerOffer(
+        ClaimSellerOfferRequest memory input
+    )
         external
         payable
         isAuthValid(
@@ -174,7 +180,9 @@ contract AssetSignedAuctionWithAuth is
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input)
+    function claimSellerOfferViaEIP1271(
+        ClaimSellerOfferRequest memory input
+    )
         external
         payable
         isAuthValid(
@@ -221,7 +229,9 @@ contract AssetSignedAuctionWithAuth is
 
     /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input)
+    function claimSellerOfferViaEIP1654(
+        ClaimSellerOfferRequest memory input
+    )
         external
         payable
         isAuthValid(
@@ -283,13 +293,12 @@ contract AssetSignedAuctionWithAuth is
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal nonReentrant {
-        uint256 offer =
-            PriceUtil.calculateCurrentPrice(
-                auctionData[AuctionData_StartingPrice],
-                auctionData[AuctionData_EndingPrice],
-                auctionData[AuctionData_Duration],
-                block.timestamp - auctionData[AuctionData_StartedAt]
-            ) * purchase[0];
+        uint256 offer = PriceUtil.calculateCurrentPrice(
+            auctionData[AuctionData_StartingPrice],
+            auctionData[AuctionData_EndingPrice],
+            auctionData[AuctionData_Duration],
+            block.timestamp - auctionData[AuctionData_StartedAt]
+        ) * purchase[0];
         claimed[seller][auctionData[AuctionData_OfferId]] =
             claimed[seller][auctionData[AuctionData_OfferId]] +
             purchase[0];

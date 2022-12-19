@@ -13,11 +13,7 @@ contract Faucet is Ownable {
 
     mapping(address => uint256) public _lastTimestamps;
 
-    constructor(
-        IERC20 ierc20,
-        uint256 period,
-        uint256 amountLimit
-    ) {
+    constructor(IERC20 ierc20, uint256 period, uint256 amountLimit) {
         _ierc20 = ierc20;
         _period = period;
         _amountLimit = amountLimit;

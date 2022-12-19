@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "../BaseWithStorage/ERC721BaseToken.sol";
 
 contract ImmutableERC721 is ERC721BaseToken {
-    uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 internal constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
-    uint256 internal constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
+    uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160);
+    uint256 internal constant SUBID_MULTIPLIER = uint256(2) ** (256 - 224);
+    uint256 internal constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2) ** (256 - 160 - 64 - 16);
     uint256 internal constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     uint256 internal constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
     uint256 internal constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;

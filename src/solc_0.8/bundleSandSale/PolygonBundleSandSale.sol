@@ -81,11 +81,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithEther(
-        uint256 saleId,
-        uint256 numPacks,
-        address to
-    ) external payable {
+    function buyBundleWithEther(uint256 saleId, uint256 numPacks, address to) external payable {
         (uint256 saleIndex, uint256 usdRequired) = _getSaleAmount(saleId, numPacks);
         uint256 ethRequired = getEtherAmountWithUSD(usdRequired);
         require(msg.value >= ethRequired, "not enough ether sent");
@@ -106,11 +102,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithDai(
-        uint256 saleId,
-        uint256 numPacks,
-        address to
-    ) external {
+    function buyBundleWithDai(uint256 saleId, uint256 numPacks, address to) external {
         (uint256 saleIndex, uint256 usdRequired) = _getSaleAmount(saleId, numPacks);
         require(dai.transferFrom(msg.sender, receivingWallet, usdRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
@@ -171,8 +163,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(value > 0, "no Asset transfered");
         require(data.length > 0, "data need to contains the sale data");
 
-        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-            abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) = abi.decode(
+            data,
+            (uint256, uint256, uint256)
+        );
 
         uint256 amount = value / numPacks;
         require(amount * numPacks == value, "invalid amounts, not divisible by numPacks");
@@ -200,8 +194,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(ids.length > 0, "need to contains Asset");
         require(data.length > 0, "data need to contains the sale data");
 
-        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-            abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) = abi.decode(
+            data,
+            (uint256, uint256, uint256)
+        );
 
         uint256[] memory amounts = new uint256[](ids.length);
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -235,11 +231,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         return uint256(pair);
     }
 
-    function _transferPack(
-        uint256 saleIndex,
-        uint256 numPacks,
-        address to
-    ) internal {
+    function _transferPack(uint256 saleIndex, uint256 numPacks, address to) internal {
         uint256 sandAmountPerPack = sales[saleIndex].sandAmount;
         require(sand.transferFrom(address(this), to, sandAmountPerPack * numPacks), "Sand Transfer failed");
         uint256[] memory ids = sales[saleIndex].ids;
@@ -282,10 +274,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
     }
 
-    function _getSaleAmount(uint256 saleId, uint256 numPacks)
-        internal
-        returns (uint256 saleIndex, uint256 usdRequired)
-    {
+    function _getSaleAmount(
+        uint256 saleId,
+        uint256 numPacks
+    ) internal returns (uint256 saleIndex, uint256 usdRequired) {
         require(saleId > 0, "PolygonBundleSandSale: invalid saleId");
         saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;

@@ -35,12 +35,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @param gemsCatalystsRegistry: GemsCatalystsRegistry for fetching attributes
     /// @param admin: for setting the migration contract address
     /// @param minter: allowed to set gems and catalysts for a given asset
-    constructor(
-        GemsCatalystsRegistry gemsCatalystsRegistry,
-        address admin,
-        address minter,
-        address upgrader
-    ) {
+    constructor(GemsCatalystsRegistry gemsCatalystsRegistry, address admin, address minter, address upgrader) {
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _admin = admin;
         _minter = minter;
@@ -53,16 +48,9 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
 
     /// @notice get the record data (catalyst id, gems ids list) for an asset id
     /// @param assetId id of the asset
-    function getRecord(uint256 assetId)
-        external
-        view
-        override
-        returns (
-            bool exists,
-            uint16 catalystId,
-            uint16[] memory gemIds
-        )
-    {
+    function getRecord(
+        uint256 assetId
+    ) external view override returns (bool exists, uint16 catalystId, uint16[] memory gemIds) {
         catalystId = _records[assetId].catalystId;
         if (catalystId == 0 && assetId & IS_NFT != 0) {
             // fallback on collection catalyst
@@ -82,12 +70,10 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @notice getAttributes
     /// @param assetId id of the asset
     /// @return values The array of values(256) requested.
-    function getAttributes(uint256 assetId, GemEvent[] calldata events)
-        external
-        view
-        override
-        returns (uint32[] memory values)
-    {
+    function getAttributes(
+        uint256 assetId,
+        GemEvent[] calldata events
+    ) external view override returns (uint32[] memory values) {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
@@ -128,11 +114,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @param assetId id of the asset
     /// @param catalystId id of the catalyst to set
     /// @param gemIds list of gems ids to set
-    function setCatalyst(
-        uint256 assetId,
-        uint16 catalystId,
-        uint16[] calldata gemIds
-    ) external virtual override {
+    function setCatalyst(uint256 assetId, uint16 catalystId, uint16[] calldata gemIds) external virtual override {
         require(_msgSender() == _minter || _msgSender() == _upgrader, "NOT_AUTHORIZED_MINTER");
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), true);
     }

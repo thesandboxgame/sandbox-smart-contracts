@@ -7,11 +7,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {
-    deployer,
-    assetAuctionAdmin,
-    assetAuctionFeeCollector,
-  } = await getNamedAccounts();
+  const {deployer, assetAuctionAdmin, assetAuctionFeeCollector} =
+    await getNamedAccounts();
 
   const assetContract = await deployments.get('Asset');
   const authValidatorContract = await deployments.get('AuthValidator');

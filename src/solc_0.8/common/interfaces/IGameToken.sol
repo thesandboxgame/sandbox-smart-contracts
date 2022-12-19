@@ -51,37 +51,25 @@ interface IGameToken {
         uint256[] calldata assetERC721Ids
     ) external;
 
-    function updateGame(
-        address from,
+    function updateGame(address from, uint256 gameId, GameData calldata update) external returns (uint256);
+
+    function getERC1155AssetBalances(
         uint256 gameId,
-        GameData calldata update
-    ) external returns (uint256);
+        uint256[] calldata assetIds
+    ) external view returns (uint256[] calldata);
 
-    function getERC1155AssetBalances(uint256 gameId, uint256[] calldata assetIds)
-        external
-        view
-        returns (uint256[] calldata);
+    function getERC721AssetBalances(
+        uint256 gameId,
+        uint256[] calldata assetIds
+    ) external view returns (uint256[] calldata);
 
-    function getERC721AssetBalances(uint256 gameId, uint256[] calldata assetIds)
-        external
-        view
-        returns (uint256[] calldata);
-
-    function setGameEditor(
-        address gameCreator,
-        address editor,
-        bool isEditor
-    ) external;
+    function setGameEditor(address gameCreator, address editor, bool isEditor) external;
 
     function isGameEditor(address gameOwner, address editor) external view returns (bool isEditor);
 
     function creatorOf(uint256 id) external view returns (address);
 
-    function transferCreatorship(
-        uint256 gameId,
-        address sender,
-        address to
-    ) external;
+    function transferCreatorship(uint256 gameId, address sender, address to) external;
 
     function name() external pure returns (string memory);
 
@@ -91,17 +79,17 @@ interface IGameToken {
 
     function onERC1155Received(
         address operator,
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
         bytes calldata /*data*/
     ) external view returns (bytes4);
 
     function onERC1155BatchReceived(
         address operator,
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
         bytes calldata /*data*/
     ) external view returns (bytes4);
 }

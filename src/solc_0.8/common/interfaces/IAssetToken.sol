@@ -33,38 +33,15 @@ interface IAssetToken {
 
     function collectionIndexOf(uint256 id) external view returns (uint256);
 
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) external returns (uint256 newId);
+    function extractERC721From(address sender, uint256 id, address to) external returns (uint256 newId);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external;
+    function transferFrom(address from, address to, uint256 id) external;
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 id) external;
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes calldata data) external;
 
-    function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external;
+    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external;
 
     function safeBatchTransferFrom(
         address from,

@@ -30,11 +30,10 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        whenNotPaused()
-    {
+    function addNewGiveaway(
+        bytes32 merkleRoot,
+        uint256 expiryTime
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -83,7 +82,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof
-    ) public whenNotPaused() {
+    ) public whenNotPaused {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
@@ -97,38 +96,38 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     }
 
     function onERC721Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC721_RECEIVED;
     }
 
     function onERC721BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC721_BATCH_RECEIVED;
     }
 
     function onERC1155Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 
     function onERC1155BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_BATCH_RECEIVED;

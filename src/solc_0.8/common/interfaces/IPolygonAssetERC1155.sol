@@ -19,18 +19,9 @@ interface IPolygonAssetERC1155 {
         bytes calldata data
     ) external returns (uint256 id);
 
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes calldata data
-    ) external;
+    function mint(address account, uint256 id, uint256 amount, bytes calldata data) external;
 
-    function mintDeficit(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external;
+    function mintDeficit(address account, uint256 id, uint256 amount) external;
 
     function mintMultiple(
         address creator,
@@ -52,13 +43,7 @@ interface IPolygonAssetERC1155 {
 
     function collectionIndexOf(uint256 id) external view returns (uint256);
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes calldata data) external;
 
     function safeBatchTransferFrom(
         address from,
@@ -68,19 +53,11 @@ interface IPolygonAssetERC1155 {
         bytes calldata data
     ) external;
 
-    function burnFrom(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external;
+    function burnFrom(address from, uint256 id, uint256 amount) external;
 
     function getBouncerAdmin() external view returns (address);
 
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) external returns (uint256 newId);
+    function extractERC721From(address sender, uint256 id, address to) external returns (uint256 newId);
 
     function isBouncer(address who) external view returns (bool);
 
@@ -92,11 +69,7 @@ interface IPolygonAssetERC1155 {
 
     function isApprovedForAll(address owner, address operator) external view returns (bool isOperator);
 
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external;
+    function setApprovalForAllFor(address sender, address operator, bool approved) external;
 
     function setApprovalForAll(address operator, bool approved) external;
 

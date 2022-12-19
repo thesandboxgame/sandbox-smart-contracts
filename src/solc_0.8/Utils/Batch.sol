@@ -59,21 +59,19 @@ contract Batch {
         }
     }
 
-    function singleTargetAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] calldata executions)
-        external
-        payable
-        onlyExecutor
-    {
+    function singleTargetAtomicBatchWithETH(
+        address target,
+        SingleTargetExecutionWithETH[] calldata executions
+    ) external payable onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             target.functionCallWithValue(executions[i].callData, executions[i].value);
         }
     }
 
-    function singleTargetNonAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] calldata executions)
-        external
-        payable
-        onlyExecutor
-    {
+    function singleTargetNonAtomicBatchWithETH(
+        address target,
+        SingleTargetExecutionWithETH[] calldata executions
+    ) external payable onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             _call(target, executions[i].callData, executions[i].value);
         }
@@ -91,11 +89,7 @@ contract Batch {
         }
     }
 
-    function _call(
-        address target,
-        bytes calldata data,
-        uint256 value
-    ) internal returns (bool) {
+    function _call(address target, bytes calldata data, uint256 value) internal returns (bool) {
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = target.call{value: value}(data);
         return success;
@@ -110,13 +104,7 @@ contract Batch {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 
@@ -135,12 +123,7 @@ contract Batch {
     bytes4 private constant ERC721_IS_RECEIVER = 0x150b7a02;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes4) {
+    function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
         return ERC721_RECEIVED;
     }
 

@@ -176,7 +176,9 @@ contract RequirementsRules is Ownable {
         emit ERC1155RequirementListSet(contractERC1155, ids, minAmountId, maxAmountId);
     }
 
-    function getERC721RequirementList(address contractERC721)
+    function getERC721RequirementList(
+        address contractERC721
+    )
         external
         view
         isContract(contractERC721)
@@ -186,7 +188,9 @@ contract RequirementsRules is Ownable {
         return _listERC721[IERC721(contractERC721)];
     }
 
-    function getERC1155RequirementList(address contractERC1155)
+    function getERC1155RequirementList(
+        address contractERC1155
+    )
         external
         view
         isContract(contractERC1155)
@@ -196,12 +200,9 @@ contract RequirementsRules is Ownable {
         return _listERC1155[IERC1155(contractERC1155)];
     }
 
-    function deleteERC721RequirementList(address contractERC721)
-        external
-        onlyOwner
-        isContract(contractERC721)
-        isERC721MemberList(contractERC721)
-    {
+    function deleteERC721RequirementList(
+        address contractERC721
+    ) external onlyOwner isContract(contractERC721) isERC721MemberList(contractERC721) {
         IERC721 reqContract = IERC721(contractERC721);
         uint256 indexToDelete = _listERC721[reqContract].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
@@ -212,12 +213,9 @@ contract RequirementsRules is Ownable {
         emit ERC721RequirementListDeleted(contractERC721);
     }
 
-    function deleteERC1155RequirementList(address contractERC1155)
-        external
-        onlyOwner
-        isContract(contractERC1155)
-        isERC1155MemberList(contractERC1155)
-    {
+    function deleteERC1155RequirementList(
+        address contractERC1155
+    ) external onlyOwner isContract(contractERC1155) isERC1155MemberList(contractERC1155) {
         IERC1155 reqContract = IERC1155(contractERC1155);
         uint256 indexToDelete = _listERC1155[reqContract].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
@@ -359,11 +357,10 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    function _maxStakeAllowedCalculator(uint256 maxStakeERC721, uint256 maxStakeERC1155)
-        internal
-        view
-        returns (uint256)
-    {
+    function _maxStakeAllowedCalculator(
+        uint256 maxStakeERC721,
+        uint256 maxStakeERC1155
+    ) internal view returns (uint256) {
         uint256 maxAllowed = maxStakeOverall;
 
         if (maxStakeERC721 + maxStakeERC1155 > 0) {

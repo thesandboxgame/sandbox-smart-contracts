@@ -31,14 +31,13 @@ abstract contract WithPermit is TheSandbox712, IERC20Permit {
         bytes32 s
     ) public {
         require(deadline >= block.timestamp, "PAST_DEADLINE");
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    _DOMAIN_SEPARATOR,
-                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, _nonces[owner]++, deadline))
-                )
-            );
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                _DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, _nonces[owner]++, deadline))
+            )
+        );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
     }

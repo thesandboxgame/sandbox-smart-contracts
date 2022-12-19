@@ -24,14 +24,10 @@ library AssetHelper {
         }
     }
 
-    function decodeAndSetCatalystDataL1toL2(AssetRegistryData storage self, bytes calldata depositData)
-        public
-        returns (
-            uint256[] memory ids,
-            uint256[] memory amounts,
-            bytes32[] memory hashes
-        )
-    {
+    function decodeAndSetCatalystDataL1toL2(
+        AssetRegistryData storage self,
+        bytes calldata depositData
+    ) public returns (uint256[] memory ids, uint256[] memory amounts, bytes32[] memory hashes) {
         bytes memory data;
         IAssetAttributesRegistry.AssetGemsCatalystData[] memory catalystDatas;
         (ids, amounts, data) = abi.decode(depositData, (uint256[], uint256[], bytes));
@@ -40,10 +36,10 @@ library AssetHelper {
         setCatalystDatas(self, catalystDatas);
     }
 
-    function decodeAndSetCatalystDataL2toL1(AssetRegistryData storage self, bytes calldata data)
-        public
-        returns (bytes32[] memory hashes)
-    {
+    function decodeAndSetCatalystDataL2toL1(
+        AssetRegistryData storage self,
+        bytes calldata data
+    ) public returns (bytes32[] memory hashes) {
         IAssetAttributesRegistry.AssetGemsCatalystData[] memory catalystDatas;
 
         (hashes, catalystDatas) = abi.decode(data, (bytes32[], IAssetAttributesRegistry.AssetGemsCatalystData[]));
@@ -51,16 +47,15 @@ library AssetHelper {
         setCatalystDatas(self, catalystDatas);
     }
 
-    function getGemsAndCatalystData(AssetRegistryData storage self, uint256[] calldata assetIds)
-        public
-        view
-        returns (IAssetAttributesRegistry.AssetGemsCatalystData[] memory)
-    {
+    function getGemsAndCatalystData(
+        AssetRegistryData storage self,
+        uint256[] calldata assetIds
+    ) public view returns (IAssetAttributesRegistry.AssetGemsCatalystData[] memory) {
         uint256 count = getGemsCatalystDataCount(self, assetIds);
         uint256 indexInCatalystArray;
 
-        IAssetAttributesRegistry.AssetGemsCatalystData[] memory gemsCatalystDatas =
-            new IAssetAttributesRegistry.AssetGemsCatalystData[](count);
+        IAssetAttributesRegistry.AssetGemsCatalystData[]
+            memory gemsCatalystDatas = new IAssetAttributesRegistry.AssetGemsCatalystData[](count);
 
         for (uint256 i = 0; i < assetIds.length; i++) {
             (bool isDataFound, uint16 catalystId, uint16[] memory gemIds) = self.assetRegistry.getRecord(assetIds[i]);
@@ -78,11 +73,10 @@ library AssetHelper {
         return gemsCatalystDatas;
     }
 
-    function getGemsCatalystDataCount(AssetRegistryData storage self, uint256[] calldata assetIds)
-        internal
-        view
-        returns (uint256)
-    {
+    function getGemsCatalystDataCount(
+        AssetRegistryData storage self,
+        uint256[] calldata assetIds
+    ) internal view returns (uint256) {
         uint256 count;
 
         for (uint256 i = 0; i < assetIds.length; i++) {

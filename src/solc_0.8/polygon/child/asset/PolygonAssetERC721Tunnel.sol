@@ -87,7 +87,7 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function _processMessageFromRoot(
-        uint256, /* stateId */
+        uint256 /* stateId */,
         address sender,
         bytes memory data /* encoded message from root tunnel */
     ) internal override validateSender(sender) {
@@ -113,9 +113,9 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function onERC721Received(
-        address, /* operator */
-        address, /* from */
-        uint256, /* tokenId */
+        address /* operator */,
+        address /* from */,
+        uint256 /* tokenId */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC721Tunnel: can't directly send Assets");
@@ -123,9 +123,9 @@ contract PolygonAssetERC721Tunnel is
     }
 
     function onERC721BatchReceived(
-        address, /* operator */
-        address, /* from */
-        uint256[] calldata, /* ids */
+        address /* operator */,
+        address /* from */,
+        uint256[] calldata /* ids */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC721Tunnel: can't directly send Assets");

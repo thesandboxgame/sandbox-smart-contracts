@@ -21,11 +21,7 @@ contract PurchaseValidator is AccessControl, EIP712 {
 
     event SigningWallet(address indexed newSigningWallet);
 
-    constructor(
-        address initialSigningWallet,
-        string memory name,
-        string memory version
-    ) EIP712(name, version) {
+    constructor(address initialSigningWallet, string memory name, string memory version) EIP712(name, version) {
         require(initialSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
         _signingWallet = initialSigningWallet;
     }
@@ -85,20 +81,19 @@ contract PurchaseValidator is AccessControl, EIP712 {
         bytes memory signature
     ) internal returns (bool) {
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        bytes32 digest =
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        PURCHASE_TYPEHASH,
-                        buyer,
-                        keccak256(abi.encodePacked(catalystIds)),
-                        keccak256(abi.encodePacked(catalystQuantities)),
-                        keccak256(abi.encodePacked(gemIds)),
-                        keccak256(abi.encodePacked(gemQuantities)),
-                        nonce
-                    )
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    PURCHASE_TYPEHASH,
+                    buyer,
+                    keccak256(abi.encodePacked(catalystIds)),
+                    keccak256(abi.encodePacked(catalystQuantities)),
+                    keccak256(abi.encodePacked(gemIds)),
+                    keccak256(abi.encodePacked(gemQuantities)),
+                    nonce
                 )
-            );
+            )
+        );
         address recoveredSigner = ECDSA.recover(digest, signature);
         return recoveredSigner == _signingWallet;
     }
@@ -109,8 +104,8 @@ contract PurchaseValidator is AccessControl, EIP712 {
     /// @return bool Whether the nonce is valid.
     /// EG: for queueId=42 nonce=7, pass: "0x0000000000000000000000000000002A00000000000000000000000000000007"
     function _checkAndUpdateNonce(address _buyer, uint256 _packedValue) private returns (bool) {
-        uint128 queueId = uint128(_packedValue / 2**128);
-        uint128 nonce = uint128(_packedValue % 2**128);
+        uint128 queueId = uint128(_packedValue / 2 ** 128);
+        uint128 nonce = uint128(_packedValue % 2 ** 128);
         uint128 currentNonce = queuedNonces[_buyer][queueId];
         if (nonce == currentNonce) {
             queuedNonces[_buyer][queueId] = currentNonce + 1;

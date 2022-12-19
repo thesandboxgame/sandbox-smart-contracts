@@ -40,7 +40,7 @@ library SafeMathWithRequire {
         // tmp cannot be zero unless a = 0 which skip the loop
         while (tmp < c) {
             c = tmp;
-            uint256 tmpSquare = tmp**2;
+            uint256 tmpSquare = tmp ** 2;
             require(tmpSquare > tmp, "overflow");
             tmp = ((a / tmpSquare) + (tmp * 2)) / 3;
         }
@@ -54,7 +54,7 @@ library SafeMathWithRequire {
         // tmp cannot be zero unless a = 0 which skip the loop
         while (tmp < c) {
             c = tmp;
-            uint256 tmpSquare = tmp**2;
+            uint256 tmpSquare = tmp ** 2;
             require(tmpSquare > tmp, "overflow");
             tmp = ((a / tmpSquare) + (tmp * 2)) / 3;
         }

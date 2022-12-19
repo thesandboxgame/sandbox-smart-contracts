@@ -14,12 +14,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
 
-    constructor(
-        string memory tokenName,
-        string memory tokenSymbol,
-        address admin,
-        address operator
-    ) {
+    constructor(string memory tokenName, string memory tokenSymbol, address admin, address operator) {
         _name = tokenName;
         _symbol = tokenSymbol;
         _admin = admin;
@@ -40,11 +35,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param to The recipient address of the tokensbeing  transfered.
     /// @param amount The number of tokens transfered.
     /// @return success Whether or not the transfer succeeded.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external override returns (bool success) {
+    function transferFrom(address from, address to, uint256 amount) external override returns (bool success) {
         if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
@@ -125,11 +116,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param spender The address to be given rights to transfer.
     /// @param amount The number of tokens allowed.
     /// @return success Whether or not the call succeeded.
-    function approveFor(
-        address owner,
-        address spender,
-        uint256 amount
-    ) public override returns (bool success) {
+    function approveFor(address owner, address spender, uint256 amount) public override returns (bool success) {
         require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "NOT_AUTHORIZED");
         _approveFor(owner, spender, amount);
         return true;
@@ -140,11 +127,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param spender The address wanting to spend tokens
     /// @param amountNeeded The amount requested to spend
     /// @return success Whether or not the call succeeded.
-    function addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) public returns (bool success) {
+    function addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) public returns (bool success) {
         require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;

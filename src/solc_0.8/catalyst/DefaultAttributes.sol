@@ -11,12 +11,10 @@ contract DefaultAttributes is IAttributes {
     /// @param assetId The asset tokenId.
     /// @param events An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.
     /// @return values An array of values for each gem present in the asset.
-    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)
-        external
-        pure
-        override
-        returns (uint32[] memory values)
-    {
+    function getAttributes(
+        uint256 assetId,
+        IAssetAttributesRegistry.GemEvent[] calldata events
+    ) external pure override returns (uint32[] memory values) {
         values = new uint32[](MAX_NUM_GEM_TYPES);
 
         uint256 numGems;

@@ -27,9 +27,9 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     function onERC721Received(
-        address, /* operator */
-        address, /* from */
-        uint256, /* tokenId */
+        address /* operator */,
+        address /* from */,
+        uint256 /* tokenId */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(transferringToL2, "LandTunnel: !BRIDGING");
@@ -37,9 +37,9 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     function onERC721BatchReceived(
-        address, /* operator */
-        address, /* from */
-        uint256[] calldata, /* ids */
+        address /* operator */,
+        address /* from */,
+        uint256[] calldata /* ids */,
         bytes calldata /* data */
     ) external view override returns (bytes4) {
         require(transferringToL2, "LandTunnel: !BRIDGING");
@@ -56,7 +56,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         uint256[] memory xs,
         uint256[] memory ys,
         bytes memory data
-    ) public whenNotPaused() {
+    ) public whenNotPaused {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         transferringToL2 = true;
         ILandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
@@ -85,8 +85,10 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
-            abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
+        (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) = abi.decode(
+            message,
+            (address, uint256[], uint256[], uint256[], bytes)
+        );
         for (uint256 index = 0; index < x.length; index++) {
             ILandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);

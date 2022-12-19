@@ -51,11 +51,7 @@ contract PolygonAssetERC1155Tunnel is
         emit SetTransferLimit(_maxTransferLimit);
     }
 
-    function batchWithdrawToRoot(
-        address to,
-        uint256[] calldata ids,
-        uint256[] calldata values
-    ) external whenNotPaused {
+    function batchWithdrawToRoot(address to, uint256[] calldata ids, uint256[] calldata values) external whenNotPaused {
         require(to != address(0), "PolygonAssetERC1155Tunnel: to can't be zero");
         require(ids.length > 0, "MISSING_TOKEN_IDS");
         require(ids.length < maxTransferLimit, "EXCEEDS_TRANSFER_LIMIT");
@@ -89,7 +85,7 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     function _processMessageFromRoot(
-        uint256, /* stateId */
+        uint256 /* stateId */,
         address sender,
         bytes memory data
     ) internal override validateSender(sender) {
@@ -97,8 +93,10 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     function _syncDeposit(bytes memory syncData) internal {
-        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) =
-            abi.decode(syncData, (address, uint256[], uint256[], bytes));
+        (address to, uint256[] memory ids, uint256[] memory values, bytes memory data) = abi.decode(
+            syncData,
+            (address, uint256[], uint256[], bytes)
+        );
         bytes32[] memory metadataHashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             bytes memory metadata = abi.encode(metadataHashes[i]);
@@ -111,12 +109,7 @@ contract PolygonAssetERC1155Tunnel is
         }
     }
 
-    function _depositMinted(
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data
-    ) internal {
+    function _depositMinted(address to, uint256 id, uint256 value, bytes memory data) internal {
         uint256 balance = childToken.balanceOf(address(this), id);
         if (balance >= value) {
             childToken.safeTransferFrom(address(this), to, id, value, data);
@@ -135,10 +128,10 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     function onERC1155Received(
-        address, /*_operator*/
-        address, /*_from*/
-        uint256, /*_id*/
-        uint256, /*_value*/
+        address /*_operator*/,
+        address /*_from*/,
+        uint256 /*_id*/,
+        uint256 /*_value*/,
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC1155Tunnel: can't directly send Assets");
@@ -146,10 +139,10 @@ contract PolygonAssetERC1155Tunnel is
     }
 
     function onERC1155BatchReceived(
-        address, /*_operator*/
-        address, /*_from*/
-        uint256[] calldata, /*_ids*/
-        uint256[] calldata, /*_values*/
+        address /*_operator*/,
+        address /*_from*/,
+        uint256[] calldata /*_ids*/,
+        uint256[] calldata /*_values*/,
         bytes calldata /*_data*/
     ) external view override returns (bytes4) {
         require(fetchingAssets == true, "PolygonAssetERC1155Tunnel: can't directly send Assets");

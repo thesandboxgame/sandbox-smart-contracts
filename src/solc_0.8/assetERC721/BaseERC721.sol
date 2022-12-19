@@ -57,11 +57,7 @@ abstract contract BaseERC721 is
     /// @param from The address giving the approval.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
-    function approveFor(
-        address from,
-        address operator,
-        uint256 id
-    ) public virtual override(IERC721ExtendedToken) {
+    function approveFor(address from, address operator, uint256 id) public virtual override(IERC721ExtendedToken) {
         require(from != address(0), "ZERO_ADDRESS");
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         approve(operator, id);
@@ -151,13 +147,9 @@ abstract contract BaseERC721 is
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id)
-        public
-        view
-        virtual
-        override(AccessControlUpgradeable, ERC721Upgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 id
+    ) public view virtual override(AccessControlUpgradeable, ERC721Upgradeable) returns (bool) {
         return super.supportsInterface(id);
     }
 

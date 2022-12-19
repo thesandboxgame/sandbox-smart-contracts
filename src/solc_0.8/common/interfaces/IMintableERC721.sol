@@ -26,11 +26,7 @@ interface IMintableERC721 {
      * Note : If you're interested in taking token metadata from L2 to L1 during exit, you must
      * implement this method
      */
-    function mint(
-        address user,
-        uint256 tokenId,
-        bytes calldata metaData
-    ) external;
+    function mint(address user, uint256 tokenId, bytes calldata metaData) external;
 
     /**
      * @notice check if token already exists, return true if it does exist
@@ -40,9 +36,5 @@ interface IMintableERC721 {
     function exists(uint256 tokenId) external view returns (bool);
 
     // This one came form ERC721 and is used by the predicate!!!
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
+    function safeTransferFrom(address from, address to, uint256 tokenId) external;
 }

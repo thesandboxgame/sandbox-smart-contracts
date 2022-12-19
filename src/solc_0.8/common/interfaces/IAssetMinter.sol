@@ -55,9 +55,10 @@ interface IAssetMinter {
         uint256 _numberOfGemsBurnPerAsset
     ) external returns (uint256 assetId);
 
-    function mintCustomNumberWithoutCatalyst(MintData calldata mintData, uint256 quantity)
-        external
-        returns (uint256 assetId);
+    function mintCustomNumberWithoutCatalyst(
+        MintData calldata mintData,
+        uint256 quantity
+    ) external returns (uint256 assetId);
 
     function addOrReplaceQuantityByCatalystId(uint16 catalystId, uint256 newQuantity) external;
 

@@ -65,11 +65,7 @@ contract ClaimERC1155 {
         return computedHash == _merkleRoot;
     }
 
-    function _sendAssets(
-        address to,
-        uint256[] memory assetIds,
-        uint256[] memory assetValues
-    ) internal {
+    function _sendAssets(address to, uint256[] memory assetIds, uint256[] memory assetValues) internal {
         _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 }

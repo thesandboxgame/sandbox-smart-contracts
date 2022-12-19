@@ -144,11 +144,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param sender address which grant approval.
     /// @param operator address which will be granted rights to transfer all token owned by `sender`.
     /// @param approved whether to approve or revoke.
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external {
+    function setApprovalForAllFor(address sender, address operator, bool approved) external {
         require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
@@ -177,12 +173,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
     /// @return the balance of each `owners` for each token type `ids`.
-    function balanceOfBatch(address[] calldata owners, uint256[] calldata ids)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
+    function balanceOfBatch(
+        address[] calldata owners,
+        uint256[] calldata ids
+    ) external view override returns (uint256[] memory) {
         require(owners.length == ids.length, "ARG_LENGTH_MISMATCH");
         uint256[] memory balances = new uint256[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
@@ -278,11 +272,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type to extract from.
     /// @param to address which will receive the token.
     /// @return newId the id of the newly minted NFT.
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) external returns (uint256) {
+    function extractERC721From(address sender, uint256 id, address to) external returns (uint256) {
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(to != address(0), "TO==0");
@@ -290,11 +280,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint24 tokenCollectionIndex = uint24(_nextCollectionIndex[id]) + 1;
         _nextCollectionIndex[id] = tokenCollectionIndex;
         string memory metaData = uri(id);
-        uint256 newId =
-            id +
-                ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // newId is always an NFT; IS_NFT is 1
-                (tokenCollectionIndex) *
-                2**ERC1155ERC721Helper.NFT_INDEX_OFFSET; // uint24 nft index
+        uint256 newId = id +
+            ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // newId is always an NFT; IS_NFT is 1
+            (tokenCollectionIndex) *
+            2 ** ERC1155ERC721Helper.NFT_INDEX_OFFSET; // uint24 nft index
         _burnFT(sender, id, 1);
         _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
         emit Extraction(id, newId);
@@ -315,12 +304,10 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param owner the owner of the tokens.
     /// @param operator address of authorized operator.
     /// @return isOperator true if the operator is approved, false if not.
-    function isApprovedForAll(address owner, address operator)
-        public
-        view
-        override(IERC1155)
-        returns (bool isOperator)
-    {
+    function isApprovedForAll(
+        address owner,
+        address operator
+    ) public view override(IERC1155) returns (bool isOperator) {
         require(owner != address(0), "OWNER==0");
         require(operator != address(0), "OPERATOR==0");
         return _operatorsForAll[owner][operator] || _superOperators[operator];
@@ -366,11 +353,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         }
     }
 
-    function _setApprovalForAll(
-        address sender,
-        address operator,
-        bool approved
-    ) internal {
+    function _setApprovalForAll(address sender, address operator, bool approved) internal {
         require(sender != address(0), "SENDER==0");
         require(sender != operator, "SENDER==OPERATOR");
         require(operator != address(0), "OPERATOR==0");
@@ -436,21 +419,13 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         }
     }
 
-    function _burn(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) internal {
+    function _burn(address from, uint256 id, uint256 amount) internal {
         require(amount > 0 && amount <= ERC1155ERC721Helper.MAX_SUPPLY, "INVALID_AMOUNT");
         _burnFT(from, id, uint32(amount));
         emit TransferSingle(_msgSender(), from, address(0), id, amount);
     }
 
-    function _burnBatch(
-        address from,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal {
+    function _burnBatch(address from, uint256[] memory ids, uint256[] memory amounts) internal {
         address operator = _msgSender();
         for (uint256 i = 0; i < ids.length; i++) {
             require(amounts[i] > 0 && amounts[i] <= ERC1155ERC721Helper.MAX_SUPPLY, "INVALID_AMOUNT");
@@ -459,11 +434,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         emit TransferBatch(operator, from, address(0), ids, amounts);
     }
 
-    function _burnFT(
-        address from,
-        uint256 id,
-        uint32 amount
-    ) internal {
+    function _burnFT(address from, uint256 id, uint32 amount) internal {
         (uint256 bin, uint256 index) = (id).getTokenBinIndex();
         _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(
             index,
@@ -472,12 +443,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         );
     }
 
-    function _mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {
+    function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
         uint16 offset = 0;
         while (offset < amounts.length) {
             _mintPack(offset, amounts, to, ids);
@@ -486,12 +452,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _completeBatchMint(_msgSender(), to, ids, amounts, data);
     }
 
-    function _mintPack(
-        uint16 offset,
-        uint256[] memory supplies,
-        address owner,
-        uint256[] memory ids
-    ) internal {
+    function _mintPack(uint16 offset, uint256[] memory supplies, address owner, uint256[] memory ids) internal {
         (uint256 bin, uint256 index) = ids[offset].getTokenBinIndex();
         for (uint256 i = 0; i < 8 && offset + i < supplies.length; i++) {
             uint256 j = offset + i;
@@ -505,12 +466,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         }
     }
 
-    function _transferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value
-    ) internal returns (bool) {
+    function _transferFrom(address from, address to, uint256 id, uint256 value) internal returns (bool) {
         address sender = _msgSender();
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
@@ -533,13 +489,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return true;
     }
 
-    function _mint(
-        address operator,
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) internal {
+    function _mint(address operator, address account, uint256 id, uint256 amount, bytes memory data) internal {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
             index,
@@ -551,12 +501,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
     }
 
-    function _mintBatches(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {
+    function _mintBatches(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
         for (uint256 i = 0; i < amounts.length; i++) {
             if (amounts[i] > 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
@@ -570,11 +515,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _completeBatchMint(_msgSender(), to, ids, amounts, data);
     }
 
-    function _mintDeficit(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) internal {
+    function _mintDeficit(address account, uint256 id, uint256 amount) internal {
         address sender = _msgSender();
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
@@ -607,11 +548,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(_checkOnERC1155BatchReceived(operator, address(0), owner, ids, supplies, data), "TRANSFER_REJECTED");
     }
 
-    function _checkEnoughBalance(
-        address from,
-        uint256 id,
-        uint256 value
-    ) internal view {
+    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal view {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "BALANCE_TOO_LOW");
     }

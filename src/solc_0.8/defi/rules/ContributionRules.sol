@@ -158,32 +158,21 @@ contract ContributionRules is Ownable, IContributionRules {
         return multiplierBalanceOfERC721(account) + multiplierBalanceOfERC1155(account);
     }
 
-    function getERC721MultiplierList(address reqContract)
-        external
-        view
-        isContract(reqContract)
-        isERC721MemberList(reqContract)
-        returns (MultiplierRule memory)
-    {
+    function getERC721MultiplierList(
+        address reqContract
+    ) external view isContract(reqContract) isERC721MemberList(reqContract) returns (MultiplierRule memory) {
         return _listERC721[IERC721(reqContract)];
     }
 
-    function getERC1155MultiplierList(address reqContract)
-        external
-        view
-        isContract(reqContract)
-        isERC1155MemberList(reqContract)
-        returns (MultiplierRule memory)
-    {
+    function getERC1155MultiplierList(
+        address reqContract
+    ) external view isContract(reqContract) isERC1155MemberList(reqContract) returns (MultiplierRule memory) {
         return _listERC1155[IERC1155(reqContract)];
     }
 
-    function deleteERC721MultiplierList(address contractERC721)
-        external
-        isContract(contractERC721)
-        isERC721MemberList(contractERC721)
-        onlyOwner
-    {
+    function deleteERC721MultiplierList(
+        address contractERC721
+    ) external isContract(contractERC721) isERC721MemberList(contractERC721) onlyOwner {
         IERC721 reqContract = IERC721(contractERC721);
         uint256 indexToDelete = _listERC721[reqContract].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
@@ -194,12 +183,9 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC721MultiplierListDeleted(address(reqContract));
     }
 
-    function deleteERC1155MultiplierList(address contractERC1155)
-        external
-        isContract(contractERC1155)
-        isERC1155MemberList(contractERC1155)
-        onlyOwner
-    {
+    function deleteERC1155MultiplierList(
+        address contractERC1155
+    ) external isContract(contractERC1155) isERC1155MemberList(contractERC1155) onlyOwner {
         IERC1155 reqContract = IERC1155(contractERC1155);
         uint256 indexToDelete = _listERC1155[reqContract].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
@@ -263,8 +249,8 @@ contract ContributionRules is Ownable, IContributionRules {
             return 0;
         }
 
-        uint256 _multiplierERC721 =
-            NFT_FACTOR_6 * (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((balERC721 - 1) * ROOT3_FACTOR) + 1)));
+        uint256 _multiplierERC721 = NFT_FACTOR_6 *
+            (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((balERC721 - 1) * ROOT3_FACTOR) + 1)));
         if (_multiplierERC721 > MIDPOINT_9) {
             _multiplierERC721 = MIDPOINT_9 + (_multiplierERC721 - MIDPOINT_9) / 10;
         }

@@ -25,7 +25,7 @@ contract WithMinter is WithAdmin {
 
     /// @dev Change the minter to be `newMinter`.
     /// @param newMinter The address of the new minter.
-    function changeMinter(address newMinter) external onlyAdmin() {
+    function changeMinter(address newMinter) external onlyAdmin {
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
     }

@@ -22,11 +22,7 @@ contract Faucets is Ownable {
         _;
     }
 
-    function addFaucet(
-        address faucet,
-        uint256 period,
-        uint256 limit
-    ) public onlyOwner {
+    function addFaucet(address faucet, uint256 period, uint256 limit) public onlyOwner {
         require(!_faucets[faucet], "Faucets: FAUCET_ALREADY_EXISTS");
         _setFaucet(faucet);
         _setPeriod(faucet, period);
