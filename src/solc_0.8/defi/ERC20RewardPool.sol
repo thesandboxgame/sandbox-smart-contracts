@@ -202,7 +202,7 @@ contract ERC20RewardPool is
     /// @return the total amount of deposited rewards
     /// @dev this function can be called by a reward calculator to throw if a campaign doesn't have
     /// @dev enough rewards to start
-    function getRewardsAvailable() external view returns (uint256) {
+    function getRewardsAvailable() public view returns (uint256) {
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
         }
@@ -370,6 +370,7 @@ contract ERC20RewardPool is
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
                 );
             }
+            require(reward <= getRewardsAvailable(), "ERC20RewardPool: not enough rewards");
             rewards[account] = mod;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
