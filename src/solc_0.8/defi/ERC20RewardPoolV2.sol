@@ -27,7 +27,7 @@ import {RequirementsRulesV2} from "./rules-v2/RequirementsRulesV2.sol";
 /// @dev This way we can build different types of pools by mixing in the plugins we want with this contract.
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
 /// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are given
-contract ERC20RewardPool is
+contract ERC20RewardPoolV2 is
     Ownable,
     StakeTokenWrapperV2,
     LockRulesV2,
