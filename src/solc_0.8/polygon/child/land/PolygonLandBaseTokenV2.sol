@@ -366,11 +366,36 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             }
         }
 
-        _owners[quadId] = uint256(uint160(to));
-        _numNFTPerAddress[to] += size * size;
-        _numNFTPerAddress[msg.sender] -= landMinted;
+        {
+            _owners[quadId] = uint256(uint160(to));
+            _numNFTPerAddress[to] += size * size;
+            _numNFTPerAddress[msg.sender] -= landMinted;
 
-        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+            if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+                uint256[] memory idsToTransfer;
+                uint256[] memory idsToMint;
+                for (uint256 i = 0; i < size * size; i++) {
+                    uint256 id = _idInPath(i, size, x, y);
+
+                    if (
+                        _isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index) ||
+                        _owners[id] == uint256(uint160(msg.sender))
+                    ) {
+                        idsToTransfer[idsToTransfer.length] = id;
+                    } else {
+                        idsToMint[idsToMint.length] = id;
+                    }
+                }
+                require(
+                    _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
+                    "erc721 batch transfer rejected by to"
+                );
+                require(
+                    _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
+                    "erc721 batch transfer rejected by to"
+                );
+            }
+        }
     }
 
     function _checkAndClearOwner(
