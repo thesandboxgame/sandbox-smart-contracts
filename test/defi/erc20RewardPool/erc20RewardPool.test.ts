@@ -33,7 +33,7 @@ describe('ERC20RewardPool main contract tests', function () {
           method(poolAsOther, rewardToken.address)
         ).to.be.revertedWith('Ownable: caller is not the owner');
         await expect(method(poolAsOther, AddressZero)).to.be.revertedWith(
-          'RequirementsRules: is not contract'
+          'RequirementsRules: is not a contract'
         );
       });
     }
@@ -853,7 +853,7 @@ describe('ERC20RewardPool main contract tests', function () {
       const user = await getUser();
 
       expect(contract.setTrustedForwarder(user.address)).to.be.revertedWith(
-        'RequirementsRules: is not contract'
+        'RequirementsRules: is not a contract'
       );
 
       expect(contract.setTrustedForwarder(rewardToken.address)).not.to.be
