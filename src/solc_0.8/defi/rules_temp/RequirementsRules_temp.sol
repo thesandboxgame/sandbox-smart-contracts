@@ -8,16 +8,13 @@ import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 
-/// @notice The base contract (ERC20RewardPool) inherits from this one. This contract contains
-/// and checks all the requirements that a user needs to meet in order to stake.
-/// These requirements are checked through the modifier checkRequirements at the moment of the stake
 contract RequirementsRules is Ownable {
     using Address for address;
 
     // we limited the number of Ids and contracts that we can have in the lists
     // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
-    uint256 public constant IDS_LIMIT = 64;
-    uint256 public constant CONTRACTS_LIMIT = 4;
+    uint256 public idsLimit = 64;
+    uint256 public contractsLimit = 4;
 
     // maxStake amount allowed if user has no ERC721 or ERC1155
     uint256 public maxStakeOverall;
@@ -64,7 +61,7 @@ contract RequirementsRules is Ownable {
     event ERC721RequirementListDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
-        require(account.isContract(), "RequirementsRules: is not a contract");
+        require(account.isContract(), "RequirementsRules: is not contract");
 
         _;
     }
@@ -101,8 +98,7 @@ contract RequirementsRules is Ownable {
         _;
     }
 
-    /// @notice set a Max stake in case user has not ERC721 or ERC1155
-    /// @param newMaxStake new max stake value
+    // if user has not erc721 or erc1155
     function setMaxStakeOverall(uint256 newMaxStake) external onlyOwner {
         uint256 oldMaxStake = maxStakeOverall;
         maxStakeOverall = newMaxStake;
@@ -110,14 +106,6 @@ contract RequirementsRules is Ownable {
         emit MaxStakeOverallSet(newMaxStake, oldMaxStake);
     }
 
-    /// @notice set the ERC71 requirements for the user to stake
-    /// @param contractERC721 ERC721 contract address to add to the list
-    /// @param ids ID user should hold
-    /// @param balanceOf if true, use the balanceOf values instead of Ids
-    /// @param minAmountBalanceOf min amount user should hold to be able to stake
-    /// @param maxAmountBalanceOf max value user can stake for each ERC721 he owns.
-    /// @param minAmountId min amount user needs to own of a specific ID to be able to stake
-    /// @param maxAmountId max value user can stake for each asset(ID) he owns
     function setERC721RequirementList(
         address contractERC721,
         uint256[] memory ids,
@@ -127,17 +115,11 @@ contract RequirementsRules is Ownable {
         uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC721) {
-        if (balanceOf == true) {
-            require(ids.length == 0, "RequirementRules: invalid ids array");
-            require(minAmountBalanceOf > 0, "RequirementRules: invalid minAmountBalanceOf");
-            require(maxAmountBalanceOf > 0, "RequirementRules: invalid maxAmountBalanceOf");
-        } else {
-            require(ids.length > 0, "RequirementRules: invalid ids array");
-            require(minAmountId > 0, "RequirementRules: invalid minAmountId");
-            require(maxAmountId > 0, "RequirementRules: invalid maxAmountId");
-            require(ids.length <= idsLimit, "RequirementRules: ids array > limit");
-        }
-
+        require(
+            (balanceOf == true && ids.length == 0 && minAmountBalanceOf > 0 && maxAmountBalanceOf > 0) ||
+                (balanceOf == false && ids.length > 0 && minAmountId > 0 && maxAmountId > 0 && ids.length <= idsLimit),
+            "RequirementRules: invalid list"
+        );
         IERC721 newContract = IERC721(contractERC721);
 
         if (ids.length != 0) {
@@ -152,7 +134,7 @@ contract RequirementsRules is Ownable {
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberRequirementList(newContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(CONTRACTS_LIMIT > _listERC721Index.length, "RequirementsRules: CONTRACTS_LIMIT exceeded");
+            require(contractsLimit > _listERC721Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
         }
@@ -168,21 +150,16 @@ contract RequirementsRules is Ownable {
         );
     }
 
-    /// @notice set the ERC1155 requirements for the user to stake
-    /// @param contractERC1155 ERC1155 contract address to add to the list
-    /// @param ids ID user should hold
-    /// @param minAmountId min amount user needs to own of a specific ID to be able to stake
-    /// @param maxAmountId max value user can stake for each asset(ID) he owns
     function setERC1155RequirementList(
         address contractERC1155,
         uint256[] memory ids,
         uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner isContract(contractERC1155) {
-        require(ids.length > 0, "RequirementRules: invalid ids");
-        require(minAmountId > 0, "RequirementRules: invalid minAmountId");
-        require(maxAmountId > 0, "RequirementRules: invalid");
-        require(ids.length <= IDS_LIMIT, "RequirementRules: IDS_LIMIT");
+        require(
+            ids.length > 0 && minAmountId > 0 && maxAmountId > 0 && ids.length <= idsLimit,
+            "RequirementRules: invalid list"
+        );
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
         _listERC1155[newContract].minAmountId = minAmountId;
@@ -191,7 +168,7 @@ contract RequirementsRules is Ownable {
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberRequirementList(newContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(CONTRACTS_LIMIT > _listERC1155Index.length, "RequirementsRules: CONTRACTS_LIMIT exceeded");
+            require(contractsLimit > _listERC1155Index.length, "RequirementsRules: contractsLimit exceeded");
             _listERC1155Index.push(newContract);
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
@@ -199,8 +176,6 @@ contract RequirementsRules is Ownable {
         emit ERC1155RequirementListSet(contractERC1155, ids, minAmountId, maxAmountId);
     }
 
-    /// @notice return the ERC721 list of the given contract
-    /// @param contractERC721 contract address to retrieve the list
     function getERC721RequirementList(address contractERC721)
         external
         view
@@ -211,8 +186,6 @@ contract RequirementsRules is Ownable {
         return _listERC721[IERC721(contractERC721)];
     }
 
-    /// @notice return the ERC1155 list of the given contract
-    /// @param contractERC1155 contract address to retrieve the list
     function getERC1155RequirementList(address contractERC1155)
         external
         view
@@ -223,8 +196,6 @@ contract RequirementsRules is Ownable {
         return _listERC1155[IERC1155(contractERC1155)];
     }
 
-    /// @notice remove the given contract from the list
-    /// @param contractERC721 contract address to be removed from the list
     function deleteERC721RequirementList(address contractERC721)
         external
         onlyOwner
@@ -241,8 +212,6 @@ contract RequirementsRules is Ownable {
         emit ERC721RequirementListDeleted(contractERC721);
     }
 
-    /// @notice remove the given contract from the list
-    /// @param contractERC1155 contract address to be removed from the list
     function deleteERC1155RequirementList(address contractERC1155)
         external
         onlyOwner
@@ -259,22 +228,14 @@ contract RequirementsRules is Ownable {
         emit ERC11551RequirementListDeleted(contractERC1155);
     }
 
-    /// @notice check if the given contract is in the list
-    /// @param reqContract contract address to check
-    /// @return true if the contract is in the list
     function isERC721MemberRequirementList(IERC721 reqContract) public view returns (bool) {
         return (_listERC721Index.length != 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
-    /// @notice check if the given contract is in the list
-    /// @param reqContract contract address to check
-    /// @return true if the contract is in the list
     function isERC1155MemberRequirementList(IERC1155 reqContract) public view returns (bool) {
         return (_listERC1155Index.length != 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
-    /// @notice return the max amount the user can stake for holding ERC721 assets
-    /// @param account user address to calculate the max stake amount
     function getERC721MaxStake(address account) public view returns (uint256) {
         uint256 _maxStake = 0;
         for (uint256 i = 0; i < _listERC721Index.length; i++) {
@@ -299,8 +260,6 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    /// @notice return the max amount the user can stake for holding ERC1155 assets
-    /// @param account user address to calculate the max stake amount
     function getERC1155MaxStake(address account) public view returns (uint256) {
         uint256 _maxStake = 0;
 
@@ -318,16 +277,12 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    /// @notice return the max amount the user can stake
-    /// @param account user address to calculate the max stake amount
     function maxStakeAllowedCalculator(address account) public view returns (uint256) {
         uint256 maxStakeERC721 = getERC721MaxStake(account);
         uint256 maxStakeERC1155 = getERC1155MaxStake(account);
         return _maxStakeAllowedCalculator(maxStakeERC721, maxStakeERC1155);
     }
 
-    /// @notice return the balance of a specific ID the given user owns
-    /// @param account user address to check the balance
     function getERC721BalanceId(IERC721 reqContract, address account) public view returns (uint256) {
         uint256 balanceOfId = 0;
 
@@ -341,8 +296,6 @@ contract RequirementsRules is Ownable {
         return balanceOfId;
     }
 
-    /// @notice return the balance of a specific ID the given user owns
-    /// @param account user address to check the balance
     function getERC1155BalanceId(IERC1155 reqContract, address account) public view returns (uint256) {
         uint256 balanceOfId = 0;
 
@@ -355,24 +308,23 @@ contract RequirementsRules is Ownable {
         return balanceOfId;
     }
 
-    /// @notice check and calculates the ERC1155 max stake for the given user
-    /// @param account user address to check
     function checkAndGetERC1155Stake(address account) public view returns (uint256) {
         uint256 _maxStake = 0;
         for (uint256 i = 0; i < _listERC1155Index.length; i++) {
+            uint256 _totalBal = 0;
             IERC1155 reqContract = _listERC1155Index[i];
 
             uint256 balanceId = getERC1155BalanceId(reqContract, account);
             if (_listERC1155[reqContract].ids.length > 0) {
                 require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
             }
-            _maxStake = _maxStake + (balanceId * _listERC1155[reqContract].maxAmountId);
+
+            _totalBal = _totalBal + balanceId;
+            _maxStake = _maxStake + (_totalBal * _listERC1155[reqContract].maxAmountId);
         }
         return _maxStake;
     }
 
-    /// @notice check and calculates the ERC721 max stake for the given user
-    /// @param account user address to check
     function checkAndGetERC721Stake(address account) public view returns (uint256) {
         uint256 _maxStake = 0;
         for (uint256 i = 0; i < _listERC721Index.length; i++) {
@@ -407,10 +359,6 @@ contract RequirementsRules is Ownable {
         return _maxStake;
     }
 
-    /// @notice calculates the maxStake allowed
-    /// @param maxStakeERC721 max stake ERC721 previously calculated for the user
-    /// @param maxStakeERC1155 max stake ERC1155 previously calculated for the user
-    /// @return max amount allowed for the user to stake
     function _maxStakeAllowedCalculator(uint256 maxStakeERC721, uint256 maxStakeERC1155)
         internal
         view
@@ -424,6 +372,8 @@ contract RequirementsRules is Ownable {
             } else {
                 maxAllowed = maxStakeERC721 + maxStakeERC1155;
             }
+        } else {
+            maxAllowed = maxStakeOverall;
         }
 
         return maxAllowed;
