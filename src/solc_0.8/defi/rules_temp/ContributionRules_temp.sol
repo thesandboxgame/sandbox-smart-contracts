@@ -9,10 +9,6 @@ import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import {IContributionRules} from "../interfaces/IContributionRules.sol";
 
-/// @notice The contribution rules is a plugin contract that takes the amount staked and the address of
-/// the user and returns the absolute share (contribution) that the user will get from the total rewards.
-/// The contribution rules must implement the IContributionRules interface. This interface has only one method:
-/// computeMultiplier which takes the account and amountStaked parameters and returns the contribution for this user.
 contract ContributionRules is Ownable, IContributionRules {
     using Address for address;
 
@@ -72,10 +68,6 @@ contract ContributionRules is Ownable, IContributionRules {
         _;
     }
 
-    /// @notice compute user multiplier based on the amount staked
-    /// @param account account to compute the multiplier
-    /// @param amountStaked amount stake for the given account
-    /// @return amountStaked
     function computeMultiplier(address account, uint256 amountStaked) external view override returns (uint256) {
         uint256 multiplierERC721 = multiplierBalanceOfERC721(account);
         uint256 multiplierERC1155 = multiplierBalanceOfERC1155(account);
@@ -92,8 +84,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return amountStaked + ((amountStaked * (multiplierERC721 + multiplierERC1155)) / 100);
     }
 
-    /// @notice set a Multiplier limit a user can reach by having ERC721 tokens
-    /// @param _newLimit new limit value - should be less then the max limit allowed by the system.
     function setERC721MultiplierLimit(uint256 _newLimit) external onlyOwner {
         require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
 
@@ -102,8 +92,6 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC721MultiplierLimitSet(_newLimit);
     }
 
-    /// @notice set a Multiplier limit a user can reach by having ERC1155 tokens
-    /// @param _newLimit new limit value - should be less then the max limit allowed by the system.
     function setERC1155MultiplierLimit(uint256 _newLimit) external onlyOwner {
         require(_newLimit <= maxMultiplier, "ContributionRules: invalid newLimit");
 
@@ -112,19 +100,13 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC1155MultiplierLimitSet(_newLimit);
     }
 
-    /// @notice set the ERC1155 Multiplier list
-    /// @param contractERC1155 ERC1155 contract address to add to the list
-    /// @param ids ID user should hold to earn the multiplier
-    /// @param multipliers multiplier applied if the user has the respective id
     function setERC1155MultiplierList(
         address contractERC1155,
         uint256[] memory ids,
         uint256[] memory multipliers
     ) external onlyOwner isContract(contractERC1155) {
-        require(ids.length > 0, "ContributionRules: ids <= 0");
-        require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
+        require(ids.length > 0 && ids.length <= idsLimit, "ContributionRules: invalid array of ids");
         require(multipliers.length > 0, "ContributionRules: invalid array of multipliers");
-        require(multipliers.length == ids.length, "ContributionRules: multipliers array != ids array");
 
         IERC1155 multContract = IERC1155(contractERC1155);
 
@@ -143,21 +125,16 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC1155MultiplierListSet(contractERC1155, multipliers, ids);
     }
 
-    /// @notice set the ERC721 Multiplier list
-    /// @param contractERC721 ERC721 contract address to add to the list
-    /// @param ids ID user should hold to earn the multiplier
-    /// @param multipliers multiplier applied if the user has the respective id
-    /// @param balanceOf if true, will use balanceOf instead of ID - id.length should be = 0
     function setERC721MultiplierList(
         address contractERC721,
         uint256[] memory ids,
         uint256[] memory multipliers,
         bool balanceOf
     ) external onlyOwner isContract(contractERC721) {
-        if (balanceOf == false) {
-            require(ids.length > 0, "ContributionRules: invalid ids array");
-            require(multipliers.length == ids.length, "ContributionRules: ids array != multipliers array");
-        }
+        require(
+            balanceOf == true || (ids.length > 0 && multipliers.length == ids.length),
+            "ContributionRules: invalid list"
+        );
         require(ids.length <= idsLimit, "ContributionRules: invalid array of ids");
 
         IERC721 multContract = IERC721(contractERC721);
@@ -177,14 +154,10 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
     }
 
-    /// @notice Return the max multiplier for the given account
-    /// @param account account address to retrieve the max multiplier
     function getMaxGlobalMultiplier(address account) external view returns (uint256) {
         return multiplierBalanceOfERC721(account) + multiplierBalanceOfERC1155(account);
     }
 
-    /// @notice return the ERC721 multiplier list for the given contract
-    /// @param reqContract ERC721 contract address to retrieve
     function getERC721MultiplierList(address reqContract)
         external
         view
@@ -195,8 +168,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return _listERC721[IERC721(reqContract)];
     }
 
-    /// @notice return the ERC1155 multiplier list for the given contract
-    /// @param reqContract ERC1155 contract address to retrieve
     function getERC1155MultiplierList(address reqContract)
         external
         view
@@ -207,8 +178,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return _listERC1155[IERC1155(reqContract)];
     }
 
-    /// @notice remove the given contract from the list
-    /// @param contractERC721 contract address to be removed from the list
     function deleteERC721MultiplierList(address contractERC721)
         external
         isContract(contractERC721)
@@ -225,8 +194,6 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC721MultiplierListDeleted(address(reqContract));
     }
 
-    /// @notice remove the given contract from the list
-    /// @param contractERC1155 contract address to be removed from the list
     function deleteERC1155MultiplierList(address contractERC1155)
         external
         isContract(contractERC1155)
@@ -243,22 +210,14 @@ contract ContributionRules is Ownable, IContributionRules {
         emit ERC1155MultiplierListDeleted(address(reqContract));
     }
 
-    /// @notice check if the given contract is in the list
-    /// @param reqContract contract address to check
-    /// @return true if the contract is in the list
     function isERC721MemberMultiplierList(IERC721 reqContract) public view returns (bool) {
         return !(_listERC721Index.length == 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
-    /// @notice check if the given contract is in the list
-    /// @param reqContract contract address to check
-    /// @return true if the contract is in the list
     function isERC1155MemberMultiplierList(IERC1155 reqContract) public view returns (bool) {
         return !(_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
-    /// @notice calculate and return the ERC721 multiplier for a given user
-    /// @param account user address to calculate the multiplier
     function multiplierBalanceOfERC721(address account) public view returns (uint256) {
         uint256 _multiplier = 0;
 
@@ -280,8 +239,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return _multiplier;
     }
 
-    /// @notice calculate and return the ERC1155 multiplier for a given user
-    /// @param account user address to calculate the multiplier
     function multiplierBalanceOfERC1155(address account) public view returns (uint256) {
         uint256 _multiplier = 0;
         for (uint256 i = 0; i < _listERC1155Index.length; i++) {
@@ -299,11 +256,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return _multiplier;
     }
 
-    /// @notice calculate and return the multiplier for a given user,
-    /// based on the amount of the specific ERC721 he owns
-    /// @param account user address to calculate the multiplier
-    /// @param contractERC721 contract address to check
-    /// @return ERC721 _multiplier based on the balance
     function multiplierLogarithm(address account, IERC721 contractERC721) public view returns (uint256) {
         uint256 balERC721 = contractERC721.balanceOf(account);
 
@@ -320,8 +272,6 @@ contract ContributionRules is Ownable, IContributionRules {
         return _multiplierERC721 / DECIMALS_7;
     }
 
-    /// @notice as admin powers are really important in this contract
-    /// we're overriding the renounceOwnership method to avoid losing rights
     function renounceOwnership() public view override onlyOwner {
         revert("ContributionRules: can't renounceOwnership");
     }

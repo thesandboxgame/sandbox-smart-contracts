@@ -6,11 +6,6 @@ import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IRewardCalculator} from "../interfaces/IRewardCalculator.sol";
 
-/// @notice This contract has two periods and two corresponding rates and durations. After an initial call
-/// that sets the first period duration and rate another call can be done to set the duration and rate
-/// for the next period. When the first period finishes, the next period becomes the current one, and
-/// then the parameters for the future next period can be set again. This way the rate for the next
-/// period can be set at any moment.
 contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     event InitialCampaign(
         uint256 reward,
@@ -37,8 +32,6 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         uint256 rate2
     );
 
-    event SavedRewardsSet(uint256 indexed reward);
-
     // This role is in charge of configuring reward distribution
     bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
     // Each time a parameter that affects the reward distribution is changed the rewards are distributed by the reward
@@ -59,7 +52,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     //                   |    ****    |            |            |*
     //                   |****        |            |            |*
     // zero -> **********|            |            |            |********************
-    //                   |<-period1-> |<-period2-> |<-restart-> |
+    //                   |<-perido1-> |<-period2-> |<-restart-> |
     uint256 public finish1;
     uint256 public rate1;
     uint256 public finish2;
@@ -73,50 +66,36 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
-    /// @notice For the UI
+    // For the UI
     function getRate() external view returns (uint256) {
-        if (isCampaignFinished()) {
-            return 0;
-        } else if (block.timestamp >= finish1) {
-            return rate2;
-        } else {
-            return rate1;
-        }
+        return rate1;
     }
 
-    /// @notice For the UI
+    // For the UI
     function getFinish() external view returns (uint256) {
-        if (isCampaignFinished()) {
-            return 0;
-        } else if (block.timestamp >= finish1) {
-            return finish2;
-        } else {
-            return finish1;
-        }
+        return finish1;
     }
 
-    /// @notice At any point in time this function must return the accumulated rewards from last call to restartRewards
+    // At any point in time this function must return the accumulated rewards from last call to restartRewards
     function getRewards() external view override returns (uint256) {
         return savedRewards + _getRewards();
     }
 
-    /// @notice The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
+    // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
     function restartRewards() external override {
         require(msg.sender == rewardPool, "not reward pool");
         lastUpdateTime = block.timestamp;
         savedRewards = 0;
     }
 
-    /// @notice Useful when switching reward calculators to set an initial reward.
+    // Useful when switching reward calculators to set an initial reward.
     function setSavedRewards(uint256 reward) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         savedRewards = reward;
         lastUpdateTime = block.timestamp;
-
-        emit SavedRewardsSet(reward);
     }
 
-    /// @notice This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly
+    // This is a helper function, it is better to call setInitialCampaign or updateNextCampaign directly
     function runCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         if (block.timestamp >= finish2) {
@@ -126,23 +105,22 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         }
     }
 
-    /// @notice Start an initial campaign, set the period1 of reward distribution, period2 rate is zero
+    // Start an initial campaign, set the period1 of reward distribution, period2 rate is zero
     function setInitialCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp >= finish2, "initial campaign running");
         _initialCampaign(reward, duration);
     }
 
-    /// @notice Update the period2 of rate distribution, must be called after an initial campaign is set
-    /// If period1 is running, period2 is set with the rate reward/duration.
-    /// If period1 is finished it is updated with the values of period2 and period2 is set with the rate reward/duration.
+    // Update the period2 of rate distribution, must be called after an initial campaign is set
+    // If period1 is running, period2 is set with the rate reward/duration.
+    // If period1 is finished it is updated with the values of period2 and period2 is set with the rate reward/duration.
     function updateNextCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp < finish2, "initial campaign not running");
         _updateNextCampaign(reward, duration);
     }
 
-    /// @notice Update the period1 (current campaign) of rate distribution, must be called after an initial campaign is set
     function updateCurrentCampaign(uint256 reward, uint256 duration) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         require(block.timestamp < finish2, "initial campaign not running");
@@ -150,11 +128,11 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     // Check if both periods already ended => campaign is finished
-    function isCampaignFinished() public view returns (bool) {
+    function isCampaignFinished() external view returns (bool) {
         return (block.timestamp >= finish2);
     }
 
-    /// @notice Check if some of the periods are still running
+    // Check if some of the periods are still running
     function isCampaignRunning() external view returns (bool) {
         return (block.timestamp < finish2);
     }

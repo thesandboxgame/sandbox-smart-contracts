@@ -39,12 +39,6 @@ contract ERC20RewardPool is
     using SafeERC20 for IERC20;
     using Address for address;
 
-    event RewardTokenSet(address indexed contractAddress);
-    event StakeTokenSet(address indexed contractAddress);
-    event TrustedForwarderSet(address indexed trustedForwarder);
-    event ContributionRulesSet(address indexed contractAddress);
-    event RewardCalculatorSet(address indexed contractAddress, bool restartRewards_);
-    event FundsRecovered(address indexed receiver, uint256 recoverAmount);
     event Staked(address indexed account, uint256 stakeAmount);
     event Withdrawn(address indexed account, uint256 stakeAmount);
     event Exit(address indexed account);
@@ -81,6 +75,14 @@ contract ERC20RewardPool is
         __ERC2771HandlerV2_initialize(trustedForwarder);
     }
 
+    // Checks that the given address is a contract and
+    // that the caller of the method is the owner of this contract - ERC20RewardPool.
+    modifier isContractAndAdmin(address contractAddress) {
+        require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
+        require(owner() == _msgSender(), "ERC20RewardPool: not admin");
+        _;
+    }
+
     modifier isValidAddress(address account) {
         require(account != address(0), "ERC20RewardPool: zero address");
 
@@ -91,9 +93,8 @@ contract ERC20RewardPool is
     /// @param contractAddress address token used to pay rewards
     function setRewardToken(address contractAddress)
         external
-        isContract(contractAddress)
+        isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
-        onlyOwner
     {
         IERC20 _newRewardToken = IERC20(contractAddress);
         require(
@@ -101,17 +102,14 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         rewardToken = _newRewardToken;
-
-        emit RewardTokenSet(contractAddress);
     }
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
     function setStakeToken(address contractAddress)
         external
-        isContract(contractAddress)
+        isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
-        onlyOwner
     {
         IERC20 _newStakeToken = IERC20(contractAddress);
         require(
@@ -119,28 +117,21 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         _stakeToken = _newStakeToken;
-
-        emit StakeTokenSet(contractAddress);
     }
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external isContract(trustedForwarder) onlyOwner {
+    function setTrustedForwarder(address trustedForwarder) external isContractAndAdmin(trustedForwarder) {
         _trustedForwarder = trustedForwarder;
-
-        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @notice set contract that contains all the contribution rules
     function setContributionRules(address contractAddress)
         external
-        isContract(contractAddress)
+        isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
-        onlyOwner
     {
         contributionRules = IContributionRules(contractAddress);
-
-        emit ContributionRulesSet(contractAddress);
     }
 
     /// @notice set the reward calculator
@@ -148,17 +139,14 @@ contract ERC20RewardPool is
     /// @param restartRewards_ if true the rewards from the previous calculator are accumulated before changing it
     function setRewardCalculator(address contractAddress, bool restartRewards_)
         external
-        isContract(contractAddress)
+        isContractAndAdmin(contractAddress)
         isValidAddress(contractAddress)
-        onlyOwner
     {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards_) {
             _restartRewards();
         }
         rewardCalculator = IRewardCalculator(contractAddress);
-
-        emit RewardCalculatorSet(contractAddress, restartRewards_);
     }
 
     /// @notice the admin recover is able to recover reward funds
@@ -175,8 +163,6 @@ contract ERC20RewardPool is
         }
 
         rewardToken.safeTransfer(receiver, recoverAmount);
-
-        emit FundsRecovered(receiver, recoverAmount);
     }
 
     /// @notice return the total supply of staked tokens
@@ -206,7 +192,7 @@ contract ERC20RewardPool is
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
         }
-        return rewardToken.balanceOf(address(this)) - _totalSupply;
+        return _stakeToken.balanceOf(address(this)) - _totalSupply;
     }
 
     /// @notice return the sum of the values returned by the contribution calculator
@@ -292,6 +278,8 @@ contract ERC20RewardPool is
             timeLockClaim.lastClaim[_msgSender()] = block.timestamp;
         }
 
+        lockDeposit.lastDeposit[_msgSender()] = block.timestamp;
+
         uint256 earlierRewards = 0;
 
         if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
@@ -335,14 +323,13 @@ contract ERC20RewardPool is
         _updateContribution(_msgSender());
     }
 
-    /// @notice as admin powers are really important in this contract
-    /// we're overriding the renounceOwnership method to avoid losing rights
     function renounceOwnership() public view override onlyOwner {
         revert("ERC20RewardPool: can't renounceOwnership");
     }
 
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
+        lockWithdraw.lastWithdraw[_msgSender()] = block.timestamp;
         super._withdraw(amount);
         emit Withdrawn(account, amount);
     }
@@ -439,14 +426,14 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    /// @dev Triggers stopped state.
-    /// The contract must not be paused.
+    // @dev Triggers stopped state.
+    // The contract must not be paused.
     function pause() external onlyOwner {
         _pause();
     }
 
-    /// @dev Returns to normal state.
-    /// The contract must be paused.
+    // @dev Returns to normal state.
+    // The contract must be paused.
     function unpause() external onlyOwner {
         _unpause();
     }
