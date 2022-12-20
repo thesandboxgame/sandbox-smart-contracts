@@ -4,7 +4,7 @@ import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {randomBigNumber} from '../../sandRewardPool/utils';
 
 export const ContributionRulesSetup = withSnapshot([], async function (hre) {
-  const contractName = 'ContributionRules';
+  const contractName = 'ContributionRulesV2';
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
   const [admin, other] = await getUnnamedAccounts();

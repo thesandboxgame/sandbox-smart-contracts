@@ -10,7 +10,7 @@ const func: DeployFunction = async function (
 
   await deployments.deploy('ERC20RewardCalculator', {
     from: deployer,
-    contract: 'TwoPeriodsRewardCalculator',
+    contract: 'TwoPeriodsRewardCalculatorV2',
     args: [Pool.address],
     log: true,
     skipIfAlreadyDeployed: true,

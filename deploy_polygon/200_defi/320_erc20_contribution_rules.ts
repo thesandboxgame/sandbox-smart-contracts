@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
 
   await deployments.deploy('ContributionRules', {
     from: deployer,
-    contract: 'ContributionRules',
+    contract: 'ContributionRulesV2',
     log: true,
     skipIfAlreadyDeployed: true,
   });
