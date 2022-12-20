@@ -16,8 +16,8 @@ contract RequirementsRules is Ownable {
 
     // we limited the number of Ids and contracts that we can have in the lists
     // to avoid the risk of DoS caused by gas limits being exceeded during the iterations
-    uint256 public constant idsLimit = 64;
-    uint256 public constant contractsLimit = 4;
+    uint256 public constant IDS_LIMIT = 64;
+    uint256 public constant CONTRACTS_LIMIT = 4;
 
     // maxStake amount allowed if user has no ERC721 or ERC1155
     uint256 public maxStakeOverall;
@@ -152,7 +152,7 @@ contract RequirementsRules is Ownable {
         // if it's a new member create a new registry, instead, only update
         if (isERC721MemberRequirementList(newContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(contractsLimit > _listERC721Index.length, "RequirementsRules: contractsLimit exceeded");
+            require(CONTRACTS_LIMIT > _listERC721Index.length, "RequirementsRules: CONTRACTS_LIMIT exceeded");
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
         }
@@ -182,7 +182,7 @@ contract RequirementsRules is Ownable {
         require(ids.length > 0, "RequirementRules: invalid ids");
         require(minAmountId > 0, "RequirementRules: invalid minAmountId");
         require(maxAmountId > 0, "RequirementRules: invalid");
-        require(ids.length <= idsLimit, "RequirementRules: idsLimit");
+        require(ids.length <= IDS_LIMIT, "RequirementRules: IDS_LIMIT");
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
         _listERC1155[newContract].minAmountId = minAmountId;
@@ -191,7 +191,7 @@ contract RequirementsRules is Ownable {
         // if it's a new member create a new registry, instead, only update
         if (isERC1155MemberRequirementList(newContract) == false) {
             // Limiting the size of the array (interations) to avoid the risk of DoS.
-            require(contractsLimit > _listERC1155Index.length, "RequirementsRules: contractsLimit exceeded");
+            require(CONTRACTS_LIMIT > _listERC1155Index.length, "RequirementsRules: CONTRACTS_LIMIT exceeded");
             _listERC1155Index.push(newContract);
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
