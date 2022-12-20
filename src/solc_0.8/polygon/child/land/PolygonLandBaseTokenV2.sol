@@ -370,7 +370,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             _owners[quadId] = uint256(uint160(to));
             _numNFTPerAddress[to] += size * size;
             _numNFTPerAddress[msg.sender] -= landMinted;
-
             if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
                 uint256[] memory idsToTransfer;
                 uint256[] memory idsToMint;
@@ -381,6 +380,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                         _isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index) ||
                         _owners[id] == uint256(uint160(msg.sender))
                     ) {
+                        _owners[id] = 0;
                         idsToTransfer[idsToTransfer.length] = id;
                     } else {
                         idsToMint[idsToMint.length] = id;
@@ -394,6 +394,11 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                     _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
                     "erc721 batch transfer rejected by to"
                 );
+            } else {
+                for (uint256 i = 0; i < size * size; i++) {
+                    uint256 id = _idInPath(i, size, x, y);
+                    if (_owners[id] == uint256(uint160(msg.sender))) _owners[id] = 0;
+                }
             }
         }
     }
