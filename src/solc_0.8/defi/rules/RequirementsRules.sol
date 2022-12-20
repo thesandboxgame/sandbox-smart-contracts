@@ -354,16 +354,13 @@ contract RequirementsRules is Ownable {
     function checkAndGetERC1155Stake(address account) public view returns (uint256) {
         uint256 _maxStake = 0;
         for (uint256 i = 0; i < _listERC1155Index.length; i++) {
-            uint256 _totalBal = 0;
             IERC1155 reqContract = _listERC1155Index[i];
 
             uint256 balanceId = getERC1155BalanceId(reqContract, account);
             if (_listERC1155[reqContract].ids.length > 0) {
                 require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
             }
-
-            _totalBal = _totalBal + balanceId;
-            _maxStake = _maxStake + (_totalBal * _listERC1155[reqContract].maxAmountId);
+            _maxStake = _maxStake + (balanceId * _listERC1155[reqContract].maxAmountId);
         }
         return _maxStake;
     }
@@ -421,8 +418,6 @@ contract RequirementsRules is Ownable {
             } else {
                 maxAllowed = maxStakeERC721 + maxStakeERC1155;
             }
-        } else {
-            maxAllowed = maxStakeOverall;
         }
 
         return maxAllowed;
