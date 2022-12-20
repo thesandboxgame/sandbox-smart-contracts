@@ -75,12 +75,24 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
 
     // For the UI
     function getRate() external view returns (uint256) {
-        return rate1;
+        if (isCampaignFinished()) {
+            return 0;
+        } else if (block.timestamp >= finish1) {
+            return rate2;
+        } else {
+            return rate1;
+        }
     }
 
     // For the UI
     function getFinish() external view returns (uint256) {
-        return finish1;
+        if (isCampaignFinished()) {
+            return 0;
+        } else if (block.timestamp >= finish1) {
+            return finish2;
+        } else {
+            return finish1;
+        }
     }
 
     // At any point in time this function must return the accumulated rewards from last call to restartRewards
@@ -138,7 +150,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     // Check if both periods already ended => campaign is finished
-    function isCampaignFinished() external view returns (bool) {
+    function isCampaignFinished() public view returns (bool) {
         return (block.timestamp >= finish2);
     }
 
