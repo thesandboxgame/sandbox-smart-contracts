@@ -256,7 +256,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 emit Transfer(msg.sender, to, _id);
             } else {
                 if (_owners[_id] == uint256(msg.sender)) {
-                    _owners[_id] = 0;
                     landMinted += 1;
                     emit Transfer(msg.sender, to, _id);
                 } else {
@@ -270,7 +269,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             _owners[quadId] = uint256(to);
             _numNFTPerAddress[to] += size * size;
             _numNFTPerAddress[msg.sender] -= landMinted;
-
             if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
                 uint256[] memory idsToTransfer;
                 uint256[] memory idsToMint;
@@ -278,6 +276,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 uint256 id = _idInPath(i, size, x, y);
 
                 if(_isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index) || _owners[id] == uint256(uint160(msg.sender))){
+                    _owners[id] = 0;
                     idsToTransfer[idsToTransfer.length]  = id;
                 } else {
                     idsToMint[idsToMint.length] = id;
@@ -285,6 +284,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             }
             require(_checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data), "erc721 batch transfer rejected by to");
             require(_checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data), "erc721 batch transfer rejected by to");
+           } else {
+                for (uint256 i = 0; i < size * size; i++) {
+                    uint256 id = _idInPath(i, size, x, y);
+                    if(_owners[id] == uint256(uint160(msg.sender))) _owners[id] = 0;
+                }
            }
         }
     }
