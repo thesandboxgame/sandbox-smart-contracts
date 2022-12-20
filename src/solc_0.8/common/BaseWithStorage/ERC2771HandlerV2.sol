@@ -12,14 +12,11 @@ abstract contract ERC2771HandlerV2 {
         _trustedForwarder = forwarder;
     }
 
-    /// @notice check if an given address is a trusted forwarder
-    /// @param forwarder address to check
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
-    /// @notice return trusted forwarder address
-    function getTrustedForwarder() external view returns (address) {
+    function getTrustedForwarder() external view returns (address trustedForwarder) {
         return _trustedForwarder;
     }
 

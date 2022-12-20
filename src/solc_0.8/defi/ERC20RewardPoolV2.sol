@@ -10,12 +10,12 @@ import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {Pausable} from "@openzeppelin/contracts-0.8/security/Pausable.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
-import {ERC2771HandlerV2} from "../common/BaseWithStorage/ERC2771HandlerV2.sol";
-import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
+import {ERC2771HandlerV3} from "../common/BaseWithStorage/ERC2771HandlerV3.sol";
+import {StakeTokenWrapperV2} from "./StakeTokenWrapperV2.sol";
 import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
-import {LockRules} from "./rules/LockRules.sol";
-import {RequirementsRules} from "./rules/RequirementsRules.sol";
+import {LockRulesV2} from "./rules-v2/LockRulesV2.sol";
+import {RequirementsRulesV2} from "./rules-v2/RequirementsRulesV2.sol";
 
 /// @title A pool that distributes rewards between users that stake any erc20 token
 /// @notice The contributions are updated passively, an external call to computeContribution from a backend is needed.
@@ -29,23 +29,29 @@ import {RequirementsRules} from "./rules/RequirementsRules.sol";
 /// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are given
 contract ERC20RewardPool is
     Ownable,
-    StakeTokenWrapper,
-    LockRules,
-    RequirementsRules,
+    StakeTokenWrapperV2,
+    LockRulesV2,
+    RequirementsRulesV2,
     ReentrancyGuard,
-    ERC2771HandlerV2,
+    ERC2771HandlerV3,
     Pausable
 {
     using SafeERC20 for IERC20;
     using Address for address;
 
+    event RewardTokenSet(address indexed contractAddress);
+    event StakeTokenSet(address indexed contractAddress);
+    event TrustedForwarderSet(address indexed trustedForwarder);
+    event ContributionRulesSet(address indexed contractAddress);
+    event RewardCalculatorSet(address indexed contractAddress, bool restartRewards_);
+    event FundsRecovered(address indexed receiver, uint256 recoverAmount);
     event Staked(address indexed account, uint256 stakeAmount);
     event Withdrawn(address indexed account, uint256 stakeAmount);
     event Exit(address indexed account);
     event RewardPaid(address indexed account, uint256 rewardAmount);
     event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
-    uint256 internal constant DECIMALS_18 = 1 ether;
+    uint256 private constant DECIMALS_18 = 1 ether;
 
     // This value multiplied by the user contribution is the share of accumulated rewards (from the start of time
     // until the last call to restartRewards) for the user taking into account the value of totalContributions.
@@ -69,18 +75,10 @@ contract ERC20RewardPool is
         IERC20 stakeToken_,
         IERC20 rewardToken_,
         address trustedForwarder
-    ) StakeTokenWrapper(stakeToken_) {
+    ) StakeTokenWrapperV2(stakeToken_) {
         require(address(rewardToken_).isContract(), "ERC20RewardPool: is not a contract");
         rewardToken = rewardToken_;
-        __ERC2771HandlerV2_initialize(trustedForwarder);
-    }
-
-    // Checks that the given address is a contract and
-    // that the caller of the method is the owner of this contract - ERC20RewardPool.
-    modifier isContractAndAdmin(address contractAddress) {
-        require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
-        require(owner() == _msgSender(), "ERC20RewardPool: not admin");
-        _;
+        __ERC2771HandlerV3_initialize(trustedForwarder);
     }
 
     modifier isValidAddress(address account) {
@@ -93,8 +91,9 @@ contract ERC20RewardPool is
     /// @param contractAddress address token used to pay rewards
     function setRewardToken(address contractAddress)
         external
-        isContractAndAdmin(contractAddress)
+        isContract(contractAddress)
         isValidAddress(contractAddress)
+        onlyOwner
     {
         IERC20 _newRewardToken = IERC20(contractAddress);
         require(
@@ -102,14 +101,17 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         rewardToken = _newRewardToken;
+
+        emit RewardTokenSet(contractAddress);
     }
 
     /// @notice set the stake token
     /// @param contractAddress address token used to stake funds
     function setStakeToken(address contractAddress)
         external
-        isContractAndAdmin(contractAddress)
+        isContract(contractAddress)
         isValidAddress(contractAddress)
+        onlyOwner
     {
         IERC20 _newStakeToken = IERC20(contractAddress);
         require(
@@ -117,21 +119,28 @@ contract ERC20RewardPool is
             "ERC20RewardPool: insufficient balance"
         );
         _stakeToken = _newStakeToken;
+
+        emit StakeTokenSet(contractAddress);
     }
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external isContractAndAdmin(trustedForwarder) {
+    function setTrustedForwarder(address trustedForwarder) external isContract(trustedForwarder) onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @notice set contract that contains all the contribution rules
     function setContributionRules(address contractAddress)
         external
-        isContractAndAdmin(contractAddress)
+        isContract(contractAddress)
         isValidAddress(contractAddress)
+        onlyOwner
     {
         contributionRules = IContributionRules(contractAddress);
+
+        emit ContributionRulesSet(contractAddress);
     }
 
     /// @notice set the reward calculator
@@ -139,14 +148,17 @@ contract ERC20RewardPool is
     /// @param restartRewards_ if true the rewards from the previous calculator are accumulated before changing it
     function setRewardCalculator(address contractAddress, bool restartRewards_)
         external
-        isContractAndAdmin(contractAddress)
+        isContract(contractAddress)
         isValidAddress(contractAddress)
+        onlyOwner
     {
         // We process the rewards of the current reward calculator before the switch.
         if (restartRewards_) {
             _restartRewards();
         }
         rewardCalculator = IRewardCalculator(contractAddress);
+
+        emit RewardCalculatorSet(contractAddress, restartRewards_);
     }
 
     /// @notice the admin recover is able to recover reward funds
@@ -163,6 +175,8 @@ contract ERC20RewardPool is
         }
 
         rewardToken.safeTransfer(receiver, recoverAmount);
+
+        emit FundsRecovered(receiver, recoverAmount);
     }
 
     /// @notice return the total supply of staked tokens
@@ -188,11 +202,11 @@ contract ERC20RewardPool is
     /// @return the total amount of deposited rewards
     /// @dev this function can be called by a reward calculator to throw if a campaign doesn't have
     /// @dev enough rewards to start
-    function getRewardsAvailable() external view returns (uint256) {
+    function getRewardsAvailable() public view returns (uint256) {
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
         }
-        return _stakeToken.balanceOf(address(this)) - _totalSupply;
+        return rewardToken.balanceOf(address(this)) - _totalSupply;
     }
 
     /// @notice return the sum of the values returned by the contribution calculator
@@ -251,13 +265,15 @@ contract ERC20RewardPool is
     /// @dev see: computeContribution
     function computeContributionInBatch(address[] calldata accounts) external {
         _restartRewards();
-        for (uint256 i = 0; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; ) {
             address account = accounts[i];
             if (account == address(0)) {
                 continue;
             }
             _processAccountRewards(account);
             _updateContribution(account);
+
+            unchecked {i++;}
         }
     }
 
@@ -273,80 +289,88 @@ contract ERC20RewardPool is
     {
         require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
+        address _sender = _msgSender();
+
         // The first time a user stakes he cannot remove his rewards immediately.
-        if (timeLockClaim.lastClaim[_msgSender()] == 0) {
-            timeLockClaim.lastClaim[_msgSender()] = block.timestamp;
+        if (timeLockClaim.lastClaim[_sender] == 0) {
+            timeLockClaim.lastClaim[_sender] = block.timestamp;
         }
 
-        lockDeposit.lastDeposit[_msgSender()] = block.timestamp;
-
-        uint256 earlierRewards = 0;
+        uint256 earlierRewards;
 
         if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
             earlierRewards = rewardCalculator.getRewards();
         }
 
-        _processRewards(_msgSender());
+        _processRewards(_sender);
         super._stake(amount);
-        _updateContribution(_msgSender());
-        require(_contributions[_msgSender()] > 0, "ERC20RewardPool: not enough contributions");
+        _updateContribution(_sender);
+        require(_contributions[_sender] > 0, "ERC20RewardPool: not enough contributions");
 
         if (earlierRewards != 0) {
-            rewards[_msgSender()] = rewards[_msgSender()] + earlierRewards;
+            rewards[_sender] = rewards[_sender] + earlierRewards;
         }
-        emit Staked(_msgSender(), amount);
+        emit Staked(_sender, amount);
     }
 
     /// @notice withdraw the stake from the contract
     /// @param amount the amount of tokens to withdraw
     /// @dev the user can withdraw his stake independently from the rewards
     function withdraw(uint256 amount) external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawStake(_msgSender(), amount);
-        _updateContribution(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawStake(_sender, amount);
+        _updateContribution(_sender);
     }
 
     /// @notice withdraw the stake and the rewards from the contract
     function exit() external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawStake(_msgSender(), _balances[_msgSender()]);
-        _withdrawRewards(_msgSender());
-        _updateContribution(_msgSender());
-        emit Exit(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawStake(_sender, _balances[_sender]);
+        _withdrawRewards(_sender);
+        _updateContribution(_sender);
+        emit Exit(_sender);
     }
 
     /// @notice withdraw the rewards from the contract
     /// @dev the user can withdraw his stake independently from the rewards
     function getReward() external nonReentrant whenNotPaused() {
-        _processRewards(_msgSender());
-        _withdrawRewards(_msgSender());
-        _updateContribution(_msgSender());
+        address _sender = _msgSender();
+
+        _processRewards(_sender);
+        _withdrawRewards(_sender);
+        _updateContribution(_sender);
     }
 
+    /// @notice as admin powers are really important in this contract
+    /// we're overriding the renounceOwnership method to avoid losing rights
     function renounceOwnership() public view override onlyOwner {
         revert("ERC20RewardPool: can't renounceOwnership");
     }
 
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
         require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
-        lockWithdraw.lastWithdraw[_msgSender()] = block.timestamp;
         super._withdraw(amount);
         emit Withdrawn(account, amount);
     }
 
     function _withdrawRewards(address account) internal timeLockClaimCheck(account) {
         uint256 reward = rewards[account];
-        uint256 mod = 0;
+        uint256 mod;
         if (reward > 0) {
             if (amountLockClaim.claimLockEnabled == true) {
                 // constrain the reward amount to the integer allowed
                 mod = reward % DECIMALS_18;
-                reward = reward - mod;
+                reward -= mod;
                 require(
                     amountLockClaim.amount <= reward,
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
                 );
             }
+            require(reward <= getRewardsAvailable(), "ERC20RewardPool: not enough rewards");
             rewards[account] = mod;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
@@ -355,9 +379,9 @@ contract ERC20RewardPool is
 
     function _updateContribution(address account) internal {
         uint256 oldContribution = _contributions[account];
-        _totalContributions = _totalContributions - oldContribution;
+        _totalContributions -= oldContribution;
         uint256 contribution = _computeContribution(account);
-        _totalContributions = _totalContributions + contribution;
+        _totalContributions += contribution;
         _contributions[account] = contribution;
         emit ContributionUpdated(account, contribution, oldContribution);
     }
@@ -426,23 +450,23 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    // @dev Triggers stopped state.
-    // The contract must not be paused.
+    /// @dev Triggers stopped state.
+    /// The contract must not be paused.
     function pause() external onlyOwner {
         _pause();
     }
 
-    // @dev Returns to normal state.
-    // The contract must be paused.
+    /// @dev Returns to normal state.
+    /// The contract must be paused.
     function unpause() external onlyOwner {
         _unpause();
     }
 
-    function _msgSender() internal view override(Context, ERC2771HandlerV2) returns (address sender) {
-        return ERC2771HandlerV2._msgSender();
+    function _msgSender() internal view override(Context, ERC2771HandlerV3) returns (address) {
+        return ERC2771HandlerV3._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771HandlerV2) returns (bytes calldata) {
-        return ERC2771HandlerV2._msgData();
+    function _msgData() internal view override(Context, ERC2771HandlerV3) returns (bytes calldata) {
+        return ERC2771HandlerV3._msgData();
     }
 }

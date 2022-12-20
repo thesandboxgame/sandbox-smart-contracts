@@ -5,18 +5,21 @@ pragma solidity 0.8.2;
 /// @dev minimal ERC2771 handler to keep bytecode-size down.
 /// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
 
-abstract contract ERC2771HandlerV2 {
+abstract contract ERC2771HandlerV3 {
     address internal _trustedForwarder;
 
-    function __ERC2771HandlerV2_initialize(address forwarder) internal {
+    function __ERC2771HandlerV3_initialize(address forwarder) internal {
         _trustedForwarder = forwarder;
     }
 
+    /// @notice check if an given address is a trusted forwarder
+    /// @param forwarder address to check
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
+    /// @notice return trusted forwarder address
+    function getTrustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
 

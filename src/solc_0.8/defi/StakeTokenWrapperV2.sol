@@ -2,11 +2,12 @@
 
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Context.sol";
-import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 
-abstract contract StakeTokenWrapper is Context {
+/// @title Token wrapper contract to be used by the staking pools
+abstract contract StakeTokenWrapperV2 is Context {
     using Address for address;
     using SafeERC20 for IERC20;
     IERC20 internal _stakeToken;
@@ -21,17 +22,21 @@ abstract contract StakeTokenWrapper is Context {
 
     function _stake(uint256 amount) internal virtual {
         require(amount > 0, "StakeTokenWrapper: amount > 0");
-        _totalSupply = _totalSupply + amount;
-        _balances[_msgSender()] = _balances[_msgSender()] + amount;
-        _stakeToken.safeTransferFrom(_msgSender(), address(this), amount);
+
+        address _sender = _msgSender();
+
+        _totalSupply += amount;
+        _balances[_sender] += amount;
+        _stakeToken.safeTransferFrom(_sender, address(this), amount);
     }
 
     function _withdraw(uint256 amount) internal virtual {
         require(amount > 0, "StakeTokenWrapper: amount > 0");
-        _totalSupply = _totalSupply - amount;
-        _balances[_msgSender()] = _balances[_msgSender()] - amount;
-        _stakeToken.safeTransfer(_msgSender(), amount);
-    }
 
-    uint256[50] private __gap;
+        address _sender = _msgSender();
+
+        _totalSupply -= amount;
+        _balances[_sender] -= amount;
+        _stakeToken.safeTransfer(_sender, amount);
+    }
 }
