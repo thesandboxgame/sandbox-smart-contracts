@@ -341,6 +341,8 @@ contract ERC20RewardPool is
         _updateContribution(_msgSender());
     }
 
+    /// @notice as admin powers are really important in this contract
+    /// we're overriding the renounceOwnership method to avoid losing rights
     function renounceOwnership() public view override onlyOwner {
         revert("ERC20RewardPool: can't renounceOwnership");
     }
