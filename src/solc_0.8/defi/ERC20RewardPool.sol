@@ -439,14 +439,14 @@ contract ERC20RewardPool is
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
-    // @dev Triggers stopped state.
-    // The contract must not be paused.
+    /// @dev Triggers stopped state.
+    /// The contract must not be paused.
     function pause() external onlyOwner {
         _pause();
     }
 
-    // @dev Returns to normal state.
-    // The contract must be paused.
+    /// @dev Returns to normal state.
+    /// The contract must be paused.
     function unpause() external onlyOwner {
         _unpause();
     }
