@@ -356,7 +356,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                 emit Transfer(msg.sender, to, _id);
             } else {
                 if (_owners[_id] == uint256(uint160(msg.sender))) {
-                    _owners[_id] = 0;
                     landMinted += 1;
                     emit Transfer(msg.sender, to, _id);
                 } else {
@@ -376,10 +375,9 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                 for (uint256 i = 0; i < size * size; i++) {
                     uint256 id = _idInPath(i, size, x, y);
 
-                    if (
-                        _isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index) ||
-                        _owners[id] == uint256(uint160(msg.sender))
-                    ) {
+                    if (_isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index)) {
+                        idsToTransfer[idsToTransfer.length] = id;
+                    } else if (_owners[id] == uint256(uint160(msg.sender))) {
                         _owners[id] = 0;
                         idsToTransfer[idsToTransfer.length] = id;
                     } else {
