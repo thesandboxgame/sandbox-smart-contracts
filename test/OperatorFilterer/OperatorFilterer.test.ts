@@ -19,7 +19,7 @@ const setupOperatorFilter = withSnapshot(
     const GenerateCodeHash = await ethers.getContract('GenerateCodeHash');
 
     const OperatorFilterRegistry = await ethers.getContract(
-      'OperatorFilterRegistry'
+      'MockOperatorFilterRegistry'
     );
     const TestERC1155 = await ethers.getContract(
       'ERC1155OperatorFilteredUpgradeable'
@@ -54,7 +54,7 @@ const setupOperatorFilter = withSnapshot(
 );
 describe('Operator filterer', function () {
   describe('TestERC1155', function () {
-    it('Should be registered ', async function () {
+    it('should be registered ', async function () {
       const {OperatorFilterRegistry, TestERC1155} = await setupOperatorFilter();
 
       expect(
@@ -120,13 +120,13 @@ describe('Operator filterer', function () {
           TestERC1155.address,
           MockMarketPlace3.address
         )
-      ).to.be.equal(true);
+      ).to.be.equal(false);
       expect(
         await OperatorFilterRegistry.isCodeHashFiltered(
           TestERC1155.address,
           marketplace3Codehash
         )
-      ).to.be.equal(true);
+      ).to.be.equal(false);
 
       const marketplace4Codehash = await GenerateCodeHash.getCodeHash(
         MockMarketPlace4.address
@@ -192,15 +192,15 @@ describe('Operator filterer', function () {
       expect(
         await OperatorFilterRegistry.isOperatorFiltered(
           defaultSubscription,
-          MockMarketPlace2.address
+          MockMarketPlace3.address
         )
-      ).to.be.equal(true);
+      ).to.be.equal(false);
       expect(
         await OperatorFilterRegistry.isCodeHashFiltered(
           defaultSubscription,
           marketplace3Codehash
         )
-      ).to.be.equal(true);
+      ).to.be.equal(false);
 
       const marketplace4Codehash = await GenerateCodeHash.getCodeHash(
         MockMarketPlace4.address
@@ -254,18 +254,6 @@ describe('Operator filterer', function () {
       ).to.be.revertedWith('Only Owner');
     });
 
-    it('owner can revoke the operator registry', async function () {
-      const {TestERC1155AsOwner, TestERC1155} = await setupOperatorFilter();
-
-      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
-
-      await expect(
-        TestERC1155AsOwner.updateOperatorFilterRegistryAddress(
-          TestERC1155.address
-        )
-      ).to.be.revertedWith('Registry has been revoked');
-    });
-
     it('owner can remove market places from Blacklist', async function () {
       const {
         MockMarketPlace1,
@@ -311,6 +299,102 @@ describe('Operator filterer', function () {
         )
       ).to.be.equal(false);
     });
+
+    it('owner can remove market places from Blacklist in batch', async function () {
+      const {
+        MockMarketPlace1,
+        MockMarketPlace2,
+        OperatorFilterRegistry,
+        TestERC1155,
+        GenerateCodeHash,
+        OperatorFilterRegistryAsOwner,
+      } = await setupOperatorFilter();
+
+      const marketplace1Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace1.address
+      );
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace1Codehash
+        )
+      ).to.be.equal(true);
+
+      const marketplace2Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace2.address
+      );
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace2.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace2Codehash
+        )
+      ).to.be.equal(true);
+
+      await OperatorFilterRegistryAsOwner.updateOperators(
+        TestERC1155.address,
+        [MockMarketPlace1.address, MockMarketPlace2.address],
+        false
+      );
+
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace1.address
+        )
+      ).to.be.equal(false);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace1Codehash
+        )
+      ).to.be.equal(true);
+
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace2.address
+        )
+      ).to.be.equal(false);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace2Codehash
+        )
+      ).to.be.equal(true);
+
+      await OperatorFilterRegistryAsOwner.updateCodeHashes(
+        TestERC1155.address,
+        [marketplace1Codehash, marketplace2Codehash],
+        false
+      );
+
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace1Codehash
+        )
+      ).to.be.equal(false);
+
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace2Codehash
+        )
+      ).to.be.equal(false);
+    });
+
     it('owner can add market places to Blacklist', async function () {
       const {
         MockMarketPlace4,
@@ -356,10 +440,104 @@ describe('Operator filterer', function () {
         )
       ).to.be.equal(true);
     });
+
+    it('owner can add market places to Blacklist in batch', async function () {
+      const {
+        MockMarketPlace4,
+        MockMarketPlace3,
+        OperatorFilterRegistry,
+        TestERC1155,
+        GenerateCodeHash,
+        OperatorFilterRegistryAsOwner,
+      } = await setupOperatorFilter();
+
+      const marketplace3Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace3.address
+      );
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace3.address
+        )
+      ).to.be.equal(false);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace3Codehash
+        )
+      ).to.be.equal(false);
+
+      const marketplace4Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace4.address
+      );
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace4.address
+        )
+      ).to.be.equal(false);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace4Codehash
+        )
+      ).to.be.equal(false);
+
+      await OperatorFilterRegistryAsOwner.updateOperators(
+        TestERC1155.address,
+        [MockMarketPlace4.address, MockMarketPlace3.address],
+        true
+      );
+
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace4.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace4Codehash
+        )
+      ).to.be.equal(false);
+
+      expect(
+        await OperatorFilterRegistry.isOperatorFiltered(
+          TestERC1155.address,
+          MockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace3Codehash
+        )
+      ).to.be.equal(false);
+
+      await OperatorFilterRegistryAsOwner.updateCodeHashes(
+        TestERC1155.address,
+        [marketplace4Codehash, marketplace3Codehash],
+        true
+      );
+
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace4Codehash
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistry.isCodeHashFiltered(
+          TestERC1155.address,
+          marketplace3Codehash
+        )
+      ).to.be.equal(true);
+    });
   });
 
   describe('Operator filterer', function () {
-    it('Should not approve blacklisted marketplaces', async function () {
+    it('should not approve blacklisted marketplaces', async function () {
       const {MockMarketPlace1, TestERC1155} = await setupOperatorFilter();
 
       await expect(
@@ -367,9 +545,12 @@ describe('Operator filterer', function () {
       ).to.be.reverted;
     });
 
-    it('Should not transfer through black listed Marketplaces', async function () {
-      const {MockMarketPlace1, TestERC1155, users} =
-        await setupOperatorFilter();
+    it('should not transfer through black listed Marketplaces', async function () {
+      const {
+        MockMarketPlace1,
+        TestERC1155,
+        users,
+      } = await setupOperatorFilter();
 
       await TestERC1155.mint(users[0].address, 1, 2, '0x');
 
@@ -390,9 +571,12 @@ describe('Operator filterer', function () {
       ).to.be.reverted;
     });
 
-    it('Should approve non black listed Marketplaces', async function () {
-      const {MockMarketPlace4, TestERC1155, users} =
-        await setupOperatorFilter();
+    it('should approve non black listed Marketplaces', async function () {
+      const {
+        MockMarketPlace4,
+        TestERC1155,
+        users,
+      } = await setupOperatorFilter();
 
       await users[0].TestERC1155.setApprovalForAll(
         MockMarketPlace4.address,
@@ -407,9 +591,12 @@ describe('Operator filterer', function () {
       ).to.be.equals(true);
     });
 
-    it('Should transfer through non black listed Marketplaces', async function () {
-      const {MockMarketPlace4, TestERC1155, users} =
-        await setupOperatorFilter();
+    it('should transfer through non black listed Marketplaces', async function () {
+      const {
+        MockMarketPlace4,
+        TestERC1155,
+        users,
+      } = await setupOperatorFilter();
 
       await TestERC1155.mint(users[0].address, 1, 2, '0x');
 
@@ -430,7 +617,119 @@ describe('Operator filterer', function () {
       expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
     });
 
-    it('Should not be able to approve after Marketplaces is blacklisted', async function () {
+    it("should be able to approve after Marketplace's Address and CodeHash is removed from blacklist ", async function () {
+      const {
+        MockMarketPlace1,
+        TestERC1155,
+        GenerateCodeHash,
+        OperatorFilterRegistryAsOwner,
+        users,
+      } = await setupOperatorFilter();
+
+      const marketplace1Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
+      ).to.be.reverted;
+
+      await OperatorFilterRegistryAsOwner.updateCodeHash(
+        TestERC1155.address,
+        marketplace1Codehash,
+        false
+      );
+
+      await expect(
+        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
+      ).to.be.reverted;
+
+      await OperatorFilterRegistryAsOwner.updateOperator(
+        TestERC1155.address,
+        MockMarketPlace1.address,
+        false
+      );
+
+      await users[0].TestERC1155.setApprovalForAll(
+        MockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await TestERC1155.isApprovedForAll(
+          users[0].address,
+          MockMarketPlace1.address
+        )
+      ).to.be.equals(true);
+    });
+
+    it("should  be able to transfer after marketplace's Address and Codehash after it is removed from blacklist", async function () {
+      const {
+        MockMarketPlace1,
+        TestERC1155,
+        GenerateCodeHash,
+        OperatorFilterRegistryAsOwner,
+        users,
+      } = await setupOperatorFilter();
+
+      await TestERC1155.mint(users[0].address, 1, 2, '0x');
+
+      const marketplace1Codehash = await GenerateCodeHash.getCodeHash(
+        MockMarketPlace1.address
+      );
+
+      await users[0].TestERC1155.setApprovalForAllWithOutFilter(
+        MockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        MockMarketPlace1.transferToken(
+          TestERC1155.address,
+          users[0].address,
+          users[1].address,
+          1,
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+
+      await OperatorFilterRegistryAsOwner.updateCodeHash(
+        TestERC1155.address,
+        marketplace1Codehash,
+        false
+      );
+
+      await expect(
+        MockMarketPlace1.transferToken(
+          TestERC1155.address,
+          users[0].address,
+          users[1].address,
+          1,
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+
+      await OperatorFilterRegistryAsOwner.updateOperator(
+        TestERC1155.address,
+        MockMarketPlace1.address,
+        false
+      );
+
+      await MockMarketPlace1.transferToken(
+        TestERC1155.address,
+        users[0].address,
+        users[1].address,
+        1,
+        2,
+        '0x'
+      );
+
+      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
+    });
+
+    it("should not be able to approve after Marketplace's Codehash is blacklisted", async function () {
       const {
         MockMarketPlace4,
         TestERC1155,
@@ -465,49 +764,37 @@ describe('Operator filterer', function () {
       ).to.be.reverted;
     });
 
-    it('Should be able to approve after Marketplaces is removed from blacklist', async function () {
+    it("should not be able to approve after Marketplace's address is blacklisted", async function () {
       const {
-        MockMarketPlace1,
+        MockMarketPlace4,
         TestERC1155,
-        GenerateCodeHash,
         OperatorFilterRegistryAsOwner,
         users,
       } = await setupOperatorFilter();
 
-      const marketplace1Codehash = await GenerateCodeHash.getCodeHash(
-        MockMarketPlace1.address
-      );
-
-      await expect(
-        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
-      ).to.be.reverted;
-
-      await OperatorFilterRegistryAsOwner.updateCodeHash(
-        TestERC1155.address,
-        marketplace1Codehash,
-        false
-      );
-
-      await OperatorFilterRegistryAsOwner.updateOperator(
-        TestERC1155.address,
-        MockMarketPlace1.address,
-        false
-      );
-
       await users[0].TestERC1155.setApprovalForAll(
-        MockMarketPlace1.address,
+        MockMarketPlace4.address,
         true
       );
-
       expect(
         await TestERC1155.isApprovedForAll(
           users[0].address,
-          MockMarketPlace1.address
+          MockMarketPlace4.address
         )
       ).to.be.equals(true);
+
+      await OperatorFilterRegistryAsOwner.updateOperator(
+        TestERC1155.address,
+        MockMarketPlace4.address,
+        true
+      );
+
+      await expect(
+        users[1].TestERC1155.setApprovalForAll(MockMarketPlace4.address, true)
+      ).to.be.reverted;
     });
 
-    it('Should not be able to transfer Token through marketplace after is blacklisted', async function () {
+    it("should not be able to transfer after marketplace's Codehash is blacklisted", async function () {
       const {
         MockMarketPlace4,
         TestERC1155,
@@ -556,64 +843,57 @@ describe('Operator filterer', function () {
       ).to.be.reverted;
     });
 
-    it('Should  be able to transfer Token through marketplace after it is removed from blacklist', async function () {
+    it("should not be able to transfer after marketplace's address is blacklisted", async function () {
       const {
-        MockMarketPlace1,
+        MockMarketPlace4,
         TestERC1155,
-        GenerateCodeHash,
         OperatorFilterRegistryAsOwner,
         users,
       } = await setupOperatorFilter();
 
       await TestERC1155.mint(users[0].address, 1, 2, '0x');
 
-      const marketplace1Codehash = await GenerateCodeHash.getCodeHash(
-        MockMarketPlace1.address
-      );
-
-      await users[0].TestERC1155.setApprovalForAllWithOutFilter(
-        MockMarketPlace1.address,
+      await users[0].TestERC1155.setApprovalForAll(
+        MockMarketPlace4.address,
         true
       );
 
-      await expect(
-        MockMarketPlace1.transferToken(
-          TestERC1155.address,
-          users[0].address,
-          users[1].address,
-          1,
-          1,
-          '0x'
-        )
-      ).to.be.reverted;
-
-      await OperatorFilterRegistryAsOwner.updateCodeHash(
+      await MockMarketPlace4.transferToken(
         TestERC1155.address,
-        marketplace1Codehash,
-        false
+        users[0].address,
+        users[1].address,
+        1,
+        1,
+        '0x'
       );
+
+      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(1);
 
       await OperatorFilterRegistryAsOwner.updateOperator(
         TestERC1155.address,
-        MockMarketPlace1.address,
-        false
+        MockMarketPlace4.address,
+        true
       );
 
-      await MockMarketPlace1.transferToken(
-        TestERC1155.address,
-        users[0].address,
-        users[1].address,
-        1,
-        2,
-        '0x'
-      );
-
-      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
+      await expect(
+        MockMarketPlace4.transferToken(
+          TestERC1155.address,
+          users[0].address,
+          users[1].address,
+          1,
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
     });
 
-    it('Should be able to approve after blacklisted Marketplaces operator registry is set to zero Address', async function () {
-      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
-        await setupOperatorFilter();
+    it('should be able to approve after blacklisted Marketplaces operator registry is set to zero Address', async function () {
+      const {
+        MockMarketPlace1,
+        TestERC1155,
+        TestERC1155AsOwner,
+        users,
+      } = await setupOperatorFilter();
 
       await expect(
         users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
@@ -634,9 +914,13 @@ describe('Operator filterer', function () {
       ).to.be.equals(true);
     });
 
-    it('Should  be able to transfer Token through blacklisted marketplace after operator registry is revoked', async function () {
-      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
-        await setupOperatorFilter();
+    it('should  be able to transfer Token through blacklisted marketplace after operator registry is set to zero address', async function () {
+      const {
+        MockMarketPlace1,
+        TestERC1155,
+        TestERC1155AsOwner,
+        users,
+      } = await setupOperatorFilter();
 
       await TestERC1155.mint(users[0].address, 1, 2, '0x');
 
@@ -657,65 +941,6 @@ describe('Operator filterer', function () {
       ).to.be.reverted;
 
       await TestERC1155AsOwner.updateOperatorFilterRegistryAddress(zeroAddress);
-
-      await MockMarketPlace1.transferToken(
-        TestERC1155.address,
-        users[0].address,
-        users[1].address,
-        1,
-        2,
-        '0x'
-      );
-
-      expect(await TestERC1155.balanceOf(users[1].address, 1)).to.be.equals(2);
-    });
-
-    it('Should be able to approve after blacklisted Marketplaces operator registry is revoked', async function () {
-      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
-        await setupOperatorFilter();
-
-      await expect(
-        users[0].TestERC1155.setApprovalForAll(MockMarketPlace1.address, true)
-      ).to.be.reverted;
-
-      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
-
-      await users[0].TestERC1155.setApprovalForAll(
-        MockMarketPlace1.address,
-        true
-      );
-
-      expect(
-        await TestERC1155.isApprovedForAll(
-          users[0].address,
-          MockMarketPlace1.address
-        )
-      ).to.be.equals(true);
-    });
-
-    it('Should  be able to transfer Token through blacklisted marketplace after operator registry is set to zero Address', async function () {
-      const {MockMarketPlace1, TestERC1155, TestERC1155AsOwner, users} =
-        await setupOperatorFilter();
-
-      await TestERC1155.mint(users[0].address, 1, 2, '0x');
-
-      await users[0].TestERC1155.setApprovalForAllWithOutFilter(
-        MockMarketPlace1.address,
-        true
-      );
-
-      await expect(
-        MockMarketPlace1.transferToken(
-          TestERC1155.address,
-          users[0].address,
-          users[1].address,
-          1,
-          1,
-          '0x'
-        )
-      ).to.be.reverted;
-
-      await TestERC1155AsOwner.revokeOperatorFilterRegistry();
 
       await MockMarketPlace1.transferToken(
         TestERC1155.address,
