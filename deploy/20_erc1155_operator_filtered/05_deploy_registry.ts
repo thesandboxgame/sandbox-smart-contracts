@@ -10,19 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
   const MockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
   const MockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
-  const MockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
   const subscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
 
-  await deploy('OperatorFilterRegistry', {
+  await deploy('MockOperatorFilterRegistry', {
     from: deployer,
-    args: [
-      subscription,
-      [
-        MockMarketPlace1.address,
-        MockMarketPlace2.address,
-        MockMarketPlace3.address,
-      ],
-    ],
+    args: [subscription, [MockMarketPlace1.address, MockMarketPlace2.address]],
     log: true,
     skipIfAlreadyDeployed: true,
   });

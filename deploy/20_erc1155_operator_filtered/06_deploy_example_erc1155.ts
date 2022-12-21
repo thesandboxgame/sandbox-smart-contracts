@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
-  const registry = await ethers.getContract('OperatorFilterRegistry');
+  const registry = await ethers.getContract('MockOperatorFilterRegistry');
 
   await deploy('ERC1155OperatorFilteredUpgradeable', {
     from: deployer,
