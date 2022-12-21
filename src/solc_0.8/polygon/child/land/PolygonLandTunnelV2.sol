@@ -5,7 +5,7 @@ import "../../../common/fx-portal/FxBaseChildTunnelUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-import "../../../common/interfaces/IPolygonLandWithIsSuperOperator.sol";
+import "../../../common/interfaces/IPolygonLandV2.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
@@ -17,7 +17,7 @@ contract PolygonLandTunnelV2 is
     OwnableUpgradeable,
     PausableUpgradeable
 {
-    IPolygonLandWithIsSuperOperator public childToken;
+    IPolygonLandV2 public childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
     bool internal transferringToL1;
@@ -56,7 +56,7 @@ contract PolygonLandTunnelV2 is
 
     function initialize(
         address _fxChild,
-        IPolygonLandWithIsSuperOperator _childToken,
+        IPolygonLandV2 _childToken,
         address _trustedForwarder,
         uint32 _maxGasLimit,
         uint256 _maxAllowedQuads,
@@ -156,8 +156,7 @@ contract PolygonLandTunnelV2 is
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
-        if (!childToken.exists(size, x, y)) childToken.mintQuad(to, size, x, y, data);
-        else childToken.transferQuad(address(this), to, size, x, y, data);
+        childToken.mintAndTransferQuad(to, size, x, y, data);
         emit Deposit(to, size, x, y, data);
     }
 

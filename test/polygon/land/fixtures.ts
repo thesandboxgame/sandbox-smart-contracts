@@ -90,6 +90,7 @@ export const setupLand = deployments.createFixture(async function () {
     trustedForwarder,
     getNamedAccounts,
     ethers,
+    getId,
   };
 });
 export const setupLandTunnelV2 = deployments.createFixture(async function () {
@@ -161,24 +162,10 @@ export const setupLandTunnelV2 = deployments.createFixture(async function () {
   await deployer.PolygonLandTunnelV2.setTrustedForwarder(
     trustedForwarder.address
   );
+  await deployer.PolygonLand.setMinter(MockPolygonLandTunnelV2.address, true);
 
   await landAdmin.Land.setMinter(landMinter.address, true);
   await polygonAdmin.PolygonLand.setMinter(landMinter.address, true);
-
-  function getId(layer: number, x: number, y: number): string {
-    const lengthOfId = 64;
-    const lengthOfBasicId = BigNumber.from(x + y * 408)._hex.length - 2;
-    const lengthOfLayerAppendment = lengthOfId - lengthOfBasicId - 2;
-    let layerAppendment = '';
-    for (let i = 0; i < lengthOfLayerAppendment; i++) {
-      layerAppendment = layerAppendment + '0';
-    }
-    return (
-      `0x0${layer - 1}` +
-      layerAppendment +
-      BigNumber.from(x + y * 408)._hex.slice(2)
-    );
-  }
 
   return {
     users,
@@ -312,3 +299,18 @@ export const setupLandMigration = deployments.createFixture(async function () {
     getId,
   };
 });
+
+export function getId(layer: number, x: number, y: number): string {
+  const lengthOfId = 64;
+  const lengthOfBasicId = BigNumber.from(x + y * 408)._hex.length - 2;
+  const lengthOfLayerAppendment = lengthOfId - lengthOfBasicId - 2;
+  let layerAppendment = '';
+  for (let i = 0; i < lengthOfLayerAppendment; i++) {
+    layerAppendment = layerAppendment + '0';
+  }
+  return (
+    `0x0${layer - 1}` +
+    layerAppendment +
+    BigNumber.from(x + y * 408)._hex.slice(2)
+  );
+}

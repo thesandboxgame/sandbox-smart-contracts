@@ -19,4 +19,12 @@ interface ILandTokenV2 is ILandToken {
         uint256 y,
         bytes calldata data
     ) external;
+
+    function mintAndTransferQuad(
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes calldata data
+    ) external;
 }

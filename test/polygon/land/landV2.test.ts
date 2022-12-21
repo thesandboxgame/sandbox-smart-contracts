@@ -2,35 +2,36 @@ import {expect} from '../../chai-setup';
 import {ethers, getUnnamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
-import {setupLand} from './fixtures';
+import {setupLand, getId} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
+import {zeroAddress} from '../../land/fixtures';
 
 type User = {
   address: string;
-  MockLandWithMint: Contract;
+  MockLandV2WithMint: Contract;
 };
 
 const setupTest = withSnapshot(
-  ['MockLandWithMint'],
+  ['MockLandV2WithMint'],
   async (): Promise<{
-    MockLandWithMint: Contract;
+    MockLandV2WithMint: Contract;
     landOwners: User[];
   }> => {
-    const MockLandWithMint = await ethers.getContract('MockLandWithMint');
+    const MockLandV2WithMint = await ethers.getContract('MockLandV2WithMint');
     const unnamedAccounts = await getUnnamedAccounts();
-    const landOwners = await setupUsers(unnamedAccounts, {MockLandWithMint});
-    return {MockLandWithMint, landOwners};
+    const landOwners = await setupUsers(unnamedAccounts, {MockLandV2WithMint});
+    return {MockLandV2WithMint, landOwners};
   }
 );
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
-describe('MockLandWithMint.sol', function () {
+describe('MockLandV2WithMint.sol', function () {
   it('creation', async function () {
-    const {MockLandWithMint} = await setupTest();
-    expect(await MockLandWithMint.name()).to.be.equal("Sandbox's LANDs");
-    expect(await MockLandWithMint.symbol()).to.be.equal('LAND');
+    const {MockLandV2WithMint} = await setupTest();
+    expect(await MockLandV2WithMint.name()).to.be.equal("Sandbox's LANDs");
+    expect(await MockLandV2WithMint.symbol()).to.be.equal('LAND');
   });
 
   it('cannot set polygon Land Tunnel to zero address', async function () {
@@ -54,7 +55,7 @@ describe('MockLandWithMint.sol', function () {
           const plotCount = size * size;
 
           await waitFor(
-            landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].MockLandV2WithMint.mintQuad(
               landOwners[1].address,
               size,
               0,
@@ -63,13 +64,13 @@ describe('MockLandWithMint.sol', function () {
             )
           );
 
-          const num = await landOwners[0].MockLandWithMint.balanceOf(
+          const num = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num).to.equal(plotCount);
 
           await waitFor(
-            landOwners[0].MockLandWithMint.connect(
+            landOwners[0].MockLandV2WithMint.connect(
               ethers.provider.getSigner(landOwners[1].address)
             ).setApprovalForAllFor(
               landOwners[1].address,
@@ -79,7 +80,7 @@ describe('MockLandWithMint.sol', function () {
           );
 
           await waitFor(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[1].address,
               landOwners[0].address,
               size,
@@ -88,11 +89,11 @@ describe('MockLandWithMint.sol', function () {
               bytes
             )
           );
-          const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+          const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num1).to.equal(0);
-          const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+          const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[0].address
           );
           expect(num2).to.equal(plotCount);
@@ -109,7 +110,7 @@ describe('MockLandWithMint.sol', function () {
           const plotCount = size * size;
 
           await waitFor(
-            landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].MockLandV2WithMint.mintQuad(
               landOwners[1].address,
               size,
               0,
@@ -118,13 +119,13 @@ describe('MockLandWithMint.sol', function () {
             )
           );
 
-          const num = await landOwners[0].MockLandWithMint.balanceOf(
+          const num = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num).to.equal(plotCount);
 
           await expect(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[1].address,
               landOwners[0].address,
               size,
@@ -150,7 +151,7 @@ describe('MockLandWithMint.sol', function () {
             const {landOwners} = await setupTest();
             const bytes = '0x3333';
             await waitFor(
-              landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[0].MockLandV2WithMint.mintQuad(
                 landOwners[0].address,
                 size1,
                 0,
@@ -161,11 +162,11 @@ describe('MockLandWithMint.sol', function () {
             for (let x = 0; x < size2; x++) {
               for (let y = 0; y < size2; y++) {
                 const tokenId = x + y * GRID_SIZE;
-                await landOwners[0].MockLandWithMint.burn(tokenId);
+                await landOwners[0].MockLandV2WithMint.burn(tokenId);
               }
             }
             await expect(
-              landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[0].MockLandV2WithMint.transferQuad(
                 landOwners[0].address,
                 landOwners[1].address,
                 size1,
@@ -184,7 +185,7 @@ describe('MockLandWithMint.sol', function () {
 
         // to have enough balance after burning a 1x1
         await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].MockLandV2WithMint.mintQuad(
             landOwners[0].address,
             3,
             3,
@@ -197,7 +198,7 @@ describe('MockLandWithMint.sol', function () {
         for (let x = 0; x < 3; x++) {
           for (let y = 0; y < 3; y++) {
             await waitFor(
-              landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[0].MockLandV2WithMint.mintQuad(
                 landOwners[0].address,
                 1,
                 x,
@@ -208,11 +209,11 @@ describe('MockLandWithMint.sol', function () {
           }
         }
 
-        await landOwners[0].MockLandWithMint.burn(0);
+        await landOwners[0].MockLandV2WithMint.burn(0);
 
         // should not be able to transfer a 3x3 quad that has a burnt 1x1
         await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].MockLandV2WithMint.transferQuad(
             landOwners[0].address,
             landOwners[1].address,
             3,
@@ -231,7 +232,7 @@ describe('MockLandWithMint.sol', function () {
           const plotCount = size * size;
 
           await waitFor(
-            landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].MockLandV2WithMint.mintQuad(
               landOwners[0].address,
               size,
               0,
@@ -240,12 +241,12 @@ describe('MockLandWithMint.sol', function () {
             )
           );
 
-          const num = await landOwners[0].MockLandWithMint.balanceOf(
+          const num = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[0].address
           );
           expect(num).to.equal(plotCount);
           await waitFor(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[0].address,
               landOwners[1].address,
               size,
@@ -254,11 +255,11 @@ describe('MockLandWithMint.sol', function () {
               bytes
             )
           );
-          const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+          const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[0].address
           );
           expect(num1).to.equal(0);
-          const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+          const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num2).to.equal(plotCount);
@@ -273,7 +274,7 @@ describe('MockLandWithMint.sol', function () {
       const bytes = '0x3333';
 
       await expect(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           '0x0000000000000000000000000000000000000000',
           landOwners[0].address,
           1,
@@ -289,7 +290,7 @@ describe('MockLandWithMint.sol', function () {
       const bytes = '0x3333';
 
       await expect(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           landOwners[0].address,
           '0x0000000000000000000000000000000000000000',
           1,
@@ -306,7 +307,7 @@ describe('MockLandWithMint.sol', function () {
         const bytes = '0x3333';
 
         await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].MockLandV2WithMint.mintQuad(
             landOwners[1].address,
             1,
             0,
@@ -315,13 +316,13 @@ describe('MockLandWithMint.sol', function () {
           )
         );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
+        const num = await landOwners[0].MockLandV2WithMint.balanceOf(
           landOwners[1].address
         );
         expect(num).to.equal(1);
 
         await waitFor(
-          landOwners[0].MockLandWithMint.connect(
+          landOwners[0].MockLandV2WithMint.connect(
             ethers.provider.getSigner(landOwners[1].address)
           ).setApprovalForAllFor(
             landOwners[1].address,
@@ -331,14 +332,14 @@ describe('MockLandWithMint.sol', function () {
         );
 
         await waitFor(
-          landOwners[1].MockLandWithMint.burn(
+          landOwners[1].MockLandV2WithMint.burn(
             0x0000000000000000000000000000000000000000000000000000000000000000 +
               (0 + 0 * 408)
           )
         );
 
         await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].MockLandV2WithMint.transferQuad(
             landOwners[1].address,
             landOwners[0].address,
             1,
@@ -357,7 +358,7 @@ describe('MockLandWithMint.sol', function () {
           const plotCount = size * size;
 
           await waitFor(
-            landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].MockLandV2WithMint.mintQuad(
               landOwners[1].address,
               size,
               0,
@@ -366,13 +367,13 @@ describe('MockLandWithMint.sol', function () {
             )
           );
 
-          const num = await landOwners[0].MockLandWithMint.balanceOf(
+          const num = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num).to.equal(plotCount);
 
           await waitFor(
-            landOwners[0].MockLandWithMint.connect(
+            landOwners[0].MockLandV2WithMint.connect(
               ethers.provider.getSigner(landOwners[1].address)
             ).setApprovalForAllFor(
               landOwners[1].address,
@@ -384,7 +385,7 @@ describe('MockLandWithMint.sol', function () {
           for (let x = 0; x < size; x++) {
             for (let y = 0; y < size; y++) {
               await waitFor(
-                landOwners[1].MockLandWithMint.burn(
+                landOwners[1].MockLandV2WithMint.burn(
                   0x0000000000000000000000000000000000000000000000000000000000000000 +
                     (x + y * 408)
                 )
@@ -393,7 +394,7 @@ describe('MockLandWithMint.sol', function () {
           }
 
           await expect(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[1].address,
               landOwners[0].address,
               size,
@@ -412,7 +413,7 @@ describe('MockLandWithMint.sol', function () {
         const bytes = '0x3333';
 
         await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].MockLandV2WithMint.mintQuad(
             landOwners[0].address,
             1,
             0,
@@ -421,20 +422,20 @@ describe('MockLandWithMint.sol', function () {
           )
         );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
+        const num = await landOwners[0].MockLandV2WithMint.balanceOf(
           landOwners[0].address
         );
         expect(num).to.equal(1);
 
         await waitFor(
-          landOwners[0].MockLandWithMint.burn(
+          landOwners[0].MockLandV2WithMint.burn(
             0x0000000000000000000000000000000000000000000000000000000000000000 +
               (0 + 0 * 408)
           )
         );
 
         await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].MockLandV2WithMint.transferQuad(
             landOwners[0].address,
             landOwners[1].address,
             1,
@@ -453,7 +454,7 @@ describe('MockLandWithMint.sol', function () {
           const plotCount = size * size;
 
           await waitFor(
-            landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].MockLandV2WithMint.mintQuad(
               landOwners[1].address,
               size,
               0,
@@ -462,13 +463,13 @@ describe('MockLandWithMint.sol', function () {
             )
           );
 
-          const num = await landOwners[0].MockLandWithMint.balanceOf(
+          const num = await landOwners[0].MockLandV2WithMint.balanceOf(
             landOwners[1].address
           );
           expect(num).to.equal(plotCount);
 
           await waitFor(
-            landOwners[1].MockLandWithMint.connect(
+            landOwners[1].MockLandV2WithMint.connect(
               ethers.provider.getSigner(landOwners[1].address)
             ).setApprovalForAllFor(
               landOwners[1].address,
@@ -480,7 +481,7 @@ describe('MockLandWithMint.sol', function () {
           for (let x = 0; x < size; x++) {
             for (let y = 0; y < size; y++) {
               await waitFor(
-                landOwners[1].MockLandWithMint.burn(
+                landOwners[1].MockLandV2WithMint.burn(
                   0x0000000000000000000000000000000000000000000000000000000000000000 +
                     (x + y * 408)
                 )
@@ -489,7 +490,7 @@ describe('MockLandWithMint.sol', function () {
           }
 
           await expect(
-            landOwners[1].MockLandWithMint.transferQuad(
+            landOwners[1].MockLandV2WithMint.transferQuad(
               landOwners[1].address,
               landOwners[0].address,
               size,
@@ -506,7 +507,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
-      await landOwners[0].MockLandWithMint.mintQuad(
+      await landOwners[0].MockLandV2WithMint.mintQuad(
         landOwners[0].address,
         1,
         0,
@@ -514,10 +515,10 @@ describe('MockLandWithMint.sol', function () {
         bytes
       );
 
-      await landOwners[0].MockLandWithMint.burn(0);
+      await landOwners[0].MockLandV2WithMint.burn(0);
 
       await expect(
-        landOwners[0].MockLandWithMint.approveFor(
+        landOwners[0].MockLandV2WithMint.approveFor(
           landOwners[0].address,
           landOwners[1].address,
           0
@@ -525,7 +526,7 @@ describe('MockLandWithMint.sol', function () {
       ).to.be.reverted;
 
       await expect(
-        landOwners[0].MockLandWithMint.approve(landOwners[1].address, 0)
+        landOwners[0].MockLandV2WithMint.approve(landOwners[1].address, 0)
       ).to.be.reverted;
     });
   });
@@ -537,7 +538,7 @@ describe('MockLandWithMint.sol', function () {
         const {landOwners} = await setupTest();
         const bytes = '0x3333';
         await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].MockLandV2WithMint.mintQuad(
             landOwners[0].address,
             size,
             size,
@@ -547,7 +548,7 @@ describe('MockLandWithMint.sol', function () {
         );
         const tokenId = size + size * GRID_SIZE;
         expect(
-          await landOwners[0].MockLandWithMint.tokenURI(tokenId)
+          await landOwners[0].MockLandV2WithMint.tokenURI(tokenId)
         ).to.be.equal(
           `https://api.sandbox.game/lands/${tokenId}/metadata.json`
         );
@@ -559,22 +560,223 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const tokenId = 2 + 2 * GRID_SIZE;
       await expect(
-        landOwners[0].MockLandWithMint.tokenURI(tokenId)
+        landOwners[0].MockLandV2WithMint.tokenURI(tokenId)
       ).to.be.revertedWith('Id does not exist');
     });
   });
-  it('supported interfaces', async function () {
-    const {MockLandWithMint} = await setupTest();
-    expect(await MockLandWithMint.supportsInterface('0x01ffc9a7')).to.be.true;
-    expect(await MockLandWithMint.supportsInterface('0x80ac58cd')).to.be.true;
-    expect(await MockLandWithMint.supportsInterface('0x5b5e139f')).to.be.true;
+
+  describe('testing mintQuad', function () {
+    it('should revert if to address zero', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintQuad(zeroAddress, 3, 3, 3, bytes)
+      ).to.be.revertedWith('to is zero address');
+    });
+
+    it('should revert if signer is not minter', async function () {
+      const {users} = await setupLand();
+
+      await expect(
+        users[0].PolygonLand.mintQuad(users[0].address, 3, 0, 0, '0x')
+      ).to.be.revertedWith('!AUTHORIZED');
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 <= size1) return;
+        it(`should NOT be able to mint child ${size1}x${size1} quad if parent ${size2}x${size2} quad is already minted`, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[0].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
+
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
+        });
+      });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 >= size1) return;
+        it(`should NOT be able to mint ${size1}x${size1} quad if child ${size2}x${size2} quad is already minted`, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[0].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
+
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
+        });
+      });
+    });
   });
+
+  describe('testing mintAndTransferQuad', function () {
+    it('should revert if signer is not minter', async function () {
+      const {users} = await setupLand();
+
+      await expect(
+        users[0].PolygonLand.mintAndTransferQuad(
+          users[0].address,
+          3,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('!AUTHORIZED');
+    });
+
+    it('should revert if to address zero', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+          zeroAddress,
+          3,
+          3,
+          3,
+          bytes
+        )
+      ).to.be.revertedWith('to is zero address');
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 >= size1) return;
+        it(`should NOT be able to mint and transfer ${size1}x${size1} quad if signer is not the owner of child ${size2}x${size2} quad`, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[1].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
+
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('Already minted');
+        });
+      });
+    });
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    sizes.forEach((size1) => {
+      sizes.forEach((size2) => {
+        if (size2 <= size1) return;
+        it(`should NOT be able to transfer child ${size1}x${size1} quad if signer is not the owner of  parent ${size2}x${size2} quad `, async function () {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          await landOwners[0].MockLandV2WithMint.mintQuad(
+            landOwners[1].address,
+            size2,
+            0,
+            0,
+            bytes
+          );
+          await expect(
+            landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+              landOwners[0].address,
+              size1,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.reverted;
+        });
+      });
+    });
+  });
+
+  it('supported interfaces', async function () {
+    const {MockLandV2WithMint} = await setupTest();
+    expect(await MockLandV2WithMint.supportsInterface('0x01ffc9a7')).to.be.true;
+    expect(await MockLandV2WithMint.supportsInterface('0x80ac58cd')).to.be.true;
+    expect(await MockLandV2WithMint.supportsInterface('0x5b5e139f')).to.be.true;
+  });
+
+  it('should revert for incorrect id (wrong size)', async function () {
+    const {MockLandV2WithMint} = await setupTest();
+
+    await expect(MockLandV2WithMint.ownerOf(getId(9, 0, 0))).to.be.revertedWith(
+      'Invalid token id'
+    );
+  });
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  sizes.forEach((quadSize) => {
+    it('should return correct ownerOf ${quadSize}x${quadSize} quad  minted', async function () {
+      const {MockLandV2WithMint, landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await MockLandV2WithMint.mintQuad(
+        landOwners[0].address,
+        quadSize,
+        quadSize,
+        quadSize,
+        bytes
+      );
+      let layer;
+      if (quadSize == 1) {
+        layer = 1;
+      } else if (quadSize == 3) {
+        layer = 2;
+      } else if (quadSize == 6) {
+        layer = 3;
+      } else if (quadSize == 12) {
+        layer = 4;
+      } else {
+        layer = 5;
+      }
+      expect(
+        await MockLandV2WithMint.ownerOf(getId(layer, quadSize, quadSize))
+      ).to.be.equal(landOwners[0].address);
+    });
+  });
+
   describe('Mint and transfer a smaller quad', function () {
     it('transferring a 1X1 quad from a 3x3', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           3,
           3,
@@ -582,13 +784,13 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(9);
 
       await waitFor(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           landOwners[0].address,
           landOwners[1].address,
           1,
@@ -598,13 +800,13 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(8);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
@@ -615,7 +817,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           12,
@@ -623,13 +825,13 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(144);
 
       await waitFor(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           landOwners[0].address,
           landOwners[1].address,
           1,
@@ -639,13 +841,13 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(143);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
@@ -656,7 +858,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           6,
           6,
@@ -664,13 +866,13 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(36);
 
       await waitFor(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           landOwners[0].address,
           landOwners[1].address,
           3,
@@ -680,13 +882,13 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(27);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
@@ -697,7 +899,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           12,
@@ -705,13 +907,13 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(144);
 
       await waitFor(
-        landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].MockLandV2WithMint.transferQuad(
           landOwners[0].address,
           landOwners[1].address,
           6,
@@ -721,13 +923,13 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(108);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
@@ -740,7 +942,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           3,
           3,
@@ -748,7 +950,7 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(9);
@@ -756,7 +958,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 3; x < 6; x++) {
         for (let y = 3; y < 6; y++) {
           await waitFor(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[0].address,
               landOwners[1].address,
               1,
@@ -772,7 +974,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 3; x < 6; x++) {
         for (let y = 3; y < 6; y++) {
           await waitFor(
-            landOwners[1].MockLandWithMint.burn(
+            landOwners[1].MockLandV2WithMint.burn(
               0x0000000000000000000000000000000000000000000000000000000000000000 +
                 (x + y * 408)
             )
@@ -780,20 +982,20 @@ describe('MockLandWithMint.sol', function () {
         }
       }
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(0);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
       expect(num2).to.equal(0);
 
       await expect(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           3,
           3,
@@ -807,7 +1009,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           6,
           6,
@@ -815,7 +1017,7 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(36);
@@ -823,7 +1025,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 6; x < 12; x++) {
         for (let y = 6; y < 12; y++) {
           await waitFor(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[0].address,
               landOwners[1].address,
               1,
@@ -839,7 +1041,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 6; x < 12; x++) {
         for (let y = 6; y < 12; y++) {
           await waitFor(
-            landOwners[1].MockLandWithMint.burn(
+            landOwners[1].MockLandV2WithMint.burn(
               0x0000000000000000000000000000000000000000000000000000000000000000 +
                 (x + y * 408)
             )
@@ -847,20 +1049,20 @@ describe('MockLandWithMint.sol', function () {
         }
       }
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(0);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
       expect(num2).to.equal(0);
 
       await expect(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           6,
           6,
@@ -874,7 +1076,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           12,
@@ -882,7 +1084,7 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num = await landOwners[0].MockLandWithMint.balanceOf(
+      const num = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num).to.equal(144);
@@ -890,7 +1092,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 12; x < 24; x++) {
         for (let y = 12; y < 24; y++) {
           await waitFor(
-            landOwners[0].MockLandWithMint.transferQuad(
+            landOwners[0].MockLandV2WithMint.transferQuad(
               landOwners[0].address,
               landOwners[1].address,
               1,
@@ -905,7 +1107,7 @@ describe('MockLandWithMint.sol', function () {
       for (let x = 12; x < 24; x++) {
         for (let y = 12; y < 24; y++) {
           await waitFor(
-            landOwners[1].MockLandWithMint.burn(
+            landOwners[1].MockLandV2WithMint.burn(
               0x0000000000000000000000000000000000000000000000000000000000000000 +
                 (x + y * 408)
             )
@@ -913,20 +1115,20 @@ describe('MockLandWithMint.sol', function () {
         }
       }
 
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
 
       expect(num1).to.equal(0);
 
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
 
       expect(num2).to.equal(0);
 
       await expect(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           12,
@@ -942,7 +1144,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           24,
           0,
@@ -951,7 +1153,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           12,
           300,
@@ -960,7 +1162,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           6,
           30,
@@ -969,7 +1171,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           3,
           24,
@@ -979,7 +1181,7 @@ describe('MockLandWithMint.sol', function () {
       );
 
       await waitFor(
-        landOwners[0].MockLandWithMint.connect(
+        landOwners[0].MockLandV2WithMint.connect(
           ethers.provider.getSigner(landOwners[1].address)
         ).setApprovalForAllFor(
           landOwners[1].address,
@@ -989,7 +1191,7 @@ describe('MockLandWithMint.sol', function () {
       );
 
       await waitFor(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
           landOwners[1].address,
           landOwners[0].address,
           [24, 12, 6, 3],
@@ -998,11 +1200,11 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
       expect(num1).to.equal(0);
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num2).to.equal(765);
@@ -1012,7 +1214,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           24,
           0,
@@ -1021,7 +1223,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           300,
@@ -1030,7 +1232,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           6,
           30,
@@ -1039,7 +1241,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           3,
           24,
@@ -1048,7 +1250,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       await waitFor(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
           landOwners[0].address,
           landOwners[1].address,
           [24, 12, 6, 3],
@@ -1057,11 +1259,11 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num1).to.equal(0);
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
       expect(num2).to.equal(765);
@@ -1071,7 +1273,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await expect(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
           landOwners[0].address,
           '0x0000000000000000000000000000000000000000',
           [24, 12, 6, 3],
@@ -1086,7 +1288,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await expect(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
           '0x0000000000000000000000000000000000000000',
           landOwners[1].address,
           [24, 12, 6, 3],
@@ -1101,7 +1303,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await expect(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
           landOwners[0].address,
           landOwners[1].address,
           [24, 12, 3],
@@ -1118,7 +1320,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           1,
           0,
@@ -1128,7 +1330,7 @@ describe('MockLandWithMint.sol', function () {
       );
 
       await expect(
-        landOwners[0].MockLandWithMint.transferFrom(
+        landOwners[0].MockLandV2WithMint.transferFrom(
           landOwners[1].address,
           landOwners[0].address,
           0
@@ -1140,7 +1342,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[1].address,
           1,
           0,
@@ -1150,23 +1352,23 @@ describe('MockLandWithMint.sol', function () {
       );
 
       await waitFor(
-        landOwners[0].MockLandWithMint.connect(
+        landOwners[0].MockLandV2WithMint.connect(
           ethers.provider.getSigner(landOwners[1].address)
         ).approve(landOwners[0].address, 0)
       );
 
       await waitFor(
-        landOwners[0].MockLandWithMint.transferFrom(
+        landOwners[0].MockLandV2WithMint.transferFrom(
           landOwners[1].address,
           landOwners[0].address,
           0
         )
       );
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
       expect(num1).to.equal(0);
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num2).to.equal(1);
@@ -1178,7 +1380,7 @@ describe('MockLandWithMint.sol', function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           12,
           0,
@@ -1188,7 +1390,7 @@ describe('MockLandWithMint.sol', function () {
       );
 
       await waitFor(
-        landOwners[0].MockLandWithMint.batchTransferFrom(
+        landOwners[0].MockLandV2WithMint.batchTransferFrom(
           landOwners[0].address,
           landOwners[1].address,
           [
@@ -1340,11 +1542,11 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
-      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num1 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[0].address
       );
       expect(num1).to.equal(0);
-      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      const num2 = await landOwners[0].MockLandV2WithMint.balanceOf(
         landOwners[1].address
       );
       expect(num2).to.equal(144);
@@ -2115,21 +2317,6 @@ describe('MockLandWithMint.sol', function () {
       }
     });
 
-    it('cannot fetch x and y values of given non existing quad id', async function () {
-      const {MockLandWithMint} = await setupTest();
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (3 + 6 * 408);
-
-      await expect(MockLandWithMint.getX(id)).to.be.revertedWith(
-        'token does not exist'
-      );
-      await expect(MockLandWithMint.getY(id)).to.be.revertedWith(
-        'token does not exist'
-      );
-    });
-
     it('should fetch owner of given quad id', async function () {
       for (let i = 1; i < sizes.length; i++) {
         const {
@@ -2184,7 +2371,7 @@ describe('MockLandWithMint.sol', function () {
       const bytes = '0x3333';
 
       await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].MockLandV2WithMint.mintQuad(
           landOwners[0].address,
           24,
           0,
@@ -2194,17 +2381,23 @@ describe('MockLandWithMint.sol', function () {
       );
 
       for (const size of sizes) {
-        expect(await landOwners[0].MockLandWithMint.exists(size, 0, 0)).to.be
+        expect(await landOwners[0].MockLandV2WithMint.exists(size, 0, 0)).to.be
           .true;
       }
 
-      await expect(landOwners[0].MockLandWithMint.exists(4, 0, 0)).to.be
+      await expect(landOwners[0].MockLandV2WithMint.exists(4, 0, 0)).to.be
         .reverted;
 
-      await expect(landOwners[0].MockLandWithMint.exists(1, 500, 0)).to.be
+      await expect(landOwners[0].MockLandV2WithMint.exists(1, 500, 0)).to.be
         .reverted;
 
-      await expect(landOwners[0].MockLandWithMint.exists(1, 0, 500)).to.be
+      await expect(landOwners[0].MockLandV2WithMint.exists(1, 0, 500)).to.be
+        .reverted;
+
+      await expect(landOwners[0].MockLandV2WithMint.exists(3, 0, 500)).to.be
+        .reverted;
+
+      await expect(landOwners[0].MockLandV2WithMint.exists(3, 500, 0)).to.be
         .reverted;
     });
   });
