@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {OperatorFiltererUpgradeable} from "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
 import {Address} from "@openzeppelin/contracts-0.8.13/utils/Address.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -24,7 +26,7 @@ contract GenericRaffle is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC2771HandlerUpgradeable,
-    OperatorFiltererUpgradeable
+    DefaultOperatorFiltererUpgradeable
 {
     using Address for address;
     uint256 public maxSupply;
@@ -85,6 +87,7 @@ contract GenericRaffle is
         __ERC2771Handler_initialize(_trustedForwarder);
         __Ownable_init_unchained();
         __ReentrancyGuard_init();
+        __DefaultOperatorFilterer_init();
         setBaseURI(baseURI);
         require(bytes(baseURI).length != 0, "baseURI is not set");
         require(bytes(_name).length != 0, "_name is not set");
