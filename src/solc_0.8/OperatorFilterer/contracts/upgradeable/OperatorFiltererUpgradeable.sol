@@ -5,7 +5,7 @@ import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract OperatorFiltererUpgradeable is Initializable {
-    IOperatorFilterRegistry private constant operatorFilterRegistry =
+    IOperatorFilterRegistry public operatorFilterRegistry =
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
@@ -26,6 +26,22 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
             }
         }
     }
+
+    /**
+     * @notice Update the address that the contract will make OperatorFilter checks against. When set to the zero
+     *         address, checks will be bypassed. OnlyOwner.
+     */
+    function updateOperatorFilterRegistryAddress(address newRegistry) public virtual {
+        if (msg.sender != owner()) {
+            revert("Only Owner");
+        }
+        operatorFilterRegistry = IOperatorFilterRegistry(newRegistry);
+    }
+
+    /**
+     * @dev assume the contract has an owner, but leave specific Ownable implementation up to inheriting contract
+     */
+    function owner() public view virtual returns (address);
 
     modifier onlyAllowedOperator(address from) virtual {
         // Check registry code length to facilitate testing in environments without a deployed registry.
