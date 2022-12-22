@@ -10,6 +10,7 @@ import helpers, {
 import {isTestnet} from '../../utils/network';
 import addresses from '../addresses.json';
 import deadlines from './deadlines';
+import {excludeMinted} from './excludeMinted';
 import prices from './prices';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
@@ -171,11 +172,6 @@ async function generateLandsForMerkleTree(
         numSandboxReserved += size * size;
       }
       const name = 'unknown : ' + landGroup.reserved;
-      // switch (land.reserved) {
-      //     case '':
-      //     default:
-      //         reportError('partner not expected: ' + land.name);
-      // }
       partnersLands.push({
         x: landGroup.x,
         y: landGroup.x,
@@ -262,8 +258,10 @@ export async function getLandSales(
 
   const landSales = [];
   for (const sectorData of sectors) {
+    const fixedSectorData = await excludeMinted(sectorData)
+    console.log({lands: sectorData.lands.length, unmintedLands: fixedSectorData.lands.length})
     const {lands} = await generateLandsForMerkleTree(
-      sectorData,
+      fixedSectorData,
       bundles,
       prices
     );
@@ -272,19 +270,12 @@ export async function getLandSales(
     const tree = new MerkleTree(createDataArray(saltedLands));
     const merkleRootHash = tree.getRoot().hash;
 
-    // const landsWithProof = [];
-    // for (const land of saltedLands) {
-    //     land.proof = tree.getProof(calculateLandHash(land));
-    //     landsWithProof.push(land);
-    // }
-
     landSales.push({
       sector: sectorData.sector,
       lands: expose ? saltedLands : lands,
       merkleRootHash,
       saltedLands,
       tree,
-      // landsWithProof,
     });
   }
   return landSales;
@@ -365,6 +356,7 @@ export function getDeadline(
     hre.deployments.log('increasing deadline by 10 year');
     deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
+  console.log(`Deadline sector ${sector}:`, new Date(deadline * 1000).toISOString())
   return deadline;
 }
 
