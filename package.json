@@ -86,7 +86,7 @@
     "coverage": "dotenv -- cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "dev": "hardhat node --watch --export contractsInfo.json",
     "compile": "hardhat compile",
-    "void:deploy": "hardhat deploy",
+    "void:deploy": "dotenv -- cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
     "local:dev": "hardhat --network localhost deploy --watch",
     "execute": "node ./scripts.js run",
     "deploy": "node ./scripts.js deploy",
