@@ -11,7 +11,7 @@ import {
 } from './PlayboyPartyPeopleV2.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('RafflePlayboyPartyPeopleV2', function () {
+describe('RafflePlayboyPartyPeopleV2', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       rafflePlayboyPartyPeopleContract,

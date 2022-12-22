@@ -15,7 +15,7 @@ export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const setupRaffle = withSnapshot(
   ['RafflePlayboyPartyPeopleV2'],
   async function (hre) {
-    const {sandAdmin, signAddress} = await getNamedAccounts();
+    const {sandAdmin} = await getNamedAccounts();
 
     const rafflePlayboyPartyPeopleContract = await ethers.getContract(
       'RafflePlayboyPartyPeopleV2'
