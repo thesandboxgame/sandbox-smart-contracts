@@ -1,109 +1,117 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts, deployments} from 'hardhat';
+import {
+  ethers,
+  getNamedAccounts,
+  getUnnamedAccounts,
+  deployments,
+} from 'hardhat';
 import {setupUsers, withSnapshot} from '../utils';
 import {expect} from '../chai-setup';
 import {zeroAddress} from '../land/fixtures';
 
 const defaultSubscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
 
-const setupOperatorFilter =  withSnapshot([] ,async function () {
-    const {deployer, upgradeAdmin} = await getNamedAccounts();
-    const {deploy} = deployments;
+const setupOperatorFilter = withSnapshot([], async function () {
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deploy} = deployments;
 
-    await deploy('MockMarketPlace1', {
-      from: deployer,
-      args: [],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    await deploy('MockMarketPlace2', {
-      from: deployer,
-      args: [],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    await deploy('MockMarketPlace3', {
-      from: deployer,
-      args: [],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    await deploy('MockMarketPlace4', {
-      from: deployer,
-      args: [],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    const MockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
-    const MockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
-    const MockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
-    const MockMarketPlace4 = await ethers.getContract('MockMarketPlace4');
-
-    await deploy('MockOperatorFilterRegistry', {
-      from: deployer,
-      args: [defaultSubscription, [MockMarketPlace1.address, MockMarketPlace2.address]],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-    const OperatorFilterRegistry = await ethers.getContract(
-      'MockOperatorFilterRegistry'
-    );
-
-    await deploy('ERC1155OperatorFilteredUpgradeable', {
-      from: deployer,
-      contract: 'ERC1155OperatorFilteredUpgradeable',
-      proxy: {
-        owner: upgradeAdmin,
-        proxyContract: 'OpenZeppelinTransparentProxy',
-        execute: {
-          methodName: '__ERC1155OperatorFiltered_init',
-          args: ['testURI.com', OperatorFilterRegistry.address],
-        },
-        upgradeIndex: 0,
-      },
-      log: true,
-    });
-
-    await deploy('GenerateCodeHash', {
-      from: deployer,
-      args: [],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    const GenerateCodeHash = await ethers.getContract('GenerateCodeHash');
-
-    const TestERC1155 = await ethers.getContract(
-      'ERC1155OperatorFilteredUpgradeable'
-    );
-
-    const others = await getUnnamedAccounts();
-
-    const users = await setupUsers(others, {TestERC1155, MockMarketPlace1});
-
-    const OperatorFilterRegistryAsOwner = await OperatorFilterRegistry.connect(
-      await ethers.getSigner(deployer)
-    );
-    const TestERC1155AsOwner = await TestERC1155.connect(
-      await ethers.getSigner(deployer)
-    );
-
-    return {
-      MockMarketPlace1,
-      MockMarketPlace2,
-      MockMarketPlace3,
-      MockMarketPlace4,
-      GenerateCodeHash,
-      OperatorFilterRegistry,
-      TestERC1155,
-      TestERC1155AsOwner,
-      OperatorFilterRegistryAsOwner,
-      users,
-    };
+  await deploy('MockMarketPlace1', {
+    from: deployer,
+    args: [],
+    log: true,
+    skipIfAlreadyDeployed: true,
   });
+
+  await deploy('MockMarketPlace2', {
+    from: deployer,
+    args: [],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  await deploy('MockMarketPlace3', {
+    from: deployer,
+    args: [],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  await deploy('MockMarketPlace4', {
+    from: deployer,
+    args: [],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  const MockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
+  const MockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
+  const MockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
+  const MockMarketPlace4 = await ethers.getContract('MockMarketPlace4');
+
+  await deploy('MockOperatorFilterRegistry', {
+    from: deployer,
+    args: [
+      defaultSubscription,
+      [MockMarketPlace1.address, MockMarketPlace2.address],
+    ],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+  const OperatorFilterRegistry = await ethers.getContract(
+    'MockOperatorFilterRegistry'
+  );
+
+  await deploy('ERC1155OperatorFilteredUpgradeable', {
+    from: deployer,
+    contract: 'ERC1155OperatorFilteredUpgradeable',
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      execute: {
+        methodName: '__ERC1155OperatorFiltered_init',
+        args: ['testURI.com', OperatorFilterRegistry.address],
+      },
+      upgradeIndex: 0,
+    },
+    log: true,
+  });
+
+  await deploy('GenerateCodeHash', {
+    from: deployer,
+    args: [],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  const GenerateCodeHash = await ethers.getContract('GenerateCodeHash');
+
+  const TestERC1155 = await ethers.getContract(
+    'ERC1155OperatorFilteredUpgradeable'
+  );
+
+  const others = await getUnnamedAccounts();
+
+  const users = await setupUsers(others, {TestERC1155, MockMarketPlace1});
+
+  const OperatorFilterRegistryAsOwner = await OperatorFilterRegistry.connect(
+    await ethers.getSigner(deployer)
+  );
+  const TestERC1155AsOwner = await TestERC1155.connect(
+    await ethers.getSigner(deployer)
+  );
+
+  return {
+    MockMarketPlace1,
+    MockMarketPlace2,
+    MockMarketPlace3,
+    MockMarketPlace4,
+    GenerateCodeHash,
+    OperatorFilterRegistry,
+    TestERC1155,
+    TestERC1155AsOwner,
+    OperatorFilterRegistryAsOwner,
+    users,
+  };
+});
 describe('Operator filterer', function () {
   describe('TestERC1155', function () {
     it('should be registered ', async function () {
