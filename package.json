@@ -51,7 +51,7 @@
     "eslint-plugin-mocha": "^8.0.0",
     "ethereum-block-by-date": "^1.4.0",
     "ethereumjs-util": "^7.1.3",
-    "ethers": "^5.1.14",
+    "ethers": "^5.7.2",
     "fs-extra": "^9.0.1",
     "fx-portal": "^1.0.3",
     "googleapis": "^66.0.0",
