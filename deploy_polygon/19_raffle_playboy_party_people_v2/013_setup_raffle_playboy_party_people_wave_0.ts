@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
@@ -15,7 +16,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const waveMaxTokens = 500;
     const waveMaxTokensToBuy = 500;
     const waveSingleTokenPrice = (1 * 10 ** 18).toString();
-    const contractAddress = '0x0000000000000000000000000000000000000000';
     const erc1155Id = 0;
     await catchUnknownSigner(
       execute(
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         waveMaxTokens,
         waveMaxTokensToBuy,
         waveSingleTokenPrice,
-        contractAddress,
+        ethers.constants.AddressZero,
         erc1155Id
       )
     );
