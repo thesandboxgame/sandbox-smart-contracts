@@ -3,10 +3,10 @@
 pragma solidity 0.8.2;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {TileWithCoordLib} from "../../../common/Libraries/TileWithCoordLib.sol";
+import {QuadTransferredLib} from "./QuadTransferredLib.sol";
 
 library QuadLib {
-    using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
+    using QuadTransferredLib for QuadTransferredLib.QuadTransferred;
     using AddressUpgradeable for address;
 
     // Our grid is 408 x 408 lands
@@ -24,11 +24,6 @@ library QuadLib {
         uint256 x;
         uint256 y;
         uint256 size;
-    }
-
-    struct QuadTransferred {
-        TileWithCoordLib.TileWithCoord quad;
-        uint256 cant;
     }
 
     function checkOwner(
@@ -61,8 +56,8 @@ library QuadLib {
         mapping(uint256 => uint256) storage _owners,
         Land memory land,
         uint256 quadCompareSize
-    ) public returns (QuadTransferred memory quadTransferred) {
-        quadTransferred = QuadTransferred({quad: TileWithCoordLib.init(land.x, land.y), cant: 0});
+    ) public returns (QuadTransferredLib.QuadTransferred memory quadTransferred) {
+        quadTransferred = QuadTransferredLib.init(land.x, land.y);
         if (land.size > 3) {
             return _checkAndClearOwner(_owners, land, quadTransferred, quadCompareSize);
         }
@@ -72,23 +67,22 @@ library QuadLib {
     function _checkAndClearOwner(
         mapping(uint256 => uint256) storage _owners,
         Land memory land,
-        QuadTransferred memory quadTransferred,
+        QuadTransferredLib.QuadTransferred memory quadTransferred,
         uint256 quadCompareSize
-    ) internal returns (QuadTransferred memory) {
+    ) internal returns (QuadTransferredLib.QuadTransferred memory) {
         (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
         uint256 toX = land.x + land.size;
         uint256 toY = land.y + land.size;
 
         for (uint256 xi = land.x; xi < toX; xi += quadCompareSize) {
             for (uint256 yi = land.y; yi < toY; yi += quadCompareSize) {
-                bool isQuadChecked = quadTransferred.quad.contain(xi, yi, quadCompareSize);
+                bool isQuadChecked = quadTransferred.contain(xi, yi, quadCompareSize);
                 if (!isQuadChecked) {
                     uint256 id = _getQuadIdByLayer(layer, xi, yi);
                     address owner = address(uint160(_owners[id]));
 
                     if (owner == msg.sender) {
-                        quadTransferred.quad = quadTransferred.quad.set(xi, yi, quadCompareSize);
-                        quadTransferred.cant += quadCompareSize * quadCompareSize;
+                        quadTransferred = quadTransferred.set(xi, yi, quadCompareSize);
                         _owners[id] = 0;
                     } else {
                         require(owner == address(0), "Already minted");

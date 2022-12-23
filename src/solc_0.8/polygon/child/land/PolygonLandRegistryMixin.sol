@@ -3,6 +3,7 @@
 pragma solidity 0.8.2;
 
 import {QuadLib} from "../../common/land/QuadLib.sol";
+import {QuadTransferredLib} from "../../common/land/QuadTransferredLib.sol";
 import {LandRegistryMixinBase} from "../../common/land/LandRegistryMixinBase.sol";
 import {PolygonLandBaseTokenV6} from "./PolygonLandBaseTokenV6.sol";
 
@@ -13,7 +14,7 @@ abstract contract PolygonLandRegistryMixin is PolygonLandBaseTokenV6, LandRegist
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal override returns (QuadLib.QuadTransferred memory quadTransferred) {
+    ) internal override returns (QuadTransferredLib.QuadTransferred memory quadTransferred) {
         quadTransferred = super._transferQuadMinting(to, size, x, y);
         _onAfterTransferQuadMinting(quadTransferred, _msgSender(), to, size, x, y);
     }

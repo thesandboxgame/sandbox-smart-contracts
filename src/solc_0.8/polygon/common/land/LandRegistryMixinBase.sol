@@ -5,6 +5,7 @@ pragma solidity 0.8.2;
 import {ILandRegistryMixin} from "../../../common/interfaces/ILandRegistryMixin.sol";
 import {IPremiumLandRegistry} from "../../../common/interfaces/IPremiumLandRegistry.sol";
 import {QuadLib} from "./QuadLib.sol";
+import {QuadTransferredLib} from "./QuadTransferredLib.sol";
 
 /// @title A mixing to support the registry for the land token
 abstract contract LandRegistryMixinBase is ILandRegistryMixin {
@@ -56,7 +57,7 @@ abstract contract LandRegistryMixinBase is ILandRegistryMixin {
     }
 
     function _onAfterTransferQuadMinting(
-        QuadLib.QuadTransferred memory quadTransferred,
+        QuadTransferredLib.QuadTransferred memory quadTransferred,
         address from,
         address to,
         uint256 size,

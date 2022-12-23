@@ -3,13 +3,13 @@
 pragma solidity 0.8.2;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {TileWithCoordLib} from "../../../../common/Libraries/TileWithCoordLib.sol";
 import {QuadLib} from "../../../common/land/QuadLib.sol";
+import {QuadTransferredLib} from "../../../common/land/QuadTransferredLib.sol";
 import {ERC721BaseTokenV6} from "./ERC721BaseTokenV6.sol";
 
 contract LandBaseTokenV6 is ERC721BaseTokenV6 {
     using AddressUpgradeable for address;
-    using TileWithCoordLib for TileWithCoordLib.TileWithCoord;
+    using QuadTransferredLib for QuadTransferredLib.QuadTransferred;
 
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
@@ -219,18 +219,19 @@ contract LandBaseTokenV6 is ERC721BaseTokenV6 {
             _numNFTPerAddress[to] += size * size;
             _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
         } else {
-            QuadLib.QuadTransferred memory quadTransferred = _transferQuadMinting(to, size, x, y);
+            QuadTransferredLib.QuadTransferred memory quadTransferred = _transferQuadMinting(to, size, x, y);
             uint256 quadId = QuadLib._getQuadIdBySize(size, x, y);
+            uint256 cant = quadTransferred.count();
             _owners[quadId] = uint256(uint160(to));
             _numNFTPerAddress[to] += size * size;
-            _numNFTPerAddress[msg.sender] -= quadTransferred.cant;
+            _numNFTPerAddress[msg.sender] -= cant;
 
             if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-                uint256[] memory idsToTransfer = new uint256[](quadTransferred.cant);
-                uint256[] memory idsToMint = new uint256[](size * size - quadTransferred.cant);
+                uint256[] memory idsToTransfer = new uint256[](cant);
+                uint256[] memory idsToMint = new uint256[](size * size - cant);
                 for (uint256 i = 0; i < size * size; i++) {
                     uint256 id = QuadLib._idInPath(i, size, x, y);
-                    if (quadTransferred.quad.contain(QuadLib._getX(id), QuadLib._getY(id))) {
+                    if (quadTransferred.contain(QuadLib._getX(id), QuadLib._getY(id))) {
                         idsToTransfer[idsToTransfer.length] = id;
                     } else {
                         idsToMint[idsToMint.length] = id;
@@ -253,7 +254,7 @@ contract LandBaseTokenV6 is ERC721BaseTokenV6 {
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal virtual returns (QuadLib.QuadTransferred memory quadTransferred) {
+    ) internal virtual returns (QuadTransferredLib.QuadTransferred memory quadTransferred) {
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
 
@@ -263,14 +264,13 @@ contract LandBaseTokenV6 is ERC721BaseTokenV6 {
             uint256 _id = QuadLib._idInPath(i, size, x, y);
             uint256 xi = QuadLib._getX(_id);
             uint256 yi = QuadLib._getY(_id);
-            bool isAlreadyMinted = quadTransferred.quad.contain(xi, yi);
+            bool isAlreadyMinted = quadTransferred.contain(xi, yi);
             if (isAlreadyMinted) {
                 emit Transfer(msg.sender, to, _id);
             } else {
                 if (_owners[_id] == uint256(uint160(msg.sender))) {
                     _owners[_id] = 0;
-                    quadTransferred.quad = quadTransferred.quad.set(xi, yi, 1);
-                    quadTransferred.cant += 1;
+                    quadTransferred = quadTransferred.set(xi, yi);
                     emit Transfer(msg.sender, to, _id);
                 } else {
                     require(_owners[_id] == 0, "Already minted");

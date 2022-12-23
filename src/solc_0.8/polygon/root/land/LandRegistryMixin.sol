@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 
 import {LandRegistryMixinBase} from "../../common/land/LandRegistryMixinBase.sol";
 import {QuadLib} from "../../common/land/QuadLib.sol";
+import {QuadTransferredLib} from "../../common/land/QuadTransferredLib.sol";
 import {LandBaseTokenV6} from "./backwardCompatibility/LandBaseTokenV6.sol";
 
 /// @title A mixing to support the registry for the land token
@@ -13,7 +14,7 @@ abstract contract LandRegistryMixin is LandBaseTokenV6, LandRegistryMixinBase {
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal override returns (QuadLib.QuadTransferred memory quadTransferred) {
+    ) internal override returns (QuadTransferredLib.QuadTransferred memory quadTransferred) {
         quadTransferred = super._transferQuadMinting(to, size, x, y);
         _onAfterTransferQuadMinting(quadTransferred, msg.sender, to, size, x, y);
     }
