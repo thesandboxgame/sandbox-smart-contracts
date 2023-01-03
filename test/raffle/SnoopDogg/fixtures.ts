@@ -11,22 +11,25 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(['RaffleTheDoggies'], async function (
-  hre
-) {
-  const raffleTheDoggiesContract = await ethers.getContract('RaffleTheDoggies');
-  const sandContract = await ethers.getContract('Sand');
-  return {
-    raffleTheDoggiesContract,
-    sandContract,
-    hre,
-    getNamedAccounts,
-    setupWave,
-    signAuthMessageAs,
-    transferSand,
-    mint: mintSetup(raffleTheDoggiesContract, sandContract),
-  };
-});
+export const setupRaffle = withSnapshot(
+  ['RaffleTheDoggies'],
+  async function (hre) {
+    const raffleTheDoggiesContract = await ethers.getContract(
+      'RaffleTheDoggies'
+    );
+    const sandContract = await ethers.getContract('Sand');
+    return {
+      raffleTheDoggiesContract,
+      sandContract,
+      hre,
+      getNamedAccounts,
+      setupWave,
+      signAuthMessageAs,
+      transferSand,
+      mint: mintSetup(raffleTheDoggiesContract, sandContract),
+    };
+  }
+);
 
 async function setupWave(
   raffle: Contract,

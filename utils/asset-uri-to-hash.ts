@@ -26,9 +26,10 @@ export function toHash(ipfsUri: string): string {
   return bn.toHexString();
 }
 
-export function extractIpfsString(
-  tokenURI: string
-): {ipfsBase: string; counter: number} {
+export function extractIpfsString(tokenURI: string): {
+  ipfsBase: string;
+  counter: number;
+} {
   const uri = tokenURI.substring(7);
   const split = uri.split('/');
   const ipfsBase = split[0];

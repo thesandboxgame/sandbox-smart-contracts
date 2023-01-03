@@ -12,11 +12,8 @@ describe('Requirementsules', function () {
       expect(await contract.maxStakeOverall()).to.be.equal(100);
     });
     it('admin should be able to call setERC721RequirementList', async function () {
-      const {
-        contract,
-        contractAsOther,
-        ERC721Token,
-      } = await setupERC20RewardPoolTest();
+      const {contract, contractAsOther, ERC721Token} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
 
@@ -45,11 +42,8 @@ describe('Requirementsules', function () {
       ).not.to.be.reverted;
     });
     it('admin should be able to call setERC1155RequirementList', async function () {
-      const {
-        contract,
-        contractAsOther,
-        ERC1155Token,
-      } = await setupERC20RewardPoolTest();
+      const {contract, contractAsOther, ERC1155Token} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
 
@@ -67,11 +61,8 @@ describe('Requirementsules', function () {
       ).not.to.be.reverted;
     });
     it('admin should be able to call deleteERC721RequirementList', async function () {
-      const {
-        ERC721Token,
-        contractAsOther,
-        contract,
-      } = await setupERC20RewardPoolTest();
+      const {ERC721Token, contractAsOther, contract} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
 
@@ -101,11 +92,8 @@ describe('Requirementsules', function () {
       ).to.be.equal(false);
     });
     it('admin should be able to call deleteERC1155RequirementList', async function () {
-      const {
-        ERC1155Token,
-        contractAsOther,
-        contract,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, contractAsOther, contract} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
 
@@ -211,12 +199,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(5);
     });
     it('checkERC721MinStake should fail - balanceOf', async function () {
-      const {
-        ERC721Token,
-        ERC1155Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC721Token, ERC1155Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const numERC721 = 1;
 
@@ -253,11 +237,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(12);
     });
     it('checkERC721MaxStake should return correct value', async function () {
-      const {
-        ERC721TokenArray,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC721TokenArray, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const numERC721 = 1;
 
@@ -295,11 +276,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(15);
     });
     it('checkERC1155MaxStake should return correct value', async function () {
-      const {
-        ERC1155TokenArray,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155TokenArray, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const user = await getUser();
 
@@ -334,12 +312,8 @@ describe('Requirementsules', function () {
   });
   describe('Max Stake Calculator', function () {
     it('ERC721 balanceOf and ERC1155', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -376,12 +350,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(72); // 60 + 12
     });
     it('ERC721 balanceOf and No ERC1155', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -419,12 +389,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(72); // 60 + 0
     });
     it('ERC721 balanceId and ERC1155', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -459,12 +425,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(32); // 20 + 12
     });
     it('No ERC721 and ERC1155', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -500,12 +462,8 @@ describe('Requirementsules', function () {
       expect(maxStake).to.be.equal(12); // 0 + 12
     });
     it('maxStakeOverall should cap maxStake', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -542,12 +500,8 @@ describe('Requirementsules', function () {
   });
   describe('Stake', function () {
     it('user should be able to stake', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -580,12 +534,8 @@ describe('Requirementsules', function () {
       await expect(user.pool.stake(20)).not.to.be.reverted;
     });
     it('stake should fail - ERC721 balanceId ', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -619,12 +569,8 @@ describe('Requirementsules', function () {
       );
     });
     it('stake should fail - ERC721 balanceOf ', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -658,12 +604,8 @@ describe('Requirementsules', function () {
       );
     });
     it('stake should fail - ERC1155 balanceId ', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;
@@ -699,12 +641,8 @@ describe('Requirementsules', function () {
       );
     });
     it('stake should fail - maxAllowed ', async function () {
-      const {
-        ERC1155Token,
-        ERC721Token,
-        contract,
-        getUser,
-      } = await setupERC20RewardPoolTest();
+      const {ERC1155Token, ERC721Token, contract, getUser} =
+        await setupERC20RewardPoolTest();
 
       const id = '0x123456';
       const numERC1155 = 1;

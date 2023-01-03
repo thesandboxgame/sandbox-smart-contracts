@@ -32,12 +32,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return;
   }
 
-  const {
-    assets,
-    merkleRootHash,
-    saltedAssets,
-    tree,
-  } = createAssetClaimMerkleTree(network.live, chainId, assetData);
+  const {assets, merkleRootHash, saltedAssets, tree} =
+    createAssetClaimMerkleTree(network.live, chainId, assetData);
 
   const assetContract = await deployments.get('Asset');
 

@@ -15,18 +15,15 @@ export const setupCollectionCatalystMigrations = withSnapshot(
     'GemsCatalystsRegistry',
   ],
   async () => {
-    const {
-      collectionCatalystMigrationsAdmin,
-      assetAttributesRegistryAdmin,
-    } = await getNamedAccounts();
+    const {collectionCatalystMigrationsAdmin, assetAttributesRegistryAdmin} =
+      await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
     const newMigrationContract = users[2];
 
-    const collectionCatalystMigrationsContract: Contract = await ethers.getContract(
-      'CollectionCatalystMigrations'
-    );
+    const collectionCatalystMigrationsContract: Contract =
+      await ethers.getContract('CollectionCatalystMigrations');
     const oldCatalystRegistry: Contract = await ethers.getContract(
       'OldCatalystRegistry'
     );
@@ -37,21 +34,25 @@ export const setupCollectionCatalystMigrations = withSnapshot(
       'AssetAttributesRegistry'
     );
 
-    const collectionCatalystMigrationsContractAsAdmin = await collectionCatalystMigrationsContract.connect(
-      ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
-    );
+    const collectionCatalystMigrationsContractAsAdmin =
+      await collectionCatalystMigrationsContract.connect(
+        ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
+      );
     const oldCatalystMinterAsUser0 = await oldCatalystMinter.connect(
       ethers.provider.getSigner(user0)
     );
-    const collectionCatalystMigrationsContractAsUser0 = await collectionCatalystMigrationsContract.connect(
-      ethers.provider.getSigner(user0)
-    );
-    const assetAttributesRegistryAsCollectionCatalystMigrationsAdmin = await assetAttributesRegistry.connect(
-      ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
-    );
-    const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
-      ethers.provider.getSigner(assetAttributesRegistryAdmin)
-    );
+    const collectionCatalystMigrationsContractAsUser0 =
+      await collectionCatalystMigrationsContract.connect(
+        ethers.provider.getSigner(user0)
+      );
+    const assetAttributesRegistryAsCollectionCatalystMigrationsAdmin =
+      await assetAttributesRegistry.connect(
+        ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
+      );
+    const assetAttributesRegistryAsRegistryAdmin =
+      await assetAttributesRegistry.connect(
+        ethers.provider.getSigner(assetAttributesRegistryAdmin)
+      );
     return {
       assetAttributesRegistryAsRegistryAdmin,
       assetAttributesRegistryAsCollectionCatalystMigrationsAdmin,
