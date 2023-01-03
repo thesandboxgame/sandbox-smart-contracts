@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, config} from 'hardhat';
 import {
   assetFixtures,
   assetSignedAuctionFixtures,
@@ -52,16 +52,13 @@ describe('assetSignedAuctionWithAuth', function () {
   const amounts = [1];
 
   it('should be able to set fee', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users} = assetFixture;
     const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
 
-    const AssetSignedAuctionAuthContractAsAdmin = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(Admin)
-    );
+    const AssetSignedAuctionAuthContractAsAdmin =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(Admin));
 
     const newFee = 500;
 
@@ -77,9 +74,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const {assetSignedAuctionFixture} = await setupAssetSignedAuction();
     const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
 
-    const AssetSignedAuctionAuthContractAsAdmin = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(Admin)
-    );
+    const AssetSignedAuctionAuthContractAsAdmin =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(Admin));
 
     const newFeeLimit = 400;
 
@@ -92,16 +88,15 @@ describe('assetSignedAuctionWithAuth', function () {
     expect(fee).to.be.equal(newFeeLimit);
   });
   it('should fail setting feeLimit - no admin', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[0].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[0].address)
+      );
 
     const newFeeLimit = 1000;
 
@@ -113,9 +108,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const {assetSignedAuctionFixture} = await setupAssetSignedAuction();
     const {assetSignedAuctionAuthContract, Admin} = assetSignedAuctionFixture;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(Admin)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(Admin));
 
     const newFeeLimit = 1000;
 
@@ -125,16 +119,15 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should fail setting fee - no admin', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[0].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[0].address)
+      );
 
     const newFee = 500;
 
@@ -144,10 +137,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should fail is buyer == seller', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
@@ -159,9 +150,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(buyer)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(buyer));
 
     const auctionData = [
       offerId,
@@ -251,10 +241,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should fail is ids.length != amounts.length', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
@@ -268,9 +256,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     const auctionData = [
       offerId,
@@ -360,10 +349,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should fail - insuficient amount', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
@@ -375,9 +362,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     const auctionData = [
       offerId,
@@ -467,10 +455,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should be able to claim seller offer in ETH', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {Asset, users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
 
@@ -482,9 +468,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(buyer)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(buyer));
 
     const auctionData = [
       offerId,
@@ -591,10 +576,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should NOT be able to claim offer if signature mismatches', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -605,9 +588,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     const auctionData = [
       offerId,
@@ -697,10 +681,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should NOT be able to claim offer with invalid backend signature', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -711,9 +693,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     const auctionData = [
       offerId,
@@ -772,7 +755,18 @@ describe('assetSignedAuctionWithAuth', function () {
       },
     ]);
 
-    const wrongBackendSig = new ethers.Wallet(users[0].address);
+    // eslint-disable-next-line
+    const accounts: any = config.networks.hardhat.accounts;
+    const index = 5;
+    const wallet = ethers.Wallet.fromMnemonic(
+      accounts.mnemonic,
+      accounts.path + `/${index}`
+    );
+
+    expect(wallet.address).to.be.equal(users[0].address);
+
+    const privateKey = wallet.privateKey;
+    const wrongBackendSig = new ethers.Wallet(privateKey);
 
     const backendSignature = await signAuthMessageAs(
       wrongBackendSig,
@@ -805,10 +799,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should be able to claim seller offer in SAND', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {Asset, users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract, Sand} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -819,9 +811,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(buyer)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(buyer));
 
     const sandAsUser = Sand.connect(ethers.provider.getSigner(buyer));
 
@@ -935,10 +926,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should be able to cancel offer', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -949,9 +938,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     await assetSignedAuctionAuthContract.cancelSellerOffer(offerId);
 
@@ -1043,10 +1033,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should NOT be able to claim offer without enough SAND', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract, Sand} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -1057,9 +1045,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 500;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(buyer)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(buyer));
 
     const sandAsUser = Sand.connect(ethers.provider.getSigner(buyer));
 
@@ -1158,10 +1145,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should NOT be able to claim offer if it did not start yet', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -1172,9 +1157,10 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) + 1000;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(users[1].address)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(
+        ethers.provider.getSigner(users[1].address)
+      );
 
     const auctionData = [
       offerId,
@@ -1264,10 +1250,8 @@ describe('assetSignedAuctionWithAuth', function () {
   });
 
   it('should NOT be able to claim offer if it already ended', async function () {
-    const {
-      assetSignedAuctionFixture,
-      assetFixture,
-    } = await setupAssetSignedAuction();
+    const {assetSignedAuctionFixture, assetFixture} =
+      await setupAssetSignedAuction();
     const {users, mintAsset} = assetFixture;
     const {assetSignedAuctionAuthContract} = assetSignedAuctionFixture;
     const tokenId = await mintAsset(users[0].address, 20);
@@ -1278,9 +1262,8 @@ describe('assetSignedAuctionWithAuth', function () {
     const offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     const startedAt = (await getTime()) - 10000;
 
-    const AssetSignedAuctionAuthContractAsUser = assetSignedAuctionAuthContract.connect(
-      ethers.provider.getSigner(buyer)
-    );
+    const AssetSignedAuctionAuthContractAsUser =
+      assetSignedAuctionAuthContract.connect(ethers.provider.getSigner(buyer));
 
     const auctionData = [
       offerId,
