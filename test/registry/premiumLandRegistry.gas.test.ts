@@ -1,10 +1,13 @@
 import {expect} from '../chai-setup';
-import {
-  setupPremiumLandRegistry,
-  setupPremiumLandRegistryWithoutRegistry,
-} from './fixtures';
+import {deployPremiumLandRegistry, setupPremiumLandRegistry} from './fixtures';
 import {BigNumber} from 'ethers';
 import {ethers} from 'hardhat';
+
+const gasWithRegistryMintAndTransferQuad = 3775108;
+const gasWithoutRegistryMintAndTransferQuad = 3703038;
+
+const gasWithRegistryMintAndTransferQuadContract = 4402214;
+const gasWithoutRegistryMintAndTransferQuadContract = 4337102;
 
 describe('@skip-on-coverage @skip-on-ci PremiumLandRegistry.sol gas tests', function () {
   describe('with registry', function () {
@@ -21,7 +24,28 @@ describe('@skip-on-coverage @skip-on-ci PremiumLandRegistry.sol gas tests', func
       const gas = BigNumber.from(
         await land.estimateGas.mintAndTransferQuad(other2, 24, 0, 0, [])
       );
-      expect(gas).to.be.eq(3775108);
+      expect(gas).to.be.eq(gasWithRegistryMintAndTransferQuad);
+    });
+    it('Land tunnel uses mintAndTransferQuad contract receiver', async function () {
+      const {
+        contractAsMapDesigner: registry,
+        landContractAsOther: land,
+        other,
+        erc721Receiver,
+      } = await setupPremiumLandRegistry();
+      await registry.set(0, 0, 24);
+      await registry.set(24, 24, 24);
+      await land.mintQuad(other, 24, 0, 0, []);
+      const gas = BigNumber.from(
+        await land.estimateGas.mintAndTransferQuad(
+          erc721Receiver.address,
+          24,
+          0,
+          0,
+          []
+        )
+      );
+      expect(gas).to.be.eq(gasWithRegistryMintAndTransferQuadContract);
     });
     describe('setting quads', function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
@@ -59,12 +83,30 @@ describe('@skip-on-coverage @skip-on-ci PremiumLandRegistry.sol gas tests', func
         landContractAsOther: land,
         other,
         other2,
-      } = await setupPremiumLandRegistryWithoutRegistry();
+      } = await deployPremiumLandRegistry();
       await land.mintQuad(other, 24, 0, 0, []);
       const gas = BigNumber.from(
         await land.estimateGas.mintAndTransferQuad(other2, 24, 0, 0, [])
       );
-      expect(gas).to.be.eq(3703038);
+      expect(gas).to.be.eq(gasWithoutRegistryMintAndTransferQuad);
+    });
+    it('Land tunnel uses mintAndTransferQuad contract receiver', async function () {
+      const {
+        landContractAsOther: land,
+        other,
+        erc721Receiver,
+      } = await deployPremiumLandRegistry();
+      await land.mintQuad(other, 24, 0, 0, []);
+      const gas = BigNumber.from(
+        await land.estimateGas.mintAndTransferQuad(
+          erc721Receiver.address,
+          24,
+          0,
+          0,
+          []
+        )
+      );
+      expect(gas).to.be.eq(gasWithoutRegistryMintAndTransferQuadContract);
     });
   });
 });

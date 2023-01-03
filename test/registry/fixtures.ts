@@ -97,104 +97,112 @@ export class TileWithCoords {
   }
 }
 
-export const setupPremiumLandRegistryWithoutRegistry = withSnapshot(
-  [],
-  async () => {
-    const {deployments, getNamedAccounts} = hre;
-    const {
-      deployer,
-      upgradeAdmin,
-      sandAdmin: adminUser,
-      mapDesigner,
-    } = await getNamedAccounts();
-    const [other, other2] = await getUnnamedAccounts();
+export const deployPremiumLandRegistry = withSnapshot([], async () => {
+  const {deployments, getNamedAccounts} = hre;
+  const {
+    deployer,
+    upgradeAdmin,
+    sandAdmin: adminUser,
+    mapDesigner,
+  } = await getNamedAccounts();
+  const [other, other2] = await getUnnamedAccounts();
 
-    const mapLib = await deployments.deploy('MapLib', {
-      from: deployer,
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-    const quadLib = await deployments.deploy('QuadLib', {
-      from: deployer,
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-    await deployments.deploy('MockLandWithMint', {
-      from: deployer,
-      log: true,
-      skipIfAlreadyDeployed: true,
-      libraries: {
-        MapLib: mapLib.address,
-        QuadLib: quadLib.address,
+  const mapLib = await deployments.deploy('MapLib', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+  const quadLib = await deployments.deploy('QuadLib', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+  await deployments.deploy('MockLandWithMint', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+    libraries: {
+      MapLib: mapLib.address,
+      QuadLib: quadLib.address,
+    },
+  });
+  const landContractAsDeployer = await ethers.getContract(
+    'MockLandWithMint',
+    deployer
+  );
+  await deployments.deploy('PremiumLandRegistry', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+    contract: 'PremiumLandRegistry',
+    libraries: {
+      MapLib: mapLib.address,
+    },
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: 'PremiumLandRegistry_init',
+        args: [adminUser, landContractAsDeployer.address],
       },
-    });
-    const landContractAsDeployer = await ethers.getContract(
-      'MockLandWithMint',
-      deployer
-    );
-    await deployments.deploy('PremiumLandRegistry', {
-      from: deployer,
-      log: true,
-      skipIfAlreadyDeployed: true,
-      contract: 'PremiumLandRegistry',
-      libraries: {
-        MapLib: mapLib.address,
-      },
-      proxy: {
-        owner: upgradeAdmin,
-        proxyContract: 'OptimizedTransparentProxy',
-        execute: {
-          methodName: 'PremiumLandRegistry_init',
-          args: [adminUser, landContractAsDeployer.address],
-        },
-        upgradeIndex: 0,
-      },
-    });
-    const contractAsAdmin = await ethers.getContract(
-      'PremiumLandRegistry',
-      adminUser
-    );
-    const contractAsMapDesigner = await ethers.getContract(
-      'PremiumLandRegistry',
-      mapDesigner
-    );
-    const contractAsOther = await ethers.getContract(
-      'PremiumLandRegistry',
-      other
-    );
-    const landContractAsOther = await ethers.getContract(
-      'MockLandWithMint',
-      other
-    );
-    const landContractAsOther2 = await ethers.getContract(
-      'MockLandWithMint',
-      other2
-    );
+      upgradeIndex: 0,
+    },
+  });
+  const contractAsAdmin = await ethers.getContract(
+    'PremiumLandRegistry',
+    adminUser
+  );
+  const contractAsMapDesigner = await ethers.getContract(
+    'PremiumLandRegistry',
+    mapDesigner
+  );
+  const contractAsOther = await ethers.getContract(
+    'PremiumLandRegistry',
+    other
+  );
+  const landContractAsOther = await ethers.getContract(
+    'MockLandWithMint',
+    other
+  );
+  const landContractAsOther2 = await ethers.getContract(
+    'MockLandWithMint',
+    other2
+  );
 
-    const MAP_DESIGNER_ROLE = await contractAsAdmin.MAP_DESIGNER_ROLE();
-    contractAsAdmin.grantRole(MAP_DESIGNER_ROLE, mapDesigner);
-    await landContractAsDeployer.setAdmin(deployer);
+  const MAP_DESIGNER_ROLE = await contractAsAdmin.MAP_DESIGNER_ROLE();
+  contractAsAdmin.grantRole(MAP_DESIGNER_ROLE, mapDesigner);
+  await landContractAsDeployer.setAdmin(deployer);
 
-    return {
-      adminUser,
-      other,
-      other2,
-      mapDesigner,
-      contractAsAdmin,
-      contractAsMapDesigner,
-      contractAsOther,
-      landContractAsDeployer,
-      landContractAsOther,
-      landContractAsOther2,
-      MAP_DESIGNER_ROLE,
-    };
-  }
-);
+  await deployments.deploy('TestERC721Receiver', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+  const erc721Receiver = await ethers.getContract(
+    'TestERC721Receiver',
+    deployer
+  );
+
+  return {
+    adminUser,
+    other,
+    other2,
+    mapDesigner,
+    contractAsAdmin,
+    contractAsMapDesigner,
+    contractAsOther,
+    landContractAsDeployer,
+    landContractAsOther,
+    landContractAsOther2,
+    MAP_DESIGNER_ROLE,
+    erc721Receiver,
+  };
+});
 
 export async function setupPremiumLandRegistry(): Promise<
-  ReturnType<typeof setupPremiumLandRegistryWithoutRegistry>
+  ReturnType<typeof deployPremiumLandRegistry>
 > {
-  const fixtures = await setupPremiumLandRegistryWithoutRegistry();
+  const fixtures = await deployPremiumLandRegistry();
   const {landContractAsDeployer, contractAsAdmin} = fixtures;
   await landContractAsDeployer.setPremiumRegistry(contractAsAdmin.address);
   return fixtures;
