@@ -1146,9 +1146,9 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         const {tokenId} = await mint(user0);
-        const receipt = await contractAsUser0['burn(uint256)'](
-          tokenId
-        ).then((tx) => tx.wait());
+        const receipt = await contractAsUser0['burn(uint256)'](tokenId).then(
+          (tx) => tx.wait()
+        );
         const eventsMatching = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber
@@ -1204,10 +1204,9 @@ module.exports = (init, extensions) => {
       }) {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
-        await contractAsUser0['burnFrom(address,uint256)'](
-          user0,
-          tokenId
-        ).then((tx) => tx.wait());
+        await contractAsUser0['burnFrom(address,uint256)'](user0, tokenId).then(
+          (tx) => tx.wait()
+        );
         await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
     });

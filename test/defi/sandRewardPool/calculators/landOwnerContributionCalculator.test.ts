@@ -5,10 +5,8 @@ import {deployments, ethers} from 'hardhat';
 describe('LandOwnerContributionCalculator', function () {
   describe('roles', function () {
     it('admin should be able to call setNFTMultiplierToken', async function () {
-      const {
-        deployer,
-        contractAsAdmin,
-      } = await landOwnerContributionCalculatorSetup();
+      const {deployer, contractAsAdmin} =
+        await landOwnerContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -20,11 +18,8 @@ describe('LandOwnerContributionCalculator', function () {
       ).not.to.be.reverted;
     });
     it('others should fail to call setNFTMultiplierToken', async function () {
-      const {
-        deployer,
-        contract,
-        contractAsOther,
-      } = await landOwnerContributionCalculatorSetup();
+      const {deployer, contract, contractAsOther} =
+        await landOwnerContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -42,11 +37,8 @@ describe('LandOwnerContributionCalculator', function () {
 
   describe('calculation', function () {
     it('users without lands get zero contributions', async function () {
-      const {
-        contract,
-        landToken,
-        other,
-      } = await landOwnerContributionCalculatorSetup();
+      const {contract, landToken, other} =
+        await landOwnerContributionCalculatorSetup();
       expect(await landToken.balanceOf(other)).to.be.equal(0);
       expect(await contract.multiplierOf(other)).to.be.equal(0);
       expect(await contract.computeContribution(other, 1000)).to.be.equal(0);
@@ -54,11 +46,8 @@ describe('LandOwnerContributionCalculator', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [1, 2, 3, 4].forEach((numLands) => {
       it(numLands + ' lands', async function () {
-        const {
-          contract,
-          landToken,
-          other,
-        } = await landOwnerContributionCalculatorSetup();
+        const {contract, landToken, other} =
+          await landOwnerContributionCalculatorSetup();
         const stake = 1000 * numLands;
         for (let i = 0; i < numLands; i++) {
           await landToken.mint(other, 123 + i);

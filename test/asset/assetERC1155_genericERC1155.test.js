@@ -4,9 +4,7 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
-const {
-  AbiCoder,
-} = require('@ethersproject/contracts/node_modules/@ethersproject/abi');
+const {AbiCoder} = require('@ethersproject/abi');
 const {waitFor, recurseTests, withSnapshot} = require('../utils');
 const generateERC1155Tests = require('../erc1155');
 
@@ -129,21 +127,11 @@ function testAsset() {
         '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd80000000800000000c00500c',
       ];
       const batchIds = (
-        await mintMultiple(ids, minter, [
-          10,
-          5,
-          8,
-          9,
-          10,
-          6,
-          8,
-          8,
-          10,
-          12,
-          1,
-          1,
-          1,
-        ])
+        await mintMultiple(
+          ids,
+          minter,
+          [10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1]
+        )
       ).tokenIds;
 
       return {

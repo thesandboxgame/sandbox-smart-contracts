@@ -271,9 +271,8 @@ describe('RafflePeopleOfCrypto', function () {
       personalizationMask
     );
 
-    const personalizationOf = await rafflePeopleOfCryptoContract.personalizationOf(
-      tokenId
-    );
+    const personalizationOf =
+      await rafflePeopleOfCryptoContract.personalizationOf(tokenId);
 
     assert.equal(personalizationOf, personalizationMask);
   });

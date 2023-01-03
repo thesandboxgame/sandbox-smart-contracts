@@ -38,12 +38,8 @@ describe('Asset_ERC1155_Tunnels', function () {
       );
     });
     it('cannot send asset directly to tunnel l1', async function () {
-      const {
-        AssetERC1155,
-        MockAssetERC1155Tunnel,
-        users,
-        mintAssetOnL1,
-      } = await setupAssetERC1155Tunnels();
+      const {AssetERC1155, MockAssetERC1155Tunnel, users, mintAssetOnL1} =
+        await setupAssetERC1155Tunnels();
       const tokenId =
         '0x2de2299db048a9e3b8d1934b8dae11b8041cc4fd800000008000000002000000';
       await mintAssetOnL1(users[0].address, tokenId, 10);
@@ -178,11 +174,10 @@ describe('Asset_ERC1155_Tunnels', function () {
         deployer,
         mintMultipleAssetOnL2,
       } = await setupAssetERC1155Tunnels();
-      const tokenIds = await mintMultipleAssetOnL2(users[0].address, [
-        10,
-        15,
-        100,
-      ]);
+      const tokenIds = await mintMultipleAssetOnL2(
+        users[0].address,
+        [10, 15, 100]
+      );
 
       let balanceA = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         users[0].address,
@@ -286,11 +281,10 @@ describe('Asset_ERC1155_Tunnels', function () {
         deployer,
         mintMultipleAssetOnL2,
       } = await setupAssetERC1155Tunnels();
-      const tokenIds = await mintMultipleAssetOnL2(users[0].address, [
-        10,
-        15,
-        100,
-      ]);
+      const tokenIds = await mintMultipleAssetOnL2(
+        users[0].address,
+        [10, 15, 100]
+      );
 
       let balanceA = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         users[0].address,

@@ -141,17 +141,14 @@ export const assetSignedAuctionFixtures = async function () {
 export const gemsAndCatalystsFixture = async function (
   isSetupForL2: boolean
 ): Promise<Contract> {
-  const {
-    assetAttributesRegistryAdmin,
-    gemMinter,
-    deployer,
-    catalystAdmin,
-  } = await getNamedAccounts();
+  const {assetAttributesRegistryAdmin, gemMinter, deployer, catalystAdmin} =
+    await getNamedAccounts();
   const L2Prefix = isSetupForL2 ? 'Polygon' : '';
-  const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
-    L2Prefix + 'AssetAttributesRegistry',
-    assetAttributesRegistryAdmin
-  );
+  const assetAttributesRegistryAsRegistryAdmin: Contract =
+    await ethers.getContract(
+      L2Prefix + 'AssetAttributesRegistry',
+      assetAttributesRegistryAdmin
+    );
 
   const GemsCatalystsRegistry = await deployments.get(
     L2Prefix + 'GemsCatalystsRegistry'

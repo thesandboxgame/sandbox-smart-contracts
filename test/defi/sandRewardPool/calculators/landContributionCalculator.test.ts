@@ -7,10 +7,8 @@ import {BigNumber} from 'ethers';
 describe('LandContributionCalculator', function () {
   describe('roles', function () {
     it('admin should be able to call setNFTMultiplierToken', async function () {
-      const {
-        deployer,
-        contractAsAdmin,
-      } = await landContributionCalculatorSetup();
+      const {deployer, contractAsAdmin} =
+        await landContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -22,11 +20,8 @@ describe('LandContributionCalculator', function () {
       ).not.to.be.reverted;
     });
     it('others should fail to call setNFTMultiplierToken', async function () {
-      const {
-        deployer,
-        contract,
-        contractAsOther,
-      } = await landContributionCalculatorSetup();
+      const {deployer, contract, contractAsOther} =
+        await landContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -44,11 +39,8 @@ describe('LandContributionCalculator', function () {
 
   describe('calculation', function () {
     it('zero lands', async function () {
-      const {
-        contract,
-        landToken,
-        other,
-      } = await landContributionCalculatorSetup();
+      const {contract, landToken, other} =
+        await landContributionCalculatorSetup();
       expect(await landToken.balanceOf(other)).to.be.equal(0);
       expect(await contract.multiplierOf(other)).to.be.equal(0);
       expect(await contract.computeContribution(other, 1000)).to.be.equal(1000);
@@ -56,11 +48,8 @@ describe('LandContributionCalculator', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     [1, 2, 3, 4].forEach((numLands) => {
       it(numLands + ' lands', async function () {
-        const {
-          contract,
-          landToken,
-          other,
-        } = await landContributionCalculatorSetup();
+        const {contract, landToken, other} =
+          await landContributionCalculatorSetup();
         for (let i = 0; i < numLands; i++) {
           await landToken.mint(other, 123 + i);
         }
@@ -75,11 +64,8 @@ describe('LandContributionCalculator', function () {
     [5, 10, 20, 50, 100, 408, 408 * 408, 408 * 408 * 408].forEach(
       (numLands) => {
         it(numLands + ' lands, to high to be minted', async function () {
-          const {
-            contract,
-            landToken,
-            other,
-          } = await landContributionCalculatorSetup();
+          const {contract, landToken, other} =
+            await landContributionCalculatorSetup();
           const numLands = 408 * 408;
           await landToken.setFakeBalance(other, numLands);
           expect(await landToken.balanceOf(other)).to.be.equal(numLands);
