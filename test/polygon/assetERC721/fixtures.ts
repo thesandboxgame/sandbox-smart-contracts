@@ -18,8 +18,13 @@ const symbol = 'ASSETERC721';
 
 export const setupAssetERC721Test = withSnapshot([], async function () {
   const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const [trustedForwarder, adminRole, minter, other, dest] =
-    await getUnnamedAccounts();
+  const [
+    trustedForwarder,
+    adminRole,
+    minter,
+    other,
+    dest,
+  ] = await getUnnamedAccounts();
 
   await deployments.deploy('PolygonAssetERC721', {
     from: deployer,

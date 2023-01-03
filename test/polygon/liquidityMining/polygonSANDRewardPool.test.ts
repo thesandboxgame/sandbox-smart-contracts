@@ -8,8 +8,7 @@ describe('PolygonSANDRewardPool', function () {
   it('last time reward application should match 30 days', async function () {
     const {rewardPoolContract} = await setupPolygonSandRewardPool();
 
-    const lastTimeRewardApplicable =
-      await rewardPoolContract.lastTimeRewardApplicable();
+    const lastTimeRewardApplicable = await rewardPoolContract.lastTimeRewardApplicable();
     const duration = 30 * 24 * 60 * 60;
 
     const latestBlock = await ethers.provider.getBlock('latest');
@@ -29,8 +28,11 @@ describe('PolygonSANDRewardPool', function () {
   });
 
   it('staking should update the reward balance, supply and staking token balance', async function () {
-    const {rewardPoolContract, stakeTokenContract, others} =
-      await setupPolygonSandRewardPool();
+    const {
+      rewardPoolContract,
+      stakeTokenContract,
+      others,
+    } = await setupPolygonSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     const initialRewardBalance = await rewardPoolContract.balanceOf(others[0]);
@@ -59,8 +61,11 @@ describe('PolygonSANDRewardPool', function () {
   });
 
   it('withdraw should update the reward balance, supply and staking token', async function () {
-    const {rewardPoolContract, stakeTokenContract, others} =
-      await setupPolygonSandRewardPool();
+    const {
+      rewardPoolContract,
+      stakeTokenContract,
+      others,
+    } = await setupPolygonSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -111,10 +116,8 @@ describe('PolygonSANDRewardPool', function () {
       .stake(BigNumber.from(stakeAmount));
 
     const totalSupply = await rewardPoolContract.totalSupply();
-    const lastTimeRewardApplicable =
-      await rewardPoolContract.lastTimeRewardApplicable();
-    const rewardPerTokenStored =
-      await rewardPoolContract.rewardPerTokenStored();
+    const lastTimeRewardApplicable = await rewardPoolContract.lastTimeRewardApplicable();
+    const rewardPerTokenStored = await rewardPoolContract.rewardPerTokenStored();
     const lastUpdateTime = await rewardPoolContract.lastUpdateTime();
 
     const rewardRate = await rewardPoolContract.rewardRate();
@@ -147,8 +150,9 @@ describe('PolygonSANDRewardPool', function () {
     const earned = await rewardPoolContract.earned(others[0]);
     const rewardBalance = await rewardPoolContract.balanceOf(others[0]);
     const rewardPerToken = await rewardPoolContract.rewardPerToken();
-    const userRewardPerTokenPaid =
-      await rewardPoolContract.userRewardPerTokenPaid(others[0]);
+    const userRewardPerTokenPaid = await rewardPoolContract.userRewardPerTokenPaid(
+      others[0]
+    );
     const rewards = await rewardPoolContract.rewards(others[0]);
 
     expect(earned).to.be.equal(
@@ -160,8 +164,11 @@ describe('PolygonSANDRewardPool', function () {
   });
 
   it('get reward should transfer the reward and emit an event', async function () {
-    const {rewardPoolContract, rewardTokenContract, others} =
-      await setupPolygonSandRewardPool();
+    const {
+      rewardPoolContract,
+      rewardTokenContract,
+      others,
+    } = await setupPolygonSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -194,8 +201,11 @@ describe('PolygonSANDRewardPool', function () {
   });
 
   it('exiting should withdraw and transfer the reward', async function () {
-    const {rewardPoolContract, rewardTokenContract, others} =
-      await setupPolygonSandRewardPool();
+    const {
+      rewardPoolContract,
+      rewardTokenContract,
+      others,
+    } = await setupPolygonSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract

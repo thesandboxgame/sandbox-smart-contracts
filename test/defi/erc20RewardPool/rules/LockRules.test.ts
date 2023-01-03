@@ -26,8 +26,12 @@ describe('ERC20RewardPool Lock Rules', function () {
     );
   });
   it('user can only get his rewards after lockTimeMS', async function () {
-    const {contract, rewardCalculatorMock, balances, getUser} =
-      await setupERC20RewardPoolTest();
+    const {
+      contract,
+      rewardCalculatorMock,
+      balances,
+      getUser,
+    } = await setupERC20RewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;
@@ -71,8 +75,11 @@ describe('ERC20RewardPool Lock Rules', function () {
     expect(deltas2.reward).to.be.equal(80);
   });
   it('we can disable lockTimeMS check by setting it to zero', async function () {
-    const {contract, rewardCalculatorMock, getUser} =
-      await setupERC20RewardPoolTest();
+    const {
+      contract,
+      rewardCalculatorMock,
+      getUser,
+    } = await setupERC20RewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;
@@ -151,8 +158,11 @@ describe('ERC20RewardPool Lock Rules', function () {
     );
   });
   it('user should wait to withdraw again and exit', async function () {
-    const {contract, rewardCalculatorMock, getUser} =
-      await setupERC20RewardPoolTest();
+    const {
+      contract,
+      rewardCalculatorMock,
+      getUser,
+    } = await setupERC20RewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;
@@ -183,8 +193,11 @@ describe('ERC20RewardPool Lock Rules', function () {
     ).to.be.revertedWith('LockRules: invalid newAmountLockClaim');
   });
   it('should be able to claim only amount allowed or if check is disabled', async function () {
-    const {contract, rewardCalculatorMock, getUser} =
-      await setupERC20RewardPoolTest();
+    const {
+      contract,
+      rewardCalculatorMock,
+      getUser,
+    } = await setupERC20RewardPoolTest();
     await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     await expect(contract.setAmountLockClaim(10, true)).not.to.be.reverted;

@@ -54,10 +54,9 @@ const func: DeployFunction = async function (hre) {
       gems.length = catalyst;
     }
     console.log(assetId, catalyst, gems, blockNumber);
-    const populatedTx =
-      await PolygonAssetAttributesRegistry.populateTransaction[
-        'setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)'
-      ](assetId, catalyst, gems, blockNumber);
+    const populatedTx = await PolygonAssetAttributesRegistry.populateTransaction[
+      'setCatalystWithBlockNumber(uint256,uint16,uint16[],uint64)'
+    ](assetId, catalyst, gems, blockNumber);
     datas.push(populatedTx.data);
   }
   const tx = await execute(

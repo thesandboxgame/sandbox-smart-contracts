@@ -4,8 +4,12 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, upgradeAdmin, treasury, raffleSignWallet} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    upgradeAdmin,
+    treasury,
+    raffleSignWallet,
+  } = await getNamedAccounts();
 
   let metadataUrl;
   if (hre.network.name === 'mainnet') {

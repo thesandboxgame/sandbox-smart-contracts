@@ -5,8 +5,13 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts, getUnnamedAccounts, upgrades, ethers} =
-    hre;
+  const {
+    deployments,
+    getNamedAccounts,
+    getUnnamedAccounts,
+    upgrades,
+    ethers,
+  } = hre;
   const {deployer} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 

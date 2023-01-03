@@ -6,8 +6,12 @@ import {expect} from '../../chai-setup';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetUpgraderFixtures = async () => {
-  const {assetAttributesRegistryAdmin, assetAdmin, sandAdmin, sandBeneficiary} =
-    await getNamedAccounts();
+  const {
+    assetAttributesRegistryAdmin,
+    assetAdmin,
+    sandAdmin,
+    sandBeneficiary,
+  } = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
   const user2 = users[2];
@@ -28,12 +32,9 @@ export const assetUpgraderFixtures = async () => {
     'PolygonAssetERC1155'
   );
   const sandContract: Contract = await ethers.getContract('PolygonSand');
-  const feeRecipient: string =
-    await assetUpgraderContract.callStatic.feeRecipient();
-  const upgradeFee: BigNumber =
-    await assetUpgraderContract.callStatic.upgradeFee();
-  const gemAdditionFee: BigNumber =
-    await assetUpgraderContract.callStatic.gemAdditionFee();
+  const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
+  const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
+  const gemAdditionFee: BigNumber = await assetUpgraderContract.callStatic.gemAdditionFee();
   const rareCatalyst: Contract = await ethers.getContract(
     'PolygonCatalyst_RARE'
   );
@@ -104,10 +105,9 @@ export const assetUpgraderFixtures = async () => {
 
   expect(await sandContract.balanceOf(catalystOwner)).to.equal(sandAmount);
 
-  const assetUpgraderContractAsCatalystOwner =
-    await assetUpgraderContract.connect(
-      ethers.provider.getSigner(catalystOwner)
-    );
+  const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract.connect(
+    ethers.provider.getSigner(catalystOwner)
+  );
 
   const assetUpgraderContractAsUser4 = await assetUpgraderContract.connect(
     ethers.provider.getSigner(user4)

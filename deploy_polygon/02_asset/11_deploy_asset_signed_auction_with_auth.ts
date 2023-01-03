@@ -6,8 +6,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getUnnamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, assetAdmin, assetAuctionFeeCollector} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    assetAdmin,
+    assetAuctionFeeCollector,
+  } = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 
   const authValidatorContract = await deployments.get('PolygonAuthValidator');

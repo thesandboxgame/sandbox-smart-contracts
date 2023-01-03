@@ -12,44 +12,43 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(
-  ['RaffleCareBears'],
-  async function (hre) {
-    const {sandAdmin} = await getNamedAccounts();
+export const setupRaffle = withSnapshot(['RaffleCareBears'], async function (
+  hre
+) {
+  const {sandAdmin} = await getNamedAccounts();
 
-    const raffleCareBearsContract = await ethers.getContract('RaffleCareBears');
-    const sandContract = await ethers.getContract('PolygonSand');
-    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  const raffleCareBearsContract = await ethers.getContract('RaffleCareBears');
+  const sandContract = await ethers.getContract('PolygonSand');
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-    const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
 
-    await depositViaChildChainManager(
-      {sand: sandContract, childChainManager},
-      sandAdmin,
-      SAND_AMOUNT
-    );
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
+    SAND_AMOUNT
+  );
 
-    return {
+  return {
+    raffleCareBearsContract,
+    sandContract,
+    hre,
+    getNamedAccounts,
+    setupWave,
+    signAuthMessageAs,
+    transferSand,
+    mint: mintSetup(raffleCareBearsContract, sandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
       raffleCareBearsContract,
-      sandContract,
-      hre,
-      getNamedAccounts,
-      setupWave,
-      signAuthMessageAs,
-      transferSand,
-      mint: mintSetup(raffleCareBearsContract, sandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        raffleCareBearsContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        raffleCareBearsContract,
-        invalidPersonalizeSignature
-      ),
-    };
-  }
-);
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      raffleCareBearsContract,
+      invalidPersonalizeSignature
+    ),
+  };
+});
 
 async function setupWave(
   raffle: Contract,

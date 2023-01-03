@@ -192,8 +192,12 @@ describe('PolygonAssetERC1155.sol', function () {
 
   describe('PolygonAsset: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
-      const {PolygonAssetERC1155, users, mintAsset, trustedForwarder} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        users,
+        mintAsset,
+        trustedForwarder,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await PolygonAssetERC1155.populateTransaction[
@@ -210,8 +214,12 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('fails to transfer someone else token by metaTx', async function () {
-      const {PolygonAssetERC1155, users, mintAsset, trustedForwarder} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        users,
+        mintAsset,
+        trustedForwarder,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await PolygonAssetERC1155.populateTransaction[
@@ -228,8 +236,12 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('can batch-transfer by metaTx', async function () {
-      const {PolygonAssetERC1155, users, mintAsset, trustedForwarder} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        users,
+        mintAsset,
+        trustedForwarder,
+      } = await setupPolygonAsset();
       const tokenId1 = await mintAsset(users[1].address, 7);
       const tokenId2 = await mintAsset(users[1].address, 3);
       const tokenIds = [tokenId1, tokenId2];
@@ -256,8 +268,11 @@ describe('PolygonAssetERC1155.sol', function () {
 
   describe('PolygonAsset: extractERC721From and collection information', function () {
     it('cannot extract ERC721 for ERC1155 supply == 1', async function () {
-      const {PolygonAssetERC1155, mintAsset, extractor} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        mintAsset,
+        extractor,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 1);
       const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -272,8 +287,12 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith('UNIQUE_ERC1155');
     });
     it('can extract ERC721 if ERC1155 supply > 1', async function () {
-      const {PolygonAssetERC1155, PolygonAssetERC721, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        PolygonAssetERC721,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 100);
       let balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -304,8 +323,12 @@ describe('PolygonAssetERC1155.sol', function () {
     });
     it('can extract to own address if sender == _msgSender() and supply > 1', async function () {
       // require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-      const {PolygonAssetERC1155, extractor, mintAsset, PolygonAssetERC721} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+        PolygonAssetERC721,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       let balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -354,8 +377,12 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftBal).to.be.equal(1);
     });
     it('cannot extract to destination address if sender == _msgSender() but sender is not owner of ERC1155', async function () {
-      const {PolygonAssetERC1155, extractor, users, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        users,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(users[1].address, 10);
       await expect(
         PolygonAssetERC1155.connect(
@@ -365,8 +392,12 @@ describe('PolygonAssetERC1155.sol', function () {
     });
     it('cannot extract to destination address if isApprovedForAll(sender, _msgSender()) but sender is not bouncer', async function () {
       // require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-      const {PolygonAssetERC1155, extractor, users, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        users,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -511,8 +542,12 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith('UNIQUE_ERC1155');
     });
     it('cannot extract ERC721 if supply == 1 if msgSender() is not approved operator', async function () {
-      const {PolygonAssetERC1155, users, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        users,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 1);
       const balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -527,8 +562,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith('!AUTHORIZED');
     });
     it('can retrieve Extraction event with ERC1155 id and new ERC721 id and they are not the same as each other', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const receipt = await waitFor(
         PolygonAssetERC1155.connect(
@@ -546,8 +584,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(args[1]).not.to.be.equal(tokenId);
     });
     it('cannot extract ERC721 if to == zeroAddress', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       await expect(
         PolygonAssetERC1155.connect(
@@ -556,8 +597,12 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith('TO==0');
     });
     it('can extract more than once', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset, PolygonAssetERC721} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+        PolygonAssetERC721,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       let balance = await PolygonAssetERC1155['balanceOf(address,uint256)'](
         extractor,
@@ -601,8 +646,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftId1).to.be.not.equal(nftId2);
     });
     it('can get the new ERC721 ID returned from extraction event', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const receipt = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -616,8 +664,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(tokenId).not.to.be.equal(newId);
     });
     it('can get the new ERC721 ID returned from extraction tx', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const newId = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -625,8 +676,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(tokenId).not.to.be.equal(newId);
     });
     it('can check collectionOf for new ERC721 gives the ERC1155 ID', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const receipt = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -656,8 +710,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can still check collectionOf for new ERC721 if I burn my ERC1155', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const receipt = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -690,8 +747,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can extract my last ERC1155 to an ERC721 (as long as supply was > 1 originally)', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
 
       await PolygonAssetERC1155.connect(
@@ -703,8 +763,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).extractERC721From(extractor, tokenId, extractor);
     });
     it('cannot burn ERC1155 after extraction if there is no more supply', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
 
       await PolygonAssetERC1155.connect(
@@ -723,8 +786,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith("can't substract more than there is");
     });
     it('can check collectionOf for new ERC721 correctly increments by 1 compared to the ERC1155 it was extracted from', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const receipt = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -754,8 +820,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftCollectionIndexOf).to.be.equal(1);
     });
     it('can burn then extract and then burn some more', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 5);
 
       await PolygonAssetERC1155.connect(
@@ -775,8 +844,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).burn(tokenId, 1);
     });
     it('can mint multiple and extract from multiple IDs in a pack as long as the id has supply > 1', async function () {
-      const {PolygonAssetERC1155, extractor, mintMultipleAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintMultipleAsset,
+      } = await setupPolygonAsset();
       const tokenIds = await mintMultipleAsset(extractor, [2, 4, 7, 1]);
 
       await PolygonAssetERC1155.connect(
@@ -796,8 +868,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).extractERC721From(extractor, tokenIds[0], extractor);
     });
     it('cannot extract from tokenId minted with mintMultiple if supply == 1', async function () {
-      const {PolygonAssetERC1155, extractor, mintMultipleAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintMultipleAsset,
+      } = await setupPolygonAsset();
       const tokenIds = await mintMultipleAsset(extractor, [2, 4, 7, 1]);
 
       await PolygonAssetERC1155.connect(
@@ -822,8 +897,11 @@ describe('PolygonAssetERC1155.sol', function () {
       ).to.be.revertedWith('UNIQUE_ERC1155');
     });
     it('can mintMultiple and check collectionOf for a new ERC721 correctly increments by 1 compared to the ERC1155 it was extracted from', async function () {
-      const {PolygonAssetERC1155, extractor, mintMultipleAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintMultipleAsset,
+      } = await setupPolygonAsset();
       const tokenIds = await mintMultipleAsset(extractor, [2, 4, 7, 1]);
 
       const receipt = await PolygonAssetERC1155.connect(
@@ -935,8 +1013,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(nftCollectionIndexOf2).to.be.equal(2);
     });
     it('can see the index of my token after burning another token in the pack', async function () {
-      const {PolygonAssetERC1155, extractor, mintMultipleAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintMultipleAsset,
+      } = await setupPolygonAsset();
       const tokenIds = await mintMultipleAsset(extractor, [2, 4, 7, 1]);
 
       const receipt = await PolygonAssetERC1155.connect(
@@ -980,8 +1061,9 @@ describe('PolygonAssetERC1155.sol', function () {
         newId
       );
       expect(nftIsCollectionAfterBurn).to.be.true;
-      const nftCollectionIndexOfAfterBurn =
-        await PolygonAssetERC1155.collectionIndexOf(newId);
+      const nftCollectionIndexOfAfterBurn = await PolygonAssetERC1155.collectionIndexOf(
+        newId
+      );
       expect(nftCollectionIndexOfAfterBurn).to.be.equal(nftCollectionIndexOf);
     });
     it('can see my ERC721 collection information in PolygonAssetERC1155 contract even after I burn that ERC721', async function () {
@@ -1034,13 +1116,17 @@ describe('PolygonAssetERC1155.sol', function () {
         newId
       );
       expect(nftIsCollectionAfterBurn).to.be.true;
-      const nftCollectionIndexOfAfterBurn =
-        await PolygonAssetERC1155.collectionIndexOf(newId);
+      const nftCollectionIndexOfAfterBurn = await PolygonAssetERC1155.collectionIndexOf(
+        newId
+      );
       expect(nftCollectionIndexOfAfterBurn).to.be.equal(nftCollectionIndexOf);
     });
     it('can see that my ERC1155 tokenId was minted even after I burn all ERC1155 in that pack', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 5);
 
       await PolygonAssetERC1155.connect(
@@ -1051,8 +1137,11 @@ describe('PolygonAssetERC1155.sol', function () {
       expect(doesHashExist).to.be.true;
     });
     it('can see that my ERC1155 tokenId was minted even after I burn and extract all ERC1155 in that pack', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
 
       await PolygonAssetERC1155.connect(
@@ -1068,8 +1157,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('can get the URI for an asset of amount 2', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
       await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -1081,8 +1173,12 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('can correctly obtain ERC721 metadata after extraction', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset, PolygonAssetERC721} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+        PolygonAssetERC721,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 10);
       const URI = await PolygonAssetERC1155.callStatic.uri(tokenId);
       expect(URI).to.be.equal(
@@ -1108,8 +1204,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('get the same URI when extract a 721', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
       const nftId = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -1129,8 +1228,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('get the same URIs for extracted 721s from same ERC1155 collection', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 3);
       const nftId1 = await PolygonAssetERC1155.connect(
         ethers.provider.getSigner(extractor)
@@ -1162,8 +1264,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('can get the chainId from extracted 721s and it does not cut across NFT_INDEX', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 3);
       const chainIndexOriginal = getAssetChainIndex(tokenId);
       expect(chainIndexOriginal).to.be.equal(1);
@@ -1200,8 +1305,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('can use chainIndex getter to obtain chainIndex for a given ID', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 3);
       const chainIndexFromId = getAssetChainIndex(tokenId);
       const chainIndexContract = await PolygonAssetERC1155.getChainIndex(
@@ -1211,8 +1319,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('collectionOf for ERC1155 with supply == 1 is NOT equal to tokenId because IS_NFT is 1', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 1);
 
       const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);
@@ -1228,8 +1339,11 @@ describe('PolygonAssetERC1155.sol', function () {
     });
 
     it('collectionOf for ERC1155 with supply > 1 is equal to tokenId', async function () {
-      const {PolygonAssetERC1155, extractor, mintAsset} =
-        await setupPolygonAsset();
+      const {
+        PolygonAssetERC1155,
+        extractor,
+        mintAsset,
+      } = await setupPolygonAsset();
       const tokenId = await mintAsset(extractor, 2);
 
       const collectionOf = await PolygonAssetERC1155.collectionOf(tokenId);

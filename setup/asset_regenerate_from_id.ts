@@ -120,8 +120,9 @@ const func: DeployFunction = async function () {
         ](to, id, supply, data);
         datasForMint.push(populatedTx.data);
         idsUsed[id] = true;
-        hashesUsed[BigNumber.from(id).and(BigNumber.from(mask)).toString()] =
-          true;
+        hashesUsed[
+          BigNumber.from(id).and(BigNumber.from(mask)).toString()
+        ] = true;
       } else {
         const populatedTx = await Asset.populateTransaction[
           'mintDeficit(address,uint256,uint256)'

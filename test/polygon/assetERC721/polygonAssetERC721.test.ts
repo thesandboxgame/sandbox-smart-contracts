@@ -6,8 +6,7 @@ describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () 
     describe('admin', function () {
       it('admin role is set', async function () {
         const fixtures = await setupAssetERC721Test();
-        const defaultAdminRole =
-          await fixtures.polygonAssetERC721.DEFAULT_ADMIN_ROLE();
+        const defaultAdminRole = await fixtures.polygonAssetERC721.DEFAULT_ADMIN_ROLE();
         expect(
           await fixtures.polygonAssetERC721.hasRole(
             defaultAdminRole,

@@ -6,8 +6,11 @@ const func: DeployFunction = async function () {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {execute, read} = deployments;
 
-  const {deployer, liquidityRewardAdmin, liquidityRewardProvider} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    liquidityRewardAdmin,
+    liquidityRewardProvider,
+  } = await getNamedAccounts();
 
   // Monthly reward 1,500,000 SAND
   const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');

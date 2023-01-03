@@ -134,8 +134,12 @@ describe('Sand.sol', function () {
     });
 
     it('total supply should not be affected by transfers', async function () {
-      const {Sand, sandBeneficiary, userWithSand, usersWithoutSand} =
-        await setupTest();
+      const {
+        Sand,
+        sandBeneficiary,
+        userWithSand,
+        usersWithoutSand,
+      } = await setupTest();
       const sandTransferValue = DECIMALS_18.mul(200);
       await sandBeneficiary.Sand.transfer(
         usersWithoutSand[0].address,

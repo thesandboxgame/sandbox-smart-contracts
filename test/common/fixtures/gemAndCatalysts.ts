@@ -174,10 +174,9 @@ export const gemsAndCatalystsFixtures = async () => {
     ethers.provider.getSigner(catalystOwner)
   );
 
-  const gemsCatalystsRegistryAsRegistrySuperOperator =
-    gemsCatalystsRegistry.connect(
-      ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
-    );
+  const gemsCatalystsRegistryAsRegistrySuperOperator = gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
+  );
 
   const gemsCatalystsRegistryAsUser3 = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(users[3])

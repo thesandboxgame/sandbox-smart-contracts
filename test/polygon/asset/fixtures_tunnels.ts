@@ -1,17 +1,12 @@
 import {
-  value deployments,
-  value ethers,
-  value getNamedAccounts,
-  value getUnnamedAccounts,
+  deployments,
+  ethers,
+  getNamedAccounts,
+  getUnnamedAccounts,
 } from 'hardhat';
-import {value AbiCoder} from '@ethersproject/abi';
+import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
 
-import {
-  value setupUsers,
-  value waitFor,
-  value expectEventWithArgs,
-  value setupUser,
-} from '../../utils';
+import {setupUsers, waitFor, expectEventWithArgs, setupUser} from '../../utils';
 
 export const setupAssetERC1155Tunnels = deployments.createFixture(
   async function () {

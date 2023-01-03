@@ -133,11 +133,10 @@ describe('RafflePlayboyPartyPeople', function () {
           '1',
           1
         );
-        const transferEvents =
-          await rafflePlayboyPartyPeopleContract.queryFilter(
-            rafflePlayboyPartyPeopleContract.filters.Transfer(),
-            receipt.blockNumber
-          );
+        const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
+          rafflePlayboyPartyPeopleContract.filters.Transfer(),
+          receipt.blockNumber
+        );
         assert.equal(transferEvents.length, 1);
         assert.exists(transferEvents[0].args);
         if (transferEvents.length > 0 && transferEvents[0].args) {
@@ -259,10 +258,9 @@ describe('RafflePlayboyPartyPeople', function () {
       personalizationMask
     );
 
-    const personalizeEvents =
-      await rafflePlayboyPartyPeopleContract.queryFilter(
-        rafflePlayboyPartyPeopleContract.filters.Personalized()
-      );
+    const personalizeEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
+      rafflePlayboyPartyPeopleContract.filters.Personalized()
+    );
 
     assert.equal(personalizeEvents.length, 1);
     assert.exists(personalizeEvents[0].args);
@@ -271,8 +269,9 @@ describe('RafflePlayboyPartyPeople', function () {
       personalizationMask
     );
 
-    const personalizationOf =
-      await rafflePlayboyPartyPeopleContract.personalizationOf(tokenId);
+    const personalizationOf = await rafflePlayboyPartyPeopleContract.personalizationOf(
+      tokenId
+    );
 
     assert.equal(personalizationOf, personalizationMask);
   });
@@ -403,16 +402,14 @@ describe('RafflePlayboyPartyPeople', function () {
       personalizationMask
     );
 
-    const allPersonalizeEvents =
-      await rafflePlayboyPartyPeopleContract.queryFilter(
-        rafflePlayboyPartyPeopleContract.filters.Personalized()
-      );
+    const allPersonalizeEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
+      rafflePlayboyPartyPeopleContract.filters.Personalized()
+    );
 
-    const personalizeEvents2 =
-      await rafflePlayboyPartyPeopleContract.queryFilter(
-        rafflePlayboyPartyPeopleContract.filters.Personalized(),
-        personalizeReceipt2.blockNumber
-      );
+    const personalizeEvents2 = await rafflePlayboyPartyPeopleContract.queryFilter(
+      rafflePlayboyPartyPeopleContract.filters.Personalized(),
+      personalizeReceipt2.blockNumber
+    );
 
     assert.equal(allPersonalizeEvents.length, 1);
     assert.equal(personalizeEvents2.length, 1);

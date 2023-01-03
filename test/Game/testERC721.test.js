@@ -51,8 +51,11 @@ const newCreationAdd1155 = (creation, assetIdsToAdd1155) => {
 
 const erc721Tests = require('../erc721')(
   withSnapshot(['Asset', 'AssetERC721', 'ChildGameToken'], async () => {
-    const {gameTokenAdmin, assetBouncerAdmin, assetAdmin} =
-      await getNamedAccounts();
+    const {
+      gameTokenAdmin,
+      assetBouncerAdmin,
+      assetAdmin,
+    } = await getNamedAccounts();
     const others = await getUnnamedAccounts();
 
     const contract = await ethers.getContract('ChildGameToken');
