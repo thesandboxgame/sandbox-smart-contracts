@@ -347,58 +347,30 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                 size / 2
             );
 
-        for (uint256 i = 0; i < size * size; i++) {
-            uint256 _id = _idInPath(i, size, x, y);
-            uint256 xi = _getX(_id);
-            uint256 yi = _getY(_id);
-            bool isAlreadyMinted = _isQuadMinted(quadMinted, xi, yi, 1, index);
-            if (isAlreadyMinted) {
-                emit Transfer(msg.sender, to, _id);
-            } else {
-                if (_owners[_id] == uint256(uint160(msg.sender))) {
-                    landMinted += 1;
+        {
+            for (uint256 i = 0; i < size * size; i++) {
+                uint256 _id = _idInPath(i, size, x, y);
+                bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
+                if (isAlreadyMinted) {
                     emit Transfer(msg.sender, to, _id);
                 } else {
-                    require(_owners[_id] == 0, "Already minted");
-                    emit Transfer(address(0), to, _id);
-                }
-            }
-        }
-
-        {
-            _owners[quadId] = uint256(uint160(to));
-            _numNFTPerAddress[to] += size * size;
-            _numNFTPerAddress[msg.sender] -= landMinted;
-            if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-                uint256[] memory idsToTransfer;
-                uint256[] memory idsToMint;
-                for (uint256 i = 0; i < size * size; i++) {
-                    uint256 id = _idInPath(i, size, x, y);
-
-                    if (_isQuadMinted(quadMinted, _getX(id), _getY(id), 1, index)) {
-                        idsToTransfer[idsToTransfer.length] = id;
-                    } else if (_owners[id] == uint256(uint160(msg.sender))) {
-                        _owners[id] = 0;
-                        idsToTransfer[idsToTransfer.length] = id;
+                    if (_owners[_id] == uint256(uint160(msg.sender))) {
+                        landMinted += 1;
+                        emit Transfer(msg.sender, to, _id);
                     } else {
-                        idsToMint[idsToMint.length] = id;
+                        require(_owners[_id] == 0, "Already minted");
+
+                        emit Transfer(address(0), to, _id);
                     }
                 }
-                require(
-                    _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
-                    "erc721 batch transfer rejected by to"
-                );
-                require(
-                    _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
-                    "erc721 batch transfer rejected by to"
-                );
-            } else {
-                for (uint256 i = 0; i < size * size; i++) {
-                    uint256 id = _idInPath(i, size, x, y);
-                    if (_owners[id] == uint256(uint160(msg.sender))) _owners[id] = 0;
-                }
             }
         }
+
+        _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, landMinted, to, size, x, y, data);
+
+        _owners[quadId] = uint256(uint160(to));
+        _numNFTPerAddress[to] += size * size;
+        _numNFTPerAddress[msg.sender] -= landMinted;
     }
 
     function _checkAndClearOwner(
@@ -414,7 +386,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
 
         for (uint256 xi = land.x; xi < toX; xi += quadCompareSize) {
             for (uint256 yi = land.y; yi < toY; yi += quadCompareSize) {
-                bool isQuadChecked = _isQuadMinted(quadMinted, xi, yi, quadCompareSize, index);
+                bool isQuadChecked = _isQuadMinted(quadMinted, Land({x: xi, y: yi, size: quadCompareSize}), index);
                 if (!isQuadChecked) {
                     uint256 id = _getQuadId(layer, xi, yi);
                     address owner = address(uint160(_owners[id]));
@@ -466,6 +438,53 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         }
     }
 
+    function _checkBatchReceiverAcceptQuadAndClearOwner(
+        Land[] memory quadMinted,
+        uint256 index,
+        uint256 landMinted,
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            uint256[] memory idsToTransfer = new uint256[](landMinted);
+            uint256 transferIndex;
+            uint256[] memory idsToMint = new uint256[]((size * size)-landMinted);
+            uint256 mintIndex;
+
+            for (uint256 i = 0; i < size * size; i++) {
+                uint256 id = _idInPath(i, size, x, y);
+
+                if (_isQuadMinted(quadMinted, Land({x: _getX(id), y: _getY(id), size: 1}), index)) {
+                    idsToTransfer[transferIndex] = id;
+                    transferIndex++;
+                } else if (_owners[id] == uint256(uint160(msg.sender))) {
+                    _owners[id] = 0;
+                    idsToTransfer[transferIndex] = id;
+                    transferIndex++;
+                } else {
+                    idsToMint[mintIndex] = id;
+                    mintIndex++;
+                }
+            }
+            require(
+                _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
+                "erc721 batch transfer rejected by to"
+            );
+            require(
+                _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
+                "erc721 batch transfer rejected by to"
+            );
+        } else {
+            for (uint256 i = 0; i < size * size; i++) {
+                uint256 id = _idInPath(i, size, x, y);
+                if (_owners[id] == uint256(uint160(msg.sender))) _owners[id] = 0;
+            }
+        }
+    }
+
     function _getX(uint256 id) internal pure returns (uint256) {
         return ((id << 8) >> 8) % GRID_SIZE;
     }
@@ -476,16 +495,14 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
 
     function _isQuadMinted(
         Land[] memory mintedLand,
-        uint256 x,
-        uint256 y,
-        uint256 size,
+        Land memory quad,
         uint256 index
     ) internal pure returns (bool) {
         for (uint256 i = 0; i < index; i++) {
             Land memory land = mintedLand[i];
-            if (land.size > size) {
-                if (x >= land.x && x < land.x + land.size) {
-                    if (y >= land.y && y < land.y + land.size) return true;
+            if (land.size > quad.size) {
+                if (quad.x >= land.x && quad.x < land.x + land.size) {
+                    if (quad.y >= land.y && quad.y < land.y + land.size) return true;
                 }
             }
         }
