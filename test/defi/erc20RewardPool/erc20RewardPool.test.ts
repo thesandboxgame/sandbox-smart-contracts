@@ -20,8 +20,11 @@ describe('ERC20RewardPool main contract tests', function () {
         await expect(method(contract, rewardToken.address)).not.to.be.reverted;
       });
       it('other should fail to call ' + funcName, async function () {
-        const {rewardToken, contract, getUser} =
-          await setupERC20RewardPoolTest();
+        const {
+          rewardToken,
+          contract,
+          getUser,
+        } = await setupERC20RewardPoolTest();
         const user = await getUser();
         const poolAsOther = contract.connect(
           await ethers.getSigner(user.address)
@@ -83,8 +86,12 @@ describe('ERC20RewardPool main contract tests', function () {
     });
 
     it('recoverFunds should fail if contract is not paused', async function () {
-      const {contract, rewardToken, totalRewardMinted, getUser} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        rewardToken,
+        totalRewardMinted,
+        getUser,
+      } = await setupERC20RewardPoolTest();
       const user = await getUser();
       expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
         totalRewardMinted
@@ -94,8 +101,12 @@ describe('ERC20RewardPool main contract tests', function () {
       );
     });
     it('admin should be able to call recoverFunds if contract is paused', async function () {
-      const {contract, rewardToken, totalRewardMinted, getUser} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        rewardToken,
+        totalRewardMinted,
+        getUser,
+      } = await setupERC20RewardPoolTest();
       const user = await getUser();
       await contract.pause();
       expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
@@ -123,8 +134,12 @@ describe('ERC20RewardPool main contract tests', function () {
       );
     });
     it('contract should have enough funds to replace the stakeToken', async function () {
-      const {contract, replaceToken, rewardToken, getUser} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        replaceToken,
+        rewardToken,
+        getUser,
+      } = await setupERC20RewardPoolTest();
 
       await contract.setMaxStakeOverall(999999999);
 
@@ -474,8 +489,11 @@ describe('ERC20RewardPool main contract tests', function () {
   });
   describe('contribution calculation', function () {
     it('initial', async function () {
-      const {getUsers, contributionRulesMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(4);
       for (const u of users) {
@@ -488,8 +506,11 @@ describe('ERC20RewardPool main contract tests', function () {
       }
     });
     it('computeContribution after the user change his contribution', async function () {
-      const {getUsers, contributionRulesMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(6);
       // stake
@@ -526,8 +547,11 @@ describe('ERC20RewardPool main contract tests', function () {
       }
     });
     it('computeContributionInBatch after the user change his contribution', async function () {
-      const {getUsers, contributionRulesMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(6);
       // stake
@@ -568,8 +592,12 @@ describe('ERC20RewardPool main contract tests', function () {
   });
   describe('contribution calculation with rewards', function () {
     it('initial', async function () {
-      const {getUsers, contributionRulesMock, rewardCalculatorMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(8);
@@ -602,8 +630,12 @@ describe('ERC20RewardPool main contract tests', function () {
       }
     });
     it('computeContribution after users change his contribution', async function () {
-      const {getUsers, contributionRulesMock, rewardCalculatorMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(6);
@@ -711,8 +743,12 @@ describe('ERC20RewardPool main contract tests', function () {
       }
     });
     it('computeContributionInBatch after the user change his contribution', async function () {
-      const {getUsers, contributionRulesMock, rewardCalculatorMock, contract} =
-        await setupERC20RewardPoolTest();
+      const {
+        getUsers,
+        contributionRulesMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       await contract.setContributionRules(contributionRulesMock.address);
       const users = await getUsers(6);
@@ -828,14 +864,20 @@ describe('ERC20RewardPool main contract tests', function () {
       );
     });
     it('setReward with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       const user = await getUser();
 
-      const {to, data} =
-        await rewardCalculatorMock.populateTransaction.setReward(22);
+      const {
+        to,
+        data,
+      } = await rewardCalculatorMock.populateTransaction.setReward(22);
 
       await sendMetaTx(to, trustedForwarder, data, user.address);
 
@@ -844,8 +886,12 @@ describe('ERC20RewardPool main contract tests', function () {
       expect(reward).to.be.equal(22);
     });
     it('stake with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       await contract.setMaxStakeOverall(999999999);
@@ -860,8 +906,12 @@ describe('ERC20RewardPool main contract tests', function () {
       expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
     });
     it('withdraw with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupERC20RewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupERC20RewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       await contract.setMaxStakeOverall(999999999);

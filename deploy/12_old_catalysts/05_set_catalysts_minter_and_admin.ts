@@ -5,8 +5,12 @@ const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {read, execute} = deployments;
 
-  const {deployer, catalystAdmin, catalystMinter, extraCatalystAndGemMinter} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    catalystAdmin,
+    catalystMinter,
+    extraCatalystAndGemMinter,
+  } = await getNamedAccounts();
 
   const currentAdmin = await read('OldCatalysts', 'getAdmin');
 

@@ -103,8 +103,11 @@ describe('Asset_ERC721_Tunnels', function () {
       });
 
       it('cannot tranfer asset directly to tunnel l1', async function () {
-        const {assetMinter, users, AssetERC721Tunnel} =
-          await setupAssetERC721Tunnels();
+        const {
+          assetMinter,
+          users,
+          AssetERC721Tunnel,
+        } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
@@ -131,8 +134,11 @@ describe('Asset_ERC721_Tunnels', function () {
       });
 
       it('cannot tranfer asset directly to tunnel l2', async function () {
-        const {assetMinter, users, PolygonAssetERC721Tunnel} =
-          await setupAssetERC721Tunnels();
+        const {
+          assetMinter,
+          users,
+          PolygonAssetERC721Tunnel,
+        } = await setupAssetERC721Tunnels();
         const assetHolder = users[0];
         const abiCoder = new AbiCoder();
         const uri = 'http://myMetadata.io/1';
@@ -387,11 +393,10 @@ describe('Asset_ERC721_Tunnels', function () {
 
         await deployer.MockPolygonAssetERC721Tunnel.unpause();
 
-        const tx =
-          await assetHolder.MockPolygonAssetERC721Tunnel.batchWithdrawToRoot(
-            assetHolder.address,
-            [tokenId]
-          );
+        const tx = await assetHolder.MockPolygonAssetERC721Tunnel.batchWithdrawToRoot(
+          assetHolder.address,
+          [tokenId]
+        );
         await tx.wait();
 
         // Check Polygon balances

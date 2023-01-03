@@ -5,8 +5,11 @@ import {skipUnlessTestnet} from '../../utils/network';
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAuctionAdmin, assetAuctionFeeCollector} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    assetAuctionAdmin,
+    assetAuctionFeeCollector,
+  } = await getNamedAccounts();
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const authValidatorContract = await deployments.get('PolygonAuthValidator');

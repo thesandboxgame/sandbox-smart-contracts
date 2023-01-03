@@ -20,8 +20,13 @@ describe('Gems & Catalysts permit', function () {
   let user3: Address;
 
   before(async function () {
-    ({luckGem, epicCatalyst, catalystOwner, gemOwner, user3} =
-      await setupGemsAndCatalysts());
+    ({
+      luckGem,
+      epicCatalyst,
+      catalystOwner,
+      gemOwner,
+      user3,
+    } = await setupGemsAndCatalysts());
   });
 
   it('user can use permit function to approve Gems via signature', async function () {

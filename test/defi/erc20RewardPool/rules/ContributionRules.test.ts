@@ -4,8 +4,11 @@ import {ContributionRulesSetup} from '../fixtures/fixtures';
 describe('ContributionRules', function () {
   describe('roles', function () {
     it('admin should be able to call setERC721MultiplierList', async function () {
-      const {ERC721Token, contractAsAdmin, contract} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+      } = await ContributionRulesSetup();
       await expect(
         contract.setERC721MultiplierList(ERC721Token[0].address, [10], [], true)
       ).to.be.revertedWith('Ownable: caller is not the owner');
@@ -59,8 +62,11 @@ describe('ContributionRules', function () {
       ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
     });
     it('admin should be able to call setERC1155MultiplierList', async function () {
-      const {ERC1155Token, contractAsAdmin, contract} =
-        await ContributionRulesSetup();
+      const {
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+      } = await ContributionRulesSetup();
       await expect(
         contract.setERC1155MultiplierList(ERC1155Token[0].address, [10], [0])
       ).to.be.revertedWith('Ownable: caller is not the owner');
@@ -114,8 +120,11 @@ describe('ContributionRules', function () {
       ).to.be.revertedWith('ContributionRules: contractsLimit exceeded');
     });
     it('admin should be able to call deleteERC721MultiplierList', async function () {
-      const {ERC721Token, contractAsAdmin, contract} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+      } = await ContributionRulesSetup();
 
       await contractAsAdmin.setERC721MultiplierList(
         ERC721Token[0].address,
@@ -141,8 +150,11 @@ describe('ContributionRules', function () {
       ).to.be.equal(false);
     });
     it('admin should be able to call deleteERC1155MultiplierList', async function () {
-      const {ERC1155Token, contractAsAdmin, contract} =
-        await ContributionRulesSetup();
+      const {
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+      } = await ContributionRulesSetup();
 
       await contractAsAdmin.setERC1155MultiplierList(
         ERC1155Token[0].address,
@@ -203,15 +215,24 @@ describe('ContributionRules', function () {
   });
   describe('compute contribution', function () {
     it('0 ERC721 - 0 ERC1155', async function () {
-      const {contract, ERC721Token, ERC1155Token, other} =
-        await ContributionRulesSetup();
+      const {
+        contract,
+        ERC721Token,
+        ERC1155Token,
+        other,
+      } = await ContributionRulesSetup();
       expect(await ERC721Token[0].balanceOf(other)).to.be.equal(0);
       expect(await ERC1155Token[0].balanceOf(other, 0)).to.be.equal(0);
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1000);
     });
     it('1 ERC721 balanceOf - 0 ERC1155', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const numERC721 = 1;
 
@@ -231,8 +252,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1100);
     });
     it('4 ERC721 balanceOf - 0 ERC1155', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const numERC721 = 4;
 
@@ -252,8 +278,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1210);
     });
     it('1 ERC721 balanceOf - 1 ERC1155', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const id = '0x123456';
 
@@ -286,8 +317,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1200);
     });
     it('1 ERC721 balanceOf - 2 ERC1155 ids', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const id1 = '0x123456';
       const id2 = '0x789012';
@@ -325,8 +361,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1250);
     });
     it('1 ERC721 id - 2 ERC1155 ids', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const id1 = '0x123456';
       const id2 = '0x789012';
@@ -362,8 +403,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1200);
     });
     it('2 ERC721 ids - 2 ERC1155 ids', async function () {
-      const {ERC721Token, ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const id1 = '0x123456';
       const id2 = '0x789012';
@@ -403,8 +449,12 @@ describe('ContributionRules', function () {
   });
   describe('multiplier limit', function () {
     it('should limit ERC721 multiplier at 15%', async function () {
-      const {ERC721Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const numERC721 = 2; // 17%
 
@@ -431,8 +481,12 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1100);
     });
     it('should limit ERC1155 multiplier at 15%', async function () {
-      const {ERC1155Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC1155Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const numERC1155 = 1; // 17%
 
@@ -463,8 +517,13 @@ describe('ContributionRules', function () {
       expect(await contract.computeMultiplier(other, 1000)).to.be.equal(1140);
     });
     it('should return MaxGlobalMultiplier', async function () {
-      const {ERC1155Token, ERC721Token, contractAsAdmin, contract, other} =
-        await ContributionRulesSetup();
+      const {
+        ERC1155Token,
+        ERC721Token,
+        contractAsAdmin,
+        contract,
+        other,
+      } = await ContributionRulesSetup();
 
       const numERC721 = 1; // 10%
       const numERC1155 = 1;

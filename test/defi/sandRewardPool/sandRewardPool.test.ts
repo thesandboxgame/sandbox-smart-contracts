@@ -18,8 +18,11 @@ describe('new SandRewardPool main contract tests', function () {
         await expect(method(contract, rewardToken.address)).not.to.be.reverted;
       });
       it('other should fail to call ' + funcName, async function () {
-        const {rewardToken, contract, getUser} =
-          await setupSandRewardPoolTest();
+        const {
+          rewardToken,
+          contract,
+          getUser,
+        } = await setupSandRewardPoolTest();
         const user = await getUser();
         const poolAsOther = contract.connect(
           await ethers.getSigner(user.address)
@@ -47,8 +50,12 @@ describe('new SandRewardPool main contract tests', function () {
       c.setRewardCalculator(rewardToken, false)
     );
     it('admin should be able to call recoverFunds', async function () {
-      const {contract, rewardToken, totalRewardMinted, getUser} =
-        await setupSandRewardPoolTest();
+      const {
+        contract,
+        rewardToken,
+        totalRewardMinted,
+        getUser,
+      } = await setupSandRewardPoolTest();
       const user = await getUser();
       expect(await rewardToken.balanceOf(contract.address)).to.be.equal(
         totalRewardMinted
@@ -375,8 +382,11 @@ describe('new SandRewardPool main contract tests', function () {
   });
   describe('contribution calculation', function () {
     it('initial', async function () {
-      const {getUsers, contributionCalculatorMock, contract} =
-        await setupSandRewardPoolTest();
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
       await contract.setContributionCalculator(
         contributionCalculatorMock.address
       );
@@ -391,8 +401,11 @@ describe('new SandRewardPool main contract tests', function () {
       }
     });
     it('computeContribution after the user change his contribution', async function () {
-      const {getUsers, contributionCalculatorMock, contract} =
-        await setupSandRewardPoolTest();
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
       await contract.setContributionCalculator(
         contributionCalculatorMock.address
       );
@@ -431,8 +444,11 @@ describe('new SandRewardPool main contract tests', function () {
       }
     });
     it('computeContributionInBatch after the user change his contribution', async function () {
-      const {getUsers, contributionCalculatorMock, contract} =
-        await setupSandRewardPoolTest();
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
       await contract.setContributionCalculator(
         contributionCalculatorMock.address
       );
@@ -756,14 +772,20 @@ describe('new SandRewardPool main contract tests', function () {
       expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
     });
     it('setReward with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupSandRewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       const user = await getUser();
 
-      const {to, data} =
-        await rewardCalculatorMock.populateTransaction.setReward(22);
+      const {
+        to,
+        data,
+      } = await rewardCalculatorMock.populateTransaction.setReward(22);
 
       await sendMetaTx(to, trustedForwarder, data, user.address);
 
@@ -772,8 +794,12 @@ describe('new SandRewardPool main contract tests', function () {
       expect(reward).to.be.equal(22);
     });
     it('stake with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupSandRewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       const user = await getUser();
@@ -786,8 +812,12 @@ describe('new SandRewardPool main contract tests', function () {
       expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
     });
     it('withdraw with meta-tx', async function () {
-      const {contract, getUser, trustedForwarder, rewardCalculatorMock} =
-        await setupSandRewardPoolTest();
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
       await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
       const user = await getUser();

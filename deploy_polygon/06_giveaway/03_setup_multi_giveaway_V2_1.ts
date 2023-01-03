@@ -6,8 +6,12 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {read, execute} = deployments;
-  const {deployer, multiGiveawayAdmin, ozdRelayer, sandAdmin} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    multiGiveawayAdmin,
+    ozdRelayer,
+    sandAdmin,
+  } = await getNamedAccounts();
 
   const DEFAULT_ADMIN_ROLE = await read(
     'PolygonMulti_Giveaway_V2_1',

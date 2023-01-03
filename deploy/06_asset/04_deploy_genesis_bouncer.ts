@@ -6,8 +6,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, read, execute} = deployments;
 
-  const {genesisBouncerAdmin, genesisMinter, deployer} =
-    await getNamedAccounts();
+  const {
+    genesisBouncerAdmin,
+    genesisMinter,
+    deployer,
+  } = await getNamedAccounts();
 
   const Asset = await deployments.get('Asset');
 

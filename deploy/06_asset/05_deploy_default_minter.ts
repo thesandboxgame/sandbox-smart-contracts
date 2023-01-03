@@ -5,8 +5,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, read, execute, catchUnknownSigner} = deployments;
 
-  const {deployer, defaultMinterAdmin, mintingFeeCollector} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    defaultMinterAdmin,
+    mintingFeeCollector,
+  } = await getNamedAccounts();
 
   const Asset = await deployments.get('Asset');
   const Sand = await deployments.get('Sand');

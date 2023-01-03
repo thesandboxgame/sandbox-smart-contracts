@@ -11,32 +11,31 @@ export const raffleSignWallet = new ethers.Wallet(
 );
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(
-  ['RaffleSteveAoki'],
-  async function (hre) {
-    const raffleSteveAokiContract = await ethers.getContract('RaffleSteveAoki');
-    const sandContract = await ethers.getContract('Sand');
-    return {
+export const setupRaffle = withSnapshot(['RaffleSteveAoki'], async function (
+  hre
+) {
+  const raffleSteveAokiContract = await ethers.getContract('RaffleSteveAoki');
+  const sandContract = await ethers.getContract('Sand');
+  return {
+    raffleSteveAokiContract,
+    sandContract,
+    hre,
+    getNamedAccounts,
+    setupWave,
+    signAuthMessageAs,
+    transferSand,
+    mint: mintSetup(raffleSteveAokiContract, sandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
       raffleSteveAokiContract,
-      sandContract,
-      hre,
-      getNamedAccounts,
-      setupWave,
-      signAuthMessageAs,
-      transferSand,
-      mint: mintSetup(raffleSteveAokiContract, sandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        raffleSteveAokiContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        raffleSteveAokiContract,
-        invalidPersonalizeSignature
-      ),
-    };
-  }
-);
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      raffleSteveAokiContract,
+      invalidPersonalizeSignature
+    ),
+  };
+});
 
 async function setupWave(
   raffle: Contract,

@@ -1,7 +1,9 @@
 import {BigNumber} from 'ethers';
 const bn2 = BigNumber.from(2);
 
-export function extractFromId(tokenID: string): {
+export function extractFromId(
+  tokenID: string
+): {
   packID: number;
   creator: string;
   numFTTypes: number;

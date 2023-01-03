@@ -16,7 +16,9 @@ type Land = {
 
 const gridSize = new BN(408);
 
-function tokenIdToMapCoords(topCornerId: BN): {
+function tokenIdToMapCoords(
+  topCornerId: BN
+): {
   coordinateX: string;
   coordinateY: string;
 } {

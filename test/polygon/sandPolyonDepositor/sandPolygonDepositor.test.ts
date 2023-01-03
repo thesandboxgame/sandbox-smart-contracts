@@ -13,11 +13,10 @@ describe('SandPolygonDepositor', function () {
       mockRootChainManagerContract,
     } = await setupSandPolygonDepositor();
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI =
-      await sandPolygonDepositorContract.populateTransaction.depositToPolygon(
-        user0,
-        approvalAmount
-      );
+    const encodedABI = await sandPolygonDepositorContract.populateTransaction.depositToPolygon(
+      user0,
+      approvalAmount
+    );
     expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const user0BalanceBefore = await sandContract.balanceOf(user0);

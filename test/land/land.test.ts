@@ -11,8 +11,12 @@ describe('LandV2', function () {
       sizes.forEach((size2) => {
         if (size2 >= size1) return;
         it(`should NOT be able to transfer ${size2}x${size2} quad twice from ${size1}x${size1} quad`, async function () {
-          const {landContract, getNamedAccounts, ethers, mintQuad} =
-            await setupLand();
+          const {
+            landContract,
+            getNamedAccounts,
+            ethers,
+            mintQuad,
+          } = await setupLand();
           const {deployer, landAdmin} = await getNamedAccounts();
           const contract = landContract.connect(
             ethers.provider.getSigner(deployer)
@@ -31,8 +35,12 @@ describe('LandV2', function () {
       sizes.forEach((size2) => {
         if (size2 >= size1) return;
         it(`should return true for ${size2}x${size2} quad minited inside a ${size1}x${size1} quad`, async function () {
-          const {landContract, getNamedAccounts, ethers, mintQuad} =
-            await setupLand();
+          const {
+            landContract,
+            getNamedAccounts,
+            ethers,
+            mintQuad,
+          } = await setupLand();
           const {deployer} = await getNamedAccounts();
           const contract = landContract.connect(
             ethers.provider.getSigner(deployer)
@@ -88,8 +96,12 @@ describe('LandV2', function () {
       sizes.forEach((size2) => {
         if (size2 >= size1) return;
         it(`should NOT be able to transfer burned ${size2}x${size2} quad twice from ${size1}x${size1} quad`, async function () {
-          const {landContract, getNamedAccounts, ethers, mintQuad} =
-            await setupLand();
+          const {
+            landContract,
+            getNamedAccounts,
+            ethers,
+            mintQuad,
+          } = await setupLand();
           const {deployer, landAdmin} = await getNamedAccounts();
           const contract = landContract.connect(
             ethers.provider.getSigner(deployer)
@@ -109,8 +121,12 @@ describe('LandV2', function () {
     });
 
     it('Burnt land cannot be minted again', async function () {
-      const {landContract, getNamedAccounts, ethers, mintQuad} =
-        await setupLand();
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
       const {deployer} = await getNamedAccounts();
       const contract = landContract.connect(
         ethers.provider.getSigner(deployer)
@@ -230,8 +246,12 @@ describe('LandV2', function () {
     });
 
     it('should enable a meta transaction processor', async function () {
-      const {landContract, sandContract, getNamedAccounts, ethers} =
-        await setupLand();
+      const {
+        landContract,
+        sandContract,
+        getNamedAccounts,
+        ethers,
+      } = await setupLand();
       const {landAdmin} = await getNamedAccounts();
       const contract = landContract.connect(
         ethers.provider.getSigner(landAdmin)
@@ -247,8 +267,12 @@ describe('LandV2', function () {
     });
 
     it('should disable a meta transaction processor', async function () {
-      const {landContract, sandContract, getNamedAccounts, ethers} =
-        await setupLand();
+      const {
+        landContract,
+        sandContract,
+        getNamedAccounts,
+        ethers,
+      } = await setupLand();
       const {landAdmin} = await getNamedAccounts();
       const contract = landContract.connect(
         ethers.provider.getSigner(landAdmin)
@@ -276,8 +300,12 @@ describe('LandV2', function () {
     });
 
     it('should only be the admin able to set a meta transaction processor', async function () {
-      const {landContract, sandContract, getNamedAccounts, ethers} =
-        await setupLand();
+      const {
+        landContract,
+        sandContract,
+        getNamedAccounts,
+        ethers,
+      } = await setupLand();
       const {deployer} = await getNamedAccounts();
       const contract = landContract.connect(
         ethers.provider.getSigner(deployer)

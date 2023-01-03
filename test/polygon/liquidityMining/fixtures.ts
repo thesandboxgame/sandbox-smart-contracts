@@ -140,8 +140,9 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
     );
     const POOL = 'PolygonLandWeightedSANDRewardPool';
     const REWARD_DURATION = 2419200; // 28 days in seconds
-    const ACTUAL_REWARD_AMOUNT =
-      REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_DURATION);
+    const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
+      REWARD_DURATION
+    );
     const ONE_DAY = 86400;
     const MULTIPLIER_NFToken = 'MockLandWithMint';
 

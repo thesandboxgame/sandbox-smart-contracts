@@ -147,8 +147,13 @@ describe('Faucet', function () {
 
   it('Retrieve succeded for deployer with any address', async function () {
     const setUp = await setupFaucet();
-    const {faucetContract, deployer, sandContract, sandBeneficiary, others} =
-      setUp;
+    const {
+      faucetContract,
+      deployer,
+      sandContract,
+      sandBeneficiary,
+      others,
+    } = setUp;
 
     const sandBeneficiaryUser = await setupUser(sandBeneficiary, {
       sandContract,
@@ -280,8 +285,13 @@ describe('Faucet', function () {
 
   it('Send with new limit succeed after limit update.', async function () {
     const setUp = await setupFaucet();
-    const {faucetContract, sandContract, sandBeneficiary, deployer, others} =
-      setUp;
+    const {
+      faucetContract,
+      sandContract,
+      sandBeneficiary,
+      deployer,
+      others,
+    } = setUp;
 
     const faucetDeployer = await setupUser(deployer, {
       faucetContract,

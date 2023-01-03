@@ -21,8 +21,13 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
       sand: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, allTrees, allMerkleRoots, allClaims} =
-      setUp;
+    const {
+      giveawayContract,
+      others,
+      allTrees,
+      allMerkleRoots,
+      allClaims,
+    } = setUp;
     const userProofs = [];
     const userTrees = [];
     userTrees.push(allTrees[0]);
@@ -57,8 +62,13 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
       sand: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, allTrees, allMerkleRoots, allClaims} =
-      setUp;
+    const {
+      giveawayContract,
+      others,
+      allTrees,
+      allMerkleRoots,
+      allClaims,
+    } = setUp;
     const userProofs = [];
     const userTrees = [];
     userTrees.push(allTrees[0]);
@@ -91,8 +101,13 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
       sand: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, allTrees, allMerkleRoots, allClaims} =
-      setUp;
+    const {
+      giveawayContract,
+      others,
+      allTrees,
+      allMerkleRoots,
+      allClaims,
+    } = setUp;
     const userProofs = [];
     const userTrees = [];
     userTrees.push(allTrees[0]);
@@ -125,8 +140,13 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
       sand: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, allTrees, allMerkleRoots, allClaims} =
-      setUp;
+    const {
+      giveawayContract,
+      others,
+      allTrees,
+      allMerkleRoots,
+      allClaims,
+    } = setUp;
     const userProofs = [];
     const userTrees = [];
     userTrees.push(allTrees[0]);

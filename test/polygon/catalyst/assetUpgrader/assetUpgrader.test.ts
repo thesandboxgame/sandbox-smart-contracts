@@ -72,14 +72,13 @@ describe('AssetUpgrader', function () {
       catalystOwner,
       Buffer.from('ff')
     );
-    const tokenId =
-      await assetUpgraderContractAsCatalystOwner.callStatic.extractAndSetCatalyst(
-        catalystOwner,
-        assetId,
-        catalystId,
-        [powerGemId],
-        catalystOwner
-      );
+    const tokenId = await assetUpgraderContractAsCatalystOwner.callStatic.extractAndSetCatalyst(
+      catalystOwner,
+      assetId,
+      catalystId,
+      [powerGemId],
+      catalystOwner
+    );
     await waitFor(
       assetUpgraderContractAsCatalystOwner.extractAndSetCatalyst(
         catalystOwner,
@@ -440,14 +439,12 @@ describe('AssetUpgrader', function () {
       assetUpgraderFeeBurnerContract,
     } = await setupAssetUpgrader();
 
-    const currentFeeRecipient =
-      await assetUpgraderFeeBurnerContract.feeRecipient();
+    const currentFeeRecipient = await assetUpgraderFeeBurnerContract.feeRecipient();
     expect(currentFeeRecipient).to.be.equal(BURN_ADDRESS);
 
-    const upgraderFeeBurnerAsUser4 =
-      await assetUpgraderFeeBurnerContract.connect(
-        ethers.provider.getSigner(user4)
-      );
+    const upgraderFeeBurnerAsUser4 = await assetUpgraderFeeBurnerContract.connect(
+      ethers.provider.getSigner(user4)
+    );
 
     await transferSand(
       sandContract,

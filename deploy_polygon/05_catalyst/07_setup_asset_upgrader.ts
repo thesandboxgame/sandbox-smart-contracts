@@ -4,8 +4,11 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {deployer, gemsCatalystsRegistryAdmin, assetAttributesRegistryAdmin} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    gemsCatalystsRegistryAdmin,
+    assetAttributesRegistryAdmin,
+  } = await getNamedAccounts();
 
   const sandCurrentAdmin = await read('PolygonSand', 'getAdmin');
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
