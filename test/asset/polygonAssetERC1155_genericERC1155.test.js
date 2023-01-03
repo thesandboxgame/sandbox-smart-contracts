@@ -4,7 +4,9 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
-const {AbiCoder} = require('@ethersproject/abi');
+const {
+  AbiCoder,
+} = require('@ethersproject/contracts/node_modules/@ethersproject/abi');
 const {
   waitFor,
   recurseTests,

@@ -11,7 +11,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12.22.1
+          node-version: 16.17.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12.22.1
+          node-version: 16.17.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -71,7 +71,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12.22.1
+          node-version: 16.17.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -101,7 +101,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12.22.1
+          node-version: 16.17.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
