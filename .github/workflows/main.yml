@@ -121,11 +121,12 @@ jobs:
       - name: Running coverage
         run: yarn coverage
 
-      - name: Report coverage
-        uses: romeovs/lcov-reporter-action@v0.2.21
-        with:
-          lcov-file: ./coverage/lcov.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      # removing - body is too long issue (report is too big to add as a comment)
+      #- name: Report coverage
+      #  uses: romeovs/lcov-reporter-action@v0.2.21
+      #  with:
+      #    lcov-file: ./coverage/lcov.info
+      #    github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enforce coverage
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
