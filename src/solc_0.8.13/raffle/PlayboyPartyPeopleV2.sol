@@ -13,8 +13,20 @@ contract PlayboyPartyPeopleV2 is GenericRaffle {
         string memory _symbol,
         address payable _sandOwner,
         address _signAddress,
-        address _trustedForwarder
+        address _trustedForwarder,
+        address _operatorFiltererSubscription,
+        bool _operatorFiltererSubscriptionSubscribe
     ) public initializer {
-        __GenericRaffle_init(baseURI, _name, _symbol, _sandOwner, _signAddress, _trustedForwarder, MAX_SUPPLY);
+        __GenericRaffle_init(
+            baseURI,
+            _name,
+            _symbol,
+            _sandOwner,
+            _signAddress,
+            _trustedForwarder,
+            _operatorFiltererSubscription,
+            _operatorFiltererSubscriptionSubscribe,
+            MAX_SUPPLY
+        );
     }
 }

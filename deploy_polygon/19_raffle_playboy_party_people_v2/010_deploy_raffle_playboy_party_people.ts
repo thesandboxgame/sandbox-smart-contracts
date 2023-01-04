@@ -10,6 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     upgradeAdmin,
     treasury,
     raffleSignWallet,
+    defaultOperatorFiltererSubscription,
   } = await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
@@ -36,6 +37,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           treasury,
           raffleSignWallet,
           TRUSTED_FORWARDER.address,
+          defaultOperatorFiltererSubscription,
+          false,
         ],
       },
       upgradeIndex: 0,
