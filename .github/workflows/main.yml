@@ -121,7 +121,6 @@ jobs:
       - name: Running coverage
         run: yarn coverage
 
-      # removing - body is too long issue (report is too big to add as a comment)
       - name: Report coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
         with:
