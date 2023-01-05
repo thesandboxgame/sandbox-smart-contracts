@@ -14,6 +14,7 @@ contract PlayboyPartyPeopleV2 is GenericRaffle {
         address payable _sandOwner,
         address _signAddress,
         address _trustedForwarder,
+        address _registry,
         address _operatorFiltererSubscription,
         bool _operatorFiltererSubscriptionSubscribe
     ) public initializer {
@@ -24,6 +25,7 @@ contract PlayboyPartyPeopleV2 is GenericRaffle {
             _sandOwner,
             _signAddress,
             _trustedForwarder,
+            _registry,
             _operatorFiltererSubscription,
             _operatorFiltererSubscriptionSubscribe,
             MAX_SUPPLY

@@ -29,6 +29,7 @@
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
     "@openzeppelin/contracts-0.8.13": "npm:@openzeppelin/contracts@4.8.0",
+    "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0",
     "@openzeppelin/contracts-upgradeable": "4.4.2",
     "@openzeppelin/hardhat-upgrades": "^1.4.3",
     "@types/chai": "^4.2.11",

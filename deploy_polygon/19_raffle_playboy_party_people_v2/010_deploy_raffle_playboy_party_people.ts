@@ -10,6 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     upgradeAdmin,
     treasury,
     raffleSignWallet,
+    defaultOperatorFiltererRegistry,
     defaultOperatorFiltererSubscription,
   } = await getNamedAccounts();
 
@@ -37,6 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           treasury,
           raffleSignWallet,
           TRUSTED_FORWARDER.address,
+          defaultOperatorFiltererRegistry,
           defaultOperatorFiltererSubscription,
           false,
         ],

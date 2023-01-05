@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {OperatorFiltererUpgradeable} from "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
-
 import {Address} from "@openzeppelin/contracts-0.8.13/utils/Address.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -17,6 +15,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is
@@ -24,7 +23,7 @@ contract GenericRaffle is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC2771HandlerUpgradeable,
-    OperatorFiltererUpgradeable
+    UpdatableOperatorFiltererUpgradeable
 {
     using Address for address;
     uint256 public maxSupply;
@@ -79,6 +78,7 @@ contract GenericRaffle is
         address payable _sandOwner,
         address _signAddress,
         address _trustedForwarder,
+        address _registry,
         address _operatorFiltererSubscription,
         bool _operatorFiltererSubscriptionSubscribe,
         uint256 _maxSupply
@@ -87,7 +87,11 @@ contract GenericRaffle is
         __ERC2771Handler_initialize(_trustedForwarder);
         __Ownable_init_unchained();
         __ReentrancyGuard_init();
-        __OperatorFilterer_init(_operatorFiltererSubscription, _operatorFiltererSubscriptionSubscribe);
+        __UpdatableOperatorFiltererUpgradeable_init(
+            _registry,
+            _operatorFiltererSubscription,
+            _operatorFiltererSubscriptionSubscribe
+        );
         setBaseURI(baseURI);
         require(bytes(baseURI).length != 0, "baseURI is not set");
         require(bytes(_name).length != 0, "_name is not set");
@@ -248,8 +252,8 @@ contract GenericRaffle is
     // Thx Cyberkongs VX <3
     function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
-        uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256 rand = uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) %
+            remaining;
         uint256 value = rand;
 
         if (availableIds[rand] != 0) {

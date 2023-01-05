@@ -279,6 +279,8 @@ const config: HardhatUserConfig = {
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
+    defaultOperatorFiltererRegistry:
+      '0x000000000000AAeB6D7670E522A718067333cd4E',
     defaultOperatorFiltererSubscription:
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
