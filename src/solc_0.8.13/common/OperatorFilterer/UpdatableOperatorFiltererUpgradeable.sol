@@ -5,21 +5,6 @@ import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Init
 
 import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
 
-/**
- * @title  UpdatableOperatorFiltererUpgradeable
- * @author qed.team, abarbatei, balajmarius
- * @notice Abstract contract whose init function automatically registers and optionally subscribes to or copies another
- *         registrant's entries in the OperatorFilterRegistry. This contract allows the Owner to update the
- *         OperatorFilterRegistry address via updateOperatorFilterRegistryAddress, including to the zero address,
- *         which will bypass registry checks.
- *         Note that OpenSea will still disable creator fee enforcement if filtered operators begin fulfilling orders
- *         on-chain, eg, if the registry is revoked or bypassed.
- * @dev    This smart contract is meant to be inherited by token contracts so they can use the following:
- *         - `onlyAllowedOperator` modifier for `transferFrom` and `safeTransferFrom` methods.
- *         - `onlyAllowedOperatorApproval` modifier for `approve` and `setApprovalForAll` methods.
- *         Also use updateOperatorFilterRegistryAddress function to change registry address if needed
- */
-
 abstract contract UpdatableOperatorFiltererUpgradeable is Initializable {
     error OperatorNotAllowed(address operator);
     error OnlyOwner();
