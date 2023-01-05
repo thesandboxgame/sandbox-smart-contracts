@@ -2,7 +2,7 @@
 pragma solidity 0.8.13;
 
 import {Address} from "@openzeppelin/contracts-0.8.13/utils/Address.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
 
 import "@openzeppelin/contracts-0.8.13/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8.13/token/ERC20/IERC20.sol";
@@ -10,14 +10,12 @@ import "@openzeppelin/contracts-0.8.13/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-0.8.13/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-0.8.13/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-0.8.13/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import {
-    UpdatableOperatorFiltererUpgradeable
-} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
+import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is
@@ -254,8 +252,8 @@ contract GenericRaffle is
     // Thx Cyberkongs VX <3
     function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
-        uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256 rand = uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) %
+            remaining;
         uint256 value = rand;
 
         if (availableIds[rand] != 0) {
@@ -396,5 +394,18 @@ contract GenericRaffle is
         bytes memory data
     ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /**
+     * @dev assume the contract has an owner, but leave specific Ownable implementation up to inheriting contract
+     */
+    function owner()
+        public
+        view
+        virtual
+        override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable)
+        returns (address)
+    {
+        return OwnableUpgradeable.owner();
     }
 }
