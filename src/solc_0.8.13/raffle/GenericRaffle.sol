@@ -137,14 +137,6 @@ contract GenericRaffle is
         emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
-    function chain() external view returns (uint256) {
-        return block.chainid;
-    }
-
-    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
-        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
-    }
-
     function mint(
         address _wallet,
         uint256 _amount,
@@ -186,10 +178,6 @@ contract GenericRaffle is
             uint256 tokenId = getRandomToken(_wallet, totalSupply());
             _safeMint(_wallet, tokenId);
         }
-    }
-
-    function personalizationOf(uint256 _tokenId) external view returns (uint256) {
-        return personalizationTraits[_tokenId];
     }
 
     function toggleSale() external onlyOwner {
@@ -243,18 +231,22 @@ contract GenericRaffle is
         emit SignAddressSet(_signAddress);
     }
 
+    function personalizationOf(uint256 _tokenId) external view returns (uint256) {
+        return personalizationTraits[_tokenId];
+    }
+
+    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
+        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
+    }
+
+    function chain() external view returns (uint256) {
+        return block.chainid;
+    }
+
     function setBaseURI(string memory baseURI) public onlyOwner {
         require(bytes(baseURI).length != 0, "baseURI is not set");
         baseTokenURI = baseURI;
         emit BaseURISet(baseURI);
-    }
-
-    function price(uint256 _count) public view virtual returns (uint256) {
-        return waveSingleTokenPrice * _count;
-    }
-
-    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
     }
 
     function renounceOwnership() public virtual override onlyOwner {
@@ -302,24 +294,12 @@ contract GenericRaffle is
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
-    // Thx Cyberkongs VX <3
-    function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
-        uint256 remaining = maxSupply - _totalMinted;
-        uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
-        uint256 value = rand;
+    function price(uint256 _count) public view virtual returns (uint256) {
+        return waveSingleTokenPrice * _count;
+    }
 
-        if (availableIds[rand] != 0) {
-            value = availableIds[rand];
-        }
-
-        if (availableIds[remaining - 1] == 0) {
-            availableIds[rand] = remaining - 1;
-        } else {
-            availableIds[rand] = availableIds[remaining - 1];
-        }
-
-        return value;
+    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
     }
 
     function _checkSignature(
@@ -396,6 +376,26 @@ contract GenericRaffle is
         return
             waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensToBuy &&
             totalSupply() + _amount <= maxSupply;
+    }
+
+    // Thx Cyberkongs VX <3
+    function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
+        uint256 remaining = maxSupply - _totalMinted;
+        uint256 rand =
+            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256 value = rand;
+
+        if (availableIds[rand] != 0) {
+            value = availableIds[rand];
+        }
+
+        if (availableIds[remaining - 1] == 0) {
+            availableIds[rand] = remaining - 1;
+        } else {
+            availableIds[rand] = availableIds[remaining - 1];
+        }
+
+        return value;
     }
 
     // Empty storage space in contracts for future enhancements
