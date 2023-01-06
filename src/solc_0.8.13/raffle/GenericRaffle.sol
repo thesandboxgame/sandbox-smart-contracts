@@ -137,26 +137,12 @@ contract GenericRaffle is
         emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
-    function price(uint256 _count) public view virtual returns (uint256) {
-        return waveSingleTokenPrice * _count;
-    }
-
-    function chain() public view returns (uint256) {
+    function chain() external view returns (uint256) {
         return block.chainid;
     }
 
-    function checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
-        return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokens;
-    }
-
-    function checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
-        return
-            waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensToBuy &&
-            totalSupply() + _amount <= maxSupply;
-    }
-
-    function checkMintAllowed(address _wallet, uint256 _amount) public view returns (bool) {
-        return checkWaveNotComplete(_amount) && checkLimitNotReached(_wallet, _amount);
+    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
+        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
     }
 
     function mint(
@@ -172,14 +158,14 @@ contract GenericRaffle is
         require(_amount > 0, "Amount cannot be 0");
         require(signatureIds[_signatureId] == 0, "signatureId already used");
         require(
-            checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
+            _checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
             "Signature failed"
         );
 
         signatureIds[_signatureId] = 1;
 
-        require(checkWaveNotComplete(_amount), "Wave completed");
-        require(checkLimitNotReached(_wallet, _amount), "Max allowed");
+        require(_checkWaveNotComplete(_amount), "Wave completed");
+        require(_checkLimitNotReached(_wallet, _amount), "Max allowed");
 
         if (waveType == 1) {
             require(IERC721(contractAddress).balanceOf(_wallet) > 0, "No NFT");
@@ -202,75 +188,6 @@ contract GenericRaffle is
         }
     }
 
-    function checkSignature(
-        address _wallet,
-        uint256 _signatureId,
-        address _contractAddress,
-        uint256 _chainId,
-        bytes memory _signature
-    ) public pure returns (address) {
-        return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
-                    )
-                ),
-                _signature
-            );
-    }
-
-    function checkPersonalizationSignature(
-        address _wallet,
-        uint256 _signatureId,
-        address _contractAddress,
-        uint256 _chainId,
-        uint256 _tokenId,
-        uint256 _personalizationMask,
-        bytes memory _signature
-    ) public pure returns (address) {
-        return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(
-                            abi.encode(
-                                _wallet,
-                                _signatureId,
-                                _contractAddress,
-                                _chainId,
-                                _tokenId,
-                                _personalizationMask
-                            )
-                        )
-                    )
-                ),
-                _signature
-            );
-    }
-
-    // Thx Cyberkongs VX <3
-    function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
-        uint256 remaining = maxSupply - _totalMinted;
-        uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
-        uint256 value = rand;
-
-        if (availableIds[rand] != 0) {
-            value = availableIds[rand];
-        }
-
-        if (availableIds[remaining - 1] == 0) {
-            availableIds[rand] = remaining - 1;
-        } else {
-            availableIds[rand] = availableIds[remaining - 1];
-        }
-
-        return value;
-    }
-
     function personalizationOf(uint256 _tokenId) external view returns (uint256) {
         return personalizationTraits[_tokenId];
     }
@@ -290,7 +207,7 @@ contract GenericRaffle is
 
         require(signatureIds[_signatureId] == 0, "SignatureId already used");
         require(
-            checkPersonalizationSignature(
+            _checkPersonalizationSignature(
                 _msgSender(),
                 _signatureId,
                 address(this),
@@ -320,8 +237,10 @@ contract GenericRaffle is
         emit SandOwnerSet(_owner);
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseTokenURI;
+    function setSignAddress(address _signAddress) external onlyOwner {
+        require(_signAddress != address(0x0), "Sign address is zero address");
+        signAddress = _signAddress;
+        emit SignAddressSet(_signAddress);
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner {
@@ -330,32 +249,17 @@ contract GenericRaffle is
         emit BaseURISet(baseURI);
     }
 
-    function setSignAddress(address _signAddress) external onlyOwner {
-        require(_signAddress != address(0x0), "Sign address is zero address");
-        signAddress = _signAddress;
-        emit SignAddressSet(_signAddress);
+    function price(uint256 _count) public view virtual returns (uint256) {
+        return waveSingleTokenPrice * _count;
     }
 
-    function _msgSender()
-        internal
-        view
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (address sender)
-    {
-        return ERC2771HandlerUpgradeable._msgSender();
-    }
-
-    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
-        return ERC2771HandlerUpgradeable._msgData();
+    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
     }
 
     function renounceOwnership() public virtual override onlyOwner {
         revert("Renounce ownership is not available");
     }
-
-    // Empty storage space in contracts for future enhancements
-    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
-    uint256[50] private __gap;
 
     function setApprovalForAll(address operator, bool approved)
         public
@@ -398,10 +302,103 @@ contract GenericRaffle is
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
-    /**
-     * @dev assume the contract has an owner, but leave specific Ownable implementation up to inheriting contract
-     */
-    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
+    // Thx Cyberkongs VX <3
+    function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
+        uint256 remaining = maxSupply - _totalMinted;
+        uint256 rand =
+            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256 value = rand;
+
+        if (availableIds[rand] != 0) {
+            value = availableIds[rand];
+        }
+
+        if (availableIds[remaining - 1] == 0) {
+            availableIds[rand] = remaining - 1;
+        } else {
+            availableIds[rand] = availableIds[remaining - 1];
+        }
+
+        return value;
     }
+
+    function _checkSignature(
+        address _wallet,
+        uint256 _signatureId,
+        address _contractAddress,
+        uint256 _chainId,
+        bytes memory _signature
+    ) internal pure returns (address) {
+        return
+            ECDSA.recover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19Ethereum Signed Message:\n32",
+                        keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
+                    )
+                ),
+                _signature
+            );
+    }
+
+    function _checkPersonalizationSignature(
+        address _wallet,
+        uint256 _signatureId,
+        address _contractAddress,
+        uint256 _chainId,
+        uint256 _tokenId,
+        uint256 _personalizationMask,
+        bytes memory _signature
+    ) internal pure returns (address) {
+        return
+            ECDSA.recover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19Ethereum Signed Message:\n32",
+                        keccak256(
+                            abi.encode(
+                                _wallet,
+                                _signatureId,
+                                _contractAddress,
+                                _chainId,
+                                _tokenId,
+                                _personalizationMask
+                            )
+                        )
+                    )
+                ),
+                _signature
+            );
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseTokenURI;
+    }
+
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+        return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
+        return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokens;
+    }
+
+    function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
+        return
+            waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensToBuy &&
+            totalSupply() + _amount <= maxSupply;
+    }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[50] private __gap;
 }
