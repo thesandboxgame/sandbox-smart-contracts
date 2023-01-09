@@ -24,6 +24,15 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
+        version: '0.8.13',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
+      {
         version: '0.8.2',
         settings: {
           optimizer: {
@@ -270,6 +279,10 @@ const config: HardhatUserConfig = {
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
+    defaultOperatorFiltererRegistry:
+      '0x000000000000AAeB6D7670E522A718067333cd4E',
+    defaultOperatorFiltererSubscription:
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
     catalystMinter: 'sandAdmin', // account that can mint catalysts
     catalystAdmin: 'sandAdmin', // can set minter and admin for catatalyt, as well as super operators
