@@ -4,12 +4,19 @@ pragma solidity 0.8.2;
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 import {IPolygonAssetERC721} from "../../../common/interfaces/IPolygonAssetERC721.sol";
 import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import {
+    OperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev AssetERC721 will be minted only on L2 and can be transferred to L1 but not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
+contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
     bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
@@ -17,6 +24,8 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
         __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
+        __Ownable_init();
+        __DefaultOperatorFilterer_init(false);
     }
 
     /// @notice Creates a new token for `to`
@@ -73,7 +82,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address operator,
         bool approved
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.setApprovalForAllFor(from, operator, approved);
     }
 
@@ -81,7 +90,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address to,
         uint256 tokenId
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.safeTransferFrom(from, to, tokenId);
     }
 
@@ -90,7 +99,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.safeBatchTransferFrom(from, to, ids, data);
     }
 
@@ -118,7 +127,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address to,
         uint256[] calldata ids
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.batchTransferFrom(from, to, ids);
     }
 
@@ -126,7 +135,19 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721 {
         address from,
         address operator,
         uint256 id
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
+    }
+
+    function _msgSender() internal view override(BaseERC721, ContextUpgradeable) returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal pure override(BaseERC721, ContextUpgradeable) returns (bytes calldata) {
+        return msg.data;
+    }
+
+    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
     }
 }
