@@ -99,13 +99,13 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param id the token type transfered.
     /// @param value amount of token transfered.
     /// @param data aditional data accompanying the transfer.
-    function safeTransferFrom(
+    function _safeTransferFrom(
         address from,
         address to,
         uint256 id,
         uint256 value,
         bytes calldata data
-    ) external override {
+    ) internal {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         bool success = _transferFrom(from, to, id, value);
@@ -121,13 +121,13 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param ids ids of each token type transfered.
     /// @param values amount of each token type transfered.
     /// @param data aditional data accompanying the transfer.
-    function safeBatchTransferFrom(
+    function _safeBatchTransferFrom(
         address from,
         address to,
         uint256[] calldata ids,
         uint256[] calldata values,
         bytes calldata data
-    ) external override {
+    ) internal {
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
@@ -144,20 +144,13 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @param sender address which grant approval.
     /// @param operator address which will be granted rights to transfer all token owned by `sender`.
     /// @param approved whether to approve or revoke.
-    function setApprovalForAllFor(
+    function _setApprovalForAllFor(
         address sender,
         address operator,
         bool approved
-    ) external {
+    ) internal {
         require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
-    }
-
-    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
-    /// @param operator address which will be granted rights to transfer all tokens of the caller.
-    /// @param approved whether to approve or revoke
-    function setApprovalForAll(address operator, bool approved) external override(IERC1155) {
-        _setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /// @notice Returns the current administrator in charge of minting rights.

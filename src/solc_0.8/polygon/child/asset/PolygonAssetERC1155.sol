@@ -3,12 +3,19 @@ pragma solidity 0.8.2;
 
 import "../../../assetERC1155/AssetBaseERC1155.sol";
 import "../../../common/interfaces/pos-portal/child/IChildToken.sol";
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import {
+    OperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC1155 which can be minted by a minter role.
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
+contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
     address public _childChainManager;
 
     function initialize(
@@ -18,10 +25,12 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         address childChainManager,
         IAssetERC721 polygonAssetERC721,
         uint8 chainIndex
-    ) external {
+    ) external initializer() {
         require(address(childChainManager) != address(0), "PolygonAssetERC1155Tunnel: childChainManager can't be zero");
         init(trustedForwarder, admin, bouncerAdmin, polygonAssetERC721, chainIndex);
         _childChainManager = childChainManager;
+        __Ownable_init();
+        __DefaultOperatorFilterer_init(false);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -229,5 +238,74 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
             numFTs *
             ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
             packIndex; // packIndex (position in the pack), 11 bits
+    }
+
+    function _msgSender() internal view override(AssetBaseERC1155, ContextUpgradeable) returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal pure override(AssetBaseERC1155, ContextUpgradeable) returns (bytes calldata) {
+        return msg.data;
+    }
+
+    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
+    }
+
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param value amount of token transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external override onlyAllowedOperator(from) {
+        super._safeTransferFrom(from, to, id, value, data);
+    }
+
+    /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
+    /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param ids ids of each token type transfered.
+    /// @param values amount of each token type transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external override onlyAllowedOperator(from) {
+        super._safeBatchTransferFrom(from, to, ids, values, data);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
+    /// @dev used for Meta Transaction (from metaTransactionContract).
+    /// @param sender address which grant approval.
+    /// @param operator address which will be granted rights to transfer all token owned by `sender`.
+    /// @param approved whether to approve or revoke.
+    function setApprovalForAllFor(
+        address sender,
+        address operator,
+        bool approved
+    ) external onlyAllowedOperatorApproval(operator) {
+        super._setApprovalForAll(sender, operator, approved);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
+    function setApprovalForAll(address operator, bool approved)
+        external
+        override(IERC1155)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super._setApprovalForAll(_msgSender(), operator, approved);
     }
 }

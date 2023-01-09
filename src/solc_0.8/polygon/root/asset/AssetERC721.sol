@@ -4,11 +4,18 @@ pragma solidity 0.8.2;
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
 import {IAssetERC721} from "../../../common/interfaces/IAssetERC721.sol";
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import {
+    OperatorFiltererUpgradeable
+} from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract AssetERC721 is BaseERC721, IAssetERC721 {
+contract AssetERC721 is BaseERC721, IAssetERC721, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
     bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
@@ -16,6 +23,8 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
         __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
+        __DefaultOperatorFilterer_init(false);
+        __Ownable_init();
     }
 
     /// @notice Mint an ERC721 Asset with the provided id.
@@ -72,7 +81,7 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         address from,
         address operator,
         bool approved
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.setApprovalForAllFor(from, operator, approved);
     }
 
@@ -80,7 +89,7 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         address from,
         address to,
         uint256 tokenId
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.safeTransferFrom(from, to, tokenId);
     }
 
@@ -89,7 +98,7 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.safeBatchTransferFrom(from, to, ids, data);
     }
 
@@ -117,7 +126,7 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         address from,
         address to,
         uint256[] calldata ids
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperator(from) {
         BaseERC721.batchTransferFrom(from, to, ids);
     }
 
@@ -125,7 +134,19 @@ contract AssetERC721 is BaseERC721, IAssetERC721 {
         address from,
         address operator,
         uint256 id
-    ) public override(BaseERC721, IERC721Base) {
+    ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
+    }
+
+    function _msgSender() internal view override(BaseERC721, ContextUpgradeable) returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal pure override(BaseERC721, ContextUpgradeable) returns (bytes calldata) {
+        return msg.data;
+    }
+
+    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
+        return OwnableUpgradeable.owner();
     }
 }
