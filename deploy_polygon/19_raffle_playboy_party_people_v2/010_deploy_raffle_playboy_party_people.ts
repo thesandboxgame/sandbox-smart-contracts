@@ -40,7 +40,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           TRUSTED_FORWARDER.address,
           defaultOperatorFiltererRegistry,
           defaultOperatorFiltererSubscription,
-          false,
+          true,
         ],
       },
       upgradeIndex: 0,
