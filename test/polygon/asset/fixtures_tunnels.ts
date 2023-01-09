@@ -4,7 +4,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
+import {AbiCoder} from '@ethersproject/abi';
 
 import {setupUsers, waitFor, expectEventWithArgs, setupUser} from '../../utils';
 
