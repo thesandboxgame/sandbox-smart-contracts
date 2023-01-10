@@ -451,7 +451,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory idsToTransfer = new uint256[](landMinted);
             uint256 transferIndex;
-            uint256[] memory idsToMint = new uint256[]((size * size)-landMinted);
+            uint256[] memory idsToMint = new uint256[]((size * size) - landMinted);
             uint256 mintIndex;
 
             for (uint256 i = 0; i < size * size; i++) {
