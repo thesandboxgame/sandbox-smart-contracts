@@ -23,6 +23,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
 
     event TunnelLandsMigrated(address oldLandTunnel, address newLandTunnel, uint256[] ids);
     event TunnelLandsMigratedWithWithdraw(OwnerWithLandIds[] _ownerWithLandIds);
+    event TunnelQuadsMigrated(address oldLandTunnel, address newLandTunnel, uint256[] sizes, uint256[] x, uint256[] y);
 
     modifier isAdmin() {
         require(admin == msg.sender, "!AUTHORISED");
@@ -76,6 +77,20 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             );
         }
         emit TunnelLandsMigratedWithWithdraw(_ownerWithLandIds);
+    }
+
+    /// @dev Transfers all the passed quads from the old land tunnel to the new land tunnel
+    /// @notice This method needs super operator role to execute
+    /// @param sizes of land quads to be migrated
+    /// @param x coordinate of land quads to be migrated
+    /// @param y coordinate of land quads to be migrated
+    function migrateQuadsToTunnel(
+        uint256[] memory sizes,
+        uint256[] memory x,
+        uint256[] memory y
+    ) external isAdmin {
+        polygonLand.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "0x");
+        emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
     }
 
     function onERC721Received(
