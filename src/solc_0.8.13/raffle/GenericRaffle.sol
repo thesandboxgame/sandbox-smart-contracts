@@ -15,7 +15,9 @@ import "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgra
 import "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
+import {
+    UpdatableOperatorFiltererUpgradeable
+} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 /* solhint-disable max-states-count */
 contract GenericRaffle is
@@ -379,8 +381,8 @@ contract GenericRaffle is
     // Thx Cyberkongs VX <3
     function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
-        uint256 rand = uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) %
-            remaining;
+        uint256 rand =
+            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;
 
         if (availableIds[rand] != 0) {
