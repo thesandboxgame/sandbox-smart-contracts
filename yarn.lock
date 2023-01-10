@@ -5522,6 +5522,11 @@ hardhat-contract-sizer@^2.0.3:
     chalk "^4.0.0"
     cli-table3 "^0.6.0"
 
+hardhat-dependency-compiler@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/hardhat-dependency-compiler/-/hardhat-dependency-compiler-1.1.3.tgz#1e49e23f68878bd713f860c66648a711bc4a4a79"
+  integrity sha512-bCDqsOxGST6WkbMvj4lPchYWidNSSBm5CFnkyAex1T11cGmr9otZTGl81W6f9pmrtBXbKCvr3OSuNJ6Q394sAw==
+
 hardhat-deploy@^0.10.5:
   version "0.10.6"
   resolved "https://registry.yarnpkg.com/hardhat-deploy/-/hardhat-deploy-0.10.6.tgz#007d9c51484ffcf6187425a4288de9dd7d0a5999"
@@ -8967,6 +8972,10 @@ safe-regex@^1.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+"sandbox-smart-contracts-0.0.1@git+ssh://git@github.com:thesandboxgame/sandbox-smart-contracts.git#master", "sandbox-smart-contracts-latest@git+ssh://git@github.com:thesandboxgame/sandbox-smart-contracts.git#master":
+  version "0.0.1"
+  resolved "git+ssh://git@github.com:thesandboxgame/sandbox-smart-contracts.git#0dcaefd4b94fd0089052908c02424c2bb635f9d5"
 
 sc-istanbul@^0.4.5:
   version "0.4.6"
