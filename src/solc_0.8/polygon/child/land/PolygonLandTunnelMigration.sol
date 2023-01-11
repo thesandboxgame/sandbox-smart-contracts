@@ -23,7 +23,13 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
 
     event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);
     event TunnelLandsMigratedWithWithdraw(OwnerWithLandIds[] _ownerWithLandIds);
-    event TunnelQuadsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] sizes, uint256[] x, uint256[] y);
+    event TunnelQuadsMigrated(
+        address indexed oldLandTunnel,
+        address indexed newLandTunnel,
+        uint256[] sizes,
+        uint256[] x,
+        uint256[] y
+    );
 
     modifier isAdmin() {
         require(admin == msg.sender, "!AUTHORISED");
