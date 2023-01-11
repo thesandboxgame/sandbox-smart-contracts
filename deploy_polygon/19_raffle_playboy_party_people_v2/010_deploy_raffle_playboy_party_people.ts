@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   let metadataUrl;
-  if (hre.network.name === 'mainnet') {
+  if (hre.network.name === 'polygon') {
     metadataUrl = 'https://contracts.sandbox.game/ppp-unrevealed/';
   } else {
     metadataUrl = 'https://contracts-demo.sandbox.game/ppp-unrevealed/';
