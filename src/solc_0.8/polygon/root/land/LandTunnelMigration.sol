@@ -12,8 +12,8 @@ contract LandTunnelMigration {
     address public oldLandTunnel;
     address private admin;
 
-    event TunnelLandsMigrated(address oldLandTunnel, address newLandTunnel, uint256[] ids);
-    event TunnelQuadsMigrated(address oldLandTunnel, address newLandTunnel, uint256[] sizes, uint256[] x, uint256[] y);
+    event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);
+    event TunnelQuadsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] sizes, uint256[] x, uint256[] y);
 
     modifier isAdmin() {
         require(admin == msg.sender, "!AUTHORISED");
