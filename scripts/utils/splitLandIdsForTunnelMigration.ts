@@ -72,7 +72,6 @@ function getParentQuadCoordinates(tokenId: number, parentSize: number) {
   const x = Math.floor((tokenId % GRID_SIZE) / parentSize) * parentSize;
   const y =
     Math.floor(Math.floor(tokenId / GRID_SIZE) / parentSize) * parentSize;
-
   return {x, y};
 }
 
@@ -145,7 +144,7 @@ for (let i = 0; i < tokensSnapshotL1.length; i++) {
     } else if (size == 24) {
       quads24x24OnLayer1.push({size: size, x: coordinates.x, y: coordinates.y});
     } else {
-      console.log('this should not be printing');
+      console.log('Wrong size in input');
     }
     clearL1Ids(size, coordinates.x, coordinates.y);
   }
@@ -166,7 +165,7 @@ for (let i = 0; i < tokensSnapshotL2.length; i++) {
     } else if (size == 24) {
       quads24x24OnLayer2.push({size: size, x: coordinates.x, y: coordinates.y});
     } else {
-      console.log('this should not be printing');
+      console.log('Wrong size in input');
     }
     clearL2Ids(size, coordinates.x, coordinates.y);
   }
