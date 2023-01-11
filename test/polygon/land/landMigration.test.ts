@@ -357,7 +357,7 @@ describe('Land Migration', function () {
         true
       );
       await waitFor(
-        deployer.MockPolygonLandTunnelMigration.migrateToTunnel(ids)
+        deployer.MockPolygonLandTunnelMigration.migrateLandsToTunnel(ids)
       );
       expect(
         await PolygonLand.balanceOf(MockPolygonLandTunnelV2.address)
@@ -418,7 +418,7 @@ describe('Land Migration', function () {
         true
       );
       await expect(
-        deployer.MockPolygonLandTunnelMigration.migrateToTunnel(ids)
+        deployer.MockPolygonLandTunnelMigration.migrateLandsToTunnel(ids)
       ).to.revertedWith('BATCHTRANSFERFROM_NOT_OWNER');
     });
 
@@ -488,10 +488,10 @@ describe('Land Migration', function () {
         true
       );
       await waitFor(
-        deployer.MockPolygonLandTunnelMigration.migrateToTunnel(ids)
+        deployer.MockPolygonLandTunnelMigration.migrateLandsToTunnel(ids)
       );
       await expect(
-        users[0].MockPolygonLandTunnelMigration.migrateToTunnel(ids)
+        users[0].MockPolygonLandTunnelMigration.migrateLandsToTunnel(ids)
       ).to.be.revertedWith('!AUTHORISED');
     });
 
