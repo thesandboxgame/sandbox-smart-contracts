@@ -89,7 +89,7 @@ function checkOwnerAndReturnQuad(
   size: number,
   arr: Array<number>
 ): {size: number; coordinates: {x: number; y: number}; isOwner: boolean} {
-  let coordinates = getParentQuadCoordinates(tokenId, size);
+  const coordinates = getParentQuadCoordinates(tokenId, size);
   let isOwner = true;
   for (let i = 0; i < size * size; i++) {
     const id = idInPath(i, size, coordinates.x, coordinates.y);

@@ -110,7 +110,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     const Land = await deployments.getOrNull('Land');
-    if (PolygonLand) {
+    if (Land) {
       const isMinter = await deployments.read(
         'Land',
         'isMinter',
