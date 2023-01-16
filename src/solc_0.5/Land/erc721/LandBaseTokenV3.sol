@@ -244,8 +244,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 index;
         uint256 landMinted;
 
-       {  
-        if (size > 3)
+        
+        if (size > 3){
             (index, landMinted) = _checkAndClearOwner(
                 Land({x: x, y: y, size: size}),
                 quadMinted,
@@ -254,6 +254,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 size / 2
             );
         }
+        
 
         {
             for (uint256 i = 0; i < size * size; i++) {
@@ -463,9 +464,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return (index, landMinted);
     }
 
-    /// @notice checks if the Land's child quads are owned buy the from address and clears all and sets the 
-    /// and if all the child quads are not owned by the from address then the owner of parent quad to land 
-    /// is checked if owned by the from address. If from is the owner then land owner is set to to address
+    /// @notice checks if the Land's child quads are owned by the from address and clears all the previous owners
+    /// if all the child quads are not owned by the "from" address then the owner of parent quad to the land
+    /// is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
     /// @param from address of the previous owner 
     /// @param to address of the new owner
     /// @param land the quad to be regrouped and transfered
