@@ -338,6 +338,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 index;
         uint256 landMinted;
 
+       { 
         if (size > 3)
             (index, landMinted) = _checkAndClearOwner(
                 Land({x: x, y: y, size: size}),
@@ -346,6 +347,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                 index,
                 size / 2
             );
+        }
 
         {
             for (uint256 i = 0; i < size * size; i++) {
@@ -557,6 +559,9 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
 
         if (size <= quadCompareSize) {
+            // when the size of the quad is smaller than the quadCompareSize(size to be compared with),
+            // then it is checked if the bigger quad which encapsulates the quad to be minted
+            // of with size equals the quadCompareSize has been minted or not
             require(
                 _owners[
                     _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
@@ -564,6 +569,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                 "Already minted"
             );
         } else {
+            // when the size is smaller than the quadCompare size the owner of all the smaller quads with size
+            // quadCompare size in the quad to be minted are checked if they are minted or not
             uint256 toX = x + size;
             uint256 toY = y + size;
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
@@ -608,6 +615,14 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         }
     }
 
+    /// @notice checks if the Land's child quads are owned buy the from address and clears all and sets the 
+    /// and if all the child quads are not owned by the from address then the owner of parent quad to land 
+    /// is checked if owned by the from address. If from is the owner then land owner is set to to address
+    /// @param from address of the previous owner 
+    /// @param to address of the new owner
+    /// @param land the quad to be regrouped and transfered
+    /// @param set for setting the new owner 
+    /// @param childQuadSize  size of the child quad to be checked for owner in the regrouping
     function _regroupQuad(
         address from,
         address to,
