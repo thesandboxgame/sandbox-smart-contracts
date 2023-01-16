@@ -36,8 +36,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  const LandTunnelV2 = await hre.companionNetworks['l1'].deployments.getOrNull(
+  
+  const deploymentsL1 = hre.companionNetworks['l1'].deployments;
+  const LandTunnelV2 = await deploymentsL1.getOrNull(
     'LandTunnelV2'
+  );
+
+  const Land = await deploymentsL1.getOrNull(
+    'Land'
   );
   // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
@@ -45,7 +51,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ].getNamedAccounts();
 
   if (LandTunnelV2) {
-    const fxChildTunnel = await hre.companionNetworks['l1'].deployments.read(
+    const fxChildTunnel = await deploymentsL1.read(
       'LandTunnelV2',
       'fxChildTunnel'
     );
@@ -53,7 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       fxChildTunnel !== PolygonLandTunnelV2.address &&
       fxChildTunnel == constants.AddressZero
     ) {
-      await hre.companionNetworks['l1'].deployments.execute(
+      await deploymentsL1.execute(
         'LandTunnelV2',
         {from: deployerOnL1, log: true},
         'setFxChildTunnel',
@@ -91,6 +97,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         true
       )
     );
+  }
+
+  if (Land && LandTunnelV2) {
+    const isMinter = await deploymentsL1.read(
+      'Land',
+      'isMinter',
+      LandTunnelV2.address
+    );
+
+    if (!isMinter) {
+      await deploymentsL1.execute(
+        'Land',
+        {from: deployerOnL1},
+        'setMinter',
+        LandTunnelV2.address,
+        true
+      );
+    }
   }
 };
 

@@ -108,6 +108,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         );
       }
     }
+
+    const Land = await deployments.getOrNull('Land');
+    if (PolygonLand) {
+      const isMinter = await deployments.read(
+        'Land',
+        'isMinter',
+        LandTunnelV2.address
+      );
+
+      if (!isMinter) {
+        await deployments.execute(
+          'Land',
+          {from: deployer},
+          'setMinter',
+          LandTunnelV2.address,
+          true
+        );
+      }
+    }
   }
 };
 
