@@ -36,15 +36,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  
-  const deploymentsL1 = hre.companionNetworks['l1'].deployments;
-  const LandTunnelV2 = await deploymentsL1.getOrNull(
-    'LandTunnelV2'
-  );
 
-  const Land = await deploymentsL1.getOrNull(
-    'Land'
-  );
+  const deploymentsL1 = hre.companionNetworks['l1'].deployments;
+  const LandTunnelV2 = await deploymentsL1.getOrNull('LandTunnelV2');
+
+  const Land = await deploymentsL1.getOrNull('Land');
   // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l1'

@@ -84,16 +84,20 @@ function idInPath(i: number, size: number, x: number, y: number) {
   }
 }
 
-function checkOwnerAndReturnQuad(tokenId:number, size: number, arr: Array<number>) : {size: number, coordinates : {x : number, y : number}, isOwner : boolean } {
+function checkOwnerAndReturnQuad(
+  tokenId: number,
+  size: number,
+  arr: Array<number>
+): {size: number; coordinates: {x: number; y: number}; isOwner: boolean} {
   let coordinates = getParentQuadCoordinates(tokenId, size);
   let isOwner = true;
   for (let i = 0; i < size * size; i++) {
     const id = idInPath(i, size, coordinates.x, coordinates.y);
     isOwner = isOwner && arr.includes(id);
   }
- 
+
   if (!isOwner && size > 3) {
-    return checkOwnerAndReturnQuad(tokenId, size / 2, arr);  
+    return checkOwnerAndReturnQuad(tokenId, size / 2, arr);
   }
 
   return {size, coordinates, isOwner};
@@ -159,13 +163,19 @@ for (let i = 0; i < tokensSnapshotL2.length; i++) {
 
 fs.writeFile(
   'tunnel_land_token_config.json',
-  JSON.stringify({commonIds,remainingTokenOnL2,quads3x3OnLayer2,
+  JSON.stringify({
+    commonIds,
+    remainingTokenOnL2,
+    quads3x3OnLayer2,
     quads6x6OnLayer2,
     quads12x12OnLayer2,
-    quads24x24OnLayer2,quads3x3OnLayer1,
+    quads24x24OnLayer2,
+    quads3x3OnLayer1,
     quads6x6OnLayer1,
     quads12x12OnLayer1,
-    quads24x24OnLayer1,tokenOnLayer1}),
+    quads24x24OnLayer1,
+    tokenOnLayer1,
+  }),
   (err) => {
     if (err) console.log(err);
     else {
@@ -173,4 +183,3 @@ fs.writeFile(
     }
   }
 );
-
