@@ -172,4 +172,6 @@ contract PolygonLandTunnelV2 is
         gasLimits[size] = limit;
         emit SetGasLimit(size, limit);
     }
+
+    uint256[50] private __gap;
 }

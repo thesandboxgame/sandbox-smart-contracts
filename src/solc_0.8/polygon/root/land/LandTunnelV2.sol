@@ -115,4 +115,6 @@ contract LandTunnelV2 is
     function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
+
+    uint256[50] private __gap;
 }
