@@ -244,8 +244,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 index;
         uint256 landMinted;
 
-        
-        if (size > 3){
+        if (size > 3) {
             (index, landMinted) = _checkAndClearOwner(
                 Land({x: x, y: y, size: size}),
                 quadMinted,
@@ -254,7 +253,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 size / 2
             );
         }
-        
 
         {
             for (uint256 i = 0; i < size * size; i++) {
@@ -313,7 +311,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory idsToTransfer = new uint256[](landMinted);
             uint256 transferIndex;
-            uint256[] memory idsToMint = new uint256[]((size * size)-landMinted);
+            uint256[] memory idsToMint = new uint256[]((size * size) - landMinted);
             uint256 mintIndex;
 
             for (uint256 i = 0; i < size * size; i++) {
@@ -464,13 +462,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return (index, landMinted);
     }
 
-    /// @notice checks if the Land's child quads are owned by the from address and clears all the previous owners
+    /// @dev checks if the Land's child quads are owned by the from address and clears all the previous owners
     /// if all the child quads are not owned by the "from" address then the owner of parent quad to the land
     /// is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
-    /// @param from address of the previous owner 
+    /// @param from address of the previous owner
     /// @param to address of the new owner
     /// @param land the quad to be regrouped and transfered
-    /// @param set for setting the new owner 
+    /// @param set for setting the new owner
     /// @param childQuadSize  size of the child quad to be checked for owner in the regrouping
     function _regroupQuad(
         address from,
@@ -484,13 +482,16 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         bool ownerOfAll = true;
 
         {
+            // double for loop itereates and checks owner of all the smaller quads in land
             for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
                 for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
                     uint256 ownerChild;
                     bool ownAllIndividual;
                     if (childQuadSize < 3) {
+                        // case when the smaller quad is 1x1,
                         ownAllIndividual = _checkAndClear(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
                     } else {
+                        // recursively calling the _regroupQuad function to check the owner of child quads.
                         ownAllIndividual = _regroupQuad(
                             from,
                             to,
@@ -502,16 +503,21 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                         ownerChild = _owners[idChild];
                         if (ownerChild != 0) {
                             if (!ownAllIndividual) {
+                                // checking the owner of child quad
                                 require(ownerChild == uint256(from), "not owner of child Quad");
                             }
+                            // clearing owner of child quad
                             _owners[idChild] = 0;
                         }
                     }
+                    // ownerOfAll should be true if "from" is owner of all the child quads ittereated over
                     ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
             }
         }
 
+        // if set is true it check if the "from" is owner of all else checks for the owner of parent quad is
+        // owned by "from" and sets the owner for the id of land to "to" address.
         if (set) {
             if (!ownerOfAll) {
                 require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner of all sub quads nor parent quads");
@@ -545,10 +551,14 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) internal pure returns (bool) {
         for (uint256 i = 0; i < index; i++) {
             Land memory land = mintedLand[i];
-            if (land.size > quad.size) {
-                if (quad.x >= land.x && quad.x < land.x + land.size) {
-                    if (quad.y >= land.y && quad.y < land.y + land.size) return true;
-                }
+            if (
+                land.size > quad.size &&
+                quad.x >= land.x &&
+                quad.x < land.x + land.size &&
+                quad.y >= land.y &&
+                quad.y < land.y + land.size
+            ) {
+                return true;
             }
         }
         return false;

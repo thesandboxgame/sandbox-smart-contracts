@@ -501,10 +501,14 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     ) internal pure returns (bool) {
         for (uint256 i = 0; i < index; i++) {
             Land memory land = mintedLand[i];
-            if (land.size > quad.size) {
-                if (quad.x >= land.x && quad.x < land.x + land.size) {
-                    if (quad.y >= land.y && quad.y < land.y + land.size) return true;
-                }
+            if (
+                land.size > quad.size &&
+                quad.x >= land.x &&
+                quad.x < land.x + land.size &&
+                quad.y >= land.y &&
+                quad.y < land.y + land.size
+            ) {
+                return true;
             }
         }
         return false;
@@ -614,7 +618,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         }
     }
 
-    /// @notice checks if the Land's child quads are owned by the from address and clears all the previous owners
+    /// @dev checks if the Land's child quads are owned by the from address and clears all the previous owners
     /// if all the child quads are not owned by the "from" address then the owner of parent quad to the land
     /// is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
     /// @param from address of the previous owner
@@ -634,13 +638,16 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         bool ownerOfAll = true;
 
         {
+            // double for loop itereates and checks owner of all the smaller quads in land
             for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
                 for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
                     uint256 ownerChild;
                     bool ownAllIndividual;
                     if (childQuadSize < 3) {
+                        // case when the smaller quad is 1x1,
                         ownAllIndividual = _checkAndClear(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
                     } else {
+                        // recursively calling the _regroupQuad function to check the owner of child quads.
                         ownAllIndividual = _regroupQuad(
                             from,
                             to,
@@ -651,17 +658,22 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                         uint256 idChild = _getQuadId(childLayer, xi, yi);
                         ownerChild = _owners[idChild];
                         if (ownerChild != 0) {
+                            // checking the owner of child quad
                             if (!ownAllIndividual) {
                                 require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                             }
+                            // clearing owner of child qua
                             _owners[idChild] = 0;
                         }
                     }
+                    // ownerOfAll should be true if "from" is owner of all the child quads ittereated over
                     ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
             }
         }
 
+        // if set is true it check if the "from" is owner of all else checks for the owner of parent quad is
+        // owned by "from" and sets the owner for the id of land to "to" address.
         if (set) {
             if (!ownerOfAll) {
                 require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner of all sub quads nor parent quads");
