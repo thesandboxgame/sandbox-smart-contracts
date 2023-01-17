@@ -18,14 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
-    metadataUrl = 'https://contracts.sandbox.game/rabbids-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/madballs-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/rabbids-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/madballs-unrevealed/';
   }
 
-  await deploy('Rabbids', {
+  await deploy('MadBalls', {
     from: deployer,
-    contract: 'Rabbids',
+    contract: 'MadBalls',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -33,8 +33,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: 'initialize',
         args: [
           metadataUrl,
-          'Rabbids',
-          'RAB',
+          'MadBalls',
+          'MAD',
           treasury,
           raffleSignWallet,
           TRUSTED_FORWARDER.address,
@@ -51,5 +51,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['Rabbids', 'Rabbids_deploy'];
+func.tags = ['MadBalls', 'MadBalls_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER_V2'];
