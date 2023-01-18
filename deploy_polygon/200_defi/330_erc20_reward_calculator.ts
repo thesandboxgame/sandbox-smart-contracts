@@ -8,7 +8,7 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
   const Pool = await deployments.get('ERC20RewardPool');
 
-  await deployments.deploy('ERC20RewardCalculator', {
+  await deployments.deploy('ERC20RewardCalculatorV2', {
     from: deployer,
     contract: 'TwoPeriodsRewardCalculatorV2',
     args: [Pool.address],

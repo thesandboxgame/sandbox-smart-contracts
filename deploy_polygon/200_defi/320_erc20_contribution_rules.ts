@@ -7,7 +7,7 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
 
-  await deployments.deploy('ContributionRules', {
+  await deployments.deploy('ContributionRulesV2', {
     from: deployer,
     contract: 'ContributionRulesV2',
     log: true,
