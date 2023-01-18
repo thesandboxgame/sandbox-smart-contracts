@@ -11,7 +11,7 @@ const func: DeployFunction = async function (
   const sandPool = await ethers.getContract('ERC20RewardPoolV2');
 
   const antiCompound = await deployments.read(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     'timeLockClaim'
   );
 
