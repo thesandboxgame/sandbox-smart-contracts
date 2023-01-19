@@ -16,4 +16,3 @@ Provide a summary of the changes made, and include some context, such as why the
 - [ ] I've generated a coverage report and included a screenshot
 - [ ] All tests are passing locally
 - [ ] I've added a `.md` documentation file per smart contract (in the contract directory) based on `.docs.example`
-- [ ] I've updated the Readthedocs (at `docs/`) following the `mkdocs.yml` structure
