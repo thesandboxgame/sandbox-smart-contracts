@@ -25,6 +25,9 @@ deployments/rinkeby_test
 deployments/goerli_test
 deployments/mumbai_test
 
+scripts/giveaway/output
+scripts/giveaway/proofs/**/
+
 .google_credentials.json
 token.json
 .bitski*
