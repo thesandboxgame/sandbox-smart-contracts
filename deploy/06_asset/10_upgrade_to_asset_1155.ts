@@ -16,6 +16,9 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const AssetERC721 = await deployments.get('AssetERC721');
+  const OperatorFilterSubscription = await deployments.get(
+    'OperatorFilterSubscription'
+  );
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
     from: deployer,
@@ -47,6 +50,7 @@ const func: DeployFunction = async function (
           assetBouncerAdmin,
           AssetERC721.address,
           0,
+          OperatorFilterSubscription.address,
         ],
       },
       upgradeIndex: 1,
@@ -57,5 +61,10 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['Asset', 'Asset_deploy', 'AssetERC1155', 'AssetERC1155_deploy'];
-func.dependencies = ['AssetERC721', 'TRUSTED_FORWARDER', 'ERC1155_PREDICATE'];
+func.dependencies = [
+  'AssetERC721',
+  'TRUSTED_FORWARDER',
+  'ERC1155_PREDICATE',
+  'operatorFilterSubscription',
+];
 func.skip = skipUnlessTestnet;

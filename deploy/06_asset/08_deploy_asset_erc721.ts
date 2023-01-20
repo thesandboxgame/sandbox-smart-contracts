@@ -10,6 +10,9 @@ const func: DeployFunction = async function (
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const OperatorFilterSubscription = await deployments.get(
+    'OperatorFilterSubscription'
+  );
 
   await deploy('AssetERC721', {
     from: deployer,
@@ -19,7 +22,11 @@ const func: DeployFunction = async function (
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [TRUSTED_FORWARDER.address, assetAdmin],
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          OperatorFilterSubscription.address,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -29,5 +36,5 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['AssetERC721', 'AssetERC721_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER'];
+func.dependencies = ['TRUSTED_FORWARDER', 'operatorFilterSubscription'];
 func.skip = skipUnlessTestnet;
