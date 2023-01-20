@@ -20,7 +20,14 @@ import {
 } from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 /* solhint-disable max-states-count */
-/// @title GenericRaffle
+/**
+ * @title GenericRaffle
+ * @notice Smart contract based used for creating Original Sandbox Collections
+ *         There are 2 different roles that operate within the contract:
+ *         - owner -> standard owner implementation (calls setupWave, updateOperatorFilterRegistryAddress,
+ *                    and other sensistive functions)
+ *         - allowedToExecuteMint -> address allowed to execute mint function. Can be set by owner
+ */
 contract GenericRaffle is
     ERC721EnumerableUpgradeable,
     OwnableUpgradeable,
@@ -605,7 +612,7 @@ contract GenericRaffle is
 
     /**
      * @notice Pseudo-random number function. Good enough for our need, thx Cyberkongs VX <3!
-     * @dev standard pseudo-random implementation using keccak256 over various parameters. Good
+     * @dev standard pseudo-random implementation using keccak256 over various parameters.
      * @param _wallet the calling account address
      * @param _totalMinted total minted tokens up to this point
      * @return pseudo-random value
