@@ -10,7 +10,6 @@ export {assert};
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
-export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 export const setupRaffle = withSnapshot(
   ['RafflePlayboyPartyPeopleV2'],
@@ -56,12 +55,9 @@ export const setupRaffle = withSnapshot(
 
 async function setupWave(
   raffle: Contract,
-  waveType: number,
   waveMaxTokens: number,
   waveMaxTokensToBuy: number,
-  waveSingleTokenPrice: string,
-  contractAddress: string,
-  erc1155Id: number
+  waveSingleTokenPrice: string
 ) {
   const {raffleSignWallet} = await getNamedAccounts();
 
@@ -71,14 +67,10 @@ async function setupWave(
   await contract.setSignAddress(raffleSignWallet);
 
   await contract.setupWave(
-    waveType,
     waveMaxTokens,
     waveMaxTokensToBuy,
-    waveSingleTokenPrice,
-    contractAddress,
-    erc1155Id
+    waveSingleTokenPrice
   );
-  assert.equal((await raffle.waveType()).toString(), waveType.toString());
   assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
@@ -95,11 +87,6 @@ async function setupWave(
     (await raffle.waveSingleTokenPrice()).toString(),
     waveSingleTokenPrice.toString()
   );
-  assert.equal(
-    (await raffle.contractAddress()).toString(),
-    contractAddress.toString()
-  );
-  assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
 }
 
 function validPersonalizeSignature(

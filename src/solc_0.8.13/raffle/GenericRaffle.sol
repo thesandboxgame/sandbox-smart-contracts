@@ -83,17 +83,11 @@ contract GenericRaffle is
     /**
      * @notice Event emitted when a wave was set up
      * @dev emitted when setupWave is called
-     * @param _waveType what is the wave type. Currently only type 0 is supported
      * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
      * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
      */
-    event WaveSetup(
-        uint256 _waveType,
-        uint256 _waveMaxTokens,
-        uint256 _waveMaxTokensToBuy,
-        uint256 _waveSingleTokenPrice
-    );
+    event WaveSetup(uint256 _waveMaxTokens, uint256 _waveMaxTokensToBuy, uint256 _waveSingleTokenPrice);
 
     /**
      * @notice Event emitted when an address was set as allowed to mint
@@ -123,15 +117,14 @@ contract GenericRaffle is
      */
     event SignAddressSet(address _signAddress);
 
-    uint256 public waveType = 0;
+    /// @notice max tokens to buy per wave, cumulating all addresses
     uint256 public waveMaxTokens;
     /// @notice max tokens to buy, per wallet in a given wave
     uint256 public waveMaxTokensToBuy;
+    /// @notice price of one token mint (in the token owned by the sandOwner which in our case is SAND)
     uint256 public waveSingleTokenPrice;
+    /// @notice number of total minted tokens in the current running wave
     uint256 public waveTotalMinted;
-
-    uint256 public erc1155Id;
-    address public contractAddress;
 
     mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
     /// @notice stores the personalization for a tokenId
@@ -220,40 +213,27 @@ contract GenericRaffle is
      * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
      *         minted in total, per wallet and minting price
      * @dev emits {WaveSetup} event
-     * @param _waveType what is the wave type. Currently only type 0 is supported
      * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
      * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
-     * @param _contractAddress depends on wave type. Set 0x0000000000000000000000000000000000000000 for wave type 0
-     * @param _erc1155Id the token ID to use if waveType is 2 (ERC1155 multiple balance). Currently only 0 is used
      */
     function setupWave(
-        uint256 _waveType,
         uint256 _waveMaxTokens,
         uint256 _waveMaxTokensToBuy,
-        uint256 _waveSingleTokenPrice,
-        address _contractAddress,
-        uint256 _erc1155Id
+        uint256 _waveSingleTokenPrice
     ) external onlyOwner {
         require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
-        require(_waveType < 3 && _waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
+        require(_waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
         require(paused == 0, "Contract is paused");
-        if (_waveType != 0) {
-            require(_contractAddress != address(0x0), "Invalid contract address");
-            require(_contractAddress.isContract(), "Contract address must be that of a contract");
-        }
         require(_waveMaxTokensToBuy <= _waveMaxTokens, "Invalid supply configuration");
 
-        waveType = _waveType;
         waveMaxTokens = _waveMaxTokens;
         waveMaxTokensToBuy = _waveMaxTokensToBuy;
         waveSingleTokenPrice = _waveSingleTokenPrice;
         waveTotalMinted = 0;
-        contractAddress = _waveType == 0 ? address(0x0) : _contractAddress;
-        erc1155Id = _waveType == 2 ? _erc1155Id : 0;
         indexWave++;
 
-        emit WaveSetup(_waveType, _waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
+        emit WaveSetup(_waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
     }
 
     /**
@@ -284,12 +264,6 @@ contract GenericRaffle is
 
         require(_checkWaveNotComplete(_amount), "Wave completed");
         require(_checkLimitNotReached(_wallet, _amount), "Max allowed");
-
-        if (waveType == 1) {
-            require(IERC721(contractAddress).balanceOf(_wallet) > 0, "No NFT");
-        } else if (waveType == 2) {
-            require(IERC1155(contractAddress).balanceOf(_wallet, erc1155Id) > 0, "No NFT");
-        }
 
         uint256 _price = price(_amount);
         if (_price > 0) {
