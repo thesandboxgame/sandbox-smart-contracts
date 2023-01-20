@@ -63,6 +63,10 @@ contract GenericRaffle is
      * @param _sandOwner address belonging to SAND token owner
      * @param _signAddress signer address that is allowed to mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
+     * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
+     * @param _operatorFiltererSubscription subscription address to use as a template for
+     * @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     *                                               just copy entries from it
      */
     event ContractInitialized(
         string baseURI,
@@ -70,7 +74,10 @@ contract GenericRaffle is
         string _symbol,
         address _sandOwner,
         address _signAddress,
-        uint256 _maxSupply
+        uint256 _maxSupply,
+        address _registry,
+        address _operatorFiltererSubscription,
+        bool _operatorFiltererSubscriptionSubscribe
     );
 
     /**
@@ -188,7 +195,17 @@ contract GenericRaffle is
         signAddress = _signAddress;
         maxSupply = _maxSupply;
 
-        emit ContractInitialized(baseURI, _name, _symbol, _sandOwner, _signAddress, _maxSupply);
+        emit ContractInitialized(
+            baseURI,
+            _name,
+            _symbol,
+            _sandOwner,
+            _signAddress,
+            _maxSupply,
+            _registry,
+            _operatorFiltererSubscription,
+            _operatorFiltererSubscriptionSubscribe
+        );
     }
 
     /**
