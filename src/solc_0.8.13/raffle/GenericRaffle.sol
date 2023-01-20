@@ -33,29 +33,29 @@ contract GenericRaffle is
     uint256 public maxSupply;
 
     /**
-    @notice Event emitted when sale state was changed.
-    @dev emitted when toggleSale is called
-    @param _pause if the sale was was paused or not
+     * @notice Event emitted when sale state was changed.
+     * @dev emitted when toggleSale is called
+     * @param _pause if the sale was was paused or not
      */
     event SaleToggled(bool _pause);
 
     /**
-    @notice Event emitted when a token personalization was made.
-    @dev emitted when personalize is called
-    @param _tokenId id of the token which had the personalization done
-    @param _personalizationMask the exact personalization that was done, as a custom meaning bit-mask
+     * @notice Event emitted when a token personalization was made.
+     * @dev emitted when personalize is called
+     * @param _tokenId id of the token which had the personalization done
+     * @param _personalizationMask the exact personalization that was done, as a custom meaning bit-mask
      */
     event Personalized(uint256 _tokenId, uint256 _personalizationMask);
 
     /**
-    @notice Event emitted when the contract was initialized.
-    @dev emitted at proxy startup, once only
-    @param baseURI an URI that will be used as the base for token URI
-    @param _name name of the ERC721 token
-    @param _symbol token symbol of the ERC721 token
-    @param _sandOwner address belonging to SAND token owner
-    @param _signAddress signer address that is allowed to mint
-    @param _maxSupply max supply of tokens to be allowed to be minted per contract
+     * @notice Event emitted when the contract was initialized.
+     * @dev emitted at proxy startup, once only
+     * @param baseURI an URI that will be used as the base for token URI
+     * @param _name name of the ERC721 token
+     * @param _symbol token symbol of the ERC721 token
+     * @param _sandOwner address belonging to SAND token owner
+     * @param _signAddress signer address that is allowed to mint
+     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      */
     event ContractInitialized(
         string baseURI,
@@ -67,12 +67,12 @@ contract GenericRaffle is
     );
 
     /**
-    @notice Event emitted when a wave was set up
-    @dev emitted when setupWave is called
-    @param _waveType what is the wave type. Currently only type 0 is supported
-    @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
-    @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
-    @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
+     * @notice Event emitted when a wave was set up
+     * @dev emitted when setupWave is called
+     * @param _waveType what is the wave type. Currently only type 0 is supported
+     * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
+     * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
+     * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
      */
     event WaveSetup(
         uint256 _waveType,
@@ -82,30 +82,30 @@ contract GenericRaffle is
     );
 
     /**
-    @notice Event emitted when an address was set as allowed to mint
-    @dev emitted when setAllowedExecuteMint is called
-    @param _address the address that will be allowed to set execute the mint function
+     * @notice Event emitted when an address was set as allowed to mint
+     * @dev emitted when setAllowedExecuteMint is called
+     * @param _address the address that will be allowed to set execute the mint function
      */
     event AllowedExecuteMintSet(address _address);
 
     /**
-    @notice Event emitted when the SAND contract owner was saved
-    @dev emitted when setSandOwnerAddress is called
-    @param _owner new owner address to be saved
+     * @notice Event emitted when the SAND contract owner was saved
+     * @dev emitted when setSandOwnerAddress is called
+     * @param _owner new owner address to be saved
      */
     event SandOwnerSet(address _owner);
 
     /**
-    @notice Event emitted when the base token URI for the contract was set or changed
-    @dev emitted when setBaseURI is called
-    @param baseURI an URI that will be used as the base for token URI
+     * @notice Event emitted when the base token URI for the contract was set or changed
+     * @dev emitted when setBaseURI is called
+     * @param baseURI an URI that will be used as the base for token URI
      */
     event BaseURISet(string baseURI);
 
     /**
-    @notice Event emitted when the signer address was set or changed
-    @dev emitted when setSignAddress is called
-    @param _signAddress new signer address to be set
+     * @notice Event emitted when the signer address was set or changed
+     * @dev emitted when setSignAddress is called
+     * @param _signAddress new signer address to be set
      */
     event SignAddressSet(address _signAddress);
 
@@ -134,19 +134,20 @@ contract GenericRaffle is
     string public baseTokenURI;
 
     /**
-    @notice initialization function in accordance with the upgradable pattern
-    @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
-    @param baseURI an URI that will be used as the base for token URI
-    @param _name name of the ERC721 token
-    @param _symbol token symbol of the ERC721 token
-    @param _sandOwner address belonging to SAND token owner
-    @param _signAddress signer address that is allowed to mint
-    @param _trustedForwarder trusted forwarder address
-    @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
-    @param _operatorFiltererSubscription subscription address to use as a template for
-    @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or just copy entries from it
-    @param _maxSupply max supply of tokens to be allowed to be minted per contract
-    */
+     * @notice initialization function in accordance with the upgradable pattern
+     * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
+     * @param baseURI an URI that will be used as the base for token URI
+     * @param _name name of the ERC721 token
+     * @param _symbol token symbol of the ERC721 token
+     * @param _sandOwner address belonging to SAND token owner
+     * @param _signAddress signer address that is allowed to mint
+     * @param _trustedForwarder trusted forwarder address
+     * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
+     * @param _operatorFiltererSubscription subscription address to use as a template for
+     * @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     *                                               just copy entries from it
+     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
+     */
     function __GenericRaffle_init(
         string memory baseURI,
         string memory _name,
@@ -184,15 +185,15 @@ contract GenericRaffle is
     }
 
     /**
-    @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
-    minted in total, per wallet and minting price
-    @dev emits {WaveSetup} event
-    @param _waveType what is the wave type. Currently only type 0 is supported
-    @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
-    @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
-    @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
-    @param _contractAddress depends on wave type. Set 0x0000000000000000000000000000000000000000 for wave type 0
-    @param _erc1155Id the token ID to use if waveType is 2 (ERC1155 multiple balance). Currently only 0 is used
+     * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
+     *         minted in total, per wallet and minting price
+     * @dev emits {WaveSetup} event
+     * @param _waveType what is the wave type. Currently only type 0 is supported
+     * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
+     * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
+     * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
+     * @param _contractAddress depends on wave type. Set 0x0000000000000000000000000000000000000000 for wave type 0
+     * @param _erc1155Id the token ID to use if waveType is 2 (ERC1155 multiple balance). Currently only 0 is used
      */
     function setupWave(
         uint256 _waveType,
@@ -223,11 +224,11 @@ contract GenericRaffle is
     }
 
     /**
-    @notice token minting function. Price is set by wave and is paid in SAND tokens
-    @param _wallet minting wallet
-    @param _amount number of token to mint
-    @param _signatureId signing signature ID
-    @param _signature signing signature value
+     * @notice token minting function. Price is set by wave and is paid in SAND tokens
+     * @param _wallet minting wallet
+     * @param _amount number of token to mint
+     * @param _signatureId signing signature ID
+     * @param _signature signing signature value
      */
     function mint(
         address _wallet,
@@ -273,8 +274,8 @@ contract GenericRaffle is
     }
 
     /**
-    @notice pause or unpause the contract. Emits the {SaleToggled} event
-    @dev toggle the paused
+     * @notice pause or unpause the contract. Emits the {SaleToggled} event
+     * @dev toggle the paused
      */
     function toggleSale() external onlyOwner {
         paused = paused == 0 ? 1 : 0;
@@ -282,13 +283,13 @@ contract GenericRaffle is
     }
 
     /**
-    @notice personalize token traits
-    @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
-    emits {Personalized} event
-    @param _signatureId the ID of the provided signature
-    @param _signature signing signature
-    @param _tokenId what token to personalize
-    @param _personalizationMask a mask where each bit has a custom meaning in-game
+     * @notice personalize token traits
+     * @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
+     *      emits {Personalized} event
+     * @param _signatureId the ID of the provided signature
+     * @param _signature signing signature
+     * @param _tokenId what token to personalize
+     * @param _personalizationMask a mask where each bit has a custom meaning in-game
      */
     function personalize(
         uint256 _signatureId,
@@ -319,9 +320,10 @@ contract GenericRaffle is
     }
 
     /**
-    @notice sets which address is allowed to execute the mint function. Emits {AllowedExecuteMintSet} event
-    @dev sets allowedToExecuteMint = _address; address can't be 0
-    @param _address the address that will be allowed to set execute the mint function
+     * @notice sets which address is allowed to execute the mint function.
+     *         Emits {AllowedExecuteMintSet} event
+     * @dev sets allowedToExecuteMint = _address; address can't be 0
+     * @param _address the address that will be allowed to set execute the mint function
      */
     function setAllowedExecuteMint(address _address) external onlyOwner {
         require(_address != address(0x0), "Address is zero address");
@@ -330,9 +332,9 @@ contract GenericRaffle is
     }
 
     /**
-    @notice saving locally the SAND token owner. Emits {SandOwnerSet} event
-    @dev just sets sandOwner = _owner
-    @param _owner new owner address to be saved
+     * @notice saving locally the SAND token owner. Emits {SandOwnerSet} event
+     * @dev just sets sandOwner = _owner
+     * @param _owner new owner address to be saved
      */
     function setSandOwnerAddress(address _owner) external onlyOwner {
         require(_owner != address(0x0), "Owner is zero address");
@@ -341,9 +343,9 @@ contract GenericRaffle is
     }
 
     /**
-    @notice sets the sign address. Emits {SignAddressSet} event
-    @dev sets signAddress = _signAddress; address can't be 0
-    @param _signAddress new signer address to be set
+     * @notice sets the sign address. Emits {SignAddressSet} event
+     * @dev sets signAddress = _signAddress; address can't be 0
+     * @param _signAddress new signer address to be set
      */
     function setSignAddress(address _signAddress) external onlyOwner {
         require(_signAddress != address(0x0), "Sign address is zero address");
@@ -352,38 +354,38 @@ contract GenericRaffle is
     }
 
     /**
-    @notice get the personalization of the indicated tokenID
-    @dev returns personalizationTraits[_tokenId]
-    @param _tokenId the token ID to check
-    @return uint256 the personalization data as uint256
+     * @notice get the personalization of the indicated tokenID
+     * @dev returns personalizationTraits[_tokenId]
+     * @param _tokenId the token ID to check
+     * @return uint256 the personalization data as uint256
      */
     function personalizationOf(uint256 _tokenId) external view returns (uint256) {
         return personalizationTraits[_tokenId];
     }
 
     /**
-    @notice check if the indicated wallet can mint the indicated amount
-    @param _wallet wallet to be checked if it can mint
-    @param _amount amount to be checked if can be minted
-    @return bool if can mint or not
+     * @notice check if the indicated wallet can mint the indicated amount
+     * @param _wallet wallet to be checked if it can mint
+     * @param _amount amount to be checked if can be minted
+     * @return if can mint or not
      */
     function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
         return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
     }
 
     /**
-    @notice helper automation function
-    @dev returns block.chainid
-    @return uint256 current chainID for the blockchain
+     * @notice helper automation function
+     * @dev returns block.chainid
+     * @return uint256 current chainID for the blockchain
      */
     function chain() external view returns (uint256) {
         return block.chainid;
     }
 
     /**
-    @notice sets the base token URI for the contract. Emits a {BaseURISet} event.
-    @dev sets baseTokenURI = baseURI
-    @param baseURI an URI that will be used as the base for token URI
+     * @notice sets the base token URI for the contract. Emits a {BaseURISet} event.
+     * @dev sets baseTokenURI = baseURI
+     * @param baseURI an URI that will be used as the base for token URI
      */
     function setBaseURI(string memory baseURI) public onlyOwner {
         require(bytes(baseURI).length != 0, "baseURI is not set");
@@ -392,15 +394,16 @@ contract GenericRaffle is
     }
 
     /**
-    @notice function renounces ownership of contract. Currently it is disable, as to not risk loosing mint funds
-    @dev reverts on call
+     * @notice function renounces ownership of contract. Currently it is disable,
+     *         as to not risk loosing mint funds
+     * @dev reverts on call
      */
     function renounceOwnership() public virtual override onlyOwner {
         revert("Renounce ownership is not available");
     }
 
     /**
-    @dev See OpenZeppelin {IERC721-setApprovalForAll}
+     * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
     function setApprovalForAll(address operator, bool approved)
         public
@@ -411,7 +414,7 @@ contract GenericRaffle is
     }
 
     /**
-    @dev See OpenZeppelin {IERC721-approve}
+     * @dev See OpenZeppelin {IERC721-approve}
      */
     function approve(address operator, uint256 tokenId)
         public
@@ -422,7 +425,7 @@ contract GenericRaffle is
     }
 
     /**
-    @dev See OpenZeppelin {IERC721-transferFrom}
+     * @dev See OpenZeppelin {IERC721-transferFrom}
      */
     function transferFrom(
         address from,
@@ -433,7 +436,7 @@ contract GenericRaffle is
     }
 
     /**
-    @dev See OpenZeppelin {IERC721-safeTransferFrom}
+     * @dev See OpenZeppelin {IERC721-safeTransferFrom}
      */
     function safeTransferFrom(
         address from,
@@ -444,7 +447,7 @@ contract GenericRaffle is
     }
 
     /**
-    @dev See OpenZeppelin {IERC721-safeTransferFrom}
+     * @dev See OpenZeppelin {IERC721-safeTransferFrom}
      */
     function safeTransferFrom(
         address from,
@@ -456,33 +459,34 @@ contract GenericRaffle is
     }
 
     /**
-    @notice get the price of minting the indicated number of tokens for the current wave
-    @dev returns waveSingleTokenPrice * _count; Does not check if it is possible to actually mint that much
-    @param _count the number of tokens to estimate mint price for
-    @return uint256 price of minting all the tokens
+     * @notice get the price of minting the indicated number of tokens for the current wave
+     * @dev returns waveSingleTokenPrice * _count; Does not check if it is possible
+     *      to actually mint that much
+     * @param _count the number of tokens to estimate mint price for
+     * @return uint256 price of minting all the tokens
      */
     function price(uint256 _count) public view virtual returns (uint256) {
         return waveSingleTokenPrice * _count;
     }
 
     /**
-    @notice returns the owner of the contract
-    @dev returns OwnableUpgradeable.owner()
-    @return owner of current contract
+     * @notice returns the owner of the contract
+     * @dev returns OwnableUpgradeable.owner()
+     * @return owner of current contract
      */
     function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
         return OwnableUpgradeable.owner();
     }
 
     /**
-    @notice validates signature
-    @dev uses ECDSA.recover on the provided params
-    @param _wallet wallet that was used in signature generation
-    @param _signatureId id of signature
-    @param _contractAddress contract address that was used in signature generation
-    @param _chainId chain ID for which the signature was generated
-    @param _signature signature
-    @return address that validates the provided signature
+     * @notice validates signature
+     * @dev uses ECDSA.recover on the provided params
+     * @param _wallet wallet that was used in signature generation
+     * @param _signatureId id of signature
+     * @param _contractAddress contract address that was used in signature generation
+     * @param _chainId chain ID for which the signature was generated
+     * @param _signature signature
+     * @return address that validates the provided signature
      */
     function _checkSignature(
         address _wallet,
@@ -504,16 +508,16 @@ contract GenericRaffle is
     }
 
     /**
-    @notice validate personalization mask
-    @dev uses ECDSA.recover on the provided params
-    @param _wallet wallet that was used in signature generation
-    @param _signatureId id of signature
-    @param _contractAddress contract address that was used in signature generation
-    @param _chainId chain ID for which the signature was generated
-    @param _tokenId token ID for which the signature was generated
-    @param _personalizationMask a mask where each bit has a custom meaning in-game
-    @param _signature signature
-    @return address that validates the provided signature
+     * @notice validate personalization mask
+     * @dev uses ECDSA.recover on the provided params
+     * @param _wallet wallet that was used in signature generation
+     * @param _signatureId id of signature
+     * @param _contractAddress contract address that was used in signature generation
+     * @param _chainId chain ID for which the signature was generated
+     * @param _tokenId token ID for which the signature was generated
+     * @param _personalizationMask a mask where each bit has a custom meaning in-game
+     * @param _signature signature
+     * @return address that validates the provided signature
      */
     function _checkPersonalizationSignature(
         address _wallet,
@@ -546,27 +550,27 @@ contract GenericRaffle is
     }
 
     /**
-    @notice get base TokenURI
-    @dev returns baseTokenURI
-    @return baseTokenURI
+     * @notice get base TokenURI
+     * @dev returns baseTokenURI
+     * @return baseTokenURI
      */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseTokenURI;
     }
 
     /**
-    @notice ERC2771 compatible msg.data getter
-    @dev returns ERC2771HandlerUpgradeable._msgData()
-    @return msg.data
+     * @notice ERC2771 compatible msg.data getter
+     * @dev returns ERC2771HandlerUpgradeable._msgData()
+     * @return msg.data
      */
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
     }
 
     /**
-    @notice ERC2771 compatible msg.sender getter
-    @dev returns ERC2771HandlerUpgradeable._msgSender()
-    @return sender msg.sender
+     * @notice ERC2771 compatible msg.sender getter
+     * @dev returns ERC2771HandlerUpgradeable._msgSender()
+     * @return sender msg.sender
      */
     function _msgSender()
         internal
@@ -578,19 +582,19 @@ contract GenericRaffle is
     }
 
     /**
-    @notice check if the current wave can still mint the indicated amount
-    @param _amount number of tokens to check if can be minted
-    @return bool if wave can mint the indicated amount
+     * @notice check if the current wave can still mint the indicated amount
+     * @param _amount number of tokens to check if can be minted
+     * @return if wave can mint the indicated amount
      */
     function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
         return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokens;
     }
 
     /**
-    @notice checks if current contract limits are respected if minting the indicated amount
-    @param _wallet minting wallet, whose restrictions will be considered
-    @param _amount number of tokens to mint
-    @return bool if amount can be safely minted
+     * @notice checks if current contract limits are respected if minting the indicated amount
+     * @param _wallet minting wallet, whose restrictions will be considered
+     * @param _amount number of tokens to mint
+     * @return if amount can be safely minted
      */
     function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
         return
@@ -599,11 +603,11 @@ contract GenericRaffle is
     }
 
     /**
-    @notice Pseudo-random number function. Good enough for our need, thx Cyberkongs VX <3!
-    @dev standard pseudo-random implementation using keccak256 over various parameters. Good
-    @param _wallet the calling account address
-    @param _totalMinted total minted tokens up to this point
-    @return uint256 pseudo-random value
+     * @notice Pseudo-random number function. Good enough for our need, thx Cyberkongs VX <3!
+     * @dev standard pseudo-random implementation using keccak256 over various parameters. Good
+     * @param _wallet the calling account address
+     * @param _totalMinted total minted tokens up to this point
+     * @return pseudo-random value
      */
     function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
