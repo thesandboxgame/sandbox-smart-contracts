@@ -148,6 +148,14 @@ contract GenericRaffle is
     string public baseTokenURI;
 
     /**
+     * @notice mitigate a possible Implementation contract takeover, as indicate by
+     *         https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializing_the_implementation_contract
+     */
+    constructor() {
+        _disableInitializers();
+    }
+
+    /**
      * @notice initialization function in accordance with the upgradable pattern
      * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
      * @param baseURI an URI that will be used as the base for token URI
