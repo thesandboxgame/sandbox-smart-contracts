@@ -15,7 +15,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
+contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererUpgradeable {
     address public _childChainManager;
 
     function initialize(
@@ -24,13 +24,13 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OwnableUpgradeabl
         address bouncerAdmin,
         address childChainManager,
         IAssetERC721 polygonAssetERC721,
-        uint8 chainIndex
-    ) external initializer() {
+        uint8 chainIndex,
+        address subscription
+    ) external initializer {
         require(address(childChainManager) != address(0), "PolygonAssetERC1155Tunnel: childChainManager can't be zero");
         init(trustedForwarder, admin, bouncerAdmin, polygonAssetERC721, chainIndex);
         _childChainManager = childChainManager;
-        __Ownable_init();
-        __DefaultOperatorFilterer_init(false);
+        __OperatorFilterer_init(subscription, true);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -238,18 +238,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OwnableUpgradeabl
             numFTs *
             ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
             packIndex; // packIndex (position in the pack), 11 bits
-    }
-
-    function _msgSender() internal view override(AssetBaseERC1155, ContextUpgradeable) returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal pure override(AssetBaseERC1155, ContextUpgradeable) returns (bytes calldata) {
-        return msg.data;
-    }
-
-    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).

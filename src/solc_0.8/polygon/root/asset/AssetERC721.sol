@@ -15,16 +15,19 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract AssetERC721 is BaseERC721, IAssetERC721, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
+contract AssetERC721 is BaseERC721, IAssetERC721, OperatorFiltererUpgradeable {
     bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
-    function initialize(address trustedForwarder, address admin) public initializer {
+    function initialize(
+        address trustedForwarder,
+        address admin,
+        address subscription
+    ) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
         __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
-        __DefaultOperatorFilterer_init(false);
-        __Ownable_init();
+        __OperatorFilterer_init(subscription, true);
     }
 
     /// @notice Mint an ERC721 Asset with the provided id.
@@ -136,17 +139,5 @@ contract AssetERC721 is BaseERC721, IAssetERC721, OwnableUpgradeable, DefaultOpe
         uint256 id
     ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
-    }
-
-    function _msgSender() internal view override(BaseERC721, ContextUpgradeable) returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal pure override(BaseERC721, ContextUpgradeable) returns (bytes calldata) {
-        return msg.data;
-    }
-
-    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
     }
 }

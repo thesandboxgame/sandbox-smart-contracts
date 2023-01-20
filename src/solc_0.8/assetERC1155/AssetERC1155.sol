@@ -9,7 +9,7 @@ import {
 import {OperatorFiltererUpgradeable} from "../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract AssetERC1155 is AssetBaseERC1155, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable {
+contract AssetERC1155 is AssetBaseERC1155, OperatorFiltererUpgradeable {
     event PredicateSet(address predicate);
 
     function initialize(
@@ -17,11 +17,11 @@ contract AssetERC1155 is AssetBaseERC1155, OwnableUpgradeable, DefaultOperatorFi
         address admin,
         address bouncerAdmin,
         IAssetERC721 assetERC721,
-        uint8 chainIndex
-    ) external initializer() {
+        uint8 chainIndex,
+        address subscription
+    ) external initializer {
         init(trustedForwarder, admin, bouncerAdmin, assetERC721, chainIndex);
-        __Ownable_init();
-        __DefaultOperatorFilterer_init(false);
+        __OperatorFilterer_init(subscription, true);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -167,18 +167,6 @@ contract AssetERC1155 is AssetBaseERC1155, OwnableUpgradeable, DefaultOperatorFi
             numFTs *
             ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
             packIndex; // packIndex (position in the pack), 11 bits
-    }
-
-    function _msgSender() internal view override(AssetBaseERC1155, ContextUpgradeable) returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal pure override(AssetBaseERC1155, ContextUpgradeable) returns (bytes calldata) {
-        return msg.data;
-    }
-
-    function owner() public view override(OperatorFiltererUpgradeable, OwnableUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
