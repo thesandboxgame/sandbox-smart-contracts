@@ -205,6 +205,7 @@ contract GenericRaffle is
     ) external onlyOwner {
         require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
         require(_waveType < 3 && _waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
+        require(paused == 0, "Contract is paused");
         if (_waveType != 0) {
             require(_contractAddress != address(0x0), "Invalid contract address");
             require(_contractAddress.isContract(), "Contract address must be that of a contract");
