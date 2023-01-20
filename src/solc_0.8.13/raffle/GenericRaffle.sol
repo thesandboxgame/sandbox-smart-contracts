@@ -663,7 +663,7 @@ contract GenericRaffle is
 
     /**
     Empty storage space in contracts for future enhancements
-    ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
      */
     uint256[50] private __gap;
 }
