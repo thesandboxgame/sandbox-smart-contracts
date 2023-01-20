@@ -27,22 +27,6 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
         }
     }
 
-    /**
-     * @notice Update the address that the contract will make OperatorFilter checks against. When set to the zero
-     *         address, checks will be bypassed. OnlyOwner.
-     */
-    function updateOperatorFilterRegistryAddress(address newRegistry) public virtual {
-        if (msg.sender != owner()) {
-            revert("Only Owner");
-        }
-        operatorFilterRegistry = IOperatorFilterRegistry(newRegistry);
-    }
-
-    /**
-     * @dev assume the contract has an owner, but leave specific Ownable implementation up to inheriting contract
-     */
-    function owner() public view virtual returns (address);
-
     modifier onlyAllowedOperator(address from) virtual {
         // Check registry code length to facilitate testing in environments without a deployed registry.
         if (address(operatorFilterRegistry).code.length > 0) {
