@@ -18,14 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
-    metadataUrl = 'https://contracts.sandbox.game/ppp-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/madballs-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/ppp-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/madballs-unrevealed/';
   }
 
-  await deploy('RafflePlayboyPartyPeopleV2', {
+  await deploy('MadBalls', {
     from: deployer,
-    contract: 'PlayboyPartyPeopleV2',
+    contract: 'MadBalls',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -33,14 +33,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: 'initialize',
         args: [
           metadataUrl,
-          'Playboy Party People',
-          'PPP',
+          'MadBalls',
+          'MAD',
           treasury,
           raffleSignWallet,
           TRUSTED_FORWARDER.address,
           defaultOperatorFiltererRegistry,
           defaultOperatorFiltererSubscription,
-          true,
+          true, // we want to subscribe to OpenSea's list
         ],
       },
       upgradeIndex: 0,
@@ -51,5 +51,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['RafflePlayboyPartyPeopleV2', 'RafflePlayboyPartyPeopleV2_deploy'];
+func.tags = ['MadBalls', 'MadBalls_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER_V2'];
