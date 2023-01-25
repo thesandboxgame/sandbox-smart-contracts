@@ -6,7 +6,6 @@ import {waitFor} from '../../../utils';
 import {
   raffleSignWallet,
   setupRaffle,
-  zeroAddress,
   assert,
 } from './PlayboyPartyPeopleV2.fixtures';
 
@@ -23,15 +22,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 20, 5, '10');
     await mint(
       raffleSignWallet,
       deployer,
@@ -61,15 +52,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      1_969,
-      1_969,
-      '1',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 1_969, 1_969, '1');
     const tokens = [];
     for (let i = 0; i < 1_969; i++) {
       if (i % 10 === 0) console.log('minting token', i);
@@ -113,15 +96,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        rafflePlayboyPartyPeopleContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(rafflePlayboyPartyPeopleContract, amount, amount, '1');
       for (let i = 0; i < amount; i++) {
         if (signatureId % 10 === 0) console.log('minting token', i);
         signatureId++;
@@ -167,15 +142,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        rafflePlayboyPartyPeopleContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(rafflePlayboyPartyPeopleContract, amount, amount, '1');
       signatureId++;
       const receipt = await mint(
         raffleSignWallet,
@@ -219,15 +186,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -291,15 +250,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -349,15 +300,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 20, 5, '10');
 
     const receipt1 = await mint(
       raffleSignWallet,
@@ -434,15 +377,7 @@ describe('RafflePlayboyPartyPeopleV2', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(rafflePlayboyPartyPeopleContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
