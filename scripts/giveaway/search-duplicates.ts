@@ -1,9 +1,13 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/giveaway/search-duplicates.ts
+ */
 import fs from 'fs';
+import {network} from 'hardhat';
 import {
-  isPolygon,
-  getMultiGiveawayFiles,
+  createtMultigiveawayBasePath,
+  getMultiGiveawayPaths,
   getProofsFileData,
-  multigiveawayPath,
 } from './utils';
 
 const main = () => {
@@ -13,25 +17,20 @@ const main = () => {
     };
   } = {};
 
-  if (!fs.existsSync(multigiveawayPath)) {
-    throw new Error(`Directory not exists: ${multigiveawayPath}`);
-  }
-
-  const giveaways = getMultiGiveawayFiles();
+  createtMultigiveawayBasePath();
+  const giveaways = getMultiGiveawayPaths();
 
   for (const giveaway of giveaways) {
     const data = getProofsFileData(giveaway);
-    if (data) {
-      data.forEach((entry) => {
-        if (hashMap[entry.salt]) {
-          hashMap[entry.salt].files.push(giveaway);
-        } else {
-          hashMap[entry.salt] = {
-            files: [giveaway],
-          };
-        }
-      });
-    }
+    data.forEach((entry) => {
+      if (hashMap[entry.salt]) {
+        hashMap[entry.salt].files.push(giveaway);
+      } else {
+        hashMap[entry.salt] = {
+          files: [giveaway],
+        };
+      }
+    });
   }
 
   const duplicates = Object.entries(hashMap).filter(
@@ -39,19 +38,20 @@ const main = () => {
     ([_key, value]) => value.files.length > 1
   );
 
-  const subPath = isPolygon ? 'polygon' : 'mumbai';
-  const basePath = `${__dirname}/output/${subPath}`;
+  console.log(`writing ${duplicates.length} duplicated records...`);
+
+  const basePath = `${__dirname}/output/${network.name}`;
 
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath, {recursive: true});
   }
+
   const fileName = `${basePath}/duplicates.csv`;
 
   fs.writeFileSync(fileName, 'salt,giveaways\r\n');
   duplicates.forEach((e) => {
     const line = `${e[0]},"${e[1].files.join(',')}"`;
     fs.writeFileSync(fileName, `${line}\r\n`, {flag: 'a+'});
-    console.log(line);
   });
 
   console.log('done!');

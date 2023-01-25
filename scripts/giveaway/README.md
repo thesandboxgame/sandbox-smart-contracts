@@ -1,6 +1,6 @@
 # Description
 
-To correct the duplicate signatures in the claiming data for multiple giveaways on Polygon, we have created a couple of scripts:
+To fix the duplicate signatures in the claiming data for multiple giveaways on Polygon, we have created a couple of scripts:
 
 Both scripts require to copy of the final proof files containing the data for each claim.
 
@@ -32,9 +32,9 @@ or for polygon mainnet:
 
 Once in place the files to process, run the following command:
 
-    npx ts-node scripts/giveaway/search-duplicates.ts
+    yarn execute <NETWORK> ./scripts/giveaway/search-duplicates.ts
 
-The script runs on the Mumbai testnet by default and generates a CSV file:
+The script generates a CSV file:
 
     sandbox-smart-contracts/scripts/giveaway/output/mumbai/duplicates.csv
 
@@ -48,19 +48,15 @@ The content file looks like this:
 
 This file lets us know how many duplicate salts we have and what giveaways are involved.
 
-To run the script using polygon mainnet network is required to add the flag --polygon
-
-    npx ts-node scripts/giveaway/search-duplicates.ts --polygon
-
 # Regenerate Claims
 
 The script to regenerate takes all the claims existing in the proof file and checks if they were already claimed. The script creates a new file with the list of unclaimed giveaways.
 
 With the files to process in place, run the following command:
 
-    npx ts-node scripts/giveaway/regenerate.ts
+    yarn execute <NETWORK> ./scripts/giveaway/regenerate.ts
 
-The script runs on the Mumbai testnet by default and generates two output files for each giveaway:
+The script generates two output files for each giveaway:
 
     sandbox-smart-contracts/scripts/giveaway/output/mumbai/{giveaway}.json
     sandbox-smart-contracts/scripts/giveaway/output/mumbai/{giveaway}.csv
@@ -82,7 +78,3 @@ or for Polygon mainnet:
     ...
 
 The JSON file has the format to be processed with the current procedure (by hand). The CSV file has the format to be processed by the new giveaway back-office.
-
-To run the script using Polygon mainnet network is required to add the flag --polygon
-
-    npx ts-node scripts/giveaway/regenerate.ts --polygon

@@ -1,9 +1,10 @@
 import axios from 'axios';
-import {isPolygon} from './utils';
+import {network} from 'hardhat';
 
-const baseUrl = isPolygon
-  ? 'https://api.sandbox.game'
-  : 'https://api-demo.sandbox.game';
+const baseUrl =
+  network.name === 'polygon'
+    ? 'https://api.sandbox.game'
+    : 'https://api-demo.sandbox.game';
 
 const getClaim = async (
   claimId: number | string

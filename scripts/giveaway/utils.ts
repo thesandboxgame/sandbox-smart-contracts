@@ -1,21 +1,35 @@
+import 'dotenv/config';
 import fs from 'fs';
+import {network} from 'hardhat';
 import {TheGraph} from '../utils/thegraph';
 
-export const isPolygon = process.argv.indexOf('--polygon') > -1;
+const multigiveawayBasePath = `${__dirname}/proofs/${network.name}`;
 
-export const multigiveawayPath = isPolygon
-  ? `${__dirname}/proofs/polygon`
-  : `${__dirname}/proofs/mumbai`;
+const outputBasePath = `${__dirname}/output/${network.name}`;
 
-export const getMultiGiveawayFiles = (): Array<number> => {
-  if (fs.existsSync(multigiveawayPath)) {
+export const createtMultigiveawayBasePath = (): void => {
+  if (!fs.existsSync(multigiveawayBasePath)) {
+    fs.mkdirSync(multigiveawayBasePath, {recursive: true});
+  }
+};
+
+export const getMultigiveawayBasePath = (): string => {
+  return multigiveawayBasePath;
+};
+
+export const getOutputBasePath = (): string => {
+  return outputBasePath;
+};
+
+export const getMultiGiveawayPaths = (): Array<number> => {
+  if (fs.existsSync(multigiveawayBasePath)) {
     return fs
-      .readdirSync(multigiveawayPath)
+      .readdirSync(multigiveawayBasePath)
       .filter((giveaway) => Number(giveaway) > 0)
       .map((giveaway) => parseInt(giveaway, 10))
       .sort((a, b) => a - b);
   } else {
-    return [];
+    throw new Error(`The directory does not exist: ${multigiveawayBasePath}`);
   }
 };
 
@@ -37,10 +51,10 @@ export const getProofsFileData = (
     contractAddresses: Array<string>;
   };
   salt: string;
-}> | null => {
-  const file = `${multigiveawayPath}/${giveaway}/proofs`;
+}> => {
+  const file = `${multigiveawayBasePath}/${giveaway}/proofs`;
   if (!fs.existsSync(file)) {
-    return null;
+    throw new Error(`The file does not exist: ${file}`);
   }
   const buffer = fs.readFileSync(file);
   return JSON.parse(buffer.toString());
@@ -51,9 +65,17 @@ export const getClaimTxs = async (
 ): Promise<
   Array<{id: string; txHash: string; wallet: {id: string}; claim: {id: string}}>
 > => {
-  const graphUrl = isPolygon
-    ? 'https://api.thegraph.com/subgraphs/name/sandboxthegraph/the-sandbox-claims-polygon'
-    : 'https://api.thegraph.com/subgraphs/name/sandboxthegraph/the-sandbox-claims-mumbai';
+  if (network.name === 'polygon' && !process.env.CLAIMS_GRAPH_URL_POLYGON) {
+    throw new Error('CLAIMS_GRAPH_URL_POLYGON is not set');
+  }
+  if (network.name === 'mumbai' && !process.env.CLAIMS_GRAPH_URL_MUMBAI) {
+    throw new Error('CLAIMS_GRAPH_URL_MUMBAI is not set');
+  }
+
+  const graphUrl =
+    network.name === 'polygon'
+      ? process.env.CLAIMS_GRAPH_URL_POLYGON
+      : process.env.CLAIMS_GRAPH_URL_MUMBAI;
 
   if (!graphUrl) throw new Error(`Giveaway claims graph url is missing`);
 
