@@ -14,7 +14,7 @@ import {
 describe('Rabbids', function () {
   it('should be able to mint with valid signature', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -23,27 +23,19 @@ describe('Rabbids', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer()
+    const transferEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -52,7 +44,7 @@ describe('Rabbids', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it('should be able to mint 2_066 different tokens', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -62,7 +54,7 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
     await setupWave(
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       0,
       2_066,
       2_066,
@@ -77,13 +69,13 @@ describe('Rabbids', function () {
         raffleSignWallet,
         deployer,
         i,
-        rafflePlayboyPartyPeopleContract.address,
+        raffleRabbidsContract.address,
         hre.network.config.chainId || 31337,
         '1',
         1
       );
-      const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-        rafflePlayboyPartyPeopleContract.filters.Transfer(),
+      const transferEvents = await raffleRabbidsContract.queryFilter(
+        raffleRabbidsContract.filters.Transfer(),
         receipt.blockNumber
       );
       assert.equal(transferEvents.length, 1);
@@ -100,7 +92,7 @@ describe('Rabbids', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it('should be able to mint 2_066 different tokens in 3 waves', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -114,7 +106,7 @@ describe('Rabbids', function () {
     let signatureId = 0;
     for (const amount of waves) {
       await setupWave(
-        rafflePlayboyPartyPeopleContract,
+        raffleRabbidsContract,
         0,
         amount,
         amount,
@@ -129,13 +121,13 @@ describe('Rabbids', function () {
           raffleSignWallet,
           deployer,
           signatureId,
-          rafflePlayboyPartyPeopleContract.address,
+          raffleRabbidsContract.address,
           hre.network.config.chainId || 31337,
           '1',
           1
         );
-        const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-          rafflePlayboyPartyPeopleContract.filters.Transfer(),
+        const transferEvents = await raffleRabbidsContract.queryFilter(
+          raffleRabbidsContract.filters.Transfer(),
           receipt.blockNumber
         );
         assert.equal(transferEvents.length, 1);
@@ -154,7 +146,7 @@ describe('Rabbids', function () {
   // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('should be able to mint 2_066 different tokens in 3 waves in 3 txs', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -168,7 +160,7 @@ describe('Rabbids', function () {
     let signatureId = 0;
     for (const amount of waves) {
       await setupWave(
-        rafflePlayboyPartyPeopleContract,
+        raffleRabbidsContract,
         0,
         amount,
         amount,
@@ -181,13 +173,13 @@ describe('Rabbids', function () {
         raffleSignWallet,
         deployer,
         signatureId,
-        rafflePlayboyPartyPeopleContract.address,
+        raffleRabbidsContract.address,
         hre.network.config.chainId || 31337,
         amount,
         amount
       );
-      const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-        rafflePlayboyPartyPeopleContract.filters.Transfer(),
+      const transferEvents = await raffleRabbidsContract.queryFilter(
+        raffleRabbidsContract.filters.Transfer(),
         receipt.blockNumber
       );
       assert.equal(transferEvents.length, amount);
@@ -207,7 +199,7 @@ describe('Rabbids', function () {
 
   it('should be able to personalize with valid signature', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -219,28 +211,20 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer()
+    const transferEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -259,8 +243,8 @@ describe('Rabbids', function () {
       personalizationMask
     );
 
-    const personalizeEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Personalized()
+    const personalizeEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Personalized()
     );
 
     assert.equal(personalizeEvents.length, 1);
@@ -270,7 +254,7 @@ describe('Rabbids', function () {
       personalizationMask
     );
 
-    const personalizationOf = await rafflePlayboyPartyPeopleContract.personalizationOf(
+    const personalizationOf = await raffleRabbidsContract.personalizationOf(
       tokenId
     );
 
@@ -279,7 +263,7 @@ describe('Rabbids', function () {
 
   it('should not be able to personalize with invalid signature', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -291,28 +275,20 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer()
+    const transferEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -336,7 +312,7 @@ describe('Rabbids', function () {
 
   it('should be able to differentiate a personalized asset', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -349,28 +325,20 @@ describe('Rabbids', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
 
     const receipt1 = await mint(
       raffleSignWallet,
       deployer,
       0,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents1 = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer(),
+    const transferEvents1 = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer(),
       receipt1.blockNumber
     );
     assert.equal(transferEvents1.length, 1);
@@ -379,14 +347,14 @@ describe('Rabbids', function () {
       raffleSignWallet,
       deployer,
       1,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents2 = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer(),
+    const transferEvents2 = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer(),
       receipt2.blockNumber
     );
     assert.equal(transferEvents2.length, 1);
@@ -403,12 +371,12 @@ describe('Rabbids', function () {
       personalizationMask
     );
 
-    const allPersonalizeEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Personalized()
+    const allPersonalizeEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Personalized()
     );
 
-    const personalizeEvents2 = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Personalized(),
+    const personalizeEvents2 = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Personalized(),
       personalizeReceipt2.blockNumber
     );
 
@@ -422,7 +390,7 @@ describe('Rabbids', function () {
 
   it('should not be able to personalize twice with the same signature', async function () {
     const {
-      rafflePlayboyPartyPeopleContract,
+      raffleRabbidsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -434,28 +402,20 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(
-      rafflePlayboyPartyPeopleContract,
-      0,
-      20,
-      5,
-      '10',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await rafflePlayboyPartyPeopleContract.queryFilter(
-      rafflePlayboyPartyPeopleContract.filters.Transfer()
+    const transferEvents = await raffleRabbidsContract.queryFilter(
+      raffleRabbidsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -469,13 +429,13 @@ describe('Rabbids', function () {
       raffleSignWallet,
       deployer,
       1,
-      rafflePlayboyPartyPeopleContract.address,
+      raffleRabbidsContract.address,
       hre.network.config.chainId || 31337,
       tokenId,
       personalizationMask
     );
 
-    const contract = rafflePlayboyPartyPeopleContract.connect(
+    const contract = raffleRabbidsContract.connect(
       ethers.provider.getSigner(deployer)
     );
 

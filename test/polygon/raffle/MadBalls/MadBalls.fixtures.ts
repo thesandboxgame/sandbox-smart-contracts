@@ -15,7 +15,7 @@ export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();
 
-  const rafflePlayboyPartyPeopleContract = await ethers.getContract('MadBalls');
+  const raffleMadballsContract = await ethers.getContract('MadBalls');
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -29,21 +29,21 @@ export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
   );
 
   return {
-    rafflePlayboyPartyPeopleContract,
+    raffleMadballsContract,
     sandContract,
     hre,
     getNamedAccounts,
     setupWave,
     signAuthMessageAs,
     transferSand,
-    mint: mintSetup(rafflePlayboyPartyPeopleContract, sandContract),
+    mint: mintSetup(raffleMadballsContract, sandContract),
     personalizeSignature: validPersonalizeSignature,
     personalize: personalizeSetup(
-      rafflePlayboyPartyPeopleContract,
+      raffleMadballsContract,
       validPersonalizeSignature
     ),
     personalizeInvalidSignature: personalizeSetup(
-      rafflePlayboyPartyPeopleContract,
+      raffleMadballsContract,
       invalidPersonalizeSignature
     ),
   };
