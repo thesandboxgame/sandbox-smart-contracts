@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import fs from 'fs';
 import {network} from 'hardhat';
+import {MultiClaim} from '../../lib/merkleTreeHelper';
 import {TheGraph} from '../utils/thegraph';
 
 const multigiveawayBasePath = `${__dirname}/proofs/${network.name}`;
@@ -33,25 +34,7 @@ export const getMultiGiveawayPaths = (): Array<number> => {
   }
 };
 
-export const getProofsFileData = (
-  giveaway: number
-): Array<{
-  to: string;
-  erc1155: Array<{
-    ids: Array<string>;
-    values: Array<number>;
-    contractAddress: string;
-  }>;
-  erc721: Array<{
-    ids: Array<string>;
-    contractAddress: string;
-  }>;
-  erc20: {
-    amounts: Array<string>;
-    contractAddresses: Array<string>;
-  };
-  salt: string;
-}> => {
+export const getProofsFileData = (giveaway: number): Array<MultiClaim> => {
   const file = `${multigiveawayBasePath}/${giveaway}/proofs`;
   if (!fs.existsSync(file)) {
     throw new Error(`The file does not exist: ${file}`);
