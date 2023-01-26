@@ -6,7 +6,7 @@ import {waitFor} from '../../../utils';
 import {raffleSignWallet, setupRaffle, assert} from './Rabbids.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('Rabbids', function () {
+describe('Rabbids', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       raffleRabbidsContract,
