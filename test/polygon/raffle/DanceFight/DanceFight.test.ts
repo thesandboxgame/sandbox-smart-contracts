@@ -37,7 +37,7 @@ describe('DanceFight', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 4_000 different tokens', async function () {
+  it('should be able to mint 3_130 different tokens', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -48,9 +48,9 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    await setupWave(raffleDanceFightContract, 4_000, 4_000, '1');
+    await setupWave(raffleDanceFightContract, 3_130, 3_130, '1');
     const tokens = [];
-    for (let i = 0; i < 4_000; i++) {
+    for (let i = 0; i < 3_130; i++) {
       if (i % 10 === 0) console.log('minting token', i);
       const receipt = await mint(
         raffleSignWallet,
@@ -77,7 +77,7 @@ describe('DanceFight', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 4_000 different tokens in 3 waves', async function () {
+  it('should be able to mint 3_130 different tokens in 3 waves', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -88,7 +88,7 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '4000');
-    const waves = [500, 1500, 2000];
+    const waves = [130, 1000, 2000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -119,11 +119,11 @@ describe('DanceFight', function () {
         }
       }
     }
-    assert.equal(tokens.length, 4000);
+    assert.equal(tokens.length, 3130);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 4_000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 3_130 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -134,7 +134,7 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    const waves = [19, 950, 1000];
+    const waves = [130, 1000, 2000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
@@ -165,7 +165,7 @@ describe('DanceFight', function () {
         }
       }
     }
-    assert.equal(tokens.length, 4000);
+    assert.equal(tokens.length, 3130);
   });
 
   it('should be able to personalize with valid signature', async function () {
