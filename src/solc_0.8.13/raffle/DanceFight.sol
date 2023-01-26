@@ -5,7 +5,7 @@ import "./GenericRaffle.sol";
 
 /* solhint-disable max-states-count */
 contract DanceFight is GenericRaffle {
-    uint256 public constant MAX_SUPPLY = 4_000;
+    uint256 public constant MAX_SUPPLY = 3_130;
 
     function initialize(
         string memory baseURI,
