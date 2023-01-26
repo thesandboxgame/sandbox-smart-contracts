@@ -9,22 +9,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const setupWaveMaxTokens = await read('DanceFight', 'waveMaxTokens');
   if (setupWaveMaxTokens.toNumber() === 0) {
     const owner = await read('DanceFight', 'owner');
-    const waveType = 0;
     const waveMaxTokens = 500;
     const waveMaxTokensToBuy = 500;
     const waveSingleTokenPrice = (1 * 10 ** 18).toString();
-    const erc1155Id = 0;
     await catchUnknownSigner(
       execute(
         'DanceFight',
         {from: owner, log: true},
         'setupWave',
-        waveType,
         waveMaxTokens,
         waveMaxTokensToBuy,
-        waveSingleTokenPrice,
-        ethers.constants.AddressZero,
-        erc1155Id
+        waveSingleTokenPrice
       )
     );
   }
