@@ -11,10 +11,10 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const setupRaffle = withSnapshot(['Madballs'], async function (hre) {
+export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();
 
-  const raffleMadBallsContract = await ethers.getContract('Madballs');
+  const raffleMadBallsContract = await ethers.getContract('MadBalls');
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
