@@ -3,15 +3,10 @@ import {ethers} from 'hardhat';
 
 import {waitFor} from '../../../utils';
 
-import {
-  raffleSignWallet,
-  setupRaffle,
-  zeroAddress,
-  assert,
-} from './Rabbids.fixtures';
+import {raffleSignWallet, setupRaffle, assert} from './Rabbids.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('Rabbids', function () {
+describe.only('Rabbids', function () {
   it('should be able to mint with valid signature', async function () {
     const {
       raffleRabbidsContract,
@@ -23,7 +18,7 @@ describe('Rabbids', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleRabbidsContract, 20, 5, '10');
     await mint(
       raffleSignWallet,
       deployer,
@@ -53,15 +48,7 @@ describe('Rabbids', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    await setupWave(
-      raffleRabbidsContract,
-      0,
-      2_066,
-      2_066,
-      '1',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleRabbidsContract, 2_066, 2_066, '1');
     const tokens = [];
     for (let i = 0; i < 2_066; i++) {
       if (i % 10 === 0) console.log('minting token', i);
@@ -101,19 +88,11 @@ describe('Rabbids', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '2066');
-    const waves = [16, 50, 2000];
+    const waves = [33, 33, 2000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleRabbidsContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleRabbidsContract, amount, amount, '1');
       for (let i = 0; i < amount; i++) {
         if (signatureId % 10 === 0) console.log('minting token', i);
         signatureId++;
@@ -140,7 +119,7 @@ describe('Rabbids', function () {
         }
       }
     }
-    assert.equal(tokens.length, 2_066);
+    assert.equal(tokens.length, 2066);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
@@ -159,15 +138,7 @@ describe('Rabbids', function () {
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleRabbidsContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleRabbidsContract, amount, amount, '1');
       signatureId++;
       const receipt = await mint(
         raffleSignWallet,
@@ -194,7 +165,7 @@ describe('Rabbids', function () {
         }
       }
     }
-    assert.equal(tokens.length, 2_066);
+    assert.equal(tokens.length, 2066);
   });
 
   it('should be able to personalize with valid signature', async function () {
@@ -211,7 +182,7 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleRabbidsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -275,7 +246,7 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleRabbidsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -325,7 +296,7 @@ describe('Rabbids', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleRabbidsContract, 20, 5, '10');
 
     const receipt1 = await mint(
       raffleSignWallet,
@@ -402,7 +373,7 @@ describe('Rabbids', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleRabbidsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleRabbidsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,

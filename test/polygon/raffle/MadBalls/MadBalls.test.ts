@@ -3,18 +3,13 @@ import {ethers} from 'hardhat';
 
 import {waitFor} from '../../../utils';
 
-import {
-  raffleSignWallet,
-  setupRaffle,
-  zeroAddress,
-  assert,
-} from './MadBalls.fixtures';
+import {raffleSignWallet, setupRaffle, assert} from './MadBalls.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
 describe('MadBalls', function () {
   it('should be able to mint with valid signature', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -23,28 +18,28 @@ describe('MadBalls', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(raffleMadballsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 20, 5, '10');
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer()
+    const transferEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 2023 different tokens', async function () {
+  it('should be able to mint 2_023 different tokens', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -53,21 +48,21 @@ describe('MadBalls', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    await setupWave(raffleMadballsContract, 0, 2023, 2023, '1', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 2_023, 2_023, '1');
     const tokens = [];
-    for (let i = 0; i < 2023; i++) {
+    for (let i = 0; i < 2_023; i++) {
       if (i % 10 === 0) console.log('minting token', i);
       const receipt = await mint(
         raffleSignWallet,
         deployer,
         i,
-        raffleMadballsContract.address,
+        raffleMadBallsContract.address,
         hre.network.config.chainId || 31337,
         '1',
         1
       );
-      const transferEvents = await raffleMadballsContract.queryFilter(
-        raffleMadballsContract.filters.Transfer(),
+      const transferEvents = await raffleMadBallsContract.queryFilter(
+        raffleMadBallsContract.filters.Transfer(),
         receipt.blockNumber
       );
       assert.equal(transferEvents.length, 1);
@@ -82,9 +77,9 @@ describe('MadBalls', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 2023 different tokens in 3 waves', async function () {
+  it('should be able to mint 2_023 different tokens in 3 waves', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -92,20 +87,12 @@ describe('MadBalls', function () {
       mint,
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
-    await transferSand(deployer, '20000');
-    const waves = [3, 20, 2000];
+    await transferSand(deployer, '2023');
+    const waves = [1, 22, 2000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleMadballsContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleMadBallsContract, amount, amount, '1');
       for (let i = 0; i < amount; i++) {
         if (signatureId % 10 === 0) console.log('minting token', i);
         signatureId++;
@@ -113,13 +100,13 @@ describe('MadBalls', function () {
           raffleSignWallet,
           deployer,
           signatureId,
-          raffleMadballsContract.address,
+          raffleMadBallsContract.address,
           hre.network.config.chainId || 31337,
           '1',
           1
         );
-        const transferEvents = await raffleMadballsContract.queryFilter(
-          raffleMadballsContract.filters.Transfer(),
+        const transferEvents = await raffleMadBallsContract.queryFilter(
+          raffleMadBallsContract.filters.Transfer(),
           receipt.blockNumber
         );
         assert.equal(transferEvents.length, 1);
@@ -136,9 +123,9 @@ describe('MadBalls', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 2023 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 2_023 different tokens in 3 waves in 3 txs', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -147,31 +134,23 @@ describe('MadBalls', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    const waves = [3, 20, 2000];
+    const waves = [19, 950, 1000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleMadballsContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleMadBallsContract, amount, amount, '1');
       signatureId++;
       const receipt = await mint(
         raffleSignWallet,
         deployer,
         signatureId,
-        raffleMadballsContract.address,
+        raffleMadBallsContract.address,
         hre.network.config.chainId || 31337,
         amount,
         amount
       );
-      const transferEvents = await raffleMadballsContract.queryFilter(
-        raffleMadballsContract.filters.Transfer(),
+      const transferEvents = await raffleMadBallsContract.queryFilter(
+        raffleMadBallsContract.filters.Transfer(),
         receipt.blockNumber
       );
       assert.equal(transferEvents.length, amount);
@@ -191,7 +170,7 @@ describe('MadBalls', function () {
 
   it('should be able to personalize with valid signature', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -203,20 +182,20 @@ describe('MadBalls', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleMadballsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer()
+    const transferEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -235,8 +214,8 @@ describe('MadBalls', function () {
       personalizationMask
     );
 
-    const personalizeEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Personalized()
+    const personalizeEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Personalized()
     );
 
     assert.equal(personalizeEvents.length, 1);
@@ -246,7 +225,7 @@ describe('MadBalls', function () {
       personalizationMask
     );
 
-    const personalizationOf = await raffleMadballsContract.personalizationOf(
+    const personalizationOf = await raffleMadBallsContract.personalizationOf(
       tokenId
     );
 
@@ -255,7 +234,7 @@ describe('MadBalls', function () {
 
   it('should not be able to personalize with invalid signature', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -267,20 +246,20 @@ describe('MadBalls', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleMadballsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer()
+    const transferEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -304,7 +283,7 @@ describe('MadBalls', function () {
 
   it('should be able to differentiate a personalized asset', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -317,20 +296,20 @@ describe('MadBalls', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(raffleMadballsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 20, 5, '10');
 
     const receipt1 = await mint(
       raffleSignWallet,
       deployer,
       0,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents1 = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer(),
+    const transferEvents1 = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer(),
       receipt1.blockNumber
     );
     assert.equal(transferEvents1.length, 1);
@@ -339,14 +318,14 @@ describe('MadBalls', function () {
       raffleSignWallet,
       deployer,
       1,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents2 = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer(),
+    const transferEvents2 = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer(),
       receipt2.blockNumber
     );
     assert.equal(transferEvents2.length, 1);
@@ -363,12 +342,12 @@ describe('MadBalls', function () {
       personalizationMask
     );
 
-    const allPersonalizeEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Personalized()
+    const allPersonalizeEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Personalized()
     );
 
-    const personalizeEvents2 = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Personalized(),
+    const personalizeEvents2 = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Personalized(),
       personalizeReceipt2.blockNumber
     );
 
@@ -382,7 +361,7 @@ describe('MadBalls', function () {
 
   it('should not be able to personalize twice with the same signature', async function () {
     const {
-      raffleMadballsContract,
+      raffleMadBallsContract,
       transferSand,
       setupWave,
       getNamedAccounts,
@@ -394,20 +373,20 @@ describe('MadBalls', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleMadballsContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleMadBallsContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
       deployer,
       0,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       '10',
       1
     );
 
-    const transferEvents = await raffleMadballsContract.queryFilter(
-      raffleMadballsContract.filters.Transfer()
+    const transferEvents = await raffleMadBallsContract.queryFilter(
+      raffleMadBallsContract.filters.Transfer()
     );
 
     assert.equal(transferEvents.length, 1);
@@ -421,13 +400,13 @@ describe('MadBalls', function () {
       raffleSignWallet,
       deployer,
       1,
-      raffleMadballsContract.address,
+      raffleMadBallsContract.address,
       hre.network.config.chainId || 31337,
       tokenId,
       personalizationMask
     );
 
-    const contract = raffleMadballsContract.connect(
+    const contract = raffleMadBallsContract.connect(
       ethers.provider.getSigner(deployer)
     );
 

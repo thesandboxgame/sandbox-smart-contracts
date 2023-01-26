@@ -10,12 +10,11 @@ export {assert};
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
-export const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
+export const setupRaffle = withSnapshot(['Madballs'], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();
 
-  const raffleMadballsContract = await ethers.getContract('MadBalls');
+  const raffleMadBallsContract = await ethers.getContract('Madballs');
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -29,21 +28,21 @@ export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
   );
 
   return {
-    raffleMadballsContract,
+    raffleMadBallsContract,
     sandContract,
     hre,
     getNamedAccounts,
     setupWave,
     signAuthMessageAs,
     transferSand,
-    mint: mintSetup(raffleMadballsContract, sandContract),
+    mint: mintSetup(raffleMadBallsContract, sandContract),
     personalizeSignature: validPersonalizeSignature,
     personalize: personalizeSetup(
-      raffleMadballsContract,
+      raffleMadBallsContract,
       validPersonalizeSignature
     ),
     personalizeInvalidSignature: personalizeSetup(
-      raffleMadballsContract,
+      raffleMadBallsContract,
       invalidPersonalizeSignature
     ),
   };
@@ -51,12 +50,9 @@ export const setupRaffle = withSnapshot(['MadBalls'], async function (hre) {
 
 async function setupWave(
   raffle: Contract,
-  waveType: number,
   waveMaxTokens: number,
   waveMaxTokensToBuy: number,
-  waveSingleTokenPrice: string,
-  contractAddress: string,
-  erc1155Id: number
+  waveSingleTokenPrice: string
 ) {
   const {raffleSignWallet} = await getNamedAccounts();
 
@@ -66,14 +62,10 @@ async function setupWave(
   await contract.setSignAddress(raffleSignWallet);
 
   await contract.setupWave(
-    waveType,
     waveMaxTokens,
     waveMaxTokensToBuy,
-    waveSingleTokenPrice,
-    contractAddress,
-    erc1155Id
+    waveSingleTokenPrice
   );
-  assert.equal((await raffle.waveType()).toString(), waveType.toString());
   assert.equal(
     (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
@@ -90,11 +82,6 @@ async function setupWave(
     (await raffle.waveSingleTokenPrice()).toString(),
     waveSingleTokenPrice.toString()
   );
-  assert.equal(
-    (await raffle.contractAddress()).toString(),
-    contractAddress.toString()
-  );
-  assert.equal((await raffle.erc1155Id()).toString(), erc1155Id.toString());
 }
 
 function validPersonalizeSignature(

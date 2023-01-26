@@ -3,12 +3,7 @@ import {ethers} from 'hardhat';
 
 import {waitFor} from '../../../utils';
 
-import {
-  raffleSignWallet,
-  setupRaffle,
-  zeroAddress,
-  assert,
-} from './DanceFight.fixtures';
+import {raffleSignWallet, setupRaffle, assert} from './DanceFight.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
 describe('DanceFight', function () {
@@ -23,7 +18,7 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '1000');
-    await setupWave(raffleDanceFightContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleDanceFightContract, 20, 5, '10');
     await mint(
       raffleSignWallet,
       deployer,
@@ -42,7 +37,7 @@ describe('DanceFight', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 2023 different tokens', async function () {
+  it('should be able to mint 4_000 different tokens', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -53,17 +48,9 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    await setupWave(
-      raffleDanceFightContract,
-      0,
-      2023,
-      2023,
-      '1',
-      zeroAddress,
-      0
-    );
+    await setupWave(raffleDanceFightContract, 4_000, 4_000, '1');
     const tokens = [];
-    for (let i = 0; i < 2023; i++) {
+    for (let i = 0; i < 4_000; i++) {
       if (i % 10 === 0) console.log('minting token', i);
       const receipt = await mint(
         raffleSignWallet,
@@ -90,7 +77,7 @@ describe('DanceFight', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it('should be able to mint 2023 different tokens in 3 waves', async function () {
+  it('should be able to mint 4_000 different tokens in 3 waves', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -100,20 +87,12 @@ describe('DanceFight', function () {
       mint,
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
-    await transferSand(deployer, '20000');
-    const waves = [3, 20, 2000];
+    await transferSand(deployer, '4000');
+    const waves = [500, 1500, 2000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleDanceFightContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleDanceFightContract, amount, amount, '1');
       for (let i = 0; i < amount; i++) {
         if (signatureId % 10 === 0) console.log('minting token', i);
         signatureId++;
@@ -140,11 +119,11 @@ describe('DanceFight', function () {
         }
       }
     }
-    assert.equal(tokens.length, 2023);
+    assert.equal(tokens.length, 4000);
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 4000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('should be able to mint 4_000 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleDanceFightContract,
       transferSand,
@@ -155,19 +134,11 @@ describe('DanceFight', function () {
     } = await setupRaffle();
     const {deployer} = await getNamedAccounts();
     await transferSand(deployer, '20000');
-    const waves = [500, 1500, 2000];
+    const waves = [19, 950, 1000];
     const tokens = [];
     let signatureId = 0;
     for (const amount of waves) {
-      await setupWave(
-        raffleDanceFightContract,
-        0,
-        amount,
-        amount,
-        '1',
-        zeroAddress,
-        0
-      );
+      await setupWave(raffleDanceFightContract, amount, amount, '1');
       signatureId++;
       const receipt = await mint(
         raffleSignWallet,
@@ -194,7 +165,7 @@ describe('DanceFight', function () {
         }
       }
     }
-    assert.equal(tokens.length, 2023);
+    assert.equal(tokens.length, 4000);
   });
 
   it('should be able to personalize with valid signature', async function () {
@@ -211,7 +182,7 @@ describe('DanceFight', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleDanceFightContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleDanceFightContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -275,7 +246,7 @@ describe('DanceFight', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleDanceFightContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleDanceFightContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
@@ -325,7 +296,7 @@ describe('DanceFight', function () {
 
     await transferSand(deployer, '1000');
 
-    await setupWave(raffleDanceFightContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleDanceFightContract, 20, 5, '10');
 
     const receipt1 = await mint(
       raffleSignWallet,
@@ -402,7 +373,7 @@ describe('DanceFight', function () {
     const {deployer} = await getNamedAccounts();
 
     await transferSand(deployer, '1000');
-    await setupWave(raffleDanceFightContract, 0, 20, 5, '10', zeroAddress, 0);
+    await setupWave(raffleDanceFightContract, 20, 5, '10');
 
     await mint(
       raffleSignWallet,
