@@ -23,6 +23,11 @@ const main = () => {
   for (const giveaway of giveaways) {
     const data = getProofsFileData(giveaway);
     data.forEach((entry) => {
+      if (!entry.salt) {
+        throw new Error(
+          `missing salt for giveaway ${giveaway} and wallet address ${entry.to}`
+        );
+      }
       if (hashMap[entry.salt]) {
         hashMap[entry.salt].files.push(giveaway);
       } else {
