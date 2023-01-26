@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         args: [
           metadataUrl,
           'DanceFight',
-          'MAD',
+          'DF',
           treasury,
           raffleSignWallet,
           TRUSTED_FORWARDER.address,
