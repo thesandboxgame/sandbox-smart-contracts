@@ -262,10 +262,7 @@ describe('AssetERC721.sol', function () {
       });
 
       it('it should not approve blacklisted market places', async function () {
-        const {
-          mockMarketPlace1,
-          users,
-        } = await setupOperatorFilter();
+        const {mockMarketPlace1, users} = await setupOperatorFilter();
 
         await expect(
           users[1].assetERC721.approveFor(
