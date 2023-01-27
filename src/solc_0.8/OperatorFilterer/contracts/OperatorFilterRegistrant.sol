@@ -16,36 +16,4 @@ contract OperatorFilterSubscription is Ownable {
             operatorFilterRegistry.registerAndSubscribe(address(this), DEFAULT_SUBSCRIPTION);
         }
     }
-
-    function updateOperator(
-        address registrant,
-        address operator,
-        bool filtered
-    ) external {
-        operatorFilterRegistry.updateOperator(registrant, operator, filtered);
-    }
-
-    function updateCodeHash(
-        address registrant,
-        bytes32 codeHash,
-        bool filtered
-    ) external {
-        operatorFilterRegistry.updateCodeHash(registrant, codeHash, filtered);
-    }
-
-    function updateOperators(
-        address registrant,
-        address[] calldata operators,
-        bool filtered
-    ) external {
-        operatorFilterRegistry.updateOperators(registrant, operators, filtered);
-    }
-
-    function updateCodeHashes(
-        address registrant,
-        bytes32[] calldata codeHashes,
-        bool filtered
-    ) external {
-        operatorFilterRegistry.updateCodeHashes(registrant, codeHashes, filtered);
-    }
 }
