@@ -10,7 +10,7 @@ export async function sendMetaTx(
   forwarder: Contract,
   data = '',
   signer: string,
-  gas = '100000',
+  gas = '200000',
   value = '0'
 ): Promise<Receipt> {
   const message = {
