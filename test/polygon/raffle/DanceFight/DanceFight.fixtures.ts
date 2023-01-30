@@ -11,10 +11,10 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const setupRaffle = withSnapshot(['Rabbids'], async function (hre) {
+export const setupRaffle = withSnapshot(['DanceFight'], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();
 
-  const raffleRabbidsContract = await ethers.getContract('Rabbids');
+  const raffleDanceFightContract = await ethers.getContract('DanceFight');
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -28,21 +28,21 @@ export const setupRaffle = withSnapshot(['Rabbids'], async function (hre) {
   );
 
   return {
-    raffleRabbidsContract,
+    raffleDanceFightContract,
     sandContract,
     hre,
     getNamedAccounts,
     setupWave,
     signAuthMessageAs,
     transferSand,
-    mint: mintSetup(raffleRabbidsContract, sandContract),
+    mint: mintSetup(raffleDanceFightContract, sandContract),
     personalizeSignature: validPersonalizeSignature,
     personalize: personalizeSetup(
-      raffleRabbidsContract,
+      raffleDanceFightContract,
       validPersonalizeSignature
     ),
     personalizeInvalidSignature: personalizeSetup(
-      raffleRabbidsContract,
+      raffleDanceFightContract,
       invalidPersonalizeSignature
     ),
   };

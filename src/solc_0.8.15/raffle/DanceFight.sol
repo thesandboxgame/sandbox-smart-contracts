@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.13;
+pragma solidity 0.8.15;
 
 import "./GenericRaffle.sol";
 
 /* solhint-disable max-states-count */
-contract Rabbids is GenericRaffle {
-    uint256 public constant MAX_SUPPLY = 2_066;
+contract DanceFight is GenericRaffle {
+    uint256 public constant MAX_SUPPLY = 3_130;
 
     function initialize(
         string memory baseURI,
