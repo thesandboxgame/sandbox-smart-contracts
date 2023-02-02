@@ -6,14 +6,14 @@ import "../asset/libraries/ERC1155ERC721Helper.sol";
 import {IOperatorFilterRegistry} from "../OperatorFilterer/interfaces/IOperatorFilterRegistry.sol";
 
 contract MockAssetERC1155 is AssetERC1155 {
-    /// @notice sets filter registry address deployed in test 
+    /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 
     /// @notice registers and substribe to the subscription on the said deployed registry
-    /// @param subscription the address to subcribe to 
+    /// @param subscription the address to subcribe to
     function registerAndSubscribe(address subscription) external {
         operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
     }

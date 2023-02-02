@@ -122,7 +122,7 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OperatorFilterer
     }
 
     /// @notice Checks if address supplierd is that of an forwarder
-    /// @param forwarder the address to be checked 
+    /// @param forwarder the address to be checked
     function isTrustedForwarder(address forwarder) public view override(BaseERC721, IERC721Base) returns (bool) {
         BaseERC721.isTrustedForwarder(forwarder);
     }
@@ -132,8 +132,8 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OperatorFilterer
         BaseERC721.getTrustedForwarder();
     }
 
-    /// @notice checks if the token id has been minted or not 
-    /// @param tokenId the id to be checked 
+    /// @notice checks if the token id has been minted or not
+    /// @param tokenId the id to be checked
     function exists(uint256 tokenId) public view override(BaseERC721, IERC721Base) returns (bool) {
         BaseERC721.exists(tokenId);
     }

@@ -124,7 +124,7 @@ contract AssetERC721 is BaseERC721, IAssetERC721, OperatorFiltererUpgradeable {
     }
 
     /// @notice Checks if address supplierd is that of an forwarder
-    /// @param forwarder the address to be checked 
+    /// @param forwarder the address to be checked
     function isTrustedForwarder(address forwarder) public view override(BaseERC721, IERC721Base) returns (bool) {
         return BaseERC721.isTrustedForwarder(forwarder);
     }
@@ -134,8 +134,8 @@ contract AssetERC721 is BaseERC721, IAssetERC721, OperatorFiltererUpgradeable {
         return BaseERC721.getTrustedForwarder();
     }
 
-    /// @notice checks if the token id has been minted or not 
-    /// @param tokenId the id to be checked 
+    /// @notice checks if the token id has been minted or not
+    /// @param tokenId the id to be checked
     function exists(uint256 tokenId) public view override(BaseERC721, IERC721Base) returns (bool) {
         return BaseERC721.exists(tokenId);
     }

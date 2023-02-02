@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
-/// @title OperatorFilterSubription 
+/// @title OperatorFilterSubription
 /// @notice This contract is ment to register and copy the default subscription of the openSea for the operator filter and our Token contract are supposed to subscribe to This contract on openSea operator filter registry
 /// @custom:experimental This is an experimental contract. There could be future changes according to the change in the requirements
 contract OperatorFilterSubscription is Ownable {
