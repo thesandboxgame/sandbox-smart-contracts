@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
 import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 
