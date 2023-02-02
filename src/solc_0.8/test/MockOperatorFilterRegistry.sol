@@ -8,9 +8,8 @@ import {EnumerableSet} from "@openzeppelin/contracts-0.8/utils/structs/Enumerabl
 import {OperatorFilterRegistryEvents} from "./OperatorFilterRegistryEvents.sol";
 
 /**
- * @title  OperatorFilterRegistry
- * @notice Borrows heavily from the QQL BlacklistOperatorFilter contract:
- *         https://github.com/qql-art/contracts/blob/main/contracts/BlacklistOperatorFilter.sol
+ * @title  MockOperatorFilterRegistry
+ * @notice Made based on the OperatorFilterRegistry of openSea at https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterRegistry.sol
  * @notice This contracts allows tokens or token owners to register specific addresses or codeHashes that may be
  * *       restricted according to the isOperatorAllowed function.
  */

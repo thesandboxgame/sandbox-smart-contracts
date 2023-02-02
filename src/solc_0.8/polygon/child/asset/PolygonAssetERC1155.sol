@@ -174,6 +174,8 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererU
         _burnBatch(_msgSender(), ids, amounts);
     }
 
+    /// @notice gets the metadata hash set for the and asset with id "id"
+    /// @param id the id of the asset whose  metadata hash has to be returned
     function metadataHash(uint256 id) external view returns (bytes32) {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
