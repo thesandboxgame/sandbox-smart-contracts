@@ -278,7 +278,7 @@ describe('AssetERC721.sol', function () {
         expect(await assetERC721.balanceOf(users[1].address)).to.be.equal(1);
       });
 
-      it('should be able to transfer token if from is the owner of token', async function () {
+      it('should be able to batch transfer token if from is the owner of token', async function () {
         const {
           assetERC721,
           users,

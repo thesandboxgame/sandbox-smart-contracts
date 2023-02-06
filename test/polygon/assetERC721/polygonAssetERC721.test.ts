@@ -148,7 +148,7 @@ describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () 
       );
     });
 
-    it('should be able to transfer token if from is the owner of token', async function () {
+    it('should be able to batch transfer token if from is the owner of token', async function () {
       const {
         polygonAssetERC721,
         users,
