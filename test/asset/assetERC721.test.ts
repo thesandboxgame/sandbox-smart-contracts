@@ -287,13 +287,9 @@ describe('AssetERC721.sol', function () {
         await mintAssetERC721(users[0].address, 1);
         await mintAssetERC721(users[0].address, 2);
 
-
-        await assetERC721['safeBatchTransferFrom(address,address,uint256[],bytes)'](
-          users[0].address,
-          users[1].address,
-          [1,2],
-          "0x"
-        );
+        await assetERC721[
+          'safeBatchTransferFrom(address,address,uint256[],bytes)'
+        ](users[0].address, users[1].address, [1, 2], '0x');
 
         expect(await assetERC721.balanceOf(users[1].address)).to.be.equal(2);
       });
@@ -327,15 +323,13 @@ describe('AssetERC721.sol', function () {
         await mintAssetERC721(users[0].address, 1);
         await mintAssetERC721(users[0].address, 2);
 
+        await assetERC721[
+          'safeBatchTransferFrom(address,address,uint256[],bytes)'
+        ](users[0].address, mockMarketPlace1.address, [1, 2], '0x');
 
-        await assetERC721['safeBatchTransferFrom(address,address,uint256[],bytes)'](
-          users[0].address,
-          mockMarketPlace1.address,
-          [1,2],
-          "0x"
-        );
-
-        expect(await assetERC721.balanceOf(mockMarketPlace1.address)).to.be.equal(2);
+        expect(
+          await assetERC721.balanceOf(mockMarketPlace1.address)
+        ).to.be.equal(2);
       });
 
       it('it should not approve blacklisted market places', async function () {

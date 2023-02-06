@@ -264,7 +264,7 @@ describe('AssetERC1155.sol', function () {
         10,
         users[0].address
       );
-      
+
       await assetERC1155.safeTransferFrom(
         users[0].address,
         users[1].address,
@@ -298,17 +298,21 @@ describe('AssetERC1155.sol', function () {
         10,
         users[0].address
       );
-      
+
       await assetERC1155.safeBatchTransferFrom(
         users[0].address,
         users[1].address,
-        [id1,id2],
-        [5,5],
+        [id1, id2],
+        [5, 5],
         '0x'
       );
 
-      expect(await assetERC1155.balanceOf(users[1].address, id1)).to.be.equal(5);
-      expect(await assetERC1155.balanceOf(users[1].address, id2)).to.be.equal(5);
+      expect(await assetERC1155.balanceOf(users[1].address, id1)).to.be.equal(
+        5
+      );
+      expect(await assetERC1155.balanceOf(users[1].address, id2)).to.be.equal(
+        5
+      );
     });
 
     it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
@@ -363,17 +367,21 @@ describe('AssetERC1155.sol', function () {
         10,
         users[0].address
       );
-      
+
       await assetERC1155.safeBatchTransferFrom(
         users[0].address,
         mockMarketPlace1.address,
-        [id1,id2],
-        [5,5],
+        [id1, id2],
+        [5, 5],
         '0x'
       );
 
-      expect(await assetERC1155.balanceOf(mockMarketPlace1.address, id1)).to.be.equal(5);
-      expect(await assetERC1155.balanceOf(mockMarketPlace1.address, id2)).to.be.equal(5);
+      expect(
+        await assetERC1155.balanceOf(mockMarketPlace1.address, id1)
+      ).to.be.equal(5);
+      expect(
+        await assetERC1155.balanceOf(mockMarketPlace1.address, id2)
+      ).to.be.equal(5);
     });
 
     it('it should not approve blacklisted market places', async function () {
