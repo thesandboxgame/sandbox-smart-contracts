@@ -129,6 +129,85 @@ describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () 
       ).to.be.equal(true);
     });
 
+    it('should be able to transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC721,
+        users,
+        mintAssetERC721,
+      } = await setupOperatorFilter();
+      await mintAssetERC721(users[0].address, 1);
+
+      await polygonAssetERC721['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        users[1].address,
+        1
+      );
+
+      expect(await polygonAssetERC721.balanceOf(users[1].address)).to.be.equal(
+        1
+      );
+    });
+
+    it('should be able to transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC721,
+        users,
+        mintAssetERC721,
+      } = await setupOperatorFilter();
+      await mintAssetERC721(users[0].address, 1);
+      await mintAssetERC721(users[0].address, 2);
+
+
+      await polygonAssetERC721['safeBatchTransferFrom(address,address,uint256[],bytes)'](
+        users[0].address,
+        users[1].address,
+        [1,2],
+        "0x"
+      );
+
+      expect(await polygonAssetERC721.balanceOf(users[1].address)).to.be.equal(2);
+    });
+
+    it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC721,
+        users,
+        mintAssetERC721,
+      } = await setupOperatorFilter();
+      await mintAssetERC721(users[0].address, 1);
+      await polygonAssetERC721['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        1
+      );
+
+      expect(
+        await polygonAssetERC721.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(1);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC721,
+        users,
+        mintAssetERC721,
+      } = await setupOperatorFilter();
+      await mintAssetERC721(users[0].address, 1);
+      await mintAssetERC721(users[0].address, 2);
+
+
+      await polygonAssetERC721['safeBatchTransferFrom(address,address,uint256[],bytes)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        [1,2],
+        "0x"
+      );
+
+      expect(await polygonAssetERC721.balanceOf(mockMarketPlace1.address)).to.be.equal(2);
+    });
+
     it('it should not approve blacklisted market places', async function () {
       const {mockMarketPlace1, users} = await setupOperatorFilter();
 

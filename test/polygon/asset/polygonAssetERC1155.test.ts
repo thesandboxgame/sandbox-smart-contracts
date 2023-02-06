@@ -1381,6 +1381,7 @@ describe('PolygonAssetERC1155.sol', function () {
         await operatorFilterRegistry.subscriptionOf(polygonAssetERC1155.address)
       ).to.be.equal(operatorFilterSubscription.address);
     });
+
     it('should have market places blacklisted', async function () {
       const {
         mockMarketPlace1,
@@ -1421,6 +1422,132 @@ describe('PolygonAssetERC1155.sol', function () {
           mockMarketPlace2CodeHash
         )
       ).to.be.equal(true);
+    });
+
+    it('should be able to transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      await polygonAssetERC1155.safeTransferFrom(
+        users[0].address,
+        users[1].address,
+        id,
+        5,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(5);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      
+      await polygonAssetERC1155.safeBatchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1,id2],
+        [5,5],
+        '0x'
+      );
+
+      expect(await polygonAssetERC1155.balanceOf(users[1].address, id1)).to.be.equal(5);
+      expect(await polygonAssetERC1155.balanceOf(users[1].address, id2)).to.be.equal(5);
+    });
+
+    it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      await polygonAssetERC1155.safeTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        id,
+        5,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id)
+      ).to.be.equal(5);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      
+      await polygonAssetERC1155.safeBatchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1,id2],
+        [5,5],
+        '0x'
+      );
+
+      expect(await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id1)).to.be.equal(5);
+      expect(await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id2)).to.be.equal(5);
     });
 
     it('it should not approve blacklisted market places', async function () {
