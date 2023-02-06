@@ -5,6 +5,12 @@ import {IAssetERC721} from "../common/interfaces/IAssetERC721.sol";
 import {IAssetERC1155} from "../common/interfaces/IAssetERC1155.sol";
 
 contract MockMarketPlace3 {
+    bytes4 private constant ERC721_IS_RECEIVER = 0x150b7a02;
+    bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
+    bytes4 private constant ERC1155_IS_RECEIVER = 0x4e2312e0;
+    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
     /// @param asset the contract address on which the token transfer will take place
     /// @param from address from which tokens are transfered.
@@ -69,5 +75,38 @@ contract MockMarketPlace3 {
         bytes memory data
     ) external {
         IAssetERC721(asset).safeBatchTransferFrom(from, to, ids, data);
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
+        return ERC1155_RECEIVED;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
+    ) external pure returns (bytes4) {
+        return ERC1155_BATCH_RECEIVED;
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
+        return ERC721_RECEIVED;
+    }
+
+    function supportsInterface(bytes4 _interfaceId) external pure returns (bool) {
+        return _interfaceId == 0x01ffc9a7 || _interfaceId == ERC1155_IS_RECEIVER || _interfaceId == ERC721_IS_RECEIVER;
     }
 }
