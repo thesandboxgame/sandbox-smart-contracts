@@ -9,13 +9,23 @@ import {
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../../../royalties/IEIP2981MultiReceiverRoyaltyClonable.sol";
+import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/MultiReceiverRoyaltyOverrideCore.sol";
+import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import "@manifoldxyz/royalty-registry-solidity/contracts/IRoyaltyRegistry.sol";
 
 /// @title This contract is for AssetERC1155 which can be minted by a minter role.
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
 /// @dev This contract supports meta transactions.
+/// @dev This contract implements a custom version of EIP2981MultiReceiverRoyaltyClonable
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererUpgradeable {
+contract PolygonAssetERC1155 is
+    AssetBaseERC1155,
+    IChildToken,
+    OperatorFiltererUpgradeable,
+    EIP2981MultiReceiverRoyaltyMultiReceiverOverrideCore,
+    IEIP2981MultiReceiverRoyaltyClonable
+{
     address public _childChainManager;
 
     function initialize(
@@ -25,12 +35,19 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererU
         address childChainManager,
         IAssetERC721 polygonAssetERC721,
         uint8 chainIndex,
-        address subscription
+        address subscription,
+        address payable royaltySplitterCloneable,
+        uint16 defaultBps,
+        Recipient[] memory defaultRecipients,
+        address initialOwner
     ) external initializer {
         require(address(childChainManager) != address(0), "PolygonAssetERC1155Tunnel: childChainManager can't be zero");
         init(trustedForwarder, admin, bouncerAdmin, polygonAssetERC721, chainIndex);
         _childChainManager = childChainManager;
         __OperatorFilterer_init(subscription, true);
+        _royaltySplitterCloneable = royaltySplitterCloneable;
+        // Initialize with default royalties
+        _setDefaultRoyalty(defaultBps, defaultRecipients);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -178,6 +195,18 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererU
     /// @param id the id of the asset whose  metadata hash has to be returned
     function metadataHash(uint256 id) external view returns (bytes32) {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
+    }
+
+    /// @dev based on @manifoldxyz. See {IEIP2981MultiReceiverRoyaltyOverride-setTokenRoyalties}
+    function setTokenRoyalties(TokenRoyaltyConfig[] calldata royaltyConfigs) external override {
+        require(_admin == _msgSender(), "!AUTHORIZED");
+        _setTokenRoyalties(royaltyConfigs);
+    }
+
+    /// @dev based on @manifoldxyz. See {IEIP2981MultiReceiverRoyaltyOverride-setDefaultRoyalty}
+    function setDefaultRoyalty(uint16 bps, Recipient[] calldata recipients) external override {
+        require(_admin == _msgSender(), "!AUTHORIZED");
+        _setDefaultRoyalty(bps, recipients);
     }
 
     function _allocateIds(
