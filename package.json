@@ -14,7 +14,8 @@
   ],
   "resolutions": {
     "websocket": "1.0.32",
-    "@manifoldxyz/royalty-registry-solidity/@openzeppelin/contracts": "npm:@openzeppelin/contracts@4.8.0"
+    "@manifoldxyz/royalty-registry-solidity/@openzeppelin/contracts": "npm:@openzeppelin/contracts@4.8.0",
+    "@manifoldxyz/royalty-registry-solidity/@openzeppelin/contracts-upgradeable": "npm:@openzeppelin/contracts-upgradeable@4.8.0"
   },
   "devDependencies": {
     "@codechecks/client": "^0.1.10",
