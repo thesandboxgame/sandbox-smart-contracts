@@ -7,7 +7,7 @@ import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IPolygonAssetERC1155.sol";
 
-/// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
+/// @notice TEST EST Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     uint32 public numberOfGemsBurnPerAsset = 1;
     uint32 public numberOfCatalystBurnPerAsset = 1;
