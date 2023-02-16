@@ -22,7 +22,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     address private admin;
 
     event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);
-    event TunnelLandsMigratedWithWithdraw(OwnerWithLandIds[] _ownerWithLandIds);
+    event TunnelLandsMigratedWithWithdraw(OwnerWithLandIds _ownerWithLandIds);
     event TunnelQuadsMigrated(
         address indexed oldLandTunnel,
         address indexed newLandTunnel,
@@ -30,10 +30,18 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         uint256[] x,
         uint256[] y
     );
+    event AdminChanged(address _newAdmin);
 
     modifier isAdmin() {
         require(admin == msg.sender, "!AUTHORISED");
         _;
+    }
+
+    /// @notice changes admin to new admin
+    /// @param _newAdmin the new admin to be set
+    function changeAdmin(address _newAdmin) external isAdmin {
+        admin = _newAdmin;
+        emit AdminChanged(_newAdmin);
     }
 
     constructor(
@@ -56,33 +64,35 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit TunnelLandsMigrated(oldLandTunnel, newLandTunnel, ids);
     }
 
-    /// @dev Fetches all locked land ids to this contract and withdraws again through the new tunnel
+    /// @dev Fetches locked land ids to this contract and withdraws again through the new tunnel
     /// @notice This method needs super operator role to execute
-    /// @param _ownerWithLandIds array of struct containing token owners with their land ids
-    function migrateToTunnelWithWithdraw(OwnerWithLandIds[] memory _ownerWithLandIds) external isAdmin {
-        uint256 numOfOwners = _ownerWithLandIds.length;
-        polygonLand.setApprovalForAll(newLandTunnel, true);
+    /// @param _ownerWithLandIds struct containing token owner with their land ids
+    function migrateToTunnelWithWithdraw(OwnerWithLandIds memory _ownerWithLandIds) external isAdmin {
         // check for gas limits based on the number of locked tokens
-        for (uint256 i = 0; i < numOfOwners; i++) {
-            // Fetch locked tokens to this contract address
-            polygonLand.batchTransferQuad(
-                oldLandTunnel,
-                address(this),
-                _ownerWithLandIds[i].sizes,
-                _ownerWithLandIds[i].x,
-                _ownerWithLandIds[i].y,
-                "0x"
-            );
-            // Withdraw tokens to L1
-            IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(
-                _ownerWithLandIds[i].owner,
-                _ownerWithLandIds[i].sizes,
-                _ownerWithLandIds[i].x,
-                _ownerWithLandIds[i].y,
-                "0x"
-            );
-        }
+        // Fetch locked tokens to this contract address
+        polygonLand.batchTransferQuad(
+            oldLandTunnel,
+            address(this),
+            _ownerWithLandIds.sizes,
+            _ownerWithLandIds.x,
+            _ownerWithLandIds.y,
+            "0x"
+        );
+        // Withdraw tokens to L1
+        IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(
+            _ownerWithLandIds.owner,
+            _ownerWithLandIds.sizes,
+            _ownerWithLandIds.x,
+            _ownerWithLandIds.y,
+            "0x"
+        );
+
         emit TunnelLandsMigratedWithWithdraw(_ownerWithLandIds);
+    }
+
+    ///@dev approves New Land Tunnel to transfer Lands on behalf of this contract
+    function approveNewLandTunnel() external {
+        polygonLand.setApprovalForAll(newLandTunnel, true);
     }
 
     /// @dev Transfers all the passed quads from the old land tunnel to the new land tunnel

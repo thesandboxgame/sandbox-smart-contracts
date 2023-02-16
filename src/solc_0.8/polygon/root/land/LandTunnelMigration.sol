@@ -20,10 +20,18 @@ contract LandTunnelMigration {
         uint256[] x,
         uint256[] y
     );
+    event AdminChanged(address _newAdmin);
 
     modifier isAdmin() {
         require(admin == msg.sender, "!AUTHORISED");
         _;
+    }
+
+    /// @notice changes admin to new admin
+    /// @param _newAdmin the new admin to be set
+    function changeAdmin(address _newAdmin) external isAdmin {
+        admin = _newAdmin;
+        emit AdminChanged(_newAdmin);
     }
 
     constructor(
