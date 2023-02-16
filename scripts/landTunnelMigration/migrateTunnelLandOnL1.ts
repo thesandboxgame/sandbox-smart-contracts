@@ -3,11 +3,29 @@
  *  - yarn execute <NETWORK> ./scripts/landTunnelMigration/migrateTunnelLandOnL1.ts
  */
 import fs from 'fs-extra';
-import {ethers, getNamedAccounts} from 'hardhat';
+import {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} from 'defender-relay-client/lib/ethers';
+
+const credentials = {
+  apiKey: process.env.GOERLI_RELAYER_API_KEY || '',
+  apiSecret: process.env.GOERLI_RELAYER_API_SECRET || '',
+};
+const provider = new DefenderRelayProvider(credentials);
+const signer = new DefenderRelaySigner(credentials, provider, {speed: 'fast'});
+
+import {ethers} from 'hardhat';
 
 const LandTunnelTokenConfig = JSON.parse(
   fs.readFileSync('./tunnel_land_token_config.json').toString()
 );
+
+interface Quad {
+  size: number;
+  x: number;
+  y: number;
+}
 
 const tokensSnapshotL1 = LandTunnelTokenConfig.tokenOnLayer1;
 const quads3x3 = LandTunnelTokenConfig.quads3x3OnLayer1;
@@ -15,31 +33,31 @@ const quads6x6 = LandTunnelTokenConfig.quads6x6OnLayer1;
 const quads12x12 = LandTunnelTokenConfig.quads12x12OnLayer1;
 const quads24x24 = LandTunnelTokenConfig.quads24x24OnLayer1;
 
-const maxIdInTransaction = 20;
-const max3x3QuadsInTransaction = 20;
-const max6x6QuadsInTransaction = 20;
-const max12x12QuadsInTransaction = 20;
-const max24x24QuadsInTransaction = 20;
+const maxIdInTransaction = 1490;
+const max3x3QuadsInTransaction = 160;
+const max6x6QuadsInTransaction = 40;
+const max12x12QuadsInTransaction = 10;
+const max24x24QuadsInTransaction = 3;
 
 void (async () => {
-  const {deployer} = await getNamedAccounts();
   const landTunnelMigration = await ethers.getContract('LandTunnelMigration');
-  const landTunnelMigrationAsAdmin = await landTunnelMigration.connect(
-    ethers.provider.getSigner(deployer)
-  );
-  let indexIds = 0;
-  const tokenIdsOnL1Length = tokensSnapshotL1.length;
-  const numberOfCallsForIds = Math.ceil(
-    tokenIdsOnL1Length / maxIdInTransaction
-  );
+  const landTunnelMigrationAsRelayer = landTunnelMigration.connect(signer);
 
-  for (let i = 0; i < numberOfCallsForIds; i++) {
-    const argument = tokensSnapshotL1.slice(
-      indexIds,
-      indexIds + maxIdInTransaction
+  if (tokensSnapshotL1.length > 0) {
+    let indexIds = 0;
+    const tokenIdsOnL1Length = tokensSnapshotL1.length;
+    const numberOfCallsForIds = Math.ceil(
+      tokenIdsOnL1Length / maxIdInTransaction
     );
-    await landTunnelMigrationAsAdmin.migrateLandsToTunnel(argument);
-    indexIds = indexIds + maxIdInTransaction;
+
+    for (let i = 0; i < numberOfCallsForIds; i++) {
+      const argument = tokensSnapshotL1.slice(
+        indexIds,
+        indexIds + maxIdInTransaction
+      );
+      await migrateLandToTunnel(argument);
+      indexIds = indexIds + maxIdInTransaction;
+    }
   }
 
   if (quads3x3.length > 0) {
@@ -53,15 +71,7 @@ void (async () => {
         index3x3Quads,
         index3x3Quads + max3x3QuadsInTransaction
       );
-      const x: Array<number> = [];
-      const y: Array<number> = [];
-      const sizes: Array<number> = [];
-      for (let i = 0; i < argument.length; i++) {
-        x.push(argument[i].x);
-        y.push(argument[i].y);
-        sizes.push(argument[i].size);
-      }
-      await landTunnelMigrationAsAdmin.migrateQuadsToTunnel(sizes, x, y);
+      await migrateQuadToTunnel(argument, 3);
       index3x3Quads = index3x3Quads + max3x3QuadsInTransaction;
     }
   }
@@ -77,15 +87,7 @@ void (async () => {
         index6x6Quads,
         index6x6Quads + max6x6QuadsInTransaction
       );
-      const x: Array<number> = [];
-      const y: Array<number> = [];
-      const sizes: Array<number> = [];
-      for (let i = 0; i < argument.length; i++) {
-        x.push(argument[i].x);
-        y.push(argument[i].y);
-        sizes.push(argument[i].size);
-      }
-      await landTunnelMigrationAsAdmin.migrateQuadsToTunnel(sizes, x, y);
+      await migrateQuadToTunnel(argument, 6);
       index6x6Quads = index6x6Quads + max6x6QuadsInTransaction;
     }
   }
@@ -101,15 +103,7 @@ void (async () => {
         index12x12Quads,
         index12x12Quads + max12x12QuadsInTransaction
       );
-      const x: Array<number> = [];
-      const y: Array<number> = [];
-      const sizes: Array<number> = [];
-      for (let i = 0; i < argument.length; i++) {
-        x.push(argument[i].x);
-        y.push(argument[i].y);
-        sizes.push(argument[i].size);
-      }
-      await landTunnelMigrationAsAdmin.migrateQuadsToTunnel(sizes, x, y);
+      await migrateQuadToTunnel(argument, 12);
       index12x12Quads = index12x12Quads + max12x12QuadsInTransaction;
     }
   }
@@ -125,16 +119,31 @@ void (async () => {
         index24x24Quads,
         index24x24Quads + max24x24QuadsInTransaction
       );
-      const x: Array<number> = [];
-      const y: Array<number> = [];
-      const sizes: Array<number> = [];
-      for (let i = 0; i < argument.length; i++) {
-        x.push(argument[i].x);
-        y.push(argument[i].y);
-        sizes.push(argument[i].size);
-      }
-      await landTunnelMigrationAsAdmin.migrateQuadsToTunnel(sizes, x, y);
+      await migrateQuadToTunnel(argument, 24);
       index24x24Quads = index24x24Quads + max24x24QuadsInTransaction;
     }
+  }
+  // function to migrate Lands through Land migration contract on L1
+  async function migrateLandToTunnel(arr: Array<number>) {
+    console.log(
+      `Migrating ${arr.length} 1x1 land from old land tunnel to new land tunnel`
+    );
+    await landTunnelMigrationAsRelayer.migrateLandsToTunnel(arr);
+  }
+
+  // function to migrate Quads through Land migration contract on L1
+  async function migrateQuadToTunnel(arr: Array<Quad>, size: number) {
+    const x: Array<number> = [];
+    const y: Array<number> = [];
+    const sizes: Array<number> = [];
+    for (let i = 0; i < arr.length; i++) {
+      x.push(arr[i].x);
+      y.push(arr[i].y);
+      sizes.push(arr[i].size);
+    }
+    console.log(
+      `Migrating ${arr.length} ${size}x${size} quad from old land tunnel to new land tunnel`
+    );
+    await landTunnelMigrationAsRelayer.migrateQuadsToTunnel(sizes, x, y);
   }
 })();

@@ -5,7 +5,7 @@
 import fs from 'fs-extra';
 
 const tokensSnapshotL1 = JSON.parse(
-  fs.readFileSync('./tunnel_mainnet.json').toString()
+  fs.readFileSync('./tunnel-mainnet.json').toString()
 );
 const tokensSnapshotL2 = JSON.parse(
   fs.readFileSync('./tunnel-polygon.json').toString()

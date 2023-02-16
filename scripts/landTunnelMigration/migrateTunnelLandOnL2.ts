@@ -3,7 +3,18 @@
  *  - yarn execute <NETWORK> ./scripts/landTunnelMigration/migrateTunnelLandOnL2.ts
  */
 import fs from 'fs-extra';
-import {ethers, getNamedAccounts} from 'hardhat';
+import {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} from 'defender-relay-client/lib/ethers';
+const credentials = {
+  apiKey: process.env.MUMBAI_RELAYER_API_KEY || '',
+  apiSecret: process.env.MUMBAI_RELAYER_API_SECRET || '',
+};
+const provider = new DefenderRelayProvider(credentials);
+const signer = new DefenderRelaySigner(credentials, provider, {speed: 'fast'});
+
+import {ethers} from 'hardhat';
 
 const LandTunnelTokenConfig = JSON.parse(
   fs.readFileSync('./tunnel_land_token_config.json').toString()
@@ -21,37 +32,36 @@ const quads6x6 = LandTunnelTokenConfig.quads6x6OnLayer2;
 const quads12x12 = LandTunnelTokenConfig.quads12x12OnLayer2;
 const quads24x24 = LandTunnelTokenConfig.quads24x24OnLayer2;
 
-const maxIdsInTransaction = 20;
-const max3x3QuadsInTransaction = 20;
-const max6x6QuadsInTransaction = 20;
-const max12x12QuadsInTransaction = 20;
-const max24x24QuadsInTransaction = 20;
+const maxIdsInTransaction = 990;
+const max3x3QuadsInTransaction = 108;
+const max6x6QuadsInTransaction = 24;
+const max12x12QuadsInTransaction = 6;
+const max24x24QuadsInTransaction = 2;
 
 void (async () => {
-  const {deployer} = await getNamedAccounts();
-
   const PolygonLandTunnelMigration = await ethers.getContract(
     'PolygonLandTunnelMigration'
   );
-
-  const PolygonLandTunnelMigrationAsAdmin = PolygonLandTunnelMigration.connect(
-    ethers.provider.getSigner(deployer)
+  const polygonLandTunnelMigrationAsRelayer = PolygonLandTunnelMigration.connect(
+    signer
   );
 
-  let indexOfIds = 0;
+  if (uniqueLandsOnTunnelL2.length > 0) {
+    let indexOfIds = 0;
 
-  const uniqueLandsOnL2Length = uniqueLandsOnTunnelL2.length;
-  const numberOfCallsForIds =
-    uniqueLandsOnL2Length / maxIdsInTransaction == 0
-      ? uniqueLandsOnL2Length / maxIdsInTransaction
-      : Math.ceil(uniqueLandsOnL2Length / maxIdsInTransaction);
-  for (let i = 0; i < numberOfCallsForIds; i++) {
-    const argument = uniqueLandsOnTunnelL2.slice(
-      indexOfIds,
-      indexOfIds + maxIdsInTransaction
-    );
-    indexOfIds = indexOfIds + maxIdsInTransaction;
-    await migrateLandToTunnel(argument);
+    const uniqueLandsOnL2Length = uniqueLandsOnTunnelL2.length;
+    const numberOfCallsForIds =
+      uniqueLandsOnL2Length / maxIdsInTransaction == 0
+        ? uniqueLandsOnL2Length / maxIdsInTransaction
+        : Math.ceil(uniqueLandsOnL2Length / maxIdsInTransaction);
+    for (let i = 0; i < numberOfCallsForIds; i++) {
+      const argument = uniqueLandsOnTunnelL2.slice(
+        indexOfIds,
+        indexOfIds + maxIdsInTransaction
+      );
+      indexOfIds = indexOfIds + maxIdsInTransaction;
+      await migrateLandToTunnel(argument);
+    }
   }
 
   if (quads3x3.length > 0) {
@@ -67,7 +77,7 @@ void (async () => {
         indexOf3x3Quads + max3x3QuadsInTransaction
       );
       indexOf3x3Quads = indexOf3x3Quads + max3x3QuadsInTransaction;
-      await migrateQuadToTunnel(argument);
+      await migrateQuadToTunnel(argument, 3);
     }
   }
 
@@ -84,7 +94,7 @@ void (async () => {
         indexOf6x6Quads + max6x6QuadsInTransaction
       );
       indexOf6x6Quads = indexOf6x6Quads + max6x6QuadsInTransaction;
-      await migrateQuadToTunnel(argument);
+      await migrateQuadToTunnel(argument, 6);
     }
   }
 
@@ -101,7 +111,7 @@ void (async () => {
         indexOf12x12Quads + max12x12QuadsInTransaction
       );
       indexOf12x12Quads = indexOf12x12Quads + max12x12QuadsInTransaction;
-      await migrateQuadToTunnel(argument);
+      await migrateQuadToTunnel(argument, 12);
     }
   }
 
@@ -118,15 +128,20 @@ void (async () => {
         indexOf24x24Quads + max24x24QuadsInTransaction
       );
       indexOf24x24Quads = indexOf24x24Quads + max24x24QuadsInTransaction;
-      await migrateQuadToTunnel(argument);
+      await migrateQuadToTunnel(argument, 24);
     }
   }
+
   // function to migrate Lands through Land migration contract on L2
   async function migrateLandToTunnel(arr: Array<number>) {
-    await PolygonLandTunnelMigrationAsAdmin.migrateLandsToTunnel(arr);
+    console.log(
+      `Migrating ${arr.length} 1x1 land from old land tunnel to new land tunnel`
+    );
+    await polygonLandTunnelMigrationAsRelayer.migrateLandsToTunnel(arr);
   }
 
-  async function migrateQuadToTunnel(arr: Array<Quad>) {
+  // function to migrate Quads through Land migration contract on L2
+  async function migrateQuadToTunnel(arr: Array<Quad>, size: number) {
     const x: Array<number> = [];
     const y: Array<number> = [];
     const sizes: Array<number> = [];
@@ -135,6 +150,9 @@ void (async () => {
       y.push(arr[i].y);
       sizes.push(arr[i].size);
     }
-    await PolygonLandTunnelMigrationAsAdmin.migrateQuadsToTunnel(sizes, x, y);
+    console.log(
+      `Migrating ${arr.length} ${size}x${size} quad from old land tunnel to new land tunnel`
+    );
+    await polygonLandTunnelMigrationAsRelayer.migrateQuadsToTunnel(sizes, x, y);
   }
 })();
