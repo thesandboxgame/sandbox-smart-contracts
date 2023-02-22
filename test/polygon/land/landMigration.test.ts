@@ -776,14 +776,31 @@ describe('Land Migration', function () {
         true
       );
       await waitFor(
-        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {
-            owner: landHolder.address,
-            sizes: [size, size, size],
-            x: [x, x + 6, x + 12],
-            y: [y, y + 6, y + 12],
-          },
-        ])
+        deployer.MockPolygonLandTunnelMigration.approveNewLandTunnel()
+      );
+      await waitFor(
+        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
+          owner: landHolder.address,
+          sizes: [size],
+          x: [x],
+          y: [y],
+        })
+      );
+      await waitFor(
+        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
+          owner: landHolder.address,
+          sizes: [size],
+          x: [x + 6],
+          y: [y + 6],
+        })
+      );
+      await waitFor(
+        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
+          owner: landHolder.address,
+          sizes: [size],
+          x: [x + 12],
+          y: [y + 12],
+        })
       );
       expect(
         await PolygonLand.balanceOf(MockPolygonLandTunnelV2.address)
@@ -842,15 +859,18 @@ describe('Land Migration', function () {
         MockPolygonLandTunnelMigration.address,
         true
       );
+
+      await waitFor(
+        deployer.MockPolygonLandTunnelMigration.approveNewLandTunnel()
+      );
+
       await expect(
-        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {
-            owner: landHolder.address,
-            sizes: [size, size, size],
-            x: [x, x + 6, x + 12],
-            y: [y, y + 6, y + 12],
-          },
-        ])
+        deployer.MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
+          owner: landHolder.address,
+          sizes: [size],
+          x: [x],
+          y: [y],
+        })
       ).to.be.revertedWith('not owner of all sub quads nor parent quads');
     });
 
@@ -917,15 +937,16 @@ describe('Land Migration', function () {
         MockPolygonLandTunnelMigration.address,
         true
       );
+      await waitFor(
+        deployer.MockPolygonLandTunnelMigration.approveNewLandTunnel()
+      );
       await expect(
-        users[0].MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw([
-          {
-            owner: landHolder.address,
-            sizes: [size, size, size],
-            x: [x, x + 6, x + 12],
-            y: [y, y + 6, y + 12],
-          },
-        ])
+        users[0].MockPolygonLandTunnelMigration.migrateToTunnelWithWithdraw({
+          owner: landHolder.address,
+          sizes: [size, size, size],
+          x: [x],
+          y: [y],
+        })
       ).to.be.revertedWith('!AUTHORISED');
     });
   });
