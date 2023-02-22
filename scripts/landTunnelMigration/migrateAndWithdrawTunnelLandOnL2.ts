@@ -56,7 +56,8 @@ void (async () => {
     );
   }
 
-  // await PolygonLandTunnelMigrationAsRelayer.approveNewLandTunnel();
+  const tnx = await PolygonLandTunnelMigrationAsRelayer.approveNewLandTunnel();
+  await tnx.wait();
 
   // function call to migrate and withdraw Land on L2
   for (let i = 0; i < ownerWithQuadSizeAndCoordinatesArr.length; i++) {
