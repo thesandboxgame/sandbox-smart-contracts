@@ -1,7 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {constants} from 'ethers';
-import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -117,10 +116,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         LandTunnelV2.address
       );
 
+      const admin = await deployments.read('Land', 'getAdmin');
+
       if (!isMinter) {
         await deployments.execute(
           'Land',
-          {from: deployer},
+          {from: admin},
           'setMinter',
           LandTunnelV2.address,
           true
@@ -138,4 +139,3 @@ func.dependencies = [
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
-func.skip = skipUnlessTest;
