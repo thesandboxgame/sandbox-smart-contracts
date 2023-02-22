@@ -119,5 +119,8 @@
   "bugs": {
     "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
   },
-  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme"
+  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
+  "dependencies": {
+    "defender-relay-client": "^1.38.0"
+  }
 }
