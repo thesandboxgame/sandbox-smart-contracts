@@ -18,10 +18,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
-    metadataUrl = 'https://contracts.sandbox.game/HellsKitchen-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/hells-kitchen-unrevealed/';
   } else {
     metadataUrl =
-      'https://contracts-demo.sandbox.game/HellsKitchen-unrevealed/';
+      'https://contracts-demo.sandbox.game/hells-kitchen-unrevealed/';
   }
 
   await deploy('HellsKitchen', {
