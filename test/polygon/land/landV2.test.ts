@@ -655,7 +655,29 @@ describe('MockLandV2WithMint.sol', function () {
       ).to.be.revertedWith('!AUTHORIZED');
     });
 
-    it('should revert if to address zero', async function () {
+    it('should revert for transfer if to address zero', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await landOwners[0].MockLandV2WithMint.mintQuad(
+        landOwners[0].address,
+        3,
+        3,
+        3,
+        bytes
+      );
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
+          zeroAddress,
+          3,
+          3,
+          3,
+          bytes
+        )
+      ).to.be.revertedWith('to is zero address');
+    });
+
+    it('should revert for mint if to address zero', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 

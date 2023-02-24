@@ -4,6 +4,7 @@ import {setupLandTunnelV2} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
+import {zeroAddress} from '../../land/fixtures';
 
 describe('PolygonLand', function () {
   describe('Land <> PolygonLand: Transfer', function () {
@@ -190,6 +191,38 @@ describe('PolygonLand', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
           plotCount
         );
+      });
+
+      it('should be able to transfer land through tunnel if to is zeroAddress', async function () {
+        const {
+          Land,
+          landMinter,
+          users,
+          LandTunnelV2,
+        } = await setupLandTunnelV2();
+        const landHolder = users[0];
+        const size = 1;
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(LandTunnelV2.address, true);
+
+        await expect(
+          landHolder.LandTunnelV2.batchTransferQuadToL2(
+            zeroAddress,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).to.be.revertedWith("can't send to zero address");
       });
 
       it('should be able to transfer 1x1 Land', async function () {
@@ -875,6 +908,69 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
         expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(0);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+      });
+
+      it('should be able to transfer land through tunnel if to is zeroAddress', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          PolygonLand,
+          MockPolygonLandTunnelV2,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const size = 1;
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnelV2.address)).to
+          .be.true;
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [size],
+          [x],
+          [y],
+          bytes
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(
+          plotCount
+        );
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          plotCount
+        );
+
+        // Transfer to L2 Tunnel
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        await expect(
+          landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+            zeroAddress,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).to.revertedWith("can't send to zero address");
       });
 
       it('should be able to transfer 1x1 Land', async function () {

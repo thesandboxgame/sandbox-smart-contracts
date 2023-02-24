@@ -490,6 +490,23 @@ describe('LandV3', function () {
       ).to.be.revertedWith('to is zero address');
     });
 
+    it('should revert for transfer when to is zeroAddress(mintAndTransferQuad)', async function () {
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+      await mintQuad(landAdmin, 6, 0, 0);
+
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(landAdmin))
+          .mintAndTransferQuad(zeroAddress, 3, 0, 0, '0x')
+      ).to.be.revertedWith('to is zero address');
+    });
+
     it('should revert when signer is not a minter', async function () {
       const {landContract, getNamedAccounts, ethers} = await setupLand();
       const {deployer} = await getNamedAccounts();
