@@ -4,7 +4,7 @@ import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {randomBigNumber} from '../../sandRewardPool/utils';
 
 export const ContributionRulesSetup = withSnapshot([], async function (hre) {
-  const contractName = 'ContributionRules';
+  const contractName = 'ContributionRulesV2';
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
   const [admin, other] = await getUnnamedAccounts();
@@ -131,11 +131,11 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
     );
   }
 
-  await deployments.deploy('ERC20RewardPool', {
+  await deployments.deploy('ERC20RewardPoolV2', {
     from: deployer,
     args: [stakeToken.address, rewardToken.address, trustedForwarder.address],
   });
-  const contract = await ethers.getContract('ERC20RewardPool', deployer);
+  const contract = await ethers.getContract('ERC20RewardPoolV2', deployer);
   const totalRewardMinted = toWei(10000);
   await rewardToken.mint(contract.address, totalRewardMinted);
   const others = await getUnnamedAccounts();
@@ -164,7 +164,7 @@ export const setupERC20RewardPoolTest = withSnapshot([], async function (hre) {
   };
 
   const contractAsOther = await ethers.getContract(
-    'ERC20RewardPool',
+    'ERC20RewardPoolV2',
     others[1]
   );
 

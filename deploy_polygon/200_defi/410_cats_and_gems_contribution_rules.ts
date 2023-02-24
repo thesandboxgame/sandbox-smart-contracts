@@ -12,7 +12,7 @@ const func: DeployFunction = async function (
   for (const cat of catalysts) {
     await deployments.deploy(`${cat.symbol}_ContributionRules`, {
       from: deployer,
-      contract: 'ContributionRules',
+      contract: 'ContributionRulesV2',
       log: true,
       // skipIfAlreadyDeployed: true,
     });
@@ -21,7 +21,7 @@ const func: DeployFunction = async function (
   for (const gem of gems) {
     await deployments.deploy(`${gem.symbol}_ContributionRules`, {
       from: deployer,
-      contract: 'ContributionRules',
+      contract: 'ContributionRulesV2',
       log: true,
       // skipIfAlreadyDeployed: true,
     });

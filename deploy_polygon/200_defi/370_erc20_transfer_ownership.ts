@@ -7,9 +7,9 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts, ethers} = hre;
   const {operationsAdmin, deployer} = await getNamedAccounts();
 
-  const rewardsCalculator = await ethers.getContract('ERC20RewardCalculator');
-  const contributionRules = await ethers.getContract('ContributionRules');
-  const sandPool = await ethers.getContract('ERC20RewardPool');
+  const rewardsCalculator = await ethers.getContract('ERC20RewardCalculatorV2');
+  const contributionRules = await ethers.getContract('ContributionRulesV2');
+  const sandPool = await ethers.getContract('ERC20RewardPoolV2');
 
   // get currentAdmin - sandpool
   const sandPoolAdmin = await sandPool.owner();
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (
   if (sandPoolAdmin.toLowerCase() !== operationsAdmin.toLowerCase()) {
     await deployments.catchUnknownSigner(
       deployments.execute(
-        'ERC20RewardPool',
+        'ERC20RewardPoolV2',
         {from: sandPoolAdmin, log: true},
         'transferOwnership',
         operationsAdmin
@@ -33,7 +33,7 @@ const func: DeployFunction = async function (
   if (contribRulesAdmin.toLowerCase() !== operationsAdmin.toLowerCase()) {
     await deployments.catchUnknownSigner(
       deployments.execute(
-        'ContributionRules',
+        'ContributionRulesV2',
         {from: contribRulesAdmin, log: true},
         'transferOwnership',
         operationsAdmin
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (
   if (await rewardsCalculator.hasRole(ADMIN_ROLE, deployer)) {
     if (!(await rewardsCalculator.hasRole(ADMIN_ROLE, operationsAdmin))) {
       await deployments.execute(
-        'ERC20RewardCalculator',
+        'ERC20RewardCalculatorV2',
         {from: deployer, log: true},
         'grantRole',
         ADMIN_ROLE,
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (
     // we need to ensure that sandAdmin has role before renounce deployer
     if (await rewardsCalculator.hasRole(ADMIN_ROLE, operationsAdmin)) {
       await deployments.execute(
-        'ERC20RewardCalculator',
+        'ERC20RewardCalculatorV2',
         {from: deployer, log: true},
         'renounceRole',
         ADMIN_ROLE,

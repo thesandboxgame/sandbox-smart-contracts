@@ -1,0 +1,21 @@
+Audience
+
+The intended audience for .md documentation is auditors, internal developers and external developer contributors.
+
+Features
+
+Include a summary of the PURPOSE of the smart contract, ensuring to describe any COMMERCIAL INTENT
+List any ASSUMPTIONS that have been made about how the smart contract will be used
+Who are the INTENDED USERS of the smart contract
+What are the privileged / admin ROLES
+What are the FEATURES of the smart contract
+
+Methods
+
+Describe as a minimum all the external and public methods used in the smart contract and their parameters
+Be sure to describe the intended usage of the methods and any limitations
+
+Links
+
+Include link(s) here to test files that help to demonstrate the intended usage of the smart contract functions
+Include link(s) here to image files that show the smart contract transaction flow
