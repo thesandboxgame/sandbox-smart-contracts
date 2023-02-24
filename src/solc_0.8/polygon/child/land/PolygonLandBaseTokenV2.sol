@@ -168,6 +168,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         bytes calldata data
     ) external virtual {
         require(isMinter(msg.sender), "!AUTHORIZED");
+        require(to != address(0), "to is zero address");
 
         if (exists(size, x, y) == true) {
             _transferQuad(msg.sender, to, size, x, y);
@@ -328,8 +329,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 y,
         bytes memory data
     ) internal {
-        require(to != address(0), "to is zero address");
-
         (uint256 layer, , ) = _getQuadLayer(size);
         uint256 quadId = _getQuadId(layer, x, y);
 

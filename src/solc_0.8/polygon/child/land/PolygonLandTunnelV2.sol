@@ -79,6 +79,7 @@ contract PolygonLandTunnelV2 is
         uint256[] calldata ys,
         bytes memory data
     ) external whenNotPaused() {
+        require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
 
         uint32 gasLimit = 0;

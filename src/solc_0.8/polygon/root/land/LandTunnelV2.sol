@@ -72,6 +72,7 @@ contract LandTunnelV2 is
         uint256[] memory ys,
         bytes memory data
     ) public whenNotPaused() {
+        require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         transferringToL2 = true;
         rootToken.batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);

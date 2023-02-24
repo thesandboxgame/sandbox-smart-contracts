@@ -24,9 +24,9 @@ contract MockLandV2WithMint is PolygonLandBaseTokenV2 {
         uint256 y,
         bytes calldata data
     ) external override {
-        bool exist = exists(size, x, y);
+        require(to != address(0), "to is zero address");
 
-        if (exist == true) {
+        if (exists(size, x, y)) {
             _transferQuad(msg.sender, to, size, x, y);
             _numNFTPerAddress[msg.sender] -= size * size;
             _numNFTPerAddress[to] += size * size;
