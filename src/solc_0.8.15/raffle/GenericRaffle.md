@@ -333,10 +333,7 @@ function _checkPersonalizationSignature(
 ```Solidity
 function _baseURI() internal view virtual override returns (string memory) 
 ```
-
- * get base TokenURI
- * returns baseTokenURI
- * returns baseTokenURI
+ * get base TokenURI (returns baseTokenURI)
 
 ----
 ```Solidity
@@ -345,7 +342,7 @@ function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpg
 
  * ERC2771 compatible msg.data getter
  * returns `ERC2771HandlerUpgradeable._msgData()`
- * returns msg.data
+
 ----
 ```Solidity
 function _msgSender()
@@ -357,7 +354,7 @@ function _msgSender()
 
  * ERC2771 compatible msg.sender getter
  * returns `ERC2771HandlerUpgradeable._msgSender()`
- * returns sender `msg.sender` equivalent
+ 
 ----
 ```Solidity
 function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) 
