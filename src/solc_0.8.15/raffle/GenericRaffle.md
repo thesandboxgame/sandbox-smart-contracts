@@ -7,8 +7,6 @@ Documentation is oriented for auditors, internal developers and external develop
 
 Writing a generic raffle Smart Contract with minimal ERC721 features / using an existing trustworthy baseline to minimize the risks as we don't plan on auditing the smart contract for each collection launch when possible. 
 
-The only configurable aspect of a collection inheriting the generic raffle should be the number of items in the collection
-
 The regular raffle flow includes following phases:
 - whitelist sale
 - public sale
@@ -24,12 +22,13 @@ Deployment:
 
 Collection made with this and released by Sandbox are under [THE SANDBOX PREMIUM NFT TERMS OF USE](https://www.sandbox.game/en/premium-nft-terms-of-use/) and commercial intent.
 
-The contract is [OpenSea royalty compliant ](https://thesandboxgame.notion.site/Sandbox-s-OpenSea-Operator-Filter-Registry-Implementation-3338f625dc4b4a4b9f07f925d680842d);
-subsequently, all extending contracts are also compliant.
+The contract is [OpenSea royalty compliant ](https://thesandboxgame.notion.site/Sandbox-s-OpenSea-Operator-Filter-Registry-Implementation-3338f625dc4b4a4b9f07f925d680842d) subsequently, all extending contracts are also compliant.
 
 # Functions
 
 Contract functions should respect [order-of-functions solidity style guide](https://docs.soliditylang.org/en/v0.8.17/style-guide.html#order-of-functions)
+
+----
 
 ```Solidity
 constructor() {
@@ -120,7 +119,7 @@ function mint(
 ```Solidity
 function toggleSale() external onlyOwner
 ```
- * pause or unpause the contract. Emits the {SaleToggled} event
+ * pause or unpause the contract. Emits the `SaleToggled` event
 
 ----
 ```Solidity
@@ -133,7 +132,7 @@ function personalize(
 ```
 
  * personalize token traits
- * after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask; emits `Personalized` event
+ * after checks, it is reduced to `personalizationTraits[_tokenId] = _personalizationMask`; emits `Personalized` event
  * `_signatureId`: the ID of the provided signature
  * `_signature`: signing signature
  * `_tokenId`: what token to personalize
@@ -155,15 +154,15 @@ function setAllowedExecuteMint(address _address) external onlyOwner
 ```
 
  * sets which address is allowed to execute the mint function. Emits `AllowedExecuteMintSet` event
- * sets allowedToExecuteMint = _address; address can't be 0
+ * sets `allowedToExecuteMint = _address`; address can't be 0
  * `_address`: the address that will be allowed to set execute the mint function
 ----
 ```Solidity
 function setSandOwnerAddress(address _owner) external onlyOwner
 ```
 
- * saving locally the SAND token owner. Emits {SandOwnerSet} event
- * just sets sandOwner = _owner
+ * saving locally the SAND token owner. Emits `SandOwnerSet` event
+ * just sets `sandOwner = _owner`
  * `_owner`: new owner address to be saved
 ----
 
@@ -172,7 +171,7 @@ function setSignAddress(address _signAddress) external onlyOwner
 ```
 
  * sets the sign address. Emits `SignAddressSet` event
- * sets signAddress = _signAddress; address can't be 0
+ * sets `signAddress = _signAddress`; address can't be 0
  * `_signAddress`: new signer address to be set
 ----
 
@@ -181,9 +180,9 @@ function personalizationOf(uint256 _tokenId) external view returns (uint256)
 ```
 
  * get the personalization of the indicated tokenID
- * returns personalizationTraits[_tokenId]
+ * returns `personalizationTraits[_tokenId]`
  * `_tokenId`: the token ID to check
- * returns uint256 the personalization data as uint256
+ * returns the personalization data as `uint256`
 
 ----
 ```Solidity
@@ -210,7 +209,7 @@ function setBaseURI(string memory baseURI) public onlyOwner
 ```
 
  * sets the base token URI for the contract. Emits a `BaseURISet` event.
- * sets baseTokenURI = baseURI
+ * sets `baseTokenURI = baseURI`
  * `baseURI`: an URI that will be used as the base for token URI
 
 ----
@@ -230,6 +229,7 @@ function setApprovalForAll(address operator, bool approved)
     onlyAllowedOperatorApproval(operator)
 ```
  * See OpenZeppelin [IERC721-setApprovalForAll](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol#L105-L115)
+ * Calls super function as indicated by OpenSea registry filter logic
 
 ----
  ```Solidity
@@ -240,6 +240,7 @@ function approve(address operator, uint256 tokenId)
 ```
 
  * See OpenZeppelin [IERC721-approve](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol#L90-L103)
+ * Calls super function as indicated by OpenSea registry filter logic
 ----
 ```Solidity
 function transferFrom(
@@ -259,7 +260,7 @@ function safeTransferFrom(
 ```
 
  * See OpenZeppelin [IERC721-safeTransferFrom](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol#L56-L70)
-
+* Calls super function as indicated by OpenSea registry filter logic
 ----
 ```Solidity
 function safeTransferFrom(
@@ -270,6 +271,7 @@ function safeTransferFrom(
 ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) 
 ```
  * See OpenZeppelin [IERC721-safeTransferFrom](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol#L41-L54)
+ * Calls super function as indicated by OpenSea registry filter logic
 ----
 ```Solidity
 function price(uint256 _count) public view virtual returns (uint256) 
@@ -283,11 +285,8 @@ function price(uint256 _count) public view virtual returns (uint256)
 ```Solidity
 function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) 
 ```
-
- * returns the owner of the contract
- * returns OwnableUpgradeable.owner()
- * returns owner of current contract
-
+ * returns the owner of the contract (`OwnableUpgradeable.owner()`)
+ * Implementation also required by the inherited parent 
 ----
 ```Solidity
 function _checkSignature(
@@ -345,7 +344,7 @@ function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpg
 ```
 
  * ERC2771 compatible msg.data getter
- * returns ERC2771HandlerUpgradeable._msgData()
+ * returns `ERC2771HandlerUpgradeable._msgData()`
  * returns msg.data
 ----
 ```Solidity
