@@ -5,22 +5,32 @@ Documentation is oriented for auditors, internal developers and external develop
 
 # Description
 
-Writing a Smart Contract with minimal ERC721 features / using an existing trustworthy baseline to minimize the risks as we don't plan auditing children contracts, when possible. 
+Writing a generic raffle Smart Contract with minimal ERC721 features / using an existing trustworthy baseline to minimize the risks as we don't plan on auditing the smart contract for each collection launch when possible. 
+
+The only configurable aspect of a collection inheriting the generic raffle should be the number of items in the collection
+
+The regular raffle flow includes following phases:
+- whitelist sale
+- public sale
+- reveal
 
 Deployment:
-- Write smark contract and deployment scripts
+- Write smart contract and deployment scripts
 - Deploy to testnet (Mumbai)
 - Setup on OpenSea (testnet)
 - Provide deployment instructions for Polygon
 - Provide setup instructions for opensea (Polygon)
 
+
 Collection made with this and released by Sandbox are under [THE SANDBOX PREMIUM NFT TERMS OF USE](https://www.sandbox.game/en/premium-nft-terms-of-use/) and commercial intent.
 
-The contract is [OpenSea royalty compliant ](https://thesandboxgame.notion.site/Sandbox-s-OpenSea-Operator-Filter-Registry-Implementation-3338f625dc4b4a4b9f07f925d680842d).
-Subsequent all extending contracts are also compliant.
+The contract is [OpenSea royalty compliant ](https://thesandboxgame.notion.site/Sandbox-s-OpenSea-Operator-Filter-Registry-Implementation-3338f625dc4b4a4b9f07f925d680842d);
+subsequently, all extending contracts are also compliant.
 
-# Methods
- 
+# Functions
+
+Contract functions should respect [order-of-functions solidity style guide](https://docs.soliditylang.org/en/v0.8.17/style-guide.html#order-of-functions)
+
 ```Solidity
 constructor() {
     _disableInitializers();
@@ -74,7 +84,12 @@ function setupWave(
  * `_waveMaxTokensToBuy`: max tokens to buy, per wallet in a given wave
  * `_waveSingleTokenPrice`: the price to mint a token in a given wave. In SAND wei
 
-mapping(address => uint256) internal waveOwnerToClaimedCounts - should be reset with each wave start, keeps track of how many tokens were claimed in a wave by a particular wallet
+*Other observation*
+
+- `mapping(address => uint256) internal waveOwnerToClaimedCounts` - should be reset with each wave start, keeps track of how many tokens were claimed in a wave by a particular wallet
+- The operation should fail unless the sale wave is not paused
+- The operation should fail if `waveMaxTokens` is larger than the available supply
+- Should reset `waveOwnerToClaimedCounts`
 
 ----
 ```Solidity
@@ -90,6 +105,16 @@ function mint(
  * `_amount`: number of token to mint
  * `_signatureId`: signing signature ID
  * `_signature`: signing signature value
+
+*Other observations*
+- Custom mint operation similar to [Cyberkonz VX](https://etherscan.io/address/0x7ea3cca10668b8346aec0bf1844a49e995527c8b#code) - with fixed price plus limit check on the amount of tokens to mint
+- The amount of tokens is randomly chosen out of the remaining pool of tokens
+- Supports other Tokens for minting (we are using SAND)
+- Should fail if:
+  - `paused == true`
+  - the wave max number of tokens limit has been reached or if the total number of tokens in collection has been reached
+  - the amount is bigger than `waveMaxTokensToBuy - waveOwnerToClaimedCounts[wallet]`
+  - the price paid is not equal to the `amount * waveSingleTokenPrice`
 
 ----
 ```Solidity
@@ -114,6 +139,16 @@ function personalize(
  * `_tokenId`: what token to personalize
  * `_personalizationMask`: a mask where each bit has a custom meaning in-game
 
+*Other observations*
+- Personalization adds an extra phase for tweaking a few metadata fields before reveal
+- `personalize` stores into a `map(tokenId x bitmap personalizationMask)` the personalization information, if the wallet calling the operation is the owner of the tokenId. 
+- Signature is calculated similar to the current mint operation signature and includes the rest of the method parameters (walletId, tokenId, personalizationMask). 
+- This operation emita a custom Event that we listen for from the backend side.
+- for calculating the bitmap personalization mask
+  - The formula/algorithm is specifically tweaked for the collection’s personalizable traits.
+  - In a `256 uint` there can be a maximum of 32 traits personalized each with max `2^8=256` values.
+  - The trait order is important to be locked, we can choose an alphabetic sorting of the traits.
+- **This feature is not present/supported in most newly created Sandbox NFT collections**
 ----
 ```Solidity
 function setAllowedExecuteMint(address _address) external onlyOwner
@@ -365,6 +400,9 @@ event SaleToggled(bool _pause);
  * Event emitted when sale state was changed.
  * emitted when toggleSale is called
  * `_pause`: if the sale was was paused or not
+- Internally uses: `bool private paused` to keep track of the sale wave being paused/unpaused
+
+
 ----
 ```Solidity
 event Personalized(uint256 _tokenId, uint256 _personalizationMask);
