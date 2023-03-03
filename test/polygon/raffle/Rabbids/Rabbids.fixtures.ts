@@ -11,10 +11,13 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const setupRaffle = withSnapshot(['Rabbids'], async function (hre) {
+export const contractName = 'Rabbids';
+export const COLLECTION_MAX_SUPPLY = 2066;
+
+export const setupRaffle = withSnapshot([contractName], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();
 
-  const raffleRabbidsContract = await ethers.getContract('Rabbids');
+  const raffleCollectionContract = await ethers.getContract(contractName);
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -28,21 +31,21 @@ export const setupRaffle = withSnapshot(['Rabbids'], async function (hre) {
   );
 
   return {
-    raffleRabbidsContract,
+    raffleCollectionContract,
     sandContract,
     hre,
     getNamedAccounts,
     setupWave,
     signAuthMessageAs,
     transferSand,
-    mint: mintSetup(raffleRabbidsContract, sandContract),
+    mint: mintSetup(raffleCollectionContract, sandContract),
     personalizeSignature: validPersonalizeSignature,
     personalize: personalizeSetup(
-      raffleRabbidsContract,
+      raffleCollectionContract,
       validPersonalizeSignature
     ),
     personalizeInvalidSignature: personalizeSetup(
-      raffleRabbidsContract,
+      raffleCollectionContract,
       invalidPersonalizeSignature
     ),
   };
@@ -163,7 +166,7 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     signatureId: number,
     contractAddress: string,
     chainId: number,
-    price: string | number,
+    approvalAmount: string | number,
     amount: number
   ) => {
     const signature = await signAuthMessageAs(
@@ -181,7 +184,11 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     ]);
     const contract = sandContract.connect(ethers.provider.getSigner(address));
     return waitFor(
-      contract.approveAndCall(raffleContract.address, price, encodedData)
+      contract.approveAndCall(
+        raffleContract.address,
+        approvalAmount,
+        encodedData
+      )
     );
   };
 }
