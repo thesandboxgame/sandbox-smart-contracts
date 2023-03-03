@@ -166,9 +166,10 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     signatureId: number,
     contractAddress: string,
     chainId: number,
-    price: string | number,
+    approvalAmount: string | number,
     amount: number
   ) => {
+    // console.log("ABA: ", approvalAmount);
     const signature = await signAuthMessageAs(
       wallet,
       address,
@@ -184,7 +185,11 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     ]);
     const contract = sandContract.connect(ethers.provider.getSigner(address));
     return waitFor(
-      contract.approveAndCall(raffleContract.address, price, encodedData)
+      contract.approveAndCall(
+        raffleContract.address,
+        approvalAmount,
+        encodedData
+      )
     );
   };
 }
