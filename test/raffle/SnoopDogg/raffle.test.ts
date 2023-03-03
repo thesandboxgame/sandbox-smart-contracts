@@ -31,7 +31,7 @@ describe.skip('RaffleTheDoggies', function () {
     assert.equal(transferEvents.length, 1);
   });
 
-  it('should be able to mint 10_000 different tokens', async function () {
+  it('@skip-on-ci @skip-on-coverage should be able to mint 10_000 different tokens', async function () {
     const {
       raffleTheDoggiesContract,
       transferSand,
@@ -78,7 +78,7 @@ describe.skip('RaffleTheDoggies', function () {
     }
   });
 
-  it('should be able to mint 10_000 different tokens in 3 waves', async function () {
+  it('@skip-on-ci @skip-on-coverage should be able to mint 10_000 different tokens in 3 waves', async function () {
     const {
       raffleTheDoggiesContract,
       transferSand,
@@ -131,7 +131,7 @@ describe.skip('RaffleTheDoggies', function () {
     assert.equal(tokens.length, 10000);
   });
 
-  it('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
+  it('@skip-on-ci @skip-on-coverage should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleTheDoggiesContract,
       transferSand,
