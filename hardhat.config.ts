@@ -303,6 +303,11 @@ const config: HardhatUserConfig = {
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
     landMigrationBatchExecutor: 'ozdRelayer',
+    nftCollectionAdmin: {
+      default: 'sandAdmin',
+      mainnet: null,
+      polygon: '0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e',
+    },
   },
   networks: {
     /**

@@ -1,0 +1,6375 @@
+[
+  {
+    "sector": 46,
+    "lands": [
+      {
+        "coordinateX": -18,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 84,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": "9999"
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 105,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 102,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 102,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 99,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 96,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 96,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 94,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 93,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 86,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 83,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 77,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 74,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 73,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 69,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 68,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -32,
+        "coordinateY": 65,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 87,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 106,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 105,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 104,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 103,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 96,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 102,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 100,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 99,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 98,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 97,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 86,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 84,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 84,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 84,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 86,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 86,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 86,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 86,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 85,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 88,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 87,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 89,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 95,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 90,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 91,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 94,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 93,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 92,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 83,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 83,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 82,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 81,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 81,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 81,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 82,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 80,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 79,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 79,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 79,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 79,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 78,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 77,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 76,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 74,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 75,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 73,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 72,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -36,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -35,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -31,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -31,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -31,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -32,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -33,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -33,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -32,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -33,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 62,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 61,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 61,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 61,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 62,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 62,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 65,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -22,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 63,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -14,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -17,
+        "coordinateY": 64,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -11,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 66,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 68,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -7,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 71,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 70,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 69,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -10,
+        "coordinateY": 67,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 101,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 84,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -26,
+        "coordinateY": 105,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 105,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 105,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 103,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 103,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 100,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 98,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -19,
+        "coordinateY": 99,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -13,
+        "coordinateY": 100,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 96,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 96,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 95,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 92,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -8,
+        "coordinateY": 89,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -28,
+        "coordinateY": 87,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -25,
+        "coordinateY": 87,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 84,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 79,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -20,
+        "coordinateY": 79,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 82,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -29,
+        "coordinateY": 77,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 77,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 75,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 76,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 73,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 72,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 72,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 70,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -23,
+        "coordinateY": 68,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 71,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 67,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -34,
+        "coordinateY": 67,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -16,
+        "coordinateY": 65,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -9,
+        "coordinateY": 67,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      }
+    ],
+    "estates": [
+      {
+        "coordinateX": -24,
+        "coordinateY": 84,
+        "type": 3,
+        "lands": [
+          {
+            "coordinateX": -24,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 102,
+        "type": 2,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 105,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 106,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 107,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 96,
+        "type": 2,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -9,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -8,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -7,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 78,
+        "type": 2,
+        "lands": [
+          {
+            "coordinateX": -18,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 66,
+        "type": 2,
+        "lands": [
+          {
+            "coordinateX": -18,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 78,
+        "type": 2,
+        "lands": [
+          {
+            "coordinateX": -30,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 102,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -27,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -18,
+        "coordinateY": 102,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -18,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -18,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -17,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -16,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 93,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -30,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 93,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 94,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 95,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 72,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -30,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -33,
+        "coordinateY": 66,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -33,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -33,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -33,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 69,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -24,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 102,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -21,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 102,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 103,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 104,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 96,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -15,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 96,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 97,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 98,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 90,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -27,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 90,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 91,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 92,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 81,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -24,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 81,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -21,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 81,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 82,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 83,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 84,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 84,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 85,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 86,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 78,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 78,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 79,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 80,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 69,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 66,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -21,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 69,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -27,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -30,
+        "coordinateY": 63,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -30,
+            "coordinateY": 63,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 63,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 63,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 64,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 64,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 64,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -30,
+            "coordinateY": 65,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -29,
+            "coordinateY": 65,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -28,
+            "coordinateY": 65,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 99,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -27,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -24,
+        "coordinateY": 99,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -24,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 99,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 100,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -24,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -23,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -22,
+            "coordinateY": 101,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -12,
+        "coordinateY": 87,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -12,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 87,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 88,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -12,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -11,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -10,
+            "coordinateY": 89,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -15,
+        "coordinateY": 75,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -15,
+            "coordinateY": 75,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 75,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 75,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 76,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 76,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 76,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -15,
+            "coordinateY": 77,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -14,
+            "coordinateY": 77,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -13,
+            "coordinateY": 77,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -21,
+        "coordinateY": 72,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -21,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 72,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 73,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -21,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -20,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -19,
+            "coordinateY": 74,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -27,
+        "coordinateY": 66,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -27,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 66,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 67,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -27,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -26,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -25,
+            "coordinateY": 68,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      },
+      {
+        "coordinateX": -33,
+        "coordinateY": 69,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -33,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 69,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -33,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 70,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -33,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -32,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -31,
+            "coordinateY": 71,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      }
+    ]
+  }
+]

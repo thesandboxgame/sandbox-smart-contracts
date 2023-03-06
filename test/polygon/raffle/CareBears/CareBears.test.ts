@@ -41,7 +41,7 @@ describe('RaffleCareBears', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens', async function () {
+  it.skip('@skip-on-ci @skip-on-coverage should be able to mint 20_000 different tokens', async function () {
     const {
       raffleCareBearsContract,
       transferSand,
@@ -89,7 +89,7 @@ describe('RaffleCareBears', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens in 3 waves', async function () {
+  it.skip('@skip-on-ci @skip-on-coverage should be able to mint 20_000 different tokens in 3 waves', async function () {
     const {
       raffleCareBearsContract,
       transferSand,
@@ -143,7 +143,7 @@ describe('RaffleCareBears', function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('should be able to mint 20_000 different tokens in 3 waves in 3 txs', async function () {
+  it.skip('@skip-on-ci @skip-on-coverage should be able to mint 20_000 different tokens in 3 waves in 3 txs', async function () {
     const {
       raffleCareBearsContract,
       transferSand,
