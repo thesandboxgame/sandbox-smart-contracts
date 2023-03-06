@@ -182,7 +182,6 @@ describe(contractName, function () {
       }
     }
     assert.equal(tokens.length, COLLECTION_MAX_SUPPLY);
-
   });
 
   it('should be able to personalize with valid signature', async function () {
