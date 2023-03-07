@@ -6,6 +6,7 @@ import {
   setupLandV2,
   getId,
   zeroAddress,
+  setupOperatorFilter,
 } from './fixtures';
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -973,6 +974,1100 @@ describe('LandV3', function () {
       await mintQuad(landAdmin, 24, 24, 0);
 
       expect(await landV3Contract.balanceOf(landAdmin)).to.be.equal(576 * 2);
+    });
+  });
+
+  describe('OperatorFilterer', function () {
+    it('should be registered', async function () {
+      const {operatorFilterRegistry, landV3} = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.isRegistered(landV3.address)
+      ).to.be.equal(true);
+    });
+
+    it('should be subscribed to operator filterer subscription contract', async function () {
+      const {
+        operatorFilterRegistry,
+        operatorFilterSubscription,
+        landV3,
+      } = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.subscriptionOf(landV3.address)
+      ).to.be.equal(operatorFilterSubscription.address);
+    });
+
+    it('should be able to transfer land if from is the owner of token', async function () {
+      const {landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3.transferFrom(users[0].address, users[1].address, id);
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer land if from is the owner of token', async function () {
+      const {landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        users[1].address,
+        Number(id)
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer(with data) land if from is the owner of token', async function () {
+      const {landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3['safeTransferFrom(address,address,uint256,bytes)'](
+        users[0].address,
+        users[1].address,
+        id,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe batch transfer Land if from is the owner of token', async function () {
+      const {landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await landV3.safeBatchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+    });
+    it('should be able to batch transfer Land if from is the owner of token', async function () {
+      const {landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await landV3.batchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+    });
+
+    it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3.transferFrom(users[0].address, mockMarketPlace1.address, id);
+
+      expect(await landV3.balanceOf(mockMarketPlace1.address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        id
+      );
+
+      expect(await landV3.balanceOf(mockMarketPlace1.address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer(with data) token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await landV3['safeTransferFrom(address,address,uint256,bytes)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        id,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(mockMarketPlace1.address)).to.be.equal(1);
+    });
+
+    it('should be able to safe batch transfer Land if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await landV3.safeBatchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(mockMarketPlace1.address)).to.be.equal(2);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await landV3.batchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(mockMarketPlace1.address)).to.be.equal(2);
+    });
+
+    it('it should not approve blacklisted market places', async function () {
+      const {mockMarketPlace1, landV3} = await setupOperatorFilter();
+      await expect(landV3.approve(mockMarketPlace1.address, 1)).to.be.reverted;
+    });
+
+    it('it should not approveFor blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].landV3.approveFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          1
+        )
+      ).to.be.reverted;
+    });
+
+    it('it should not setApprovalForAll blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].landV3.setApprovalForAll(mockMarketPlace1.address, true)
+      ).to.be.reverted;
+    });
+
+    it('it should not setApprovalForAllFor blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].landV3.setApprovalForAllFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.reverted;
+    });
+
+    it('it should approve non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].landV3.approve(mockMarketPlace3.address, id);
+      expect(await landV3.getApproved(id)).to.be.equal(
+        mockMarketPlace3.address
+      );
+    });
+
+    it('it should approveFor non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await users[0].landV3.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id
+      );
+      expect(await landV3.getApproved(id)).to.be.equal(
+        mockMarketPlace3.address
+      );
+    });
+
+    it('it should setApprovalForAll non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+      users[0].landV3.setApprovalForAll(mockMarketPlace3.address, true);
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should setApprovalForAllFor non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+      users[0].landV3.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to approve non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].landV3.approve(mockMarketPlace3.address, id1);
+
+      expect(await landV3.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].landV3.approve(mockMarketPlace3.address, id2)
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approveFor non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].landV3.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id1
+      );
+
+      expect(await landV3.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].landV3.approveFor(
+          users[0].address,
+          mockMarketPlace3.address,
+          id2
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+      await users[0].landV3.setApprovalForAll(mockMarketPlace3.address, true);
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].landV3.setApprovalForAll(mockMarketPlace3.address, true)
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to setApprovalForAllFor non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+      users[0].landV3.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].landV3.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approve non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].landV3.approve(mockMarketPlace3.address, id1);
+
+      expect(await landV3.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].landV3.approve(mockMarketPlace3.address, id2)
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+    it('it should not be able to approveFor non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].landV3.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id1
+      );
+
+      expect(await landV3.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].landV3.approveFor(
+          users[0].address,
+          mockMarketPlace3.address,
+          id2
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await users[0].landV3.setApprovalForAll(mockMarketPlace3.address, true);
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].landV3.setApprovalForAll(mockMarketPlace3.address, true)
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to setApprovalForAllFor non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      users[0].landV3.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].landV3.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to approve blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await expect(
+        users[0].landV3.approve(mockMarketPlace1.address, id)
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].landV3.approve(mockMarketPlace1.address, id);
+
+      expect(await landV3.getApproved(id)).to.be.equal(
+        mockMarketPlace1.address
+      );
+    });
+
+    it('it should be able to approveFor blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await expect(
+        users[0].landV3.approveFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          id
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].landV3.approveFor(
+        users[0].address,
+        mockMarketPlace1.address,
+        id
+      );
+
+      expect(await landV3.getApproved(id)).to.be.equal(
+        mockMarketPlace1.address
+      );
+    });
+
+    it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].landV3.setApprovalForAll(mockMarketPlace1.address, true)
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].landV3.setApprovalForAll(mockMarketPlace1.address, true);
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should be able to setApprovalForAllFor blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        landV3,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].landV3.setApprovalForAllFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].landV3.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await landV3.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to transfer through blacklisted market places', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.transferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          id,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to transfer through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.transferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        id1,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        mockMarketPlace3.transferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          id2,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to transfer through non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3.transferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        id,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('it should not be able to transfer through non blacklisted market places after their codeHash is blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3.transferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        id1,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        mockMarketPlace3.transferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          id2,
+          '0x'
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace1.transferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          id,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+      await mockMarketPlace1.transferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        id,
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('it should not be able to batch transfer through blacklisted market places', async function () {
+      const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.batchTransferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to batch transfer through non blacklisted market places', async function () {
+      const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+    });
+
+    it('it should be not be able to batch transfer through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await users[1].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.batchTransferLand(
+          landV3.address,
+          users[1].address,
+          users[0].address,
+          [id1, id2],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be not be able to batch transfer through market places after their codeHash is blackListed', async function () {
+      const {
+        mockMarketPlace3,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await users[1].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.batchTransferLand(
+          landV3.address,
+          users[1].address,
+          users[0].address,
+          [id1, id2],
+          '0x'
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to batch transfer through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        landV3,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await users[0].landV3.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.batchTransferLand(
+          landV3.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await mockMarketPlace1.batchTransferLand(
+        landV3.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
     });
   });
 });
