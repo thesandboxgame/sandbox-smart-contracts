@@ -6,12 +6,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {read, execute, catchUnknownSigner} = deployments;
   const {raffleSignWallet} = await getNamedAccounts();
 
-  const signer = await read('RafflePlayboyPartyPeopleV2', 'signAddress');
+  const signer = await read('HellsKitchen', 'signAddress');
   if (signer !== raffleSignWallet) {
-    const owner = await read('RafflePlayboyPartyPeopleV2', 'owner');
+    const owner = await read('HellsKitchen', 'owner');
     await catchUnknownSigner(
       execute(
-        'RafflePlayboyPartyPeopleV2',
+        'HellsKitchen',
         {from: owner, log: true},
         'setSignAddress',
         raffleSignWallet
@@ -21,9 +21,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = [
-  'RafflePlayboyPartyPeopleV2',
-  'RafflePlayboyPartyPeopleV2_setup',
-  'RafflePlayboyPartyPeopleV2_setup_signer',
-];
-func.dependencies = ['RafflePlayboyPartyPeopleV2_deploy'];
+func.tags = ['HellsKitchen', 'HellsKitchen_setup', 'HellsKitchen_setup_signer'];
+func.dependencies = ['HellsKitchen_deploy'];

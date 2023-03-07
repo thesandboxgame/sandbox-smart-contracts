@@ -11,47 +11,45 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const setupRaffle = withSnapshot(
-  ['RafflePlayboyPartyPeopleV2'],
-  async function (hre) {
-    const {sandAdmin} = await getNamedAccounts();
+export const contractName = 'FistOfTheNorthStar';
+export const COLLECTION_MAX_SUPPLY = 2000;
 
-    const rafflePlayboyPartyPeopleContract = await ethers.getContract(
-      'RafflePlayboyPartyPeopleV2'
-    );
+export const setupRaffle = withSnapshot([contractName], async function (hre) {
+  const {sandAdmin} = await getNamedAccounts();
 
-    const sandContract = await ethers.getContract('PolygonSand');
-    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  const raffleCollectionContract = await ethers.getContract(contractName);
 
-    const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+  const sandContract = await ethers.getContract('PolygonSand');
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-    await depositViaChildChainManager(
-      {sand: sandContract, childChainManager},
-      sandAdmin,
-      SAND_AMOUNT
-    );
+  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
 
-    return {
-      rafflePlayboyPartyPeopleContract,
-      sandContract,
-      hre,
-      getNamedAccounts,
-      setupWave,
-      signAuthMessageAs,
-      transferSand,
-      mint: mintSetup(rafflePlayboyPartyPeopleContract, sandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        rafflePlayboyPartyPeopleContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        rafflePlayboyPartyPeopleContract,
-        invalidPersonalizeSignature
-      ),
-    };
-  }
-);
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
+    SAND_AMOUNT
+  );
+
+  return {
+    raffleCollectionContract,
+    sandContract,
+    hre,
+    getNamedAccounts,
+    setupWave,
+    signAuthMessageAs,
+    transferSand,
+    mint: mintSetup(raffleCollectionContract, sandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
+      raffleCollectionContract,
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      raffleCollectionContract,
+      invalidPersonalizeSignature
+    ),
+  };
+});
 
 async function setupWave(
   raffle: Contract,
@@ -168,9 +166,10 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     signatureId: number,
     contractAddress: string,
     chainId: number,
-    price: string | number,
+    approvalAmount: string | number,
     amount: number
   ) => {
+    // console.log("ABA: ", approvalAmount);
     const signature = await signAuthMessageAs(
       wallet,
       address,
@@ -186,7 +185,11 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     ]);
     const contract = sandContract.connect(ethers.provider.getSigner(address));
     return waitFor(
-      contract.approveAndCall(raffleContract.address, price, encodedData)
+      contract.approveAndCall(
+        raffleContract.address,
+        approvalAmount,
+        encodedData
+      )
     );
   };
 }

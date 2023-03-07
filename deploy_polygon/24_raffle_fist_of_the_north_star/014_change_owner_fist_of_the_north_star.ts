@@ -6,12 +6,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {catchUnknownSigner, execute, read} = deployments;
   const {sandAdmin} = await getNamedAccounts();
 
-  const owner = await read('RafflePlayboyPartyPeopleV2', 'owner');
+  const owner = await read('FistOfTheNorthStar', 'owner');
 
   if (sandAdmin?.toLocaleLowerCase() !== owner?.toLocaleLowerCase()) {
     await catchUnknownSigner(
       execute(
-        'RafflePlayboyPartyPeopleV2',
+        'FistOfTheNorthStar',
         {from: owner, log: true},
         'transferOwnership',
         sandAdmin
@@ -21,8 +21,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = [
-  'RafflePlayboyPartyPeopleV2',
-  'RafflePlayboyPartyPeopleV2_change_admin',
-];
-func.dependencies = ['RafflePlayboyPartyPeopleV2_deploy'];
+func.tags = ['FistOfTheNorthStar', 'FistOfTheNorthStar_change_admin'];
+func.dependencies = ['FistOfTheNorthStar_deploy'];

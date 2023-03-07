@@ -11,8 +11,8 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const contractName = 'DanceFight';
-export const COLLECTION_MAX_SUPPLY = 3130;
+export const contractName = 'HellsKitchen';
+export const COLLECTION_MAX_SUPPLY = 2333;
 
 export const setupRaffle = withSnapshot([contractName], async function (hre) {
   const {sandAdmin} = await getNamedAccounts();

@@ -5,18 +5,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
 
-  const setupWaveMaxTokens = await read(
-    'RafflePlayboyPartyPeopleV2',
-    'waveMaxTokens'
-  );
+  const setupWaveMaxTokens = await read('FistOfTheNorthStar', 'waveMaxTokens');
   if (setupWaveMaxTokens.toNumber() === 0) {
-    const owner = await read('RafflePlayboyPartyPeopleV2', 'owner');
+    const owner = await read('FistOfTheNorthStar', 'owner');
     const waveMaxTokens = 500;
     const waveMaxTokensToBuy = 500;
     const waveSingleTokenPrice = (1 * 10 ** 18).toString();
     await catchUnknownSigner(
       execute(
-        'RafflePlayboyPartyPeopleV2',
+        'FistOfTheNorthStar',
         {from: owner, log: true},
         'setupWave',
         waveMaxTokens,
@@ -29,8 +26,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = [
-  'RafflePlayboyPartyPeopleV2',
-  'RafflePlayboyPartyPeopleV2_setup',
-  'RafflePlayboyPartyPeopleV2_setup_wave',
+  'FistOfTheNorthStar',
+  'FistOfTheNorthStar_setup',
+  'FistOfTheNorthStar_setup_wave',
 ];
-func.dependencies = ['RafflePlayboyPartyPeopleV2_deploy'];
+func.dependencies = ['FistOfTheNorthStar_deploy'];

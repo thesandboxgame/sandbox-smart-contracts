@@ -4,8 +4,8 @@ pragma solidity 0.8.15;
 import "./GenericRaffle.sol";
 
 /* solhint-disable max-states-count */
-contract PlayboyPartyPeopleV2 is GenericRaffle {
-    uint256 public constant MAX_SUPPLY = 1_969;
+contract HellsKitchen is GenericRaffle {
+    uint256 public constant MAX_SUPPLY = 2_333;
 
     function initialize(
         string memory baseURI,

@@ -9,7 +9,7 @@ import {
   assert,
   COLLECTION_MAX_SUPPLY,
   contractName,
-} from './DanceFight.fixtures';
+} from './FistOfTheNorthStar.fixtures';
 
 const BATCH_SIZE = 50;
 

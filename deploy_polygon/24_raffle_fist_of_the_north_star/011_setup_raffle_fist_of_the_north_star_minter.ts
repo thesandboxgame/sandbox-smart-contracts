@@ -6,15 +6,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {get, read, execute, catchUnknownSigner} = deployments;
 
   const sandContract = await get('PolygonSand');
-  const minter = await read(
-    'RafflePlayboyPartyPeopleV2',
-    'allowedToExecuteMint'
-  );
+  const minter = await read('FistOfTheNorthStar', 'allowedToExecuteMint');
   if (minter !== sandContract.address) {
-    const owner = await read('RafflePlayboyPartyPeopleV2', 'owner');
+    const owner = await read('FistOfTheNorthStar', 'owner');
     await catchUnknownSigner(
       execute(
-        'RafflePlayboyPartyPeopleV2',
+        'FistOfTheNorthStar',
         {from: owner, log: true},
         'setAllowedExecuteMint',
         sandContract.address
@@ -25,8 +22,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = [
-  'RafflePlayboyPartyPeopleV2',
-  'RafflePlayboyPartyPeopleV2_setup',
-  'RafflePlayboyPartyPeopleV2_setup_minter',
+  'FistOfTheNorthStar',
+  'FistOfTheNorthStar_setup',
+  'FistOfTheNorthStar_setup_minter',
 ];
-func.dependencies = ['PolygonSand_deploy', 'RafflePlayboyPartyPeopleV2_deploy'];
+func.dependencies = ['PolygonSand_deploy', 'FistOfTheNorthStar_deploy'];
