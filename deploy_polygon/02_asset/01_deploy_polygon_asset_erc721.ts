@@ -12,6 +12,9 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
     'TRUSTED_FORWARDER_V2'
   );
+  const OperatorFilterSubscription = await deployments.get(
+    'PolygonOperatorFilterSubscription'
+  );
 
   await deploy('PolygonAssetERC721', {
     from: deployer,
@@ -21,7 +24,11 @@ const func: DeployFunction = async function (
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [TRUSTED_FORWARDER_V2?.address, assetAdmin],
+        args: [
+          TRUSTED_FORWARDER_V2?.address,
+          assetAdmin,
+          OperatorFilterSubscription.address,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -36,5 +43,5 @@ func.tags = [
   'L2',
   'PolygonAsset',
 ];
-func.dependencies = ['TRUSTED_FORWARDER'];
+func.dependencies = ['TRUSTED_FORWARDER', 'polygonOperatorFilterSubscription'];
 func.skip = skipUnlessTestnet;

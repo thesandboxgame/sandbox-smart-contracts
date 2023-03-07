@@ -17,6 +17,9 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
   const PolygonAssetERC721 = await deployments.get('PolygonAssetERC721');
+  const OperatorFilterSubscription = await deployments.get(
+    'PolygonOperatorFilterSubscription'
+  );
 
   const assetHelperLib = await deploy('AssetHelper', {
     from: deployer,
@@ -49,6 +52,7 @@ const func: DeployFunction = async function (
           CHILD_CHAIN_MANAGER.address,
           PolygonAssetERC721.address,
           1,
+          OperatorFilterSubscription.address,
         ],
       },
       upgradeIndex: 0,
@@ -68,5 +72,6 @@ func.dependencies = [
   'TRUSTED_FORWARDER',
   'CHILD_CHAIN_MANAGER',
   'PolygonAssetERC721',
+  'polygonOperatorFilterSubscription',
 ];
 func.skip = skipUnlessTestnet;

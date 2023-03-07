@@ -2,9 +2,14 @@
 pragma solidity 0.8.2;
 
 import "./AssetBaseERC1155.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {
+    DefaultOperatorFiltererUpgradeable
+} from "../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract AssetERC1155 is AssetBaseERC1155 {
+contract AssetERC1155 is AssetBaseERC1155, OperatorFiltererUpgradeable {
     event PredicateSet(address predicate);
 
     function initialize(
@@ -12,9 +17,11 @@ contract AssetERC1155 is AssetBaseERC1155 {
         address admin,
         address bouncerAdmin,
         IAssetERC721 assetERC721,
-        uint8 chainIndex
-    ) external {
+        uint8 chainIndex,
+        address subscription
+    ) external initializer {
         init(trustedForwarder, admin, bouncerAdmin, assetERC721, chainIndex);
+        __OperatorFilterer_init(subscription, true);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -136,6 +143,8 @@ contract AssetERC1155 is AssetBaseERC1155 {
         _burn(from, id, amount);
     }
 
+    /// @notice gets the metadata hash set for the and asset with id "id"
+    /// @param id the id of the asset whose  metadata hash has to be returned
     function metadataHash(uint256 id) external view returns (bytes32) {
         return _metadataHash[id & ERC1155ERC721Helper.URI_ID];
     }
@@ -160,5 +169,62 @@ contract AssetERC1155 is AssetBaseERC1155 {
             numFTs *
             ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack, 12 bits
             packIndex; // packIndex (position in the pack), 11 bits
+    }
+
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param value amount of token transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external override onlyAllowedOperator(from) {
+        super._safeTransferFrom(from, to, id, value, data);
+    }
+
+    /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
+    /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param ids ids of each token type transfered.
+    /// @param values amount of each token type transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external override onlyAllowedOperator(from) {
+        super._safeBatchTransferFrom(from, to, ids, values, data);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
+    /// @dev used for Meta Transaction (from metaTransactionContract).
+    /// @param sender address which grant approval.
+    /// @param operator address which will be granted rights to transfer all token owned by `sender`.
+    /// @param approved whether to approve or revoke.
+    function setApprovalForAllFor(
+        address sender,
+        address operator,
+        bool approved
+    ) external onlyAllowedOperatorApproval(operator) {
+        super._setApprovalForAll(sender, operator, approved);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
+    function setApprovalForAll(address operator, bool approved)
+        external
+        override(IERC1155)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super._setApprovalForAll(_msgSender(), operator, approved);
     }
 }
