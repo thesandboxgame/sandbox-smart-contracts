@@ -52,3 +52,7 @@ giveaway.json
 .idea/
 
 .DS_Store
+
+.yarn/
+.yarnrc
+.yarnrc.yml
