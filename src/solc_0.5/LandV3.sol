@@ -4,9 +4,13 @@ pragma solidity 0.5.9;
 
 import "./Land/erc721/LandBaseTokenV3.sol";
 import "./Land/erc721/ERC721BaseTokenV2.sol";
-import "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import "./contracts_common/Libraries/OperatorFiltererLib.sol";
 
-contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
+contract LandV3 is LandBaseTokenV3 {
+    using OperatorFiltererLib for *;
+
+    IOperatorFilterRegistry internal operatorFilterRegistry;
+
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract
@@ -21,6 +25,33 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      */
     function symbol() external pure returns (string memory) {
         return "LAND";
+    }
+
+    modifier onlyAllowedOperator(address from) {
+        // Check registry code length to facilitate testing in environments without a deployed registry.
+        if (address(operatorFilterRegistry).isContract()) {
+            // Allow spending tokens from addresses with balance
+            // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
+            // from an EOA.
+            if (from == msg.sender) {
+                _;
+                return;
+            }
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
+                revert("Operator Not Allowed");
+            }
+        }
+        _;
+    }
+
+    modifier onlyAllowedOperatorApproval(address operator) {
+        // Check registry code length to facilitate testing in environments without a deployed registry.
+        if (address(operatorFilterRegistry).isContract()) {
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), operator)) {
+                revert("Operator Not Allowed");
+            }
+        }
+        _;
     }
 
     // solium-disable-next-line security/no-assign-params
@@ -73,11 +104,11 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     }
 
     /// @notice This function is used to register Land on the Operator filterer Registry of Opensea.can only be called by admin.
-    /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list. 
+    /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
-    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin{
-        __OperatorFilterer_init(subscriptionOrRegistrantToCopy, subscribe);
+    function register(address subscriptionOrRegistrantToCopy, bool subscribe, address registry) external onlyAdmin{
+        OperatorFiltererLib.__OperatorFilterer_init(subscriptionOrRegistrantToCopy, subscribe, registry);
     }
 
      /**

@@ -191,7 +191,11 @@ export const setupOperatorFilter = withSnapshot(['Sand'], async function () {
 
   await landV3
     .connect(await ethers.getSigner(deployer))
-    .register(operatorFilterSubscription.address, true);
+    .register(
+      operatorFilterSubscription.address,
+      true,
+      operatorFilterRegistry.address
+    );
 
   return {
     mockMarketPlace1,

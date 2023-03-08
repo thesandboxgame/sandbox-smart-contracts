@@ -4,8 +4,11 @@ pragma solidity 0.5.9;
 
 import {LandV3} from "../LandV3.sol";
 import {IOperatorFilterRegistry} from "../OperatorFilterer/interfaces/IOperatorFilterRegistry.sol";
+import {OperatorFiltererLib} from "../contracts_common/Libraries/OperatorFiltererLib.sol";
 
 contract MockLandV3 is LandV3 {
+    using OperatorFiltererLib for *;
+
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external {
