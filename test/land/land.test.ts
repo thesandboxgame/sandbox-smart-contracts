@@ -946,9 +946,20 @@ describe('LandV3', function () {
       expect(await landContract.getAdmin()).to.be.equal(landAdmin);
       expect(await landContract.ownerOf(0)).to.be.equal(landAdmin);
 
+      await deploy('OperatorFiltererLib', {
+        from: deployer,
+        log: true,
+        skipIfAlreadyDeployed: true,
+      });
+
+      const operatorFiltererLib = await deployments.get('OperatorFiltererLib');
+
       await deploy('Land', {
         from: deployer,
         contract: 'LandV3',
+        libraries: {
+          OperatorFiltererLib: operatorFiltererLib.address,
+        },
         proxy: {
           owner: upgradeAdmin,
           proxyContract: 'OpenZeppelinTransparentProxy',
