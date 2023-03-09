@@ -1,5 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
@@ -25,5 +26,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
+func.skip = skipUnlessTestnet;
 func.tags = ['DanceFight', 'DanceFight_setup', 'DanceFight_setup_wave'];
 func.dependencies = ['DanceFight_deploy'];
