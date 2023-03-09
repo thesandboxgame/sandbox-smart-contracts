@@ -238,6 +238,16 @@ describe('Test first Asset contract and upgrade process for splitting into ERC11
         log: true,
       });
 
+      const OperatorFilterSubscription = await deploy(
+        'OperatorFilterSubscription',
+        {
+          from: deployer,
+          contract: 'OperatorFilterSubscription',
+          log: true,
+          skipIfAlreadyDeployed: true,
+        }
+      );
+
       const AssetERC721 = await deploy('AssetERC721', {
         from: deployer,
         contract: 'AssetERC721',
@@ -246,7 +256,11 @@ describe('Test first Asset contract and upgrade process for splitting into ERC11
           proxyContract: 'OptimizedTransparentProxy',
           execute: {
             methodName: 'initialize',
-            args: [TRUSTED_FORWARDER.address, assetAdmin],
+            args: [
+              TRUSTED_FORWARDER.address,
+              assetAdmin,
+              OperatorFilterSubscription.address,
+            ],
           },
           upgradeIndex: 0,
         },
@@ -287,6 +301,7 @@ describe('Test first Asset contract and upgrade process for splitting into ERC11
               assetBouncerAdmin,
               AssetERC721.address,
               0,
+              OperatorFilterSubscription.address,
             ],
           },
           upgradeIndex: 1,

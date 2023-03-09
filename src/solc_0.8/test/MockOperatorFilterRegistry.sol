@@ -2,7 +2,7 @@
 // solhint-disable code-complexity
 pragma solidity 0.8.2;
 
-import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../OperatorFilterer/interfaces/IOperatorFilterRegistry.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 import {OperatorFilterRegistryEvents} from "./OperatorFilterRegistryEvents.sol";

@@ -9,6 +9,7 @@ import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {ethers} from 'hardhat';
 import {constants} from 'ethers';
+import {setupOperatorFilter} from '../assetERC721/fixtures';
 
 const zeroAddress = constants.AddressZero;
 
@@ -1356,6 +1357,1037 @@ describe('PolygonAssetERC1155.sol', function () {
         tokenId
       );
       expect(collectionIndexOf).to.be.equal(0);
+    });
+  });
+
+  describe('PolygonAssetERC1155: operator filterer', function () {
+    it('should be registered', async function () {
+      const {
+        operatorFilterRegistry,
+        polygonAssetERC1155,
+      } = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.isRegistered(polygonAssetERC1155.address)
+      ).to.be.equal(true);
+    });
+
+    it('should be subscribed to operator filterer subscription contract', async function () {
+      const {
+        operatorFilterRegistry,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+      } = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.subscriptionOf(polygonAssetERC1155.address)
+      ).to.be.equal(operatorFilterSubscription.address);
+    });
+
+    it('should have market places blacklisted', async function () {
+      const {
+        mockMarketPlace1,
+        mockMarketPlace2,
+        operatorFilterRegistry,
+        polygonAssetERC1155,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistry.codeHashOf(
+        mockMarketPlace1.address
+      );
+      expect(
+        await operatorFilterRegistry.isOperatorFiltered(
+          polygonAssetERC1155.address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+
+      expect(
+        await operatorFilterRegistry.isCodeHashFiltered(
+          polygonAssetERC1155.address,
+          mockMarketPlace1CodeHash
+        )
+      ).to.be.equal(true);
+
+      const mockMarketPlace2CodeHash = await operatorFilterRegistry.codeHashOf(
+        mockMarketPlace2.address
+      );
+      expect(
+        await operatorFilterRegistry.isOperatorFiltered(
+          polygonAssetERC1155.address,
+          mockMarketPlace2.address
+        )
+      ).to.be.equal(true);
+
+      expect(
+        await operatorFilterRegistry.isCodeHashFiltered(
+          polygonAssetERC1155.address,
+          mockMarketPlace2CodeHash
+        )
+      ).to.be.equal(true);
+    });
+
+    it('should be able to transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      await polygonAssetERC1155.safeTransferFrom(
+        users[0].address,
+        users[1].address,
+        id,
+        5,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(5);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token', async function () {
+      const {
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await polygonAssetERC1155.safeBatchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        [5, 5],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id1)
+      ).to.be.equal(5);
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id2)
+      ).to.be.equal(5);
+    });
+
+    it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      await polygonAssetERC1155.safeTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        id,
+        5,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id)
+      ).to.be.equal(5);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await polygonAssetERC1155.safeBatchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1, id2],
+        [5, 5],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id1)
+      ).to.be.equal(5);
+      expect(
+        await polygonAssetERC1155.balanceOf(mockMarketPlace1.address, id2)
+      ).to.be.equal(5);
+    });
+
+    it('it should not approve blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+      } = await setupOperatorFilter();
+
+      await expect(
+        polygonAssetERC1155.setApprovalForAll(mockMarketPlace1.address, true)
+      ).to.be.reverted;
+    });
+
+    it('it should approve non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+      await users[0].polygonAssetERC1155.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to approve non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+      await users[0].polygonAssetERC1155.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].polygonAssetERC1155.setApprovalForAll(
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approve non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].polygonAssetERC1155.setApprovalForAll(
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to approve blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].polygonAssetERC1155.setApprovalForAll(
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAll(
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not approve for all for blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+      } = await setupOperatorFilter();
+
+      await expect(
+        polygonAssetERC1155.setApprovalForAllFor(mockMarketPlace1.address, true)
+      ).to.be.reverted;
+    });
+
+    it('it should approve for all for non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+      await users[0].polygonAssetERC1155.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to approve for all for non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+
+      await users[0].polygonAssetERC1155.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].polygonAssetERC1155.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approve for all for non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].polygonAssetERC1155.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to approve for all for blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonAssetERC1155,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].polygonAssetERC1155.setApprovalForAllFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await polygonAssetERC1155.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to transfer through blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.transferTokenForERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          id,
+          2,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to transfer through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.transferTokenForERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        id,
+        2,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(2);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.transferTokenForERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          id,
+          2,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to transfer through non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3.transferTokenForERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        id,
+        2,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(2);
+    });
+
+    it('it should not be able to transfer through non blacklisted market places after their codeHash is filtered', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3.transferTokenForERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        id,
+        2,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(2);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.transferTokenForERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          id,
+          2,
+          '0x'
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      const id = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace1.transferTokenForERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          id,
+          2,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+      await mockMarketPlace1.transferTokenForERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        id,
+        2,
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id)
+      ).to.be.equal(2);
+    });
+
+    it('it should not be able to batch transfer through blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.batchTransferTokenERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          [1, 1],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to batch transfer through blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferTokenERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        [10, 10],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id1)
+      ).to.be.equal(10);
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id2)
+      ).to.be.equal(10);
+    });
+
+    it('it should be not be able to batch transfer through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferTokenERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        [5, 5],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id1)
+      ).to.be.equal(5);
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id2)
+      ).to.be.equal(5);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.batchTransferTokenERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          [5, 5],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be not be able to batch transfer through market places after their codeHash is filtered', async function () {
+      const {
+        mockMarketPlace3,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3.batchTransferTokenERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        [5, 5],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id1)
+      ).to.be.equal(5);
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id2)
+      ).to.be.equal(5);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3.batchTransferTokenERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          [5, 5],
+          '0x'
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to batch transfer through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        polygonAssetERC1155,
+        ipfsHashString,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        mintAssetERC1155,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      const id1 = await mintAssetERC1155(
+        users[0].address,
+        1,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      const id2 = await mintAssetERC1155(
+        users[0].address,
+        2,
+        ipfsHashString,
+        10,
+        users[0].address
+      );
+
+      await users[0].polygonAssetERC1155.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1.batchTransferTokenERC1155(
+          polygonAssetERC1155.address,
+          users[0].address,
+          users[1].address,
+          [id1, id2],
+          [5, 5],
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+      await mockMarketPlace1.batchTransferTokenERC1155(
+        polygonAssetERC1155.address,
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        [5, 5],
+        '0x'
+      );
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id1)
+      ).to.be.equal(5);
+
+      expect(
+        await polygonAssetERC1155.balanceOf(users[1].address, id2)
+      ).to.be.equal(5);
     });
   });
 });
