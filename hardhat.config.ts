@@ -399,6 +399,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('polygon'),
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
+      // gasPrice: 200000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'mainnet',
       },
