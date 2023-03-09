@@ -30,22 +30,30 @@ contract PolygonLandTunnelV2 is
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
+    /// @notice set the limit of estimated gas we accept when sending a batch of quads to L1
+    /// @param _maxGasLimit maximum accepted gas limit
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
         emit SetMaxGasLimit(_maxGasLimit);
     }
 
+    /// @notice set the limit of quads we can send in one tx to L1
+    /// @param _maxAllowedQuads maximum number of quads accepted
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
         require(_maxAllowedQuads > 0, "PolygonLandTunnel: max allowed value cannot be zero");
         maxAllowedQuads = _maxAllowedQuads;
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
 
+    /// @notice set the estimate of gas that the L1 transaction will use per quad size
+    /// @param  size the size of the quad
+    /// @param  limit the estimated gas that the L1 tx will use
     function setLimit(uint8 size, uint32 limit) external onlyOwner {
         _setLimit(size, limit);
     }
 
-    // setupLimits([5, 10, 20, 90, 340]);
+    /// @notice set the estimate of gas that the L1 transaction will use per quad size
+    /// @param  limits the estimated gas that the L1 tx will use per quad size
     function setupLimits(uint32[5] memory limits) public onlyOwner {
         _setLimit(1, limits[0]);
         _setLimit(3, limits[1]);
@@ -54,6 +62,12 @@ contract PolygonLandTunnelV2 is
         _setLimit(24, limits[4]);
     }
 
+    /// @notice initialize the contract
+    /// @param  _fxChild fx child tunnel contract address
+    /// @param  _trustedForwarder address of an ERC2771 meta transaction sender contract
+    /// @param _maxGasLimit maximum accepted gas limit
+    /// @param _maxAllowedQuads maximum number of quads accepted
+    /// @param  limits the estimated gas that the L1 tx will use per quad size
     function initialize(
         address _fxChild,
         IPolygonLandV2 _childToken,
@@ -72,6 +86,12 @@ contract PolygonLandTunnelV2 is
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
+    /// @notice send a batch of quads to L1
+    /// @param  to address of the receiver on L1
+    /// @param  sizes sizes of quad
+    /// @param  xs x coordinates of quads
+    /// @param  ys y coordinates of quads
+    /// @param  data data send to the receiver onERC721BatchReceived on L1
     function batchTransferQuadToL1(
         address to,
         uint256[] calldata sizes,
