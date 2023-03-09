@@ -748,6 +748,7 @@ describe('GemsCatalystsRegistry', function () {
       trustedForwarder,
       powerGem,
       gemsCatalystsRegistryAsDeployer,
+      deployer,
     } = await setupGemsAndCatalysts();
     const initialTrustedForwarder = await gemsCatalystsRegistryAsRegAdmin.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
@@ -764,7 +765,7 @@ describe('GemsCatalystsRegistry', function () {
         trustedForwarder.address
       )
     ).to.be.revertedWith(
-      'AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'
+      `AccessControl: account ${deployer.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
   });
   it('cannot set trustedForwarder to zero address', async function () {
