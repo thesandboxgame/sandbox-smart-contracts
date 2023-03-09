@@ -11,7 +11,7 @@ library OperatorFiltererLib {
 
     address public constant REGISTRY = 0x000000000000AAeB6D7670E522A718067333cd4E;
 
-    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe, address registry) internal {
+    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe, address registry) public {
 
         IOperatorFilterRegistry operatorFilterRegistry =
         // Address of the operator filterer registry

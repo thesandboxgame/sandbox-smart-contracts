@@ -171,8 +171,19 @@ export const setupOperatorFilter = withSnapshot(['Sand'], async function () {
 
   const sandContract = await deployments.get('Sand');
 
+  await deploy('OperatorFiltererLib', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  const operatorFiltererLib = await deployments.get('OperatorFiltererLib');
+
   await deployments.deploy('MockLandV3', {
     from: deployer,
+    libraries: {
+      OperatorFiltererLib: operatorFiltererLib.address,
+    },
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OptimizedTransparentProxy',

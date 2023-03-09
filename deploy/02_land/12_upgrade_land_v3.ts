@@ -7,9 +7,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
+  await deploy('OperatorFiltererLib', {
+    from: deployer,
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
+  const operatorFiltererLib = await deployments.get('OperatorFiltererLib');
+
   await deploy('Land', {
     from: deployer,
     contract: 'LandV3',
+    libraries: {
+      OperatorFiltererLib: operatorFiltererLib.address,
+    },
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
