@@ -8,7 +8,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, multiGiveawayAdmin} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
+    'TRUSTED_FORWARDER_V2'
+  );
 
   const adminByNetwork: {
     [n: number]: {[name: string]: string | undefined; default: string};
@@ -33,7 +35,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       skipIfAlreadyDeployed: true,
       args: [
         adminByNetwork[n][hre.network.name] || adminByNetwork[n].default,
-        TRUSTED_FORWARDER_V2.address,
+        TRUSTED_FORWARDER_V2?.address ||
+          '0x0000000000000000000000000000000000000000',
       ], // admin, trustedForwarder
     });
   }
