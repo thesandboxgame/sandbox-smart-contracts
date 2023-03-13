@@ -4,7 +4,7 @@ import {Contract} from 'ethers';
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {setupLand, getId} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
-import {zeroAddress} from '../../land/fixtures';
+import {zeroAddress, setupOperatorFilter} from '../../land/fixtures';
 
 type User = {
   address: string;
@@ -2421,6 +2421,1145 @@ describe('MockLandV2WithMint.sol', function () {
 
       await expect(landOwners[0].MockLandV2WithMint.exists(3, 500, 0)).to.be
         .reverted;
+    });
+  });
+
+  describe('OperatorFilterer', function () {
+    it('should be registered', async function () {
+      const {
+        operatorFilterRegistry,
+        polygonLandV2,
+      } = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.isRegistered(polygonLandV2.address)
+      ).to.be.equal(true);
+    });
+
+    it('should be subscribed to operator filterer subscription contract', async function () {
+      const {
+        operatorFilterRegistry,
+        operatorFilterSubscription,
+        polygonLandV2,
+      } = await setupOperatorFilter();
+      expect(
+        await operatorFilterRegistry.subscriptionOf(polygonLandV2.address)
+      ).to.be.equal(operatorFilterSubscription.address);
+    });
+
+    it('should be able to transfer land if from is the owner of token', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2.transferFrom(users[0].address, users[1].address, id);
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer land if from is the owner of token', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        users[1].address,
+        Number(id)
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer(with data) land if from is the owner of token', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2['safeTransferFrom(address,address,uint256,bytes)'](
+        users[0].address,
+        users[1].address,
+        id,
+        '0x'
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should be able to safe batch transfer Land if from is the owner of token', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await polygonLandV2.safeBatchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(2);
+    });
+    it('should be able to batch transfer Land if from is the owner of token', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await polygonLandV2.batchTransferFrom(
+        users[0].address,
+        users[1].address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(2);
+    });
+
+    it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2.transferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        id
+      );
+
+      expect(
+        await polygonLandV2.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2['safeTransferFrom(address,address,uint256)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        id
+      );
+
+      expect(
+        await polygonLandV2.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(1);
+    });
+
+    it('should be able to safe transfer(with data) token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await polygonLandV2['safeTransferFrom(address,address,uint256,bytes)'](
+        users[0].address,
+        mockMarketPlace1.address,
+        id,
+        '0x'
+      );
+
+      expect(
+        await polygonLandV2.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(1);
+    });
+
+    it('should be able to safe batch transfer Land if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await polygonLandV2.safeBatchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(
+        await polygonLandV2.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(2);
+    });
+
+    it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await polygonLandV2.batchTransferFrom(
+        users[0].address,
+        mockMarketPlace1.address,
+        [id1, id2],
+        '0x'
+      );
+
+      expect(
+        await polygonLandV2.balanceOf(mockMarketPlace1.address)
+      ).to.be.equal(2);
+    });
+
+    it('it should not approve blacklisted market places', async function () {
+      const {mockMarketPlace1, polygonLandV2} = await setupOperatorFilter();
+      await expect(polygonLandV2.approve(mockMarketPlace1.address, 1)).to.be
+        .reverted;
+    });
+
+    it('it should not approveFor blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          1
+        )
+      ).to.be.reverted;
+    });
+
+    it('it should not setApprovalForAll blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].polygonLandV2.setApprovalForAll(mockMarketPlace1.address, true)
+      ).to.be.reverted;
+    });
+
+    it('it should not setApprovalForAllFor blacklisted market places', async function () {
+      const {mockMarketPlace1, users} = await setupOperatorFilter();
+      await expect(
+        users[0].polygonLandV2.setApprovalForAllFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.reverted;
+    });
+
+    it('it should approve non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.approve(mockMarketPlace3.address, id);
+      expect(await polygonLandV2.getApproved(id)).to.be.equal(
+        mockMarketPlace3.address
+      );
+    });
+
+    it('it should approveFor non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await users[0].polygonLandV2.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id
+      );
+      expect(await polygonLandV2.getApproved(id)).to.be.equal(
+        mockMarketPlace3.address
+      );
+    });
+
+    it('it should setApprovalForAll non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      users[0].polygonLandV2.setApprovalForAll(mockMarketPlace3.address, true);
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should setApprovalForAllFor non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      users[0].polygonLandV2.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to approve non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].polygonLandV2.approve(mockMarketPlace3.address, id1);
+
+      expect(await polygonLandV2.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].polygonLandV2.approve(mockMarketPlace3.address, id2)
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approveFor non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].polygonLandV2.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id1
+      );
+
+      expect(await polygonLandV2.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[0].address,
+          mockMarketPlace3.address,
+          id2
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await users[0].polygonLandV2.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].polygonLandV2.setApprovalForAll(mockMarketPlace3.address, true)
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to setApprovalForAllFor non blacklisted market places after they are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      users[0].polygonLandV2.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        users[1].polygonLandV2.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to approve non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].polygonLandV2.approve(mockMarketPlace3.address, id1);
+
+      expect(await polygonLandV2.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].polygonLandV2.approve(mockMarketPlace3.address, id2)
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+    it('it should not be able to approveFor non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+      await users[0].polygonLandV2.approveFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        id1
+      );
+
+      expect(await polygonLandV2.getApproved(id1)).to.be.equal(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[0].address,
+          mockMarketPlace3.address,
+          id2
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await users[0].polygonLandV2.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].polygonLandV2.setApprovalForAll(mockMarketPlace3.address, true)
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should not be able to setApprovalForAllFor non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      const {
+        mockMarketPlace3,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      users[0].polygonLandV2.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace3.address
+        )
+      ).to.be.equal(true);
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await expect(
+        users[1].polygonLandV2.setApprovalForAllFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to approve blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await expect(
+        users[0].polygonLandV2.approve(mockMarketPlace1.address, id)
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonLandV2.approve(mockMarketPlace1.address, id);
+
+      expect(await polygonLandV2.getApproved(id)).to.be.equal(
+        mockMarketPlace1.address
+      );
+    });
+
+    it('it should be able to approveFor blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          id
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonLandV2.approveFor(
+        users[0].address,
+        mockMarketPlace1.address,
+        id
+      );
+
+      expect(await polygonLandV2.getApproved(id)).to.be.equal(
+        mockMarketPlace1.address
+      );
+    });
+
+    it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].polygonLandV2.setApprovalForAll(mockMarketPlace1.address, true)
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonLandV2.setApprovalForAll(
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should be able to setApprovalForAllFor blacklisted market places after they are removed from the blacklist ', async function () {
+      const {
+        mockMarketPlace1,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+
+      await expect(
+        users[0].polygonLandV2.setApprovalForAllFor(
+          users[0].address,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await users[0].polygonLandV2.setApprovalForAllFor(
+        users[0].address,
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await polygonLandV2.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('it should not be able to transfer through blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1['transferLand(address,address,address,uint256,bytes)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should not be able to transfer through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](polygonLandV2.address, users[0].address, users[1].address, id1, '0x');
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        mockMarketPlace3['transferLand(address,address,address,uint256,bytes)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id2,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to transfer through non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](polygonLandV2.address, users[0].address, users[1].address, id, '0x');
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('it should not be able to transfer through non blacklisted market places after their codeHash is blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id1 = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](polygonLandV2.address, users[0].address, users[1].address, id1, '0x');
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 1, '0x');
+      const id2 = getId(1, 0, 1);
+
+      await expect(
+        mockMarketPlace3['transferLand(address,address,address,uint256,bytes)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id2,
+          '0x'
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace1['transferLand(address,address,address,uint256,bytes)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id,
+          '0x'
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+      await mockMarketPlace1[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](polygonLandV2.address, users[0].address, users[1].address, id, '0x');
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('it should not be able to transfer(without data) through blacklisted market places', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1['transferLand(address,address,address,uint256)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be able to transfer(without data) through non blacklisted market places', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
+        polygonLandV2.address,
+        users[0].address,
+        users[1].address,
+        id
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('it should be not be able to transfer(without data) through market places after they are blacklisted', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
+        polygonLandV2.address,
+        users[0].address,
+        users[1].address,
+        id
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace3.address,
+        true
+      );
+
+      await users[1].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3['transferLand(address,address,address,uint256)'](
+          polygonLandV2.address,
+          users[1].address,
+          users[0].address,
+          id
+        )
+      ).to.be.revertedWith('Address is filtered');
+    });
+
+    it('it should be not be able to transfer(without data) through market places after their codeHash is blackListed', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
+        polygonLandV2.address,
+        users[0].address,
+        users[1].address,
+        id
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+
+      const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace3.address
+      );
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace3CodeHash,
+        true
+      );
+
+      await users[1].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace3.address,
+        true
+      );
+
+      await expect(
+        mockMarketPlace3['transferLand(address,address,address,uint256)'](
+          polygonLandV2.address,
+          users[1].address,
+          users[0].address,
+          id
+        )
+      ).to.be.revertedWith('Codehash is filtered');
+    });
+
+    it('it should be able to transfer(without data) through blacklisted market places after they are removed from blacklist', async function () {
+      const {
+        mockMarketPlace1,
+        polygonLandV2,
+        users,
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+      } = await setupOperatorFilter();
+      const mockMarketPlace1CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
+        mockMarketPlace1.address
+      );
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+
+      await users[0].polygonLandV2.setApprovalForAllWithOutFilter(
+        mockMarketPlace1.address,
+        true
+      );
+      await expect(
+        mockMarketPlace1['transferLand(address,address,address,uint256)'](
+          polygonLandV2.address,
+          users[0].address,
+          users[1].address,
+          id
+        )
+      ).to.be.revertedWith('Address is filtered');
+
+      await operatorFilterRegistryAsOwner.updateCodeHash(
+        operatorFilterSubscription.address,
+        mockMarketPlace1CodeHash,
+        false
+      );
+
+      await operatorFilterRegistryAsOwner.updateOperator(
+        operatorFilterSubscription.address,
+        mockMarketPlace1.address,
+        false
+      );
+
+      await mockMarketPlace1['transferLand(address,address,address,uint256)'](
+        polygonLandV2.address,
+        users[0].address,
+        users[1].address,
+        id
+      );
+
+      expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
     });
   });
 });
