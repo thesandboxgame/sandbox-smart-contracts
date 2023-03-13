@@ -17,4 +17,10 @@ interface ILandTokenV3 is ILandTokenV2 {
         uint256[] calldata ids,
         bytes calldata data
     ) external;
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external;
 }
