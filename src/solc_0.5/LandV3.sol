@@ -189,26 +189,4 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     function safeTransferFrom(address from, address to, uint256 id) external onlyAllowedOperator(from){
         super.safeTransferFrom(from, to, id, "");
     }
-
-    /**
-     * @notice Transfer many tokens between 2 addresses
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param ids The ids of the tokens
-     * @param data additional data
-    */
-    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external  onlyAllowedOperator(from){
-        _batchTransferFrom(from, to, ids, data, false);
-    }
-
-    /**
-     * @notice Transfer many tokens between 2 addresses ensuring the receiving contract has a receiver method
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param ids The ids of the tokens
-     * @param data additional data
-    */
-    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external onlyAllowedOperator(from){
-        _batchTransferFrom(from, to, ids, data, true);
-    }
 }
