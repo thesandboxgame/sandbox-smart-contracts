@@ -7,9 +7,10 @@ import {
     DefaultOperatorFiltererUpgradeable
 } from "../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract AssetERC1155 is AssetBaseERC1155, OperatorFiltererUpgradeable {
+contract AssetERC1155 is AssetBaseERC1155, Initializable, OperatorFiltererUpgradeable {
     event PredicateSet(address predicate);
 
     function initialize(

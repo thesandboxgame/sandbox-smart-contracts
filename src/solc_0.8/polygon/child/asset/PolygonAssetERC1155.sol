@@ -10,12 +10,13 @@ import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @title This contract is for AssetERC1155 which can be minted by a minter role.
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererUpgradeable {
+contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, Initializable, OperatorFiltererUpgradeable {
     address public _childChainManager;
 
     function initialize(

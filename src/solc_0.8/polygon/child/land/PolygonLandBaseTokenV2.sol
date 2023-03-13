@@ -180,20 +180,20 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         }
     }
 
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) public override(ILandToken, ERC721BaseTokenV2) {
-        super.batchTransferFrom(from, to, ids, data);
-    }
-
     /// @notice x coordinate of Land token
     /// @param id tokenId
     /// @return the x coordinates
     function getX(uint256 id) external pure returns (uint256) {
         return _getX(id);
+    }
+
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) public virtual override(ILandToken, ERC721BaseTokenV2) {
+        super.batchTransferFrom(from, to, ids, data);
     }
 
     /// @notice y coordinate of Land token

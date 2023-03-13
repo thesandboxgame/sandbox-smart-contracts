@@ -97,16 +97,14 @@ contract MockMarketPlace2 {
     /// @param land the contract address on which the token transfer will take place
     /// @param from The sender of the tokens.
     /// @param to The recipient of the tokens.
-    /// @param ids The ids of the tokens to be transferred.
-    /// @param data Additional data.
-    function batchTransferLand(
+    /// @param id The id of the token to be transferred.
+    function transferLand(
         address land,
         address from,
         address to,
-        uint256[] memory ids,
-        bytes memory data
+        uint256 id
     ) external {
-        ILandTokenV3(land).safeBatchTransferFrom(from, to, ids, data);
+        ILandTokenV3(land).safeTransferFrom(from, to, id);
     }
 
     function onERC1155Received(
