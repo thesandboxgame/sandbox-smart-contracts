@@ -95,113 +95,139 @@ export function setMinter(landContract: Contract) {
   };
 }
 
-export const setupOperatorFilter = withSnapshot(['Sand'], async function () {
-  const defaultSubscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
+export const setupOperatorFilter = withSnapshot(
+  ['Sand', 'TRUSTED_FORWARDER_V2'],
+  async function () {
+    const defaultSubscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
 
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+    const {deployer, upgradeAdmin} = await getNamedAccounts();
 
-  const otherAccounts = await getUnnamedAccounts();
+    const otherAccounts = await getUnnamedAccounts();
 
-  const {deploy} = deployments;
+    const {deploy} = deployments;
 
-  await deploy('MockMarketPlace1', {
-    from: deployer,
-    args: [],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('MockMarketPlace1', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  await deploy('MockMarketPlace2', {
-    from: deployer,
-    args: [],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('MockMarketPlace2', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  await deploy('MockMarketPlace3', {
-    from: deployer,
-    args: [],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('MockMarketPlace3', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  await deploy('MockMarketPlace4', {
-    from: deployer,
-    args: [],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('MockMarketPlace4', {
+      from: deployer,
+      args: [],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  const mockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
-  const mockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
-  const mockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
-  const mockMarketPlace4 = await ethers.getContract('MockMarketPlace4');
+    const mockMarketPlace1 = await ethers.getContract('MockMarketPlace1');
+    const mockMarketPlace2 = await ethers.getContract('MockMarketPlace2');
+    const mockMarketPlace3 = await ethers.getContract('MockMarketPlace3');
+    const mockMarketPlace4 = await ethers.getContract('MockMarketPlace4');
 
-  await deploy('MockOperatorFilterRegistry', {
-    from: deployer,
-    args: [
-      defaultSubscription,
-      [mockMarketPlace1.address, mockMarketPlace2.address],
-    ],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('MockOperatorFilterRegistry', {
+      from: deployer,
+      args: [
+        defaultSubscription,
+        [mockMarketPlace1.address, mockMarketPlace2.address],
+      ],
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  await deploy('OperatorFilterSubscription', {
-    from: deployer,
-    contract: 'OperatorFilterSubscription',
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+    await deploy('OperatorFilterSubscription', {
+      from: deployer,
+      contract: 'OperatorFilterSubscription',
+      log: true,
+      skipIfAlreadyDeployed: true,
+    });
 
-  const operatorFilterRegistry = await ethers.getContract(
-    'MockOperatorFilterRegistry'
-  );
-  const operatorFilterSubscription = await deployments.get(
-    'OperatorFilterSubscription'
-  );
+    const operatorFilterRegistry = await ethers.getContract(
+      'MockOperatorFilterRegistry'
+    );
+    const operatorFilterSubscription = await deployments.get(
+      'OperatorFilterSubscription'
+    );
 
-  const operatorFilterRegistryAsOwner = operatorFilterRegistry.connect(
-    await ethers.getSigner(deployer)
-  );
-  await operatorFilterRegistryAsOwner.registerAndCopyEntries(
-    operatorFilterSubscription.address,
-    defaultSubscription
-  );
+    const operatorFilterRegistryAsOwner = operatorFilterRegistry.connect(
+      await ethers.getSigner(deployer)
+    );
+    await operatorFilterRegistryAsOwner.registerAndCopyEntries(
+      operatorFilterSubscription.address,
+      defaultSubscription
+    );
 
-  const sandContract = await deployments.get('Sand');
+    const sandContract = await deployments.get('Sand');
 
-  await deployments.deploy('MockLandV3', {
-    from: deployer,
-    proxy: {
-      owner: upgradeAdmin,
-      proxyContract: 'OptimizedTransparentProxy',
-      execute: {
-        methodName: 'initialize',
-        args: [sandContract.address, deployer],
+    await deployments.deploy('MockLandV3', {
+      from: deployer,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [sandContract.address, deployer],
+        },
       },
-    },
-  });
+    });
 
-  const landV3 = await ethers.getContract('MockLandV3');
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
-  const users = await setupUsers(otherAccounts, {landV3});
+    await deployments.deploy('MockPolygonLandV2', {
+      from: deployer,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [TRUSTED_FORWARDER.address],
+        },
+      },
+    });
 
-  await landV3.setOperatorRegistry(operatorFilterRegistry.address);
+    const landV3 = await ethers.getContract('MockLandV3');
 
-  await landV3
-    .connect(await ethers.getSigner(deployer))
-    .register(operatorFilterSubscription.address, true);
+    const polygonLandV2 = await ethers.getContract('MockPolygonLandV2');
 
-  return {
-    mockMarketPlace1,
-    mockMarketPlace2,
-    mockMarketPlace3,
-    mockMarketPlace4,
-    operatorFilterRegistry,
-    operatorFilterRegistryAsOwner,
-    operatorFilterSubscription,
-    landV3,
-    users,
-  };
-});
+    const users = await setupUsers(otherAccounts, {landV3, polygonLandV2});
+
+    await landV3.setOperatorRegistry(operatorFilterRegistry.address);
+
+    await polygonLandV2.setOperatorRegistry(operatorFilterRegistry.address);
+
+    await landV3
+      .connect(await ethers.getSigner(deployer))
+      .register(operatorFilterSubscription.address, true);
+
+    await polygonLandV2
+      .connect(await ethers.getSigner(deployer))
+      .register(operatorFilterSubscription.address, true);
+
+    return {
+      mockMarketPlace1,
+      mockMarketPlace2,
+      mockMarketPlace3,
+      mockMarketPlace4,
+      operatorFilterRegistry,
+      operatorFilterRegistryAsOwner,
+      operatorFilterSubscription,
+      landV3,
+      users,
+      polygonLandV2,
+    };
+  }
+);
