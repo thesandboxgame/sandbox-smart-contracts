@@ -1694,7 +1694,7 @@ describe('LandV3', function () {
         true
       );
       await expect(
-        mockMarketPlace1.transferLand(
+        mockMarketPlace1['transferLand(address,address,address,uint256,bytes)'](
           landV3.address,
           users[0].address,
           users[1].address,
@@ -1720,13 +1720,9 @@ describe('LandV3', function () {
         true
       );
 
-      await mockMarketPlace3.transferLand(
-        landV3.address,
-        users[0].address,
-        users[1].address,
-        id1,
-        '0x'
-      );
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](landV3.address, users[0].address, users[1].address, id1, '0x');
 
       expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
 
@@ -1740,7 +1736,7 @@ describe('LandV3', function () {
       const id2 = getId(1, 0, 1);
 
       await expect(
-        mockMarketPlace3.transferLand(
+        mockMarketPlace3['transferLand(address,address,address,uint256,bytes)'](
           landV3.address,
           users[0].address,
           users[1].address,
@@ -1759,13 +1755,9 @@ describe('LandV3', function () {
         mockMarketPlace3.address,
         true
       );
-      await mockMarketPlace3.transferLand(
-        landV3.address,
-        users[0].address,
-        users[1].address,
-        id,
-        '0x'
-      );
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](landV3.address, users[0].address, users[1].address, id, '0x');
 
       expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
     });
@@ -1785,13 +1777,9 @@ describe('LandV3', function () {
         mockMarketPlace3.address,
         true
       );
-      await mockMarketPlace3.transferLand(
-        landV3.address,
-        users[0].address,
-        users[1].address,
-        id1,
-        '0x'
-      );
+      await mockMarketPlace3[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](landV3.address, users[0].address, users[1].address, id1, '0x');
 
       expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
 
@@ -1807,7 +1795,7 @@ describe('LandV3', function () {
       const id2 = getId(1, 0, 1);
 
       await expect(
-        mockMarketPlace3.transferLand(
+        mockMarketPlace3['transferLand(address,address,address,uint256,bytes)'](
           landV3.address,
           users[0].address,
           users[1].address,
@@ -1837,7 +1825,7 @@ describe('LandV3', function () {
       );
 
       await expect(
-        mockMarketPlace1.transferLand(
+        mockMarketPlace1['transferLand(address,address,address,uint256,bytes)'](
           landV3.address,
           users[0].address,
           users[1].address,
@@ -1857,63 +1845,53 @@ describe('LandV3', function () {
         mockMarketPlace1.address,
         false
       );
-      await mockMarketPlace1.transferLand(
-        landV3.address,
-        users[0].address,
-        users[1].address,
-        id,
-        '0x'
-      );
+      await mockMarketPlace1[
+        'transferLand(address,address,address,uint256,bytes)'
+      ](landV3.address, users[0].address, users[1].address, id, '0x');
 
       expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
     });
 
-    it('it should not be able to batch transfer through blacklisted market places', async function () {
+    it('it should not be able to transfer(without data) through blacklisted market places', async function () {
       const {mockMarketPlace1, landV3, users} = await setupOperatorFilter();
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id1 = getId(1, 0, 0);
-      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
-      const id2 = getId(1, 0, 1);
+      const id = getId(1, 0, 0);
 
       await users[0].landV3.setApprovalForAllWithOutFilter(
         mockMarketPlace1.address,
         true
       );
       await expect(
-        mockMarketPlace1.batchTransferLand(
+        mockMarketPlace1['transferLand(address,address,address,uint256)'](
           landV3.address,
           users[0].address,
           users[1].address,
-          [id1, id2],
-          '0x'
+          id
         )
       ).to.be.revertedWith('Address is filtered');
     });
 
-    it('it should be able to batch transfer through non blacklisted market places', async function () {
+    it('it should be able to transfer(without data) through non blacklisted market places', async function () {
       const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id1 = getId(1, 0, 0);
-      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
-      const id2 = getId(1, 0, 1);
+      const id = getId(1, 0, 0);
 
       await users[0].landV3.setApprovalForAllWithOutFilter(
         mockMarketPlace3.address,
         true
       );
 
-      await mockMarketPlace3.batchTransferLand(
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
         landV3.address,
         users[0].address,
         users[1].address,
-        [id1, id2],
-        '0x'
+        id
       );
 
-      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
     });
 
-    it('it should be not be able to batch transfer through market places after they are blacklisted', async function () {
+    it('it should be not be able to transfer(without data) through market places after they are blacklisted', async function () {
       const {
         mockMarketPlace3,
         landV3,
@@ -1922,24 +1900,21 @@ describe('LandV3', function () {
         operatorFilterSubscription,
       } = await setupOperatorFilter();
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id1 = getId(1, 0, 0);
-      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
-      const id2 = getId(1, 0, 1);
+      const id = getId(1, 0, 0);
 
       await users[0].landV3.setApprovalForAllWithOutFilter(
         mockMarketPlace3.address,
         true
       );
 
-      await mockMarketPlace3.batchTransferLand(
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
         landV3.address,
         users[0].address,
         users[1].address,
-        [id1, id2],
-        '0x'
+        id
       );
 
-      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
 
       await operatorFilterRegistryAsOwner.updateOperator(
         operatorFilterSubscription.address,
@@ -1953,17 +1928,16 @@ describe('LandV3', function () {
       );
 
       await expect(
-        mockMarketPlace3.batchTransferLand(
+        mockMarketPlace3['transferLand(address,address,address,uint256)'](
           landV3.address,
           users[1].address,
           users[0].address,
-          [id1, id2],
-          '0x'
+          id
         )
       ).to.be.revertedWith('Address is filtered');
     });
 
-    it('it should be not be able to batch transfer through market places after their codeHash is blackListed', async function () {
+    it('it should be not be able to transfer(without data) through market places after their codeHash is blackListed', async function () {
       const {
         mockMarketPlace3,
         landV3,
@@ -1972,24 +1946,21 @@ describe('LandV3', function () {
         operatorFilterSubscription,
       } = await setupOperatorFilter();
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id1 = getId(1, 0, 0);
-      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
-      const id2 = getId(1, 0, 1);
+      const id = getId(1, 0, 0);
 
       await users[0].landV3.setApprovalForAllWithOutFilter(
         mockMarketPlace3.address,
         true
       );
 
-      await mockMarketPlace3.batchTransferLand(
+      await mockMarketPlace3['transferLand(address,address,address,uint256)'](
         landV3.address,
         users[0].address,
         users[1].address,
-        [id1, id2],
-        '0x'
+        id
       );
 
-      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
 
       const mockMarketPlace3CodeHash = await operatorFilterRegistryAsOwner.codeHashOf(
         mockMarketPlace3.address
@@ -2007,17 +1978,16 @@ describe('LandV3', function () {
       );
 
       await expect(
-        mockMarketPlace3.batchTransferLand(
+        mockMarketPlace3['transferLand(address,address,address,uint256)'](
           landV3.address,
           users[1].address,
           users[0].address,
-          [id1, id2],
-          '0x'
+          id
         )
       ).to.be.revertedWith('Codehash is filtered');
     });
 
-    it('it should be able to batch transfer through blacklisted market places after they are removed from blacklist', async function () {
+    it('it should be able to transfer(without data) through blacklisted market places after they are removed from blacklist', async function () {
       const {
         mockMarketPlace1,
         landV3,
@@ -2029,21 +1999,18 @@ describe('LandV3', function () {
         mockMarketPlace1.address
       );
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id1 = getId(1, 0, 0);
-      await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 1, '0x');
-      const id2 = getId(1, 0, 1);
+      const id = getId(1, 0, 0);
 
       await users[0].landV3.setApprovalForAllWithOutFilter(
         mockMarketPlace1.address,
         true
       );
       await expect(
-        mockMarketPlace1.batchTransferLand(
+        mockMarketPlace1['transferLand(address,address,address,uint256)'](
           landV3.address,
           users[0].address,
           users[1].address,
-          [id1, id2],
-          '0x'
+          id
         )
       ).to.be.revertedWith('Address is filtered');
 
@@ -2059,15 +2026,14 @@ describe('LandV3', function () {
         false
       );
 
-      await mockMarketPlace1.batchTransferLand(
+      await mockMarketPlace1['transferLand(address,address,address,uint256)'](
         landV3.address,
         users[0].address,
         users[1].address,
-        [id1, id2],
-        '0x'
+        id
       );
 
-      expect(await landV3.balanceOf(users[1].address)).to.be.equal(2);
+      expect(await landV3.balanceOf(users[1].address)).to.be.equal(1);
     });
   });
 });
