@@ -127,6 +127,9 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         return this.onERC721BatchReceived.selector;
     }
 
+    /// @dev to be called by external contact to check if this contract supports ERC721 token and batch token receive
+    /// @param interfaceId the interface to be checked if supported by the contract
+    /// 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }

@@ -77,7 +77,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin{
-        __OperatorFilterer_init(subscriptionOrRegistrantToCopy, subscribe);
+        _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
      /**

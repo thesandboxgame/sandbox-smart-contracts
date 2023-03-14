@@ -2,15 +2,20 @@
 pragma solidity 0.8.2;
 
 import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
-abstract contract OperatorFiltererUpgradeable {
+abstract contract OperatorFiltererUpgradeable is Initializable {
     IOperatorFilterRegistry public operatorFilterRegistry =
         // Address of the operator filterer registry
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
-    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
+    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
         // order for the modifier to filter addresses.

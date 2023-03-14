@@ -12,7 +12,7 @@ contract OperatorFiltererUpgradeable {
         // Address of the operator filterer registry
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
-    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
+    function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
         // order for the modifier to filter addresses.
