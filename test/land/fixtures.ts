@@ -96,7 +96,7 @@ export function setMinter(landContract: Contract) {
 }
 
 export const setupOperatorFilter = withSnapshot(
-  ['Sand', 'TRUSTED_FORWARDER_V2'],
+  ['Sand', 'TRUSTED_FORWARDER_V2', 'operatorFilterSubscription'],
   async function () {
     const defaultSubscription = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
 
@@ -145,13 +145,6 @@ export const setupOperatorFilter = withSnapshot(
         defaultSubscription,
         [mockMarketPlace1.address, mockMarketPlace2.address],
       ],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-
-    await deploy('OperatorFilterSubscription', {
-      from: deployer,
-      contract: 'OperatorFilterSubscription',
       log: true,
       skipIfAlreadyDeployed: true,
     });
