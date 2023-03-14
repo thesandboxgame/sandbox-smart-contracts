@@ -5,6 +5,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const operatorFilterSubscription = await deployments.get(
+    'PolygonOperatorFilterSubscription'
+  );
 
   await deploy('PolygonLand', {
     from: deployer,
@@ -16,7 +19,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     log: true,
   });
+
+  const admin = await deployments.read('PolygonLand', 'getAdmin');
+
+  await deployments.execute(
+    'PolygonLand',
+    {from: admin},
+    'register',
+    operatorFilterSubscription.address,
+    true
+  );
 };
 export default func;
 func.tags = ['PolygonLand', 'PolygonLandV2', 'L2'];
-func.dependencies = ['PolygonLand_deploy'];
+func.dependencies = ['PolygonLand_deploy', 'polygonOperatorFilterSubscription'];

@@ -5,11 +5,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   await deploy('PolygonOperatorFilterSubscription', {
     from: deployer,
     contract: 'OperatorFilterSubscription',
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      upgradeIndex: 0,
+    },
     log: true,
     skipIfAlreadyDeployed: true,
   });
