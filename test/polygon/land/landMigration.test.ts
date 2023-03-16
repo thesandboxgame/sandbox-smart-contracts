@@ -1,9 +1,113 @@
 import {expect} from '../../chai-setup';
+import {zeroAddress} from '../../land/fixtures';
 import {waitFor} from '../../utils';
 import {setupLandMigration} from './fixtures';
+import {deployments} from 'hardhat';
+const {deploy} = deployments;
 
 describe('Land Migration', function () {
   describe('LandTunnel <> LandTunnelV2: Land Migration', function () {
+    it("can't set admin to zero address", async function () {
+      const {
+        deployer,
+        MockLandTunnelV2,
+        MockLandTunnel,
+      } = await setupLandMigration();
+      await expect(
+        deploy('LandTunnelMigration', {
+          from: deployer.address,
+          contract: 'LandTunnelMigration',
+          args: [
+            zeroAddress,
+            MockLandTunnelV2.address,
+            MockLandTunnel.address,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+      await expect(
+        deployer.MockLandTunnelMigration.changeAdmin(zeroAddress)
+      ).to.revertedWith("LandTunnelMigration: admin can't be zero address");
+    });
+
+    it("can't set Land to zero address constructor", async function () {
+      const {
+        deployer,
+        MockLandTunnelV2,
+        MockLandTunnel,
+      } = await setupLandMigration();
+      await expect(
+        deploy('LandTunnelMigration', {
+          from: deployer.address,
+          contract: 'LandTunnelMigration',
+          args: [
+            zeroAddress,
+            MockLandTunnelV2.address,
+            MockLandTunnel.address,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set LandTunnelV2 to zero address constructor", async function () {
+      const {deployer, MockLandTunnel, Land} = await setupLandMigration();
+      await expect(
+        deploy('LandTunnelMigration', {
+          from: deployer.address,
+          contract: 'LandTunnelMigration',
+          args: [
+            Land.address,
+            zeroAddress,
+            MockLandTunnel.address,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set LandTunnel to zero address constructor", async function () {
+      const {deployer, MockLandTunnelV2, Land} = await setupLandMigration();
+      await expect(
+        deploy('LandTunnelMigration', {
+          from: deployer.address,
+          contract: 'LandTunnelMigration',
+          args: [
+            Land.address,
+            MockLandTunnelV2.address,
+            zeroAddress,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set admin to zero address through constructor", async function () {
+      const {
+        deployer,
+        MockLandTunnelV2,
+        MockLandTunnel,
+        Land,
+      } = await setupLandMigration();
+      await expect(
+        deploy('LandTunnelMigration', {
+          from: deployer.address,
+          contract: 'LandTunnelMigration',
+          args: [
+            Land.address,
+            MockLandTunnelV2.address,
+            MockLandTunnel.address,
+            zeroAddress,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
     it('land Migration from old land Tunnel to new land Tunnel', async function () {
       const {
         landMinter,
@@ -290,6 +394,90 @@ describe('Land Migration', function () {
   });
 
   describe('PolygonLandTunnel <> PolygonLandTunnelV2: Land Migration', function () {
+    it("can't set admin to zero address", async function () {
+      const {deployer} = await setupLandMigration();
+      await expect(
+        deployer.MockPolygonLandTunnelMigration.changeAdmin(zeroAddress)
+      ).to.revertedWith("LandTunnelMigration: admin can't be zero address");
+    });
+
+    it("can't set Land to zero address constructor", async function () {
+      const {
+        deployer,
+        MockLandTunnelV2,
+        MockLandTunnel,
+      } = await setupLandMigration();
+      await expect(
+        deploy('PolygonLandTunnelMigration', {
+          from: deployer.address,
+          contract: 'PolygonLandTunnelMigration',
+          args: [
+            zeroAddress,
+            MockLandTunnelV2.address,
+            MockLandTunnel.address,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set LandTunnelV2 to zero address constructor", async function () {
+      const {deployer, MockLandTunnel, Land} = await setupLandMigration();
+      await expect(
+        deploy('PolygonLandTunnelMigration', {
+          from: deployer.address,
+          contract: 'PolygonLandTunnelMigration',
+          args: [
+            Land.address,
+            zeroAddress,
+            MockLandTunnel.address,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set LandTunnel to zero address constructor", async function () {
+      const {deployer, MockLandTunnelV2, Land} = await setupLandMigration();
+      await expect(
+        deploy('PolygonLandTunnelMigration', {
+          from: deployer.address,
+          contract: 'PolygonLandTunnelMigration',
+          args: [
+            Land.address,
+            MockLandTunnelV2.address,
+            zeroAddress,
+            deployer.address,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
+    it("can't set admin to zero address through constructor", async function () {
+      const {
+        deployer,
+        MockLandTunnelV2,
+        MockLandTunnel,
+        Land,
+      } = await setupLandMigration();
+      await expect(
+        deploy('PolygonLandTunnelMigration', {
+          from: deployer.address,
+          contract: 'PolygonLandTunnelMigration',
+          args: [
+            Land.address,
+            MockLandTunnelV2.address,
+            MockLandTunnel.address,
+            zeroAddress,
+          ],
+          log: true,
+        })
+      ).to.be.reverted;
+    });
+
     it('land Migration from old Polygon land Tunnel to new Polygon land Tunnel', async function () {
       const {
         landMinter,

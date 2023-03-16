@@ -51,7 +51,7 @@ describe('PolygonLand', function () {
             LandTunnelV2.address,
             landId
           )
-        ).to.be.revertedWith('LandTunnel: !BRIDGING');
+        ).to.be.revertedWith('LandTunnelV2: !BRIDGING');
       });
 
       it('cannot accept randomly transferred lands as batch', async function () {
@@ -73,7 +73,7 @@ describe('PolygonLand', function () {
             [0],
             bytes
           )
-        ).to.be.revertedWith('LandTunnel: !BRIDGING');
+        ).to.be.revertedWith('LandTunnelV2: !BRIDGING');
       });
 
       it('only owner can unpause tunnels', async function () {
@@ -134,7 +134,7 @@ describe('PolygonLand', function () {
         await expect(
           deployer.PolygonLandTunnelV2.setMaxAllowedQuads(0)
         ).to.be.revertedWith(
-          'PolygonLandTunnel: max allowed value cannot be zero'
+          'PolygonLandTunnelV2: max allowed value cannot be zero'
         );
       });
 
@@ -778,7 +778,7 @@ describe('PolygonLand', function () {
             MockPolygonLandTunnelV2.address,
             landId
           )
-        ).to.be.revertedWith('PolygonLandTunnel: !BRIDGING');
+        ).to.be.revertedWith('PolygonLandTunnelV2: !BRIDGING');
       });
       it('cannot accept randomly transferred lands as batch', async function () {
         const {
@@ -818,7 +818,7 @@ describe('PolygonLand', function () {
             [0],
             bytes
           )
-        ).to.be.revertedWith('PolygonLandTunnel: !BRIDGING');
+        ).to.be.revertedWith('PolygonLandTunnelV2: !BRIDGING');
       });
       it('should not be able to transfer Land when paused', async function () {
         const {
