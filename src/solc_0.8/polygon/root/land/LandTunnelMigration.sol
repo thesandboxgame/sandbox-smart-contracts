@@ -23,13 +23,14 @@ contract LandTunnelMigration {
     event AdminChanged(address _newAdmin);
 
     modifier isAdmin() {
-        require(admin == msg.sender, "!AUTHORISED");
+        require(admin == msg.sender, "LandTunnelMigration: !AUTHORISED");
         _;
     }
 
     /// @notice changes admin to new admin
     /// @param _newAdmin the new admin to be set
     function changeAdmin(address _newAdmin) external isAdmin {
+        require(_newAdmin != address(0), "LandTunnelMigration: admin can't be zero address");
         admin = _newAdmin;
         emit AdminChanged(_newAdmin);
     }
@@ -40,6 +41,10 @@ contract LandTunnelMigration {
         address _oldLandTunnel,
         address _admin
     ) {
+        require(_admin != address(0), "LandTunnelMigration: admin can't be zero address");
+        require(_landToken != address(0), "LandTunnelMigration: landToken can't be zero address");
+        require(_newLandTunnel != address(0), "LandTunnelMigration: new Tunnel can't be zero address");
+        require(_oldLandTunnel != address(0), "LandTunnelMigration: old Tunnel can't be zero address");
         admin = _admin;
         landToken = ILandToken(_landToken);
         newLandTunnel = _newLandTunnel;

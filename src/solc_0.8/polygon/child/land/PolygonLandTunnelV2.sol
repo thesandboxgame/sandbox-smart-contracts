@@ -40,7 +40,7 @@ contract PolygonLandTunnelV2 is
     /// @notice set the limit of quads we can send in one tx to L1
     /// @param _maxAllowedQuads maximum number of quads accepted
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
-        require(_maxAllowedQuads > 0, "PolygonLandTunnel: max allowed value cannot be zero");
+        require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
         maxAllowedQuads = _maxAllowedQuads;
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
@@ -99,8 +99,11 @@ contract PolygonLandTunnelV2 is
         uint256[] calldata ys,
         bytes memory data
     ) external whenNotPaused() {
-        require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
+        require(to != address(0), "PolygonLandTunnelV2: can't send to zero address");
+        require(
+            sizes.length == xs.length && sizes.length == ys.length,
+            "PolygonLandTunnelV2: sizes, xs, ys must be same length"
+        );
 
         uint32 gasLimit = 0;
         uint256 quads = 0;
@@ -109,8 +112,8 @@ contract PolygonLandTunnelV2 is
             quads += sizes[i] * sizes[i];
         }
 
-        require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
-        require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
+        require(quads <= maxAllowedQuads, "PolygonLandTunnelV2: Exceeds max allowed quads.");
+        require(gasLimit < maxGasLimitOnL1, "PolygonLandTunnelV2: Exceeds gas limit on L1.");
         transferringToL1 = true;
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
@@ -145,7 +148,7 @@ contract PolygonLandTunnelV2 is
         uint256,
         bytes calldata
     ) external view override returns (bytes4) {
-        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
+        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnelV2: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -158,7 +161,7 @@ contract PolygonLandTunnelV2 is
         uint256[] calldata,
         bytes calldata
     ) external view override returns (bytes4) {
-        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnel: !BRIDGING");
+        require(transferringToL1 || childToken.isSuperOperator(operator), "PolygonLandTunnelV2: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 

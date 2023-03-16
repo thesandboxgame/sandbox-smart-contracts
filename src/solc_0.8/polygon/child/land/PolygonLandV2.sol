@@ -44,13 +44,13 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
-        require(sender != address(0), "ZERO_ADDRESS_SENDER");
-        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(sender != address(0), "PolygonLandV2: ZERO_ADDRESS_SENDER");
+        require(owner != address(0), "PolygonLandV2: NONEXISTENT_TOKEN");
         require(
             msgSender == sender || _operatorsForAll[sender][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
+            "PolygonLandV2: UNAUTHORIZED_APPROVAL"
         );
-        require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
+        require(address(uint160(ownerData)) == sender, "PolygonLandV2: OWNER_NOT_SENDER");
         _approveFor(ownerData, operator, id);
     }
 
@@ -63,10 +63,10 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
-        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(owner != address(0), "PolygonLandV2: NONEXISTENT_TOKEN");
         require(
             owner == msgSender || _operatorsForAll[owner][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
+            "PolygonLandV2: UNAUTHORIZED_APPROVAL"
         );
         _approveFor(ownerData, operator, id);
     }
@@ -85,7 +85,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "ERC721_TRANSFER_REJECTED");
+            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "PolygonLandV2: ERC721_TRANSFER_REJECTED");
         }
     }
 
@@ -105,7 +105,10 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
+            require(
+                _checkOnERC721Received(_msgSender(), from, to, id, data),
+                "PolygonLandV2: ERC721_TRANSFER_REJECTED"
+            );
         }
     }
 
@@ -147,9 +150,9 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address operator,
         bool approved
     ) external override onlyAllowedOperatorApproval(operator) {
-        require(sender != address(0), "Invalid sender address");
+        require(sender != address(0), "PolygonLandV2: Invalid sender address");
         address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
+        require(msgSender == sender || _superOperators[msgSender], "PolygonLandV2: UNAUTHORIZED_APPROVE_FOR_ALL");
 
         _setApprovalForAll(sender, operator, approved);
     }

@@ -44,7 +44,7 @@ contract LandTunnelV2 is
         uint256, /* tokenId */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnel: !BRIDGING");
+        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnelV2: !BRIDGING");
         return this.onERC721Received.selector;
     }
 
@@ -57,7 +57,7 @@ contract LandTunnelV2 is
         uint256[] calldata, /* ids */
         bytes calldata /* data */
     ) external view override returns (bytes4) {
-        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnel: !BRIDGING");
+        require(transferringToL2 || rootToken.isSuperOperator(operator), "LandTunnelV2: !BRIDGING");
         return this.onERC721BatchReceived.selector;
     }
 
@@ -75,8 +75,8 @@ contract LandTunnelV2 is
         uint256[] memory ys,
         bytes memory data
     ) public whenNotPaused() {
-        require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
+        require(to != address(0), "LandTunnelV2: can't send to zero address");
+        require(sizes.length == xs.length && xs.length == ys.length, "LandTunnelV2: invalid data");
         transferringToL2 = true;
         rootToken.batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
         transferringToL2 = false;
