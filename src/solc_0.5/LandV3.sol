@@ -73,6 +73,12 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(address registry) external onlyAdmin {
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    }
+
     /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval

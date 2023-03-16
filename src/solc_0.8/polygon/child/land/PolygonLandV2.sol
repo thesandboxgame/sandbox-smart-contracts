@@ -164,4 +164,10 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(address registry) external virtual onlyAdmin{
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    }
 }
