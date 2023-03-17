@@ -13,6 +13,12 @@ avoid reaching the block gas limit on L1 we check the amount of quads and estima
 is called on L2. There is a map of estimated gas used per quad size and two limits: maxAllowedQuads and maxGasLimitOnL1.
 Both are checked on L2 before accepting a call to bridge a batch of quads to L1.
 
+The tunnel can be used to move Land and Quads (group of lands, see the Land contract docs) from L1 to L2 and the other
+way around as many times as desired.
+
+The tunnel is Ownable and Pausable; it has an owner address that can pause the operation of the tunnel, also it supports
+an ERC2771 meta-transaction forwarder that can be set by the owner address.
+
 # Methods
 
 ## Events info

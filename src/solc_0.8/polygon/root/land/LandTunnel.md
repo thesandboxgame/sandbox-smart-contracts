@@ -6,7 +6,13 @@ The intended audience for .md documentation is auditors, internal developers and
 
 This is the implementation of the
 matic [fx-pos](https://wiki.polygon.technology/docs/develop/l1-l2-communication/fx-portal/) tunnel for
-the [LAND](../../../../solc_0.5/Land.md) contract. This contract must be run on the Ethereum network (L1)
+the [LAND](../../../../solc_0.5/Land.md) contract. This contract must be run on the Ethereum network (L1).
+
+The tunnel can be used to move Land and Quads (group of lands, see the Land contract docs) from L1 to L2 and the other
+way around as many times as desired.
+
+The tunnel is Ownable and Pausable; it has an owner address that can pause the operation of the tunnel, also it supports
+an ERC2771 meta-transaction forwarder that can be set by the owner address.
 
 # Methods
 
