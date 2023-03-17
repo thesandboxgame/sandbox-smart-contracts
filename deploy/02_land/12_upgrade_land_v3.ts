@@ -23,16 +23,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const admin = await deployments.read('Land', 'getAdmin');
 
-  const operatorFilterRegistry = await deployments.read(
-    'OperatorFilterSubscription',
-    'operatorFilterRegistry'
+  const operatorFilterRegistry = await deployments.get(
+    'OperatorFilterRegistry'
   );
 
   await deployments.execute(
     'Land',
     {from: admin},
     'setOperatorRegistry',
-    operatorFilterRegistry
+    operatorFilterRegistry.address
   );
 
   await deployments.execute(
