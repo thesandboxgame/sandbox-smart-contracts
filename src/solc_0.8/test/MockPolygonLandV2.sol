@@ -7,7 +7,7 @@ import "../polygon/child/land/PolygonLandV2.sol";
 contract MockPolygonLandV2 is PolygonLandV2 {
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) override external {
+    function setOperatorRegistry(address registry) external override {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 

@@ -162,12 +162,13 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
+        require(subscriptionOrRegistrantToCopy != address(0), "PolygonLandV2: subscription can't be zero address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external virtual onlyAdmin{
+    function setOperatorRegistry(address registry) external virtual onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 }

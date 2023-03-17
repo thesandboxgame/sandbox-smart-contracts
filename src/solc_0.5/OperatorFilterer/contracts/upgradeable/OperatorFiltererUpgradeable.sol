@@ -8,9 +8,7 @@ import {AddressUtils} from "../../../contracts_common/Libraries/AddressUtils.sol
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
 contract OperatorFiltererUpgradeable {
     using AddressUtils for address;
-    IOperatorFilterRegistry public operatorFilterRegistry =
-        // Address of the operator filterer registry
-        IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
+    IOperatorFilterRegistry public operatorFilterRegistry;
 
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
