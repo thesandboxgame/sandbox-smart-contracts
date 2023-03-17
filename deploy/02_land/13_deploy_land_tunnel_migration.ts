@@ -11,16 +11,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const land = await deployments.get('Land');
   const landTunnelV2 = await deployments.get('LandTunnelV2');
 
-  // await deploy('LandTunnelMigration', {
-  //   from: deployer,
-  //   contract: 'LandTunnelMigration',
-  //   args: [land.address, landTunnelV2.address, landTunnel.address, deployer],
-  //   log: true,
-  // });
-
-  const ans = await deployments.read('Land', 'operatorFilterRegistry');
-console.log({ans});
+  await deploy('LandTunnelMigration', {
+    from: deployer,
+    contract: 'LandTunnelMigration',
+    args: [land.address, landTunnelV2.address, landTunnel.address, deployer],
+    log: true,
+  });
 };
 export default func;
 func.tags = ['LandTunnelMigration'];
-// func.dependencies = ['LandTunnel', 'LandTunnelV2', 'Land'];
+func.dependencies = ['LandTunnel', 'LandTunnelV2', 'Land'];
