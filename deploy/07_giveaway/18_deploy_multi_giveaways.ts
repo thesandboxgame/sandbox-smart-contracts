@@ -38,4 +38,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['Multi_Giveaway', 'Multi_Giveaway_deploy'];
+func.tags = [
+  'Multi_Giveaway',
+  'Multi_Giveaway_deploy',
+  // Legacy deployment tag
+  'Multi_Giveaway_1',
+];

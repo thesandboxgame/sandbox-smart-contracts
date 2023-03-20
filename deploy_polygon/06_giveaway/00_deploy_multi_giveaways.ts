@@ -43,4 +43,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PolygonMulti_Giveaway', 'PolygonMulti_Giveaway_deploy'];
+func.tags = [
+  'PolygonMulti_Giveaway',
+  'PolygonMulti_Giveaway_deploy',
+  // Legacy deployment tag
+  'PolygonMulti_Giveaway_1',
+];
