@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const admin = await deployments.read('PolygonLand', 'getAdmin');
 
   const operatorFilterRegistry = await deployments.get(
-    'OperatorFilterRegistry'
+    'PolygonOperatorFilterRegistry'
   );
 
   await deployments.execute(
@@ -43,4 +43,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['PolygonLand', 'PolygonLandV2', 'L2'];
-func.dependencies = ['PolygonLand_deploy', 'polygonOperatorFilterSubscription'];
+func.dependencies = [
+  'PolygonLand_deploy',
+  'polygonOperatorFilterSubscription',
+  'PolygonOperatorFilterRegistry',
+];

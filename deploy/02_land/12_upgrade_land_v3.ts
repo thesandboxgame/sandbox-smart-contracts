@@ -50,4 +50,5 @@ func.dependencies = [
   'Land_Old_deploy',
   'LandV2_deploy',
   'operatorFilterSubscription',
+  'OperatorFilterRegistry',
 ];
