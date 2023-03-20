@@ -65,5 +65,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
+func.dependencies = ['PolygonMulti_Giveaway_deploy'];
 func.tags = ['PolygonMulti_Giveaway_1', 'PolygonMulti_Giveaway_1_setup', 'L2'];
 func.skip = skipUnlessTest;
