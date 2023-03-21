@@ -47,8 +47,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = [
-  'operatorFilterSubscription',
-  'operatorFilterSubscription_deploy',
-  'OperatorFilterRegistry',
-];
+func.tags = ['operatorFilterSubscription', 'operatorFilterSubscription_deploy'];
+func.dependencies = ['OperatorFilterRegistry'];

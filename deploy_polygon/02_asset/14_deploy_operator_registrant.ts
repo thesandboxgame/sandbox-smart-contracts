@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!isRegistered) {
     const defaultSubscription = await deployments.read(
-      'OperatorFilterSubscription',
+      'PolygonOperatorFilterSubscription',
       'DEFAULT_SUBSCRIPTION'
     );
     await deployments.execute(
@@ -50,5 +50,5 @@ export default func;
 func.tags = [
   'polygonOperatorFilterSubscription',
   'polygonOperatorFilterSubscription_deploy',
-  'PolygonOperatorFilterRegistry',
 ];
+func.dependencies = ['PolygonOperatorFilterRegistry'];

@@ -37,6 +37,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         [mockMarketPlace1.address, mockMarketPlace2.address],
       ],
       log: true,
+      skipIfAlreadyDeployed: true,
     });
   }
 };

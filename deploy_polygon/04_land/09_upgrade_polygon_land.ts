@@ -43,8 +43,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['PolygonLand', 'PolygonLandV2', 'L2'];
-func.dependencies = [
-  'PolygonLand_deploy',
-  'polygonOperatorFilterSubscription',
-  'PolygonOperatorFilterRegistry',
-];
+func.dependencies = ['PolygonLand_deploy', 'polygonOperatorFilterSubscription'];
