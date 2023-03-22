@@ -2,32 +2,146 @@
 
 The intended audience for .md documentation is auditors, internal developers and external developer contributors.
 
+The Land contract implements the following standards:
+
+- [ERC721](https://eips.ethereum.org/EIPS/eip-721)
+- [ERC2771](https://eips.ethereum.org/EIPS/eip-2771)
+
+check the standards for an explanation of concepts like tokenId, approval, minting, transfer, meta-transaction, etc.
+
 # Features
 
 A [LAND](https://sandboxgame.gitbook.io/the-sandbox/land/what-is-land) is a digital piece of real-estate in The
-Sandbox's metaverse. Each LAND is a unique piece of the metaverse map. The map is a grid of 408x408 lands.
+Sandbox's metaverse. Each LAND is a unique piece of the metaverse map which is a grid of 408x408 lands.
 
-The land contract complies with the ERC-721 standard. The tokenId is used to pack the coordinates `(x,y)` of the land
-inside the grid and the layerId (explained bellow) using the following formula `tokenId = ( x + y * 408 ) | layerId`.
+Instead of using sequential tokenIds the tokenId value is used to store the following information:
 
-The layerId is used to represent groups of lands called [Quads](https://en.wikipedia.org/wiki/Quadtree) we support quads
-of the following sizes: 24x24, 12x12, 6x6, 3x3. A user owns a quad if he owns all the lands inside it. Using quads a
-full group of lands can be transferred in one transaction. The contract also support batch transfers of quads and lands.
+- the coordinates `(x,y)` of the land inside the map.
+- the `layerId` that related to the size of [quads](#quads) (explained bellow).
 
-Land exists on ethereum (L1) and polygon (L2). There are two different contracts for each layer and also a land tunnel
-based on the matic fx-portal library.
+Land exists on ethereum (L1) and polygon (L2). There is a Land contract for each network and also a land tunnel based on
+the matic fx-portal library that can be used to transfer lands back and forth between the two networks.
 
-In the V1 of the land contract lands can only be minted on L1, V2 adds the possibility to mint lands on L2 too. V3
-implement the OpenSea royalties blacklist.
+In the V1 of the contract lands can only be minted on L1, V2 adds the possibility to mint on L2 too. V3 implement the
+OpenSea royalties blacklist.
+
+## Roles
 
 The land contract support the following roles:
 
-- admin: this is a unique address assigned during the initialization of the contract and can add/remove addresses from
-  the other roles.
-- minter: the addresses in this list can mint lands by calling the `mintQuad` method.
-- super operator: the addresses in this list are approved to transfer tokens between users.
-- meta transaction processor: the addresses in this can transfer lands in behalf of other users (similar to super
-  operators). On the L2 contract this role is the ERC2771 meta transaction forwarder.
+- admin: a unique address that is the owner of the contract and can manage the other roles.
+- minters: a list of addresses that can mint lands.
+- super operators: a list of addresses that are automatically approved to transfer tokens between users.
+- meta transaction processor: an address that can transfer lands in behalf of other users and used to implement
+  meta-transactions. On the L2 contract this role is the ERC2771 meta transaction forwarder.
+
+# Quads
+
+Quads are a way to groups lands. A quad of lands can be minted and transferred in one step. The concept is related to
+a [QuadTree](https://en.wikipedia.org/wiki/Quadtree) but it has it own specific implementation in the Land contract.
+
+The full map of `408x408` lands is divided in a grid of `17x17` quads that has a size of `24x24` each. Each `24x24`
+quad is divided in four `12x12` quads, each `12x12` quad is divided in four `6x6` quads, each `6x6`
+quad is divided in four `3x3` quads and each `3x3` quad is divided in nine `1x1` quads (or just lands). This way we have
+a QuadTree. Each node is a ***quad*** and has one ***parent-quad*** and some ***child-quads*** that he includes.
+
+![](images/TheGreatQuad.png)
+
+A quad is recognized by its top left coordinate, top right coordinate and its size. Quads are part of a grid, so, the
+coordinates of the quad must be a multiple of the quad size. For example: the coordinate `(6,0)` is valid for a `3x3`
+quad and a `6x6` quad, but the coordinate `(3,0)` is only valid for a `3x3` quad.
+
+***A quad of size `1x1` is just a land, and we will refer interchangeably to it as quad or land.***
+
+## TokenId
+
+The ERC721 tokenId is used to store the coordinates and size of quads. Instead of storing directly the size of the quad
+a layerId is used to represent it. The formula for the quad information used is: `tokenId = ( x + y * 408 ) | layerId`.
+Where
+
+- `x,y` are the coordinates of the quad in the map and must be multiple of quad size.
+- layerId depends on the size is one of:
+  - `LAYER_1x1` = `0x0000000000000000000000000000000000000000000000000000000000000000`
+  - `LAYER_3x3` = `0x0100000000000000000000000000000000000000000000000000000000000000`
+  - `LAYER_6x6` = `0x0200000000000000000000000000000000000000000000000000000000000000`
+  - `LAYER_12x12` = `0x0300000000000000000000000000000000000000000000000000000000000000`
+  - `LAYER_24x24` = `0x0400000000000000000000000000000000000000000000000000000000000000`
+
+Each land (a specific `x,y` coordinate) is included in five quads one for each layerId and each one of those quads has
+its own tokenId. For example: the land `(0x123,0)` has the token id `0x123` and it is also included in the `3x3` quad
+that has the tokenId `0x0100...0123`, etc.
+
+***Using the tokenId of a quad a lot of lands can be minted or transferred in one transaction.***
+
+## Ownership
+
+The land contract uses a mapping called `_owners` that keep track of the ownership of quads and lands, it maps
+the `tokenId` to the address of the owner, also the same mapping is used to store two flags. Here is the description of
+the `_owners` mapping value:
+
+- Bit 0-159 are used for the owner address
+- Bit 160 is set when a land is burned, at the same time the owner address is set to zero.
+- Bit 255 is used for the flag `operatorEnabled`. This flag is used to enable operators for a specific tokenId and is
+  set during a call to approve. This flag is cleared automatically on transfer.
+
+To decide if a user is the owner of a quad there are a few things to take into account:
+
+1. When a user owns only part of the quad then the quad doesn't really belong to anybody, it belongs "to nobody".
+2. We must represent quads that are not minted yet, they have "no owner".
+3. Each land belongs to five quads (one for each layer) the contract choose which entry to set and which one to use to
+   decide the right ownership of a land.
+
+The contract keeps the consistency between the owners of quads, parent-quads and child-quads by using the following
+rules:
+
+- The ***address zero*** is used to represent both "nobody" and "no owner" which will be use interchangeably form now
+  on.
+- To be the owner of a quad the user must meet two conditions:
+  - All the child-quads must be owned by him or must have "no owner".
+  - If any of the child-quads belongs to "no owner" then the user must be the owner of the quad or some parent-quad.
+    NOTE:
+    if the user is the owner of all child-quads then automatically is the owner of the quad.
+- When a user transfers a quad instead of setting the address of the user on all the child-quads the child-quads are set
+  to "no owner" and the parent-quads are left untouched. This leave some parent-quads out of sync (some child can have a
+  different owner). Even if this sounds wrong there is no way to abuse the situation because the owner of the
+  parent-quad is not the owner of the child-quads anymore.
+- When a user gets a new quad, and it fills a parent-quad the parent quad is left untouched and the user just owns the
+  different pieces. If the user wants to unify the parent-quad he must do an extra transaction to transfer the
+  parent-quad to himself.
+- To mint a quad:
+  - All child-quads must have "no owner".
+  - All parent-quads must have "no owner".
+  - Only one entry in the `_owners[tokenId]` mapping that corresponds to the tokenId of the quad is set to the address
+    of the new owner. ***Only one storage slot is changed when minting.***
+
+### Example
+
+Let's imagine we're minting a 6x6 quad for user A, in the coordinates 0, 0. We'll mint a single token, with a quad id
+equal to `LAYER_6x6`. There won't be 36 tokens minted, just one, with an id that allows us to access all its internal
+quads.
+
+![](images/quadIMG1.png)
+
+User A can transfer his 6x6 quad to user B if he wants to, calling the `transferQuad` function.
+
+![](images/quadIMG2.png)
+
+The quad can also be separated in `3x3` ones and each `3x3` can be separated into `1x1` ones. The next image shows what
+would happen if a `3x3` quad is transferred to user B. At this point user A lost the ownership of the `6x6` quad.
+
+![](images/quadIMG3.png)
+
+The same happen to the `3x3` quad when a `1x1` quad is transferred.
+
+![](images/quadIMG4.png)
+
+Now, if we try to transfer the `3x3` quad from which we took one of the lands, we will get the error "not owner".
+
+![](images/quadIMG5.png)
+
+If the user A wants to send the rest of these lands of the `3x3` quad, he must send them one by one.
+
+![](images/quadIMG6.png)
 
 # Methods
 
