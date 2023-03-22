@@ -508,7 +508,7 @@ Parameters:
 function register(address subscriptionOrRegistrantToCopy, bool subscribe) external;
 ```
 
-This function is used to register Land on the Operator filterer Registry of Opensea.can only be called by admin.
+This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
 
 used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
 

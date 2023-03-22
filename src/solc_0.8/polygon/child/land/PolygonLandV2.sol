@@ -157,7 +157,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         _setApprovalForAll(sender, operator, approved);
     }
 
-    /// @notice This function is used to register Land contract on the Operator filterer Registry of Opensea.
+    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
     /// @dev can only be called by admin.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".

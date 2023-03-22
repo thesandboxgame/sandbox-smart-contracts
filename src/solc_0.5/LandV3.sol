@@ -65,7 +65,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
-    /// @notice This function is used to register Land on the Operator filterer Registry of Opensea.can only be called by admin.
+    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
