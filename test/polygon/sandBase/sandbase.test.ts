@@ -135,7 +135,7 @@ describe('SandBaseToken.sol', function () {
         userWithSand.address
       );
       const sandTransferValue = DECIMALS_18.mul(200);
-      userWithSand.SandBaseToken.transfer(
+      await userWithSand.SandBaseToken.transfer(
         userWithSand.address,
         sandTransferValue
       );
@@ -175,7 +175,7 @@ describe('SandBaseToken.sol', function () {
       const {userWithSand, usersWithoutSand} = await setupTest();
       const TOTAL_ALLOWANCE = DECIMALS_18.mul(250);
       const USED_ALLOWANCE = DECIMALS_18.mul(350);
-      userWithSand.SandBaseToken.approve(
+      await userWithSand.SandBaseToken.approve(
         usersWithoutSand[0].address,
         TOTAL_ALLOWANCE
       );
@@ -197,7 +197,7 @@ describe('SandBaseToken.sol', function () {
       const allowanceCarrier = usersWithoutSand[0];
       const allowanceReceiver = usersWithoutSand[1];
 
-      allowanceApprover.SandBaseToken.approve(
+      await allowanceApprover.SandBaseToken.approve(
         allowanceCarrier.address,
         TOTAL_ALLOWANCE
       );
@@ -209,7 +209,7 @@ describe('SandBaseToken.sol', function () {
         allowanceCarrier.address
       );
 
-      allowanceCarrier.SandBaseToken.transferFrom(
+      await allowanceCarrier.SandBaseToken.transferFrom(
         allowanceApprover.address,
         allowanceReceiver.address,
         TRANSFER
@@ -236,7 +236,7 @@ describe('SandBaseToken.sol', function () {
       const allowanceCarrier = usersWithoutSand[0];
       const allowanceReceiver = usersWithoutSand[1];
 
-      allowanceApprover.SandBaseToken.approve(
+      await allowanceApprover.SandBaseToken.approve(
         allowanceCarrier.address,
         TOTAL_ALLOWANCE
       );
@@ -248,7 +248,7 @@ describe('SandBaseToken.sol', function () {
         allowanceCarrier.address
       );
 
-      allowanceCarrier.SandBaseToken.transferFrom(
+      await allowanceCarrier.SandBaseToken.transferFrom(
         allowanceApprover.address,
         allowanceReceiver.address,
         TRANSFER
@@ -274,7 +274,7 @@ describe('SandBaseToken.sol', function () {
       const allowanceApprover = userWithSand;
       const allowanceCarrier = usersWithoutSand[0];
 
-      allowanceApprover.SandBaseToken.approve(
+      await allowanceApprover.SandBaseToken.approve(
         allowanceCarrier.address,
         TOTAL_ALLOWANCE
       );
@@ -288,7 +288,10 @@ describe('SandBaseToken.sol', function () {
         allowanceCarrier.address
       );
 
-      allowanceCarrier.SandBaseToken.burnFor(allowanceApprover.address, BURN);
+      await allowanceCarrier.SandBaseToken.burnFor(
+        allowanceApprover.address,
+        BURN
+      );
 
       const senderAfter = await SandBaseToken.balanceOf(
         allowanceApprover.address
