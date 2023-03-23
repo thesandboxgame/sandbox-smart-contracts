@@ -964,7 +964,10 @@ describe('assetSignedAuctionWithAuth', function () {
       ethers.provider.getSigner(users[1].address)
     );
 
-    await assetSignedAuctionAuthContract.cancelSellerOffer(offerId);
+    const AssetSignedAuctionAuthContractAsSeller = assetSignedAuctionAuthContract.connect(
+      ethers.provider.getSigner(seller)
+    );
+    await AssetSignedAuctionAuthContractAsSeller.cancelSellerOffer(offerId);
 
     const auctionData = [
       offerId,
@@ -1035,7 +1038,7 @@ describe('assetSignedAuctionWithAuth', function () {
       [buyAmount, '5000000000000000000']
     );
 
-    void expect(
+    await expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
           buyer: buyer,
