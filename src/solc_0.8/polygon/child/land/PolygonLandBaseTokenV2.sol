@@ -45,8 +45,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     /// @param from current owner of the quad
     /// @param to destination
     /// @param sizes list of sizes for each quad
-    /// @param xs list of top left x coordinates for each quad
-    /// @param ys list of top left y coordinates for each quad
+    /// @param xs list of bottom left x coordinates for each quad
+    /// @param ys list of bottom left y coordinates for each quad
     /// @param data additional data
     function batchTransferQuad(
         address from,
