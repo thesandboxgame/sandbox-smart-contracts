@@ -7,7 +7,7 @@ contract MetaTransactionReceiverV2 is AdminV2 {
     using AddressUtils for address;
 
     mapping(address => bool) internal _metaTransactionContracts;
-    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
+    event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);
 
     /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.

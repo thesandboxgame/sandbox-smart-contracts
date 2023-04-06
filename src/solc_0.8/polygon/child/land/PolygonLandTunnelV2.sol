@@ -24,7 +24,7 @@ contract PolygonLandTunnelV2 is
 
     mapping(uint8 => uint32) public gasLimits;
 
-    event SetGasLimit(uint8 size, uint32 limit);
+    event SetGasLimit(uint8 indexed size, uint32 indexed limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
     event SetMaxAllowedQuads(uint256 maxQuads);
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);

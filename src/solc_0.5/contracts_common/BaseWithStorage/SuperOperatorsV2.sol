@@ -6,7 +6,7 @@ contract SuperOperatorsV2 is AdminV2 {
 
     mapping(address => bool) internal _superOperators;
 
-    event SuperOperator(address superOperator, bool enabled);
+    event SuperOperator(address indexed superOperator, bool enabled);
 
     /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
     /// @param superOperator address that will be given/removed superOperator right.
