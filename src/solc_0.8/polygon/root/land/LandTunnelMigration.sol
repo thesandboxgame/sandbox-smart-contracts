@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/interfaces/ILandToken.sol";
+import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
 
 /// @title Tunnel migration on L1
 contract LandTunnelMigration {

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./ILandToken.sol";
+import {ILandToken} from "./ILandToken.sol";
 
 interface IPolygonLand is ILandToken {
     function mintQuad(

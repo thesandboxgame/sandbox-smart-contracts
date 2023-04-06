@@ -2,8 +2,8 @@
 /* solhint-disable no-empty-blocks */
 pragma solidity 0.5.9;
 
-import "./Land/erc721/LandBaseTokenV3.sol";
-import "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+import {LandBaseTokenV3} from "./Land/erc721/LandBaseTokenV3.sol";
+import {OperatorFiltererUpgradeable} from "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
 contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     /**

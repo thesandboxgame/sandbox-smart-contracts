@@ -2,8 +2,8 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "./WithAdminV2.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {WithAdminV2} from "./WithAdminV2.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
     mapping(address => bool) internal _superOperators;

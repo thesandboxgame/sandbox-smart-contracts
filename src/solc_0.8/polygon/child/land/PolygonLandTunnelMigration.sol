@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../common/interfaces/IPolygonLandWithSetApproval.sol";
-import "../../../common/interfaces/IPolygonLandTunnel.sol";
-import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import {IPolygonLandWithSetApproval} from "../../../common/interfaces/IPolygonLandWithSetApproval.sol";
+import {IPolygonLandTunnel} from "../../../common/interfaces/IPolygonLandTunnel.sol";
+import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @title Tunnel migration on L2
 contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
