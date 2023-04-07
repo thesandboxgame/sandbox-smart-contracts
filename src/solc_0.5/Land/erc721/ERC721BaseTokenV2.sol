@@ -9,6 +9,12 @@ import {SuperOperatorsV2} from "../../contracts_common/BaseWithStorage/SuperOper
 import {MetaTransactionReceiverV2} from "../../contracts_common/BaseWithStorage/MetaTransactionReceiverV2.sol";
 import {ERC721MandatoryTokenReceiver} from "../../contracts_common/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
+/**
+ * @title ERC721BaseTokenV2
+ * @author The Sandbox
+ * @notice Basic functionalities of a NFT
+ * @dev ERC721 implementation that supports meta-transactions and super operators
+ */
 contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionReceiverV2 {
     using AddressUtils for address;
 
@@ -18,9 +24,16 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
+    /// @notice Number of NFT an address own
     mapping (address => uint256) public _numNFTPerAddress;
+
+    /// @notice Token ids per address
     mapping (uint256 => uint256) public _owners;
+
+    /// @notice Operators for each owner address for all tokens
     mapping (address => mapping(address => bool)) public _operatorsForAll;
+
+    /// @notice Operator for each token id
     mapping (uint256 => address) public _operators;
 
     bool internal _initialized;
@@ -30,6 +43,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         _;
     }
 
+    /**
+     * @notice Initializes the contract with the meta-transaction contract & admin
+     * @param metaTransactionContract Authorized contract for meta-transactions
+     * @param admin Admin of the contract
+     */
     function initialize (
         address metaTransactionContract,
         address admin
@@ -39,6 +57,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         _initialized = true;
     }
 
+    /**
+     * @param from Sender address
+     * @param to Recipient address
+     * @param id Token id to transfer
+     */
     function _transferFrom(address from, address to, uint256 id) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
@@ -56,11 +79,19 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         return _numNFTPerAddress[owner];
     }
 
-
+    /**
+     * @param id Token id
+     */
     function _ownerOf(uint256 id) internal view returns (address) {
         return address(_owners[id]);
     }
 
+    /**
+     *
+     * @param id Token id
+     * @return owner Address of the token's owner
+     * @return operatorEnabled Is he an operator
+     */
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[id];
         owner = address(data);
@@ -77,6 +108,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         require(owner != address(0), "token does not exist");
     }
 
+    /**
+     * @param owner The address giving the approval
+     * @param operator The address receiving the approval
+     * @param id The id of the token
+     */
     function _approveFor(address owner, address operator, uint256 id) internal {
         if(operator == address(0)) {
             _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
@@ -143,6 +179,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         }
     }
 
+    /**
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param id The id of the token
+     */
     function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
@@ -159,6 +200,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         }
     }
 
+    /**
+     * @dev Checks if the target contract supports the given interface & doesn't exceed 10000 gas
+     * @param _contract The target contract
+     * @param interfaceId The interface id
+     */
     function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId)
         internal
         view
@@ -247,6 +293,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         _batchTransferFrom(from, to, ids, data, false);
     }
 
+    /**
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param ids The ids of the tokens
+     * @param data additional data
+     * @param safe checks the target contract
+     */
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         bool authorized = msg.sender == from ||
@@ -341,7 +394,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
-
+    /**
+     * @param sender Sender address
+     * @param operator The address receiving the approval
+     * @param approved The determination of the approval
+     */
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -370,6 +427,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    /**
+     * @param from sender address
+     * @param owner owner address of the token
+     * @param id token id to burn
+     */
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "not owner");
         _owners[id] = 2**160; // cannot mint it again
@@ -400,6 +462,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         _burn(from, owner, id);
     }
 
+    /**
+     * @param operator Sender of the tx
+     * @param from Owner of the token
+     * @param to Recipient
+     * @param tokenId Token id
+     * @param _data extra data
+     */
     function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
@@ -407,6 +476,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         return (retval == _ERC721_RECEIVED);
     }
 
+    /**
+     * @param operator Sender of the tx
+     * @param from Owner of the token
+     * @param to Recipient
+     * @param ids Token ids
+     * @param _data extra data
+     */
     function _checkOnERC721BatchReceived(address operator, address from, address to, uint256[] memory ids, bytes memory _data)
         internal returns (bool)
     {
