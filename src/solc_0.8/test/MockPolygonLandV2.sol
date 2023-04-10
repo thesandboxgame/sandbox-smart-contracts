@@ -35,4 +35,12 @@ contract MockPolygonLandV2 is PolygonLandV2 {
     ) external override {
         _mintQuad(user, size, x, y, data);
     }
+
+    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
+    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+    /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
+    function registerFilterer(address subscriptionOrRegistrantToCopy, bool subscribe) external {
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
 }
