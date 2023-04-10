@@ -265,10 +265,11 @@ export const setupLandMigration = deployments.createFixture(async function () {
     Land,
     PolygonLand,
   });
-  const landMinter = await setupUser(minter, {Land});
+  const landMinter = await setupUser(minter, {Land, PolygonLand});
   await landAdmin.Land.setMinter(landMinter.address, true);
   await deployer.PolygonLand.setMinter(MockPolygonLandTunnel.address, true);
   await deployer.PolygonLand.setMinter(MockPolygonLandTunnelV2.address, true);
+  await deployer.PolygonLand.setMinter(minter, true);
   await deployer.PolygonLand.setTrustedForwarder(trustedForwarder.address);
   await deployer.MockLandTunnelV2.setTrustedForwarder(trustedForwarder.address);
   await deployer.MockLandTunnel.setTrustedForwarder(trustedForwarder.address);

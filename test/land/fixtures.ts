@@ -28,14 +28,29 @@ export const setupLandV2 = withSnapshot(
 
 export const setupLand = withSnapshot(['Land', 'Sand'], async function (hre) {
   const landContract = await ethers.getContract('Land');
+  const {deploy} = deployments;
+
+  const {landAdmin, deployer} = await getNamedAccounts();
+
+  await deploy('TestERC1155ERC721TokenReceiver', {
+    from: deployer,
+    contract: 'TestERC1155ERC721TokenReceiver',
+    args: [landContract.address, true, true, true, true, false],
+    log: true,
+  });
+
   const sandContract = await ethers.getContract('Sand');
-  const {landAdmin} = await getNamedAccounts();
+  const TestERC1155ERC721TokenReceiver = await ethers.getContract(
+    'TestERC1155ERC721TokenReceiver'
+  );
+
   await setMinter(landContract)(landAdmin, true);
   return {
     landContract,
     sandContract,
     hre,
     ethers,
+    TestERC1155ERC721TokenReceiver,
     getNamedAccounts,
     mintQuad: mintQuad(landContract),
   };
@@ -196,8 +211,6 @@ export const setupOperatorFilter = withSnapshot(
 
     const polygonLandV2 = await ethers.getContract('MockPolygonLandV2');
 
-    const users = await setupUsers(otherAccounts, {landV3, polygonLandV2});
-
     await landV3.setOperatorRegistry(operatorFilterRegistry.address);
 
     await polygonLandV2.setOperatorRegistry(operatorFilterRegistry.address);
@@ -210,6 +223,45 @@ export const setupOperatorFilter = withSnapshot(
       .connect(await ethers.getSigner(deployer))
       .register(operatorFilterSubscription.address, true);
 
+    await deployments.deploy('LandV3', {
+      from: deployer,
+      contract: 'MockLandV3',
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [sandContract.address, deployer],
+        },
+      },
+    });
+
+    await deployments.deploy('PolygonLandV2', {
+      from: deployer,
+      contract: 'MockPolygonLandV2',
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: 'initialize',
+          args: [TRUSTED_FORWARDER.address],
+        },
+      },
+    });
+
+    const LandV3WithRegistryNotSet = await ethers.getContract('LandV3');
+
+    const PolygonLandV2WithRegistryNotSet = await ethers.getContract(
+      'PolygonLandV2'
+    );
+
+    const users = await setupUsers(otherAccounts, {
+      landV3,
+      polygonLandV2,
+      LandV3WithRegistryNotSet,
+      PolygonLandV2WithRegistryNotSet,
+    });
+
     return {
       mockMarketPlace1,
       mockMarketPlace2,
@@ -221,6 +273,11 @@ export const setupOperatorFilter = withSnapshot(
       landV3,
       users,
       polygonLandV2,
+      deployer,
+      upgradeAdmin,
+      sandContract,
+      LandV3WithRegistryNotSet,
+      PolygonLandV2WithRegistryNotSet,
     };
   }
 );

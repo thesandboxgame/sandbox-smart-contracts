@@ -2,7 +2,7 @@ import {expect} from '../../chai-setup';
 import {zeroAddress} from '../../land/fixtures';
 import {waitFor} from '../../utils';
 import {setupLandMigration} from './fixtures';
-import {deployments} from 'hardhat';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
 const {deploy} = deployments;
 
 describe('Land Migration', function () {
@@ -106,6 +106,25 @@ describe('Land Migration', function () {
           log: true,
         })
       ).to.be.reverted;
+    });
+
+    it('admin can set new admin and only admin can set new admin', async function () {
+      const {MockLandTunnelMigration} = await setupLandMigration();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await MockLandTunnelMigration.connect(
+        await ethers.provider.getSigner(deployer)
+      ).changeAdmin(landAdmin);
+    });
+
+    it("admin can't be set to zero address", async function () {
+      const {MockLandTunnelMigration} = await setupLandMigration();
+      const {deployer} = await getNamedAccounts();
+
+      await expect(
+        MockLandTunnelMigration.connect(
+          await ethers.provider.getSigner(deployer)
+        ).changeAdmin(zeroAddress)
+      ).to.be.revertedWith("LandTunnelMigration: admin can't be zero address");
     });
 
     it('land Migration from old land Tunnel to new land Tunnel', async function () {
@@ -401,6 +420,27 @@ describe('Land Migration', function () {
       ).to.revertedWith("LandTunnelMigration: admin can't be zero address");
     });
 
+    it('admin can set new admin and only admin can set new admin', async function () {
+      const {MockPolygonLandTunnelMigration} = await setupLandMigration();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await MockPolygonLandTunnelMigration.connect(
+        await ethers.provider.getSigner(deployer)
+      ).changeAdmin(landAdmin);
+    });
+
+    it("admin can't be set to zero address", async function () {
+      const {MockPolygonLandTunnelMigration} = await setupLandMigration();
+      const {deployer} = await getNamedAccounts();
+
+      await expect(
+        MockPolygonLandTunnelMigration.connect(
+          await ethers.provider.getSigner(deployer)
+        ).changeAdmin(zeroAddress)
+      ).to.be.revertedWith(
+        "PolygonLandTunnelMigration: admin can't be zero address"
+      );
+    });
+
     it("can't set Land to zero address constructor", async function () {
       const {
         deployer,
@@ -476,6 +516,27 @@ describe('Land Migration', function () {
           log: true,
         })
       ).to.be.reverted;
+    });
+
+    it('Can receive ERC721 tokens', async function () {
+      const {
+        landMinter,
+        users,
+        PolygonLand,
+        getId,
+        MockPolygonLandTunnelMigration,
+      } = await setupLandMigration();
+      await landMinter.PolygonLand.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(0, 0);
+      await users[0].PolygonLand.transferFrom(
+        users[0].address,
+        MockPolygonLandTunnelMigration.address,
+        id
+      );
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(
+        MockPolygonLandTunnelMigration.address
+      );
     });
 
     it('land Migration from old Polygon land Tunnel to new Polygon land Tunnel', async function () {

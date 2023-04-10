@@ -1,10 +1,17 @@
 import {expect} from '../../chai-setup';
-import {ethers, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  getUnnamedAccounts,
+  getNamedAccounts,
+  deployments,
+} from 'hardhat';
 import {Contract} from 'ethers';
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {setupLand, getId} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
 import {zeroAddress, setupOperatorFilter} from '../../land/fixtures';
+
+const {deploy} = deployments;
 
 type User = {
   address: string;
@@ -16,11 +23,24 @@ const setupTest = withSnapshot(
   async (): Promise<{
     MockLandV2WithMint: Contract;
     landOwners: User[];
+    TestERC1155ERC721TokenReceiver: Contract;
   }> => {
+    const {deployer} = await getNamedAccounts();
     const MockLandV2WithMint = await ethers.getContract('MockLandV2WithMint');
+
+    await deploy('TestERC1155ERC721TokenReceiver', {
+      from: deployer,
+      contract: 'TestERC1155ERC721TokenReceiver',
+      args: [MockLandV2WithMint.address, true, true, true, true, false],
+      log: true,
+    });
+
+    const TestERC1155ERC721TokenReceiver = await ethers.getContract(
+      'TestERC1155ERC721TokenReceiver'
+    );
     const unnamedAccounts = await getUnnamedAccounts();
     const landOwners = await setupUsers(unnamedAccounts, {MockLandV2WithMint});
-    return {MockLandV2WithMint, landOwners};
+    return {MockLandV2WithMint, landOwners, TestERC1155ERC721TokenReceiver};
   }
 );
 
@@ -32,6 +52,13 @@ describe('MockLandV2WithMint.sol', function () {
     const {MockLandV2WithMint} = await setupTest();
     expect(await MockLandV2WithMint.name()).to.be.equal("Sandbox's LANDs");
     expect(await MockLandV2WithMint.symbol()).to.be.equal('LAND');
+  });
+
+  it('Only admin can set minter', async function () {
+    const {MockLandV2WithMint, landOwners} = await setupTest();
+    await expect(
+      MockLandV2WithMint.setMinter(landOwners[0].address, true)
+    ).to.be.revertedWith('only admin is allowed to add minters');
   });
 
   it('cannot set polygon Land Tunnel to zero address', async function () {
@@ -583,6 +610,19 @@ describe('MockLandV2WithMint.sol', function () {
       ).to.be.revertedWith('!AUTHORIZED');
     });
 
+    it('should revert for wrong size', async function () {
+      const {landOwners} = await setupTest();
+      await expect(
+        landOwners[0].MockLandV2WithMint.mintQuad(
+          landOwners[0].address,
+          9,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('Invalid size');
+    });
+
     // eslint-disable-next-line mocha/no-setup-in-describe
     sizes.forEach((size1) => {
       sizes.forEach((size2) => {
@@ -656,24 +696,11 @@ describe('MockLandV2WithMint.sol', function () {
     });
 
     it('should revert for transfer if to address zero', async function () {
-      const {landOwners} = await setupTest();
+      const {deployer} = await setupLand();
       const bytes = '0x3333';
-      await landOwners[0].MockLandV2WithMint.mintQuad(
-        landOwners[0].address,
-        3,
-        3,
-        3,
-        bytes
-      );
-
+      await deployer.PolygonLand.setMinter(deployer.address, true);
       await expect(
-        landOwners[0].MockLandV2WithMint.mintAndTransferQuad(
-          zeroAddress,
-          3,
-          3,
-          3,
-          bytes
-        )
+        deployer.PolygonLand.mintAndTransferQuad(zeroAddress, 3, 3, 3, bytes)
       ).to.be.revertedWith('to is zero address');
     });
 
@@ -690,6 +717,271 @@ describe('MockLandV2WithMint.sol', function () {
           bytes
         )
       ).to.be.revertedWith('to is zero address');
+    });
+
+    it('should revert for mint if co-ordinates of Quad are invalid', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          4,
+          4,
+          bytes
+        )
+      ).to.be.revertedWith('Invalid coordinates');
+    });
+
+    it('should revert for mint if co-ordinates are out of bound', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          411,
+          411,
+          bytes
+        )
+      ).to.be.revertedWith('Out of bounds');
+    });
+
+    it('should revert for mint if size is out of bound', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          25,
+          0,
+          0,
+          bytes
+        )
+      ).to.be.revertedWith('Invalid size');
+    });
+
+    it('should revert when to is non ERC721 receiving contract', async function () {
+      const {
+        MockLandV2WithMint,
+        TestERC1155ERC721TokenReceiver,
+      } = await setupTest();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      const bytes = '0x3333';
+      await TestERC1155ERC721TokenReceiver.connect(
+        await ethers.getSigner(deployer)
+      ).returnWrongBytes();
+      await MockLandV2WithMint.mintQuad(landAdmin, 3, 0, 0, bytes);
+      await expect(
+        MockLandV2WithMint.connect(
+          ethers.provider.getSigner(landAdmin)
+        ).mintAndTransferQuad(
+          TestERC1155ERC721TokenReceiver.address,
+          6,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('erc721 batch transfer rejected by to');
+    });
+
+    it('should not revert when to is ERC721 receiving contract', async function () {
+      const {
+        MockLandV2WithMint,
+        TestERC1155ERC721TokenReceiver,
+      } = await setupTest();
+      const {landAdmin} = await getNamedAccounts();
+      const bytes = '0x3333';
+      await MockLandV2WithMint.mintQuad(landAdmin, 3, 0, 0, bytes);
+      await MockLandV2WithMint.connect(
+        ethers.provider.getSigner(landAdmin)
+      ).mintAndTransferQuad(
+        TestERC1155ERC721TokenReceiver.address,
+        6,
+        0,
+        0,
+        '0x'
+      );
+      const id = getId(3, 0, 0);
+      expect(await MockLandV2WithMint.ownerOf(id)).to.be.equal(
+        TestERC1155ERC721TokenReceiver.address
+      );
+    });
+
+    it('should revert when size is invalid', async function () {
+      const {
+        MockLandV2WithMint,
+        TestERC1155ERC721TokenReceiver,
+      } = await setupTest();
+      const {landAdmin} = await getNamedAccounts();
+      const bytes = '0x3333';
+      await MockLandV2WithMint.mintQuad(landAdmin, 3, 0, 0, bytes);
+      await expect(
+        MockLandV2WithMint.connect(
+          ethers.provider.getSigner(landAdmin)
+        ).mintAndTransferQuad(
+          TestERC1155ERC721TokenReceiver.address,
+          9,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('Invalid size');
+    });
+
+    it('should revert when to is zero address', async function () {
+      const {MockLandV2WithMint} = await setupTest();
+      const {landAdmin} = await getNamedAccounts();
+      await expect(
+        MockLandV2WithMint.connect(
+          ethers.provider.getSigner(landAdmin)
+        ).mintAndTransferQuad(zeroAddress, 9, 0, 0, '0x')
+      ).to.be.revertedWith('to is zero address');
+    });
+
+    it('should revert when sender is not the owner of child quad', async function () {
+      const {
+        MockLandV2WithMint,
+        TestERC1155ERC721TokenReceiver,
+      } = await setupTest();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      const bytes = '0x3333';
+      await TestERC1155ERC721TokenReceiver.connect(
+        await ethers.getSigner(deployer)
+      ).returnWrongBytes();
+      await MockLandV2WithMint.mintQuad(landAdmin, 3, 0, 0, bytes);
+      await expect(
+        MockLandV2WithMint.connect(
+          ethers.provider.getSigner(deployer)
+        ).transferQuad(
+          deployer,
+          TestERC1155ERC721TokenReceiver.address,
+          6,
+          0,
+          0,
+          '0x'
+        )
+      ).to.be.revertedWith('not owner of child Quad');
+    });
+
+    it('should revert approveFor for zeroAddress spender', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          zeroAddress,
+          mockMarketPlace3.address,
+          id
+        )
+      ).to.be.revertedWith('PolygonLandV2: ZERO_ADDRESS_SENDER');
+    });
+
+    it('should revert approveFor for unauthorized user', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[1].address,
+          mockMarketPlace3.address,
+          id
+        )
+      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVAL');
+    });
+
+    it('should revert approveFor zero owner of tokenId', async function () {
+      const {mockMarketPlace3, users} = await setupOperatorFilter();
+      const GRID_SIZE = 408;
+      const tokenId = 2 + 2 * GRID_SIZE;
+      await expect(
+        users[0].polygonLandV2.approveFor(
+          users[0].address,
+          mockMarketPlace3.address,
+          tokenId
+        )
+      ).to.be.revertedWith('PolygonLandV2: NONEXISTENT_TOKEN');
+    });
+
+    it('should revert approve for zero address owner of token', async function () {
+      const {mockMarketPlace3, users} = await setupOperatorFilter();
+      const GRID_SIZE = 408;
+      const tokenId = 2 + 2 * GRID_SIZE;
+      await expect(
+        users[0].polygonLandV2.approve(mockMarketPlace3.address, tokenId)
+      ).to.be.revertedWith('PolygonLandV2: NONEXISTENT_TOKEN');
+    });
+
+    it('should revert approve for zeroAddress spender', async function () {
+      const {
+        mockMarketPlace3,
+        polygonLandV2,
+        users,
+      } = await setupOperatorFilter();
+      await polygonLandV2.mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await expect(
+        users[1].polygonLandV2.approve(mockMarketPlace3.address, id)
+      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVAL');
+    });
+
+    it('should revert setApprovalForAllFor for zeroAddress', async function () {
+      const {mockMarketPlace3, users} = await setupOperatorFilter();
+      await expect(
+        users[0].polygonLandV2.setApprovalForAllFor(
+          zeroAddress,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('PolygonLandV2: Invalid sender address');
+    });
+
+    it('should revert setApprovalForAllFor for unauthorized users', async function () {
+      const {mockMarketPlace3, users} = await setupOperatorFilter();
+      await expect(
+        users[0].polygonLandV2.setApprovalForAllFor(
+          mockMarketPlace3.address,
+          mockMarketPlace3.address,
+          true
+        )
+      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVE_FOR_ALL');
+    });
+
+    it('should revert approvalFor for same sender and spender', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      const {deployer} = await getNamedAccounts();
+      await polygonLandV2
+        .connect(await ethers.getSigner(deployer))
+        .mintQuad(users[0].address, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await expect(
+        polygonLandV2
+          .connect(await ethers.getSigner(deployer))
+          .approveFor(deployer, deployer, id)
+      ).to.be.revertedWith('PolygonLandV2: OWNER_NOT_SENDER');
+    });
+
+    it('subscription can not be zero address', async function () {
+      const {polygonLandV2} = await setupOperatorFilter();
+      const {deployer} = await getNamedAccounts();
+      await expect(
+        polygonLandV2
+          .connect(await ethers.getSigner(deployer))
+          .register(zeroAddress, true)
+      ).to.be.revertedWith("PolygonLandV2: subscription can't be zero address");
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -2388,6 +2680,38 @@ describe('MockLandV2WithMint.sol', function () {
       }
     });
 
+    it('should revert when fetching owner of given quad id with wrong size', async function () {
+      const {PolygonLand} = await setupLand();
+      const id = getId(9, 0, 0);
+      await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
+        'Invalid token id'
+      );
+    });
+
+    it('should revert when fetching owner of given quad id with invalid token', async function () {
+      const {PolygonLand} = await setupLand();
+      const id = getId(3, 2, 2);
+      await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
+        'Invalid token id'
+      );
+    });
+
+    it('should return owner for quad id', async function () {
+      const {landOwners} = await setupTest();
+
+      await landOwners[0].MockLandV2WithMint.mintQuad(
+        landOwners[0].address,
+        24,
+        0,
+        0,
+        '0x'
+      );
+      const id = getId(5, 0, 0);
+      expect(await landOwners[0].MockLandV2WithMint.ownerOf(id)).to.be.equal(
+        landOwners[0].address
+      );
+    });
+
     it('checks if a quad is valid & exists', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
@@ -2433,6 +2757,215 @@ describe('MockLandV2WithMint.sol', function () {
       expect(
         await operatorFilterRegistry.isRegistered(polygonLandV2.address)
       ).to.be.equal(true);
+    });
+
+    it('operator filterer registrant would not register on the operator filter registry if not set on it', async function () {
+      const {
+        operatorFilterRegistry,
+        deployer,
+        upgradeAdmin,
+      } = await setupOperatorFilter();
+      const OperatorFilterSubscription = await deploy(
+        'MockOperatorFilterSubscription',
+        {
+          from: deployer,
+          contract: 'OperatorFilterSubscription',
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: 'OpenZeppelinTransparentProxy',
+            execute: {
+              methodName: 'initialize',
+              args: [],
+            },
+            upgradeIndex: 0,
+          },
+          log: true,
+          skipIfAlreadyDeployed: true,
+        }
+      );
+
+      expect(
+        await operatorFilterRegistry.isRegistered(
+          OperatorFilterSubscription.address
+        )
+      ).to.be.equal(false);
+    });
+
+    it('would not register on the operator filter registry if not set on the Land', async function () {
+      const {
+        operatorFilterRegistry,
+        PolygonLandV2WithRegistryNotSet,
+      } = await setupOperatorFilter();
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        zeroAddress,
+        false
+      );
+
+      expect(
+        await operatorFilterRegistry.isRegistered(
+          PolygonLandV2WithRegistryNotSet.address
+        )
+      ).to.be.equal(false);
+    });
+
+    it('would not subscribe to operatorFilterSubscription if Land is already registered', async function () {
+      const {
+        operatorFilterRegistryAsOwner,
+        operatorFilterSubscription,
+        PolygonLandV2WithRegistryNotSet,
+      } = await setupOperatorFilter();
+      await PolygonLandV2WithRegistryNotSet.setOperatorRegistry(
+        operatorFilterRegistryAsOwner.address
+      );
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        zeroAddress,
+        false
+      );
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        operatorFilterSubscription.address,
+        true
+      );
+
+      expect(
+        await operatorFilterRegistryAsOwner.subscriptionOf(
+          PolygonLandV2WithRegistryNotSet.address
+        )
+      ).to.be.equal(zeroAddress);
+    });
+
+    it('should could be registered through OperatorFiltererUpgradeable', async function () {
+      const {
+        operatorFilterRegistry,
+        PolygonLandV2WithRegistryNotSet,
+      } = await setupOperatorFilter();
+
+      await PolygonLandV2WithRegistryNotSet.setOperatorRegistry(
+        operatorFilterRegistry.address
+      );
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        zeroAddress,
+        false
+      );
+
+      expect(
+        await operatorFilterRegistry.isRegistered(
+          PolygonLandV2WithRegistryNotSet.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('should could be registered and copy subscription through OperatorFiltererUpgradeable', async function () {
+      const {
+        operatorFilterRegistry,
+        PolygonLandV2WithRegistryNotSet,
+        operatorFilterSubscription,
+        mockMarketPlace1,
+      } = await setupOperatorFilter();
+
+      await PolygonLandV2WithRegistryNotSet.setOperatorRegistry(
+        operatorFilterRegistry.address
+      );
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        operatorFilterSubscription.address,
+        false
+      );
+
+      expect(
+        await operatorFilterRegistry.isRegistered(
+          PolygonLandV2WithRegistryNotSet.address
+        )
+      ).to.be.equal(true);
+
+      expect(
+        await operatorFilterRegistry.subscriptionOf(
+          PolygonLandV2WithRegistryNotSet.address
+        )
+      ).to.be.equal(zeroAddress);
+
+      expect(
+        await operatorFilterRegistry.isOperatorFiltered(
+          PolygonLandV2WithRegistryNotSet.address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('Black listed market places can be approved if operator filterer registry is not set on Land', async function () {
+      const {
+        PolygonLandV2WithRegistryNotSet,
+        users,
+        operatorFilterSubscription,
+        mockMarketPlace1,
+      } = await setupOperatorFilter();
+
+      await PolygonLandV2WithRegistryNotSet.mintQuad(
+        users[0].address,
+        1,
+        0,
+        0,
+        '0x'
+      );
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        operatorFilterSubscription.address,
+        true
+      );
+
+      await users[0].PolygonLandV2WithRegistryNotSet.setApprovalForAll(
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await PolygonLandV2WithRegistryNotSet.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+    });
+
+    it('Black listed market places can transfer token if operator filterer registry is not set on Land', async function () {
+      const {
+        PolygonLandV2WithRegistryNotSet,
+        users,
+        operatorFilterSubscription,
+        mockMarketPlace1,
+      } = await setupOperatorFilter();
+
+      await PolygonLandV2WithRegistryNotSet.mintQuad(
+        users[0].address,
+        1,
+        0,
+        0,
+        '0x'
+      );
+      const id = getId(1, 0, 0);
+      await PolygonLandV2WithRegistryNotSet.registerFilterer(
+        operatorFilterSubscription.address,
+        true
+      );
+
+      await users[0].PolygonLandV2WithRegistryNotSet.setApprovalForAll(
+        mockMarketPlace1.address,
+        true
+      );
+
+      expect(
+        await PolygonLandV2WithRegistryNotSet.isApprovedForAll(
+          users[0].address,
+          mockMarketPlace1.address
+        )
+      ).to.be.equal(true);
+
+      await mockMarketPlace1['transferLand(address,address,address,uint256)'](
+        PolygonLandV2WithRegistryNotSet.address,
+        users[0].address,
+        users[1].address,
+        id
+      );
+
+      expect(await PolygonLandV2WithRegistryNotSet.ownerOf(id)).to.be.equal(
+        users[1].address
+      );
     });
 
     it('should be subscribed to operator filterer subscription contract', async function () {
