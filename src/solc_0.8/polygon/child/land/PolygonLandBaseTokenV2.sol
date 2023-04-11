@@ -7,6 +7,12 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 
+/**
+ * @title PolygonLandBaseTokenV2
+ * @author The Sandbox
+ * @notice Implement LAND and quad functionalities on top of an ERC721 token
+ * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
+ */
 abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721BaseTokenV2 {
     using AddressUpgradeable for address;
 
@@ -175,6 +181,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         return _getX(id);
     }
 
+    /// @inheritdoc ERC721BaseTokenV2
     function batchTransferFrom(
         address from,
         address to,
