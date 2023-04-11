@@ -13,7 +13,7 @@ library AddressUtils {
      * @param _address target address
      * @return a payable address
      */
-    function toPayable(address _address) internal pure returns (address payable _payable) {
+    function toPayable(address _address) internal pure returns (address payable) {
         return address(uint160(_address));
     }
 
