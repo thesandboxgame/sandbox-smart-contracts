@@ -4,6 +4,9 @@ pragma solidity 0.8.2;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
+/// @title WithAdminV2
+/// @author The Sandbox
+/// @notice Add an admin to the contract
 contract WithAdminV2 is ContextUpgradeable {
     address internal _admin;
 
@@ -17,12 +20,14 @@ contract WithAdminV2 is ContextUpgradeable {
         _;
     }
 
+    /// @notice Get the current admin
     /// @dev Get the current administrator of this contract.
     /// @return The current administrator of this contract.
     function getAdmin() external view returns (address) {
         return _admin;
     }
 
+    /// @notice Change the admin of the contract
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
     function changeAdmin(address newAdmin) external {
