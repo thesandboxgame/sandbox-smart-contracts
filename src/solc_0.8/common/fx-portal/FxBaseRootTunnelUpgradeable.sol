@@ -19,7 +19,7 @@ abstract contract FxBaseRootTunnelUpgradeable is FxBaseRootTunnel {
     /**
      * @dev Initializes the contract
      * @param _checkpointManager checkpoint manager address
-     * @param _fxRoot root token address
+     * @param _fxRoot state sender contract
      */
     function __FxBaseRootTunnelUpgradeable_initialize(address _checkpointManager, address _fxRoot) internal {
         checkpointManager = ICheckpointManager(_checkpointManager);

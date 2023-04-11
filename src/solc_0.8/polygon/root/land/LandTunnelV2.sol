@@ -11,7 +11,9 @@ import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol
 import {ILandTokenV2} from "../../../common/interfaces/ILandTokenV2.sol";
 import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
-/// @title LAND bridge on L1
+/// @title LandTunnelV2
+/// @author The Sandbox
+/// @notice LAND tunnel on the root chain
 contract LandTunnelV2 is
     FxBaseRootTunnelUpgradeable,
     IERC721MandatoryTokenReceiver,
@@ -25,6 +27,11 @@ contract LandTunnelV2 is
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
 
+    /// @notice Initializes the contract
+    /// @param _checkpointManager checkpoint manager address
+    /// @param _fxRoot state sender contract
+    /// @param _rootToken LAND token on the root chain
+    /// @param _trustedForwarder trusted forwarder for meta-tx
     function initialize(
         address _checkpointManager,
         address _fxRoot,
@@ -71,6 +78,12 @@ contract LandTunnelV2 is
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
+    /// @notice Send a batch of quads to L2
+    /// @param  to address of the receiver on L2
+    /// @param  sizes sizes of quad
+    /// @param  xs x coordinates of quads
+    /// @param  ys y coordinates of quads
+    /// @param  data data send to the receiver onERC721BatchReceived on L1
     function batchTransferQuadToL2(
         address to,
         uint256[] memory sizes,

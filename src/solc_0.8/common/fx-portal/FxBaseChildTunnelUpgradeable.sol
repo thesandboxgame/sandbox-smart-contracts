@@ -14,7 +14,7 @@ abstract contract FxBaseChildTunnelUpgradeable is FxBaseChildTunnel {
 
     /**
      * @dev Initializes the contract
-     * @param _fxChild child token address
+     * @param _fxChild fx child
      */
     function __FxBaseChildTunnelUpgradeable_initialize(address _fxChild) internal {
         fxChild = _fxChild;

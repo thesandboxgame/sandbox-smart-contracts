@@ -11,6 +11,11 @@ import {IPolygonLandV2} from "../../../common/interfaces/IPolygonLandV2.sol";
 import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import {ERC2771Handler} from "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
+/**
+ * @title PolygonLandTunnelV2
+ * @author The Sandbox
+ * @notice LAND tunnel on the child chain
+ */
 contract PolygonLandTunnelV2 is
     FxBaseChildTunnelUpgradeable,
     IERC721MandatoryTokenReceiver,
@@ -69,7 +74,7 @@ contract PolygonLandTunnelV2 is
     }
 
     /// @notice initialize the contract
-    /// @param  _fxChild fx child tunnel contract address
+    /// @param  _fxChild fx child
     /// @param  _trustedForwarder address of an ERC2771 meta transaction sender contract
     /// @param _maxGasLimit maximum accepted gas limit
     /// @param _maxAllowedQuads maximum number of quads accepted
