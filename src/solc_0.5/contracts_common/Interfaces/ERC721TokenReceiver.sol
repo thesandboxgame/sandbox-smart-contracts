@@ -5,7 +5,7 @@ pragma solidity 0.5.9;
 /**
  * @title ERC721TokenReceiver
  * @author The Sandbox
- * @notice
+ * @notice Handle the receipt of an NFT
  */
 interface ERC721TokenReceiver {
     /**
