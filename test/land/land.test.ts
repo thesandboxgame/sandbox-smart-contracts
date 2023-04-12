@@ -335,6 +335,14 @@ describe('LandV3', function () {
       );
     });
 
+    it('should revert when minted with zero size', async function () {
+      const {getNamedAccounts, mintQuad} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      await expect(mintQuad(deployer, 0, 0, 0)).to.be.revertedWith(
+        'size cannot be zero'
+      );
+    });
+
     it('should revert when child quad is already minted', async function () {
       const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
@@ -535,6 +543,16 @@ describe('LandV3', function () {
       ).to.be.revertedWith('to is zero address');
     });
 
+    it('should revert when mintAndTransfer zero size', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(landAdmin))
+          .mintAndTransferQuad(landAdmin, 0, 0, 0, '0x')
+      ).to.be.revertedWith('size cannot be zero');
+    });
+
     it('should revert when to is non ERC721 receiving contract', async function () {
       const {
         landContract,
@@ -642,6 +660,16 @@ describe('LandV3', function () {
           .connect(ethers.provider.getSigner(landAdmin))
           .transferQuad(landAdmin, deployer, 1, 0, 0, '0x')
       ).to.be.revertedWith('token does not exist');
+    });
+
+    it('should revert when transfer Quad of zero size', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(landAdmin))
+          .transferQuad(landAdmin, deployer, 0, 0, 0, '0x')
+      ).to.be.revertedWith('size cannot be zero');
     });
 
     it('should revert when from is not owner of Quad (transferQuad)', async function () {
