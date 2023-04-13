@@ -46,7 +46,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
+        require(sizes.length == xs.length, "PolygonLandBaseTokenV2: sizes's and x's length are different");
+        require(xs.length == ys.length, "PolygonLandBaseTokenV2: x's and y's length are different");
         if (_msgSender() != from) {
             require(
                 _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
@@ -611,8 +612,10 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 x,
         uint256 y
     ) internal {
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+        require(x % size == 0, "Invalid x coordinate");
+        require(y % size == 0, "Invalid y coordinate");
+        require(x <= GRID_SIZE - size, "Out of bounds");
+        require(y <= GRID_SIZE - size, "Out of bounds");
         if (size == 3 || size == 6 || size == 12 || size == 24) {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         } else {
@@ -732,7 +735,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     function _ownerOf(uint256 id) internal view override returns (address) {
         require(id & LAYER == 0, "Invalid token id");
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
-        require(x % size == 0 && y % size == 0, "Invalid token id");
+        require(x % size == 0, "x coordinate: Invalid token id");
+        require(y % size == 0, "y coordinate: Invalid token id");
         if (size == 1) {
             uint256 owner1x1 = _owners[id];
             return (owner1x1 & BURNED_FLAG) == BURNED_FLAG ? address(0) : _ownerOfQuad(size, x, y);

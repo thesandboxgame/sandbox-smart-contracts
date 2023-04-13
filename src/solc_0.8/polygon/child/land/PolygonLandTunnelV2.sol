@@ -100,10 +100,8 @@ contract PolygonLandTunnelV2 is
         bytes memory data
     ) external whenNotPaused() {
         require(to != address(0), "PolygonLandTunnelV2: can't send to zero address");
-        require(
-            sizes.length == xs.length && sizes.length == ys.length,
-            "PolygonLandTunnelV2: sizes, xs, ys must be same length"
-        );
+        require(sizes.length == xs.length, "PolygonLandTunnelV2: sizes's and x's length are different");
+        require(sizes.length == ys.length, "PolygonLandTunnelV2: x's and y's length are different");
 
         uint32 gasLimit = 0;
         uint256 quads = 0;
