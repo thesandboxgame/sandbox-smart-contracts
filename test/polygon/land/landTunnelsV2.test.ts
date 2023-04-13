@@ -504,7 +504,41 @@ describe('PolygonLand', function () {
             [y],
             bytes
           )
-        ).to.be.revertedWith('LandTunnelV2: invalid data');
+        ).to.be.revertedWith(
+          "LandTunnelV2: sizes's and x's length are different"
+        );
+      });
+
+      it('batchTransferQuadToL2 should revert if args xs, ys are not of same length', async function () {
+        const {
+          Land,
+          landMinter,
+          users,
+          LandTunnelV2,
+        } = await setupLandTunnelV2();
+        const landHolder = users[0];
+        const size = 1;
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(LandTunnelV2.address, true);
+
+        await expect(
+          landHolder.LandTunnelV2.batchTransferQuadToL2(
+            users[0].address,
+            [size],
+            [x],
+            [x, y],
+            bytes
+          )
+        ).to.be.revertedWith("LandTunnelV2: x's and y's length are different");
       });
 
       it('batchTransferQuadToL1 should revert if args sizes, xs, ys are not of same length', async function () {
@@ -568,7 +602,72 @@ describe('PolygonLand', function () {
             bytes
           )
         ).to.revertedWith(
-          'PolygonLandTunnelV2: sizes, xs, ys must be same length'
+          "PolygonLandTunnelV2: sizes's and x's length are different"
+        );
+      });
+
+      it('batchTransferQuadToL1 should revert if args xs, ys are not of same length', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnelV2,
+          PolygonLand,
+          MockPolygonLandTunnelV2,
+        } = await setupLandTunnelV2();
+
+        const landHolder = users[0];
+        const size = 1;
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setMinter(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        expect(await PolygonLand.isMinter(MockPolygonLandTunnelV2.address)).to
+          .be.true;
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnelV2.address, true);
+        await landHolder.MockLandTunnelV2.batchTransferQuadToL2(
+          landHolder.address,
+          [size],
+          [x],
+          [y],
+          bytes
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(
+          plotCount
+        );
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          plotCount
+        );
+
+        // Transfer to L2 Tunnel
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnelV2.address,
+          true
+        );
+        await expect(
+          landHolder.MockPolygonLandTunnelV2.batchTransferQuadToL1(
+            deployer.address,
+            [size],
+            [x],
+            [x, y],
+            bytes
+          )
+        ).to.revertedWith(
+          "PolygonLandTunnelV2: x's and y's length are different"
         );
       });
 
