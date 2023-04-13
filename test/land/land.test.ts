@@ -546,13 +546,7 @@ describe('LandV3', function () {
     });
 
     it('should revert for owner of by invalid x coordinate', async function () {
-      const {
-        landContract,
-        getNamedAccounts,
-        ethers,
-        mintQuad,
-      } = await setupLand();
-      const {deployer, landAdmin} = await getNamedAccounts();
+      const {landContract} = await setupLand();
       const id = getId(3, 3, 0);
       await expect(landContract.ownerOf(id)).to.be.revertedWith(
         'x coordinate: Invalid token id'
@@ -560,13 +554,7 @@ describe('LandV3', function () {
     });
 
     it('should revert for owner of by invalid y coordinate', async function () {
-      const {
-        landContract,
-        getNamedAccounts,
-        ethers,
-        mintQuad,
-      } = await setupLand();
-      const {deployer, landAdmin} = await getNamedAccounts();
+      const {landContract} = await setupLand();
       const id = getId(3, 0, 3);
       await expect(landContract.ownerOf(id)).to.be.revertedWith(
         'y coordinate: Invalid token id'
