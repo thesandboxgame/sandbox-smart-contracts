@@ -78,8 +78,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) external {
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
-        
-        if (exists(size, x, y) == true) {
+
+        if (exists(size, x, y)) {
             _transferQuad(msg.sender, to, size, x, y);
             _numNFTPerAddress[msg.sender] -= size * size;
             _numNFTPerAddress[to] += size * size;
