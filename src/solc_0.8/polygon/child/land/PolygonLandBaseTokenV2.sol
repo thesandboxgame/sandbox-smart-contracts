@@ -630,7 +630,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     /// is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
     /// @param from address of the previous owner
     /// @param to address of the new owner
-    /// @param land the quad to be regrouped and transfered
+    /// @param land the quad to be regrouped and transferred
     /// @param set for setting the new owner
     /// @param childQuadSize  size of the child quad to be checked for owner in the regrouping
     function _regroupQuad(
@@ -645,7 +645,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         bool ownerOfAll = true;
 
         {
-            // double for loop itereates and checks owner of all the smaller quads in land
+            // double for loop iterates and checks owner of all the smaller quads in land
             for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
                 for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
                     uint256 ownerChild;
@@ -669,11 +669,11 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                             if (!ownAllIndividual) {
                                 require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                             }
-                            // clearing owner of child qua
+                            // clearing owner of child quad
                             _owners[idChild] = 0;
                         }
                     }
-                    // ownerOfAll should be true if "from" is owner of all the child quads ittereated over
+                    // ownerOfAll should be true if "from" is owner of all the child quads itereated over
                     ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
             }

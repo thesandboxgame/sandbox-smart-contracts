@@ -115,7 +115,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      */
     function _approveFor(address owner, address operator, uint256 id) internal {
         if(operator == address(0)) {
-            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
+            _owners[id] = uint256(owner); // no need to reset the operator, it will be overidden next time
         } else {
             _owners[id] = uint256(owner) + 2**255;
             _operators[id] = operator;

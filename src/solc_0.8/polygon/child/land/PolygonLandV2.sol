@@ -160,7 +160,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
     /// @dev can only be called by admin.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
-    /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
+    /// @param subscribe bool to signify subscription "true" or to copy the list "false".
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
         require(subscriptionOrRegistrantToCopy != address(0), "PolygonLandV2: subscription can't be zero address");
         _register(subscriptionOrRegistrantToCopy, subscribe);

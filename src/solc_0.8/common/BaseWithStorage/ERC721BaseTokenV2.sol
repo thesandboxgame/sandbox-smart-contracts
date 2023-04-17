@@ -89,7 +89,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     }
 
     /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer.
-    /// @param from The send of the token.
+    /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param id The id of the token.
     function safeTransferFrom(
@@ -158,7 +158,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         _burn(_msgSender(), _ownerOf(id), id);
     }
 
-    /// @notice Burn token`id` from `from`.
+    /// @notice Burn token `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external virtual {
@@ -358,7 +358,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @dev Check if receiving contract accepts erc721 transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
-    /// @param to The adddress we want to transfer to.
+    /// @param to The address we want to transfer to.
     /// @param tokenId The id of the token we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
     /// @return Whether the expected value of 0x150b7a02 is returned.
@@ -376,7 +376,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @dev Check if receiving contract accepts erc721 batch transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
-    /// @param to The adddress we want to transfer to.
+    /// @param to The address we want to transfer to.
     /// @param ids The ids of the tokens we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
     /// @return Whether the expected value of 0x4b808c46 is returned.
@@ -421,7 +421,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
 
     /// @dev Check whether a transfer is a meta Transaction or not.
     /// @param from The address who initiated the transfer (may differ from msg.sender).
-    /// @param to The address recieving the token.
+    /// @param to The address receiving the token.
     /// @param id The token being transferred.
     /// @return isMetaTx Whether or not the transaction is a MetaTx.
     function _checkTransfer(

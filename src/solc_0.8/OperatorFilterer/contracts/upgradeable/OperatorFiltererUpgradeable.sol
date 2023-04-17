@@ -2,12 +2,11 @@
 pragma solidity 0.8.2;
 
 import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
-abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
+abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {

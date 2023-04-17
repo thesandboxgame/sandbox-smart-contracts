@@ -5,7 +5,7 @@ import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.
 import {AddressUtils} from "../../../contracts_common/Libraries/AddressUtils.sol";
 
 ///@title OperatorFiltererUpgradeable
-///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
+///@notice This contract would subscribe or copy the subscription provided or just register to default subscription list
 contract OperatorFiltererUpgradeable {
     using AddressUtils for address;
     IOperatorFilterRegistry public operatorFilterRegistry;
