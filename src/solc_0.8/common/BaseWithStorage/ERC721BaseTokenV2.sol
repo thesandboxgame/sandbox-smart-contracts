@@ -417,12 +417,11 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param to The address recieving the token.
     /// @param id The token being transferred.
-    /// @return isMetaTx Whether or not the transaction is a MetaTx.
     function _checkTransfer(
         address from,
         address to,
         uint256 id
-    ) internal view returns (bool isMetaTx) {
+    ) internal view {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -435,7 +434,6 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
                 (operatorEnabled && _operators[id] == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
-        return true;
     }
 
     /// @dev Check if there was enough gas.
