@@ -634,13 +634,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param id token id
     /// @return the x coordinate
     function _getX(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) % GRID_SIZE;
+        return (id & ~LAYER) % GRID_SIZE;
     }
 
     /// @param id token id
     /// @return the y coordinate
     function _getY(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) / GRID_SIZE;
+        return (id & ~LAYER) / GRID_SIZE;
     }
 
     /// @param size of the quad
