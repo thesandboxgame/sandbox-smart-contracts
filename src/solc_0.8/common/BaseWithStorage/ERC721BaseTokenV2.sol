@@ -137,7 +137,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address sender,
         address operator,
         bool approved
-    ) external virtual {
+    ) public virtual {
         require(sender != address(0), "Invalid sender address");
         address msgSender = _msgSender();
         require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
@@ -148,7 +148,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
     /// @param operator The address receiving the approval.
     /// @param approved The determination of the approval.
-    function setApprovalForAll(address operator, bool approved) external virtual override {
+    function setApprovalForAll(address operator, bool approved) public virtual override {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 

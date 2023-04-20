@@ -98,18 +98,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         address sender,
         address operator,
         uint256 id
-    ) external onlyAllowedOperatorApproval(operator) {
-        address owner = _ownerOf(id);
-        require(sender != address(0), "LandV3: sender is zero address");
-        require(
-            msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _operatorsForAll[sender][msg.sender] ||
-                _superOperators[msg.sender],
-            "LandV3: not authorized to approve"
-        );
-        require(owner == sender, "LandV3: owner != sender");
-        _approveFor(owner, operator, id);
+    ) public onlyAllowedOperatorApproval(operator) {
+        super.approveFor(sender, operator, id);
     }
 
     /**
@@ -117,8 +107,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved) external onlyAllowedOperatorApproval(operator) {
-        _setApprovalForAll(msg.sender, operator, approved);
+    function setApprovalForAll(address operator, bool approved) public onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAll(operator, approved);
     }
 
     /**
@@ -131,14 +121,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         address sender,
         address operator,
         bool approved
-    ) external onlyAllowedOperatorApproval(operator) {
-        require(sender != address(0), "LandV3: Invalid sender address");
-        require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
-            "LandV3: not authorized to approve for all"
-        );
-
-        _setApprovalForAll(sender, operator, approved);
+    ) public onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAllFor(sender, operator, approved);
     }
 
     /**
@@ -146,14 +130,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approve(address operator, uint256 id) external onlyAllowedOperatorApproval(operator) {
-        address owner = _ownerOf(id);
-        require(owner != address(0), "LandV3: token does not exist");
-        require(
-            owner == msg.sender || _operatorsForAll[owner][msg.sender] || _superOperators[msg.sender],
-            "LandV3: not authorized to approve"
-        );
-        _approveFor(owner, operator, id);
+    function approve(address operator, uint256 id) public onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, id);
     }
 
     /**
@@ -166,15 +144,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         address from,
         address to,
         uint256 id
-    ) external onlyAllowedOperator(from) {
-        bool metaTx = _checkTransfer(from, to, id);
-        _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(
-                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""),
-                "LandV3: erc721 transfer rejected by to"
-            );
-        }
+    ) public onlyAllowedOperator(from) {
+        super.transferFrom(from, to, id);
     }
 
     /**

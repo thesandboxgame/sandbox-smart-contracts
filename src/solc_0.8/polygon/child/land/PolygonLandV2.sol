@@ -98,7 +98,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address to,
         uint256 id
     ) public override onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, id, "");
+        super.safeTransferFrom(from, to, id);
     }
 
     /**
@@ -107,7 +107,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
      * @param approved The determination of the approval
      */
     function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
-        _setApprovalForAll(_msgSender(), operator, approved);
+        super.setApprovalForAll(operator, approved);
     }
 
     /**
@@ -120,12 +120,8 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address sender,
         address operator,
         bool approved
-    ) external override onlyAllowedOperatorApproval(operator) {
-        require(sender != address(0), "PolygonLandV2: Invalid sender address");
-        address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "PolygonLandV2: UNAUTHORIZED_APPROVE_FOR_ALL");
-
-        _setApprovalForAll(sender, operator, approved);
+    ) public override onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAllFor(sender, operator, approved);
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
