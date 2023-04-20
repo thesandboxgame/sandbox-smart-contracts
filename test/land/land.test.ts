@@ -1104,6 +1104,16 @@ describe('LandV3', function () {
       expect(await contract.getAdmin()).to.be.equal(deployer);
     });
 
+    it('should revert for change the admin for zero address', async function () {
+      const {landContract, ethers} = await setupLand();
+      const admin = await landContract.getAdmin();
+      const contract = landContract.connect(ethers.provider.getSigner(admin));
+
+      await expect(contract.changeAdmin(zeroAddress)).to.be.revertedWith(
+        'zero address cannot be admin'
+      );
+    });
+
     it('should only be changed to a new admin', async function () {
       const {landContract, ethers} = await setupLand();
       const admin = await landContract.getAdmin();
