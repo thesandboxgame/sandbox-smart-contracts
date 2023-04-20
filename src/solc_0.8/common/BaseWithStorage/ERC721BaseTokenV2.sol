@@ -31,6 +31,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     uint256 internal constant BURNED_FLAG = (2**160);
 
     mapping(address => uint256) internal _numNFTPerAddress;
+    // mapping to store owner of lands and quads. For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved. For burned 1x1 Land 160 bit is set to 1.
     mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
