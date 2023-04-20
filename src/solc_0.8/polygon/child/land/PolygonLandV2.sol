@@ -11,15 +11,20 @@ import "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradea
 contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFiltererUpgradeable {
     using AddressUpgradeable for address;
 
+    event OperatorRegistrySet(address indexed registry);
+    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+
     function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
+        emit AdminChanged(address(0), _admin);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderSet(trustedForwarder);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
@@ -40,18 +45,8 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address sender,
         address operator,
         uint256 id
-    ) external override onlyAllowedOperatorApproval(operator) {
-        uint256 ownerData = _owners[_storageId(id)];
-        address owner = _ownerOf(id);
-        address msgSender = _msgSender();
-        require(sender != address(0), "PolygonLandV2: ZERO_ADDRESS_SENDER");
-        require(owner != address(0), "PolygonLandV2: NONEXISTENT_TOKEN");
-        require(
-            msgSender == sender || _operatorsForAll[sender][msgSender] || _superOperators[msgSender],
-            "PolygonLandV2: UNAUTHORIZED_APPROVAL"
-        );
-        require(address(uint160(ownerData)) == sender, "PolygonLandV2: OWNER_NOT_SENDER");
-        _approveFor(ownerData, operator, id);
+    ) public override onlyAllowedOperatorApproval(operator) {
+        super.approveFor(sender, operator, id);
     }
 
     /**
@@ -59,16 +54,8 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approve(address operator, uint256 id) external override onlyAllowedOperatorApproval(operator) {
-        uint256 ownerData = _owners[_storageId(id)];
-        address owner = _ownerOf(id);
-        address msgSender = _msgSender();
-        require(owner != address(0), "PolygonLandV2: NONEXISTENT_TOKEN");
-        require(
-            owner == msgSender || _operatorsForAll[owner][msgSender] || _superOperators[msgSender],
-            "PolygonLandV2: UNAUTHORIZED_APPROVAL"
-        );
-        _approveFor(ownerData, operator, id);
+    function approve(address operator, uint256 id) public override onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, id);
     }
 
     /**
@@ -81,12 +68,8 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address from,
         address to,
         uint256 id
-    ) external override onlyAllowedOperator(from) {
-        _checkTransfer(from, to, id);
-        _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "PolygonLandV2: ERC721_TRANSFER_REJECTED");
-        }
+    ) public override onlyAllowedOperator(from) {
+        super.transferFrom(from, to, id);
     }
 
     /**
@@ -115,7 +98,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address from,
         address to,
         uint256 id
-    ) external override onlyAllowedOperator(from) {
+    ) public override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, id, "");
     }
 
@@ -124,11 +107,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved)
-        external
-        override
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
@@ -157,11 +136,13 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
         require(subscriptionOrRegistrantToCopy != address(0), "PolygonLandV2: subscription can't be zero address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
+        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external virtual onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 }
