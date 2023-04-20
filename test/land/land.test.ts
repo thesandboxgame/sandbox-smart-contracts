@@ -602,6 +602,26 @@ describe('LandV3', function () {
       ).to.be.revertedWith("can't send to zero address");
     });
 
+    it('should clear operator for Land when parent Quad is mintAndTransfer', async function () {
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
+      const {landAdmin, deployer, sandAdmin} = await getNamedAccounts();
+      await mintQuad(landAdmin, 1, 0, 0);
+      const id = getId(1, 0, 0);
+      await landContract
+        .connect(ethers.provider.getSigner(landAdmin))
+        .approve(deployer, id);
+      expect(await landContract.getApproved(id)).to.be.equal(deployer);
+      await landContract
+        .connect(await ethers.provider.getSigner(landAdmin))
+        .mintAndTransferQuad(sandAdmin, 3, 0, 0, '0x');
+      expect(await landContract.getApproved(id)).to.be.equal(zeroAddress);
+    });
+
     it('should revert when from is zeroAddress (transferQuad)', async function () {
       const {
         landContract,
@@ -746,7 +766,7 @@ describe('LandV3', function () {
       const id = getId(1, 0, 0);
       await expect(
         users[0].landV3.approveFor(deployer, mockMarketPlace3.address, id)
-      ).to.be.revertedWith('LandV3: not authorized to approve');
+      ).to.be.revertedWith('not authorized to approve');
     });
 
     it('it should revert for setApprovalForAllFor of zero address', async function () {
@@ -757,7 +777,7 @@ describe('LandV3', function () {
           mockMarketPlace3.address,
           true
         )
-      ).to.be.revertedWith('LandV3: Invalid sender address');
+      ).to.be.revertedWith('Invalid sender address');
     });
 
     it('should revert approveFor of operator is zeroAddress', async function () {
@@ -766,7 +786,7 @@ describe('LandV3', function () {
       const id = getId(1, 0, 0);
       await expect(
         users[0].landV3.approveFor(zeroAddress, mockMarketPlace3.address, id)
-      ).to.be.revertedWith('LandV3: sender is zero address');
+      ).to.be.revertedWith('sender is zero address');
     });
 
     it('it should revert setApprovalForAllFor for unauthorized sender', async function () {
@@ -777,7 +797,7 @@ describe('LandV3', function () {
           mockMarketPlace3.address,
           true
         )
-      ).to.be.revertedWith('LandV3: not authorized to approve for all');
+      ).to.be.revertedWith('not authorized to approve for all');
     });
 
     it('it should revert Approval for invalid token', async function () {
@@ -786,7 +806,7 @@ describe('LandV3', function () {
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
       const id = getId(3, 0, 0);
       await expect(users[0].landV3.approve(deployer, id)).to.be.revertedWith(
-        'LandV3: token does not exist'
+        'token does not exist'
       );
     });
 
@@ -801,7 +821,7 @@ describe('LandV3', function () {
       const id = getId(1, 0, 0);
       await expect(
         users[0].landV3.approveFor(deployer, mockMarketPlace3.address, id)
-      ).to.be.revertedWith('LandV3: not authorized to approve');
+      ).to.be.revertedWith('not authorized to approve');
     });
 
     it('should revert for transfer when to is zeroAddress(mintAndTransferQuad)', async function () {
