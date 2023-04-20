@@ -32,7 +32,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
-    function approve(address operator, uint256 id) external virtual override {
+    function approve(address operator, uint256 id) public virtual override {
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
@@ -52,7 +52,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address sender,
         address operator,
         uint256 id
-    ) external virtual {
+    ) public virtual {
         uint256 ownerData = _owners[_storageId(id)];
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
