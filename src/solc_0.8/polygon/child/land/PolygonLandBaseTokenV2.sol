@@ -721,6 +721,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     }
 
     function _ownerOf(uint256 id) internal view override returns (address) {
+        require(id & LAYER == 0, "Invalid token id");
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
         require(x % size == 0, "x coordinate: Invalid token id");
         require(y % size == 0, "y coordinate: Invalid token id");

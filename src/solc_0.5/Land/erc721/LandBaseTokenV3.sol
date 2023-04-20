@@ -729,6 +729,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param id quad id
     /// @return address of the owner
     function _ownerOf(uint256 id) internal view returns (address) {
+        require(id & LAYER == 0, "Invalid token id");
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
         require(x % size == 0, "x coordinate: Invalid token id");
         require(y % size == 0, "y coordinate: Invalid token id");
