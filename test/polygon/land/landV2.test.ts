@@ -915,7 +915,7 @@ describe('MockLandV2WithMint.sol', function () {
           mockMarketPlace3.address,
           id
         )
-      ).to.be.revertedWith('PolygonLandV2: ZERO_ADDRESS_SENDER');
+      ).to.be.revertedWith('ZERO_ADDRESS_SENDER');
     });
 
     it('should revert approveFor for unauthorized user', async function () {
@@ -932,7 +932,7 @@ describe('MockLandV2WithMint.sol', function () {
           mockMarketPlace3.address,
           id
         )
-      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVAL');
+      ).to.be.revertedWith('UNAUTHORIZED_APPROVAL');
     });
 
     it('should revert approveFor zero owner of tokenId', async function () {
@@ -945,7 +945,7 @@ describe('MockLandV2WithMint.sol', function () {
           mockMarketPlace3.address,
           tokenId
         )
-      ).to.be.revertedWith('PolygonLandV2: NONEXISTENT_TOKEN');
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
     });
 
     it('should revert approve for zero address owner of token', async function () {
@@ -954,7 +954,7 @@ describe('MockLandV2WithMint.sol', function () {
       const tokenId = 2 + 2 * GRID_SIZE;
       await expect(
         users[0].polygonLandV2.approve(mockMarketPlace3.address, tokenId)
-      ).to.be.revertedWith('PolygonLandV2: NONEXISTENT_TOKEN');
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
     });
 
     it('should revert approve for zeroAddress spender', async function () {
@@ -967,7 +967,7 @@ describe('MockLandV2WithMint.sol', function () {
       const id = getId(1, 0, 0);
       await expect(
         users[1].polygonLandV2.approve(mockMarketPlace3.address, id)
-      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVAL');
+      ).to.be.revertedWith('UNAUTHORIZED_APPROVAL');
     });
 
     it('should revert setApprovalForAllFor for zeroAddress', async function () {
@@ -1003,7 +1003,7 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2
           .connect(await ethers.getSigner(deployer))
           .approveFor(deployer, deployer, id)
-      ).to.be.revertedWith('PolygonLandV2: OWNER_NOT_SENDER');
+      ).to.be.revertedWith('OWNER_NOT_SENDER');
     });
 
     it('subscription can not be zero address', async function () {
