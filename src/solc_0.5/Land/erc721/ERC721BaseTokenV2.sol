@@ -364,7 +364,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     function isApprovedForAll(address owner, address operator)
         external
         view
-        returns (bool isOperator)
+        returns (bool)
     {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }

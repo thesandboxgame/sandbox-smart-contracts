@@ -78,7 +78,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) external {
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
-        
+
         if (exists(size, x, y) == true) {
             _transferQuad(msg.sender, to, size, x, y);
             _numNFTPerAddress[msg.sender] -= size * size;
@@ -607,8 +607,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 layer,
         uint256 x,
         uint256 y
-    ) internal pure returns (uint256 quadId) {
-        quadId = layer + x + y * GRID_SIZE;
+    ) internal pure returns (uint256) {
+        return layer + x + y * GRID_SIZE;
     }
 
     function _ownerOfQuad(
