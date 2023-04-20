@@ -567,7 +567,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                             _owners[idChild] = 0;
                         }
                     }
-                    // ownerOfAll should be true if "from" is owner of all the child quads itereated over
+                    // ownerOfAll should be true if "from" is owner of all the child quads iterated over
                     ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
             }
