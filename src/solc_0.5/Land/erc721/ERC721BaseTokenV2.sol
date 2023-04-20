@@ -477,11 +477,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     }
 
     /**
+     * @dev Check if receiving contract accepts erc721 batch transfers.
      * @param operator Sender of the tx
      * @param from Owner of the token
      * @param to Recipient
      * @param ids Token ids
      * @param _data extra data
+     * @return Whether the expected value of 0x4b808c46 is returned.
      */
     function _checkOnERC721BatchReceived(address operator, address from, address to, uint256[] memory ids, bytes memory _data)
         internal returns (bool)
