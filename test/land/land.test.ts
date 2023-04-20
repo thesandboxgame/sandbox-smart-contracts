@@ -580,10 +580,9 @@ describe('LandV3', function () {
           0,
           '0x'
         );
-      const id = getId(3, 0, 0);
-      expect(await landContract.ownerOf(id)).to.be.equal(
-        TestERC1155ERC721TokenReceiver.address
-      );
+      expect(
+        await landContract.balanceOf(TestERC1155ERC721TokenReceiver.address)
+      ).to.be.equal(36);
     });
 
     it('should revert when to is zeroAddress (transferQuad)', async function () {
@@ -634,6 +633,14 @@ describe('LandV3', function () {
       ).to.be.revertedWith('not authorized to transferQuad');
     });
 
+    it('should revert ownerOf invalid tokenId', async function () {
+      const {landContract} = await setupLand();
+      const id = getId(3, 0, 1);
+      await expect(landContract.ownerOf(id)).to.be.revertedWith(
+        'Invalid token id'
+      );
+    });
+
     it('should revert when from is not owner of land (transferQuad)', async function () {
       const {landContract, getNamedAccounts, ethers} = await setupLand();
       const {deployer, landAdmin} = await getNamedAccounts();
@@ -672,12 +679,10 @@ describe('LandV3', function () {
       await mintQuad(deployer, 3, 0, 3);
       await mintQuad(deployer, 3, 3, 0);
       await mintQuad(deployer, 3, 3, 3);
-
       await landContract
         .connect(ethers.provider.getSigner(deployer))
         .transferQuad(deployer, landAdmin, 6, 0, 0, '0x');
-      const id = getId(3, 0, 0);
-      expect(await landContract.ownerOf(id)).to.be.equal(landAdmin);
+      expect(await landContract.balanceOf(landAdmin)).to.be.equal(36);
     });
 
     it('should revert when size is invalid (transferQuad)', async function () {
@@ -705,16 +710,16 @@ describe('LandV3', function () {
     it('should return correct tokenUri for quad', async function () {
       const {landContract, getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
-      await mintQuad(deployer, 6, 0, 0);
-      const id = getId(3, 0, 0);
+      await mintQuad(deployer, 1, 1, 1);
+      const id = getId(1, 1, 1);
       expect(await landContract.tokenURI(id)).to.equal(
-        'https://api.sandbox.game/lands/904625697166532776746648320380374280103671755200316906558262375061821325312/metadata.json'
+        'https://api.sandbox.game/lands/409/metadata.json'
       );
     });
 
     it('should revert when id is not minted', async function () {
       const {landContract} = await setupLand();
-      const id = getId(3, 0, 0);
+      const id = getId(1, 2, 2);
       await expect(landContract.tokenURI(id)).to.be.revertedWith(
         'LandV3: Id does not exist'
       );
@@ -784,7 +789,7 @@ describe('LandV3', function () {
       const {users, deployer} = await setupOperatorFilter();
       const {landV3} = await setupOperatorFilter();
       await landV3.mintQuadWithOutMinterCheck(users[0].address, 1, 0, 0, '0x');
-      const id = getId(3, 0, 0);
+      const id = getId(1, 2, 2);
       await expect(users[0].landV3.approve(deployer, id)).to.be.revertedWith(
         'LandV3: token does not exist'
       );
@@ -905,39 +910,17 @@ describe('LandV3', function () {
       });
     });
   });
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  sizes.forEach((quadSize) => {
-    it(`should return correct ownerOf ${quadSize}x${quadSize} quad minted`, async function () {
-      const {
-        landContract,
-        getNamedAccounts,
-        ethers,
-        mintQuad,
-      } = await setupLand();
-      const {deployer} = await getNamedAccounts();
-      const contract = landContract.connect(
-        ethers.provider.getSigner(deployer)
-      );
-
-      await mintQuad(deployer, quadSize, quadSize, quadSize);
-      let layer;
-      if (quadSize == 1) {
-        layer = 1;
-      } else if (quadSize == 3) {
-        layer = 2;
-      } else if (quadSize == 6) {
-        layer = 3;
-      } else if (quadSize == 12) {
-        layer = 4;
-      } else {
-        layer = 5;
-      }
-
-      expect(
-        await contract.ownerOf(getId(layer, quadSize, quadSize))
-      ).to.be.equal(deployer);
-    });
+  it('should return correct ownerOf 1*1 quad minted', async function () {
+    const {
+      landContract,
+      getNamedAccounts,
+      ethers,
+      mintQuad,
+    } = await setupLand();
+    const {deployer} = await getNamedAccounts();
+    const contract = landContract.connect(ethers.provider.getSigner(deployer));
+    await mintQuad(deployer, 1, 1, 1);
+    expect(await contract.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
   });
 
   it('should revert for incorrect id (wrong size)', async function () {
