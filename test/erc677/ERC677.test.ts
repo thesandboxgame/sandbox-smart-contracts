@@ -58,7 +58,7 @@ describe('ERC677Token', function () {
       gemToken
         .connect(ethers.provider.getSigner(accounts.deployer))
         .transferAndCall(emptyContract.address, amount, Buffer.from('data'))
-    ).to.be.revertedWith('');
+    ).to.be.revertedWithoutReason(); // TODO: Maybe we must change the contract to get a message?
     const toBalanceAfter = await gemToken.balanceOf(emptyContract.address);
     expect(toBalanceAfter).to.equal(toBalanceBefore);
   });

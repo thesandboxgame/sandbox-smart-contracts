@@ -29,7 +29,7 @@ describe('new SandRewardPool main contract tests', function () {
         );
         await expect(
           method(poolAsOther, rewardToken.address)
-        ).to.be.revertedWith('not admin');
+        ).to.be.revertedWith('SandRewardPool: not admin');
       });
     }
 
@@ -71,13 +71,13 @@ describe('new SandRewardPool main contract tests', function () {
       const {getUser} = await setupSandRewardPoolTest();
       const user = await getUser();
       await expect(user.pool.recoverFunds(user.address)).to.be.revertedWith(
-        'not admin'
+        'SandRewardPool: not admin'
       );
     });
     it('recoverFunds must fail with address zero', async function () {
       const {contract} = await setupSandRewardPoolTest();
       await expect(contract.recoverFunds(AddressZero)).to.be.revertedWith(
-        'invalid receiver'
+        'SandRewardPool: invalid receiver'
       );
     });
   });

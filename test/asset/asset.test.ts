@@ -519,10 +519,18 @@ describe('AssetERC1155.sol', function () {
     });
 
     it('it should not approve for all for blacklisted market places', async function () {
-      const {mockMarketPlace1, assetERC1155} = await setupOperatorFilter();
+      const {
+        deployer,
+        mockMarketPlace1,
+        assetERC1155,
+      } = await setupOperatorFilter();
       await expect(
-        assetERC1155.setApprovalForAllFor(mockMarketPlace1.address, true)
-      ).to.be.reverted;
+        assetERC1155.setApprovalForAllFor(
+          deployer,
+          mockMarketPlace1.address,
+          true
+        )
+      ).to.be.revertedWith('Address is filtered');
     });
 
     it('it should approve for all for non blacklisted market places', async function () {

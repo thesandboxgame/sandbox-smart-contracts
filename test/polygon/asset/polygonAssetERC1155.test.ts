@@ -1707,12 +1707,17 @@ describe('PolygonAssetERC1155.sol', function () {
 
     it('it should not approve for all for blacklisted market places', async function () {
       const {
+        deployer,
         mockMarketPlace1,
         polygonAssetERC1155,
       } = await setupOperatorFilter();
 
       await expect(
-        polygonAssetERC1155.setApprovalForAllFor(mockMarketPlace1.address, true)
+        polygonAssetERC1155.setApprovalForAllFor(
+          deployer,
+          mockMarketPlace1.address,
+          true
+        )
       ).to.be.reverted;
     });
 

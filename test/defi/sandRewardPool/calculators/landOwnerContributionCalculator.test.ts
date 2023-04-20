@@ -33,10 +33,10 @@ describe('LandOwnerContributionCalculator', function () {
       const someOtherContract = await ethers.getContract('someOtherContract');
       await expect(
         contract.setNFTMultiplierToken(someOtherContract.address)
-      ).to.be.revertedWith('not the owner');
+      ).to.be.revertedWith('Ownable: caller is not the owner');
       await expect(
         contractAsOther.setNFTMultiplierToken(someOtherContract.address)
-      ).to.be.revertedWith('not the owner');
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
 

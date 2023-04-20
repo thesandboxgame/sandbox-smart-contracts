@@ -139,7 +139,7 @@ describe('PolygonSand.sol Meta TX', function () {
     it('should fail to set the trusted forwarder if not owner', async function () {
       await expect(
         fixtures.deployer.sand.setTrustedForwarder(users[3])
-      ).to.revertedWith('caller is not the owner');
+      ).to.revertedWith('Ownable: caller is not the owner');
     });
     it('should success to set the trusted forwarder if owner', async function () {
       expect(await fixtures.sandBeneficiary.sand.isTrustedForwarder(users[3]))

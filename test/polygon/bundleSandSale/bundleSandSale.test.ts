@@ -247,7 +247,7 @@ describe('PolygonBundleSandSale.sol', function () {
     it('should fail with the wrong saleId', async function () {
       await expect(
         fixtures.contract.buyBundleWithDai(0, 1, fixtures.otherUsers[4])
-      ).to.revertedWith('invalid saleId');
+      ).to.revertedWith('PolygonBundleSandSale: invalid saleId');
     });
     it('should fail if not enough packs', async function () {
       const {saleId, numPacks} = await createPack(fixtures);
@@ -257,7 +257,7 @@ describe('PolygonBundleSandSale.sol', function () {
           numPacks * 2,
           fixtures.otherUsers[4]
         )
-      ).to.revertedWith('not enough packs on sale');
+      ).to.revertedWith('PolygonBundleSandSale: not enough packs on sale');
     });
     it('should fail if not enough DAI', async function () {
       const someUser = fixtures.otherUsers[7];
@@ -346,7 +346,7 @@ describe('PolygonBundleSandSale.sol', function () {
       it('should fail with the wrong saleId', async function () {
         await expect(
           fixtures.contract.buyBundleWithEther(0, 1, fixtures.otherUsers[4])
-        ).to.revertedWith('invalid saleId');
+        ).to.revertedWith('PolygonBundleSandSale: invalid saleId');
       });
       it('should fail if not enough packs', async function () {
         const {saleId, numPacks} = await createPack(fixtures);
@@ -356,7 +356,7 @@ describe('PolygonBundleSandSale.sol', function () {
             numPacks * 2,
             fixtures.otherUsers[4]
           )
-        ).to.revertedWith('not enough packs on sale');
+        ).to.revertedWith('PolygonBundleSandSale: not enough packs on sale');
       });
 
       it('should fail if not enough ETH', async function () {

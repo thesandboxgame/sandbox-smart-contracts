@@ -229,7 +229,8 @@ describe('AssetMinter', function () {
           numberOfCatalystBurnPerAsset,
           numberOfGemsBurnPerAsset
         )
-      ).to.revertedWith('AssetMinter: invalid numberOfGemsBurnPerAsset value');
+        // TODO: Remove the extra space at the end from the contract
+      ).to.revertedWith('AssetMinter: invalid numberOfGemsBurnPerAsset value ');
     });
     it('mintWithCatalyst transaction reverts in case of change in numberOfCatalystBurnPerAsset', async function () {
       const {

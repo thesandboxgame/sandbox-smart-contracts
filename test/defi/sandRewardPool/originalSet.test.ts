@@ -1186,14 +1186,14 @@ describe('SandRewardPool', function () {
       rewardPoolContract
         .connect(ethers.provider.getSigner(deployer))
         .setRewardToken(constants.AddressZero)
-    ).to.be.revertedWith('not a contract');
+    ).to.be.revertedWith('SandRewardPool: not a contract');
 
     // use deployer address as not contract address
     await expect(
       rewardPoolContract
         .connect(ethers.provider.getSigner(deployer))
         .setRewardToken(deployer)
-    ).to.be.revertedWith('not a contract');
+    ).to.be.revertedWith('SandRewardPool: not a contract');
 
     await expect(
       contributionCalculator
