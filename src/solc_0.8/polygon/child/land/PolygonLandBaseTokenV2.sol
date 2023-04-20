@@ -444,7 +444,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         // size of the child quad is set to be the next smaller child quad size (12 => 6 => 3)
         quadCompareSize = quadCompareSize / 2;
         // if child quad size is greater than 3 _checkAndClearOwner is checked for new child quads in the  quad in land struct.        if (quadCompareSize >= 3)
-        (index, landMinted) = _checkAndClearOwner(land, quadMinted, landMinted, index, quadCompareSize);
+        if (quadCompareSize >= 3)
+            (index, landMinted) = _checkAndClearOwner(land, quadMinted, landMinted, index, quadCompareSize);
         return (index, landMinted);
     }
 
