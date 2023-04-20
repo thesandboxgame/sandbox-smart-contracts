@@ -7,6 +7,10 @@ import "./Land/erc721/ERC721BaseTokenV2.sol";
 import "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
 contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
+
+    event OperatorRegistrySet(address indexed registry);
+    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract
@@ -72,12 +76,14 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
         require(subscriptionOrRegistrantToCopy != address(0), "LandV3: subscription can't be zero address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
+        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /**

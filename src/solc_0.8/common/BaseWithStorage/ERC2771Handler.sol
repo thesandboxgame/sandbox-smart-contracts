@@ -9,8 +9,11 @@ pragma solidity 0.8.2;
 abstract contract ERC2771Handler {
     address internal _trustedForwarder;
 
+    event TrustedForwarderSet(address indexed newForwarder);
+
     function __ERC2771Handler_initialize(address forwarder) internal {
         _trustedForwarder = forwarder;
+        emit TrustedForwarderSet(_trustedForwarder);
     }
 
     function isTrustedForwarder(address forwarder) public view returns (bool) {
