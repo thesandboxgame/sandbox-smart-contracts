@@ -29,18 +29,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size;
     }
 
-    // modifier validQuad(
-    //     uint256 size,
-    //     uint256 x,
-    //     uint256 y
-    // ) {
-    //     require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
-    //     require(x % size == 0 && y % size == 0, "Invalid coordinates");
-    //     require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-
-    //     _;
-    // }
-
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
     /// @param to destination
