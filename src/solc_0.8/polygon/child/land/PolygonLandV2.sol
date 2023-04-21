@@ -12,8 +12,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     using AddressUpgradeable for address;
 
     event OperatorRegistrySet(address indexed registry);
-    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
-
+    
     function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
@@ -136,7 +135,6 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
         require(subscriptionOrRegistrantToCopy != address(0), "PolygonLandV2: subscription can't be zero address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
-        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test

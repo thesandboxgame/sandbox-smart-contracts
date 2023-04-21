@@ -10,6 +10,8 @@ contract OperatorFiltererUpgradeable {
     using AddressUtils for address;
     IOperatorFilterRegistry public operatorFilterRegistry;
 
+    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
@@ -27,6 +29,7 @@ contract OperatorFiltererUpgradeable {
                 }
             }
         }
+        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     modifier onlyAllowedOperator(address from) {
