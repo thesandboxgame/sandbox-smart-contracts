@@ -242,13 +242,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         // Length of array is equal to number of 3x3 child quad a 24x24 quad can have
         Land[] memory quadMinted = new Land[](64);
         uint256 index;
-        uint256 numLandMinted;
+        uint256 landMinted;
 
         if (size > 3) {
-            (index, numLandMinted) = _checkAndClearOwner(
+            (index, landMinted) = _checkAndClearOwner(
                 Land({x: x, y: y, size: size}),
                 quadMinted,
-                numLandMinted,
+                landMinted,
                 index,
                 size / 2
             );
@@ -262,7 +262,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                     emit Transfer(msg.sender, to, _id);
                 } else {
                     if (_owners[_id] == uint256(msg.sender)) {
-                        numLandMinted += 1;
+                        landMinted += 1;
                         emit Transfer(msg.sender, to, _id);
                     } else {
                         require(_owners[_id] == 0, "Already minted");
@@ -273,11 +273,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             }
         }
 
-        _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, numLandMinted, to, size, x, y, data);
+        _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, landMinted, to, size, x, y, data);
 
         _owners[quadId] = uint256(to);
         _numNFTPerAddress[to] += size * size;
-        _numNFTPerAddress[msg.sender] -= numLandMinted;
+        _numNFTPerAddress[msg.sender] -= landMinted;
     }
 
     function _checkBatchReceiverAcceptQuad(
@@ -301,7 +301,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function _checkBatchReceiverAcceptQuadAndClearOwner(
         Land[] memory quadMinted,
         uint256 index,
-        uint256 numLandMinted,
+        uint256 landMinted,
         address to,
         uint256 size,
         uint256 x,
@@ -309,9 +309,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         bytes memory data
     ) internal {
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            uint256[] memory idsToTransfer = new uint256[](numLandMinted);
+            uint256[] memory idsToTransfer = new uint256[](landMinted);
             uint256 transferIndex;
-            uint256[] memory idsToMint = new uint256[]((size * size) - numLandMinted);
+            uint256[] memory idsToMint = new uint256[]((size * size) - landMinted);
             uint256 mintIndex;
 
             for (uint256 i = 0; i < size * size; i++) {
@@ -429,7 +429,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function _checkAndClearOwner(
         Land memory land,
         Land[] memory quadMinted,
-        uint256 numLandMinted,
+        uint256 landMinted,
         uint256 index,
         uint256 quadCompareSize
     ) internal returns (uint256, uint256) {
@@ -447,7 +447,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                     if (owner == msg.sender) {
                         quadMinted[index] = Land({x: xi, y: yi, size: quadCompareSize});
                         index++;
-                        numLandMinted += quadCompareSize * quadCompareSize;
+                        landMinted += quadCompareSize * quadCompareSize;
                         _owners[id] = 0;
                     } else {
                         require(owner == address(0), "Already minted");
@@ -458,8 +458,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
         quadCompareSize = quadCompareSize / 2;
         if (quadCompareSize >= 3)
-            (index, numLandMinted) = _checkAndClearOwner(land, quadMinted, numLandMinted, index, quadCompareSize);
-        return (index, numLandMinted);
+            (index, landMinted) = _checkAndClearOwner(land, quadMinted, landMinted, index, quadCompareSize);
+        return (index, landMinted);
     }
 
     /// @dev checks if the Land's child quads are owned by the from address and clears all the previous owners
