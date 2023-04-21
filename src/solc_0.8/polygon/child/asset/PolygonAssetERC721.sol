@@ -174,4 +174,12 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OperatorFilterer
     ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
     }
+
+    function _msgSender() internal view virtual override(ContextUpgradeable, BaseERC721) returns (address sender) {
+        return BaseERC721._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, BaseERC721) returns (bytes calldata) {
+        return BaseERC721._msgData();
+    }
 }
