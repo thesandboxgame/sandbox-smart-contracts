@@ -719,7 +719,7 @@ describe('MockLandV2WithMint.sol', function () {
       ).to.be.revertedWith('to is zero address');
     });
 
-    it('should revert for mint if co-ordinates of Quad are invalid', async function () {
+    it('should revert for mint if x co-ordinates of Quad are invalid', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
@@ -732,10 +732,26 @@ describe('MockLandV2WithMint.sol', function () {
           4,
           bytes
         )
-      ).to.be.revertedWith('Invalid coordinates');
+      ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert for mint if co-ordinates are out of bound', async function () {
+    it('should revert for mint if y co-ordinates of Quad are invalid', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          3,
+          4,
+          bytes
+        )
+      ).to.be.revertedWith('Invalid y coordinate');
+    });
+
+    it('should revert for mint if x co-ordinates are out of bound', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
@@ -748,7 +764,23 @@ describe('MockLandV2WithMint.sol', function () {
           411,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('x out of bounds');
+    });
+
+    it('should revert for mint if y co-ordinates are out of bound', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
+          411,
+          bytes
+        )
+      ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for mint if size is out of bound', async function () {

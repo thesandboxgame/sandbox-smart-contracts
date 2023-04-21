@@ -29,17 +29,17 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size;
     }
 
-    modifier validQuad(
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) {
-        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+    // modifier validQuad(
+    //     uint256 size,
+    //     uint256 x,
+    //     uint256 y
+    // ) {
+    //     require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
+    //     require(x % size == 0 && y % size == 0, "Invalid coordinates");
+    //     require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
-        _;
-    }
+    //     _;
+    // }
 
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
@@ -145,7 +145,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 x,
         uint256 y,
         bytes memory data
-    ) external virtual override validQuad(size, x, y) {
+    ) external virtual override {
+        _isValidCoordinates(x, y, size);
         require(isMinter(_msgSender()), "!AUTHORIZED");
         _mintQuad(user, size, x, y, data);
     }
@@ -239,8 +240,20 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size,
         uint256 x,
         uint256 y
-    ) public view override validQuad(size, x, y) returns (bool) {
+    ) public view override returns (bool) {
+        _isValidCoordinates(x, y, size);
         return _ownerOfQuad(size, x, y) != address(0);
+    }
+
+    function _isValidCoordinates(
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) internal pure {
+        require(x % size == 0, "Invalid x coordinate");
+        require(y % size == 0, "Invalid y coordinate");
+        require(x <= GRID_SIZE - size, "x out of bounds");
+        require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
     /**
@@ -282,7 +295,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal validQuad(size, x, y) {
+    ) internal {
+        _isValidCoordinates(x, y, size);
         if (size == 1) {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
