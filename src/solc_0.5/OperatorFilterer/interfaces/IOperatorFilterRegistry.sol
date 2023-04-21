@@ -5,7 +5,7 @@ pragma solidity 0.5.9;
  * @title IOperatorFilterRegistry
  * @author OpenSea
  * @notice Interface of the operator filter registry
- * @dev This interface comes from OpenSea https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/IOperatorFilterRegistry.sol
+ * @dev This interface comes from OpenSea https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/IOperatorFilterRegistry.sol and adapted to the 0.5.9 solidity version
  */
 interface IOperatorFilterRegistry {
     /**
