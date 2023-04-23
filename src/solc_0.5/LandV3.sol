@@ -7,6 +7,9 @@ import "./Land/erc721/ERC721BaseTokenV2.sol";
 import "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
 contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
+
+    event OperatorRegistrySet(address indexed registry);
+
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract
@@ -78,6 +81,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /**

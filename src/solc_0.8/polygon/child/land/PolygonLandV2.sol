@@ -11,15 +11,19 @@ import "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradea
 contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFiltererUpgradeable {
     using AddressUpgradeable for address;
 
+    event OperatorRegistrySet(address indexed registry);
+    
     function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
+        emit AdminChanged(address(0), _admin);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderSet(trustedForwarder);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
@@ -133,5 +137,6 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external virtual onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 }

@@ -9,6 +9,8 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 abstract contract OperatorFiltererUpgradeable is Initializable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
+    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
@@ -30,6 +32,7 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
                 }
             }
         }
+        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     modifier onlyAllowedOperator(address from) virtual {
