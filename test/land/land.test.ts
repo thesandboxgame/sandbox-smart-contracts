@@ -105,7 +105,7 @@ describe('LandV3', function () {
         );
         await expect(
           contract.exists(quadSize, quadSize + 1, quadSize + 1)
-        ).to.be.revertedWith('Invalid coordinates');
+        ).to.be.revertedWith('Invalid x coordinate');
       });
     });
 
@@ -300,19 +300,35 @@ describe('LandV3', function () {
       );
     });
 
-    it('should revert when to coordinates are wrong', async function () {
+    it('should revert when to x coordinates are wrong', async function () {
       const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
       await expect(mintQuad(deployer, 3, 5, 5)).to.be.revertedWith(
-        'Invalid coordinates'
+        'Invalid x coordinate'
       );
     });
 
-    it('should revert when quad is out of bounds (mintQuad)', async function () {
+    it('should revert when to y coordinates are wrong', async function () {
       const {getNamedAccounts, mintQuad} = await setupLand();
       const {deployer} = await getNamedAccounts();
-      await expect(mintQuad(deployer, 3, 441, 441)).to.be.revertedWith(
-        'Out of bounds'
+      await expect(mintQuad(deployer, 3, 0, 5)).to.be.revertedWith(
+        'Invalid y coordinate'
+      );
+    });
+
+    it('should revert when x quad is out of bounds (mintQuad)', async function () {
+      const {getNamedAccounts, mintQuad} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      await expect(mintQuad(deployer, 3, 441, 0)).to.be.revertedWith(
+        'x out of bounds'
+      );
+    });
+
+    it('should revert when y quad is out of bounds (mintQuad)', async function () {
+      const {getNamedAccounts, mintQuad} = await setupLand();
+      const {deployer} = await getNamedAccounts();
+      await expect(mintQuad(deployer, 3, 0, 441)).to.be.revertedWith(
+        'y out of bounds'
       );
     });
 
@@ -382,7 +398,43 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(deployer))
           .batchTransferQuad(deployer, landAdmin, [6], [0, 6], [0, 6], '0x')
-      ).to.be.revertedWith('invalid data');
+      ).to.be.revertedWith(
+        "LandBaseTokenV3: sizes's and x's length are different"
+      );
+    });
+
+    it('should revert when x, y are not of same length', async function () {
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await mintQuad(deployer, 6, 0, 0);
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(deployer))
+          .batchTransferQuad(deployer, landAdmin, [6, 6], [0, 6], [6], '0x')
+      ).to.be.revertedWith("LandBaseTokenV3: x's and y's length are different");
+    });
+
+    it('should revert when size, x are not of same length', async function () {
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await mintQuad(deployer, 6, 0, 0);
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(deployer))
+          .batchTransferQuad(deployer, landAdmin, [6], [0, 6], [0, 6], '0x')
+      ).to.be.revertedWith(
+        "LandBaseTokenV3: sizes's and x's length are different"
+      );
     });
 
     it('should revert when to is a contract and not a ERC721 receiver', async function () {
@@ -490,10 +542,26 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(deployer))
           .transferQuad(deployer, landAdmin, 6, 1, 1, '0x')
-      ).to.be.revertedWith('Invalid coordinates');
+      ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert when quad is out of bounds (transferQuad)', async function () {
+    it('should revert for owner of by invalid x coordinate', async function () {
+      const {landContract} = await setupLand();
+      const id = getId(3, 3, 0);
+      await expect(landContract.ownerOf(id)).to.be.revertedWith(
+        'x coordinate: Invalid token id'
+      );
+    });
+
+    it('should revert for owner of by invalid y coordinate', async function () {
+      const {landContract} = await setupLand();
+      const id = getId(3, 0, 3);
+      await expect(landContract.ownerOf(id)).to.be.revertedWith(
+        'y coordinate: Invalid token id'
+      );
+    });
+
+    it('should revert when x coordinate is out of bounds (transferQuad)', async function () {
       const {
         landContract,
         getNamedAccounts,
@@ -505,8 +573,24 @@ describe('LandV3', function () {
       await expect(
         landContract
           .connect(ethers.provider.getSigner(deployer))
-          .transferQuad(deployer, landAdmin, 3, 441, 441, '0x')
-      ).to.be.revertedWith('Out of bounds');
+          .transferQuad(deployer, landAdmin, 3, 441, 0, '0x')
+      ).to.be.revertedWith('x out of bounds');
+    });
+
+    it('should revert when transfer quad when y is out of bounds (transferQuad)', async function () {
+      const {
+        landContract,
+        getNamedAccounts,
+        ethers,
+        mintQuad,
+      } = await setupLand();
+      const {deployer, landAdmin} = await getNamedAccounts();
+      await mintQuad(deployer, 6, 0, 0);
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(deployer))
+          .transferQuad(deployer, landAdmin, 3, 0, 441, '0x')
+      ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for invalid size', async function () {
@@ -533,6 +617,26 @@ describe('LandV3', function () {
           .connect(ethers.provider.getSigner(landAdmin))
           .mintAndTransferQuad(zeroAddress, 3, 0, 0, '0x')
       ).to.be.revertedWith('to is zero address');
+    });
+
+    it('should revert when y is out of bound', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(landAdmin))
+          .mintAndTransferQuad(landAdmin, 3, 0, 441, '0x')
+      ).to.be.revertedWith('y out of bounds');
+    });
+
+    it('should revert when x is out of bound', async function () {
+      const {landContract, getNamedAccounts, ethers} = await setupLand();
+      const {landAdmin} = await getNamedAccounts();
+      await expect(
+        landContract
+          .connect(ethers.provider.getSigner(landAdmin))
+          .mintAndTransferQuad(landAdmin, 3, 441, 0, '0x')
+      ).to.be.revertedWith('x out of bounds');
     });
 
     it('should revert when to is non ERC721 receiving contract', async function () {
@@ -843,17 +947,17 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(landAdmin))
           .mintAndTransferQuad(deployer, 3, 5, 5, '0x')
-      ).to.be.revertedWith('Invalid coordinates');
+      ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert when quad is out of bounds (mintAndTransferQuad)', async function () {
+    it('should revert when x coordinate is out of bounds (mintAndTransferQuad)', async function () {
       const {landContract, getNamedAccounts, ethers} = await setupLand();
       const {deployer, landAdmin} = await getNamedAccounts();
       await expect(
         landContract
           .connect(ethers.provider.getSigner(landAdmin))
           .mintAndTransferQuad(deployer, 3, 441, 441, '0x')
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('x out of bounds');
     });
   });
 

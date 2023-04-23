@@ -719,7 +719,7 @@ describe('MockLandV2WithMint.sol', function () {
       ).to.be.revertedWith('to is zero address');
     });
 
-    it('should revert for mint if co-ordinates of Quad are invalid', async function () {
+    it('should revert for mint if x co-ordinates of Quad are invalid', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
@@ -729,13 +729,29 @@ describe('MockLandV2WithMint.sol', function () {
           landOwners[1].address,
           3,
           4,
-          4,
+          0,
           bytes
         )
       ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert for mint if co-ordinates are out of bound', async function () {
+    it('should revert for mint if y co-ordinates of Quad are invalid', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
+          4,
+          bytes
+        )
+      ).to.be.revertedWith('Invalid y coordinate');
+    });
+
+    it('should revert for mint if x co-ordinate are out of bound', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
@@ -745,6 +761,22 @@ describe('MockLandV2WithMint.sol', function () {
           landOwners[1].address,
           3,
           411,
+          0,
+          bytes
+        )
+      ).to.be.revertedWith('Out of bounds');
+    });
+
+    it('should revert for mint if y co-ordinate are out of bound', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
           411,
           bytes
         )
@@ -1605,7 +1637,26 @@ describe('MockLandV2WithMint.sol', function () {
           [0, 300, 30, 24],
           bytes
         )
-      ).to.be.revertedWith('invalid data');
+      ).to.be.revertedWith(
+        "PolygonLandBaseTokenV2: sizes's and x's length are different"
+      );
+    });
+
+    it('reverts transfers batch of quads for invalid x and y length', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await expect(
+        landOwners[0].MockLandV2WithMint.batchTransferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          [24, 12],
+          [0, 300],
+          [0, 300, 30, 24],
+          bytes
+        )
+      ).to.be.revertedWith(
+        "PolygonLandBaseTokenV2: x's and y's length are different"
+      );
     });
   });
 
@@ -2672,7 +2723,23 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 2, 2);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'Invalid token id'
+        'x coordinate: Invalid token id'
+      );
+    });
+
+    it('should revert when fetching owner of given quad id with invalid token by(x)', async function () {
+      const {PolygonLand} = await setupLand();
+      const id = getId(3, 2, 0);
+      await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
+        'x coordinate: Invalid token id'
+      );
+    });
+
+    it('should revert when fetching owner of given quad id with invalid token(y)', async function () {
+      const {PolygonLand} = await setupLand();
+      const id = getId(3, 0, 2);
+      await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
+        'y coordinate: Invalid token id'
       );
     });
 
@@ -2967,6 +3034,13 @@ describe('MockLandV2WithMint.sol', function () {
       await polygonLandV2.transferFrom(users[0].address, users[1].address, id);
 
       expect(await polygonLandV2.balanceOf(users[1].address)).to.be.equal(1);
+    });
+
+    it('should revert for minted invalid size', async function () {
+      const {polygonLandV2, users} = await setupOperatorFilter();
+      await expect(
+        polygonLandV2.mintQuad(users[0].address, 25, 0, 0, '0x')
+      ).to.be.revertedWith('Invalid size');
     });
 
     it('should be able to safe transfer land if from is the owner of token', async function () {
