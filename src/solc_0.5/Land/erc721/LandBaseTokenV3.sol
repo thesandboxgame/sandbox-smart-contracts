@@ -13,6 +13,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant NOT_OPERATOR_FLAG = 2**255 - 1;
 
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
@@ -268,7 +269,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 if (isAlreadyMinted) {
                     emit Transfer(msg.sender, to, _id);
                 } else {
-                    if (_owners[_id] == uint256(msg.sender)) {
+                    if (_owners[_id] & NOT_OPERATOR_FLAG == uint256(msg.sender)) {
+                        if (_operators[_id] != address(0)) _operators[_id] = address(0);
                         landMinted += 1;
                         emit Transfer(msg.sender, to, _id);
                     } else {
@@ -327,7 +329,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 if (_isQuadMinted(quadMinted, Land({x: _getX(id), y: _getY(id), size: 1}), index)) {
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
-                } else if (_owners[id] == uint256(msg.sender)) {
+                } else if (_owners[id] & NOT_OPERATOR_FLAG == uint256(msg.sender)) {
                     _owners[id] = 0;
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
