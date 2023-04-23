@@ -1,6 +1,7 @@
 import {expect} from '../../chai-setup';
 import {setupLand} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
+import {zeroAddress} from '../../land/fixtures';
 
 describe('PolygonLand:WithAdminV2', function () {
   it('should get the current admin', async function () {
@@ -17,6 +18,16 @@ describe('PolygonLand:WithAdminV2', function () {
     await expect(contract.changeAdmin(users[0].address)).not.to.be.reverted;
 
     expect(await contract.getAdmin()).to.be.equal(users[0].address);
+  });
+
+  it('should revert for change the admin for zero address', async function () {
+    const {PolygonLand, ethers} = await setupLand();
+    const admin = await PolygonLand.getAdmin();
+    const contract = PolygonLand.connect(ethers.provider.getSigner(admin));
+
+    await expect(contract.changeAdmin(zeroAddress)).to.be.revertedWith(
+      'zero address cannot be admin'
+    );
   });
 
   describe('Meta transactions', function () {

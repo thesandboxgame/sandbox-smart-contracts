@@ -27,6 +27,7 @@ contract WithAdminV2 is ContextUpgradeable {
     /// @param newAdmin The address of the new administrator.
     function changeAdmin(address newAdmin) external {
         address admin = _admin;
+        require(newAdmin != address(0), "zero address cannot be admin");
         require(_msgSender() == admin, "ADMIN_ACCESS_DENIED");
         emit AdminChanged(admin, newAdmin);
         _admin = newAdmin;
