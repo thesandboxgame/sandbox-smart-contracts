@@ -720,17 +720,23 @@ describe('LandV3', function () {
         ethers,
         mintQuad,
       } = await setupLand();
-      const {landAdmin, deployer, sandAdmin} = await getNamedAccounts();
+      const {
+        landAdmin,
+        deployer,
+        landSaleFeeRecipient,
+      } = await getNamedAccounts();
       await mintQuad(landAdmin, 1, 0, 0);
       const id = getId(1, 0, 0);
       await landContract
         .connect(ethers.provider.getSigner(landAdmin))
         .approve(deployer, id);
+      expect(await landContract.ownerOf(id)).to.be.equal(landAdmin);
       expect(await landContract.getApproved(id)).to.be.equal(deployer);
       await landContract
         .connect(await ethers.provider.getSigner(landAdmin))
-        .mintAndTransferQuad(sandAdmin, 3, 0, 0, '0x');
+        .mintAndTransferQuad(landSaleFeeRecipient, 3, 0, 0, '0x');
       expect(await landContract.getApproved(id)).to.be.equal(zeroAddress);
+      expect(await landContract.ownerOf(id)).to.be.equal(landSaleFeeRecipient);
     });
 
     it('should revert when from is zeroAddress (transferQuad)', async function () {

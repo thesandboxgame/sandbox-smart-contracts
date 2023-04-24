@@ -711,6 +711,9 @@ describe('MockLandV2WithMint.sol', function () {
       await deployer.PolygonLand.mintQuad(deployer.address, 1, 0, 0, bytes);
       const id = getId(1, 0, 0);
       await deployer.PolygonLand.approve(landAdmin.address, id);
+      expect(await deployer.PolygonLand.ownerOf(id)).to.be.equal(
+        deployer.address
+      );
       expect(await deployer.PolygonLand.getApproved(id)).to.be.equal(
         landAdmin.address
       );
@@ -723,6 +726,9 @@ describe('MockLandV2WithMint.sol', function () {
       );
       expect(await deployer.PolygonLand.getApproved(id)).to.be.equal(
         zeroAddress
+      );
+      expect(await deployer.PolygonLand.ownerOf(id)).to.be.equal(
+        landMinter.address
       );
     });
 
