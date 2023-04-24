@@ -245,7 +245,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
-    /** @dev checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
+    /**
+     * @dev checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
      * It recursively checks child quad of every size(exculding Lands of 1x1 size) are minted or not.
      * Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in the parent quad is minted or not.
      * While checking if the every child Quad and Land is minted it also checks and clear the owner for quads which are minted.

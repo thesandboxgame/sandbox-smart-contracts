@@ -332,7 +332,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 
-    /** @dev checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
+    /**
+     * @dev checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
      * It recursively checks child quad of every size(exculding Lands of 1x1 size) are minted or not.
      * Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in
      * the parent quad is minted or not. While checking if the every child Quad and Land is minted it
@@ -403,7 +404,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         _numNFTPerAddress[msg.sender] -= landMinted;
     }
 
-    /** @dev recursivly checks if the child quads are minted in land and push them to the quadMinted array.
+    /**
+     * @dev recursivly checks if the child quads are minted in land and push them to the quadMinted array.
      * if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
      * in quads which are minted. it clears the minted child quads owners.
     */
