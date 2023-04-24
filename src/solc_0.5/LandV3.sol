@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 /* solhint-disable no-empty-blocks */
 pragma solidity 0.5.9;
 
