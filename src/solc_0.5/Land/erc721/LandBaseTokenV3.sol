@@ -360,7 +360,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 if (_isQuadMinted(quadMinted, Land({x: _getX(id), y: _getY(id), size: 1}), index)) {
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
-                } else if (address(uint160(_owners[          id])) == msg.sender) {
+                } else if (address(uint160(_owners[id])) == msg.sender) {
                     _owners[id] = 0;
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
