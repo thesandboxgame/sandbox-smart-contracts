@@ -380,7 +380,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         } else {
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 id = _idInPath(i, size, x, y);
-                if (_owners[id] == uint256(msg.sender)) _owners[id] = 0;
+                if (address(uint160(_owners[id])) == msg.sender) _owners[id] = 0;
             }
         }
     }
