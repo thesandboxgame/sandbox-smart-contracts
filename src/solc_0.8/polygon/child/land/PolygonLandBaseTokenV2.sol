@@ -83,8 +83,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external {
-        require(_msgSender() == _admin, "only admin is allowed to add minters");
+    function setMinter(address minter, bool enabled) external onlyAdmin {
         require(minter != address(0), "PolygonLand: Invalid address");
         _minters[minter] = enabled;
         emit Minter(minter, enabled);
