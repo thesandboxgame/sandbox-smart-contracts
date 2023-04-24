@@ -233,6 +233,17 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         return _ownerOfQuad(size, x, y) != address(0);
     }
 
+    function _isValidCoordinates(
+        uint256 x,
+        uint256 y,
+        uint256 size
+    ) internal pure {
+        require(x % size == 0, "Invalid x coordinate");
+        require(y % size == 0, "Invalid y coordinate");
+        require(x <= GRID_SIZE - size, "x out of bounds");
+        require(y <= GRID_SIZE - size, "y out of bounds");
+    }
+
     /**
      * @notice Return the symbol of the token contract
      * @return The symbol of the token contract

@@ -271,7 +271,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                 } else {
                     if (_owners[_id] & NOT_OPERATOR_FLAG == uint256(msg.sender)) {
                         if (_operators[_id] != address(0)) _operators[_id] = address(0);
-                        landMinted += 1;
+                        numLandMinted += 1;
                         emit Transfer(msg.sender, to, _id);
                     } else {
                         require(_owners[_id] == 0, "Already minted");

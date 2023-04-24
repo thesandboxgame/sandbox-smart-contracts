@@ -786,7 +786,7 @@ describe('MockLandV2WithMint.sol', function () {
           0,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('x out of bounds');
     });
 
     it('should revert for mint if y co-ordinate are out of bound', async function () {
@@ -802,7 +802,23 @@ describe('MockLandV2WithMint.sol', function () {
           411,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('y out of bounds');
+    });
+
+    it('should revert for mint if y co-ordinates are out of bound', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandV2WithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
+          411,
+          bytes
+        )
+      ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for mint if size is out of bound', async function () {
