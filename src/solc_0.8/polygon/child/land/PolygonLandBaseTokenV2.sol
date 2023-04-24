@@ -160,7 +160,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         require(isMinter(msg.sender), "!AUTHORIZED");
         require(to != address(0), "to is zero address");
 
-        if (exists(size, x, y) == true) {
+        if (exists(size, x, y)) {
             _transferQuad(msg.sender, to, size, x, y);
             _numNFTPerAddress[msg.sender] -= size * size;
             _numNFTPerAddress[to] += size * size;
