@@ -288,7 +288,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256 size,
         uint256 x,
         uint256 y
-    ) internal view {
+    ) internal pure {
         require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
         require(x % size == 0, "Invalid x coordinate");
         require(y % size == 0, "Invalid y coordinate");

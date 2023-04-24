@@ -238,6 +238,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
         require(x % size == 0, "Invalid x coordinate");
         require(y % size == 0, "Invalid y coordinate");
         require(x <= GRID_SIZE - size, "x out of bounds");
