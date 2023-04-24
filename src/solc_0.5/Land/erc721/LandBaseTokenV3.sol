@@ -481,8 +481,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param index array size
     /// @param landMinted number of lands transferred
     /// @param quadCompareSize size to compare with
-    /// @return
-    /// @return
+    /// @return the index of last quad pushed in quadMinted array and the total land already minted
+    /// @return the number of lands minted
     function _checkAndClearOwner(
         Land memory land,
         Land[] memory quadMinted,
