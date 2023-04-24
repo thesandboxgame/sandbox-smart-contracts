@@ -9,7 +9,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
-    event LandRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+    event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         _register(subscriptionOrRegistrantToCopy, subscribe);
@@ -32,7 +32,7 @@ abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
                 }
             }
         }
-        emit LandRegistered(subscriptionOrRegistrantToCopy, subscribe);
+        emit ContractRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     modifier onlyAllowedOperator(address from) virtual {
