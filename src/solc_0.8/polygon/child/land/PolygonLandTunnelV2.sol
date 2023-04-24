@@ -75,6 +75,7 @@ contract PolygonLandTunnelV2 is
 
     /// @notice initialize the contract
     /// @param  _fxChild fx child
+    /// @param _childToken address of the token on the child chain
     /// @param  _trustedForwarder address of an ERC2771 meta transaction sender contract
     /// @param _maxGasLimit maximum accepted gas limit
     /// @param _maxAllowedQuads maximum number of quads accepted

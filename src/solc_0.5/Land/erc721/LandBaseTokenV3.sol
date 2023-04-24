@@ -443,6 +443,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     /// @param from owner of the token
     /// @param id token id
+    /// @return if the address is the owner of the token
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
         uint256 owner = _owners[id];
         if (owner != 0) {

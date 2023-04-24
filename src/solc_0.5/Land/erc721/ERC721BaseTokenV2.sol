@@ -80,14 +80,14 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     }
 
     /**
-     * @param id Token id
+     * @param id token id
+     * @return address of the owner
      */
     function _ownerOf(uint256 id) internal view returns (address) {
         return address(_owners[id]);
     }
 
     /**
-     *
      * @param id Token id
      * @return owner Address of the token's owner
      * @return operatorEnabled Is he an operator
@@ -183,6 +183,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param id The id of the token
+     * @return is it a meta-tx
      */
     function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
@@ -204,6 +205,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @dev Checks if the target contract supports the given interface & doesn't exceed 10000 gas
      * @param _contract The target contract
      * @param interfaceId The interface id
+     * @return if the call is a success
      */
     function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId)
         internal
