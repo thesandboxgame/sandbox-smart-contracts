@@ -123,7 +123,7 @@ describe('ERC20RewardPool main contract tests', function () {
       const {getUser} = await setupERC20RewardPoolTest();
       const user = await getUser();
       await expect(user.pool.recoverFunds(user.address)).to.be.revertedWith(
-        'caller is not the owner'
+        'Ownable: caller is not the owner'
       );
     });
     it('recoverFunds must fail with address zero', async function () {

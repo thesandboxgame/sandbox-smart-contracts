@@ -270,6 +270,7 @@ export const setupOperatorFilter = withSnapshot(
       assetERC721,
       ipfsHashString,
       users,
+      deployer,
       mintAssetERC1155,
       mintAssetERC721,
     };

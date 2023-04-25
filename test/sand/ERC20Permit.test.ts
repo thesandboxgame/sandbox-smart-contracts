@@ -271,6 +271,6 @@ describe('Gems & Catalysts permit', function () {
         sig.r,
         sig.s
       )
-    ).to.be.revertedWith('INVALID_OWNER');
+    ).to.be.revertedWith('INVALID_OWNER_||_SPENDER');
   });
 });

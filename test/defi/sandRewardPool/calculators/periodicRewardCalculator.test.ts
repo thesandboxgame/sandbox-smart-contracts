@@ -17,14 +17,14 @@ describe('PeriodicRewardCalculator', function () {
       } = await periodicSetup();
 
       await expect(contract.restartRewards()).to.be.revertedWith(
-        'not reward pool'
+        'PeriodicRewardCalculator: not reward pool'
       );
       await expect(contractAsAdmin.restartRewards()).to.be.revertedWith(
-        'not reward pool'
+        'PeriodicRewardCalculator: not reward pool'
       );
       await expect(
         contractAsRewardDistribution.restartRewards()
-      ).to.be.revertedWith('not reward pool');
+      ).to.be.revertedWith('PeriodicRewardCalculator: not reward pool');
     });
 
     it('reward distribution should be able to call notifyRewardAmount', async function () {
@@ -40,14 +40,14 @@ describe('PeriodicRewardCalculator', function () {
       } = await periodicSetup();
 
       await expect(contract.notifyRewardAmount(12345678)).to.be.revertedWith(
-        'not reward distribution'
+        'PeriodicRewardCalculator: not reward distribution'
       );
       await expect(
         contractAsAdmin.notifyRewardAmount(12345678)
-      ).to.be.revertedWith('not reward distribution');
+      ).to.be.revertedWith('PeriodicRewardCalculator: not reward distribution');
       await expect(
         contractAsRewardPool.notifyRewardAmount(12345678)
-      ).to.be.revertedWith('not reward distribution');
+      ).to.be.revertedWith('PeriodicRewardCalculator: not reward distribution');
     });
 
     it('reward distribution should be able to call setSavedRewards', async function () {
@@ -63,14 +63,14 @@ describe('PeriodicRewardCalculator', function () {
       } = await periodicSetup();
 
       await expect(contract.setSavedRewards(12345678)).to.be.revertedWith(
-        'not reward distribution'
+        'PeriodicRewardCalculator: not reward distribution'
       );
       await expect(
         contractAsAdmin.setSavedRewards(12345678)
-      ).to.be.revertedWith('not reward distribution');
+      ).to.be.revertedWith('PeriodicRewardCalculator: not reward distribution');
       await expect(
         contractAsRewardPool.setSavedRewards(12345678)
-      ).to.be.revertedWith('not reward distribution');
+      ).to.be.revertedWith('PeriodicRewardCalculator: not reward distribution');
     });
   });
 
@@ -281,7 +281,7 @@ describe('PeriodicRewardCalculator', function () {
 
     await expect(
       contractAsRewardDistribution.setDuration(newDuration)
-    ).to.be.revertedWith('not admin');
+    ).to.be.revertedWith('PeriodicRewardCalculator: not admin');
 
     await expect(contract.setDuration(newDuration)).not.to.be.reverted;
   });
@@ -311,7 +311,7 @@ describe('PeriodicRewardCalculator', function () {
     const newDuration = 50 * 24 * 60 * 60;
 
     await expect(contract.setDuration(newDuration)).to.be.revertedWith(
-      'campaign already started'
+      'PeriodicRewardCalculator: campaign already started'
     );
   });
 });

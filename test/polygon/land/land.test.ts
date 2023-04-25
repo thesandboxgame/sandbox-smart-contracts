@@ -1580,7 +1580,7 @@ describe('MockLandWithMint.sol', function () {
                   y,
                   bytes
                 )
-              ).to.be.revertedWith('not owner');
+              ).to.be.revertedWith(/not owner/);
             }
           }
         }

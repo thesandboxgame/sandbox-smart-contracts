@@ -29,7 +29,7 @@ describe('LandOwnersSandRewardPool', function () {
     const cant = toWei(1);
     await sandAsOther.approve(contractAsOther.address, cant);
     await expect(contractAsOther.stake(cant)).to.be.revertedWith(
-      'not enough contributions'
+      'SandRewardPool: not enough contributions'
     );
   });
   it('if a user sells his land we can recompute the contribution', async function () {

@@ -474,6 +474,7 @@ export const setupOperatorFilter = withSnapshot(
       polygonAssetERC1155,
       ipfsHashString,
       users,
+      deployer,
       mintAssetERC1155,
       mintAssetERC721,
     };

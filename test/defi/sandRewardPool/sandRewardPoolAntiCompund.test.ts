@@ -23,7 +23,7 @@ describe('new SandRewardPool anti compound tests', function () {
       const user = await getUser();
       await expect(
         user.pool.setAntiCompoundLockPeriod(1000)
-      ).to.be.revertedWith('not admin');
+      ).to.be.revertedWith('SandRewardPool: not admin');
     });
   });
   it('user can only get his rewards after lockTimeMS', async function () {
@@ -46,7 +46,9 @@ describe('new SandRewardPool anti compound tests', function () {
     await user.pool.stake(1000);
     expect(await contract.earned(user.address)).to.be.equal(30);
 
-    await expect(user.pool.getReward()).to.revertedWith('must wait');
+    await expect(user.pool.getReward()).to.revertedWith(
+      'SandRewardPool: must wait'
+    );
     await increaseTime(lockTimeMS);
     await doOnNextBlock(async () => {
       await user.pool.getReward();
@@ -59,7 +61,9 @@ describe('new SandRewardPool anti compound tests', function () {
     await rewardCalculatorMock.setReward(50);
     expect(await contract.earned(user.address)).to.be.equal(50);
 
-    await expect(user.pool.getReward()).to.revertedWith('must wait');
+    await expect(user.pool.getReward()).to.revertedWith(
+      'SandRewardPool: must wait'
+    );
 
     await increaseTime(lockTimeMS);
     expect(await contract.earned(user.address)).to.be.equal(50);
@@ -85,7 +89,9 @@ describe('new SandRewardPool anti compound tests', function () {
     await rewardCalculatorMock.setReward(30);
     await user.pool.stake(1000);
 
-    await expect(user.pool.getReward()).to.revertedWith('must wait');
+    await expect(user.pool.getReward()).to.revertedWith(
+      'SandRewardPool: must wait'
+    );
 
     // Disable the check
     await contract.setAntiCompoundLockPeriod(0);
