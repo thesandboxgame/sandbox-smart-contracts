@@ -193,10 +193,14 @@ describe('PolygonStarterPack.sol', function () {
   });
   describe('getReceivingWallet', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('can view the receiving wallet', async function () {
-      const {PolygonStarterPack} = await setupPolygonStarterPack();
-      // TODO: A getter will never revert ???
-      await expect(PolygonStarterPack.getReceivingWallet()).to.not.be.reverted;
+    it('can view the receiving wallet', async function () {
+      const {
+        PolygonStarterPack,
+        starterPackSaleBeneficiary,
+      } = await setupPolygonStarterPack();
+      expect(await PolygonStarterPack.getReceivingWallet()).to.be.equal(
+        starterPackSaleBeneficiary
+      );
     });
   });
   describe('setReceivingWallet', function () {
@@ -2229,10 +2233,12 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasReport: any = {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function record(name: any, gasUsed: any) {
         gasReport[name] = gasUsed.toNumber();
       }
+
       await deployManyGemContracts(15);
       await deployManyCatalystContracts(16);
       const receipt = await waitFor(
@@ -2299,10 +2305,12 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasReport: any = {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function record(name: any, gasUsed: any) {
         gasReport[name] = gasUsed.toNumber();
       }
+
       await deployManyGemContracts(25);
       await deployManyCatalystContracts(26);
       const receipt = await waitFor(
@@ -2389,10 +2397,12 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasReport: any = {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function record(name: any, gasUsed: any) {
         gasReport[name] = gasUsed.toNumber();
       }
+
       await deployManyGemContracts(45);
       await deployManyCatalystContracts(46);
       const receipt = await waitFor(
@@ -2519,10 +2529,12 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasReport: any = {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function record(name: any, gasUsed: any) {
         gasReport[name] = gasUsed.toNumber();
       }
+
       await deployManyGemContracts(45);
       await deployManyCatalystContracts(46);
       const receipt = await waitFor(
@@ -2595,10 +2607,12 @@ describe('PolygonStarterPack.sol', function () {
       } = await setupPolygonStarterPack();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasReport: any = {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function record(name: any, gasUsed: any) {
         gasReport[name] = gasUsed.toNumber();
       }
+
       await deployManyGemContracts(45);
       await deployManyCatalystContracts(46);
       const receipt = await waitFor(
