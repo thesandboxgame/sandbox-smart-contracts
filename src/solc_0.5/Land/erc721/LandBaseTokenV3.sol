@@ -20,7 +20,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant NOT_OPERATOR_FLAG = 2**255 - 1;
 
     mapping(address => bool) internal _minters;
     event Minter(address indexed superOperator, bool enabled);
