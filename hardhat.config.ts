@@ -1,6 +1,5 @@
 import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import '@nomiclabs/hardhat-etherscan';
-import '@openzeppelin/hardhat-upgrades';
 import 'dotenv/config';
 import 'hardhat-contract-sizer';
 import 'hardhat-deploy';

@@ -29,9 +29,8 @@
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
     "@openzeppelin/contracts-0.8.13": "npm:@openzeppelin/contracts@4.8.0",
-    "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0",
     "@openzeppelin/contracts-upgradeable": "4.4.2",
-    "@openzeppelin/hardhat-upgrades": "^1.4.3",
+    "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0",
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^9.0.6",
     "@types/inquirer": "^7.3.1",
@@ -74,7 +73,7 @@
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
-    "ts-node": "^9.0.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.0.5"
   },
   "scripts": {
