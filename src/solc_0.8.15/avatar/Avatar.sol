@@ -5,7 +5,7 @@ import { OwnableUpgradeable } from "openzeppelin-upgradeable/access/OwnableUpgra
 import { ReentrancyGuardUpgradeable } from "openzeppelin-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-upgradeable/access/AccessControlUpgradeable.sol";
 // import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
-import { CollectionAccessControlRules } from "./CollectionAccessControlRules.sol";
+import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { CollectionStateManagement } from "./CollectionStateManagement.sol";
 
 import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
@@ -17,7 +17,7 @@ import {
     IERC721Upgradeable
     } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
-contract Avatar is CollectionAccessControlRules, ReentrancyGuardUpgradeable, ERC721BurnMemoryEnumerableUpgradeable, CollectionStateManagement, ERC2771HandlerUpgradeable
+contract Avatar is CollectionAccessControl, ReentrancyGuardUpgradeable, ERC721BurnMemoryEnumerableUpgradeable, CollectionStateManagement, ERC2771HandlerUpgradeable
 // , UpdatableOperatorFiltererUpgradeable
     {
 

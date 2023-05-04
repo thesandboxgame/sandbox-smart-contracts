@@ -1,17 +1,17 @@
 {
   "abi": [],
   "bytecode": {
-    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220b4d36858f5db9221a1129a25d51b163a1534ba80eef82a1f3620b891846797e964736f6c634300080f0033",
+    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220808a5f47e6132c4aa19cda5d2ce0c42889e79393bb5ee894df6d6ecfef93cad564736f6c634300080f0033",
     "sourceMap": "199:2098:31:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;199:2098:31;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220b4d36858f5db9221a1129a25d51b163a1534ba80eef82a1f3620b891846797e964736f6c634300080f0033",
+    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220808a5f47e6132c4aa19cda5d2ce0c42889e79393bb5ee894df6d6ecfef93cad564736f6c634300080f0033",
     "sourceMap": "199:2098:31:-:0;;;;;;;;",
     "linkReferences": {}
   },
   "methodIdentifiers": {},
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"String operations.\",\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol\":\"StringsUpgradeable\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\",\":solady/=lib/solady/src/\"]},\"sources\":{\"lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol\":{\"keccak256\":\"0x6b9a5d35b744b25529a2856a8093e7c03fb35a34b1c4fb5499e560f8ade140da\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://187b5c3a1c9e77678732a2cc5284237f9cfca6bc28ee8bc0a0f4f951d7b3a2f8\",\"dweb:/ipfs/Qmb2KFr7WuQu7btdCiftQG64vTzrG4UyzVmo53EYHcnHYA\"]},\"lib/openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol\":{\"keccak256\":\"0xc1bd5b53319c68f84e3becd75694d941e8f4be94049903232cd8bc7c535aaa5a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://056027a78e6f4b78a39be530983551651ee5a052e786ca2c1c6a3bb1222b03b4\",\"dweb:/ipfs/QmXRUpywAqNwAfXS89vrtiE2THRM9dX9pQ4QxAkV1Wx9kt\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"String operations.\",\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol\":\"StringsUpgradeable\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\"]},\"sources\":{\"lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol\":{\"keccak256\":\"0x6b9a5d35b744b25529a2856a8093e7c03fb35a34b1c4fb5499e560f8ade140da\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://187b5c3a1c9e77678732a2cc5284237f9cfca6bc28ee8bc0a0f4f951d7b3a2f8\",\"dweb:/ipfs/Qmb2KFr7WuQu7btdCiftQG64vTzrG4UyzVmo53EYHcnHYA\"]},\"lib/openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol\":{\"keccak256\":\"0xc1bd5b53319c68f84e3becd75694d941e8f4be94049903232cd8bc7c535aaa5a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://056027a78e6f4b78a39be530983551651ee5a052e786ca2c1c6a3bb1222b03b4\",\"dweb:/ipfs/QmXRUpywAqNwAfXS89vrtiE2THRM9dX9pQ4QxAkV1Wx9kt\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -43,12 +43,10 @@
         ":hardhat-deploy/=node_modules/hardhat-deploy/",
         ":hardhat/=node_modules/hardhat/",
         ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
         ":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin/=lib/openzeppelin-contracts/contracts/",
         ":operator-filter-registry/=node_modules/operator-filter-registry/",
-        ":proxy-factory/=lib/proxy-factory/contracts/",
-        ":solady/=lib/solady/src/"
+        ":proxy-factory/=lib/proxy-factory/contracts/"
       ],
       "optimizer": {
         "enabled": true,

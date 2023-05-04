@@ -443,7 +443,7 @@
   },
   "ast": {
     "absolutePath": "src/solc_0.8.15/proxy/CollectionProxy.sol",
-    "id": 36487,
+    "id": 36530,
     "exportedSymbols": {
       "Address": [
         34009
@@ -452,7 +452,7 @@
         33594
       ],
       "CollectionProxy": [
-        36486
+        36529
       ],
       "StorageSlot": [
         34091
@@ -462,7 +462,7 @@
     "src": "32:3664:55",
     "nodes": [
       {
-        "id": 36392,
+        "id": 36435,
         "nodeType": "PragmaDirective",
         "src": "32:24:55",
         "nodes": [],
@@ -474,19 +474,19 @@
         ]
       },
       {
-        "id": 36394,
+        "id": 36437,
         "nodeType": "ImportDirective",
         "src": "58:82:55",
         "nodes": [],
         "absolutePath": "lib/openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol",
         "file": "openzeppelin-contracts/proxy/beacon/BeaconProxy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 36487,
+        "scope": 36530,
         "sourceUnit": 33595,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 36393,
+              "id": 36436,
               "name": "BeaconProxy",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -500,19 +500,19 @@
         "unitAlias": ""
       },
       {
-        "id": 36396,
+        "id": 36439,
         "nodeType": "ImportDirective",
         "src": "141:75:55",
         "nodes": [],
         "absolutePath": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol",
         "file": "openzeppelin-contracts/utils/StorageSlot.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 36487,
+        "scope": 36530,
         "sourceUnit": 34092,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 36395,
+              "id": 36438,
               "name": "StorageSlot",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -526,19 +526,19 @@
         "unitAlias": ""
       },
       {
-        "id": 36398,
+        "id": 36441,
         "nodeType": "ImportDirective",
         "src": "217:67:55",
         "nodes": [],
         "absolutePath": "lib/openzeppelin-contracts/contracts/utils/Address.sol",
         "file": "openzeppelin-contracts/utils/Address.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 36487,
+        "scope": 36530,
         "sourceUnit": 34010,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 36397,
+              "id": 36440,
               "name": "Address",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -552,17 +552,17 @@
         "unitAlias": ""
       },
       {
-        "id": 36486,
+        "id": 36529,
         "nodeType": "ContractDefinition",
         "src": "287:3408:55",
         "nodes": [
           {
-            "id": 36418,
+            "id": 36461,
             "nodeType": "FunctionDefinition",
             "src": "731:119:55",
             "nodes": [],
             "body": {
-              "id": 36417,
+              "id": 36460,
               "nodeType": "Block",
               "src": "809:41:55",
               "nodes": [],
@@ -572,7 +572,7 @@
                     "arguments": [
                       {
                         "expression": {
-                          "id": 36413,
+                          "id": 36456,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -583,7 +583,7 @@
                             "typeString": "msg"
                           }
                         },
-                        "id": 36414,
+                        "id": 36457,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -604,7 +604,7 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 36412,
+                      "id": 36455,
                       "name": "_changeAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -615,7 +615,7 @@
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 36415,
+                    "id": 36458,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -630,14 +630,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 36416,
+                  "id": 36459,
                   "nodeType": "ExpressionStatement",
                   "src": "819:24:55"
                 }
               ]
             },
             "documentation": {
-              "id": 36401,
+              "id": 36444,
               "nodeType": "StructuredDocumentation",
               "src": "514:212:55",
               "text": " @notice Collection contructor; pass-through wile setting the admin to the sender\n         see {BeaconProxy.constructor} for more details\n @custom:event {ERC1967Upgrade.AdminChanged}"
@@ -648,11 +648,11 @@
               {
                 "arguments": [
                   {
-                    "id": 36408,
+                    "id": 36451,
                     "name": "beacon_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 36403,
+                    "referencedDeclaration": 36446,
                     "src": "793:7:55",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -660,11 +660,11 @@
                     }
                   },
                   {
-                    "id": 36409,
+                    "id": 36452,
                     "name": "data_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 36405,
+                    "referencedDeclaration": 36448,
                     "src": "802:5:55",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
@@ -672,10 +672,10 @@
                     }
                   }
                 ],
-                "id": 36410,
+                "id": 36453,
                 "kind": "baseConstructorSpecifier",
                 "modifierName": {
-                  "id": 36407,
+                  "id": 36450,
                   "name": "BeaconProxy",
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 33594,
@@ -688,17 +688,17 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 36406,
+              "id": 36449,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36403,
+                  "id": 36446,
                   "mutability": "mutable",
                   "name": "beacon_",
                   "nameLocation": "752:7:55",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36418,
+                  "scope": 36461,
                   "src": "744:15:55",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -707,7 +707,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36402,
+                    "id": 36445,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "744:7:55",
@@ -721,12 +721,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 36405,
+                  "id": 36448,
                   "mutability": "mutable",
                   "name": "data_",
                   "nameLocation": "774:5:55",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36418,
+                  "scope": 36461,
                   "src": "761:18:55",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -735,7 +735,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 36404,
+                    "id": 36447,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "761:5:55",
@@ -750,23 +750,23 @@
               "src": "743:37:55"
             },
             "returnParameters": {
-              "id": 36411,
+              "id": 36454,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "809:0:55"
             },
-            "scope": 36486,
+            "scope": 36529,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 36441,
+            "id": 36484,
             "nodeType": "FunctionDefinition",
             "src": "1792:207:55",
             "nodes": [],
             "body": {
-              "id": 36440,
+              "id": 36483,
               "nodeType": "Block",
               "src": "1861:138:55",
               "nodes": [],
@@ -779,14 +779,14 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 36431,
+                        "id": 36474,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "expression": {
-                            "id": 36427,
+                            "id": 36470,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -797,7 +797,7 @@
                               "typeString": "msg"
                             }
                           },
-                          "id": 36428,
+                          "id": 36471,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -816,7 +816,7 @@
                           "arguments": [],
                           "expression": {
                             "argumentTypes": [],
-                            "id": 36429,
+                            "id": 36472,
                             "name": "_getAdmin",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -827,7 +827,7 @@
                               "typeString": "function () view returns (address)"
                             }
                           },
-                          "id": 36430,
+                          "id": 36473,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -850,7 +850,7 @@
                       },
                       {
                         "hexValue": "436f6c6c656374696f6e50726f78793a206f6e6c792061646d696e2063616e206368616e676520626561636f6e",
-                        "id": 36432,
+                        "id": 36475,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -876,7 +876,7 @@
                           "typeString": "literal_string \"CollectionProxy: only admin can change beacon\""
                         }
                       ],
-                      "id": 36426,
+                      "id": 36469,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -890,7 +890,7 @@
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 36433,
+                    "id": 36476,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -905,7 +905,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 36434,
+                  "id": 36477,
                   "nodeType": "ExpressionStatement",
                   "src": "1871:84:55"
                 },
@@ -913,11 +913,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 36436,
+                        "id": 36479,
                         "name": "newBeacon",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 36421,
+                        "referencedDeclaration": 36464,
                         "src": "1976:9:55",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -925,11 +925,11 @@
                         }
                       },
                       {
-                        "id": 36437,
+                        "id": 36480,
                         "name": "data",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 36423,
+                        "referencedDeclaration": 36466,
                         "src": "1987:4:55",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -948,7 +948,7 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 36435,
+                      "id": 36478,
                       "name": "_setBeacon",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -959,7 +959,7 @@
                         "typeString": "function (address,bytes memory)"
                       }
                     },
-                    "id": 36438,
+                    "id": 36481,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -974,14 +974,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 36439,
+                  "id": 36482,
                   "nodeType": "ExpressionStatement",
                   "src": "1965:27:55"
                 }
               ]
             },
             "documentation": {
-              "id": 36419,
+              "id": 36462,
               "nodeType": "StructuredDocumentation",
               "src": "1045:742:55",
               "text": " @notice Changes the beacon to which this proxy points to\n @dev any function from implementation address with a signature hash colistion of f8ab7198 will reroute to here and cannot be executed\n      If `data` is nonempty, it's used as data in a delegate call to the implementation returned by the beacon.\n      Sighash   |   Function Signature\n      =========================================\n      f8ab7198  =>  changeBeacon(address,bytes)\n      custom:event {ERC1967Upgrade.BeaconUpgraded}\n @param newBeacon the new beacon address for this proxy to point to\n @param data initialization data as an ecodedWithSignature output; if exists will be called on the new implementation"
@@ -993,17 +993,17 @@
             "name": "changeBeacon",
             "nameLocation": "1801:12:55",
             "parameters": {
-              "id": 36424,
+              "id": 36467,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36421,
+                  "id": 36464,
                   "mutability": "mutable",
                   "name": "newBeacon",
                   "nameLocation": "1822:9:55",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36441,
+                  "scope": 36484,
                   "src": "1814:17:55",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1012,7 +1012,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36420,
+                    "id": 36463,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1814:7:55",
@@ -1026,12 +1026,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 36423,
+                  "id": 36466,
                   "mutability": "mutable",
                   "name": "data",
                   "nameLocation": "1846:4:55",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36441,
+                  "scope": 36484,
                   "src": "1833:17:55",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1040,7 +1040,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 36422,
+                    "id": 36465,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1833:5:55",
@@ -1055,40 +1055,40 @@
               "src": "1813:38:55"
             },
             "returnParameters": {
-              "id": 36425,
+              "id": 36468,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1861:0:55"
             },
-            "scope": 36486,
+            "scope": 36529,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 36465,
+            "id": 36508,
             "nodeType": "FunctionDefinition",
             "src": "2481:272:55",
             "nodes": [],
             "body": {
-              "id": 36464,
+              "id": 36507,
               "nodeType": "Block",
               "src": "2544:209:55",
               "nodes": [],
               "statements": [
                 {
                   "assignments": [
-                    36448
+                    36491
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 36448,
+                      "id": 36491,
                       "mutability": "mutable",
                       "name": "admin",
                       "nameLocation": "2562:5:55",
                       "nodeType": "VariableDeclaration",
-                      "scope": 36464,
+                      "scope": 36507,
                       "src": "2554:13:55",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1097,7 +1097,7 @@
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 36447,
+                        "id": 36490,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "2554:7:55",
@@ -1110,12 +1110,12 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 36451,
+                  "id": 36494,
                   "initialValue": {
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 36449,
+                      "id": 36492,
                       "name": "_getAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -1126,7 +1126,7 @@
                         "typeString": "function () view returns (address)"
                       }
                     },
-                    "id": 36450,
+                    "id": 36493,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1152,14 +1152,14 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 36456,
+                        "id": 36499,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "expression": {
-                            "id": 36453,
+                            "id": 36496,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -1170,7 +1170,7 @@
                               "typeString": "msg"
                             }
                           },
-                          "id": 36454,
+                          "id": 36497,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1186,11 +1186,11 @@
                         "nodeType": "BinaryOperation",
                         "operator": "==",
                         "rightExpression": {
-                          "id": 36455,
+                          "id": 36498,
                           "name": "admin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 36448,
+                          "referencedDeclaration": 36491,
                           "src": "2614:5:55",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -1205,7 +1205,7 @@
                       },
                       {
                         "hexValue": "436f6c6c656374696f6e50726f78793a206f6e6c792061646d696e2063616e206368616e67652061646d696e",
-                        "id": 36457,
+                        "id": 36500,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1231,7 +1231,7 @@
                           "typeString": "literal_string \"CollectionProxy: only admin can change admin\""
                         }
                       ],
-                      "id": 36452,
+                      "id": 36495,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -1245,7 +1245,7 @@
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 36458,
+                    "id": 36501,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1260,7 +1260,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 36459,
+                  "id": 36502,
                   "nodeType": "ExpressionStatement",
                   "src": "2591:77:55"
                 },
@@ -1268,11 +1268,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 36461,
+                        "id": 36504,
                         "name": "newAdmin",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 36444,
+                        "referencedDeclaration": 36487,
                         "src": "2691:8:55",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1287,7 +1287,7 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 36460,
+                      "id": 36503,
                       "name": "_changeAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -1298,7 +1298,7 @@
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 36462,
+                    "id": 36505,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1313,14 +1313,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 36463,
+                  "id": 36506,
                   "nodeType": "ExpressionStatement",
                   "src": "2678:22:55"
                 }
               ]
             },
             "documentation": {
-              "id": 36442,
+              "id": 36485,
               "nodeType": "StructuredDocumentation",
               "src": "2005:471:55",
               "text": " @notice Changes the admin of the beacon to a new provided one\n @dev any function from implementation address with a signature hash colistion of aac96d4b will reroute to here and cannot be executed\n      Sighash   |   Function Signature\n      ========================\n      aac96d4b  =>  changeCollectionProxyAdmin(address)\n      @custom:event {ERC1967Upgrade.AdminChanged}\n @param newAdmin the new admin of the proxy"
@@ -1332,17 +1332,17 @@
             "name": "changeCollectionProxyAdmin",
             "nameLocation": "2490:26:55",
             "parameters": {
-              "id": 36445,
+              "id": 36488,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36444,
+                  "id": 36487,
                   "mutability": "mutable",
                   "name": "newAdmin",
                   "nameLocation": "2525:8:55",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36465,
+                  "scope": 36508,
                   "src": "2517:16:55",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1351,7 +1351,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36443,
+                    "id": 36486,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2517:7:55",
@@ -1367,23 +1367,23 @@
               "src": "2516:18:55"
             },
             "returnParameters": {
-              "id": 36446,
+              "id": 36489,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2544:0:55"
             },
-            "scope": 36486,
+            "scope": 36529,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 36475,
+            "id": 36518,
             "nodeType": "FunctionDefinition",
             "src": "3160:82:55",
             "nodes": [],
             "body": {
-              "id": 36474,
+              "id": 36517,
               "nodeType": "Block",
               "src": "3209:33:55",
               "nodes": [],
@@ -1393,7 +1393,7 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 36471,
+                      "id": 36514,
                       "name": "_beacon",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -1404,7 +1404,7 @@
                         "typeString": "function () view returns (address)"
                       }
                     },
-                    "id": 36472,
+                    "id": 36515,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1419,15 +1419,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 36470,
-                  "id": 36473,
+                  "functionReturnParameters": 36513,
+                  "id": 36516,
                   "nodeType": "Return",
                   "src": "3219:16:55"
                 }
               ]
             },
             "documentation": {
-              "id": 36466,
+              "id": 36509,
               "nodeType": "StructuredDocumentation",
               "src": "2759:396:55",
               "text": " @notice retrieves the currently pointed to beacon address\n @dev any function from implementation address with a signature hash colistion of 59659e90 will reroute to here and cannot be executed\n      Sighash   |   Function Signature\n      ========================\n      59659e90  =>  beacon()\n @return the address of the currently pointed to beacon"
@@ -1439,23 +1439,23 @@
             "name": "beacon",
             "nameLocation": "3169:6:55",
             "parameters": {
-              "id": 36467,
+              "id": 36510,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3175:2:55"
             },
             "returnParameters": {
-              "id": 36470,
+              "id": 36513,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36469,
+                  "id": 36512,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36475,
+                  "scope": 36518,
                   "src": "3201:7:55",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1464,7 +1464,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36468,
+                    "id": 36511,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3201:7:55",
@@ -1479,18 +1479,18 @@
               ],
               "src": "3200:9:55"
             },
-            "scope": 36486,
+            "scope": 36529,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 36485,
+            "id": 36528,
             "nodeType": "FunctionDefinition",
             "src": "3604:89:55",
             "nodes": [],
             "body": {
-              "id": 36484,
+              "id": 36527,
               "nodeType": "Block",
               "src": "3658:35:55",
               "nodes": [],
@@ -1500,7 +1500,7 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 36481,
+                      "id": 36524,
                       "name": "_getAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -1511,7 +1511,7 @@
                         "typeString": "function () view returns (address)"
                       }
                     },
-                    "id": 36482,
+                    "id": 36525,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1526,15 +1526,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 36480,
-                  "id": 36483,
+                  "functionReturnParameters": 36523,
+                  "id": 36526,
                   "nodeType": "Return",
                   "src": "3668:18:55"
                 }
               ]
             },
             "documentation": {
-              "id": 36476,
+              "id": 36519,
               "nodeType": "StructuredDocumentation",
               "src": "3248:351:55",
               "text": " @notice gets the admin of the proxy\n @dev any function from implementation address with a signature hash colistion of 3e47158c will reroute to here and cannot be executed\n      Sighash   |   Function Signature\n      ========================\n      3e47158c  =>  proxyAdmin()\n @return proxy admin address"
@@ -1546,23 +1546,23 @@
             "name": "proxyAdmin",
             "nameLocation": "3613:10:55",
             "parameters": {
-              "id": 36477,
+              "id": 36520,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3623:2:55"
             },
             "returnParameters": {
-              "id": 36480,
+              "id": 36523,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36479,
+                  "id": 36522,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36485,
+                  "scope": 36528,
                   "src": "3649:7:55",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1571,7 +1571,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36478,
+                    "id": 36521,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3649:7:55",
@@ -1586,7 +1586,7 @@
               ],
               "src": "3648:9:55"
             },
-            "scope": 36486,
+            "scope": 36529,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -1596,13 +1596,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 36399,
+              "id": 36442,
               "name": "BeaconProxy",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 33594,
               "src": "315:11:55"
             },
-            "id": 36400,
+            "id": 36443,
             "nodeType": "InheritanceSpecifier",
             "src": "315:11:55"
           }
@@ -1612,7 +1612,7 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          36486,
+          36529,
           33594,
           33476,
           33162,
@@ -1620,7 +1620,7 @@
         ],
         "name": "CollectionProxy",
         "nameLocation": "296:15:55",
-        "scope": 36487,
+        "scope": 36530,
         "usedErrors": []
       }
     ],

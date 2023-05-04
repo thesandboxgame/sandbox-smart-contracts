@@ -1,17 +1,17 @@
 {
   "abi": [],
   "bytecode": {
-    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122030ce184a884a4c64514e6de00839cf0c162506c0a362109fe127aa70b1ea424564736f6c634300080f0033",
+    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212208250895908d957bfe29c26a10583b86d1a006cfcd7f93378c7bd5cba957689b664736f6c634300080f0033",
     "sourceMap": "7339:4527:9:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;7339:4527:9;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122030ce184a884a4c64514e6de00839cf0c162506c0a362109fe127aa70b1ea424564736f6c634300080f0033",
+    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212208250895908d957bfe29c26a10583b86d1a006cfcd7f93378c7bd5cba957689b664736f6c634300080f0033",
     "sourceMap": "7339:4527:9:-:0;;;;;;;;",
     "linkReferences": {}
   },
   "methodIdentifiers": {},
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/forge-std/src/StdStorage.sol\":\"stdStorage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\",\":solady/=lib/solady/src/\"]},\"sources\":{\"lib/forge-std/src/StdStorage.sol\":{\"keccak256\":\"0xd1517df281f973dba8b7ba52c02d3df552b60d91b8f47e4669049da648778673\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://52e43264f58a5dcfd985f3c99aa81064805aa8f1c2b4c6521fd63d45cdbba8d5\",\"dweb:/ipfs/QmUMTF6cRjt5tCQrrgQDXVRmHQLjevNsTvLFdaA1m9TBj9\"]},\"lib/forge-std/src/Vm.sol\":{\"keccak256\":\"0x06f0761a502a8dc74c06029c603831780ff32f1e85dad2ae0f810b7545fba09b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://70e940ed53ef0270d1d6f3215fcccf92dd675f8ec4a59e1fbd0535e0d52fb46c\",\"dweb:/ipfs/QmPTkXXzGKFyWBmbQPrL6Yg4ECWmu3LndSH9ex2E3czZuF\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/forge-std/src/StdStorage.sol\":\"stdStorage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\"]},\"sources\":{\"lib/forge-std/src/StdStorage.sol\":{\"keccak256\":\"0xd1517df281f973dba8b7ba52c02d3df552b60d91b8f47e4669049da648778673\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://52e43264f58a5dcfd985f3c99aa81064805aa8f1c2b4c6521fd63d45cdbba8d5\",\"dweb:/ipfs/QmUMTF6cRjt5tCQrrgQDXVRmHQLjevNsTvLFdaA1m9TBj9\"]},\"lib/forge-std/src/Vm.sol\":{\"keccak256\":\"0x06f0761a502a8dc74c06029c603831780ff32f1e85dad2ae0f810b7545fba09b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://70e940ed53ef0270d1d6f3215fcccf92dd675f8ec4a59e1fbd0535e0d52fb46c\",\"dweb:/ipfs/QmPTkXXzGKFyWBmbQPrL6Yg4ECWmu3LndSH9ex2E3czZuF\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -43,12 +43,10 @@
         ":hardhat-deploy/=node_modules/hardhat-deploy/",
         ":hardhat/=node_modules/hardhat/",
         ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
         ":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin/=lib/openzeppelin-contracts/contracts/",
         ":operator-filter-registry/=node_modules/operator-filter-registry/",
-        ":proxy-factory/=lib/proxy-factory/contracts/",
-        ":solady/=lib/solady/src/"
+        ":proxy-factory/=lib/proxy-factory/contracts/"
       ],
       "optimizer": {
         "enabled": true,

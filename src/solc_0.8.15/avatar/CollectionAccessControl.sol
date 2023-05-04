@@ -1,20 +1,37 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity 0.8.15;
 
 import { AccessControlUpgradeable } from "openzeppelin-upgradeable/access/AccessControlUpgradeable.sol";
-
 import { Ownable2StepUpgradeable } from "openzeppelin-upgradeable/access/Ownable2StepUpgradeable.sol";
-
-
 import { OwnableUpgradeable } from "openzeppelin-upgradeable/access/OwnableUpgradeable.sol";
-
 
 import { IERC5313 } from "../common/IERC5313.sol";
 
 
-// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControlDefaultAdminRules.sol
 
-abstract contract CollectionAccessControlRules is AccessControlUpgradeable, OwnableUpgradeable {
+/*
+    We wanted an access control functionality that:
+    - has ower
+    - 2 step owner transfer
+    - allows roles
+    - only owner can add users to roles
+    - tranfering owner does not break the above invariants
+
+    Some functionality was taken directly from Ownable2StepUpgradeable:
+    - exactly as they were:
+        - _pendingOwner variable
+        - OwnershipTransferStarted event
+        - pendingOwner
+        - transferOwnership
+        - _transferOwnership
+    - slightly modified
+        - acceptOwnership
+            - to also transfer roles before changing ownership
+
+    We could not inherit Ownable2StepUpgradeable directly because:
+    - Ownable2StepUpgradeable.acceptOwnership() is not declared virtual
+*/
+abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUpgradeable {
 
     // keccak256("ADMIN_ROLE");
     bytes32 public constant ADMIN_ROLE = 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
@@ -43,6 +60,10 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
         _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            Initializers
+    //////////////////////////////////////////////////////////////*/
+
     function __InitializeAccessControl(address owner_) internal initializer {
         require(owner_ != address(0), "CollectionAccessControlRules: new owner is the zero address");
 
@@ -56,12 +77,16 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
         _setRoleAdmin(TRANSFORMER_ROLE, ADMIN_ROLE);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                    External and public functions
+    //////////////////////////////////////////////////////////////*/
+
     function addConfigurator(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControlRules: account is zero address");
         super.grantRole(CONFIGURATOR_ROLE, account);
     }
 
-    function revokeConfiguratorRole(address account) onlyOwner external {
+    function revokeConfiguratorRole(address account) external onlyOwner {
         super.revokeRole(CONFIGURATOR_ROLE, account);
     }
 
@@ -70,7 +95,7 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
         super.grantRole(TRANSFORMER_ROLE, account);
     }
 
-    function revokeTransformerRole(address account) onlyOwner external {
+    function revokeTransformerRole(address account) external onlyOwner {
         super.revokeRole(TRANSFORMER_ROLE, account);
     }
 
@@ -83,6 +108,14 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
 
         _transferOwnership(sender);
     }
+
+    function renounceOwnership() public virtual override onlyOwner {
+        revert("CollectionAccessControlRules: Renounce ownership is not available");
+    }
+
+    /*//////////////////////////////////////////////////////////////
+        Functions copied directly from Ownable2StepUpgradeable
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @dev Returns the address of the pending owner.
@@ -100,6 +133,10 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
         emit OwnershipTransferStarted(owner(), newOwner);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                    Internal and private functions
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`) and deletes any pending owner.
      * Internal function without access restriction.
@@ -107,9 +144,5 @@ abstract contract CollectionAccessControlRules is AccessControlUpgradeable, Owna
     function _transferOwnership(address newOwner) internal virtual override {
         delete _pendingOwner;
         super._transferOwnership(newOwner);
-    }
-
-    function renounceOwnership() public virtual override onlyOwner {
-        revert("CollectionAccessControlRules: Renounce ownership is not available");
     }
 }
