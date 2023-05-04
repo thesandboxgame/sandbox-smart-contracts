@@ -1,0 +1,26 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "solidity.linter": "solhint",
+  "solidity.enableLocalNodeCompiler": false,
+  "solidity.compileUsingRemoteVersion": "v0.7.5+commit.eb77ed08",
+  "solidity.packageDefaultDependenciesContractsDirectory": "",
+  "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+  "solidity.validationDelay": 1500,
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "mochaExplorer.env": {
+    "HARDHAT_CONFIG": "hardhat.config.ts",
+    "HARDHAT_COMPILE": "true",
+    "NODE_OPTIONS": "--max-old-space-size=4096 --unhandled-rejections=strict"
+  },
+  "mochaExplorer.require": ["ts-node/register/transpile-only"],
+  "[markdown]": {
+    "editor.formatOnSave": false
+  }
+}
