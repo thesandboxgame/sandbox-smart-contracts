@@ -1,0 +1,5 @@
+coverage/
+artifacts/
+cache/
+secret/
+.proof*
