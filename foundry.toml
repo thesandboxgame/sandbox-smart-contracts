@@ -1,7 +1,7 @@
 [profile.default]
 src = 'src/solc_0.8.15'
 out = 'deployments_foundry'
-libs = ['node_modules', 'lib']
+libs = ['node_modules','lib']
 test = 'test/foundry'
 cache_path  = 'cache_forge'
 solc_version    = '0.8.15'       # Override for the solc version (setting this ignores `auto_detect_solc`)
@@ -12,9 +12,9 @@ fs_permissions = [{ access = "read", path = "./"}]
 remappings = [
   "forge-std/=lib/forge-std/src/",
   "proxy-factory/=lib/proxy-factory/contracts/",
-  "openzeppelin/=lib/openzeppelin-contracts/contracts/",
+  "openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
   "openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
-  "solady/=lib/solady/src/"
+  "contracts/=src/solc_0.8.15/"
 ]
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
 

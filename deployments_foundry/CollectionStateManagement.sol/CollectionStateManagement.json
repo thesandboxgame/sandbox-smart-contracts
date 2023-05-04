@@ -1,0 +1,652 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "enum CollectionStateManagement.State",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "name": "changeState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentState",
+      "outputs": [
+        {
+          "internalType": "enum CollectionStateManagement.State",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b506101b0806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b604051610055919061012a565b60405180910390f35b61007161006c366004610152565b610073565b005b80600481111561008557610085610114565b60005460ff16600481111561009c5761009c610114565b036100ed5760405162461bcd60e51b815260206004820152601860248201527f416c726561647920696e20646573697265642073746174650000000000000000604482015260640160405180910390fd5b6000805482919060ff1916600183600481111561010c5761010c610114565b021790555050565b634e487b7160e01b600052602160045260246000fd5b602081016005831061014c57634e487b7160e01b600052602160045260246000fd5b91905290565b60006020828403121561016457600080fd5b81356005811061017357600080fd5b939250505056fea2646970667358221220c8a469c4f4acfbbdb087225847a858f0fb2b4774ac0b30025da8995805ff21c864736f6c634300080f0033",
+    "sourceMap": "58:547:50:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b604051610055919061012a565b60405180910390f35b61007161006c366004610152565b610073565b005b80600481111561008557610085610114565b60005460ff16600481111561009c5761009c610114565b036100ed5760405162461bcd60e51b815260206004820152601860248201527f416c726561647920696e20646573697265642073746174650000000000000000604482015260640160405180910390fd5b6000805482919060ff1916600183600481111561010c5761010c610114565b021790555050565b634e487b7160e01b600052602160045260246000fd5b602081016005831061014c57634e487b7160e01b600052602160045260246000fd5b91905290565b60006020828403121561016457600080fd5b81356005811061017357600080fd5b939250505056fea2646970667358221220c8a469c4f4acfbbdb087225847a858f0fb2b4774ac0b30025da8995805ff21c864736f6c634300080f0033",
+    "sourceMap": "58:547:50:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;100:25;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;448:154;;;;;;:::i;:::-;;:::i;:::-;;;531:5;515:21;;;;;;;;:::i;:::-;:12;;;;:21;;;;;;;;:::i;:::-;;507:58;;;;-1:-1:-1;;;507:58:50;;964:2:60;507:58:50;;;946:21:60;1003:2;983:18;;;976:30;1042:26;1022:18;;;1015:54;1086:18;;507:58:50;;;;;;;;575:12;:20;;590:5;;575:12;-1:-1:-1;;575:20:50;;590:5;575:20;;;;;;;;:::i;:::-;;;;;;448:154;:::o;14:127:60:-;75:10;70:3;66:20;63:1;56:31;106:4;103:1;96:15;130:4;127:1;120:15;146:339;289:2;274:18;;322:1;311:13;;301:144;;367:10;362:3;358:20;355:1;348:31;402:4;399:1;392:15;430:4;427:1;420:15;301:144;454:25;;;146:339;:::o;490:267::-;560:6;613:2;601:9;592:7;588:23;584:32;581:52;;;629:1;626;619:12;581:52;668:9;655:23;707:1;700:5;697:12;687:40;;723:1;720;713:12;687:40;746:5;490:267;-1:-1:-1;;;490:267:60:o",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "changeState(uint8)": "268f1153",
+    "currentState()": "0c3f6acf"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"state\",\"type\":\"uint8\"}],\"name\":\"changeState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentState\",\"outputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":\"CollectionStateManagement\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\",\":solady/=lib/solady/src/\"]},\"sources\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":{\"keccak256\":\"0x69e2b5baf56d2559bf1cd563baaf599e6dcaa2109f939fb007661a7c7625f4ec\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be2a291600bc424b9de5fb494f192830b677b2c7049e60b56e7c85119b09821b\",\"dweb:/ipfs/Qmd6Re26EzH4rHC8v9qcFxdWrPG7cKngE2NHmBQPuzhQX5\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "enum CollectionStateManagement.State",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "changeState"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "currentState",
+          "outputs": [
+            {
+              "internalType": "enum CollectionStateManagement.State",
+              "name": "",
+              "type": "uint8"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@maticnetwork/=node_modules/@maticnetwork/",
+        ":@openzeppelin/=node_modules/@openzeppelin/",
+        ":contracts/=src/solc_0.8.15/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/",
+        ":eth-gas-reporter/=node_modules/eth-gas-reporter/",
+        ":forge-std/=lib/forge-std/src/",
+        ":fx-portal/=node_modules/fx-portal/",
+        ":hardhat-deploy/=node_modules/hardhat-deploy/",
+        ":hardhat/=node_modules/hardhat/",
+        ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":openzeppelin/=lib/openzeppelin-contracts/contracts/",
+        ":operator-filter-registry/=node_modules/operator-filter-registry/",
+        ":proxy-factory/=lib/proxy-factory/contracts/",
+        ":solady/=lib/solady/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "src/solc_0.8.15/avatar/CollectionStateManagement.sol": "CollectionStateManagement"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "src/solc_0.8.15/avatar/CollectionStateManagement.sol": {
+        "keccak256": "0x69e2b5baf56d2559bf1cd563baaf599e6dcaa2109f939fb007661a7c7625f4ec",
+        "urls": [
+          "bzz-raw://be2a291600bc424b9de5fb494f192830b677b2c7049e60b56e7c85119b09821b",
+          "dweb:/ipfs/Qmd6Re26EzH4rHC8v9qcFxdWrPG7cKngE2NHmBQPuzhQX5"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/solc_0.8.15/avatar/CollectionStateManagement.sol",
+    "id": 35393,
+    "exportedSymbols": {
+      "CollectionStateManagement": [
+        35392
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:573:50",
+    "nodes": [
+      {
+        "id": 35350,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:50",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 35392,
+        "nodeType": "ContractDefinition",
+        "src": "58:547:50",
+        "nodes": [
+          {
+            "id": 35353,
+            "nodeType": "VariableDeclaration",
+            "src": "100:25:50",
+            "nodes": [],
+            "constant": false,
+            "functionSelector": "0c3f6acf",
+            "mutability": "mutable",
+            "name": "currentState",
+            "nameLocation": "113:12:50",
+            "scope": 35392,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_enum$_State_$35359",
+              "typeString": "enum CollectionStateManagement.State"
+            },
+            "typeName": {
+              "id": 35352,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 35351,
+                "name": "State",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 35359,
+                "src": "100:5:50"
+              },
+              "referencedDeclaration": 35359,
+              "src": "100:5:50",
+              "typeDescriptions": {
+                "typeIdentifier": "t_enum$_State_$35359",
+                "typeString": "enum CollectionStateManagement.State"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 35359,
+            "nodeType": "EnumDefinition",
+            "src": "132:167:50",
+            "nodes": [],
+            "canonicalName": "CollectionStateManagement.State",
+            "members": [
+              {
+                "id": 35354,
+                "name": "DEFAULT",
+                "nameLocation": "153:7:50",
+                "nodeType": "EnumValue",
+                "src": "153:7:50"
+              },
+              {
+                "id": 35355,
+                "name": "MARKETING_MINT",
+                "nameLocation": "218:14:50",
+                "nodeType": "EnumValue",
+                "src": "218:14:50"
+              },
+              {
+                "id": 35356,
+                "name": "ALLOWLIST_MINT",
+                "nameLocation": "242:14:50",
+                "nodeType": "EnumValue",
+                "src": "242:14:50"
+              },
+              {
+                "id": 35357,
+                "name": "PUBLIC_MINT",
+                "nameLocation": "266:11:50",
+                "nodeType": "EnumValue",
+                "src": "266:11:50"
+              },
+              {
+                "id": 35358,
+                "name": "PAUSED",
+                "nameLocation": "287:6:50",
+                "nodeType": "EnumValue",
+                "src": "287:6:50"
+              }
+            ],
+            "name": "State",
+            "nameLocation": "137:5:50"
+          },
+          {
+            "id": 35373,
+            "nodeType": "ModifierDefinition",
+            "src": "305:137:50",
+            "nodes": [],
+            "body": {
+              "id": 35372,
+              "nodeType": "Block",
+              "src": "339:103:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_enum$_State_$35359",
+                          "typeString": "enum CollectionStateManagement.State"
+                        },
+                        "id": 35367,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 35365,
+                          "name": "currentState",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 35353,
+                          "src": "357:12:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_enum$_State_$35359",
+                            "typeString": "enum CollectionStateManagement.State"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "id": 35366,
+                          "name": "state",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 35362,
+                          "src": "373:5:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_enum$_State_$35359",
+                            "typeString": "enum CollectionStateManagement.State"
+                          }
+                        },
+                        "src": "357:21:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4f7065726174696f6e2063616e6e6f7420626520646f6e6520696e2063757272656e74207374617465",
+                        "id": 35368,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "380:43:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_604663446a6c8bc66bfd17edad8b6b0aefe21f341c3ca72f5cb4df2a32589b01",
+                          "typeString": "literal_string \"Operation cannot be done in current state\""
+                        },
+                        "value": "Operation cannot be done in current state"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_604663446a6c8bc66bfd17edad8b6b0aefe21f341c3ca72f5cb4df2a32589b01",
+                          "typeString": "literal_string \"Operation cannot be done in current state\""
+                        }
+                      ],
+                      "id": 35364,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "349:7:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 35369,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "349:75:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 35370,
+                  "nodeType": "ExpressionStatement",
+                  "src": "349:75:50"
+                },
+                {
+                  "id": 35371,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "434:1:50"
+                }
+              ]
+            },
+            "name": "onlyInState",
+            "nameLocation": "314:11:50",
+            "parameters": {
+              "id": 35363,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35362,
+                  "mutability": "mutable",
+                  "name": "state",
+                  "nameLocation": "332:5:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35373,
+                  "src": "326:11:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_State_$35359",
+                    "typeString": "enum CollectionStateManagement.State"
+                  },
+                  "typeName": {
+                    "id": 35361,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 35360,
+                      "name": "State",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 35359,
+                      "src": "326:5:50"
+                    },
+                    "referencedDeclaration": 35359,
+                    "src": "326:5:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_State_$35359",
+                      "typeString": "enum CollectionStateManagement.State"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "325:13:50"
+            },
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 35391,
+            "nodeType": "FunctionDefinition",
+            "src": "448:154:50",
+            "nodes": [],
+            "body": {
+              "id": 35390,
+              "nodeType": "Block",
+              "src": "497:105:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_enum$_State_$35359",
+                          "typeString": "enum CollectionStateManagement.State"
+                        },
+                        "id": 35382,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 35380,
+                          "name": "currentState",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 35353,
+                          "src": "515:12:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_enum$_State_$35359",
+                            "typeString": "enum CollectionStateManagement.State"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "id": 35381,
+                          "name": "state",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 35376,
+                          "src": "531:5:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_enum$_State_$35359",
+                            "typeString": "enum CollectionStateManagement.State"
+                          }
+                        },
+                        "src": "515:21:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "416c726561647920696e2064657369726564207374617465",
+                        "id": 35383,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "538:26:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_2384423f8d2b0328b8f3df1cb82ca0c7b1cba0db47bdd4e1023524a0bab1a977",
+                          "typeString": "literal_string \"Already in desired state\""
+                        },
+                        "value": "Already in desired state"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_2384423f8d2b0328b8f3df1cb82ca0c7b1cba0db47bdd4e1023524a0bab1a977",
+                          "typeString": "literal_string \"Already in desired state\""
+                        }
+                      ],
+                      "id": 35379,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "507:7:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 35384,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "507:58:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 35385,
+                  "nodeType": "ExpressionStatement",
+                  "src": "507:58:50"
+                },
+                {
+                  "expression": {
+                    "id": 35388,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 35386,
+                      "name": "currentState",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35353,
+                      "src": "575:12:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_State_$35359",
+                        "typeString": "enum CollectionStateManagement.State"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 35387,
+                      "name": "state",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35376,
+                      "src": "590:5:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_State_$35359",
+                        "typeString": "enum CollectionStateManagement.State"
+                      }
+                    },
+                    "src": "575:20:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_State_$35359",
+                      "typeString": "enum CollectionStateManagement.State"
+                    }
+                  },
+                  "id": 35389,
+                  "nodeType": "ExpressionStatement",
+                  "src": "575:20:50"
+                }
+              ]
+            },
+            "functionSelector": "268f1153",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "changeState",
+            "nameLocation": "457:11:50",
+            "parameters": {
+              "id": 35377,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35376,
+                  "mutability": "mutable",
+                  "name": "state",
+                  "nameLocation": "475:5:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35391,
+                  "src": "469:11:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_State_$35359",
+                    "typeString": "enum CollectionStateManagement.State"
+                  },
+                  "typeName": {
+                    "id": 35375,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 35374,
+                      "name": "State",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 35359,
+                      "src": "469:5:50"
+                    },
+                    "referencedDeclaration": 35359,
+                    "src": "469:5:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_State_$35359",
+                      "typeString": "enum CollectionStateManagement.State"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "468:13:50"
+            },
+            "returnParameters": {
+              "id": 35378,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "497:0:50"
+            },
+            "scope": 35392,
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "CollectionStateManagement",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          35392
+        ],
+        "name": "CollectionStateManagement",
+        "nameLocation": "67:25:50",
+        "scope": 35393,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 50
+}
