@@ -33,6 +33,10 @@ import { IERC5313 } from "../common/IERC5313.sol";
 */
 abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUpgradeable {
 
+    /*//////////////////////////////////////////////////////////////
+                           Global state variables
+    //////////////////////////////////////////////////////////////*/
+
     // keccak256("ADMIN_ROLE");
     bytes32 public constant ADMIN_ROLE = 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 

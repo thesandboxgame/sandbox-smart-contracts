@@ -430,14 +430,14 @@ contract CollectionFactoryTest is Test {
     }
 
     /*
-        testing removeBeacon
+        testing transferBeacon
             - can only be called by owner
-            - successful removed beacon
+            - successful transfered the beacon
             - input validation works
             - respects onther invariants test
     */
 
-    function test_removeBeacon_revertsIfNotFactoryOwner() public {
+    function test_transferBeacon_revertsIfNotFactoryOwner() public {
 
         vm.prank(collectionFactoryOwner);
         bytes32 alias_ = "main";
@@ -445,10 +445,10 @@ contract CollectionFactoryTest is Test {
 
         vm.prank(alice);
         vm.expectRevert("Ownable: caller is not the owner");
-        collectionFactory.removeBeacon(alias_, bob);
+        collectionFactory.transferBeacon(alias_, bob);
     }
 
-    function test_removeBeacon_succesful() public {
+    function test_transferBeacon_succesful() public {
 
         vm.startPrank(collectionFactoryOwner);
         // deploy 2 beacons
@@ -482,57 +482,57 @@ contract CollectionFactoryTest is Test {
         assertEq(UpgradeableBeacon(beacon1).owner(), address(collectionFactory), "Initial beacon 1 owner assesment failed");
         assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assesment failed");
 
-        // remove first beacon (2 collections)
-        collectionFactory.removeBeacon(centralAlias, alice);
+        // transfer first beacon (2 collections)
+        collectionFactory.transferBeacon(centralAlias, alice);
 
         // check variants were succesfully modified
         uint256 afterBeacon1RemovedCount = collectionFactory.beaconCount();
-        assertEq(afterBeacon1RemovedCount, 1, "first remove beconCount value assement failed");
-        assertEq(afterBeacon1RemovedCount, originalBeaconCount - 1, "first remove beconCount RELATIVE value assement failed");
+        assertEq(afterBeacon1RemovedCount, 1, "first transfer beconCount value assement failed");
+        assertEq(afterBeacon1RemovedCount, originalBeaconCount - 1, "first transfer beconCount RELATIVE value assement failed");
 
         // check that only 1 beacon was deleted, not the other
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "first remove aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "first remove aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "first transfer aliasToBeacon assesment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "first transfer aliasToBeacon assesment failed for beacon 2");
 
         collectionFactory.getCollection(0);
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "firt remove beacon 1 owner assesment failed");
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "first remove beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "firt transfer beacon 1 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "first transfer beacon 2 owner assesment failed");
 
-        // remove second beacon (1 collection)
-        collectionFactory.removeBeacon(secondaryAlias, bob);
+        // transfer second beacon (1 collection)
+        collectionFactory.transferBeacon(secondaryAlias, bob);
         uint256 lastBeaconRemovedCount = collectionFactory.beaconCount();
-        assertEq(lastBeaconRemovedCount, 0, "last remove beconCount value assement failed");
-        assertEq(lastBeaconRemovedCount, afterBeacon1RemovedCount - 1, "last remove beconCount RELATIVE value assement failed");
+        assertEq(lastBeaconRemovedCount, 0, "last transfer beconCount value assement failed");
+        assertEq(lastBeaconRemovedCount, afterBeacon1RemovedCount - 1, "last transfer beconCount RELATIVE value assement failed");
 
         // check that both beacons were deleted
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "last remove aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), address(0), "last remove aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "last transfer aliasToBeacon assesment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), address(0), "last transfer aliasToBeacon assesment failed for beacon 2");
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "last remove beacon 1 owner assesment failed");
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(bob), "last remove beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "last transfer beacon 1 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(bob), "last transfer beacon 2 owner assesment failed");
 
         vm.stopPrank();
     }
 
-    function test_removeBeacon_inputValidationWorks() public {
+    function test_transferBeacon_inputValidationWorks() public {
 
         vm.startPrank(collectionFactoryOwner);
         collectionFactory.deployBeacon(implementation, centralAlias);
 
         vm.expectRevert("CollectionFactory: beacon is not tracked");
-        collectionFactory.removeBeacon("not", alice);
+        collectionFactory.transferBeacon("not", alice);
 
         vm.expectRevert("CollectionFactory: new owner cannot be 0 address");
-        collectionFactory.removeBeacon(centralAlias, address(0));
+        collectionFactory.transferBeacon(centralAlias, address(0));
 
         vm.stopPrank();
     }
 
 
-    function test_removeBeacon_respectsOtherInvariants() public {
+    function test_transferBeacon_respectsOtherInvariants() public {
 
         vm.startPrank(collectionFactoryOwner);
         // deploy 2 beacons
@@ -562,8 +562,8 @@ contract CollectionFactoryTest is Test {
 
         assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assesment failed");
 
-        // remove first beacon (2 collections)
-        collectionFactory.removeBeacon(centralAlias, alice);
+        // transfer first beacon (2 collections)
+        collectionFactory.transferBeacon(centralAlias, alice);
 
         // see that they exist after removal and code dosen't revert
         collectionFactory.getCollection(0);
@@ -576,7 +576,7 @@ contract CollectionFactoryTest is Test {
         assertEq(firstRemoveCollectionCount, 3, "remove collectionCount value assement failed");
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "last remove beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "last transfer beacon 2 owner assesment failed");
 
         vm.stopPrank();
     }

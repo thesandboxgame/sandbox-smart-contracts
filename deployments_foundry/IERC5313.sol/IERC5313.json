@@ -27,7 +27,7 @@
   "methodIdentifiers": {
     "owner()": "8da5cb5b"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Interface for the Light Contract Ownership Standard. A standardized minimal interface required to identify an account that controls a contract _Available since v4.9._\",\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Gets the address of the owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/common/IERC5313.sol\":\"IERC5313\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=node_modules/operator-filter-registry/\",\":proxy-factory/=lib/proxy-factory/contracts/\",\":solady/=lib/solady/src/\"]},\"sources\":{\"src/solc_0.8.15/common/IERC5313.sol\":{\"keccak256\":\"0xadba4a9fe2d8a6dae3a40bb31b4ca3b0269c275dfe2242f811f0257496ef2373\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3991ee107ff9a7cac24137b51ad2d276c2d4924ec8a176d9ae35555ad05a0d90\",\"dweb:/ipfs/QmdYWbumcJe7bssuQQPwEWvzHP9myJif1Rov3fZfmA615t\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Interface for the Light Contract Ownership Standard. A standardized minimal interface required to identify an account that controls a contract _Available since v4.9._\",\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Gets the address of the owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/common/IERC5313.sol\":\"IERC5313\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"src/solc_0.8.15/common/IERC5313.sol\":{\"keccak256\":\"0xadba4a9fe2d8a6dae3a40bb31b4ca3b0269c275dfe2242f811f0257496ef2373\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3991ee107ff9a7cac24137b51ad2d276c2d4924ec8a176d9ae35555ad05a0d90\",\"dweb:/ipfs/QmdYWbumcJe7bssuQQPwEWvzHP9myJif1Rov3fZfmA615t\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -77,12 +77,9 @@
         ":hardhat-deploy/=node_modules/hardhat-deploy/",
         ":hardhat/=node_modules/hardhat/",
         ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin-contracts/=lib/operator-filter-registry/lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
         ":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
-        ":openzeppelin/=lib/openzeppelin-contracts/contracts/",
-        ":operator-filter-registry/=node_modules/operator-filter-registry/",
-        ":proxy-factory/=lib/proxy-factory/contracts/",
-        ":solady/=lib/solady/src/"
+        ":operator-filter-registry/=lib/operator-filter-registry/src/"
       ],
       "optimizer": {
         "enabled": true,
@@ -110,19 +107,19 @@
   },
   "ast": {
     "absolutePath": "src/solc_0.8.15/common/IERC5313.sol",
-    "id": 35556,
+    "id": 36035,
     "exportedSymbols": {
       "IERC5313": [
-        35555
+        36034
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "33:628:53",
+    "src": "33:628:55",
     "nodes": [
       {
-        "id": 35547,
+        "id": 36026,
         "nodeType": "PragmaDirective",
-        "src": "33:23:53",
+        "src": "33:23:55",
         "nodes": [],
         "literals": [
           "solidity",
@@ -132,19 +129,19 @@
         ]
       },
       {
-        "id": 35555,
+        "id": 36034,
         "nodeType": "ContractDefinition",
-        "src": "526:135:53",
+        "src": "526:135:55",
         "nodes": [
           {
-            "id": 35554,
+            "id": 36033,
             "nodeType": "FunctionDefinition",
-            "src": "610:49:53",
+            "src": "610:49:55",
             "nodes": [],
             "documentation": {
-              "id": 35549,
+              "id": 36028,
               "nodeType": "StructuredDocumentation",
-              "src": "551:54:53",
+              "src": "551:54:55",
               "text": " @dev Gets the address of the owner."
             },
             "functionSelector": "8da5cb5b",
@@ -152,26 +149,26 @@
             "kind": "function",
             "modifiers": [],
             "name": "owner",
-            "nameLocation": "619:5:53",
+            "nameLocation": "619:5:55",
             "parameters": {
-              "id": 35550,
+              "id": 36029,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "624:2:53"
+              "src": "624:2:55"
             },
             "returnParameters": {
-              "id": 35553,
+              "id": 36032,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35552,
+                  "id": 36031,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35554,
-                  "src": "650:7:53",
+                  "scope": 36033,
+                  "src": "650:7:55",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -179,10 +176,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35551,
+                    "id": 36030,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "650:7:53",
+                    "src": "650:7:55",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -192,9 +189,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "649:9:53"
+              "src": "649:9:55"
             },
-            "scope": 35555,
+            "scope": 36034,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -206,22 +203,22 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 35548,
+          "id": 36027,
           "nodeType": "StructuredDocumentation",
-          "src": "331:194:53",
+          "src": "331:194:55",
           "text": " @dev Interface for the Light Contract Ownership Standard.\n A standardized minimal interface required to identify an account that controls a contract\n _Available since v4.9._"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35555
+          36034
         ],
         "name": "IERC5313",
-        "nameLocation": "536:8:53",
-        "scope": 35556,
+        "nameLocation": "536:8:55",
+        "scope": 36035,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 53
+  "id": 55
 }

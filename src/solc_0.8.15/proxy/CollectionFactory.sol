@@ -63,7 +63,7 @@ contract CollectionFactory is Ownable2Step {
 
    /**
      * @notice Event emitted when a beacon was removed from tracking
-     * @dev emitted when removeBeacon is called
+     * @dev emitted when transferBeacon is called
      * @param beaconAlias the alias of the removed beacon
      * @param beaconAddress the address of the removed beacon
      * @param newBeaconOwner the address of the new owner of the beacon
@@ -72,7 +72,7 @@ contract CollectionFactory is Ownable2Step {
 
      /**
      * @notice Event emitted when the owner of this beacon was changed
-     * @dev emitted when removeBeacon is called
+     * @dev emitted when transferBeacon is called
      * @param oldOwner the previous owner of the beacon
      * @param newOwner the current owner of the beacon
      */
@@ -97,7 +97,7 @@ contract CollectionFactory is Ownable2Step {
 
    /**
      * @notice Event emitted when a collection was removed from tracking from a beacon
-     * @dev emitted when removeBeacon is called
+     * @dev emitted when transferCollections is called
      * @param beaconAddress the address of the beacon to which this collection points to
      * @param collectionProxy the address of the removed collection
      */
@@ -105,9 +105,9 @@ contract CollectionFactory is Ownable2Step {
 
     /**
      * @notice Event emitted when the admin of this proxy was changed
-     * @dev emitted when removeBeacon is called
-     * @param oldAdmin the previous admin of the collection
-     * @param newAdmin the current admin of the collection
+     * @dev emitted when transferCollections is called
+     * @param oldAdmin the previous admin of the collection proxy
+     * @param newAdmin the current admin of the collection proxy
      */
     event CollectionProxyAdminChanged(address indexed oldAdmin, address indexed newAdmin);
 
@@ -183,7 +183,7 @@ contract CollectionFactory is Ownable2Step {
         require(beaconAlias != 0, "CollectionFactory: beacon alias cannot be empty");
         require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon already added");
         require(Address.isContract(beacon), "CollectionFactory: beacon is not a contract");
-        require(UpgradeableBeacon(beacon).owner() == address(this), "CollectionFactory: ownership must be given to factory");
+        require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
 
         _saveBeacon(beacon, beaconAlias);
     }
@@ -207,13 +207,13 @@ contract CollectionFactory is Ownable2Step {
     }
 
     /**
-     * @notice Removes a beacon from the factory and all linked collections. Also sets the owner to the provided one.
+     * @notice Transfers a beacon from the factory and all linked collections. Sets the owner to the provided one.
      * @custom:event {BeaconOwnershipChanged}
      * @custom:event {BeaconRemoved}
      * @param beaconAlias alias for the beacon to remove
      * @param newBeaconOwner the new owner of the beacon. It will be changed to this before removal
      */
-    function removeBeacon(bytes32 beaconAlias, address newBeaconOwner)
+    function transferBeacon(bytes32 beaconAlias, address newBeaconOwner)
         external
         onlyOwner
         beaconIsAvailable(beaconAlias)
@@ -235,24 +235,33 @@ contract CollectionFactory is Ownable2Step {
     /**
      * @notice adds collections to be tracked by the factory
      *         Collection ownership must be transfered to this contract beforehand
-     * @dev will revert if collections were given, and the owner of them is not the factory
-     *      also reverts if the {collections_} list is empty
+     * @dev Reverts if:
+     *      - no collections no were given, if the {collections_} list is empty
+     *      - the collection owner is not the factory
+     *      - the owner of the beacon pointed by the proxy is not the factory
      * @custom:event {CollectionAdded} for each collection
-     * @param collections_ the collections associated with this beacon (if from a migration)
+     * @param _collections the collections to be added to the factory
      */
-    function addCollections(address[] memory collections_)
+    function addCollections(address[] memory _collections)
         external
         onlyOwner
     {
-        require(collections_.length != 0, "CollectionFactory: empty collection list");
+        require(_collections.length != 0, "CollectionFactory: empty collection list");
 
-        uint256 collectionsLength = collections_.length;
+        uint256 collectionsLength = _collections.length;
         collectionCount += collectionsLength;
+        bool succes;
+        address beacon;
 
         for (uint256 index; index < collectionsLength; ) {
-            CollectionProxy collection = CollectionProxy(payable(collections_[index]));
+            CollectionProxy collection = CollectionProxy(payable(_collections[index]));
             require(collection.proxyAdmin() == address(this), "CollectionFactory: owner of collection must be factory");
-            collections.add(address(collection));
+
+            succes = collections.add(address(collection));
+            require(succes, "CollectionFactory: failed to add collection");
+
+            beacon = collection.beacon();
+            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
 
             emit CollectionAdded(collection.beacon(), address(collection));
 
@@ -311,24 +320,24 @@ contract CollectionFactory is Ownable2Step {
     }
 
     /**
-     * @notice Removes a list of collections from the factory. Also sets the owner to the provided one.
+     * @notice Transfers a list of collections from the factory. Sets the owner to the provided one.
      * @dev will revert it a collection from the list is not tracked by the factory or if new owner is 0 address
      * @custom:event {CollectionRemoved} for each removed collection
      * @custom:event {CollectionProxyAdminChanged}
-     * @param collections_ list of collections to remove from tracking
-     * @param newCollectionOwner the new owner of the beacon. It will be changed to this before removal
+     * @param _collections list of collections to transfer
+     * @param newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
      */
-    function removeCollections(address[] calldata collections_, address newCollectionOwner)
+    function transferCollections(address[] calldata _collections, address newCollectionOwner)
         external
         onlyOwner
     {
         require(newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
         bool success;
-        uint256 collectionsLength = collections_.length;
+        uint256 collectionsLength = _collections.length;
         collectionCount -= collectionsLength;
 
         for (uint256 index; index < collectionsLength; ) {
-            CollectionProxy collection = CollectionProxy(payable(collections_[index]));
+            CollectionProxy collection = CollectionProxy(payable(_collections[index]));
 
             success = collections.remove(address(collection));
             require(success, "CollectionFactory: failed to remove collection");
@@ -459,5 +468,9 @@ contract CollectionFactory is Ownable2Step {
         beaconCount += 1;
 
         emit BeaconAdded(beaconAlias, beacon);
+    }
+
+    function _isFactoryBeaconOwner(address beacon) internal view returns (bool) {
+        return UpgradeableBeacon(beacon).owner() == address(this);
     }
 }
