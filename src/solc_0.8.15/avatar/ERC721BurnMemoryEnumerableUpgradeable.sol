@@ -6,7 +6,7 @@ import {
     ERC721EnumerableUpgradeable,
     ERC721Upgradeable,
     IERC721Upgradeable
-    } from "openzeppelin-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+    } from "openzeppelin-contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 
 contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {

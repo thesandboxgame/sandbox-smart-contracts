@@ -2,19 +2,14 @@
 pragma solidity 0.8.15;
 
 
-import { OwnableUpgradeable } from "openzeppelin-upgradeable/access/OwnableUpgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "openzeppelin-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-upgradeable/access/AccessControlUpgradeable.sol";
-// import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
-
-import { UpdatableOperatorFiltererUpgradeable } from "./OperatorFiltererNew/UpdatableOperatorFiltererUpgradeable.sol";
-
-
+import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { CollectionStateManagement } from "./CollectionStateManagement.sol";
 import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
-// import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import { ERC2771HandlerUpgradeable } from "./ERC2771HandlerUpgradeable.sol";
+import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
@@ -582,7 +577,7 @@ contract AvatarCollection is
      * @dev returns OwnableUpgradeable.owner()
      * @return owner of current contract
      */
-    function owner() public view override(OwnableUpgradeable) returns (address) { // , UpdatableOperatorFiltererUpgradeable
+    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) { // , UpdatableOperatorFiltererUpgradeable
         return OwnableUpgradeable.owner();
     }
 

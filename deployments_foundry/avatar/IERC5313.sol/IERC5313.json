@@ -2,7 +2,7 @@
   "abi": [
     {
       "inputs": [],
-      "name": "implementation",
+      "name": "owner",
       "outputs": [
         {
           "internalType": "address",
@@ -25,9 +25,9 @@
     "linkReferences": {}
   },
   "methodIdentifiers": {
-    "implementation()": "5c60da1b"
+    "owner()": "8da5cb5b"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"implementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This is the interface that {BeaconProxy} expects of its beacon.\",\"kind\":\"dev\",\"methods\":{\"implementation()\":{\"details\":\"Must return an address that can be used as a delegate call target. {BeaconProxy} will check that this address is a contract.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol\":\"IBeacon\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol\":{\"keccak256\":\"0xd50a3421ac379ccb1be435fa646d66a65c986b4924f0849839f08692f39dde61\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ada1e030c0231db8d143b44ce92b4d1158eedb087880cad6d8cc7bd7ebe7b354\",\"dweb:/ipfs/QmWZ2NHZweRpz1U9GF6R1h65ri76dnX7fNxLBeM2t5N5Ce\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Interface for the Light Contract Ownership Standard. A standardized minimal interface required to identify an account that controls a contract _Available since v4.9._\",\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Gets the address of the owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/avatar/IERC5313.sol\":\"IERC5313\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"src/solc_0.8.15/avatar/IERC5313.sol\":{\"keccak256\":\"0xadba4a9fe2d8a6dae3a40bb31b4ca3b0269c275dfe2242f811f0257496ef2373\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3991ee107ff9a7cac24137b51ad2d276c2d4924ec8a176d9ae35555ad05a0d90\",\"dweb:/ipfs/QmdYWbumcJe7bssuQQPwEWvzHP9myJif1Rov3fZfmA615t\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -39,7 +39,7 @@
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
-          "name": "implementation",
+          "name": "owner",
           "outputs": [
             {
               "internalType": "address",
@@ -52,8 +52,8 @@
       "devdoc": {
         "kind": "dev",
         "methods": {
-          "implementation()": {
-            "details": "Must return an address that can be used as a delegate call target. {BeaconProxy} will check that this address is a contract."
+          "owner()": {
+            "details": "Gets the address of the owner."
           }
         },
         "version": 1
@@ -82,16 +82,16 @@
         "bytecodeHash": "ipfs"
       },
       "compilationTarget": {
-        "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": "IBeacon"
+        "src/solc_0.8.15/avatar/IERC5313.sol": "IERC5313"
       },
       "libraries": {}
     },
     "sources": {
-      "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
-        "keccak256": "0xd50a3421ac379ccb1be435fa646d66a65c986b4924f0849839f08692f39dde61",
+      "src/solc_0.8.15/avatar/IERC5313.sol": {
+        "keccak256": "0xadba4a9fe2d8a6dae3a40bb31b4ca3b0269c275dfe2242f811f0257496ef2373",
         "urls": [
-          "bzz-raw://ada1e030c0231db8d143b44ce92b4d1158eedb087880cad6d8cc7bd7ebe7b354",
-          "dweb:/ipfs/QmWZ2NHZweRpz1U9GF6R1h65ri76dnX7fNxLBeM2t5N5Ce"
+          "bzz-raw://3991ee107ff9a7cac24137b51ad2d276c2d4924ec8a176d9ae35555ad05a0d90",
+          "dweb:/ipfs/QmdYWbumcJe7bssuQQPwEWvzHP9myJif1Rov3fZfmA615t"
         ],
         "license": "MIT"
       }
@@ -99,20 +99,20 @@
     "version": 1
   },
   "ast": {
-    "absolutePath": "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol",
-    "id": 33605,
+    "absolutePath": "src/solc_0.8.15/avatar/IERC5313.sol",
+    "id": 38363,
     "exportedSymbols": {
-      "IBeacon": [
-        33604
+      "IERC5313": [
+        38362
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "93:357:42",
+    "src": "33:628:59",
     "nodes": [
       {
-        "id": 33596,
+        "id": 38354,
         "nodeType": "PragmaDirective",
-        "src": "93:23:42",
+        "src": "33:23:59",
         "nodes": [],
         "literals": [
           "solidity",
@@ -122,46 +122,46 @@
         ]
       },
       {
-        "id": 33604,
+        "id": 38362,
         "nodeType": "ContractDefinition",
-        "src": "198:251:42",
+        "src": "526:135:59",
         "nodes": [
           {
-            "id": 33603,
+            "id": 38361,
             "nodeType": "FunctionDefinition",
-            "src": "389:58:42",
+            "src": "610:49:59",
             "nodes": [],
             "documentation": {
-              "id": 33598,
+              "id": 38356,
               "nodeType": "StructuredDocumentation",
-              "src": "222:162:42",
-              "text": " @dev Must return an address that can be used as a delegate call target.\n {BeaconProxy} will check that this address is a contract."
+              "src": "551:54:59",
+              "text": " @dev Gets the address of the owner."
             },
-            "functionSelector": "5c60da1b",
+            "functionSelector": "8da5cb5b",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "implementation",
-            "nameLocation": "398:14:42",
+            "name": "owner",
+            "nameLocation": "619:5:59",
             "parameters": {
-              "id": 33599,
+              "id": 38357,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "412:2:42"
+              "src": "624:2:59"
             },
             "returnParameters": {
-              "id": 33602,
+              "id": 38360,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33601,
+                  "id": 38359,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33603,
-                  "src": "438:7:42",
+                  "scope": 38361,
+                  "src": "650:7:59",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -169,10 +169,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33600,
+                    "id": 38358,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "438:7:42",
+                    "src": "650:7:59",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -182,9 +182,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "437:9:42"
+              "src": "649:9:59"
             },
-            "scope": 33604,
+            "scope": 38362,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -192,26 +192,26 @@
         ],
         "abstract": false,
         "baseContracts": [],
-        "canonicalName": "IBeacon",
+        "canonicalName": "IERC5313",
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33597,
+          "id": 38355,
           "nodeType": "StructuredDocumentation",
-          "src": "118:79:42",
-          "text": " @dev This is the interface that {BeaconProxy} expects of its beacon."
+          "src": "331:194:59",
+          "text": " @dev Interface for the Light Contract Ownership Standard.\n A standardized minimal interface required to identify an account that controls a contract\n _Available since v4.9._"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33604
+          38362
         ],
-        "name": "IBeacon",
-        "nameLocation": "208:7:42",
-        "scope": 33605,
+        "name": "IERC5313",
+        "nameLocation": "536:8:59",
+        "scope": 38363,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 42
+  "id": 59
 }

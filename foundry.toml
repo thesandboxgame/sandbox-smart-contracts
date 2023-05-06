@@ -12,7 +12,7 @@ fs_permissions = [{ access = "read", path = "./"}]
 remappings = [
   "forge-std/=lib/forge-std/src/",
   "openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
-  "openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+  "openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
   "operator-filter-registry/=lib/operator-filter-registry/src/",
   "contracts/=src/solc_0.8.15/"
 ]

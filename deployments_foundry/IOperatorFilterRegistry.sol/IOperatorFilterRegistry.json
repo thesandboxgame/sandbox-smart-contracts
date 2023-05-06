@@ -527,7 +527,7 @@
     "updateOperator(address,address,bool)": "a2f367ab",
     "updateOperators(address,address[],bool)": "a14584c1"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"codeHashOf\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToCopy\",\"type\":\"address\"}],\"name\":\"copyEntriesOf\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filteredCodeHashAt\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"filteredCodeHashes\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filteredOperatorAt\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"filteredOperators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"codeHash\",\"type\":\"bytes32\"}],\"name\":\"isCodeHashFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operatorWithCode\",\"type\":\"address\"}],\"name\":\"isCodeHashOfFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isOperatorAllowed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isOperatorFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"name\":\"register\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToCopy\",\"type\":\"address\"}],\"name\":\"registerAndCopyEntries\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"subscription\",\"type\":\"address\"}],\"name\":\"registerAndSubscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToSubscribe\",\"type\":\"address\"}],\"name\":\"subscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"subscriberAt\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"name\":\"subscribers\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"subscriptionOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unregister\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"copyExistingEntries\",\"type\":\"bool\"}],\"name\":\"unsubscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"codehash\",\"type\":\"bytes32\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateCodeHash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32[]\",\"name\":\"codeHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateCodeHashes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateOperator\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"operators\",\"type\":\"address[]\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateOperators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"codeHashOf(address)\":{\"details\":\"Convenience method to compute the code hash of an arbitrary contract\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"copyEntriesOf(address,address)\":{\"notice\":\"Copy filtered operators and codeHashes from a different registrantToCopy to addr.\"},\"filteredCodeHashAt(address,uint256)\":{\"notice\":\"Returns the filtered codeHash at the given index of the list of filtered codeHashes for a given address or         its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredCodeHashes(address)\":{\"notice\":\"Returns the set of filtered codeHashes for a given address or its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredOperatorAt(address,uint256)\":{\"notice\":\"Returns the filtered operator at the given index of the set of filtered operators for a given address or         its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredOperators(address)\":{\"notice\":\"Returns a list of filtered operators for a given address or its subscription.\"},\"isCodeHashFiltered(address,bytes32)\":{\"notice\":\"Returns true if a codeHash is filtered by a given address or its subscription.\"},\"isCodeHashOfFiltered(address,address)\":{\"notice\":\"Returns true if the hash of an address's code is filtered by a given address or its subscription.\"},\"isOperatorAllowed(address,address)\":{\"notice\":\"Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns         true if supplied registrant address is not registered.\"},\"isOperatorFiltered(address,address)\":{\"notice\":\"Returns true if operator is filtered by a given address or its subscription.\"},\"isRegistered(address)\":{\"notice\":\"Returns true if an address has registered\"},\"register(address)\":{\"notice\":\"Registers an address with the registry. May be called by address itself or by EIP-173 owner.\"},\"registerAndCopyEntries(address,address)\":{\"notice\":\"Registers an address with the registry and copies the filtered operators and codeHashes from another         address without subscribing.\"},\"registerAndSubscribe(address,address)\":{\"notice\":\"Registers an address with the registry and \\\"subscribes\\\" to another address's filtered operators and codeHashes.\"},\"subscribe(address,address)\":{\"notice\":\"Subscribe an address to another registrant's filtered operators and codeHashes. Will remove previous         subscription if present.         Note that accounts with subscriptions may go on to subscribe to other accounts - in this case,         subscriptions will not be forwarded. Instead the former subscription's existing entries will still be         used.\"},\"subscriberAt(address,uint256)\":{\"notice\":\"Get the subscriber at a given index in the set of addresses subscribed to a given registrant.         Note that order is not guaranteed as updates are made.\"},\"subscribers(address)\":{\"notice\":\"Get the set of addresses subscribed to a given registrant.         Note that order is not guaranteed as updates are made.\"},\"subscriptionOf(address)\":{\"notice\":\"Get the subscription address of a given registrant, if any.\"},\"unregister(address)\":{\"notice\":\"Unregisters an address with the registry and removes its subscription. May be called by address itself or by EIP-173 owner.         Note that this does not remove any filtered addresses or codeHashes.         Also note that any subscriptions to this registrant will still be active and follow the existing filtered addresses and codehashes.\"},\"unsubscribe(address,bool)\":{\"notice\":\"Unsubscribe an address from its current subscribed registrant, and optionally copy its filtered operators and codeHashes.\"},\"updateCodeHash(address,bytes32,bool)\":{\"notice\":\"Update a codeHash for a registered address - when filtered is true, the codeHash is filtered.\"},\"updateCodeHashes(address,bytes32[],bool)\":{\"notice\":\"Update multiple codeHashes for a registered address - when filtered is true, the codeHashes will be filtered. Reverts on duplicates.\"},\"updateOperator(address,address,bool)\":{\"notice\":\"Update an operator address for a registered address - when filtered is true, the operator is filtered.\"},\"updateOperators(address,address[],bool)\":{\"notice\":\"Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/operator-filter-registry/src/IOperatorFilterRegistry.sol\":\"IOperatorFilterRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@maticnetwork/=node_modules/@maticnetwork/\",\":@openzeppelin/=node_modules/@openzeppelin/\",\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":fx-portal/=node_modules/fx-portal/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"lib/operator-filter-registry/src/IOperatorFilterRegistry.sol\":{\"keccak256\":\"0x56ad8df389958dbf89cc30196e5f37779ee87d2e8b551d84a8d0a696e1c69937\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7ca12c8b2d8a6c0ef1ba2204be8628c1443d9371c37aa619a3cc485267b6a30c\",\"dweb:/ipfs/QmaKXZeCR6kPRXCYo6NZJFnbBEa4eWwBKRYAKyY87vBrtc\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"codeHashOf\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToCopy\",\"type\":\"address\"}],\"name\":\"copyEntriesOf\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filteredCodeHashAt\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"filteredCodeHashes\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filteredOperatorAt\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"filteredOperators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"codeHash\",\"type\":\"bytes32\"}],\"name\":\"isCodeHashFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operatorWithCode\",\"type\":\"address\"}],\"name\":\"isCodeHashOfFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isOperatorAllowed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isOperatorFiltered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"name\":\"register\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToCopy\",\"type\":\"address\"}],\"name\":\"registerAndCopyEntries\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"subscription\",\"type\":\"address\"}],\"name\":\"registerAndSubscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"registrantToSubscribe\",\"type\":\"address\"}],\"name\":\"subscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"subscriberAt\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"name\":\"subscribers\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"subscriptionOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unregister\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"copyExistingEntries\",\"type\":\"bool\"}],\"name\":\"unsubscribe\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"codehash\",\"type\":\"bytes32\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateCodeHash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"bytes32[]\",\"name\":\"codeHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateCodeHashes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateOperator\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"registrant\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"operators\",\"type\":\"address[]\"},{\"internalType\":\"bool\",\"name\":\"filtered\",\"type\":\"bool\"}],\"name\":\"updateOperators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"codeHashOf(address)\":{\"details\":\"Convenience method to compute the code hash of an arbitrary contract\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"copyEntriesOf(address,address)\":{\"notice\":\"Copy filtered operators and codeHashes from a different registrantToCopy to addr.\"},\"filteredCodeHashAt(address,uint256)\":{\"notice\":\"Returns the filtered codeHash at the given index of the list of filtered codeHashes for a given address or         its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredCodeHashes(address)\":{\"notice\":\"Returns the set of filtered codeHashes for a given address or its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredOperatorAt(address,uint256)\":{\"notice\":\"Returns the filtered operator at the given index of the set of filtered operators for a given address or         its subscription.         Note that order is not guaranteed as updates are made.\"},\"filteredOperators(address)\":{\"notice\":\"Returns a list of filtered operators for a given address or its subscription.\"},\"isCodeHashFiltered(address,bytes32)\":{\"notice\":\"Returns true if a codeHash is filtered by a given address or its subscription.\"},\"isCodeHashOfFiltered(address,address)\":{\"notice\":\"Returns true if the hash of an address's code is filtered by a given address or its subscription.\"},\"isOperatorAllowed(address,address)\":{\"notice\":\"Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns         true if supplied registrant address is not registered.\"},\"isOperatorFiltered(address,address)\":{\"notice\":\"Returns true if operator is filtered by a given address or its subscription.\"},\"isRegistered(address)\":{\"notice\":\"Returns true if an address has registered\"},\"register(address)\":{\"notice\":\"Registers an address with the registry. May be called by address itself or by EIP-173 owner.\"},\"registerAndCopyEntries(address,address)\":{\"notice\":\"Registers an address with the registry and copies the filtered operators and codeHashes from another         address without subscribing.\"},\"registerAndSubscribe(address,address)\":{\"notice\":\"Registers an address with the registry and \\\"subscribes\\\" to another address's filtered operators and codeHashes.\"},\"subscribe(address,address)\":{\"notice\":\"Subscribe an address to another registrant's filtered operators and codeHashes. Will remove previous         subscription if present.         Note that accounts with subscriptions may go on to subscribe to other accounts - in this case,         subscriptions will not be forwarded. Instead the former subscription's existing entries will still be         used.\"},\"subscriberAt(address,uint256)\":{\"notice\":\"Get the subscriber at a given index in the set of addresses subscribed to a given registrant.         Note that order is not guaranteed as updates are made.\"},\"subscribers(address)\":{\"notice\":\"Get the set of addresses subscribed to a given registrant.         Note that order is not guaranteed as updates are made.\"},\"subscriptionOf(address)\":{\"notice\":\"Get the subscription address of a given registrant, if any.\"},\"unregister(address)\":{\"notice\":\"Unregisters an address with the registry and removes its subscription. May be called by address itself or by EIP-173 owner.         Note that this does not remove any filtered addresses or codeHashes.         Also note that any subscriptions to this registrant will still be active and follow the existing filtered addresses and codehashes.\"},\"unsubscribe(address,bool)\":{\"notice\":\"Unsubscribe an address from its current subscribed registrant, and optionally copy its filtered operators and codeHashes.\"},\"updateCodeHash(address,bytes32,bool)\":{\"notice\":\"Update a codeHash for a registered address - when filtered is true, the codeHash is filtered.\"},\"updateCodeHashes(address,bytes32[],bool)\":{\"notice\":\"Update multiple codeHashes for a registered address - when filtered is true, the codeHashes will be filtered. Reverts on duplicates.\"},\"updateOperator(address,address,bool)\":{\"notice\":\"Update an operator address for a registered address - when filtered is true, the operator is filtered.\"},\"updateOperators(address,address[],bool)\":{\"notice\":\"Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/operator-filter-registry/src/IOperatorFilterRegistry.sol\":\"IOperatorFilterRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":openzeppelin-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"lib/operator-filter-registry/src/IOperatorFilterRegistry.sol\":{\"keccak256\":\"0x56ad8df389958dbf89cc30196e5f37779ee87d2e8b551d84a8d0a696e1c69937\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7ca12c8b2d8a6c0ef1ba2204be8628c1443d9371c37aa619a3cc485267b6a30c\",\"dweb:/ipfs/QmaKXZeCR6kPRXCYo6NZJFnbBEa4eWwBKRYAKyY87vBrtc\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -1102,19 +1102,12 @@
     },
     "settings": {
       "remappings": [
-        ":@maticnetwork/=node_modules/@maticnetwork/",
-        ":@openzeppelin/=node_modules/@openzeppelin/",
         ":contracts/=src/solc_0.8.15/",
         ":ds-test/=lib/forge-std/lib/ds-test/src/",
-        ":erc4626-tests/=lib/operator-filter-registry/lib/openzeppelin-contracts/lib/erc4626-tests/",
-        ":eth-gas-reporter/=node_modules/eth-gas-reporter/",
         ":forge-std/=lib/forge-std/src/",
-        ":fx-portal/=node_modules/fx-portal/",
-        ":hardhat-deploy/=node_modules/hardhat-deploy/",
-        ":hardhat/=node_modules/hardhat/",
         ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
         ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
-        ":openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":openzeppelin-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
         ":operator-filter-registry/=lib/operator-filter-registry/src/"
       ],
       "optimizer": {
@@ -1143,19 +1136,19 @@
   },
   "ast": {
     "absolutePath": "lib/operator-filter-registry/src/IOperatorFilterRegistry.sol",
-    "id": 6626,
+    "id": 36748,
     "exportedSymbols": {
       "IOperatorFilterRegistry": [
-        6625
+        36747
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "32:6175:27",
+    "src": "32:6175:54",
     "nodes": [
       {
-        "id": 6409,
+        "id": 36531,
         "nodeType": "PragmaDirective",
-        "src": "32:24:27",
+        "src": "32:24:54",
         "nodes": [],
         "literals": [
           "solidity",
@@ -1165,19 +1158,19 @@
         ]
       },
       {
-        "id": 6625,
+        "id": 36747,
         "nodeType": "ContractDefinition",
-        "src": "58:6148:27",
+        "src": "58:6148:54",
         "nodes": [
           {
-            "id": 6419,
+            "id": 36541,
             "nodeType": "FunctionDefinition",
-            "src": "303:94:27",
+            "src": "303:94:54",
             "nodes": [],
             "documentation": {
-              "id": 6410,
+              "id": 36532,
               "nodeType": "StructuredDocumentation",
-              "src": "98:200:27",
+              "src": "98:200:54",
               "text": " @notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns\n         true if supplied registrant address is not registered."
             },
             "functionSelector": "c6171134",
@@ -1185,20 +1178,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "isOperatorAllowed",
-            "nameLocation": "312:17:27",
+            "nameLocation": "312:17:54",
             "parameters": {
-              "id": 6415,
+              "id": 36537,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6412,
+                  "id": 36534,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "338:10:27",
+                  "nameLocation": "338:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6419,
-                  "src": "330:18:27",
+                  "scope": 36541,
+                  "src": "330:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1206,10 +1199,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6411,
+                    "id": 36533,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "330:7:27",
+                    "src": "330:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1220,13 +1213,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6414,
+                  "id": 36536,
                   "mutability": "mutable",
                   "name": "operator",
-                  "nameLocation": "358:8:27",
+                  "nameLocation": "358:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6419,
-                  "src": "350:16:27",
+                  "scope": 36541,
+                  "src": "350:16:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1234,10 +1227,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6413,
+                    "id": 36535,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "350:7:27",
+                    "src": "350:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1247,21 +1240,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "329:38:27"
+              "src": "329:38:54"
             },
             "returnParameters": {
-              "id": 6418,
+              "id": 36540,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6417,
+                  "id": 36539,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6419,
-                  "src": "391:4:27",
+                  "scope": 36541,
+                  "src": "391:4:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1269,10 +1262,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6416,
+                    "id": 36538,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "391:4:27",
+                    "src": "391:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1281,22 +1274,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "390:6:27"
+              "src": "390:6:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6425,
+            "id": 36547,
             "nodeType": "FunctionDefinition",
-            "src": "527:47:27",
+            "src": "527:47:54",
             "nodes": [],
             "documentation": {
-              "id": 6420,
+              "id": 36542,
               "nodeType": "StructuredDocumentation",
-              "src": "403:119:27",
+              "src": "403:119:54",
               "text": " @notice Registers an address with the registry. May be called by address itself or by EIP-173 owner."
             },
             "functionSelector": "4420e486",
@@ -1304,20 +1297,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "536:8:27",
+            "nameLocation": "536:8:54",
             "parameters": {
-              "id": 6423,
+              "id": 36545,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6422,
+                  "id": 36544,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "553:10:27",
+                  "nameLocation": "553:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6425,
-                  "src": "545:18:27",
+                  "scope": 36547,
+                  "src": "545:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1325,10 +1318,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6421,
+                    "id": 36543,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "545:7:27",
+                    "src": "545:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1338,28 +1331,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "544:20:27"
+              "src": "544:20:54"
             },
             "returnParameters": {
-              "id": 6424,
+              "id": 36546,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "573:0:27"
+              "src": "573:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6433,
+            "id": 36555,
             "nodeType": "FunctionDefinition",
-            "src": "723:81:27",
+            "src": "723:81:54",
             "nodes": [],
             "documentation": {
-              "id": 6426,
+              "id": 36548,
               "nodeType": "StructuredDocumentation",
-              "src": "580:138:27",
+              "src": "580:138:54",
               "text": " @notice Registers an address with the registry and \"subscribes\" to another address's filtered operators and codeHashes."
             },
             "functionSelector": "7d3e3dbe",
@@ -1367,20 +1360,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "registerAndSubscribe",
-            "nameLocation": "732:20:27",
+            "nameLocation": "732:20:54",
             "parameters": {
-              "id": 6431,
+              "id": 36553,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6428,
+                  "id": 36550,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "761:10:27",
+                  "nameLocation": "761:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6433,
-                  "src": "753:18:27",
+                  "scope": 36555,
+                  "src": "753:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1388,10 +1381,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6427,
+                    "id": 36549,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "753:7:27",
+                    "src": "753:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1402,13 +1395,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6430,
+                  "id": 36552,
                   "mutability": "mutable",
                   "name": "subscription",
-                  "nameLocation": "781:12:27",
+                  "nameLocation": "781:12:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6433,
-                  "src": "773:20:27",
+                  "scope": 36555,
+                  "src": "773:20:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1416,10 +1409,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6429,
+                    "id": 36551,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "773:7:27",
+                    "src": "773:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1429,28 +1422,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "752:42:27"
+              "src": "752:42:54"
             },
             "returnParameters": {
-              "id": 6432,
+              "id": 36554,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "803:0:27"
+              "src": "803:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6441,
+            "id": 36563,
             "nodeType": "FunctionDefinition",
-            "src": "986:87:27",
+            "src": "986:87:54",
             "nodes": [],
             "documentation": {
-              "id": 6434,
+              "id": 36556,
               "nodeType": "StructuredDocumentation",
-              "src": "810:171:27",
+              "src": "810:171:54",
               "text": " @notice Registers an address with the registry and copies the filtered operators and codeHashes from another\n         address without subscribing."
             },
             "functionSelector": "a0af2903",
@@ -1458,20 +1451,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "registerAndCopyEntries",
-            "nameLocation": "995:22:27",
+            "nameLocation": "995:22:54",
             "parameters": {
-              "id": 6439,
+              "id": 36561,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6436,
+                  "id": 36558,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "1026:10:27",
+                  "nameLocation": "1026:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6441,
-                  "src": "1018:18:27",
+                  "scope": 36563,
+                  "src": "1018:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1479,10 +1472,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6435,
+                    "id": 36557,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1018:7:27",
+                    "src": "1018:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1493,13 +1486,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6438,
+                  "id": 36560,
                   "mutability": "mutable",
                   "name": "registrantToCopy",
-                  "nameLocation": "1046:16:27",
+                  "nameLocation": "1046:16:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6441,
-                  "src": "1038:24:27",
+                  "scope": 36563,
+                  "src": "1038:24:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1507,10 +1500,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6437,
+                    "id": 36559,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1038:7:27",
+                    "src": "1038:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1520,28 +1513,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1017:46:27"
+              "src": "1017:46:54"
             },
             "returnParameters": {
-              "id": 6440,
+              "id": 36562,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1072:0:27"
+              "src": "1072:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6447,
+            "id": 36569,
             "nodeType": "FunctionDefinition",
-            "src": "1465:43:27",
+            "src": "1465:43:54",
             "nodes": [],
             "documentation": {
-              "id": 6442,
+              "id": 36564,
               "nodeType": "StructuredDocumentation",
-              "src": "1079:381:27",
+              "src": "1079:381:54",
               "text": " @notice Unregisters an address with the registry and removes its subscription. May be called by address itself or by EIP-173 owner.\n         Note that this does not remove any filtered addresses or codeHashes.\n         Also note that any subscriptions to this registrant will still be active and follow the existing filtered addresses and codehashes."
             },
             "functionSelector": "2ec2c246",
@@ -1549,20 +1542,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "unregister",
-            "nameLocation": "1474:10:27",
+            "nameLocation": "1474:10:54",
             "parameters": {
-              "id": 6445,
+              "id": 36567,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6444,
+                  "id": 36566,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "1493:4:27",
+                  "nameLocation": "1493:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6447,
-                  "src": "1485:12:27",
+                  "scope": 36569,
+                  "src": "1485:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1570,10 +1563,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6443,
+                    "id": 36565,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1485:7:27",
+                    "src": "1485:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1583,28 +1576,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1484:14:27"
+              "src": "1484:14:54"
             },
             "returnParameters": {
-              "id": 6446,
+              "id": 36568,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1507:0:27"
+              "src": "1507:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6457,
+            "id": 36579,
             "nodeType": "FunctionDefinition",
-            "src": "1648:86:27",
+            "src": "1648:86:54",
             "nodes": [],
             "documentation": {
-              "id": 6448,
+              "id": 36570,
               "nodeType": "StructuredDocumentation",
-              "src": "1514:129:27",
+              "src": "1514:129:54",
               "text": " @notice Update an operator address for a registered address - when filtered is true, the operator is filtered."
             },
             "functionSelector": "a2f367ab",
@@ -1612,20 +1605,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "updateOperator",
-            "nameLocation": "1657:14:27",
+            "nameLocation": "1657:14:54",
             "parameters": {
-              "id": 6455,
+              "id": 36577,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6450,
+                  "id": 36572,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "1680:10:27",
+                  "nameLocation": "1680:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6457,
-                  "src": "1672:18:27",
+                  "scope": 36579,
+                  "src": "1672:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1633,10 +1626,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6449,
+                    "id": 36571,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1672:7:27",
+                    "src": "1672:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1647,13 +1640,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6452,
+                  "id": 36574,
                   "mutability": "mutable",
                   "name": "operator",
-                  "nameLocation": "1700:8:27",
+                  "nameLocation": "1700:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6457,
-                  "src": "1692:16:27",
+                  "scope": 36579,
+                  "src": "1692:16:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1661,10 +1654,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6451,
+                    "id": 36573,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1692:7:27",
+                    "src": "1692:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1675,13 +1668,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6454,
+                  "id": 36576,
                   "mutability": "mutable",
                   "name": "filtered",
-                  "nameLocation": "1715:8:27",
+                  "nameLocation": "1715:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6457,
-                  "src": "1710:13:27",
+                  "scope": 36579,
+                  "src": "1710:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1689,10 +1682,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6453,
+                    "id": 36575,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1710:4:27",
+                    "src": "1710:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1701,28 +1694,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1671:53:27"
+              "src": "1671:53:54"
             },
             "returnParameters": {
-              "id": 6456,
+              "id": 36578,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1733:0:27"
+              "src": "1733:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6468,
+            "id": 36590,
             "nodeType": "FunctionDefinition",
-            "src": "1902:99:27",
+            "src": "1902:99:54",
             "nodes": [],
             "documentation": {
-              "id": 6458,
+              "id": 36580,
               "nodeType": "StructuredDocumentation",
-              "src": "1740:157:27",
+              "src": "1740:157:54",
               "text": " @notice Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates."
             },
             "functionSelector": "a14584c1",
@@ -1730,20 +1723,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "updateOperators",
-            "nameLocation": "1911:15:27",
+            "nameLocation": "1911:15:54",
             "parameters": {
-              "id": 6466,
+              "id": 36588,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6460,
+                  "id": 36582,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "1935:10:27",
+                  "nameLocation": "1935:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6468,
-                  "src": "1927:18:27",
+                  "scope": 36590,
+                  "src": "1927:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1751,10 +1744,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6459,
+                    "id": 36581,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1927:7:27",
+                    "src": "1927:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1765,13 +1758,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6463,
+                  "id": 36585,
                   "mutability": "mutable",
                   "name": "operators",
-                  "nameLocation": "1966:9:27",
+                  "nameLocation": "1966:9:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6468,
-                  "src": "1947:28:27",
+                  "scope": 36590,
+                  "src": "1947:28:54",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -1780,19 +1773,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 6461,
+                      "id": 36583,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1947:7:27",
+                      "src": "1947:7:54",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 6462,
+                    "id": 36584,
                     "nodeType": "ArrayTypeName",
-                    "src": "1947:9:27",
+                    "src": "1947:9:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1802,13 +1795,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6465,
+                  "id": 36587,
                   "mutability": "mutable",
                   "name": "filtered",
-                  "nameLocation": "1982:8:27",
+                  "nameLocation": "1982:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6468,
-                  "src": "1977:13:27",
+                  "scope": 36590,
+                  "src": "1977:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1816,10 +1809,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6464,
+                    "id": 36586,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1977:4:27",
+                    "src": "1977:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1828,28 +1821,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1926:65:27"
+              "src": "1926:65:54"
             },
             "returnParameters": {
-              "id": 6467,
+              "id": 36589,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2000:0:27"
+              "src": "2000:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6478,
+            "id": 36600,
             "nodeType": "FunctionDefinition",
-            "src": "2132:86:27",
+            "src": "2132:86:54",
             "nodes": [],
             "documentation": {
-              "id": 6469,
+              "id": 36591,
               "nodeType": "StructuredDocumentation",
-              "src": "2007:120:27",
+              "src": "2007:120:54",
               "text": " @notice Update a codeHash for a registered address - when filtered is true, the codeHash is filtered."
             },
             "functionSelector": "712fc00b",
@@ -1857,20 +1850,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "updateCodeHash",
-            "nameLocation": "2141:14:27",
+            "nameLocation": "2141:14:54",
             "parameters": {
-              "id": 6476,
+              "id": 36598,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6471,
+                  "id": 36593,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "2164:10:27",
+                  "nameLocation": "2164:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6478,
-                  "src": "2156:18:27",
+                  "scope": 36600,
+                  "src": "2156:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1878,10 +1871,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6470,
+                    "id": 36592,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2156:7:27",
+                    "src": "2156:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1892,13 +1885,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6473,
+                  "id": 36595,
                   "mutability": "mutable",
                   "name": "codehash",
-                  "nameLocation": "2184:8:27",
+                  "nameLocation": "2184:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6478,
-                  "src": "2176:16:27",
+                  "scope": 36600,
+                  "src": "2176:16:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1906,10 +1899,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6472,
+                    "id": 36594,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2176:7:27",
+                    "src": "2176:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1919,13 +1912,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6475,
+                  "id": 36597,
                   "mutability": "mutable",
                   "name": "filtered",
-                  "nameLocation": "2199:8:27",
+                  "nameLocation": "2199:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6478,
-                  "src": "2194:13:27",
+                  "scope": 36600,
+                  "src": "2194:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1933,10 +1926,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6474,
+                    "id": 36596,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2194:4:27",
+                    "src": "2194:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1945,28 +1938,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2155:53:27"
+              "src": "2155:53:54"
             },
             "returnParameters": {
-              "id": 6477,
+              "id": 36599,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2217:0:27"
+              "src": "2217:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6489,
+            "id": 36611,
             "nodeType": "FunctionDefinition",
-            "src": "2388:101:27",
+            "src": "2388:101:54",
             "nodes": [],
             "documentation": {
-              "id": 6479,
+              "id": 36601,
               "nodeType": "StructuredDocumentation",
-              "src": "2224:159:27",
+              "src": "2224:159:54",
               "text": " @notice Update multiple codeHashes for a registered address - when filtered is true, the codeHashes will be filtered. Reverts on duplicates."
             },
             "functionSelector": "063298b6",
@@ -1974,20 +1967,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "updateCodeHashes",
-            "nameLocation": "2397:16:27",
+            "nameLocation": "2397:16:54",
             "parameters": {
-              "id": 6487,
+              "id": 36609,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6481,
+                  "id": 36603,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "2422:10:27",
+                  "nameLocation": "2422:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6489,
-                  "src": "2414:18:27",
+                  "scope": 36611,
+                  "src": "2414:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1995,10 +1988,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6480,
+                    "id": 36602,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2414:7:27",
+                    "src": "2414:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2009,13 +2002,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6484,
+                  "id": 36606,
                   "mutability": "mutable",
                   "name": "codeHashes",
-                  "nameLocation": "2453:10:27",
+                  "nameLocation": "2453:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6489,
-                  "src": "2434:29:27",
+                  "scope": 36611,
+                  "src": "2434:29:54",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -2024,18 +2017,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 6482,
+                      "id": 36604,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2434:7:27",
+                      "src": "2434:7:54",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 6483,
+                    "id": 36605,
                     "nodeType": "ArrayTypeName",
-                    "src": "2434:9:27",
+                    "src": "2434:9:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -2045,13 +2038,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6486,
+                  "id": 36608,
                   "mutability": "mutable",
                   "name": "filtered",
-                  "nameLocation": "2470:8:27",
+                  "nameLocation": "2470:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6489,
-                  "src": "2465:13:27",
+                  "scope": 36611,
+                  "src": "2465:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2059,10 +2052,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6485,
+                    "id": 36607,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2465:4:27",
+                    "src": "2465:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2071,28 +2064,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2413:66:27"
+              "src": "2413:66:54"
             },
             "returnParameters": {
-              "id": 6488,
+              "id": 36610,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2488:0:27"
+              "src": "2488:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6497,
+            "id": 36619,
             "nodeType": "FunctionDefinition",
-            "src": "2915:79:27",
+            "src": "2915:79:54",
             "nodes": [],
             "documentation": {
-              "id": 6490,
+              "id": 36612,
               "nodeType": "StructuredDocumentation",
-              "src": "2495:415:27",
+              "src": "2495:415:54",
               "text": " @notice Subscribe an address to another registrant's filtered operators and codeHashes. Will remove previous\n         subscription if present.\n         Note that accounts with subscriptions may go on to subscribe to other accounts - in this case,\n         subscriptions will not be forwarded. Instead the former subscription's existing entries will still be\n         used."
             },
             "functionSelector": "b314d414",
@@ -2100,20 +2093,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "subscribe",
-            "nameLocation": "2924:9:27",
+            "nameLocation": "2924:9:54",
             "parameters": {
-              "id": 6495,
+              "id": 36617,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6492,
+                  "id": 36614,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "2942:10:27",
+                  "nameLocation": "2942:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6497,
-                  "src": "2934:18:27",
+                  "scope": 36619,
+                  "src": "2934:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2121,10 +2114,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6491,
+                    "id": 36613,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2934:7:27",
+                    "src": "2934:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2135,13 +2128,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6494,
+                  "id": 36616,
                   "mutability": "mutable",
                   "name": "registrantToSubscribe",
-                  "nameLocation": "2962:21:27",
+                  "nameLocation": "2962:21:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6497,
-                  "src": "2954:29:27",
+                  "scope": 36619,
+                  "src": "2954:29:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2149,10 +2142,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6493,
+                    "id": 36615,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2954:7:27",
+                    "src": "2954:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2162,28 +2155,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2933:51:27"
+              "src": "2933:51:54"
             },
             "returnParameters": {
-              "id": 6496,
+              "id": 36618,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2993:0:27"
+              "src": "2993:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6505,
+            "id": 36627,
             "nodeType": "FunctionDefinition",
-            "src": "3153:76:27",
+            "src": "3153:76:54",
             "nodes": [],
             "documentation": {
-              "id": 6498,
+              "id": 36620,
               "nodeType": "StructuredDocumentation",
-              "src": "3000:148:27",
+              "src": "3000:148:54",
               "text": " @notice Unsubscribe an address from its current subscribed registrant, and optionally copy its filtered operators and codeHashes."
             },
             "functionSelector": "34a0dc10",
@@ -2191,20 +2184,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "unsubscribe",
-            "nameLocation": "3162:11:27",
+            "nameLocation": "3162:11:54",
             "parameters": {
-              "id": 6503,
+              "id": 36625,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6500,
+                  "id": 36622,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "3182:10:27",
+                  "nameLocation": "3182:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6505,
-                  "src": "3174:18:27",
+                  "scope": 36627,
+                  "src": "3174:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2212,10 +2205,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6499,
+                    "id": 36621,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3174:7:27",
+                    "src": "3174:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2226,13 +2219,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6502,
+                  "id": 36624,
                   "mutability": "mutable",
                   "name": "copyExistingEntries",
-                  "nameLocation": "3199:19:27",
+                  "nameLocation": "3199:19:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6505,
-                  "src": "3194:24:27",
+                  "scope": 36627,
+                  "src": "3194:24:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2240,10 +2233,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6501,
+                    "id": 36623,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3194:4:27",
+                    "src": "3194:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2252,28 +2245,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3173:46:27"
+              "src": "3173:46:54"
             },
             "returnParameters": {
-              "id": 6504,
+              "id": 36626,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3228:0:27"
+              "src": "3228:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6513,
+            "id": 36635,
             "nodeType": "FunctionDefinition",
-            "src": "3326:76:27",
+            "src": "3326:76:54",
             "nodes": [],
             "documentation": {
-              "id": 6506,
+              "id": 36628,
               "nodeType": "StructuredDocumentation",
-              "src": "3235:86:27",
+              "src": "3235:86:54",
               "text": " @notice Get the subscription address of a given registrant, if any."
             },
             "functionSelector": "3c5030bb",
@@ -2281,20 +2274,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "subscriptionOf",
-            "nameLocation": "3335:14:27",
+            "nameLocation": "3335:14:54",
             "parameters": {
-              "id": 6509,
+              "id": 36631,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6508,
+                  "id": 36630,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "3358:4:27",
+                  "nameLocation": "3358:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6513,
-                  "src": "3350:12:27",
+                  "scope": 36635,
+                  "src": "3350:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2302,10 +2295,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6507,
+                    "id": 36629,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3350:7:27",
+                    "src": "3350:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2315,21 +2308,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3349:14:27"
+              "src": "3349:14:54"
             },
             "returnParameters": {
-              "id": 6512,
+              "id": 36634,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6511,
+                  "id": 36633,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "3390:10:27",
+                  "nameLocation": "3390:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6513,
-                  "src": "3382:18:27",
+                  "scope": 36635,
+                  "src": "3382:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2337,10 +2330,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6510,
+                    "id": 36632,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3382:7:27",
+                    "src": "3382:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2350,22 +2343,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3381:20:27"
+              "src": "3381:20:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6522,
+            "id": 36644,
             "nodeType": "FunctionDefinition",
-            "src": "3568:77:27",
+            "src": "3568:77:54",
             "nodes": [],
             "documentation": {
-              "id": 6514,
+              "id": 36636,
               "nodeType": "StructuredDocumentation",
-              "src": "3408:155:27",
+              "src": "3408:155:54",
               "text": " @notice Get the set of addresses subscribed to a given registrant.\n         Note that order is not guaranteed as updates are made."
             },
             "functionSelector": "5745ae28",
@@ -2373,20 +2366,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "subscribers",
-            "nameLocation": "3577:11:27",
+            "nameLocation": "3577:11:54",
             "parameters": {
-              "id": 6517,
+              "id": 36639,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6516,
+                  "id": 36638,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "3597:10:27",
+                  "nameLocation": "3597:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6522,
-                  "src": "3589:18:27",
+                  "scope": 36644,
+                  "src": "3589:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2394,10 +2387,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6515,
+                    "id": 36637,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3589:7:27",
+                    "src": "3589:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2407,21 +2400,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3588:20:27"
+              "src": "3588:20:54"
             },
             "returnParameters": {
-              "id": 6521,
+              "id": 36643,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6520,
+                  "id": 36642,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6522,
-                  "src": "3627:16:27",
+                  "scope": 36644,
+                  "src": "3627:16:54",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2430,19 +2423,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 6518,
+                      "id": 36640,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3627:7:27",
+                      "src": "3627:7:54",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 6519,
+                    "id": 36641,
                     "nodeType": "ArrayTypeName",
-                    "src": "3627:9:27",
+                    "src": "3627:9:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -2451,22 +2444,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3626:18:27"
+              "src": "3626:18:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6532,
+            "id": 36654,
             "nodeType": "FunctionDefinition",
-            "src": "3846:84:27",
+            "src": "3846:84:54",
             "nodes": [],
             "documentation": {
-              "id": 6523,
+              "id": 36645,
               "nodeType": "StructuredDocumentation",
-              "src": "3651:190:27",
+              "src": "3651:190:54",
               "text": " @notice Get the subscriber at a given index in the set of addresses subscribed to a given registrant.\n         Note that order is not guaranteed as updates are made."
             },
             "functionSelector": "55940e51",
@@ -2474,20 +2467,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "subscriberAt",
-            "nameLocation": "3855:12:27",
+            "nameLocation": "3855:12:54",
             "parameters": {
-              "id": 6528,
+              "id": 36650,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6525,
+                  "id": 36647,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "3876:10:27",
+                  "nameLocation": "3876:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6532,
-                  "src": "3868:18:27",
+                  "scope": 36654,
+                  "src": "3868:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2495,10 +2488,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6524,
+                    "id": 36646,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3868:7:27",
+                    "src": "3868:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2509,13 +2502,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6527,
+                  "id": 36649,
                   "mutability": "mutable",
                   "name": "index",
-                  "nameLocation": "3896:5:27",
+                  "nameLocation": "3896:5:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6532,
-                  "src": "3888:13:27",
+                  "scope": 36654,
+                  "src": "3888:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2523,10 +2516,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6526,
+                    "id": 36648,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3888:7:27",
+                    "src": "3888:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2535,21 +2528,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3867:35:27"
+              "src": "3867:35:54"
             },
             "returnParameters": {
-              "id": 6531,
+              "id": 36653,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6530,
+                  "id": 36652,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6532,
-                  "src": "3921:7:27",
+                  "scope": 36654,
+                  "src": "3921:7:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2557,10 +2550,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6529,
+                    "id": 36651,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3921:7:27",
+                    "src": "3921:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2570,22 +2563,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3920:9:27"
+              "src": "3920:9:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6540,
+            "id": 36662,
             "nodeType": "FunctionDefinition",
-            "src": "4049:78:27",
+            "src": "4049:78:54",
             "nodes": [],
             "documentation": {
-              "id": 6533,
+              "id": 36655,
               "nodeType": "StructuredDocumentation",
-              "src": "3936:108:27",
+              "src": "3936:108:54",
               "text": " @notice Copy filtered operators and codeHashes from a different registrantToCopy to addr."
             },
             "functionSelector": "1e06b4b4",
@@ -2593,20 +2586,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "copyEntriesOf",
-            "nameLocation": "4058:13:27",
+            "nameLocation": "4058:13:54",
             "parameters": {
-              "id": 6538,
+              "id": 36660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6535,
+                  "id": 36657,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "4080:10:27",
+                  "nameLocation": "4080:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6540,
-                  "src": "4072:18:27",
+                  "scope": 36662,
+                  "src": "4072:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2614,10 +2607,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6534,
+                    "id": 36656,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4072:7:27",
+                    "src": "4072:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2628,13 +2621,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6537,
+                  "id": 36659,
                   "mutability": "mutable",
                   "name": "registrantToCopy",
-                  "nameLocation": "4100:16:27",
+                  "nameLocation": "4100:16:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6540,
-                  "src": "4092:24:27",
+                  "scope": 36662,
+                  "src": "4092:24:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2642,10 +2635,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6536,
+                    "id": 36658,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4092:7:27",
+                    "src": "4092:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2655,28 +2648,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4071:46:27"
+              "src": "4071:46:54"
             },
             "returnParameters": {
-              "id": 6539,
+              "id": 36661,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4126:0:27"
+              "src": "4126:0:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6550,
+            "id": 36672,
             "nodeType": "FunctionDefinition",
-            "src": "4241:90:27",
+            "src": "4241:90:54",
             "nodes": [],
             "documentation": {
-              "id": 6541,
+              "id": 36663,
               "nodeType": "StructuredDocumentation",
-              "src": "4133:103:27",
+              "src": "4133:103:54",
               "text": " @notice Returns true if operator is filtered by a given address or its subscription."
             },
             "functionSelector": "e4aecb54",
@@ -2684,20 +2677,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "isOperatorFiltered",
-            "nameLocation": "4250:18:27",
+            "nameLocation": "4250:18:54",
             "parameters": {
-              "id": 6546,
+              "id": 36668,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6543,
+                  "id": 36665,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "4277:10:27",
+                  "nameLocation": "4277:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6550,
-                  "src": "4269:18:27",
+                  "scope": 36672,
+                  "src": "4269:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2705,10 +2698,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6542,
+                    "id": 36664,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4269:7:27",
+                    "src": "4269:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2719,13 +2712,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6545,
+                  "id": 36667,
                   "mutability": "mutable",
                   "name": "operator",
-                  "nameLocation": "4297:8:27",
+                  "nameLocation": "4297:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6550,
-                  "src": "4289:16:27",
+                  "scope": 36672,
+                  "src": "4289:16:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2733,10 +2726,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6544,
+                    "id": 36666,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4289:7:27",
+                    "src": "4289:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2746,21 +2739,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4268:38:27"
+              "src": "4268:38:54"
             },
             "returnParameters": {
-              "id": 6549,
+              "id": 36671,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6548,
+                  "id": 36670,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6550,
-                  "src": "4325:4:27",
+                  "scope": 36672,
+                  "src": "4325:4:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2768,10 +2761,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6547,
+                    "id": 36669,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4325:4:27",
+                    "src": "4325:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2780,22 +2773,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4324:6:27"
+              "src": "4324:6:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6560,
+            "id": 36682,
             "nodeType": "FunctionDefinition",
-            "src": "4466:100:27",
+            "src": "4466:100:54",
             "nodes": [],
             "documentation": {
-              "id": 6551,
+              "id": 36673,
               "nodeType": "StructuredDocumentation",
-              "src": "4337:124:27",
+              "src": "4337:124:54",
               "text": " @notice Returns true if the hash of an address's code is filtered by a given address or its subscription."
             },
             "functionSelector": "5eae3173",
@@ -2803,20 +2796,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "isCodeHashOfFiltered",
-            "nameLocation": "4475:20:27",
+            "nameLocation": "4475:20:54",
             "parameters": {
-              "id": 6556,
+              "id": 36678,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6553,
+                  "id": 36675,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "4504:10:27",
+                  "nameLocation": "4504:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6560,
-                  "src": "4496:18:27",
+                  "scope": 36682,
+                  "src": "4496:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2824,10 +2817,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6552,
+                    "id": 36674,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4496:7:27",
+                    "src": "4496:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2838,13 +2831,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6555,
+                  "id": 36677,
                   "mutability": "mutable",
                   "name": "operatorWithCode",
-                  "nameLocation": "4524:16:27",
+                  "nameLocation": "4524:16:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6560,
-                  "src": "4516:24:27",
+                  "scope": 36682,
+                  "src": "4516:24:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2852,10 +2845,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6554,
+                    "id": 36676,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4516:7:27",
+                    "src": "4516:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2865,21 +2858,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4495:46:27"
+              "src": "4495:46:54"
             },
             "returnParameters": {
-              "id": 6559,
+              "id": 36681,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6558,
+                  "id": 36680,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6560,
-                  "src": "4560:4:27",
+                  "scope": 36682,
+                  "src": "4560:4:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2887,10 +2880,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6557,
+                    "id": 36679,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4560:4:27",
+                    "src": "4560:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2899,22 +2892,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4559:6:27"
+              "src": "4559:6:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6570,
+            "id": 36692,
             "nodeType": "FunctionDefinition",
-            "src": "4682:90:27",
+            "src": "4682:90:54",
             "nodes": [],
             "documentation": {
-              "id": 6561,
+              "id": 36683,
               "nodeType": "StructuredDocumentation",
-              "src": "4572:105:27",
+              "src": "4572:105:54",
               "text": " @notice Returns true if a codeHash is filtered by a given address or its subscription."
             },
             "functionSelector": "6af0c315",
@@ -2922,20 +2915,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "isCodeHashFiltered",
-            "nameLocation": "4691:18:27",
+            "nameLocation": "4691:18:54",
             "parameters": {
-              "id": 6566,
+              "id": 36688,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6563,
+                  "id": 36685,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "4718:10:27",
+                  "nameLocation": "4718:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6570,
-                  "src": "4710:18:27",
+                  "scope": 36692,
+                  "src": "4710:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2943,10 +2936,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6562,
+                    "id": 36684,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4710:7:27",
+                    "src": "4710:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2957,13 +2950,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6565,
+                  "id": 36687,
                   "mutability": "mutable",
                   "name": "codeHash",
-                  "nameLocation": "4738:8:27",
+                  "nameLocation": "4738:8:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6570,
-                  "src": "4730:16:27",
+                  "scope": 36692,
+                  "src": "4730:16:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2971,10 +2964,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6564,
+                    "id": 36686,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4730:7:27",
+                    "src": "4730:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -2983,21 +2976,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4709:38:27"
+              "src": "4709:38:54"
             },
             "returnParameters": {
-              "id": 6569,
+              "id": 36691,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6568,
+                  "id": 36690,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6570,
-                  "src": "4766:4:27",
+                  "scope": 36692,
+                  "src": "4766:4:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3005,10 +2998,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6567,
+                    "id": 36689,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4766:4:27",
+                    "src": "4766:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -3017,22 +3010,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4765:6:27"
+              "src": "4765:6:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6579,
+            "id": 36701,
             "nodeType": "FunctionDefinition",
-            "src": "4887:77:27",
+            "src": "4887:77:54",
             "nodes": [],
             "documentation": {
-              "id": 6571,
+              "id": 36693,
               "nodeType": "StructuredDocumentation",
-              "src": "4778:104:27",
+              "src": "4778:104:54",
               "text": " @notice Returns a list of filtered operators for a given address or its subscription."
             },
             "functionSelector": "c4308805",
@@ -3040,20 +3033,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "filteredOperators",
-            "nameLocation": "4896:17:27",
+            "nameLocation": "4896:17:54",
             "parameters": {
-              "id": 6574,
+              "id": 36696,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6573,
+                  "id": 36695,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "4922:4:27",
+                  "nameLocation": "4922:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6579,
-                  "src": "4914:12:27",
+                  "scope": 36701,
+                  "src": "4914:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3061,10 +3054,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6572,
+                    "id": 36694,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4914:7:27",
+                    "src": "4914:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3074,21 +3067,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4913:14:27"
+              "src": "4913:14:54"
             },
             "returnParameters": {
-              "id": 6578,
+              "id": 36700,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6577,
+                  "id": 36699,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6579,
-                  "src": "4946:16:27",
+                  "scope": 36701,
+                  "src": "4946:16:54",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3097,19 +3090,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 6575,
+                      "id": 36697,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4946:7:27",
+                      "src": "4946:7:54",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 6576,
+                    "id": 36698,
                     "nodeType": "ArrayTypeName",
-                    "src": "4946:9:27",
+                    "src": "4946:9:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -3118,22 +3111,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4945:18:27"
+              "src": "4945:18:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6588,
+            "id": 36710,
             "nodeType": "FunctionDefinition",
-            "src": "5151:78:27",
+            "src": "5151:78:54",
             "nodes": [],
             "documentation": {
-              "id": 6580,
+              "id": 36702,
               "nodeType": "StructuredDocumentation",
-              "src": "4970:176:27",
+              "src": "4970:176:54",
               "text": " @notice Returns the set of filtered codeHashes for a given address or its subscription.\n         Note that order is not guaranteed as updates are made."
             },
             "functionSelector": "22fa2762",
@@ -3141,20 +3134,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "filteredCodeHashes",
-            "nameLocation": "5160:18:27",
+            "nameLocation": "5160:18:54",
             "parameters": {
-              "id": 6583,
+              "id": 36705,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6582,
+                  "id": 36704,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "5187:4:27",
+                  "nameLocation": "5187:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6588,
-                  "src": "5179:12:27",
+                  "scope": 36710,
+                  "src": "5179:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3162,10 +3155,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6581,
+                    "id": 36703,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5179:7:27",
+                    "src": "5179:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3175,21 +3168,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5178:14:27"
+              "src": "5178:14:54"
             },
             "returnParameters": {
-              "id": 6587,
+              "id": 36709,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6586,
+                  "id": 36708,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6588,
-                  "src": "5211:16:27",
+                  "scope": 36710,
+                  "src": "5211:16:54",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3198,18 +3191,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 6584,
+                      "id": 36706,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5211:7:27",
+                      "src": "5211:7:54",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 6585,
+                    "id": 36707,
                     "nodeType": "ArrayTypeName",
-                    "src": "5211:9:27",
+                    "src": "5211:9:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -3218,22 +3211,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5210:18:27"
+              "src": "5210:18:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6598,
+            "id": 36720,
             "nodeType": "FunctionDefinition",
-            "src": "5474:90:27",
+            "src": "5474:90:54",
             "nodes": [],
             "documentation": {
-              "id": 6589,
+              "id": 36711,
               "nodeType": "StructuredDocumentation",
-              "src": "5235:234:27",
+              "src": "5235:234:54",
               "text": " @notice Returns the filtered operator at the given index of the set of filtered operators for a given address or\n         its subscription.\n         Note that order is not guaranteed as updates are made."
             },
             "functionSelector": "3f1cc5fa",
@@ -3241,20 +3234,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "filteredOperatorAt",
-            "nameLocation": "5483:18:27",
+            "nameLocation": "5483:18:54",
             "parameters": {
-              "id": 6594,
+              "id": 36716,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6591,
+                  "id": 36713,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "5510:10:27",
+                  "nameLocation": "5510:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6598,
-                  "src": "5502:18:27",
+                  "scope": 36720,
+                  "src": "5502:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3262,10 +3255,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6590,
+                    "id": 36712,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5502:7:27",
+                    "src": "5502:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3276,13 +3269,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6593,
+                  "id": 36715,
                   "mutability": "mutable",
                   "name": "index",
-                  "nameLocation": "5530:5:27",
+                  "nameLocation": "5530:5:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6598,
-                  "src": "5522:13:27",
+                  "scope": 36720,
+                  "src": "5522:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3290,10 +3283,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6592,
+                    "id": 36714,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5522:7:27",
+                    "src": "5522:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3302,21 +3295,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5501:35:27"
+              "src": "5501:35:54"
             },
             "returnParameters": {
-              "id": 6597,
+              "id": 36719,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6596,
+                  "id": 36718,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6598,
-                  "src": "5555:7:27",
+                  "scope": 36720,
+                  "src": "5555:7:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3324,10 +3317,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6595,
+                    "id": 36717,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5555:7:27",
+                    "src": "5555:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3337,22 +3330,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5554:9:27"
+              "src": "5554:9:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6608,
+            "id": 36730,
             "nodeType": "FunctionDefinition",
-            "src": "5811:90:27",
+            "src": "5811:90:54",
             "nodes": [],
             "documentation": {
-              "id": 6599,
+              "id": 36721,
               "nodeType": "StructuredDocumentation",
-              "src": "5570:236:27",
+              "src": "5570:236:54",
               "text": " @notice Returns the filtered codeHash at the given index of the list of filtered codeHashes for a given address or\n         its subscription.\n         Note that order is not guaranteed as updates are made."
             },
             "functionSelector": "a6529eb5",
@@ -3360,20 +3353,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "filteredCodeHashAt",
-            "nameLocation": "5820:18:27",
+            "nameLocation": "5820:18:54",
             "parameters": {
-              "id": 6604,
+              "id": 36726,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6601,
+                  "id": 36723,
                   "mutability": "mutable",
                   "name": "registrant",
-                  "nameLocation": "5847:10:27",
+                  "nameLocation": "5847:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6608,
-                  "src": "5839:18:27",
+                  "scope": 36730,
+                  "src": "5839:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3381,10 +3374,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6600,
+                    "id": 36722,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5839:7:27",
+                    "src": "5839:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3395,13 +3388,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 6603,
+                  "id": 36725,
                   "mutability": "mutable",
                   "name": "index",
-                  "nameLocation": "5867:5:27",
+                  "nameLocation": "5867:5:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6608,
-                  "src": "5859:13:27",
+                  "scope": 36730,
+                  "src": "5859:13:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3409,10 +3402,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6602,
+                    "id": 36724,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5859:7:27",
+                    "src": "5859:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3421,21 +3414,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5838:35:27"
+              "src": "5838:35:54"
             },
             "returnParameters": {
-              "id": 6607,
+              "id": 36729,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6606,
+                  "id": 36728,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6608,
-                  "src": "5892:7:27",
+                  "scope": 36730,
+                  "src": "5892:7:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3443,10 +3436,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6605,
+                    "id": 36727,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5892:7:27",
+                    "src": "5892:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -3455,22 +3448,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "5891:9:27"
+              "src": "5891:9:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6616,
+            "id": 36738,
             "nodeType": "FunctionDefinition",
-            "src": "5980:60:27",
+            "src": "5980:60:54",
             "nodes": [],
             "documentation": {
-              "id": 6609,
+              "id": 36731,
               "nodeType": "StructuredDocumentation",
-              "src": "5907:68:27",
+              "src": "5907:68:54",
               "text": " @notice Returns true if an address has registered"
             },
             "functionSelector": "c3c5a547",
@@ -3478,20 +3471,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "isRegistered",
-            "nameLocation": "5989:12:27",
+            "nameLocation": "5989:12:54",
             "parameters": {
-              "id": 6612,
+              "id": 36734,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6611,
+                  "id": 36733,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "6010:4:27",
+                  "nameLocation": "6010:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6616,
-                  "src": "6002:12:27",
+                  "scope": 36738,
+                  "src": "6002:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3499,10 +3492,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6610,
+                    "id": 36732,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6002:7:27",
+                    "src": "6002:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3512,21 +3505,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "6001:14:27"
+              "src": "6001:14:54"
             },
             "returnParameters": {
-              "id": 6615,
+              "id": 36737,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6614,
+                  "id": 36736,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6616,
-                  "src": "6034:4:27",
+                  "scope": 36738,
+                  "src": "6034:4:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3534,10 +3527,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6613,
+                    "id": 36735,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6034:4:27",
+                    "src": "6034:4:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -3546,22 +3539,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "6033:6:27"
+              "src": "6033:6:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 6624,
+            "id": 36746,
             "nodeType": "FunctionDefinition",
-            "src": "6143:61:27",
+            "src": "6143:61:54",
             "nodes": [],
             "documentation": {
-              "id": 6617,
+              "id": 36739,
               "nodeType": "StructuredDocumentation",
-              "src": "6046:92:27",
+              "src": "6046:92:54",
               "text": " @dev Convenience method to compute the code hash of an arbitrary contract"
             },
             "functionSelector": "bbd652c7",
@@ -3569,20 +3562,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "codeHashOf",
-            "nameLocation": "6152:10:27",
+            "nameLocation": "6152:10:54",
             "parameters": {
-              "id": 6620,
+              "id": 36742,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6619,
+                  "id": 36741,
                   "mutability": "mutable",
                   "name": "addr",
-                  "nameLocation": "6171:4:27",
+                  "nameLocation": "6171:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6624,
-                  "src": "6163:12:27",
+                  "scope": 36746,
+                  "src": "6163:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3590,10 +3583,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6618,
+                    "id": 36740,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6163:7:27",
+                    "src": "6163:7:54",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3603,21 +3596,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "6162:14:27"
+              "src": "6162:14:54"
             },
             "returnParameters": {
-              "id": 6623,
+              "id": 36745,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6622,
+                  "id": 36744,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6624,
-                  "src": "6195:7:27",
+                  "scope": 36746,
+                  "src": "6195:7:54",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3625,10 +3618,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6621,
+                    "id": 36743,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6195:7:27",
+                    "src": "6195:7:54",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -3637,9 +3630,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "6194:9:27"
+              "src": "6194:9:54"
             },
-            "scope": 6625,
+            "scope": 36747,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -3652,15 +3645,15 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          6625
+          36747
         ],
         "name": "IOperatorFilterRegistry",
-        "nameLocation": "68:23:27",
-        "scope": 6626,
+        "nameLocation": "68:23:54",
+        "scope": 36748,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 27
+  "id": 54
 }
