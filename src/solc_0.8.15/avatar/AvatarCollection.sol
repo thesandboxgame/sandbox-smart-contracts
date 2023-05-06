@@ -5,10 +5,10 @@ pragma solidity 0.8.15;
 import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { CollectionStateManagement } from "./CollectionStateManagement.sol";
-import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {
     ERC721BurnMemoryEnumerableUpgradeable,
@@ -132,7 +132,7 @@ contract AvatarCollection is
     event AllowedExecuteMintSet(address _address);
 
     /**
-     * @notice Event emitted when the SAND contract owner was saved
+     * @notice Event emitted when the treasury address was saved
      * @dev emitted when setTreasury is called
      * @param _owner new owner address to be saved
      */
@@ -234,16 +234,14 @@ contract AvatarCollection is
         baseTokenURI = _initialBaseURI;
 
         __ReentrancyGuard_init();
-        __Ownable_init_unchained();
+        __InitializeAccessControl(_collectionOwner); // owner is also initialized here
         __ERC2771Handler_initialize(_initialTrustedForwarder);
         __ERC721_init(_name, _symbol);
-        __InitializeAccessControl(_collectionOwner);
-
-        // __UpdatableOperatorFiltererUpgradeable_init(
-        //     _registry,
-        //     _operatorFiltererSubscription,
-        //     _operatorFiltererSubscriptionSubscribe
-        // );
+        __UpdatableOperatorFiltererUpgradeable_init(
+            _registry,
+            _operatorFiltererSubscription,
+            _operatorFiltererSubscriptionSubscribe
+        );
 
         mintTreasury = _mintTreasury;
         signAddress = _signAddress;
@@ -339,9 +337,7 @@ contract AvatarCollection is
 
     function mintWithSand(
         address _wallet,
-        uint256 _amount,
-        uint256 _signatureId,
-        bytes memory _signature
+        uint256 _amount
     ) external nonReentrant {
         require(paused == 0, "Contract is paused");
         require(_wallet != address(0), "Wallet is zero address");
@@ -505,61 +501,61 @@ contract AvatarCollection is
         return super.supportsInterface(interfaceId);
     }
 
-    // /**
-    //  * @dev See OpenZeppelin {IERC721-setApprovalForAll}
-    //  */
-    // function setApprovalForAll(address operator, bool approved)
-    //     public
-    //     override(ERC721Upgradeable, IERC721Upgradeable)
-    //     onlyAllowedOperatorApproval(operator)
-    // {
-    //     super.setApprovalForAll(operator, approved);
-    // }
+    /**
+     * @dev See OpenZeppelin {IERC721-setApprovalForAll}
+     */
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super.setApprovalForAll(operator, approved);
+    }
 
-    // /**
-    //  * @dev See OpenZeppelin {IERC721-approve}
-    //  */
-    // function approve(address operator, uint256 tokenId)
-    //     public
-    //     override(ERC721Upgradeable, IERC721Upgradeable)
-    //     onlyAllowedOperatorApproval(operator)
-    // {
-    //     super.approve(operator, tokenId);
-    // }
+    /**
+     * @dev See OpenZeppelin {IERC721-approve}
+     */
+    function approve(address operator, uint256 tokenId)
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super.approve(operator, tokenId);
+    }
 
-    // /**
-    //  * @dev See OpenZeppelin {IERC721-transferFrom}
-    //  */
-    // function transferFrom(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
-    //     super.transferFrom(from, to, tokenId);
-    // }
+    /**
+     * @dev See OpenZeppelin {IERC721-transferFrom}
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
 
-    // /**
-    //  * @dev See OpenZeppelin {IERC721-safeTransferFrom}
-    //  */
-    // function safeTransferFrom(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
-    //     super.safeTransferFrom(from, to, tokenId);
-    // }
+    /**
+     * @dev See OpenZeppelin {IERC721-safeTransferFrom}
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId);
+    }
 
-    // /**
-    //  * @dev See OpenZeppelin {IERC721-safeTransferFrom}
-    //  */
-    // function safeTransferFrom(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId,
-    //     bytes memory data
-    // ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
-    //     super.safeTransferFrom(from, to, tokenId, data);
-    // }
+    /**
+     * @dev See OpenZeppelin {IERC721-safeTransferFrom}
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId, data);
+    }
 
     /**
      * @notice get the price of minting the indicated number of tokens for the current wave
@@ -577,7 +573,7 @@ contract AvatarCollection is
      * @dev returns OwnableUpgradeable.owner()
      * @return owner of current contract
      */
-    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) { // , UpdatableOperatorFiltererUpgradeable
+    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
         return OwnableUpgradeable.owner();
     }
 
