@@ -7,7 +7,7 @@ import { ReentrancyGuardUpgradeable } from "openzeppelin-upgradeable/security/Re
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-upgradeable/access/AccessControlUpgradeable.sol";
 // import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
 
-import { UpdatableOperatorFiltererUpgradeable } from "../common/OperatorFiltererNew/UpdatableOperatorFiltererUpgradeable.sol";
+import { UpdatableOperatorFiltererUpgradeable } from "./OperatorFiltererNew/UpdatableOperatorFiltererUpgradeable.sol";
 
 
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
