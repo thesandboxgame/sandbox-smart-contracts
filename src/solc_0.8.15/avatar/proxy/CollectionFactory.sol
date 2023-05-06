@@ -7,7 +7,9 @@ import { UpgradeableBeacon } from "openzeppelin-contracts/proxy/beacon/Upgradeab
 import { EnumerableSet } from "openzeppelin-contracts/utils/structs/EnumerableSet.sol";
 import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { CollectionProxy } from "./CollectionProxy.sol";
-import { IERC5313 } from "../common/IERC5313.sol";
+// import { IERC5313 } from "../../common/IERC5313.sol";
+
+import { IERC5313 } from "../IERC5313.sol";
 
 
 contract CollectionFactory is Ownable2Step {

@@ -4,7 +4,7 @@ pragma solidity 0.8.15;
 import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { MockUpgradable } from "./mocks/MockUpgradable.sol";
 import { MockUpgradableV2 } from "./mocks/MockUpgradableV2.sol";
-import { CollectionFactory } from "contracts/proxy/CollectionFactory.sol";
+import { CollectionFactory } from "contracts/avatar/proxy/CollectionFactory.sol";
 import { Test } from "forge-std/Test.sol";
 import { console } from "forge-std/console.sol";
 import { UpgradeableBeacon } from "openzeppelin-contracts/proxy/beacon/UpgradeableBeacon.sol";

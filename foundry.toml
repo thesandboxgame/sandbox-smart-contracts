@@ -1,7 +1,7 @@
 [profile.default]
 src = 'src/solc_0.8.15/avatar'
 out = 'deployments_foundry'
-libs = ['node_modules','lib']
+libs = ['lib']
 test = 'test/foundry'
 cache_path  = 'cache_forge'
 solc_version    = '0.8.15'       # Override for the solc version (setting this ignores `auto_detect_solc`)
