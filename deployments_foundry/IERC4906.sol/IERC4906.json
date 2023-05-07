@@ -1,0 +1,315 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchMetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "MetadataUpdate",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {},
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_toTokenId\",\"type\":\"uint256\"}],\"name\":\"BatchMetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"MetadataUpdate\",\"type\":\"event\"}],\"devdoc\":{\"events\":{\"BatchMetadataUpdate(uint256,uint256)\":{\"details\":\"This event emits when the metadata of a range of tokens is changed. So that the third-party platforms such as NFT market could timely update the images and related attributes of the NFTs.\"},\"MetadataUpdate(uint256)\":{\"details\":\"This event emits when the metadata of a token is changed. So that the third-party platforms such as NFT market could timely update the images and related attributes of the NFT.\"}},\"kind\":\"dev\",\"methods\":{},\"title\":\"EIP-721 Metadata Update Extension\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/common/IERC4906.sol\":\"IERC4906\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"src/solc_0.8.15/common/IERC4906.sol\":{\"keccak256\":\"0xb2e6c7febb843c1f3e7baded1bc48b9ab2c221e9998717c9397cb55fd94031e2\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://dc5a91835a140446d80bbb00c56e5276406fba03b7c0ddb70e9cb2415c570310\",\"dweb:/ipfs/QmXuViUBZXfM2kLvDf85XsccWpPCc7Nqw6RohhgHDxDv56\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_fromTokenId",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "_toTokenId",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "BatchMetadataUpdate",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "MetadataUpdate",
+          "anonymous": false
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":contracts/=src/solc_0.8.15/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":operator-filter-registry/=lib/operator-filter-registry/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "src/solc_0.8.15/common/IERC4906.sol": "IERC4906"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "src/solc_0.8.15/common/IERC4906.sol": {
+        "keccak256": "0xb2e6c7febb843c1f3e7baded1bc48b9ab2c221e9998717c9397cb55fd94031e2",
+        "urls": [
+          "bzz-raw://dc5a91835a140446d80bbb00c56e5276406fba03b7c0ddb70e9cb2415c570310",
+          "dweb:/ipfs/QmXuViUBZXfM2kLvDf85XsccWpPCc7Nqw6RohhgHDxDv56"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/solc_0.8.15/common/IERC4906.sol",
+    "id": 8449,
+    "exportedSymbols": {
+      "IERC4906": [
+        8448
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "33:635:33",
+    "nodes": [
+      {
+        "id": 8434,
+        "nodeType": "PragmaDirective",
+        "src": "33:23:33",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 8448,
+        "nodeType": "ContractDefinition",
+        "src": "104:563:33",
+        "nodes": [
+          {
+            "id": 8440,
+            "nodeType": "EventDefinition",
+            "src": "335:39:33",
+            "nodes": [],
+            "anonymous": false,
+            "documentation": {
+              "id": 8436,
+              "nodeType": "StructuredDocumentation",
+              "src": "129:201:33",
+              "text": "@dev This event emits when the metadata of a token is changed.\n So that the third-party platforms such as NFT market could\n timely update the images and related attributes of the NFT."
+            },
+            "eventSelector": "f8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7",
+            "name": "MetadataUpdate",
+            "nameLocation": "341:14:33",
+            "parameters": {
+              "id": 8439,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8438,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "364:8:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8440,
+                  "src": "356:16:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8437,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "356:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "355:18:33"
+            }
+          },
+          {
+            "id": 8447,
+            "nodeType": "EventDefinition",
+            "src": "597:68:33",
+            "nodes": [],
+            "anonymous": false,
+            "documentation": {
+              "id": 8441,
+              "nodeType": "StructuredDocumentation",
+              "src": "380:212:33",
+              "text": "@dev This event emits when the metadata of a range of tokens is changed.\n So that the third-party platforms such as NFT market could\n timely update the images and related attributes of the NFTs."
+            },
+            "eventSelector": "6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
+            "name": "BatchMetadataUpdate",
+            "nameLocation": "603:19:33",
+            "parameters": {
+              "id": 8446,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8443,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "_fromTokenId",
+                  "nameLocation": "631:12:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8447,
+                  "src": "623:20:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8442,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8445,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "_toTokenId",
+                  "nameLocation": "653:10:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8447,
+                  "src": "645:18:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8444,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "645:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "622:42:33"
+            }
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IERC4906",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 8435,
+          "nodeType": "StructuredDocumentation",
+          "src": "59:45:33",
+          "text": "@title EIP-721 Metadata Update Extension"
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          8448
+        ],
+        "name": "IERC4906",
+        "nameLocation": "114:8:33",
+        "scope": 8449,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 33
+}

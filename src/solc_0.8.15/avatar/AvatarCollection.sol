@@ -5,11 +5,18 @@ pragma solidity 0.8.15;
 import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
 import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
+import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
+
 import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
+
+import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+import { IERC4906 } from "../common/IERC4906.sol";
+
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { CollectionStateManagement } from "./CollectionStateManagement.sol";
-import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
@@ -19,9 +26,6 @@ import {
 
 
 
-import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
-import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
-
 /* solhint-disable max-states-count */
 contract AvatarCollection is
     ReentrancyGuardUpgradeable,
@@ -29,7 +33,8 @@ contract AvatarCollection is
     CollectionAccessControl,
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC2771HandlerUpgradeable,
-    UpdatableOperatorFiltererUpgradeable
+    UpdatableOperatorFiltererUpgradeable,
+    IERC4906
 {
 
     /*//////////////////////////////////////////////////////////////
@@ -223,13 +228,13 @@ contract AvatarCollection is
         bool _operatorFiltererSubscriptionSubscribe,
         uint256 _maxSupply) internal onlyInitializing {
 
-        require(bytes(_initialBaseURI).length != 0, "AvatarCollection: BaseURI is not set");
-        require(bytes(_name).length != 0, "AvatarCollection: Name is empty");
+        require(bytes(_initialBaseURI).length != 0, "AvatarCollection: baseURI is not set");
+        require(bytes(_name).length != 0, "AvatarCollection: name is empty");
         require(bytes(_symbol).length != 0, "AvatarCollection: symbol is empty");
-        require(_signAddress != address(0), "AvatarCollection: Sign address is zero address");
-        require(_initialTrustedForwarder != address(0), "AvatarCollection: Trusted forwarder is zero address");
-        require(_mintTreasury != address(0), "AvatarCollection: Sand owner is zero address");
-        require(_maxSupply > 0, "AvatarCollection: Max supply should be more than 0");
+        require(_signAddress != address(0), "AvatarCollection: sign address is zero address");
+        require(_initialTrustedForwarder != address(0), "AvatarCollection: trusted forwarder is zero address");
+        require(_mintTreasury != address(0), "AvatarCollection: treasury is zero address");
+        require(_maxSupply > 0, "AvatarCollection: max supply should be more than 0");
 
         baseTokenURI = _initialBaseURI;
 
@@ -277,10 +282,10 @@ contract AvatarCollection is
         uint256 _waveMaxTokensToBuy,
         uint256 _waveSingleTokenPrice
     ) external onlyOwner {
-        require(_waveMaxTokens <= maxSupply, "_waveMaxTokens should not exceed maxSupply");
-        require(_waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "Invalid configuration");
-        require(paused == 0, "Contract is paused");
-        require(_waveMaxTokensToBuy <= _waveMaxTokens, "Invalid supply configuration");
+        require(_waveMaxTokens <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
+        require(_waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "AvatarCollection: invalid configuration");
+        require(paused == 0, "AvatarCollection: contract is paused");
+        require(_waveMaxTokensToBuy <= _waveMaxTokens, "AvatarCollection: invalid supply configuration");
 
         waveMaxTokens = _waveMaxTokens;
         waveMaxTokensToBuy = _waveMaxTokensToBuy;
@@ -304,54 +309,25 @@ contract AvatarCollection is
         uint256 _signatureId,
         bytes memory _signature
     ) external nonReentrant {
-        require(indexWave > 0, "Contract is not configured");
-        require(_msgSender() == allowedToExecuteMint, "Not allowed");
-        require(paused == 0, "Contract is paused");
-        require(_wallet != address(0), "Wallet is zero address");
-        require(_amount > 0, "Amount cannot be 0");
-        require(signatureIds[_signatureId] == 0, "signatureId already used");
+        require(indexWave > 0, "AvatarCollection: contract is not configured");
+        require(_msgSender() == allowedToExecuteMint, "AvatarCollection: not allowed");
+        require(paused == 0, "AvatarCollection: contract is paused");
+        require(_wallet != address(0), "AvatarCollection: wallet is zero address");
+        require(_amount > 0, "AvatarCollection: amount cannot be 0");
+        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
             _checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
-            "Signature failed"
+            "AvatarCollection: signature failed"
         );
 
         signatureIds[_signatureId] = 1;
 
-        require(_checkWaveNotComplete(_amount), "Wave completed");
-        require(_checkLimitNotReached(_wallet, _amount), "Max allowed");
+        require(_checkWaveNotComplete(_amount), "AvatarCollection: wave completed");
+        require(_checkLimitNotReached(_wallet, _amount), "AvatarCollection: max allowed");
 
         uint256 _price = price(_amount);
         if (_price > 0) {
             SafeERC20.safeTransferFrom(IERC20(_msgSender()), _wallet, mintTreasury, _price);
-        }
-
-        waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
-
-        waveTotalMinted += _amount;
-
-        for (uint256 i = 0; i < _amount; i++) {
-            uint256 tokenId = getRandomToken(_wallet, totalSupply());
-            _safeMint(_wallet, tokenId);
-        }
-    }
-
-    function mintWithSand(
-        address _wallet,
-        uint256 _amount
-    ) external nonReentrant {
-        require(paused == 0, "Contract is paused");
-        require(_wallet != address(0), "Wallet is zero address");
-        require(_amount > 0, "Amount cannot be 0");
-
-        require(_checkWaveNotComplete(_amount), "Wave completed");
-        require(_checkLimitNotReached(_wallet, _amount), "Max allowed");
-
-        uint256 _price = price(_amount);
-        if (_price > 0) {
-            uint256 oldAllowance = paymentToken.allowance(_msgSender(), address(this));
-            paymentToken.approve(address(this), _price);
-            SafeERC20.safeTransferFrom(paymentToken, _wallet, mintTreasury, _price);
-            paymentToken.approve(address(this), oldAllowance);
         }
 
         waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
@@ -390,7 +366,7 @@ contract AvatarCollection is
     ) external {
         require(ownerOf(_tokenId) == _msgSender(), "AvatarCollection: sender is not owner");
 
-        require(signatureIds[_signatureId] == 0, "SignatureId already used");
+        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
             _checkPersonalizationSignature(
                 _msgSender(),
@@ -407,7 +383,9 @@ contract AvatarCollection is
         signatureIds[_signatureId] = 1;
 
         personalizationTraits[_tokenId] = _personalizationMask;
+
         emit Personalized(_tokenId, _personalizationMask);
+        emit MetadataUpdate(_tokenId);
     }
 
     /**
@@ -417,7 +395,7 @@ contract AvatarCollection is
      * @param _address the address that will be allowed to set execute the mint function
      */
     function setAllowedExecuteMint(address _address) external onlyOwner {
-        require(_address != address(0), "Address is zero address");
+        require(_address != address(0), "AvatarCollection: address is zero address");
         allowedToExecuteMint = _address;
         emit AllowedExecuteMintSet(_address);
     }
@@ -429,7 +407,7 @@ contract AvatarCollection is
      * @param _treasury new treasury address to be saved
      */
     function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "Owner is zero address");
+        require(_treasury != address(0), "AvatarCollection: owner is zero address");
         mintTreasury = _treasury;
         emit TreasurySet(_treasury);
     }
@@ -440,7 +418,7 @@ contract AvatarCollection is
      * @param _signAddress new signer address to be set
      */
     function setSignAddress(address _signAddress) external onlyOwner {
-        require(_signAddress != address(0), "Sign address is zero address");
+        require(_signAddress != address(0), "AvatarCollection: sign address is zero address");
         signAddress = _signAddress;
         emit SignAddressSet(_signAddress);
     }
@@ -480,9 +458,12 @@ contract AvatarCollection is
      * @param baseURI an URI that will be used as the base for token URI
      */
     function setBaseURI(string memory baseURI) public onlyOwner {
-        require(bytes(baseURI).length != 0, "baseURI is not set");
+        require(bytes(baseURI).length != 0, "AvatarCollection: baseURI is not set");
         baseTokenURI = baseURI;
         emit BaseURISet(baseURI);
+
+        // Refreshes tje whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
+        emit MetadataUpdate(type(uint256).max);
     }
 
     /**
@@ -491,7 +472,7 @@ contract AvatarCollection is
      * @dev reverts on call
      */
     function renounceOwnership() public virtual override onlyOwner {
-        revert("Renounce ownership is not available");
+        revert("AvatarCollection: renounce ownership is not available");
     }
 
     /**

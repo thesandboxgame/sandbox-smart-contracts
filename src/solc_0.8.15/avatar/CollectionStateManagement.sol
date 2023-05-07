@@ -7,7 +7,7 @@ contract CollectionStateManagement {
                            Global state variables
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice the current state of the collection contract; Values as defined in the State enum
+    /// @notice the current state of the collection contract; Values are defined in the State enum
     State public currentState;
 
     /// @notice Possible states in which the collection contract will be
@@ -15,8 +15,7 @@ contract CollectionStateManagement {
         IDLE,           // 0; default as state variables are set to 0
         MARKETING_MINT, // 1
         ALLOWLIST_MINT, // 2
-        PUBLIC_MINT,    // 3
-        PAUSED          // 4
+        PUBLIC_MINT     // 3
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -41,14 +40,6 @@ contract CollectionStateManagement {
      */
     modifier onlyInState(State state) {
         require(currentState == state, "CollectionStateManagement: operation cannot be done in current state");
-        _;
-    }
-
-    /**
-     * @notice Modifier used to check if the current state is not paused
-     */
-    modifier onlyNotPaused() {
-        require(currentState != State.PAUSED, "CollectionStateManagement: collection is paused");
         _;
     }
 
