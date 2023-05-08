@@ -14,14 +14,14 @@ The project is still heavily under development and will be subjugated to further
 | src/solc_0.8.15/avatar/ERC721BurnMemoryEnumerableUpgradeable.sol | Contract | 81 | 28 | 39 | 0%  | ERC721EnumerableUpgradeable extension that supports storing information about *who burned what token* to be used more easily off-chain then replying only on Events |
 | src/solc_0.8.15/avatar/CollectionAccessControl.sol | Abstract | 152 | 61 | 60 | 0% | Hybrid Owner + Role access control management for collections |
 | src/solc_0.8.15/avatar/CollectionStateManagement.sol | Contract | 64 | 21 | 36 | 0% | State management for collections (marketing minting, public minting, etc) |
-| src/solc_0.8.15/proxy/CollectionFactory.sol | Contract | 476 | 156 | 200 | 62.16% | Deployer factory for collection proxies and beacon contracts, main deployment code |
-| src/solc_0.8.15/proxy/CollectionProxy.sol | Contract | 82 | 24 | 49 | 42.86% | BeaconProxy extension that supports changing beacon by an admin |
+| src/solc_0.8.15/proxy/CollectionFactory.sol | Contract | 476 | 156 | 200 | 100% | Deployer factory for collection proxies and beacon contracts, main deployment code |
+| src/solc_0.8.15/proxy/CollectionProxy.sol | Contract | 82 | 24 | 49 | 100% | BeaconProxy extension that supports changing beacon by an admin |
 | Totals | - | 1621 | 601 | 666 |   |   |
 
 
 # Dependencies / External Imports
 
-| Dependency / Import Path |	Count |
+| Dependency / Import Path |    Count |
 |:-|:-:|
 |openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol | 2 |
 |openzeppelin-contracts-upgradeable/access/Ownable2StepUpgradeable.sol | 1 |
