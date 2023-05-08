@@ -160,7 +160,7 @@ contract CollectionFactory is Ownable2Step {
         returns (address beacon)
     {
         require(beaconAlias != 0, "CollectionFactory: beacon alias cannot be empty");
-        require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon already added");
+        require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon alias already used");
 
         beacon = address(new UpgradeableBeacon(implementation));
         _saveBeacon(beacon, beaconAlias);
@@ -181,7 +181,7 @@ contract CollectionFactory is Ownable2Step {
         onlyOwner
     {
         require(beaconAlias != 0, "CollectionFactory: beacon alias cannot be empty");
-        require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon already added");
+        require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon alias already used");
         require(Address.isContract(beacon), "CollectionFactory: beacon is not a contract");
         require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
 
@@ -233,45 +233,6 @@ contract CollectionFactory is Ownable2Step {
     }
 
     /**
-     * @notice adds collections to be tracked by the factory
-     *         Collection ownership must be transferred to this contract beforehand
-     * @dev Reverts if:
-     *      - no collections no were given, if the {collections_} list is empty
-     *      - the collection owner is not the factory
-     *      - the owner of the beacon pointed by the proxy is not the factory
-     * @custom:event {CollectionAdded} for each collection
-     * @param _collections the collections to be added to the factory
-     */
-    function addCollections(address[] memory _collections)
-        external
-        onlyOwner
-    {
-        require(_collections.length != 0, "CollectionFactory: empty collection list");
-
-        uint256 collectionsLength = _collections.length;
-        collectionCount += collectionsLength;
-        bool success;
-        address beacon;
-
-        for (uint256 index; index < collectionsLength; ) {
-            CollectionProxy collection = CollectionProxy(payable(_collections[index]));
-            require(collection.proxyAdmin() == address(this), "CollectionFactory: owner of collection must be factory");
-
-            success = collections.add(address(collection));
-            require(success, "CollectionFactory: failed to add collection");
-
-            beacon = collection.beacon();
-            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
-
-            emit CollectionAdded(collection.beacon(), address(collection));
-
-            unchecked {
-                ++index;
-            }
-        }
-    }
-
-    /**
      * @notice deploys a collection, making it point to the indicated beacon address
                and calls any initialization function if initializationArgs is provided
      * @dev checks that implementation is actually a contract and not already added
@@ -296,6 +257,50 @@ contract CollectionFactory is Ownable2Step {
         collectionCount += 1;
 
         emit CollectionAdded(beacon, collection);
+    }
+
+    /**
+     * @notice adds collections to be tracked by the factory
+     *         Collection ownership must be transferred to this contract beforehand
+     * @dev Reverts if:
+     *      - no collections no were given, if the {collections_} list is empty
+     *      - any of the give collections is 0 address
+     *      - the collection owner is not the factory
+     *      - failed to add the collection (duplicate present)
+     *      - the owner of the beacon pointed by the proxy is not the factory
+     * @custom:event {CollectionAdded} for each collection
+     * @param _collections the collections to be added to the factory
+     */
+    function addCollections(address[] memory _collections)
+        external
+        onlyOwner
+    {
+        require(_collections.length != 0, "CollectionFactory: empty collection list");
+
+        uint256 collectionsLength = _collections.length;
+        collectionCount += collectionsLength;
+        bool success;
+        address beacon;
+
+        for (uint256 index; index < collectionsLength; ) {
+            address collectionAddress = _collections[index];
+            require(collectionAddress != address(0), "CollectionFactory: collection is zero address");
+
+            CollectionProxy collection = CollectionProxy(payable(collectionAddress));
+            require(collection.proxyAdmin() == address(this), "CollectionFactory: owner of collection must be factory");
+
+            success = collections.add(address(collection));
+            require(success, "CollectionFactory: failed to add collection");
+
+            beacon = collection.beacon();
+            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
+
+            emit CollectionAdded(collection.beacon(), address(collection));
+
+            unchecked {
+                ++index;
+            }
+        }
     }
 
     /**
@@ -448,7 +453,7 @@ contract CollectionFactory is Ownable2Step {
      * @dev reverts on call
      */
     function renounceOwnership() public virtual override onlyOwner {
-        revert("CollectionFactory: Renounce ownership is not available");
+        revert("CollectionFactory: renounce ownership is not available");
     }
 
     /*//////////////////////////////////////////////////////////////

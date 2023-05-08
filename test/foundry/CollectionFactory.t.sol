@@ -5,6 +5,7 @@ import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { MockUpgradable } from "./mocks/MockUpgradable.sol";
 import { MockUpgradableV2 } from "./mocks/MockUpgradableV2.sol";
 import { CollectionFactory } from "contracts/proxy/CollectionFactory.sol";
+import { CollectionProxy } from "contracts/proxy/CollectionProxy.sol";
 import { Test } from "forge-std/Test.sol";
 import { console } from "forge-std/console.sol";
 import { UpgradeableBeacon } from "openzeppelin-contracts/proxy/beacon/UpgradeableBeacon.sol";
@@ -106,6 +107,15 @@ contract CollectionFactoryTest is Test {
 
         vm.expectRevert();
         collectionFactory.getCollection(0);
+
+        vm.startPrank(collectionFactoryOwner);
+        vm.expectRevert("CollectionFactory: beacon alias cannot be empty");
+        collectionFactory.deployBeacon(implementation, "");
+
+        vm.expectRevert("CollectionFactory: beacon alias already used");
+        collectionFactory.deployBeacon(implementation, alias_);
+
+        vm.stopPrank();
     }
 
     /*
@@ -166,7 +176,7 @@ contract CollectionFactoryTest is Test {
 
         collectionFactory.addBeacon(createdBeacon, centralAlias);
 
-        vm.expectRevert("CollectionFactory: beacon already added");
+        vm.expectRevert("CollectionFactory: beacon alias already used");
         collectionFactory.addBeacon(createdBeacon, centralAlias);
         vm.stopPrank();
     }
@@ -531,7 +541,6 @@ contract CollectionFactoryTest is Test {
         vm.stopPrank();
     }
 
-
     function test_transferBeacon_respectsOtherInvariants() public {
 
         vm.startPrank(collectionFactoryOwner);
@@ -579,6 +588,251 @@ contract CollectionFactoryTest is Test {
         assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "last transfer beacon 2 owner assessment failed");
 
         vm.stopPrank();
+    }
+
+    /*
+        testing transferCollections
+            - works successfully
+            - input validation works
+            - respects other invariants test
+    */
+
+    function test_transferCollections_revertsIfNotFactoryOwner() public {
+        vm.startPrank(collectionFactoryOwner);
+        collectionFactory.deployBeacon(implementation, centralAlias);
+
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        vm.stopPrank();
+
+        // sanity check
+        assertEq(collection.proxyAdmin(), address(collectionFactory));
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+
+        vm.expectRevert("Ownable: caller is not the owner");
+        collectionFactory.transferCollections(collections, alice);
+    }
+
+    function test_transferCollections_successful() public {
+        vm.startPrank(collectionFactoryOwner);
+        collectionFactory.deployBeacon(implementation, centralAlias);
+
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+
+        // sanity check
+        assertEq(collection.proxyAdmin(), address(collectionFactory));
+
+        uint256 initialCollectionCount = collectionFactory.collectionCount();
+
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+        collectionFactory.transferCollections(collections, alice);
+
+        assertEq(initialCollectionCount - 1, collectionFactory.collectionCount());
+        assertEq(0, collectionFactory.collectionCount());
+        assertEq(collection.proxyAdmin(), alice);
+        vm.stopPrank();
+    }
+
+    function test_transferCollections_inputValidationWorks() public {
+        vm.startPrank(collectionFactoryOwner);
+        collectionFactory.deployBeacon(implementation, centralAlias);
+
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        vm.stopPrank();
+
+        // sanity check
+        assertEq(collection.proxyAdmin(), address(collectionFactory));
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+
+        vm.expectRevert("Ownable: caller is not the owner");
+        collectionFactory.transferCollections(collections, alice);
+
+        vm.startPrank(collectionFactoryOwner);
+        vm.expectRevert("CollectionFactory: new owner cannot be 0 address");
+        collectionFactory.transferCollections(collections, address(0));
+
+        collections[0] = address(0xdead);
+        vm.expectRevert("CollectionFactory: failed to remove collection");
+        collectionFactory.transferCollections(collections, alice);
+        vm.stopPrank();
+    }
+
+    function test_transferCollections_respectsOtherInvariants() public {
+        vm.startPrank(collectionFactoryOwner);
+        collectionFactory.deployBeacon(implementation, centralAlias);
+
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+
+        uint256 initialBeaconCount = collectionFactory.beaconCount();
+
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+        collectionFactory.transferCollections(collections, alice);
+
+        assertEq(initialBeaconCount, collectionFactory.beaconCount());
+
+        vm.stopPrank();
+    }
+    /*
+        testing addCollections
+            - works successfully
+            - input validation works
+            - respects other invariants test
+    */
+
+    function test_addCollections_inputValidationWorks() public {
+        vm.startPrank(collectionFactoryOwner);
+
+        // setup
+        collectionFactory.deployBeacon(implementation, centralAlias);
+        collectionFactory.deployBeacon(implementation2, secondaryAlias);
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        CollectionProxy secondCollection = CollectionProxy(payable(collectionFactory.deployCollection(secondaryAlias, args)));
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+        collectionFactory.transferCollections(collections, alice);
+        // done setup
+        vm.stopPrank();
+
+        vm.expectRevert("Ownable: caller is not the owner");
+        collectionFactory.addCollections(collections);
+
+        vm.startPrank(collectionFactoryOwner);
+
+        address[] memory emptyCollections = new address[](0);
+        vm.expectRevert("CollectionFactory: empty collection list");
+        collectionFactory.addCollections(emptyCollections);
+
+        address[] memory zeroedCollections = new address[](5);
+        vm.expectRevert("CollectionFactory: collection is zero address");
+        collectionFactory.addCollections(zeroedCollections);
+
+        vm.expectRevert("CollectionFactory: owner of collection must be factory");
+        collectionFactory.addCollections(collections);
+
+        address[] memory duplicatedCollections = new address[](1);
+        duplicatedCollections[0] = address(secondCollection);
+        vm.expectRevert("CollectionFactory: failed to add collection");
+        collectionFactory.addCollections(duplicatedCollections);
+
+        // remove the ownership of the beacon connected to the collection for the next revert to be triggered
+        collectionFactory.transferBeacon(centralAlias, alice);
+        // readd ownership of collection to collection factory in order to reach that error
+        vm.stopPrank();
+
+        vm.prank(alice);
+        collection.changeCollectionProxyAdmin(address(collectionFactory));
+
+        vm.prank(collectionFactoryOwner);
+        vm.expectRevert("CollectionFactory: ownership must be given to factory");
+        collectionFactory.addCollections(collections);
+
+
+    }
+
+    function test_addCollections_successful() public {
+        vm.startPrank(collectionFactoryOwner);
+
+        // setup
+        collectionFactory.deployBeacon(implementation, centralAlias);
+        collectionFactory.deployBeacon(implementation2, secondaryAlias);
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        collectionFactory.deployCollection(secondaryAlias, args);
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+        collectionFactory.transferCollections(collections, alice);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        collection.changeCollectionProxyAdmin(address(collectionFactory));
+        // done setup
+
+        uint256 initialCollectionCount = collectionFactory.collectionCount();
+
+        // sanity check
+        assertEq(1, collectionFactory.collectionCount());
+
+        vm.prank(collectionFactoryOwner);
+        collectionFactory.addCollections(collections);
+
+        assertEq(initialCollectionCount + 1 , collectionFactory.collectionCount());
+        assertEq(2 , collectionFactory.collectionCount());
+    }
+
+    function test_addCollections_respectsOtherInvariants() public {
+        vm.startPrank(collectionFactoryOwner);
+
+        // setup
+        collectionFactory.deployBeacon(implementation, centralAlias);
+        collectionFactory.deployBeacon(implementation2, secondaryAlias);
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        collectionFactory.deployCollection(secondaryAlias, args);
+        address[] memory collections = new address[](1);
+        collections[0] = address(collection);
+        collectionFactory.transferCollections(collections, alice);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        collection.changeCollectionProxyAdmin(address(collectionFactory));
+
+        uint256 originalBeaconCount = collectionFactory.beaconCount();
+
+        vm.prank(collectionFactoryOwner);
+        collectionFactory.addCollections(collections);
+
+        assertEq(originalBeaconCount, collectionFactory.beaconCount());
+    }
+    /*
+    testing
+            getBeaconAliases - works successfully
+            beaconOf - checks if collection exists
+            renounceOwnership - reverts
+    */
+
+    function test_getBeaconAliases_successful() public {
+        vm.startPrank(collectionFactoryOwner);
+
+        // setup
+        collectionFactory.deployBeacon(implementation, centralAlias);
+        collectionFactory.deployBeacon(implementation2, secondaryAlias);
+
+        bytes32[] memory aliases = collectionFactory.getBeaconAliases();
+
+        assertEq(aliases.length, 2);
+
+        for (uint256 index = 0; index < collectionFactory.beaconCount(); index++) {
+            assertEq(aliases[index], collectionFactory.getBeaconAlias(index));
+        }
+
+        vm.stopPrank();
+    }
+
+    function test_beaconOf_inputValidation() public {
+        vm.startPrank(collectionFactoryOwner);
+
+        // setup
+        collectionFactory.deployBeacon(implementation, centralAlias);
+        collectionFactory.deployBeacon(implementation2, secondaryAlias);
+        bytes memory args = _defaultArgsData();
+        CollectionProxy collection = CollectionProxy(payable(collectionFactory.deployCollection(centralAlias, args)));
+        vm.stopPrank();
+
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), collectionFactory.beaconOf(address(collection)));
+    }
+
+    function test_renounceOwnership_reverts() public {
+        vm.prank(collectionFactoryOwner);
+        vm.expectRevert("CollectionFactory: renounce ownership is not available");
+        collectionFactory.renounceOwnership();
     }
 
     /*//////////////////////////////////////////////////////////////
