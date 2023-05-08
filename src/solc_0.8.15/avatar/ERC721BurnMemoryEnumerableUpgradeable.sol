@@ -18,7 +18,7 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
     /// @notice tokenId to burner mapping; saves who burned a specific token
     mapping (uint256 => address) public burner;
 
-    /// @notice burner to list of burrned tokens mapping; to see what tokens who burned
+    /// @notice burner to list of burned tokens mapping; to see what tokens who burned
     mapping (address => uint256[]) public burnedTokens;
 
     /*//////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
 
     /**
      * @notice Returns the burner of the `tokenId`
-     * @dev Does NOT revert if token was not burned/ dosen't exist
+     * @dev Does NOT revert if token was not burned/doesn't exist
      * @param tokenId the tokenId to be checked who burned it
      * @return the address of who burned the indicated token ID
      */

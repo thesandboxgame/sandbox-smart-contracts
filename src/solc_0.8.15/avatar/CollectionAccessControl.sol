@@ -11,11 +11,11 @@ import { IERC5313 } from "../common/IERC5313.sol";
 
 /*
     We wanted an access control functionality that:
-    - has ower
+    - has owner
     - 2 step owner transfer
     - allows roles
     - only owner can add users to roles
-    - tranfering owner does not break the above invariants
+    - transferring owner does not break the above invariants
 
     Some functionality was taken directly from Ownable2StepUpgradeable:
     - exactly as they were:
@@ -76,7 +76,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
         _transferOwnership(owner_);
         _grantRole(ADMIN_ROLE, owner_);
 
-        // makes ADMIN_ROLE role holders be able to modify/configure the other rols
+        // makes ADMIN_ROLE role holders be able to modify/configure the other roles
         _setRoleAdmin(CONFIGURATOR_ROLE, ADMIN_ROLE);
         _setRoleAdmin(TRANSFORMER_ROLE, ADMIN_ROLE);
     }

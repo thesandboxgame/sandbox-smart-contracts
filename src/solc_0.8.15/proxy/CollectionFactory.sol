@@ -19,7 +19,7 @@ contract CollectionFactory is Ownable2Step {
                            Global state variables
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice list of tracked beacon adresses
+    /// @notice list of tracked beacon addresses
     EnumerableSet.Bytes32Set internal aliases;
 
     /// @notice mapping alias to beacon address
@@ -168,9 +168,9 @@ contract CollectionFactory is Ownable2Step {
 
     /**
      * @notice adds, an already deployed beacon, to be tracked/used by the factory;
-     *         Beacon ownership must be transfered to this contract beforehand
+     *         Beacon ownership must be transferred to this contract beforehand
      * @dev checks that implementation is actually a contract and not already added;
-     *      will revert if beacon owner was not transfered to the factory beforehand
+     *      will revert if beacon owner was not transferred to the factory beforehand
      * @custom:event {BeaconAdded}
      * @custom:event {CollectionAdded} for each collection
      * @param beacon the beacon address to be added/tracked
@@ -234,7 +234,7 @@ contract CollectionFactory is Ownable2Step {
 
     /**
      * @notice adds collections to be tracked by the factory
-     *         Collection ownership must be transfered to this contract beforehand
+     *         Collection ownership must be transferred to this contract beforehand
      * @dev Reverts if:
      *      - no collections no were given, if the {collections_} list is empty
      *      - the collection owner is not the factory
@@ -250,15 +250,15 @@ contract CollectionFactory is Ownable2Step {
 
         uint256 collectionsLength = _collections.length;
         collectionCount += collectionsLength;
-        bool succes;
+        bool success;
         address beacon;
 
         for (uint256 index; index < collectionsLength; ) {
             CollectionProxy collection = CollectionProxy(payable(_collections[index]));
             require(collection.proxyAdmin() == address(this), "CollectionFactory: owner of collection must be factory");
 
-            succes = collections.add(address(collection));
-            require(succes, "CollectionFactory: failed to add collection");
+            success = collections.add(address(collection));
+            require(success, "CollectionFactory: failed to add collection");
 
             beacon = collection.beacon();
             require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
@@ -278,7 +278,7 @@ contract CollectionFactory is Ownable2Step {
      * @custom:event CollectionAdded
      * @param beaconAlias alias for the beacon from which the collection will get its implementation
      * @param initializationArgs (encodeWithSignature) initialization function with arguments
-     *                           to be called on newly deployed collection. If not provieded,
+     *                           to be called on newly deployed collection. If not provided,
      *                           will not call any function
      * @return collection the newly created collection address
      */
@@ -305,7 +305,7 @@ contract CollectionFactory is Ownable2Step {
      * @param collection the collection for which the beacon to be changed
      * @param beaconAlias alias for the beacon to be used by the collection
      * @param updateArgs (encodeWithSignature) update function with arguments to be called on
-     *                   the newly update collection. If not provieded, will not call any function
+     *                   the newly update collection. If not provided, will not call any function
      */
     function updateCollection(address collection, bytes32 beaconAlias, bytes memory updateArgs)
         external
@@ -413,7 +413,7 @@ contract CollectionFactory is Ownable2Step {
 
     /**
      * @notice Helper function that retrieves the collection at a specific index
-     * @param index index at which to get the collectin from
+     * @param index index at which to get the collection from
      * @return collection address from specific index
      */
     function getCollection(uint256 index)

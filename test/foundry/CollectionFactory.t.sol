@@ -48,7 +48,7 @@ contract CollectionFactoryTest is Test {
             - can only be called by owner
             - successful deploy
             - input validation works
-            - respects onther invariants
+            - respects other invariants
     */
 
     function test_deployBeacon_revertsIfNotOwner() public {
@@ -113,7 +113,7 @@ contract CollectionFactoryTest is Test {
             - can only be called by owner
             - successful deploy
             - input validation works
-            - respects onther invariants
+            - respects other invariants
     */
 
     function test_addBeacon_revertsIfNotOwner() public {
@@ -191,7 +191,7 @@ contract CollectionFactoryTest is Test {
             - can only be called by owner
             - successful deploy
             - input validation works
-            - respects onther invariants
+            - respects other invariants
     */
 
     function test_deployCollection_revertsIfNotFactoryOwner() public {
@@ -232,7 +232,7 @@ contract CollectionFactoryTest is Test {
     function test_deployCollection_inputValidationWorks() public {
 
         vm.startPrank(collectionFactoryOwner);
-        collectionFactory.deployBeacon(implementation, "anoterOne");
+        collectionFactory.deployBeacon(implementation, "anotherOne");
         bytes memory args = _defaultArgsData();
 
         vm.expectRevert("CollectionFactory: beacon is not tracked");
@@ -266,7 +266,7 @@ contract CollectionFactoryTest is Test {
             - successful update from factory owner (no init args)
             - successful update from collection owner (no init args)
             - input validation works
-            - respects onther invariants
+            - respects other invariants
     */
 
     function test_updateCollection_revertsIfNotFactoryOwnerOrCollectionOwner() public {
@@ -285,7 +285,7 @@ contract CollectionFactoryTest is Test {
         collectionFactory.updateCollection(returnedCollection, secondaryAlias, updateArgs);
     }
 
-    function _updateCollection_succesful_noUpdateArgs(address user) public {
+    function _updateCollection_successful_noUpdateArgs(address user) public {
         bytes memory updateArgs;
 
         vm.startPrank(collectionFactoryOwner);
@@ -302,12 +302,12 @@ contract CollectionFactoryTest is Test {
         vm.stopPrank();
     }
 
-    function test_updateCollection_succesful_factoryOwner_noUpdateArgs() public {
-        _updateCollection_succesful_noUpdateArgs(collectionFactoryOwner);
+    function test_updateCollection_successful_factoryOwner_noUpdateArgs() public {
+        _updateCollection_successful_noUpdateArgs(collectionFactoryOwner);
     }
 
-    function test_updateCollection_succesful_collectionOwner_noUpdateArgs() public {
-        _updateCollection_succesful_noUpdateArgs(alice);
+    function test_updateCollection_successful_collectionOwner_noUpdateArgs() public {
+        _updateCollection_successful_noUpdateArgs(alice);
     }
 
     function test_updateCollection_inputValidationWorks() public {
@@ -368,7 +368,7 @@ contract CollectionFactoryTest is Test {
             - can not be called by random address
             - successful update
             - input validation works
-            - respects onther invariants
+            - respects other invariants
     */
 
     function test_updateBeaconImplementation_revertsIfNotFactoryOwner() public {
@@ -382,7 +382,7 @@ contract CollectionFactoryTest is Test {
         collectionFactory.updateBeaconImplementation(secondaryAlias, implementation2);
     }
 
-    function test_updateBeaconImplementation_succesful() public {
+    function test_updateBeaconImplementation_successful() public {
 
         vm.startPrank(collectionFactoryOwner);
         bytes32 alias_ = "central";
@@ -432,9 +432,9 @@ contract CollectionFactoryTest is Test {
     /*
         testing transferBeacon
             - can only be called by owner
-            - successful transfered the beacon
+            - successful transferred the beacon
             - input validation works
-            - respects onther invariants test
+            - respects other invariants test
     */
 
     function test_transferBeacon_revertsIfNotFactoryOwner() public {
@@ -448,7 +448,7 @@ contract CollectionFactoryTest is Test {
         collectionFactory.transferBeacon(alias_, bob);
     }
 
-    function test_transferBeacon_succesful() public {
+    function test_transferBeacon_successful() public {
 
         vm.startPrank(collectionFactoryOwner);
         // deploy 2 beacons
@@ -457,11 +457,11 @@ contract CollectionFactoryTest is Test {
 
         // sanity check that there are 2 beacons
         uint256 originalBeaconCount = collectionFactory.beaconCount();
-        assertEq(originalBeaconCount, 2, "Initial beacon count assesment failed");
+        assertEq(originalBeaconCount, 2, "Initial beacon count assessment failed");
 
         // check that there are aliases mapped (revers if they are not)
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), beacon1, "Initial aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "Initial aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), beacon1, "Initial aliasToBeacon assessment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "Initial aliasToBeacon assessment failed for beacon 2");
 
         // deploying 3 collections
         bytes memory args = _defaultArgsData();
@@ -471,48 +471,48 @@ contract CollectionFactoryTest is Test {
 
         // save original count
         uint256 originalCollectionCount = collectionFactory.collectionCount();
-        assertEq(originalCollectionCount, 3, "Initial collection count assesment failed");
+        assertEq(originalCollectionCount, 3, "Initial collection count assessment failed");
 
-        // see that they exist and code dosen't revert
+        // see that they exist and code doesn't revert
         collectionFactory.getCollection(0);
         collectionFactory.getCollection(1);
         collectionFactory.getCollection(2);
 
         // original beacon owner is factory
-        assertEq(UpgradeableBeacon(beacon1).owner(), address(collectionFactory), "Initial beacon 1 owner assesment failed");
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon1).owner(), address(collectionFactory), "Initial beacon 1 owner assessment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assessment failed");
 
         // transfer first beacon (2 collections)
         collectionFactory.transferBeacon(centralAlias, alice);
 
-        // check variants were succesfully modified
+        // check variants were successfully modified
         uint256 afterBeacon1RemovedCount = collectionFactory.beaconCount();
-        assertEq(afterBeacon1RemovedCount, 1, "first transfer beconCount value assement failed");
-        assertEq(afterBeacon1RemovedCount, originalBeaconCount - 1, "first transfer beconCount RELATIVE value assement failed");
+        assertEq(afterBeacon1RemovedCount, 1, "first transfer beaconCount value assessment failed");
+        assertEq(afterBeacon1RemovedCount, originalBeaconCount - 1, "first transfer beaconCount RELATIVE value assessment failed");
 
         // check that only 1 beacon was deleted, not the other
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "first transfer aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "first transfer aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "first transfer aliasToBeacon assessment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "first transfer aliasToBeacon assessment failed for beacon 2");
 
         collectionFactory.getCollection(0);
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "firt transfer beacon 1 owner assesment failed");
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "first transfer beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "first transfer beacon 1 owner assessment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "first transfer beacon 2 owner assessment failed");
 
         // transfer second beacon (1 collection)
         collectionFactory.transferBeacon(secondaryAlias, bob);
         uint256 lastBeaconRemovedCount = collectionFactory.beaconCount();
-        assertEq(lastBeaconRemovedCount, 0, "last transfer beconCount value assement failed");
-        assertEq(lastBeaconRemovedCount, afterBeacon1RemovedCount - 1, "last transfer beconCount RELATIVE value assement failed");
+        assertEq(lastBeaconRemovedCount, 0, "last transfer beaconCount value assessment failed");
+        assertEq(lastBeaconRemovedCount, afterBeacon1RemovedCount - 1, "last transfer beaconCount RELATIVE value assessment failed");
 
         // check that both beacons were deleted
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "last transfer aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), address(0), "last transfer aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), address(0), "last transfer aliasToBeacon assessment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), address(0), "last transfer aliasToBeacon assessment failed for beacon 2");
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "last transfer beacon 1 owner assesment failed");
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(bob), "last transfer beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon1).owner(), address(alice), "last transfer beacon 1 owner assessment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(bob), "last transfer beacon 2 owner assessment failed");
 
         vm.stopPrank();
     }
@@ -540,8 +540,8 @@ contract CollectionFactoryTest is Test {
         address beacon2 = collectionFactory.deployBeacon(implementation2, secondaryAlias);
 
         // check that there are aliases mapped (revers if they are not)
-        assertEq(collectionFactory.aliasToBeacon(centralAlias), beacon1, "Initial aliasToBeacon assesment failed for beacon 1");
-        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "Initial aliasToBeacon assesment failed for beacon 2");
+        assertEq(collectionFactory.aliasToBeacon(centralAlias), beacon1, "Initial aliasToBeacon assessment failed for beacon 1");
+        assertEq(collectionFactory.aliasToBeacon(secondaryAlias), beacon2, "Initial aliasToBeacon assessment failed for beacon 2");
 
         // deploying 3 collections
         bytes memory args = _defaultArgsData();
@@ -553,30 +553,30 @@ contract CollectionFactoryTest is Test {
         uint256 originalCollectionCount = collectionFactory.collectionCount();
 
         //////////////////////////////////////////////////////////////
-        assertEq(originalCollectionCount, 3, "Initial collection count assesment failed");
+        assertEq(originalCollectionCount, 3, "Initial collection count assessment failed");
 
-        // see that they exist and code dosen't revert
+        // see that they exist and code doesn't revert
         collectionFactory.getCollection(0);
         collectionFactory.getCollection(1);
         collectionFactory.getCollection(2);
 
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "Initial beacon 2 owner assessment failed");
 
         // transfer first beacon (2 collections)
         collectionFactory.transferBeacon(centralAlias, alice);
 
-        // see that they exist after removal and code dosen't revert
+        // see that they exist after removal and code doesn't revert
         collectionFactory.getCollection(0);
         collectionFactory.getCollection(1);
         collectionFactory.getCollection(2);
 
         // check collection count after remove
         uint256 firstRemoveCollectionCount = collectionFactory.collectionCount();
-        assertEq(firstRemoveCollectionCount, originalCollectionCount, "remove collectionCount RELATIVE value assement failed");
-        assertEq(firstRemoveCollectionCount, 3, "remove collectionCount value assement failed");
+        assertEq(firstRemoveCollectionCount, originalCollectionCount, "remove collectionCount RELATIVE value assessment failed");
+        assertEq(firstRemoveCollectionCount, 3, "remove collectionCount value assessment failed");
 
         // see that the owner has changed
-        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "last transfer beacon 2 owner assesment failed");
+        assertEq(UpgradeableBeacon(beacon2).owner(), address(collectionFactory), "last transfer beacon 2 owner assessment failed");
 
         vm.stopPrank();
     }

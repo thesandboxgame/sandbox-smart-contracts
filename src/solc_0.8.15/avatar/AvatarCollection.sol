@@ -688,7 +688,7 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice Pseudo-random number function. Good enough for our need, thx Cyberkongs VX <3!
+     * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
      * @dev standard pseudo-random implementation using keccak256 over various parameters.
      * @param _wallet the calling account address
      * @param _totalMinted total minted tokens up to this point
