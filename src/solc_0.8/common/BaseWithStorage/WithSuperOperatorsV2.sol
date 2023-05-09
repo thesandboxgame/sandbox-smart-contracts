@@ -25,4 +25,8 @@ contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
     function isSuperOperator(address who) public view returns (bool) {
         return _superOperators[who];
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }

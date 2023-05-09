@@ -31,4 +31,8 @@ contract WithAdminV2 is ContextUpgradeable {
         emit AdminChanged(admin, newAdmin);
         _admin = newAdmin;
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }
