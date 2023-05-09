@@ -478,10 +478,19 @@ contract AvatarCollection is
 
         signatureIds[_signatureId] = 1;
 
-        personalizationTraits[_tokenId] = _personalizationMask;
+        _updateTokenTraits(_tokenId, _personalizationMask);
+    }
 
-        emit Personalized(_tokenId, _personalizationMask);
-        emit MetadataUpdate(_tokenId);
+    function operatorPersonalize(
+        uint256 _tokenId,
+        uint256 _personalizationMask
+    )
+        external
+        authorizedRole(TRANSFORMER_ROLE)
+    {
+        require(_exists(_tokenId), "AvatarCollection: invalid token ID");
+
+        _updateTokenTraits(_tokenId, _personalizationMask);
     }
 
     /**
@@ -565,8 +574,15 @@ contract AvatarCollection is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
-        return interfaceId == type(ERC721EnumerableUpgradeable).interfaceId || interfaceId == type(AccessControlUpgradeable).interfaceId;
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
+        returns (bool)
+    {
+        return interfaceId == type(ERC721EnumerableUpgradeable).interfaceId
+                || interfaceId == type(AccessControlUpgradeable).interfaceId;
     }
 
     /**
@@ -641,7 +657,12 @@ contract AvatarCollection is
      * @dev returns OwnableUpgradeable.owner()
      * @return owner of current contract
      */
-    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
+    function owner()
+        public
+        view
+        override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable)
+        returns (address)
+    {
         return OwnableUpgradeable.owner();
     }
 
@@ -734,7 +755,12 @@ contract AvatarCollection is
      * @dev returns ERC2771HandlerUpgradeable._msgData()
      * @return msg.data
      */
-    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
         return ERC2771HandlerUpgradeable._msgData();
     }
 
@@ -752,12 +778,28 @@ contract AvatarCollection is
         return ERC2771HandlerUpgradeable._msgSender();
     }
 
+    function _updateTokenTraits(
+        uint256 _tokenId,
+        uint256 _personalizationMask
+    )
+        internal
+    {
+        personalizationTraits[_tokenId] = _personalizationMask;
+
+        emit Personalized(_tokenId, _personalizationMask);
+        emit MetadataUpdate(_tokenId);
+    }
+
     /**
      * @notice check if the current wave can still mint the indicated amount
      * @param _amount number of tokens to check if can be minted
      * @return if wave can mint the indicated amount
      */
-    function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
+    function _checkWaveNotComplete(uint256 _amount)
+        internal
+        view
+        returns (bool)
+    {
         return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokensOverall;
     }
 
@@ -767,7 +809,12 @@ contract AvatarCollection is
      * @param _amount number of tokens to mint
      * @return if amount can be safely minted
      */
-    function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
+    function _checkLimitNotReached(
+        address _wallet,
+        uint256 _amount
+    )
+        internal view returns (bool)
+    {
         return
             waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
             totalSupply() + _amount <= maxSupply;
