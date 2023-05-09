@@ -6,9 +6,11 @@ pragma solidity 0.8.15;
 import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import { IERC20Metadata } from "openzeppelin-contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { SafeERC20 } from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
@@ -26,7 +28,6 @@ import {
     } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
 
-
 /* solhint-disable max-states-count */
 contract AvatarCollection is
     ReentrancyGuardUpgradeable,
@@ -35,8 +36,37 @@ contract AvatarCollection is
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC2771HandlerUpgradeable,
     UpdatableOperatorFiltererUpgradeable,
+    PausableUpgradeable,
     IERC4906
 {
+
+
+    /**
+     * @notice Structure used to group default minting parameters in order to avoid stack too deep error
+     * @param mintPrice default mint price for both allowlist and public minting
+     * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
+     * @param maxAllowlistTokensPerWallet maximum tokens mint per wallet in the allowlist minting
+     * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
+     */
+    struct MintingDefaults {
+        uint256 mintPrice;
+        uint256 maxPublicTokensPerWallet;
+        uint256 maxAllowlistTokensPerWallet;
+        uint256 maxMarketingTokens;
+    }
+
+    /**
+     * @notice Structure used to group registry filter parameters in order to avoid stack too deep error
+     * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
+     * @param operatorFiltererSubscription subscription address to use as a template for
+     * @param operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     *                                              just copy entries from it
+     */
+    struct OpenseaRegistryFilterParameters {
+        address registry;
+        address operatorFiltererSubscription;
+        bool operatorFiltererSubscriptionSubscribe;
+    }
 
     /*//////////////////////////////////////////////////////////////
                            Global state variables
@@ -46,10 +76,10 @@ contract AvatarCollection is
     uint256 public maxSupply;
 
     /// @notice max tokens to buy per wave, cumulating all addresses
-    uint256 public waveMaxTokens;
+    uint256 public waveMaxTokensOverall;
 
     /// @notice max tokens to buy, per wallet in a given wave
-    uint256 public waveMaxTokensToBuy;
+    uint256 public waveMaxTokensPerWallet;
 
     /// @notice price of one token mint (in the token owned by the mintTreasury which in our case is SAND)
     uint256 public waveSingleTokenPrice;
@@ -57,15 +87,18 @@ contract AvatarCollection is
     /// @notice number of total minted tokens in the current running wave
     uint256 public waveTotalMinted;
 
+    /// @notice mapping of [owner -> wave index -> minted count]
     mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
 
     /// @notice stores the personalization for a tokenId
     mapping(uint256 => uint256) public personalizationTraits;
 
+    /// @notice each wave has an index to help track minting/tokens per wallet
     uint256 public indexWave;
 
-    uint256 public paused;
-
+    /// @notice default* are used when calling predefined wave setup functions:
+    ///         setMarketingMint, setAllowlistMint and setPublicMint
+    MintingDefaults public mintingDefaults;
     mapping(uint256 => uint256) private signatureIds;
     mapping(uint256 => uint256) private availableIds;
 
@@ -74,18 +107,9 @@ contract AvatarCollection is
     address public signAddress;
     string public baseTokenURI;
 
-    IERC20 immutable public paymentToken;
-
     /*//////////////////////////////////////////////////////////////
                                 Events
     //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Event emitted when sale state was changed.
-     * @dev emitted when toggleSale is called
-     * @param _pause if the sale was was paused or not
-     */
-    event SaleToggled(bool _pause);
 
     /**
      * @notice Event emitted when a token personalization was made.
@@ -93,7 +117,7 @@ contract AvatarCollection is
      * @param _tokenId id of the token which had the personalization done
      * @param _personalizationMask the exact personalization that was done, as a custom meaning bit-mask
      */
-    event Personalized(uint256 _tokenId, uint256 _personalizationMask);
+    event Personalized(uint256 indexed _tokenId, uint256 indexed _personalizationMask);
 
     /**
      * @notice Event emitted when the contract was initialized.
@@ -103,6 +127,7 @@ contract AvatarCollection is
      * @param _symbol token symbol of the ERC721 token
      * @param _mintTreasury address belonging to SAND token owner
      * @param _signAddress signer address that is allowed to mint
+     * @param _allowedToExecuteMint token address that is allowed to execute the mint function
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param _operatorFiltererSubscription subscription address to use as a template for
@@ -110,11 +135,12 @@ contract AvatarCollection is
      *                                               just copy entries from it
      */
     event ContractInitialized(
-        string baseURI,
-        string _name,
-        string _symbol,
+        string indexed baseURI,
+        string indexed _name,
+        string indexed _symbol,
         address _mintTreasury,
         address _signAddress,
+        address _allowedToExecuteMint,
         uint256 _maxSupply,
         address _registry,
         address _operatorFiltererSubscription,
@@ -128,35 +154,54 @@ contract AvatarCollection is
      * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
      * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
      */
-    event WaveSetup(uint256 _waveMaxTokens, uint256 _waveMaxTokensToBuy, uint256 _waveSingleTokenPrice);
+    event WaveSetup(
+        uint256 indexed _waveMaxTokens,
+        uint256 indexed _waveMaxTokensToBuy,
+        uint256 indexed _waveSingleTokenPrice
+    );
 
     /**
      * @notice Event emitted when an address was set as allowed to mint
      * @dev emitted when setAllowedExecuteMint is called
      * @param _address the address that will be allowed to set execute the mint function
      */
-    event AllowedExecuteMintSet(address _address);
+    event AllowedExecuteMintSet(address indexed _address);
 
     /**
      * @notice Event emitted when the treasury address was saved
      * @dev emitted when setTreasury is called
      * @param _owner new owner address to be saved
      */
-    event TreasurySet(address _owner);
+    event TreasurySet(address indexed _owner);
 
     /**
      * @notice Event emitted when the base token URI for the contract was set or changed
      * @dev emitted when setBaseURI is called
      * @param baseURI an URI that will be used as the base for token URI
      */
-    event BaseURISet(string baseURI);
+    event BaseURISet(string indexed baseURI);
 
     /**
      * @notice Event emitted when the signer address was set or changed
      * @dev emitted when setSignAddress is called
      * @param _signAddress new signer address to be set
      */
-    event SignAddressSet(address _signAddress);
+    event SignAddressSet(address indexed _signAddress);
+
+    /**
+     * @notice Event emitted when the default values used by wave manipulation functions were changed
+     * @dev emitted when initialize or setWaveDefaults is called
+     * @param mintPrice default mint price for both allowlist and public minting
+     * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
+     * @param maxAllowlistTokensPerWallet maximum tokens mint per wallet in the allowlist minting
+     * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
+     */
+    event DefaultMintingValuesSet(
+        uint256 mintPrice,
+        uint256 maxPublicTokensPerWallet,
+        uint256 maxAllowlistTokensPerWallet,
+        uint256 maxMarketingTokens
+    );
 
     /*//////////////////////////////////////////////////////////////
                             Initializers
@@ -166,10 +211,7 @@ contract AvatarCollection is
      * @notice mitigate a possible Implementation contract takeover, as indicate by
      *         https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializing_the_implementation_contract
      */
-    constructor(address _paymentToken) {
-        require(_isContract(_paymentToken), "AvatarCollection: payment address is not a contract");
-        paymentToken = IERC20(_paymentToken);
-
+    constructor() {
         _disableInitializers();
     }
 
@@ -181,10 +223,10 @@ contract AvatarCollection is
         address payable _mintTreasury,
         address _signAddress,
         address _initialTrustedForwarder,
-        address _registry,
-        address _operatorFiltererSubscription,
-        bool _operatorFiltererSubscriptionSubscribe,
-        uint256 _maxSupply
+        address _allowedToExecuteMint,
+        uint256 _maxSupply,
+        OpenseaRegistryFilterParameters memory _filterParams,
+        MintingDefaults memory _mintingDefaults
     ) external virtual initializer {
         __AvatarCollection_init(
             _collectionOwner,
@@ -194,10 +236,10 @@ contract AvatarCollection is
             _mintTreasury,
             _signAddress,
             _initialTrustedForwarder,
-            _registry,
-            _operatorFiltererSubscription,
-            _operatorFiltererSubscriptionSubscribe,
-            _maxSupply
+            _allowedToExecuteMint,
+            _maxSupply,
+            _filterParams,
+            _mintingDefaults
         );
     }
 
@@ -210,10 +252,8 @@ contract AvatarCollection is
      * @param _mintTreasury address belonging to SAND token owner
      * @param _signAddress signer address that is allowed to mint
      * @param _initialTrustedForwarder trusted forwarder address
-     * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
-     * @param _operatorFiltererSubscription subscription address to use as a template for
-     * @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
-     *                                               just copy entries from it
+     * @param _filterParams Opensea registry filter initialization parameters
+     * @param _mintingDefaults default minting values for predefined wave helpers
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      */
     function __AvatarCollection_init(
@@ -224,10 +264,11 @@ contract AvatarCollection is
         address payable _mintTreasury,
         address _signAddress,
         address _initialTrustedForwarder,
-        address _registry,
-        address _operatorFiltererSubscription,
-        bool _operatorFiltererSubscriptionSubscribe,
-        uint256 _maxSupply) internal onlyInitializing {
+        address _allowedToExecuteMint,
+        uint256 _maxSupply,
+        OpenseaRegistryFilterParameters memory _filterParams,
+        MintingDefaults memory _mintingDefaults
+    ) internal onlyInitializing {
 
         require(bytes(_initialBaseURI).length != 0, "AvatarCollection: baseURI is not set");
         require(bytes(_name).length != 0, "AvatarCollection: name is empty");
@@ -235,23 +276,36 @@ contract AvatarCollection is
         require(_signAddress != address(0), "AvatarCollection: sign address is zero address");
         require(_initialTrustedForwarder != address(0), "AvatarCollection: trusted forwarder is zero address");
         require(_mintTreasury != address(0), "AvatarCollection: treasury is zero address");
+        require(_isContract(_allowedToExecuteMint), "AvatarCollection: executor address is not a contract");
         require(_maxSupply > 0, "AvatarCollection: max supply should be more than 0");
 
-        baseTokenURI = _initialBaseURI;
+        // totalSupply() should be 0 and just maxSupply could be used here; paranoia
+        uint256 remaining = maxSupply - totalSupply();
+
+        require(_mintingDefaults.mintPrice > 0, "AvatarCollection: public mint price cannot be 0");
+        require(_mintingDefaults.maxPublicTokensPerWallet <= remaining
+                && _mintingDefaults.maxAllowlistTokensPerWallet <= remaining,
+                "AvatarCollection: invalid tokens per wallet configuration");
+        require(_mintingDefaults.maxMarketingTokens <= remaining, "AvatarCollection: invalid marketing share");
+
 
         __ReentrancyGuard_init();
         __InitializeAccessControl(_collectionOwner); // owner is also initialized here
         __ERC2771Handler_initialize(_initialTrustedForwarder);
+        __Pausable_init();
         __ERC721_init(_name, _symbol);
         __UpdatableOperatorFiltererUpgradeable_init(
-            _registry,
-            _operatorFiltererSubscription,
-            _operatorFiltererSubscriptionSubscribe
+            _filterParams.registry,
+            _filterParams.operatorFiltererSubscription,
+            _filterParams.operatorFiltererSubscriptionSubscribe
         );
 
+        baseTokenURI = _initialBaseURI;
         mintTreasury = _mintTreasury;
         signAddress = _signAddress;
+        allowedToExecuteMint = _allowedToExecuteMint;
         maxSupply = _maxSupply;
+        mintingDefaults = _mintingDefaults;
 
         emit ContractInitialized(
             _initialBaseURI,
@@ -259,10 +313,11 @@ contract AvatarCollection is
             _symbol,
             _mintTreasury,
             _signAddress,
+            _allowedToExecuteMint,
             _maxSupply,
-            _registry,
-            _operatorFiltererSubscription,
-            _operatorFiltererSubscriptionSubscribe
+            _filterParams.registry,
+            _filterParams.operatorFiltererSubscription,
+            _filterParams.operatorFiltererSubscriptionSubscribe
         );
     }
 
@@ -282,19 +337,60 @@ contract AvatarCollection is
         uint256 _waveMaxTokens,
         uint256 _waveMaxTokensToBuy,
         uint256 _waveSingleTokenPrice
-    ) external onlyOwner {
+    ) external authorizedRole(CONFIGURATOR_ROLE) whenNotPaused {
         require(_waveMaxTokens <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
         require(_waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "AvatarCollection: invalid configuration");
-        require(paused == 0, "AvatarCollection: contract is paused");
         require(_waveMaxTokensToBuy <= _waveMaxTokens, "AvatarCollection: invalid supply configuration");
 
-        waveMaxTokens = _waveMaxTokens;
-        waveMaxTokensToBuy = _waveMaxTokensToBuy;
+        waveMaxTokensOverall = _waveMaxTokens;
+        waveMaxTokensPerWallet = _waveMaxTokensToBuy;
         waveSingleTokenPrice = _waveSingleTokenPrice;
         waveTotalMinted = 0;
         indexWave++;
 
         emit WaveSetup(_waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
+    }
+
+    function setMarketingMint()
+        external
+        whenNotPaused
+        authorizedRole(CONFIGURATOR_ROLE)
+    {
+        waveMaxTokensOverall = mintingDefaults.maxMarketingTokens;
+        waveMaxTokensPerWallet = mintingDefaults.maxMarketingTokens;
+        waveSingleTokenPrice = 0;
+        waveTotalMinted = 0;
+        indexWave++;
+
+        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
+    }
+
+    function setAllowlistMint()
+        external
+        whenNotPaused
+        authorizedRole(CONFIGURATOR_ROLE)
+    {
+        waveMaxTokensOverall = maxSupply - totalSupply();
+        waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
+        waveSingleTokenPrice = mintingDefaults.mintPrice;
+        waveTotalMinted = 0;
+        indexWave++;
+
+        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
+    }
+
+    function setPublicMint()
+        external
+        whenNotPaused
+        authorizedRole(CONFIGURATOR_ROLE)
+    {
+        waveMaxTokensOverall = maxSupply - totalSupply();
+        waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
+        waveSingleTokenPrice = mintingDefaults.mintPrice;
+        waveTotalMinted = 0;
+        indexWave++;
+
+        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
     }
 
     /**
@@ -309,10 +405,9 @@ contract AvatarCollection is
         uint256 _amount,
         uint256 _signatureId,
         bytes memory _signature
-    ) external nonReentrant {
+    ) external whenNotPaused nonReentrant {
         require(indexWave > 0, "AvatarCollection: contract is not configured");
-        require(_msgSender() == allowedToExecuteMint, "AvatarCollection: not allowed");
-        require(paused == 0, "AvatarCollection: contract is paused");
+        require(_msgSender() == allowedToExecuteMint, "AvatarCollection: caller is not allowed");
         require(_wallet != address(0), "AvatarCollection: wallet is zero address");
         require(_amount > 0, "AvatarCollection: amount cannot be 0");
         require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
@@ -335,19 +430,19 @@ contract AvatarCollection is
 
         waveTotalMinted += _amount;
 
-        for (uint256 i = 0; i < _amount; i++) {
-            uint256 tokenId = getRandomToken(_wallet, totalSupply());
-            _safeMint(_wallet, tokenId);
+        for (uint256 i; i < _amount; ) {
+            _safeMint(_wallet, getRandomToken(_wallet, totalSupply()));
+
+            unchecked { ++i; }
         }
     }
 
-    /**
-     * @notice pause or unpause the contract. Emits the {SaleToggled} event
-     * @dev toggle the paused
-     */
-    function toggleSale() external onlyOwner {
-        paused = paused == 0 ? 1 : 0;
-        emit SaleToggled(paused == 1);
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 
     /**
@@ -378,7 +473,7 @@ contract AvatarCollection is
                 _personalizationMask,
                 _signature
             ) == signAddress,
-            "Signature failed"
+            "AvatarCollection: signature check failed"
         );
 
         signatureIds[_signatureId] = 1;
@@ -392,13 +487,13 @@ contract AvatarCollection is
     /**
      * @notice sets which address is allowed to execute the mint function.
      *         Emits {AllowedExecuteMintSet} event
-     * @dev sets allowedToExecuteMint = _address; address can't be 0
-     * @param _address the address that will be allowed to set execute the mint function
+     * @dev sets allowedToExecuteMint = _address; address must belong to a contract
+     * @param _minterToken the address that will be allowed to execute the mint function
      */
-    function setAllowedExecuteMint(address _address) external onlyOwner {
-        require(_address != address(0), "AvatarCollection: address is zero address");
-        allowedToExecuteMint = _address;
-        emit AllowedExecuteMintSet(_address);
+    function setAllowedExecuteMint(address _minterToken) public onlyOwner {
+        require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
+        allowedToExecuteMint = _minterToken;
+        emit AllowedExecuteMintSet(_minterToken);
     }
 
     /**
@@ -458,7 +553,7 @@ contract AvatarCollection is
      * @dev sets baseTokenURI = baseURI
      * @param baseURI an URI that will be used as the base for token URI
      */
-    function setBaseURI(string memory baseURI) public onlyOwner {
+    function setBaseURI(string memory baseURI) public authorizedRole(CONFIGURATOR_ROLE) {
         require(bytes(baseURI).length != 0, "AvatarCollection: baseURI is not set");
         baseTokenURI = baseURI;
         emit BaseURISet(baseURI);
@@ -468,19 +563,10 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice function renounces ownership of contract. Currently it is disable,
-     *         as to not risk loosing mint funds
-     * @dev reverts on call
-     */
-    function renounceOwnership() public virtual override onlyOwner {
-        revert("AvatarCollection: renounce ownership is not available");
-    }
-
-    /**
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == type(ERC721EnumerableUpgradeable).interfaceId || interfaceId == type(AccessControlUpgradeable).interfaceId;
     }
 
     /**
@@ -672,7 +758,7 @@ contract AvatarCollection is
      * @return if wave can mint the indicated amount
      */
     function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
-        return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokens;
+        return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokensOverall;
     }
 
     /**
@@ -683,7 +769,7 @@ contract AvatarCollection is
      */
     function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
         return
-            waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensToBuy &&
+            waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
             totalSupply() + _amount <= maxSupply;
     }
 
