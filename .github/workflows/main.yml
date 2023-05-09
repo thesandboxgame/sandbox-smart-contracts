@@ -78,14 +78,26 @@ jobs:
       - name: Running coverage
         run: yarn coverage:ci
 
+      - name: Coverage created?
+        id: check_coverage
+        run: |
+          if [ -s ./coverage/lconv.info ] ; then
+            echo "check_result=true" >> $GITHUB_OUTPUT
+          else
+            echo "check_result=false" >> $GITHUB_OUTPUT
+          fi
+          echo $GITHUB_OUTPUT
+
       - name: Report coverage
+        if: steps.check_coverage.outputs.check_result == 'true'
         uses: romeovs/lcov-reporter-action@v0.3.1
         with:
           lcov-file: ./coverage/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enforce coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        if: steps.check_coverage.outputs.check_result == 'true'
+        uses: VeryGoodOpenSource/very_good_coverage@v2
         with:
           path: ./coverage/lcov.info
           min_coverage: 80
