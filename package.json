@@ -5,7 +5,7 @@
         "packages/*"
     ],
     "private": true,
-    "description": "TheSandbox game smart contracts",
+    "description": "The Sandbox smart contracts",
     "scripts": {
         "test": "nx run-many --target=test",
         "coverage": "nx run-many --target=coverage && istanbul-combine -r lcov -r html packages/*/coverage.json",
@@ -22,7 +22,7 @@
     },
     "repository": "https://github.com/thesandboxgame/contracts.git",
     "keywords": [],
-    "author": "Andres Adjimann <adjisb@sandbox.game>",
+    "author": "",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/thesandboxgame/contracts/issues"
