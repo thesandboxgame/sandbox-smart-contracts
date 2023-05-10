@@ -96,7 +96,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     }
 
     ///@dev approves New Land Tunnel to transfer Lands on behalf of this contract
-    function approveNewLandTunnel() external {
+    function approveNewLandTunnel() external isAdmin {
         polygonLand.setApprovalForAll(newLandTunnel, true);
     }
 
