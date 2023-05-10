@@ -4,7 +4,7 @@
   "description": "Asset L2 smart contracts",
   "scripts": {
     "node": "hardhat node --no-deploy",
-    "deploy": "hardhat deploy --network localhost",
+    "deploy": "hardhat deploy",
     "test": "hardhat test"
   },
   "devDependencies": {
