@@ -27,14 +27,6 @@ contract LandTunnelMigration {
         _;
     }
 
-    /// @notice changes admin to new admin
-    /// @param _newAdmin the new admin to be set
-    function changeAdmin(address _newAdmin) external isAdmin {
-        require(_newAdmin != address(0), "LandTunnelMigration: admin can't be zero address");
-        admin = _newAdmin;
-        emit AdminChanged(_newAdmin);
-    }
-
     /// @notice Constructor of the tunnel migration contract
     /// @param _landToken LAND token address
     /// @param _newLandTunnel the tunnel address to migrate to
@@ -79,5 +71,13 @@ contract LandTunnelMigration {
     ) external isAdmin {
         landToken.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "");
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
+    }
+
+    /// @notice changes admin to new admin
+    /// @param _newAdmin the new admin to be set
+    function changeAdmin(address _newAdmin) external isAdmin {
+        require(_newAdmin != address(0), "LandTunnelMigration: admin can't be zero address");
+        admin = _newAdmin;
+        emit AdminChanged(_newAdmin);
     }
 }
