@@ -817,7 +817,7 @@ contract AvatarCollection is
         override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address sender)
     {
-        return ERC2771HandlerUpgradeable._msgSender();
+        sender = ERC2771HandlerUpgradeable._msgSender();
     }
 
     function _updateTokenTraits(
