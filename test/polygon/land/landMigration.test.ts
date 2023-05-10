@@ -1059,6 +1059,19 @@ describe('Land Migration', function () {
       ).to.be.equal(0);
     });
 
+    it('only deployer can call approve land tunnel', async function () {
+      const {
+        users,
+        MockPolygonLandTunnelMigration,
+      } = await setupLandMigration();
+
+      await expect(
+        MockPolygonLandTunnelMigration.connect(
+          await ethers.provider.getSigner(users[0].address)
+        ).approveNewLandTunnel()
+      ).to.be.revertedWith('PolygonLandTunnelMigration: !AUTHORISED');
+    });
+
     it('can only migrate and withdraw land from the old polygon land tunnel', async function () {
       const {
         landMinter,
