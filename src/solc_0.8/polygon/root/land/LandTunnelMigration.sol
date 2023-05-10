@@ -50,10 +50,13 @@ contract LandTunnelMigration {
         require(_landToken != address(0), "LandTunnelMigration: landToken can't be zero address");
         require(_newLandTunnel != address(0), "LandTunnelMigration: new Tunnel can't be zero address");
         require(_oldLandTunnel != address(0), "LandTunnelMigration: old Tunnel can't be zero address");
+
         admin = _admin;
         landToken = ILandToken(_landToken);
         newLandTunnel = _newLandTunnel;
         oldLandTunnel = _oldLandTunnel;
+
+        emit AdminChanged(_admin);
     }
 
     /// @dev Transfers all the passed land ids from the old land tunnel to the new land tunnel
