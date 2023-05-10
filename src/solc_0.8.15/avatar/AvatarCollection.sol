@@ -7,6 +7,11 @@ import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/Ow
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
+import {
+    ERC721EnumerableUpgradeable,
+    ERC721Upgradeable,
+    IERC721Upgradeable
+    } from "openzeppelin-contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
@@ -20,12 +25,7 @@ import { IERC4906 } from "../common/IERC4906.sol";
 
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { CollectionStateManagement } from "./CollectionStateManagement.sol";
-import {
-    ERC721BurnMemoryEnumerableUpgradeable,
-    ERC721EnumerableUpgradeable,
-    ERC721Upgradeable,
-    IERC721Upgradeable
-    } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
+import { ERC721BurnMemoryEnumerableUpgradeable } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
 
 /* solhint-disable max-states-count */
