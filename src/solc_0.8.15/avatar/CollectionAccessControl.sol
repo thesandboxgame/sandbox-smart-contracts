@@ -60,7 +60,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     modifier authorizedRole(bytes32 role) {
         address sender = _msgSender();
-        require(hasRole(role, sender) || owner() == sender);
+        require(hasRole(role, sender) || owner() == sender, "CollectionAccessControl: sender not authorized");
         _;
     }
 
