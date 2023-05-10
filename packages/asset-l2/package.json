@@ -1,0 +1,19 @@
+{
+  "name": "@sandbox-smart-contracts/asset-l2",
+  "version": "1.0.0",
+  "description": "Asset L2 smart contracts",
+  "scripts": {
+    "node": "hardhat node --no-deploy",
+    "deploy": "hardhat deploy --network localhost",
+    "test": "hardhat test --network localhost"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@openzeppelin/contracts": "^4.8.2",
+    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.13.0",
+    "hardhat-deploy": "^0.11.25"
+  }
+}
