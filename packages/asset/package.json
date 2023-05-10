@@ -1,11 +1,11 @@
 {
-  "name": "@sandbox-smart-contracts/asset-l2",
-  "version": "1.0.0",
+  "name": "@sandbox-smart-contracts/asset",
+  "version": "alpha",
   "description": "Asset L2 smart contracts",
   "scripts": {
     "node": "hardhat node --no-deploy",
     "deploy": "hardhat deploy --network localhost",
-    "test": "hardhat test --network localhost"
+    "test": "hardhat test"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
