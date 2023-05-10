@@ -74,7 +74,7 @@ contract LandTunnelV2 is
         uint256[] memory xs,
         uint256[] memory ys,
         bytes memory data
-    ) public whenNotPaused() {
+    ) external whenNotPaused() {
         require(to != address(0), "LandTunnelV2: can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "LandTunnelV2: invalid data");
         transferringToL2 = true;
