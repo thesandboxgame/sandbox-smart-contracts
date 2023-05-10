@@ -79,4 +79,10 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
     function burnedTokensCount(address previousOwner) external view returns (uint256) {
         return burnedTokens[previousOwner].length;
     }
+
+    /**
+    Empty storage space in contracts for future enhancements
+    ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
+     */
+    uint256[50] private __gap;
 }
