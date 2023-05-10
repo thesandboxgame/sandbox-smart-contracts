@@ -120,10 +120,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     }
 
     /// @dev called on ERC721 transfer to this contract
-    /// @param operator address executing the transfer
-    /// @param from sender of the token
-    /// @param tokenId token id
-    /// @param data extra data
+    /// @return onERC721Received function selector
     function onERC721Received(
         address, /* operator */
         address, /* from */
@@ -134,10 +131,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     }
 
     /// @dev called on ERC721 batch transfer to this contract
-    /// @param operator address executing the transfer
-    /// @param from sender of the token
-    /// @param tokenIds token ids
-    /// @param data extra data
+    /// @return onERC721BatchReceived function selector
     function onERC721BatchReceived(
         address, /* operator */
         address, /* from */
@@ -149,7 +143,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
 
     /// @dev to be called by external contact to check if this contract supports ERC721 token and batch token receive
     /// @param interfaceId the interface to be checked if supported by the contract
-    /// 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
+    /// @return 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
