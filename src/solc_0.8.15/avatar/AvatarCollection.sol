@@ -197,9 +197,9 @@ contract AvatarCollection is
      * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
      */
     event DefaultMintingValuesSet(
-        uint256 mintPrice,
-        uint256 maxPublicTokensPerWallet,
-        uint256 maxAllowlistTokensPerWallet,
+        uint256 indexed mintPrice,
+        uint256 indexed maxPublicTokensPerWallet,
+        uint256 indexed maxAllowlistTokensPerWallet,
         uint256 maxMarketingTokens
     );
 
@@ -306,6 +306,13 @@ contract AvatarCollection is
         allowedToExecuteMint = _allowedToExecuteMint;
         maxSupply = _maxSupply;
         mintingDefaults = _mintingDefaults;
+
+        emit DefaultMintingValuesSet(
+            _mintingDefaults.mintPrice,
+            _mintingDefaults.maxPublicTokensPerWallet,
+            _mintingDefaults.maxAllowlistTokensPerWallet,
+            _mintingDefaults.maxMarketingTokens
+        );
 
         emit ContractInitialized(
             _initialBaseURI,
