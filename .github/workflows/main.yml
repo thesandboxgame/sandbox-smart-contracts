@@ -86,7 +86,6 @@ jobs:
           else
             echo "check_result=false" >> $GITHUB_OUTPUT
           fi
-          echo $GITHUB_OUTPUT
 
       - name: Report coverage
         if: steps.check_coverage.outputs.check_result == 'true'
