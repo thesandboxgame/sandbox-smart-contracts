@@ -6,6 +6,8 @@ import {IPolygonLandTunnel} from "../../../common/interfaces/IPolygonLandTunnel.
 import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @title Tunnel migration on L2
+/// @author The Sandbox
+/// @notice Contract handling the migration of LAND tokens from a tunnel to a new one
 contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     struct OwnerWithLandIds {
         address owner;
@@ -43,6 +45,11 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit AdminChanged(_newAdmin);
     }
 
+    /// @notice Constructor of the tunnel migration contract
+    /// @param _polygonLand LAND token address on the child chain
+    /// @param _newLandTunnel tunnel address to migrate to
+    /// @param _oldLandTunnel tunnel address to migrate from
+    /// @param _admin admin of the contract
     constructor(
         address _polygonLand,
         address _newLandTunnel,
@@ -112,6 +119,11 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
     }
 
+    /// @dev called on ERC721 transfer to this contract
+    /// @param operator address executing the transfer
+    /// @param from sender of the token
+    /// @param tokenId token id
+    /// @param data extra data
     function onERC721Received(
         address, /* operator */
         address, /* from */
@@ -121,6 +133,11 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         return this.onERC721Received.selector;
     }
 
+    /// @dev called on ERC721 batch transfer to this contract
+    /// @param operator address executing the transfer
+    /// @param from sender of the token
+    /// @param tokenIds token ids
+    /// @param data extra data
     function onERC721BatchReceived(
         address, /* operator */
         address, /* from */

@@ -74,12 +74,12 @@ contract PolygonLandTunnelV2 is
     }
 
     /// @notice initialize the contract
-    /// @param  _fxChild fx child
+    /// @param _fxChild child contract for state receiver
     /// @param _childToken address of the token on the child chain
-    /// @param  _trustedForwarder address of an ERC2771 meta transaction sender contract
+    /// @param _trustedForwarder address of an ERC2771 meta transaction sender contract
     /// @param _maxGasLimit maximum accepted gas limit
     /// @param _maxAllowedQuads maximum number of quads accepted
-    /// @param  limits the estimated gas that the L1 tx will use per quad size
+    /// @param limits the estimated gas that the L1 tx will use per quad size
     function initialize(
         address _fxChild,
         IPolygonLandV2 _childToken,
@@ -189,7 +189,7 @@ contract PolygonLandTunnelV2 is
 
     /// @dev to be called by external contact to check if this contract supports ERC721 token and batch token receive
     /// @param interfaceId the interface to be checked if supported by the contract
-    /// 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
+    /// @return 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
