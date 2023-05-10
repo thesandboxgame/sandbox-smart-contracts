@@ -410,13 +410,14 @@ contract AvatarCollection is
         require(_msgSender() == allowedToExecuteMint, "AvatarCollection: caller is not allowed");
         require(_wallet != address(0), "AvatarCollection: wallet is zero address");
         require(_amount > 0, "AvatarCollection: amount cannot be 0");
-        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
-        require(
-            _checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
-            "AvatarCollection: signature failed"
-        );
 
-        signatureIds[_signatureId] = 1;
+        _checkAndSetSignature(
+            {
+                _address: _wallet,
+                _signatureId:_signatureId,
+                _signature:_signature
+            }
+        );
 
         require(_checkWaveNotComplete(_amount), "AvatarCollection: wave completed");
         require(_checkLimitNotReached(_wallet, _amount), "AvatarCollection: max allowed");
@@ -435,6 +436,33 @@ contract AvatarCollection is
 
             unchecked { ++i; }
         }
+    }
+
+    /**
+     * @notice Helper function to emit the {MetadataUpdate} event in order for marketplaces to, on demand,
+     *         refresh metadata, for the provided token ID
+     * @dev will revert if owner of token is not caller or if signature is not valid
+     * @param _tokenId the ID belonging to the NFT token for which to emit the event
+     * @param _signatureId validation signature ID
+     * @param _signature validation signature
+     */
+    function reveal(
+        uint256 _tokenId,
+        uint256 _signatureId,
+        bytes memory _signature) external
+    {
+        address sender = _msgSender();
+        require(ownerOf(_tokenId) == sender, "AvatarCollection: sender is not owner");
+
+        _checkAndSetSignature(
+            {
+                _address: sender,
+                _signatureId:_signatureId,
+                _signature:_signature
+            }
+        );
+
+        emit MetadataUpdate(_tokenId);
     }
 
     function pause() external onlyOwner {
@@ -567,7 +595,7 @@ contract AvatarCollection is
         baseTokenURI = baseURI;
         emit BaseURISet(baseURI);
 
-        // Refreshes tje whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
+        // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
         emit MetadataUpdate(type(uint256).max);
     }
 
@@ -669,6 +697,19 @@ contract AvatarCollection is
     /*//////////////////////////////////////////////////////////////
                     Internal and private functions
     //////////////////////////////////////////////////////////////*/
+
+    function _checkAndSetSignature(
+        address _address,
+        uint256 _signatureId,
+        bytes memory _signature) internal
+    {
+        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
+        require(
+            _checkSignature(_address, _signatureId, address(this), block.chainid, _signature) == signAddress,
+            "AvatarCollection: signature failed"
+        );
+        signatureIds[_signatureId] = 1;
+    }
 
     /**
      * @notice validates signature
