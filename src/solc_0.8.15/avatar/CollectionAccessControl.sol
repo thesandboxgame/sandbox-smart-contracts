@@ -66,7 +66,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
     //////////////////////////////////////////////////////////////*/
 
     function __InitializeAccessControl(address owner_) internal initializer {
-        require(owner_ != address(0), "CollectionAccessControlRules: new owner is the zero address");
+        require(owner_ != address(0), "CollectionAccessControl: new owner is the zero address");
 
         __AccessControl_init();
 
@@ -83,7 +83,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
     //////////////////////////////////////////////////////////////*/
 
     function addConfigurator(address account) external onlyOwner {
-        require(account != address(0), "CollectionAccessControlRules: account is zero address");
+        require(account != address(0), "CollectionAccessControl: account is zero address");
         super.grantRole(CONFIGURATOR_ROLE, account);
     }
 
@@ -92,7 +92,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
     }
 
     function addTransformer(address account) external onlyOwner {
-        require(account != address(0), "CollectionAccessControlRules: account is zero address");
+        require(account != address(0), "CollectionAccessControl: account is zero address");
         super.grantRole(TRANSFORMER_ROLE, account);
     }
 
@@ -102,7 +102,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
 
     function acceptOwnership() external {
         address sender = _msgSender();
-        require(pendingOwner() == sender, "CollectionAccessControlRules: caller is not the new owner");
+        require(pendingOwner() == sender, "CollectionAccessControl: caller is not the new owner");
 
         super.revokeRole(ADMIN_ROLE, owner());
         super.grantRole(ADMIN_ROLE, sender);
@@ -111,7 +111,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
     }
 
     function renounceOwnership() public virtual override onlyOwner {
-        revert("CollectionAccessControlRules: Renounce ownership is not available");
+        revert("CollectionAccessControl: Renounce ownership is not available");
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -24,14 +24,12 @@ import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC
 import { IERC4906 } from "../common/IERC4906.sol";
 
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
-import { CollectionStateManagement } from "./CollectionStateManagement.sol";
 import { ERC721BurnMemoryEnumerableUpgradeable } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
 
 /* solhint-disable max-states-count */
 contract AvatarCollection is
     ReentrancyGuardUpgradeable,
-    CollectionStateManagement,
     CollectionAccessControl,
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC2771HandlerUpgradeable,
@@ -39,7 +37,9 @@ contract AvatarCollection is
     PausableUpgradeable,
     IERC4906
 {
-
+    /*//////////////////////////////////////////////////////////////
+                           Type declarations
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Structure used to group default minting parameters in order to avoid stack too deep error
@@ -227,7 +227,11 @@ contract AvatarCollection is
         uint256 _maxSupply,
         OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
-    ) external virtual initializer {
+    )
+        external
+        virtual
+        initializer
+    {
         __AvatarCollection_init(
             _collectionOwner,
             _initialBaseURI,
@@ -268,8 +272,10 @@ contract AvatarCollection is
         uint256 _maxSupply,
         OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
-    ) internal onlyInitializing {
-
+    )
+        internal
+        onlyInitializing
+    {
         require(bytes(_initialBaseURI).length != 0, "AvatarCollection: baseURI is not set");
         require(bytes(_name).length != 0, "AvatarCollection: name is empty");
         require(bytes(_symbol).length != 0, "AvatarCollection: symbol is empty");
@@ -344,7 +350,11 @@ contract AvatarCollection is
         uint256 _waveMaxTokensOverall,
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
-    ) external authorizedRole(CONFIGURATOR_ROLE) whenNotPaused {
+    )
+        external
+        whenNotPaused
+        authorizedRole(CONFIGURATOR_ROLE)
+    {
         require(_waveMaxTokensOverall <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
         require(_waveMaxTokensOverall > 0 , "AvatarCollection: max tokens to mint is 0");
         require(_waveMaxTokensPerWallet > 0, "AvatarCollection: max tokens to mint per wallet is 0");
@@ -413,7 +423,9 @@ contract AvatarCollection is
         uint256 _amount,
         uint256 _signatureId,
         bytes memory _signature
-    ) external whenNotPaused nonReentrant {
+    )
+        external whenNotPaused nonReentrant
+    {
         require(indexWave > 0, "AvatarCollection: contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "AvatarCollection: caller is not allowed");
         require(_wallet != address(0), "AvatarCollection: wallet is zero address");
@@ -440,7 +452,7 @@ contract AvatarCollection is
         waveTotalMinted += _amount;
 
         for (uint256 i; i < _amount; ) {
-            _safeMint(_wallet, getRandomToken(_wallet, totalSupply()));
+            _safeMint(_wallet, _getRandomToken(_wallet, totalSupply()));
 
             unchecked { ++i; }
         }
@@ -457,7 +469,9 @@ contract AvatarCollection is
     function reveal(
         uint256 _tokenId,
         uint256 _signatureId,
-        bytes memory _signature) external
+        bytes memory _signature
+    )
+        external
     {
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "AvatarCollection: sender is not owner");
@@ -495,7 +509,9 @@ contract AvatarCollection is
         bytes memory _signature,
         uint256 _tokenId,
         uint256 _personalizationMask
-    ) external {
+    )
+        external
+    {
         require(ownerOf(_tokenId) == _msgSender(), "AvatarCollection: sender is not owner");
 
         require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
@@ -530,18 +546,6 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice sets which address is allowed to execute the mint function.
-     *         Emits {AllowedExecuteMintSet} event
-     * @dev sets allowedToExecuteMint = _address; address must belong to a contract
-     * @param _minterToken the address that will be allowed to execute the mint function
-     */
-    function setAllowedExecuteMint(address _minterToken) public onlyOwner {
-        require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
-        allowedToExecuteMint = _minterToken;
-        emit AllowedExecuteMintSet(_minterToken);
-    }
-
-    /**
      * @notice saving locally the SAND token owner
      * @dev sets mintTreasury = _treasury
      * @custom:event {TreasurySet}
@@ -565,6 +569,32 @@ contract AvatarCollection is
     }
 
     /**
+     * @notice sets which address is allowed to execute the mint function.
+     *         Emits {AllowedExecuteMintSet} event
+     * @dev sets allowedToExecuteMint = _address; address must belong to a contract
+     * @param _minterToken the address that will be allowed to execute the mint function
+     */
+    function setAllowedExecuteMint(address _minterToken) external onlyOwner {
+        require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
+        allowedToExecuteMint = _minterToken;
+        emit AllowedExecuteMintSet(_minterToken);
+    }
+
+    /**
+     * @notice sets the base token URI for the contract. Emits a {BaseURISet} event.
+     * @dev sets baseTokenURI = baseURI
+     * @param baseURI an URI that will be used as the base for token URI
+     */
+    function setBaseURI(string memory baseURI) external authorizedRole(CONFIGURATOR_ROLE) {
+        require(bytes(baseURI).length != 0, "AvatarCollection: baseURI is not set");
+        baseTokenURI = baseURI;
+        emit BaseURISet(baseURI);
+
+        // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
+        emit MetadataUpdate(type(uint256).max);
+    }
+
+    /**
      * @notice get the personalization of the indicated tokenID
      * @dev returns personalizationTraits[_tokenId]
      * @param _tokenId the token ID to check
@@ -585,26 +615,23 @@ contract AvatarCollection is
     }
 
     /**
+     * @notice get the price of minting the indicated number of tokens for the current wave
+     * @dev returns waveSingleTokenPrice * _count; Does not check if it is possible
+     *      to actually mint that much
+     * @param _count the number of tokens to estimate mint price for
+     * @return uint256 price of minting all the tokens
+     */
+    function price(uint256 _count) public view virtual returns (uint256) {
+        return waveSingleTokenPrice * _count;
+    }
+
+    /**
      * @notice helper automation function
      * @dev returns block.chainid
      * @return uint256 current chainID for the blockchain
      */
     function chain() external view returns (uint256) {
         return block.chainid;
-    }
-
-    /**
-     * @notice sets the base token URI for the contract. Emits a {BaseURISet} event.
-     * @dev sets baseTokenURI = baseURI
-     * @param baseURI an URI that will be used as the base for token URI
-     */
-    function setBaseURI(string memory baseURI) public authorizedRole(CONFIGURATOR_ROLE) {
-        require(bytes(baseURI).length != 0, "AvatarCollection: baseURI is not set");
-        baseTokenURI = baseURI;
-        emit BaseURISet(baseURI);
-
-        // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
-        emit MetadataUpdate(type(uint256).max);
     }
 
     /**
@@ -619,6 +646,20 @@ contract AvatarCollection is
     {
         return interfaceId == type(ERC721EnumerableUpgradeable).interfaceId
                 || interfaceId == type(AccessControlUpgradeable).interfaceId;
+    }
+
+    /**
+     * @notice returns the owner of the contract
+     * @dev returns OwnableUpgradeable.owner()
+     * @return owner of current contract
+     */
+    function owner()
+        public
+        view
+        override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable)
+        returns (address)
+    {
+        return OwnableUpgradeable.owner();
     }
 
     /**
@@ -650,7 +691,11 @@ contract AvatarCollection is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from)
+    {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -661,7 +706,11 @@ contract AvatarCollection is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from)
+    {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -673,122 +722,17 @@ contract AvatarCollection is
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, tokenId, data);
-    }
-
-    /**
-     * @notice get the price of minting the indicated number of tokens for the current wave
-     * @dev returns waveSingleTokenPrice * _count; Does not check if it is possible
-     *      to actually mint that much
-     * @param _count the number of tokens to estimate mint price for
-     * @return uint256 price of minting all the tokens
-     */
-    function price(uint256 _count) public view virtual returns (uint256) {
-        return waveSingleTokenPrice * _count;
-    }
-
-    /**
-     * @notice returns the owner of the contract
-     * @dev returns OwnableUpgradeable.owner()
-     * @return owner of current contract
-     */
-    function owner()
+    )
         public
-        view
-        override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable)
-        returns (address)
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from)
     {
-        return OwnableUpgradeable.owner();
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     /*//////////////////////////////////////////////////////////////
                     Internal and private functions
     //////////////////////////////////////////////////////////////*/
-
-    function _checkAndSetSignature(
-        address _address,
-        uint256 _signatureId,
-        bytes memory _signature) internal
-    {
-        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
-        require(
-            _checkSignature(_address, _signatureId, address(this), block.chainid, _signature) == signAddress,
-            "AvatarCollection: signature failed"
-        );
-        signatureIds[_signatureId] = 1;
-    }
-
-    /**
-     * @notice validates signature
-     * @dev uses ECDSA.recover on the provided params
-     * @param _wallet wallet that was used in signature generation
-     * @param _signatureId id of signature
-     * @param _contractAddress contract address that was used in signature generation
-     * @param _chainId chain ID for which the signature was generated
-     * @param _signature signature
-     * @return address that validates the provided signature
-     */
-    function _checkSignature(
-        address _wallet,
-        uint256 _signatureId,
-        address _contractAddress,
-        uint256 _chainId,
-        bytes memory _signature
-    ) internal pure returns (address) {
-        return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
-                    )
-                ),
-                _signature
-            );
-    }
-
-    /**
-     * @notice validate personalization mask
-     * @dev uses ECDSA.recover on the provided params
-     * @param _wallet wallet that was used in signature generation
-     * @param _signatureId id of signature
-     * @param _contractAddress contract address that was used in signature generation
-     * @param _chainId chain ID for which the signature was generated
-     * @param _tokenId token ID for which the signature was generated
-     * @param _personalizationMask a mask where each bit has a custom meaning in-game
-     * @param _signature signature
-     * @return address that validates the provided signature
-     */
-    function _checkPersonalizationSignature(
-        address _wallet,
-        uint256 _signatureId,
-        address _contractAddress,
-        uint256 _chainId,
-        uint256 _tokenId,
-        uint256 _personalizationMask,
-        bytes memory _signature
-    ) internal pure returns (address) {
-        return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(
-                            abi.encode(
-                                _wallet,
-                                _signatureId,
-                                _contractAddress,
-                                _chainId,
-                                _tokenId,
-                                _personalizationMask
-                            )
-                        )
-                    )
-                ),
-                _signature
-            );
-    }
 
     /**
      * @notice get base TokenURI
@@ -827,16 +771,98 @@ contract AvatarCollection is
         sender = ERC2771HandlerUpgradeable._msgSender();
     }
 
-    function _updateTokenTraits(
-        uint256 _tokenId,
-        uint256 _personalizationMask
-    )
-        internal
+    function _checkAndSetSignature(
+        address _address,
+        uint256 _signatureId,
+        bytes memory _signature) internal
     {
-        personalizationTraits[_tokenId] = _personalizationMask;
+        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
+        require(
+            _checkSignature(
+                _address,
+                _signatureId,
+                address(this),
+                block.chainid,
+                _signature
+            ) == signAddress,
+            "AvatarCollection: signature failed"
+        );
+        signatureIds[_signatureId] = 1;
+    }
 
-        emit Personalized(_tokenId, _personalizationMask);
-        emit MetadataUpdate(_tokenId);
+    /**
+     * @notice validates signature
+     * @dev uses ECDSA.recover on the provided params
+     * @param _wallet wallet that was used in signature generation
+     * @param _signatureId id of signature
+     * @param _contractAddress contract address that was used in signature generation
+     * @param _chainId chain ID for which the signature was generated
+     * @param _signature signature
+     * @return address that validates the provided signature
+     */
+    function _checkSignature(
+        address _wallet,
+        uint256 _signatureId,
+        address _contractAddress,
+        uint256 _chainId,
+        bytes memory _signature
+    )
+        internal pure returns (address)
+    {
+        return
+            ECDSA.recover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19Ethereum Signed Message:\n32",
+                        keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
+                    )
+                ),
+                _signature
+            );
+    }
+
+    /**
+     * @notice validate personalization mask
+     * @dev uses ECDSA.recover on the provided params
+     * @param _wallet wallet that was used in signature generation
+     * @param _signatureId id of signature
+     * @param _contractAddress contract address that was used in signature generation
+     * @param _chainId chain ID for which the signature was generated
+     * @param _tokenId token ID for which the signature was generated
+     * @param _personalizationMask a mask where each bit has a custom meaning in-game
+     * @param _signature signature
+     * @return address that validates the provided signature
+     */
+    function _checkPersonalizationSignature(
+        address _wallet,
+        uint256 _signatureId,
+        address _contractAddress,
+        uint256 _chainId,
+        uint256 _tokenId,
+        uint256 _personalizationMask,
+        bytes memory _signature
+    )
+        internal pure returns (address)
+    {
+        return
+            ECDSA.recover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19Ethereum Signed Message:\n32",
+                        keccak256(
+                            abi.encode(
+                                _wallet,
+                                _signatureId,
+                                _contractAddress,
+                                _chainId,
+                                _tokenId,
+                                _personalizationMask
+                            )
+                        )
+                    )
+                ),
+                _signature
+            );
     }
 
     /**
@@ -869,6 +895,19 @@ contract AvatarCollection is
             totalSupply() + _amount <= maxSupply;
     }
 
+
+    function _updateTokenTraits(
+        uint256 _tokenId,
+        uint256 _personalizationMask
+    )
+        internal
+    {
+        personalizationTraits[_tokenId] = _personalizationMask;
+
+        emit Personalized(_tokenId, _personalizationMask);
+        emit MetadataUpdate(_tokenId);
+    }
+
     /**
      * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
      * @dev standard pseudo-random implementation using keccak256 over various parameters.
@@ -876,10 +915,19 @@ contract AvatarCollection is
      * @param _totalMinted total minted tokens up to this point
      * @return pseudo-random value
      */
-    function getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
+    function _getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
         uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        _wallet,
+                        block.difficulty,
+                        block.timestamp,
+                        remaining
+                    )
+                )
+            ) % remaining;
         uint256 value = rand;
 
         if (availableIds[rand] != 0) {
