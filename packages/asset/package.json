@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/asset",
-  "version": "alpha",
+  "version": "0.0.1",
   "description": "Asset L2 smart contracts",
   "scripts": {
     "node": "hardhat node --no-deploy",
