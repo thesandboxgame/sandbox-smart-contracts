@@ -329,26 +329,27 @@ contract AvatarCollection is
      * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
      *         minted in total, per wallet and minting price
      * @dev emits {WaveSetup} event
-     * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
-     * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
+     * @param _waveMaxTokensOverall the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
+     * @param _waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
      * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
      */
     function setupWave(
-        uint256 _waveMaxTokens,
-        uint256 _waveMaxTokensToBuy,
+        uint256 _waveMaxTokensOverall,
+        uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
     ) external authorizedRole(CONFIGURATOR_ROLE) whenNotPaused {
-        require(_waveMaxTokens <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
-        require(_waveMaxTokens > 0 && _waveMaxTokensToBuy > 0, "AvatarCollection: invalid configuration");
-        require(_waveMaxTokensToBuy <= _waveMaxTokens, "AvatarCollection: invalid supply configuration");
+        require(_waveMaxTokensOverall <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
+        require(_waveMaxTokensOverall > 0 , "AvatarCollection: max tokens to mint is 0");
+        require(_waveMaxTokensPerWallet > 0, "AvatarCollection: max tokens to mint per wallet is 0");
+        require(_waveMaxTokensPerWallet <= _waveMaxTokensOverall, "AvatarCollection: invalid supply configuration");
 
-        waveMaxTokensOverall = _waveMaxTokens;
-        waveMaxTokensPerWallet = _waveMaxTokensToBuy;
+        waveMaxTokensOverall = _waveMaxTokensOverall;
+        waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
         waveSingleTokenPrice = _waveSingleTokenPrice;
         waveTotalMinted = 0;
         indexWave++;
 
-        emit WaveSetup(_waveMaxTokens, _waveMaxTokensToBuy, _waveSingleTokenPrice);
+        emit WaveSetup(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
     }
 
     function setMarketingMint()
