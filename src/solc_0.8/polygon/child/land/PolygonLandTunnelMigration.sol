@@ -56,10 +56,10 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         address _oldLandTunnel,
         address _admin
     ) {
-        require(_admin != address(0), "PolygonLandTunnelMigration: admin cant be zero address");
-        require(_polygonLand != address(0), "PolygonLandTunnelMigration: polygonLand cant be zero address");
-        require(_newLandTunnel != address(0), "PolygonLandTunnelMigration: new Tunnel cant be zero address");
-        require(_oldLandTunnel != address(0), "PolygonLandTunnelMigration: old Tunnel cant be zero address");
+        require(_admin != address(0), "PolygonLandTunnelMigration: admin can't be zero address");
+        require(_polygonLand != address(0), "PolygonLandTunnelMigration: polygonLand can't be zero address");
+        require(_newLandTunnel != address(0), "PolygonLandTunnelMigration: new Tunnel can't be zero address");
+        require(_oldLandTunnel != address(0), "PolygonLandTunnelMigration: old Tunnel can't be zero address");
         admin = _admin;
         polygonLand = IPolygonLandWithSetApproval(_polygonLand);
         newLandTunnel = _newLandTunnel;

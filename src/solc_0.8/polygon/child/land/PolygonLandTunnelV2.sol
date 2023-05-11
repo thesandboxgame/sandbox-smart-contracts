@@ -161,7 +161,7 @@ contract PolygonLandTunnelV2 is
         _unpause();
     }
 
-    /// @dev called on ERC721 trasnfer to this contract
+    /// @dev called on ERC721 transfer to this contract
     /// @param operator address of the one sending the ERC721 Token
     /// @return onERC721Received function selector
     function onERC721Received(
@@ -174,7 +174,7 @@ contract PolygonLandTunnelV2 is
         return this.onERC721Received.selector;
     }
 
-    /// @dev called on ERC721 batch trasnfer to this contract
+    /// @dev called on ERC721 batch transfer to this contract
     /// @param operator address of the one sending the ERC721 Token
     /// @return onERC721BatchReceived function selector
     function onERC721BatchReceived(
