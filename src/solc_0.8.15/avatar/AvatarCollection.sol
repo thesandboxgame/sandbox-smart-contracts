@@ -740,8 +740,9 @@ contract AvatarCollection is
         override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
-        return interfaceId == type(ERC721EnumerableUpgradeable).interfaceId
-                || interfaceId == type(AccessControlUpgradeable).interfaceId;
+        return
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
+            ERC721EnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
     /**
