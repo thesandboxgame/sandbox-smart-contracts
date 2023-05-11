@@ -16,9 +16,9 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         uint256[] y;
     }
 
-    IPolygonLandWithSetApproval public polygonLand;
-    address public newLandTunnel;
-    address public oldLandTunnel;
+    IPolygonLandWithSetApproval public immutable polygonLand;
+    address public immutable newLandTunnel;
+    address public immutable oldLandTunnel;
     address private admin;
 
     event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);
