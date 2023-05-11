@@ -52,7 +52,7 @@ contract PolygonLandTunnelV2 is
     /// @param  size the size of the quad
     /// @param  limit the estimated gas that the L1 tx will use
     function setLimit(uint8 size, uint32 limit) external onlyOwner {
-        require(size == 1 | size == 3 | size == 6 | size == 12 | size == 24, "PolygonLandTunnelV2: invalid data");
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "PolygonLandTunnelV2: invalid data");
 
         _setLimit(size, limit);
     }
