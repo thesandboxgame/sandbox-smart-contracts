@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import { BeaconProxy } from "openzeppelin-contracts/proxy/beacon/BeaconProxy.sol";
+import { BeaconProxy } from "@openzeppelin/contracts-0.8.15/proxy/beacon/BeaconProxy.sol";
 
 /**
  * @title CollectionProxy

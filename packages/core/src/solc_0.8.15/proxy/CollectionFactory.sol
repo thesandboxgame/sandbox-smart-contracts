@@ -2,10 +2,10 @@
 pragma solidity 0.8.15;
 
 
-import { Ownable2Step } from "openzeppelin-contracts/access/Ownable2Step.sol";
-import { UpgradeableBeacon } from "openzeppelin-contracts/proxy/beacon/UpgradeableBeacon.sol";
-import { EnumerableSet } from "openzeppelin-contracts/utils/structs/EnumerableSet.sol";
-import { Address } from "openzeppelin-contracts/utils/Address.sol";
+import { Ownable2Step } from "@openzeppelin/contracts-0.8.15/access/Ownable2Step.sol";
+import { UpgradeableBeacon } from "@openzeppelin/contracts-0.8.15/proxy/beacon/UpgradeableBeacon.sol";
+import { EnumerableSet } from "@openzeppelin/contracts-0.8.15/utils/structs/EnumerableSet.sol";
+import { Address } from "@openzeppelin/contracts-0.8.15/utils/Address.sol";
 import { CollectionProxy } from "./CollectionProxy.sol";
 import { IERC5313 } from "../common/IERC5313.sol";
 

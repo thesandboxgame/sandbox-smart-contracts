@@ -2,23 +2,23 @@
 
 pragma solidity 0.8.15;
 
-
-import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import { AccessControlUpgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import { AccessControlUpgradeable, ContextUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
 import {
     ERC721EnumerableUpgradeable,
     ERC721Upgradeable,
     IERC721Upgradeable
-    } from "openzeppelin-contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+    } from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
-import { ECDSA } from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
-import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
-import { IERC20Metadata } from "openzeppelin-contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import { SafeERC20 } from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
+import { ECDSA } from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
+import { IERC20 } from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
+import { IERC20Metadata } from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
+import { SafeERC20 } from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 
-import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
+// import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/src/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
+import { UpdatableOperatorFiltererUpgradeable } from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import { IERC4906 } from "../common/IERC4906.sol";
@@ -742,7 +742,7 @@ contract AvatarCollection is
     {
         return
             interfaceId == type(AccessControlUpgradeable).interfaceId ||
-            ERC721EnumerableUpgradeable.supportsInterface(interfaceId);
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -1069,7 +1069,7 @@ contract AvatarCollection is
 
     /**
      * Empty storage space in contracts for future enhancements
-     * ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
+     * ref: https://github.com/OpenZeppelin/<at>openzeppelin/contracts-upgradeable/issues/13
      */
     uint256[50] private __gap;
 }

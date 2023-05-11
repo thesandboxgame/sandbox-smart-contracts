@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import { ERC721EnumerableUpgradeable } from "openzeppelin-contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import { ERC721EnumerableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /**
  * @title ERC721BurnMemoryEnumerableUpgradeable
