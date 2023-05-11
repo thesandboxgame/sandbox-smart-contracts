@@ -47,20 +47,20 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5061021b806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b6040516100559190610195565b60405180910390f35b61007161006c3660046101bd565b610073565b005b60005460ff1681600381111561008b5761008b61017f565b81600381111561009d5761009d61017f565b0361010a5760405162461bcd60e51b815260206004820152603360248201527f436f6c6c656374696f6e53746174654d616e6167656d656e743a20616c726561604482015272647920696e206465736972656420737461746560681b606482015260840160405180910390fd5b6000805483919060ff191660018360038111156101295761012961017f565b02179055508160038111156101405761014061017f565b8160038111156101525761015261017f565b6040517fe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d890600090a35050565b634e487b7160e01b600052602160045260246000fd5b60208101600483106101b757634e487b7160e01b600052602160045260246000fd5b91905290565b6000602082840312156101cf57600080fd5b8135600481106101de57600080fd5b939250505056fea2646970667358221220559fb45d63c0459efce81270f58e825e8941b91944f7233aa9490a47652b4b7a64736f6c634300080f0033",
-    "sourceMap": "57:2345:30:-:0;;;;;;;;;;;;;;;;;;;",
+    "object": "0x608060405234801561001057600080fd5b5061021b806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b6040516100559190610195565b60405180910390f35b61007161006c3660046101bd565b610073565b005b60005460ff1681600381111561008b5761008b61017f565b81600381111561009d5761009d61017f565b0361010a5760405162461bcd60e51b815260206004820152603360248201527f436f6c6c656374696f6e53746174654d616e6167656d656e743a20616c726561604482015272647920696e206465736972656420737461746560681b606482015260840160405180910390fd5b6000805483919060ff191660018360038111156101295761012961017f565b02179055508160038111156101405761014061017f565b8160038111156101525761015261017f565b6040517fe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d890600090a35050565b634e487b7160e01b600052602160045260246000fd5b60208101600483106101b757634e487b7160e01b600052602160045260246000fd5b91905290565b6000602082840312156101cf57600080fd5b8135600481106101de57600080fd5b939250505056fea26469706673582212202b005eb0a95c837e46da5224313f95bd7186bc2ac903fe742cfa55bbc2509c9664736f6c634300080f0033",
+    "sourceMap": "410:2345:61:-:0;;;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b6040516100559190610195565b60405180910390f35b61007161006c3660046101bd565b610073565b005b60005460ff1681600381111561008b5761008b61017f565b81600381111561009d5761009d61017f565b0361010a5760405162461bcd60e51b815260206004820152603360248201527f436f6c6c656374696f6e53746174654d616e6167656d656e743a20616c726561604482015272647920696e206465736972656420737461746560681b606482015260840160405180910390fd5b6000805483919060ff191660018360038111156101295761012961017f565b02179055508160038111156101405761014061017f565b8160038111156101525761015261017f565b6040517fe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d890600090a35050565b634e487b7160e01b600052602160045260246000fd5b60208101600483106101b757634e487b7160e01b600052602160045260246000fd5b91905290565b6000602082840312156101cf57600080fd5b8135600481106101de57600080fd5b939250505056fea2646970667358221220559fb45d63c0459efce81270f58e825e8941b91944f7233aa9490a47652b4b7a64736f6c634300080f0033",
-    "sourceMap": "57:2345:30:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;387:25;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;2139:261;;;;;;:::i;:::-;;:::i;:::-;;;2198:14;2215:12;;;2257:5;2245:17;;;;;;;;:::i;:::-;:8;:17;;;;;;;;:::i;:::-;;2237:81;;;;-1:-1:-1;;;2237:81:30;;962:2:35;2237:81:30;;;944:21:35;1001:2;981:18;;;974:30;1040:34;1020:18;;;1013:62;-1:-1:-1;;;1091:18:35;;;1084:49;1150:19;;2237:81:30;;;;;;;;2328:12;:20;;2343:5;;2328:12;-1:-1:-1;;2328:20:30;;2343:5;2328:20;;;;;;;;:::i;:::-;;;;;;2387:5;2364:29;;;;;;;;:::i;:::-;2377:8;2364:29;;;;;;;;:::i;:::-;;;;;;;;2188:212;2139:261;:::o;14:127:35:-;75:10;70:3;66:20;63:1;56:31;106:4;103:1;96:15;130:4;127:1;120:15;146:338;288:2;273:18;;321:1;310:13;;300:144;;366:10;361:3;357:20;354:1;347:31;401:4;398:1;391:15;429:4;426:1;419:15;300:144;453:25;;;146:338;:::o;489:266::-;558:6;611:2;599:9;590:7;586:23;582:32;579:52;;;627:1;624;617:12;579:52;666:9;653:23;705:1;698:5;695:12;685:40;;721:1;718;711:12;685:40;744:5;489:266;-1:-1:-1;;;489:266:35:o",
+    "object": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80630c3f6acf1461003b578063268f11531461005e575b600080fd5b6000546100489060ff1681565b6040516100559190610195565b60405180910390f35b61007161006c3660046101bd565b610073565b005b60005460ff1681600381111561008b5761008b61017f565b81600381111561009d5761009d61017f565b0361010a5760405162461bcd60e51b815260206004820152603360248201527f436f6c6c656374696f6e53746174654d616e6167656d656e743a20616c726561604482015272647920696e206465736972656420737461746560681b606482015260840160405180910390fd5b6000805483919060ff191660018360038111156101295761012961017f565b02179055508160038111156101405761014061017f565b8160038111156101525761015261017f565b6040517fe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d890600090a35050565b634e487b7160e01b600052602160045260246000fd5b60208101600483106101b757634e487b7160e01b600052602160045260246000fd5b91905290565b6000602082840312156101cf57600080fd5b8135600481106101de57600080fd5b939250505056fea26469706673582212202b005eb0a95c837e46da5224313f95bd7186bc2ac903fe742cfa55bbc2509c9664736f6c634300080f0033",
+    "sourceMap": "410:2345:61:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;740:25;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;2492:261;;;;;;:::i;:::-;;:::i;:::-;;;2551:14;2568:12;;;2610:5;2598:17;;;;;;;;:::i;:::-;:8;:17;;;;;;;;:::i;:::-;;2590:81;;;;-1:-1:-1;;;2590:81:61;;964:2:72;2590:81:61;;;946:21:72;1003:2;983:18;;;976:30;1042:34;1022:18;;;1015:62;-1:-1:-1;;;1093:18:72;;;1086:49;1152:19;;2590:81:61;;;;;;;;2681:12;:20;;2696:5;;2681:12;-1:-1:-1;;2681:20:61;;2696:5;2681:20;;;;;;;;:::i;:::-;;;;;;2740:5;2717:29;;;;;;;;:::i;:::-;2730:8;2717:29;;;;;;;;:::i;:::-;;;;;;;;2541:212;2492:261;:::o;14:127:72:-;75:10;70:3;66:20;63:1;56:31;106:4;103:1;96:15;130:4;127:1;120:15;146:339;289:2;274:18;;322:1;311:13;;301:144;;367:10;362:3;358:20;355:1;348:31;402:4;399:1;392:15;430:4;427:1;420:15;301:144;454:25;;;146:339;:::o;490:267::-;560:6;613:2;601:9;592:7;588:23;584:32;581:52;;;629:1;626;619:12;581:52;668:9;655:23;707:1;700:5;697:12;687:40;;723:1;720;713:12;687:40;746:5;490:267;-1:-1:-1;;;490:267:72:o",
     "linkReferences": {}
   },
   "methodIdentifiers": {
     "changeState(uint8)": "268f1153",
     "currentState()": "0c3f6acf"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"oldState\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"newState\",\"type\":\"uint8\"}],\"name\":\"StateChanged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"state\",\"type\":\"uint8\"}],\"name\":\"changeState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentState\",\"outputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"StateChanged(uint8,uint8)\":{\"details\":\"emitted when changeState is called\",\"params\":{\"newState\":\"the new contract state\",\"oldState\":\"the previous contract state\"}}},\"kind\":\"dev\",\"methods\":{\"changeState(uint8)\":{\"custom:event\":\"{StateChanged}\",\"details\":\"will revert if we are already in the desired state\",\"params\":{\"state\":\"the state in which the contract will change\"}}},\"version\":1},\"userdoc\":{\"events\":{\"StateChanged(uint8,uint8)\":{\"notice\":\"Event emitted when the contract state was changed\"}},\"kind\":\"user\",\"methods\":{\"changeState(uint8)\":{\"notice\":\"Changes the current contract state         WARNING this must be overwritten if you want to add control modifiers to it\"},\"currentState()\":{\"notice\":\"the current state of the collection contract; Values are defined in the State enum\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":\"CollectionStateManagement\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":{\"keccak256\":\"0x4483a32c0a1401e5947c41c431e2715720ce1d6b93731545abbf073b619e1497\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8cec0ba3af2d7d26121acc4251dba8202c0501b2d7678c751fbf1a2e0e5f7e0b\",\"dweb:/ipfs/QmNTJLBSqjiTqMj4S15DCyP3wgJWNUtxVmSu1TVggya96K\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"oldState\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"newState\",\"type\":\"uint8\"}],\"name\":\"StateChanged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"state\",\"type\":\"uint8\"}],\"name\":\"changeState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentState\",\"outputs\":[{\"internalType\":\"enum CollectionStateManagement.State\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"qed.team x The Sandbox\",\"events\":{\"StateChanged(uint8,uint8)\":{\"details\":\"emitted when changeState is called\",\"params\":{\"newState\":\"the new contract state\",\"oldState\":\"the previous contract state\"}}},\"kind\":\"dev\",\"methods\":{\"changeState(uint8)\":{\"custom:event\":\"{StateChanged}\",\"details\":\"will revert if we are already in the desired state\",\"params\":{\"state\":\"the state in which the contract will change\"}}},\"title\":\"CollectionStateManagement\",\"version\":1},\"userdoc\":{\"events\":{\"StateChanged(uint8,uint8)\":{\"notice\":\"Event emitted when the contract state was changed\"}},\"kind\":\"user\",\"methods\":{\"changeState(uint8)\":{\"notice\":\"Changes the current contract state         WARNING this must be overwritten if you want to add control modifiers to it\"},\"currentState()\":{\"notice\":\"the current state of the collection contract; Values are defined in the State enum\"}},\"notice\":\"helper contract used to manage avatar collection states with regards to minting phases         Warning, {changeState} must be overwritten in the inheriting contract and added accesses         control limitations as this version is called by anybody as it is\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":\"CollectionStateManagement\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":contracts/=src/solc_0.8.15/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/operator-filter-registry/lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":operator-filter-registry/=lib/operator-filter-registry/src/\"]},\"sources\":{\"src/solc_0.8.15/avatar/CollectionStateManagement.sol\":{\"keccak256\":\"0x752c238292ef0b5f6f0a28dbacc2e1823274f7a8f12aab3fe259ab13dd1cdc5d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://4651198a51744f6b865931a4a86baeefd01f1e4d3f106c892f331f7f090a808e\",\"dweb:/ipfs/QmURbwPV1hxNqb9Sk45fWZW4CPbw1NKxu5ouj5GhL6qWyW\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -162,10 +162,10 @@
     },
     "sources": {
       "src/solc_0.8.15/avatar/CollectionStateManagement.sol": {
-        "keccak256": "0x4483a32c0a1401e5947c41c431e2715720ce1d6b93731545abbf073b619e1497",
+        "keccak256": "0x752c238292ef0b5f6f0a28dbacc2e1823274f7a8f12aab3fe259ab13dd1cdc5d",
         "urls": [
-          "bzz-raw://8cec0ba3af2d7d26121acc4251dba8202c0501b2d7678c751fbf1a2e0e5f7e0b",
-          "dweb:/ipfs/QmNTJLBSqjiTqMj4S15DCyP3wgJWNUtxVmSu1TVggya96K"
+          "bzz-raw://4651198a51744f6b865931a4a86baeefd01f1e4d3f106c892f331f7f090a808e",
+          "dweb:/ipfs/QmURbwPV1hxNqb9Sk45fWZW4CPbw1NKxu5ouj5GhL6qWyW"
         ],
         "license": "MIT"
       }
@@ -174,19 +174,19 @@
   },
   "ast": {
     "absolutePath": "src/solc_0.8.15/avatar/CollectionStateManagement.sol",
-    "id": 8237,
+    "id": 39260,
     "exportedSymbols": {
       "CollectionStateManagement": [
-        8236
+        39259
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "32:2371:30",
+    "src": "32:2724:61",
     "nodes": [
       {
-        "id": 8173,
+        "id": 39195,
         "nodeType": "PragmaDirective",
-        "src": "32:23:30",
+        "src": "32:23:61",
         "nodes": [],
         "literals": [
           "solidity",
@@ -195,140 +195,140 @@
         ]
       },
       {
-        "id": 8236,
+        "id": 39259,
         "nodeType": "ContractDefinition",
-        "src": "57:2345:30",
+        "src": "410:2345:61",
         "nodes": [
           {
-            "id": 8177,
+            "id": 39200,
             "nodeType": "VariableDeclaration",
-            "src": "387:25:30",
+            "src": "740:25:61",
             "nodes": [],
             "constant": false,
             "documentation": {
-              "id": 8174,
+              "id": 39197,
               "nodeType": "StructuredDocumentation",
-              "src": "288:94:30",
+              "src": "641:94:61",
               "text": "@notice the current state of the collection contract; Values are defined in the State enum"
             },
             "functionSelector": "0c3f6acf",
             "mutability": "mutable",
             "name": "currentState",
-            "nameLocation": "400:12:30",
-            "scope": 8236,
+            "nameLocation": "753:12:61",
+            "scope": 39259,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_enum$_State_$8182",
+              "typeIdentifier": "t_enum$_State_$39205",
               "typeString": "enum CollectionStateManagement.State"
             },
             "typeName": {
-              "id": 8176,
+              "id": 39199,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 8175,
+                "id": 39198,
                 "name": "State",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 8182,
-                "src": "387:5:30"
+                "referencedDeclaration": 39205,
+                "src": "740:5:61"
               },
-              "referencedDeclaration": 8182,
-              "src": "387:5:30",
+              "referencedDeclaration": 39205,
+              "src": "740:5:61",
               "typeDescriptions": {
-                "typeIdentifier": "t_enum$_State_$8182",
+                "typeIdentifier": "t_enum$_State_$39205",
                 "typeString": "enum CollectionStateManagement.State"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 8182,
+            "id": 39205,
             "nodeType": "EnumDefinition",
-            "src": "492:175:30",
+            "src": "845:175:61",
             "nodes": [],
             "canonicalName": "CollectionStateManagement.State",
             "members": [
               {
-                "id": 8178,
+                "id": 39201,
                 "name": "IDLE",
-                "nameLocation": "513:4:30",
+                "nameLocation": "866:4:61",
                 "nodeType": "EnumValue",
-                "src": "513:4:30"
+                "src": "866:4:61"
               },
               {
-                "id": 8179,
+                "id": 39202,
                 "name": "MARKETING_MINT",
-                "nameLocation": "583:14:30",
+                "nameLocation": "936:14:61",
                 "nodeType": "EnumValue",
-                "src": "583:14:30"
+                "src": "936:14:61"
               },
               {
-                "id": 8180,
+                "id": 39203,
                 "name": "ALLOWLIST_MINT",
-                "nameLocation": "612:14:30",
+                "nameLocation": "965:14:61",
                 "nodeType": "EnumValue",
-                "src": "612:14:30"
+                "src": "965:14:61"
               },
               {
-                "id": 8181,
+                "id": 39204,
                 "name": "PUBLIC_MINT",
-                "nameLocation": "641:11:30",
+                "nameLocation": "994:11:61",
                 "nodeType": "EnumValue",
-                "src": "641:11:30"
+                "src": "994:11:61"
               }
             ],
             "name": "State",
-            "nameLocation": "497:5:30"
+            "nameLocation": "850:5:61"
           },
           {
-            "id": 8191,
+            "id": 39214,
             "nodeType": "EventDefinition",
-            "src": "1076:67:30",
+            "src": "1429:67:61",
             "nodes": [],
             "anonymous": false,
             "documentation": {
-              "id": 8183,
+              "id": 39206,
               "nodeType": "StructuredDocumentation",
-              "src": "851:220:30",
+              "src": "1204:220:61",
               "text": " @notice Event emitted when the contract state was changed\n @dev emitted when changeState is called\n @param oldState the previous contract state\n @param newState the new contract state"
             },
             "eventSelector": "e8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d8",
             "name": "StateChanged",
-            "nameLocation": "1082:12:30",
+            "nameLocation": "1435:12:61",
             "parameters": {
-              "id": 8190,
+              "id": 39213,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8186,
+                  "id": 39209,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "oldState",
-                  "nameLocation": "1109:8:30",
+                  "nameLocation": "1462:8:61",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8191,
-                  "src": "1095:22:30",
+                  "scope": 39214,
+                  "src": "1448:22:61",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_State_$8182",
+                    "typeIdentifier": "t_enum$_State_$39205",
                     "typeString": "enum CollectionStateManagement.State"
                   },
                   "typeName": {
-                    "id": 8185,
+                    "id": 39208,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 8184,
+                      "id": 39207,
                       "name": "State",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 8182,
-                      "src": "1095:5:30"
+                      "referencedDeclaration": 39205,
+                      "src": "1448:5:61"
                     },
-                    "referencedDeclaration": 8182,
-                    "src": "1095:5:30",
+                    "referencedDeclaration": 39205,
+                    "src": "1448:5:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
@@ -336,52 +336,52 @@
                 },
                 {
                   "constant": false,
-                  "id": 8189,
+                  "id": 39212,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "newState",
-                  "nameLocation": "1133:8:30",
+                  "nameLocation": "1486:8:61",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8191,
-                  "src": "1119:22:30",
+                  "scope": 39214,
+                  "src": "1472:22:61",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_State_$8182",
+                    "typeIdentifier": "t_enum$_State_$39205",
                     "typeString": "enum CollectionStateManagement.State"
                   },
                   "typeName": {
-                    "id": 8188,
+                    "id": 39211,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 8187,
+                      "id": 39210,
                       "name": "State",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 8182,
-                      "src": "1119:5:30"
+                      "referencedDeclaration": 39205,
+                      "src": "1472:5:61"
                     },
-                    "referencedDeclaration": 8182,
-                    "src": "1119:5:30",
+                    "referencedDeclaration": 39205,
+                    "src": "1472:5:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "1094:48:30"
+              "src": "1447:48:61"
             }
           },
           {
-            "id": 8206,
+            "id": 39229,
             "nodeType": "ModifierDefinition",
-            "src": "1460:164:30",
+            "src": "1813:164:61",
             "nodes": [],
             "body": {
-              "id": 8205,
+              "id": 39228,
               "nodeType": "Block",
-              "src": "1494:130:30",
+              "src": "1847:130:61",
               "nodes": [],
               "statements": [
                 {
@@ -389,41 +389,41 @@
                     "arguments": [
                       {
                         "commonType": {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         },
-                        "id": 8200,
+                        "id": 39223,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
-                          "id": 8198,
+                          "id": 39221,
                           "name": "currentState",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8177,
-                          "src": "1512:12:30",
+                          "referencedDeclaration": 39200,
+                          "src": "1865:12:61",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_State_$8182",
+                            "typeIdentifier": "t_enum$_State_$39205",
                             "typeString": "enum CollectionStateManagement.State"
                           }
                         },
                         "nodeType": "BinaryOperation",
                         "operator": "==",
                         "rightExpression": {
-                          "id": 8199,
+                          "id": 39222,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8195,
-                          "src": "1528:5:30",
+                          "referencedDeclaration": 39218,
+                          "src": "1881:5:61",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_State_$8182",
+                            "typeIdentifier": "t_enum$_State_$39205",
                             "typeString": "enum CollectionStateManagement.State"
                           }
                         },
-                        "src": "1512:21:30",
+                        "src": "1865:21:61",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -431,14 +431,14 @@
                       },
                       {
                         "hexValue": "436f6c6c656374696f6e53746174654d616e6167656d656e743a206f7065726174696f6e2063616e6e6f7420626520646f6e6520696e2063757272656e74207374617465",
-                        "id": 8201,
+                        "id": 39224,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "1535:70:30",
+                        "src": "1888:70:61",
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_f3810c37664fc88bc540f19da7f8e67e767e8a830e5583f0168a8091bde6201b",
                           "typeString": "literal_string \"CollectionStateManagement: operation cannot be done in current state\""
@@ -457,7 +457,7 @@
                           "typeString": "literal_string \"CollectionStateManagement: operation cannot be done in current state\""
                         }
                       ],
-                      "id": 8197,
+                      "id": 39220,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -465,13 +465,13 @@
                         -18
                       ],
                       "referencedDeclaration": -18,
-                      "src": "1504:7:30",
+                      "src": "1857:7:61",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 8202,
+                    "id": 39225,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -479,183 +479,183 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1504:102:30",
+                    "src": "1857:102:61",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 8203,
+                  "id": 39226,
                   "nodeType": "ExpressionStatement",
-                  "src": "1504:102:30"
+                  "src": "1857:102:61"
                 },
                 {
-                  "id": 8204,
+                  "id": 39227,
                   "nodeType": "PlaceholderStatement",
-                  "src": "1616:1:30"
+                  "src": "1969:1:61"
                 }
               ]
             },
             "documentation": {
-              "id": 8192,
+              "id": 39215,
               "nodeType": "StructuredDocumentation",
-              "src": "1330:125:30",
+              "src": "1683:125:61",
               "text": " @notice Modifier used to check if we are in specific state\n @param state the beacon address to check"
             },
             "name": "onlyInState",
-            "nameLocation": "1469:11:30",
+            "nameLocation": "1822:11:61",
             "parameters": {
-              "id": 8196,
+              "id": 39219,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8195,
+                  "id": 39218,
                   "mutability": "mutable",
                   "name": "state",
-                  "nameLocation": "1487:5:30",
+                  "nameLocation": "1840:5:61",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8206,
-                  "src": "1481:11:30",
+                  "scope": 39229,
+                  "src": "1834:11:61",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_State_$8182",
+                    "typeIdentifier": "t_enum$_State_$39205",
                     "typeString": "enum CollectionStateManagement.State"
                   },
                   "typeName": {
-                    "id": 8194,
+                    "id": 39217,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 8193,
+                      "id": 39216,
                       "name": "State",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 8182,
-                      "src": "1481:5:30"
+                      "referencedDeclaration": 39205,
+                      "src": "1834:5:61"
                     },
-                    "referencedDeclaration": 8182,
-                    "src": "1481:5:30",
+                    "referencedDeclaration": 39205,
+                    "src": "1834:5:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "1480:13:30"
+              "src": "1833:13:61"
             },
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 8235,
+            "id": 39258,
             "nodeType": "FunctionDefinition",
-            "src": "2139:261:30",
+            "src": "2492:261:61",
             "nodes": [],
             "body": {
-              "id": 8234,
+              "id": 39257,
               "nodeType": "Block",
-              "src": "2188:212:30",
+              "src": "2541:212:61",
               "nodes": [],
               "statements": [
                 {
                   "assignments": [
-                    8215
+                    39238
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 8215,
+                      "id": 39238,
                       "mutability": "mutable",
                       "name": "oldState",
-                      "nameLocation": "2204:8:30",
+                      "nameLocation": "2557:8:61",
                       "nodeType": "VariableDeclaration",
-                      "scope": 8234,
-                      "src": "2198:14:30",
+                      "scope": 39257,
+                      "src": "2551:14:61",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_State_$8182",
+                        "typeIdentifier": "t_enum$_State_$39205",
                         "typeString": "enum CollectionStateManagement.State"
                       },
                       "typeName": {
-                        "id": 8214,
+                        "id": 39237,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 8213,
+                          "id": 39236,
                           "name": "State",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 8182,
-                          "src": "2198:5:30"
+                          "referencedDeclaration": 39205,
+                          "src": "2551:5:61"
                         },
-                        "referencedDeclaration": 8182,
-                        "src": "2198:5:30",
+                        "referencedDeclaration": 39205,
+                        "src": "2551:5:61",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 8217,
+                  "id": 39240,
                   "initialValue": {
-                    "id": 8216,
+                    "id": 39239,
                     "name": "currentState",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 8177,
-                    "src": "2215:12:30",
+                    "referencedDeclaration": 39200,
+                    "src": "2568:12:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2198:29:30"
+                  "src": "2551:29:61"
                 },
                 {
                   "expression": {
                     "arguments": [
                       {
                         "commonType": {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         },
-                        "id": 8221,
+                        "id": 39244,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
-                          "id": 8219,
+                          "id": 39242,
                           "name": "oldState",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8215,
-                          "src": "2245:8:30",
+                          "referencedDeclaration": 39238,
+                          "src": "2598:8:61",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_State_$8182",
+                            "typeIdentifier": "t_enum$_State_$39205",
                             "typeString": "enum CollectionStateManagement.State"
                           }
                         },
                         "nodeType": "BinaryOperation",
                         "operator": "!=",
                         "rightExpression": {
-                          "id": 8220,
+                          "id": 39243,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8210,
-                          "src": "2257:5:30",
+                          "referencedDeclaration": 39233,
+                          "src": "2610:5:61",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_State_$8182",
+                            "typeIdentifier": "t_enum$_State_$39205",
                             "typeString": "enum CollectionStateManagement.State"
                           }
                         },
-                        "src": "2245:17:30",
+                        "src": "2598:17:61",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -663,14 +663,14 @@
                       },
                       {
                         "hexValue": "436f6c6c656374696f6e53746174654d616e6167656d656e743a20616c726561647920696e2064657369726564207374617465",
-                        "id": 8222,
+                        "id": 39245,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "2264:53:30",
+                        "src": "2617:53:61",
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_c793921ceb18f8d11d3328ab0ad0bafe5053c2686e2ac40e40e92746812fd0b8",
                           "typeString": "literal_string \"CollectionStateManagement: already in desired state\""
@@ -689,7 +689,7 @@
                           "typeString": "literal_string \"CollectionStateManagement: already in desired state\""
                         }
                       ],
-                      "id": 8218,
+                      "id": 39241,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -697,13 +697,13 @@
                         -18
                       ],
                       "referencedDeclaration": -18,
-                      "src": "2237:7:30",
+                      "src": "2590:7:61",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 8223,
+                    "id": 39246,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -711,84 +711,84 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2237:81:30",
+                    "src": "2590:81:61",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 8224,
+                  "id": 39247,
                   "nodeType": "ExpressionStatement",
-                  "src": "2237:81:30"
+                  "src": "2590:81:61"
                 },
                 {
                   "expression": {
-                    "id": 8227,
+                    "id": 39250,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 8225,
+                      "id": 39248,
                       "name": "currentState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8177,
-                      "src": "2328:12:30",
+                      "referencedDeclaration": 39200,
+                      "src": "2681:12:61",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_State_$8182",
+                        "typeIdentifier": "t_enum$_State_$39205",
                         "typeString": "enum CollectionStateManagement.State"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 8226,
+                      "id": 39249,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8210,
-                      "src": "2343:5:30",
+                      "referencedDeclaration": 39233,
+                      "src": "2696:5:61",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_State_$8182",
+                        "typeIdentifier": "t_enum$_State_$39205",
                         "typeString": "enum CollectionStateManagement.State"
                       }
                     },
-                    "src": "2328:20:30",
+                    "src": "2681:20:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
-                  "id": 8228,
+                  "id": 39251,
                   "nodeType": "ExpressionStatement",
-                  "src": "2328:20:30"
+                  "src": "2681:20:61"
                 },
                 {
                   "eventCall": {
                     "arguments": [
                       {
-                        "id": 8230,
+                        "id": 39253,
                         "name": "oldState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8215,
-                        "src": "2377:8:30",
+                        "referencedDeclaration": 39238,
+                        "src": "2730:8:61",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         }
                       },
                       {
-                        "id": 8231,
+                        "id": 39254,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8210,
-                        "src": "2387:5:30",
+                        "referencedDeclaration": 39233,
+                        "src": "2740:5:61",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         }
                       }
@@ -796,26 +796,26 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         },
                         {
-                          "typeIdentifier": "t_enum$_State_$8182",
+                          "typeIdentifier": "t_enum$_State_$39205",
                           "typeString": "enum CollectionStateManagement.State"
                         }
                       ],
-                      "id": 8229,
+                      "id": 39252,
                       "name": "StateChanged",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8191,
-                      "src": "2364:12:30",
+                      "referencedDeclaration": 39214,
+                      "src": "2717:12:61",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_event_nonpayable$_t_enum$_State_$8182_$_t_enum$_State_$8182_$returns$__$",
+                        "typeIdentifier": "t_function_event_nonpayable$_t_enum$_State_$39205_$_t_enum$_State_$39205_$returns$__$",
                         "typeString": "function (enum CollectionStateManagement.State,enum CollectionStateManagement.State)"
                       }
                     },
-                    "id": 8232,
+                    "id": 39255,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -823,23 +823,23 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2364:29:30",
+                    "src": "2717:29:61",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 8233,
+                  "id": 39256,
                   "nodeType": "EmitStatement",
-                  "src": "2359:34:30"
+                  "src": "2712:34:61"
                 }
               ]
             },
             "documentation": {
-              "id": 8207,
+              "id": 39230,
               "nodeType": "StructuredDocumentation",
-              "src": "1819:315:30",
+              "src": "2172:315:61",
               "text": " @notice Changes the current contract state\n         WARNING this must be overwritten if you want to add control modifiers to it\n @dev will revert if we are already in the desired state\n @custom:event {StateChanged}\n @param state the state in which the contract will change"
             },
             "functionSelector": "268f1153",
@@ -847,55 +847,55 @@
             "kind": "function",
             "modifiers": [],
             "name": "changeState",
-            "nameLocation": "2148:11:30",
+            "nameLocation": "2501:11:61",
             "parameters": {
-              "id": 8211,
+              "id": 39234,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8210,
+                  "id": 39233,
                   "mutability": "mutable",
                   "name": "state",
-                  "nameLocation": "2166:5:30",
+                  "nameLocation": "2519:5:61",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8235,
-                  "src": "2160:11:30",
+                  "scope": 39258,
+                  "src": "2513:11:61",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_State_$8182",
+                    "typeIdentifier": "t_enum$_State_$39205",
                     "typeString": "enum CollectionStateManagement.State"
                   },
                   "typeName": {
-                    "id": 8209,
+                    "id": 39232,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 8208,
+                      "id": 39231,
                       "name": "State",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 8182,
-                      "src": "2160:5:30"
+                      "referencedDeclaration": 39205,
+                      "src": "2513:5:61"
                     },
-                    "referencedDeclaration": 8182,
-                    "src": "2160:5:30",
+                    "referencedDeclaration": 39205,
+                    "src": "2513:5:61",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_State_$8182",
+                      "typeIdentifier": "t_enum$_State_$39205",
                       "typeString": "enum CollectionStateManagement.State"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "2159:13:30"
+              "src": "2512:13:61"
             },
             "returnParameters": {
-              "id": 8212,
+              "id": 39235,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2188:0:30"
+              "src": "2541:0:61"
             },
-            "scope": 8236,
+            "scope": 39259,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "public"
@@ -906,17 +906,23 @@
         "canonicalName": "CollectionStateManagement",
         "contractDependencies": [],
         "contractKind": "contract",
+        "documentation": {
+          "id": 39196,
+          "nodeType": "StructuredDocumentation",
+          "src": "57:352:61",
+          "text": " @title CollectionStateManagement\n @author qed.team x The Sandbox\n @notice helper contract used to manage avatar collection states with regards to minting phases\n         Warning, {changeState} must be overwritten in the inheriting contract and added accesses\n         control limitations as this version is called by anybody as it is"
+        },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          8236
+          39259
         ],
         "name": "CollectionStateManagement",
-        "nameLocation": "66:25:30",
-        "scope": 8237,
+        "nameLocation": "419:25:61",
+        "scope": 39260,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 30
+  "id": 61
 }
