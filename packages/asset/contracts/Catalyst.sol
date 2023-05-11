@@ -21,14 +21,7 @@ contract Catalyst is
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
 
-    uint256 public constant COMMON_CATALYST_ID = 1;
-    uint256 public constant UNCOMMON_CATAYST_ID = 2;
-    uint256 public constant RARE_CATALYST_ID = 3;
-    uint256 public constant EPIC_CATALYST_ID = 4;
-    uint256 public constant LEGENDARY_CATALYST_ID = 5;
-    uint256 public constant MYTHIC_CATALYST_ID = 6;
-
-    uint256 public catalystTypeCount = 6;
+    uint256 public catalystTierCount;
 
     address private royaltyRecipient;
     mapping(uint256 => uint256) private catalystRoyaltyBps;
@@ -54,6 +47,9 @@ contract Catalyst is
         _royaltyRecipient = _royaltyRecipient;
         for (uint256 i = 0; i < _catalystRoyaltyBps.length; i++) {
             catalystRoyaltyBps[i + 1] = _catalystRoyaltyBps[i];
+            unchecked {
+                catalystTierCount++;
+            }
         }
     }
 
@@ -69,35 +65,31 @@ contract Catalyst is
     /// @param to The address that will own the minted token
     /// @param id The token id to mint
     /// @param amount The amount to be minted
-    /// @param data Additional data with no specified format, sent in call to `_to`
     function mint(
         address to,
         uint256 id,
-        uint256 amount,
-        bytes memory data
+        uint256 amount
     ) external onlyRole(MINTER_ROLE) {
-        require(id > 0 && id <= catalystTypeCount, "INVALID_CATALYST_ID");
-        _mint(to, id, amount, data);
+        require(id > 0 && id <= catalystTierCount, "INVALID_CATALYST_ID");
+        _mint(to, id, amount, "");
     }
 
     /// @notice Mints a batch of tokens, limited to MINTER_ROLE only
     /// @param to The address that will own the minted tokens
     /// @param ids The token ids to mint
     /// @param amounts The amounts to be minted per token id
-    /// @param data Additional data with no specified format, sent in call to `_to`
     function mintBatch(
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        uint256[] memory amounts
     ) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < ids.length; i++) {
             require(
-                ids[i] > 0 && ids[i] <= catalystTypeCount,
+                ids[i] > 0 && ids[i] <= catalystTierCount,
                 "INVALID_CATALYST_ID"
             );
         }
-        _mintBatch(to, ids, amounts, data);
+        _mintBatch(to, ids, amounts, "");
     }
 
     function burnFrom(
@@ -123,7 +115,7 @@ contract Catalyst is
         uint256 catalystId,
         uint256 royaltyBps
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        catalystTypeCount++;
+        catalystTierCount++;
         catalystRoyaltyBps[catalystId] = royaltyBps;
         emit NewCatalystTypeAdded(catalystId, royaltyBps);
     }

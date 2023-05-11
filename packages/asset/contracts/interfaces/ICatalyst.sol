@@ -20,10 +20,5 @@ interface ICatalyst {
         uint256[] memory amounts
     ) external;
 
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) external;
+    function mint(address to, uint256 id, uint256 amount) external;
 }
