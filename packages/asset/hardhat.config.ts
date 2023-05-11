@@ -18,20 +18,16 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  typechain: {
-    outDir: "typechain",
-    target: "ethers-v5",
-  },
   namedAccounts: {
     deployer: {
       default: 0,
     },
-    upgradeAdmin : {
+    upgradeAdmin: {
       default: 1,
     },
-    assetAdmin: 'upgradeAdmin',
-    uriSetter: 'upgradeAdmin',
-    revealer: 'upgradeAdmin'
+    assetAdmin: "upgradeAdmin",
+    uriSetter: "upgradeAdmin",
+    revealer: "upgradeAdmin",
   },
   defaultNetwork: "hardhat",
   networks: {
