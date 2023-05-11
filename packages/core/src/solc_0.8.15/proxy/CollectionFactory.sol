@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-
-import { Ownable2Step } from "@openzeppelin/contracts-0.8.15/access/Ownable2Step.sol";
-import { UpgradeableBeacon } from "@openzeppelin/contracts-0.8.15/proxy/beacon/UpgradeableBeacon.sol";
-import { EnumerableSet } from "@openzeppelin/contracts-0.8.15/utils/structs/EnumerableSet.sol";
-import { Address } from "@openzeppelin/contracts-0.8.15/utils/Address.sol";
-import { CollectionProxy } from "./CollectionProxy.sol";
-import { IERC5313 } from "../common/IERC5313.sol";
+import {Ownable2Step} from "@openzeppelin/contracts-0.8.15/access/Ownable2Step.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts-0.8.15/proxy/beacon/UpgradeableBeacon.sol";
+import {EnumerableSet} from "@openzeppelin/contracts-0.8.15/utils/structs/EnumerableSet.sol";
+import {Address} from "@openzeppelin/contracts-0.8.15/utils/Address.sol";
+import {CollectionProxy} from "./CollectionProxy.sol";
+import {IERC5313} from "../common/IERC5313.sol";
 
 /**
  * @title CollectionFactory
@@ -20,7 +19,6 @@ import { IERC5313 } from "../common/IERC5313.sol";
  * - collections (proxies) can have the beacon they are pointing to changed
  */
 contract CollectionFactory is Ownable2Step {
-
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -55,7 +53,7 @@ contract CollectionFactory is Ownable2Step {
      */
     event BeaconAdded(bytes32 indexed beaconAlias, address indexed beaconAddress);
 
-   /**
+    /**
      * @notice Event emitted when a beacon has its implementation updated
      * @dev emitted when updateBeaconImplementation is called
      * @param oldImplementation the old beacon implementation
@@ -68,9 +66,9 @@ contract CollectionFactory is Ownable2Step {
         address indexed newImplementation,
         bytes32 indexed beaconAlias,
         address beaconAddress
-        );
+    );
 
-   /**
+    /**
      * @notice Event emitted when a beacon was removed from tracking
      * @dev emitted when transferBeacon is called
      * @param beaconAlias the alias of the removed beacon
@@ -79,7 +77,7 @@ contract CollectionFactory is Ownable2Step {
      */
     event BeaconRemoved(bytes32 indexed beaconAlias, address indexed beaconAddress, address indexed newBeaconOwner);
 
-     /**
+    /**
      * @notice Event emitted when the owner of this beacon was changed
      * @dev emitted when transferBeacon is called
      * @param oldOwner the previous owner of the beacon
@@ -95,7 +93,7 @@ contract CollectionFactory is Ownable2Step {
      */
     event CollectionAdded(address indexed beaconAddress, address indexed collectionProxy);
 
-   /**
+    /**
      * @notice Event emitted when a collection (proxy) was updated (had it's implementation change)
      * @dev emitted when updateCollection is called
      * @param proxyAddress the proxy address whose beacon has changed
@@ -104,7 +102,7 @@ contract CollectionFactory is Ownable2Step {
      */
     event CollectionUpdated(address indexed proxyAddress, bytes32 indexed beaconAlias, address indexed beaconAddress);
 
-   /**
+    /**
      * @notice Event emitted when a collection was removed from tracking from a beacon
      * @dev emitted when transferCollections is called
      * @param beaconAddress the address of the beacon to which this collection points to
@@ -147,7 +145,10 @@ contract CollectionFactory is Ownable2Step {
      * @param collection the targeted collection address
      */
     modifier onlyOwners(address collection) {
-        require(IERC5313(collection).owner() == msg.sender || owner() == msg.sender, "CollectionFactory: caller is not collection or factory owner");
+        require(
+            IERC5313(collection).owner() == msg.sender || owner() == msg.sender,
+            "CollectionFactory: caller is not collection or factory owner"
+        );
         _;
     }
 
@@ -163,11 +164,7 @@ contract CollectionFactory is Ownable2Step {
      * @param beaconAlias the beacon alias to be attributed to the newly deployed beacon
      * @return beacon the newly added beacon address that was launched
      */
-    function deployBeacon(address implementation, bytes32 beaconAlias)
-        external
-        onlyOwner
-        returns (address beacon)
-    {
+    function deployBeacon(address implementation, bytes32 beaconAlias) external onlyOwner returns (address beacon) {
         require(beaconAlias != 0, "CollectionFactory: beacon alias cannot be empty");
         require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon alias already used");
 
@@ -185,10 +182,7 @@ contract CollectionFactory is Ownable2Step {
      * @param beacon the beacon address to be added/tracked
      * @param beaconAlias the beacon address to be added/tracked
      */
-    function addBeacon(address beacon, bytes32 beaconAlias)
-        external
-        onlyOwner
-    {
+    function addBeacon(address beacon, bytes32 beaconAlias) external onlyOwner {
         require(beaconAlias != 0, "CollectionFactory: beacon alias cannot be empty");
         require(aliasToBeacon[beaconAlias] == address(0), "CollectionFactory: beacon alias already used");
         require(Address.isContract(beacon), "CollectionFactory: beacon is not a contract");
@@ -280,10 +274,7 @@ contract CollectionFactory is Ownable2Step {
      * @custom:event {CollectionAdded} for each collection
      * @param _collections the collections to be added to the factory
      */
-    function addCollections(address[] memory _collections)
-        external
-        onlyOwner
-    {
+    function addCollections(address[] memory _collections) external onlyOwner {
         require(_collections.length != 0, "CollectionFactory: empty collection list");
 
         uint256 collectionsLength = _collections.length;
@@ -306,9 +297,7 @@ contract CollectionFactory is Ownable2Step {
 
             emit CollectionAdded(collection.beacon(), address(collection));
 
-            unchecked {
-                ++index;
-            }
+            unchecked {++index;}
         }
     }
 
@@ -321,12 +310,11 @@ contract CollectionFactory is Ownable2Step {
      * @param updateArgs (encodeWithSignature) update function with arguments to be called on
      *                   the newly update collection. If not provided, will not call any function
      */
-    function updateCollection(address collection, bytes32 beaconAlias, bytes memory updateArgs)
-        external
-        beaconIsAvailable(beaconAlias)
-        collectionExists(collection)
-        onlyOwners(collection)
-    {
+    function updateCollection(
+        address collection,
+        bytes32 beaconAlias,
+        bytes memory updateArgs
+    ) external beaconIsAvailable(beaconAlias) collectionExists(collection) onlyOwners(collection) {
         address beacon = aliasToBeacon[beaconAlias];
         CollectionProxy(payable(collection)).changeBeacon(beacon, updateArgs);
 
@@ -341,10 +329,7 @@ contract CollectionFactory is Ownable2Step {
      * @param _collections list of collections to transfer
      * @param newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
      */
-    function transferCollections(address[] calldata _collections, address newCollectionOwner)
-        external
-        onlyOwner
-    {
+    function transferCollections(address[] calldata _collections, address newCollectionOwner) external onlyOwner {
         require(newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
         bool success;
         uint256 collectionsLength = _collections.length;
@@ -360,9 +345,7 @@ contract CollectionFactory is Ownable2Step {
             collection.changeCollectionProxyAdmin(newCollectionOwner);
             emit CollectionProxyAdminChanged(address(this), newCollectionOwner);
 
-            unchecked {
-                ++index;
-            }
+            unchecked {++index;}
         }
     }
 
@@ -374,13 +357,9 @@ contract CollectionFactory is Ownable2Step {
      * @notice Helper function that retrieves all beacons tracked by the factory
      * @return list of beacons managed by the factory
      */
-    function getBeacons()
-        external
-        view
-        returns (address[] memory)
-    {
+    function getBeacons() external view returns (address[] memory) {
         uint256 beaconCount_ = beaconCount;
-        address [] memory beacons_ = new address[](beaconCount_);
+        address[] memory beacons_ = new address[](beaconCount_);
         for (uint256 index = 0; index < beaconCount_; index++) {
             bytes32 beaconAlias = aliases.at(index);
             beacons_[index] = aliasToBeacon[beaconAlias];
@@ -392,11 +371,7 @@ contract CollectionFactory is Ownable2Step {
      * @notice Helper function that retrieves all aliases tracked by the factory
      * @return list of aliases managed by the factory
      */
-    function getBeaconAliases()
-        external
-        view
-        returns (bytes32[] memory)
-    {
+    function getBeaconAliases() external view returns (bytes32[] memory) {
         return aliases.values();
     }
 
@@ -405,11 +380,7 @@ contract CollectionFactory is Ownable2Step {
      * @param index index at which to get the alias from
      * @return alias at that specific index
      */
-    function getBeaconAlias(uint256 index)
-        external
-        view
-        returns (bytes32)
-    {
+    function getBeaconAlias(uint256 index) external view returns (bytes32) {
         return aliases.at(index);
     }
 
@@ -417,11 +388,7 @@ contract CollectionFactory is Ownable2Step {
      * @notice Helper function that retrieves all collections tracked by the factory
      * @return list of collections managed by the factory
      */
-    function getCollections()
-        external
-        view
-        returns (address[] memory)
-    {
+    function getCollections() external view returns (address[] memory) {
         return collections.values();
     }
 
@@ -430,11 +397,7 @@ contract CollectionFactory is Ownable2Step {
      * @param index index at which to get the collection from
      * @return collection address from specific index
      */
-    function getCollection(uint256 index)
-        external
-        view
-        returns (address)
-    {
+    function getCollection(uint256 index) external view returns (address) {
         return collections.at(index);
     }
 
@@ -443,12 +406,7 @@ contract CollectionFactory is Ownable2Step {
      * @param collection the collection for which to get the pointed beacon
      * @return the beacon address pointed by the collection
      */
-    function beaconOf(address collection)
-        external
-        view
-        collectionExists(collection)
-        returns (address)
-    {
+    function beaconOf(address collection) external view collectionExists(collection) returns (address) {
         return CollectionProxy(payable(collection)).beacon();
     }
 

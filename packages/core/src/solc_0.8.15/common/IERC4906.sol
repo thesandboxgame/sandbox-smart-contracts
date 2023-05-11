@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-
 /// @title EIP-721 Metadata Update Extension
 interface IERC4906 {
     /// @dev This event emits when the metadata of a token is changed.

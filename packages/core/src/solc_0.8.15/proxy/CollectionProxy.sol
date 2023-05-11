@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import { BeaconProxy } from "@openzeppelin/contracts-0.8.15/proxy/beacon/BeaconProxy.sol";
+import {BeaconProxy} from "@openzeppelin/contracts-0.8.15/proxy/beacon/BeaconProxy.sol";
 
 /**
  * @title CollectionProxy
@@ -23,7 +23,6 @@ import { BeaconProxy } from "@openzeppelin/contracts-0.8.15/proxy/beacon/BeaconP
  *
  */
 contract CollectionProxy is BeaconProxy {
-
     /*//////////////////////////////////////////////////////////////
                             Initializers
     //////////////////////////////////////////////////////////////*/
@@ -33,7 +32,7 @@ contract CollectionProxy is BeaconProxy {
      *         see {BeaconProxy.constructor} for more details
      * @custom:event {ERC1967Upgrade.AdminChanged}
      */
-    constructor (address beacon_, bytes memory data_) BeaconProxy(beacon_, data_) {
+    constructor(address beacon_, bytes memory data_) BeaconProxy(beacon_, data_) {
         _changeAdmin(msg.sender);
     }
 
@@ -53,7 +52,7 @@ contract CollectionProxy is BeaconProxy {
      * @param data initialization data as an encodedWithSignature output; if exists will be called on the new implementation
      */
     function changeBeacon(address newBeacon, bytes memory data) external {
-        require (msg.sender == _getAdmin(), "CollectionProxy: only admin can change beacon");
+        require(msg.sender == _getAdmin(), "CollectionProxy: only admin can change beacon");
         _setBeacon(newBeacon, data);
     }
 
@@ -68,7 +67,7 @@ contract CollectionProxy is BeaconProxy {
      */
     function changeCollectionProxyAdmin(address newAdmin) external {
         address admin = _getAdmin();
-        require (msg.sender == admin, "CollectionProxy: only admin can change admin");
+        require(msg.sender == admin, "CollectionProxy: only admin can change admin");
         _changeAdmin(newAdmin); // checks for "new admin is the zero address"
     }
 
@@ -80,7 +79,7 @@ contract CollectionProxy is BeaconProxy {
      *      59659e90  =>  beacon()
      * @return the address of the currently pointed to beacon
      */
-    function beacon() external view returns (address){
+    function beacon() external view returns (address) {
         return _beacon();
     }
 

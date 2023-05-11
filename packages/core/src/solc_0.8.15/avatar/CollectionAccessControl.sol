@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
-
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
 
 /**
  * @title CollectionAccessControl
@@ -32,7 +31,6 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/a
  *   - Ownable2StepUpgradeable.acceptOwnership() is not declared virtual
  */
 abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUpgradeable {
-
     /*//////////////////////////////////////////////////////////////
                            Global state variables
     //////////////////////////////////////////////////////////////*/

@@ -2,29 +2,36 @@
 
 pragma solidity 0.8.15;
 
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
-import { AccessControlUpgradeable, ContextUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
+import {
+    ReentrancyGuardUpgradeable
+} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
 import {
     ERC721EnumerableUpgradeable,
     ERC721Upgradeable,
     IERC721Upgradeable
-    } from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
-import { ECDSA } from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
-import { IERC20 } from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
-import { IERC20Metadata } from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
-import { SafeERC20 } from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
+import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
+import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 
 // import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/src/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
-import { UpdatableOperatorFiltererUpgradeable } from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
+import {
+    UpdatableOperatorFiltererUpgradeable
+} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
-import { ERC2771HandlerUpgradeable } from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
-import { IERC4906 } from "../common/IERC4906.sol";
+import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
+import {IERC4906} from "../common/IERC4906.sol";
 
-import { CollectionAccessControl } from "./CollectionAccessControl.sol";
-import { ERC721BurnMemoryEnumerableUpgradeable } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
+import {CollectionAccessControl} from "./CollectionAccessControl.sol";
+import {ERC721BurnMemoryEnumerableUpgradeable} from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
 /**
  * @title AvatarCollection
@@ -272,11 +279,7 @@ contract AvatarCollection is
         uint256 _maxSupply,
         OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
-    )
-        external
-        virtual
-        initializer
-    {
+    ) external virtual initializer {
         __AvatarCollection_init(
             _collectionOwner,
             _initialBaseURI,
@@ -320,10 +323,7 @@ contract AvatarCollection is
         uint256 _maxSupply,
         OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
-    )
-        internal
-        onlyInitializing
-    {
+    ) internal onlyInitializing {
         require(bytes(_initialBaseURI).length != 0, "AvatarCollection: baseURI is not set");
         require(bytes(_name).length != 0, "AvatarCollection: name is empty");
         require(bytes(_symbol).length != 0, "AvatarCollection: symbol is empty");
@@ -337,11 +337,12 @@ contract AvatarCollection is
         uint256 remaining = maxSupply - totalSupply();
 
         require(_mintingDefaults.mintPrice > 0, "AvatarCollection: public mint price cannot be 0");
-        require(_mintingDefaults.maxPublicTokensPerWallet <= remaining
-                && _mintingDefaults.maxAllowlistTokensPerWallet <= remaining,
-                "AvatarCollection: invalid tokens per wallet configuration");
+        require(
+            _mintingDefaults.maxPublicTokensPerWallet <= remaining &&
+                _mintingDefaults.maxAllowlistTokensPerWallet <= remaining,
+            "AvatarCollection: invalid tokens per wallet configuration"
+        );
         require(_mintingDefaults.maxMarketingTokens <= remaining, "AvatarCollection: invalid marketing share");
-
 
         __ReentrancyGuard_init();
         __InitializeAccessControl(_collectionOwner); // owner is also initialized here
@@ -399,13 +400,9 @@ contract AvatarCollection is
         uint256 _waveMaxTokensOverall,
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
-    )
-        external
-        whenNotPaused
-        authorizedRole(CONFIGURATOR_ROLE)
-    {
+    ) external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
         require(_waveMaxTokensOverall <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
-        require(_waveMaxTokensOverall > 0 , "AvatarCollection: max tokens to mint is 0");
+        require(_waveMaxTokensOverall > 0, "AvatarCollection: max tokens to mint is 0");
         require(_waveMaxTokensPerWallet > 0, "AvatarCollection: max tokens to mint per wallet is 0");
         require(_waveMaxTokensPerWallet <= _waveMaxTokensOverall, "AvatarCollection: invalid supply configuration");
 
@@ -425,11 +422,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setMarketingMint()
-        external
-        whenNotPaused
-        authorizedRole(CONFIGURATOR_ROLE)
-    {
+    function setMarketingMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = mintingDefaults.maxMarketingTokens;
         waveMaxTokensPerWallet = mintingDefaults.maxMarketingTokens;
         waveSingleTokenPrice = 0;
@@ -446,11 +439,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setAllowlistMint()
-        external
-        whenNotPaused
-        authorizedRole(CONFIGURATOR_ROLE)
-    {
+    function setAllowlistMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = maxSupply - totalSupply();
         waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -467,11 +456,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setPublicMint()
-        external
-        whenNotPaused
-        authorizedRole(CONFIGURATOR_ROLE)
-    {
+    function setPublicMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = maxSupply - totalSupply();
         waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -495,23 +480,13 @@ contract AvatarCollection is
         uint256 _amount,
         uint256 _signatureId,
         bytes memory _signature
-    )
-        external
-        whenNotPaused
-        nonReentrant
-    {
+    ) external whenNotPaused nonReentrant {
         require(indexWave > 0, "AvatarCollection: contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "AvatarCollection: caller is not allowed");
         require(_wallet != address(0), "AvatarCollection: wallet is zero address");
         require(_amount > 0, "AvatarCollection: amount cannot be 0");
 
-        _checkAndSetSignature(
-            {
-                _address: _wallet,
-                _signatureId:_signatureId,
-                _signature:_signature
-            }
-        );
+        _checkAndSetSignature({_address: _wallet, _signatureId: _signatureId, _signature: _signature});
 
         require(_checkWaveNotComplete(_amount), "AvatarCollection: wave completed");
         require(_checkLimitNotReached(_wallet, _amount), "AvatarCollection: max allowed");
@@ -528,7 +503,7 @@ contract AvatarCollection is
         for (uint256 i; i < _amount; ) {
             _safeMint(_wallet, _getRandomToken(_wallet, totalSupply()));
 
-            unchecked { ++i; }
+            unchecked {++i;}
         }
     }
 
@@ -546,19 +521,11 @@ contract AvatarCollection is
         uint256 _tokenId,
         uint256 _signatureId,
         bytes memory _signature
-    )
-        external
-    {
+    ) external {
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "AvatarCollection: sender is not owner");
 
-        _checkAndSetSignature(
-            {
-                _address: sender,
-                _signatureId:_signatureId,
-                _signature:_signature
-            }
-        );
+        _checkAndSetSignature({_address: sender, _signatureId: _signatureId, _signature: _signature});
 
         emit MetadataUpdate(_tokenId);
     }
@@ -594,9 +561,7 @@ contract AvatarCollection is
         bytes memory _signature,
         uint256 _tokenId,
         uint256 _personalizationMask
-    )
-        external
-    {
+    ) external {
         require(ownerOf(_tokenId) == _msgSender(), "AvatarCollection: sender is not owner");
 
         require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
@@ -627,10 +592,7 @@ contract AvatarCollection is
      * @param _tokenId what token to personalize
      * @param _personalizationMask a mask where each bit has a custom meaning in-game
      */
-    function operatorPersonalize(
-        uint256 _tokenId,
-        uint256 _personalizationMask
-    )
+    function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask)
         external
         authorizedRole(TRANSFORMER_ROLE)
     {
@@ -740,9 +702,7 @@ contract AvatarCollection is
         override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
-        return
-            interfaceId == type(AccessControlUpgradeable).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(AccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -750,12 +710,7 @@ contract AvatarCollection is
      * @dev returns OwnableUpgradeable.owner()
      * @return owner of current contract
      */
-    function owner()
-        public
-        view
-        override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable)
-        returns (address)
-    {
+    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
         return OwnableUpgradeable.owner();
     }
 
@@ -788,11 +743,7 @@ contract AvatarCollection is
         address from,
         address to,
         uint256 tokenId
-    )
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperator(from)
-    {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -803,11 +754,7 @@ contract AvatarCollection is
         address from,
         address to,
         uint256 tokenId
-    )
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperator(from)
-    {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -819,11 +766,7 @@ contract AvatarCollection is
         address to,
         uint256 tokenId,
         bytes memory data
-    )
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperator(from)
-    {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
@@ -845,12 +788,7 @@ contract AvatarCollection is
      * @dev returns ERC2771HandlerUpgradeable._msgData()
      * @return msg.data
      */
-    function _msgData()
-        internal
-        view
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
     }
 
@@ -878,17 +816,11 @@ contract AvatarCollection is
     function _checkAndSetSignature(
         address _address,
         uint256 _signatureId,
-        bytes memory _signature) internal
-    {
+        bytes memory _signature
+    ) internal {
         require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
-            _checkSignature(
-                _address,
-                _signatureId,
-                address(this),
-                block.chainid,
-                _signature
-            ) == signAddress,
+            _checkSignature(_address, _signatureId, address(this), block.chainid, _signature) == signAddress,
             "AvatarCollection: signature failed"
         );
         _signatureIds[_signatureId] = 1;
@@ -910,9 +842,7 @@ contract AvatarCollection is
         address _contractAddress,
         uint256 _chainId,
         bytes memory _signature
-    )
-        internal pure returns (address)
-    {
+    ) internal pure returns (address) {
         return
             ECDSA.recover(
                 keccak256(
@@ -945,9 +875,7 @@ contract AvatarCollection is
         uint256 _tokenId,
         uint256 _personalizationMask,
         bytes memory _signature
-    )
-        internal pure returns (address)
-    {
+    ) internal pure returns (address) {
         return
             ECDSA.recover(
                 keccak256(
@@ -974,11 +902,7 @@ contract AvatarCollection is
      * @param _amount number of tokens to check if can be minted
      * @return if wave can mint the indicated amount
      */
-    function _checkWaveNotComplete(uint256 _amount)
-        internal
-        view
-        returns (bool)
-    {
+    function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
         return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokensOverall;
     }
 
@@ -988,12 +912,7 @@ contract AvatarCollection is
      * @param _amount number of tokens to mint
      * @return if amount can be safely minted
      */
-    function _checkLimitNotReached(
-        address _wallet,
-        uint256 _amount
-    )
-        internal view returns (bool)
-    {
+    function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
         return
             waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
             totalSupply() + _amount <= maxSupply;
@@ -1007,12 +926,7 @@ contract AvatarCollection is
      * @param _tokenId the ID for the token to personalize
      * @param _personalizationMask the personalization mask that will be applied
      */
-    function _updateTokenTraits(
-        uint256 _tokenId,
-        uint256 _personalizationMask
-    )
-        internal
-    {
+    function _updateTokenTraits(uint256 _tokenId, uint256 _personalizationMask) internal {
         personalizationTraits[_tokenId] = _personalizationMask;
 
         emit Personalized(_tokenId, _personalizationMask);
@@ -1029,16 +943,7 @@ contract AvatarCollection is
     function _getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
         uint256 remaining = maxSupply - _totalMinted;
         uint256 rand =
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        _wallet,
-                        block.difficulty,
-                        block.timestamp,
-                        remaining
-                    )
-                )
-            ) % remaining;
+            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;
 
         if (_availableIds[rand] != 0) {

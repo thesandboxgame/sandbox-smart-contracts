@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import { ERC721EnumerableUpgradeable } from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {
+    ERC721EnumerableUpgradeable
+} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /**
  * @title ERC721BurnMemoryEnumerableUpgradeable
@@ -12,16 +14,15 @@ import { ERC721EnumerableUpgradeable } from "@openzeppelin/contracts-upgradeable
  *     - keeping track of who burned what token for faster in-game gating checks
  */
 contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
-
     /*//////////////////////////////////////////////////////////////
                            Global state variables
     //////////////////////////////////////////////////////////////*/
 
     /// @notice tokenId to burner mapping; saves who burned a specific token
-    mapping (uint256 => address) public burner;
+    mapping(uint256 => address) public burner;
 
     /// @notice burner to list of burned tokens mapping; to see what tokens who burned
-    mapping (address => uint256[]) public burnedTokens;
+    mapping(address => uint256[]) public burnedTokens;
 
     /*//////////////////////////////////////////////////////////////
                                 Events
@@ -44,7 +45,7 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
-     function burn(uint256 tokenId) external {
+    function burn(uint256 tokenId) external {
         address sender = _msgSender();
         require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
         super._burn(tokenId);

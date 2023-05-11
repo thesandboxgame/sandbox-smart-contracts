@@ -9,7 +9,6 @@ pragma solidity 0.8.15;
  *         control limitations as this version is called by anybody as it is
  */
 contract CollectionStateManagement {
-
     /*//////////////////////////////////////////////////////////////
                            Global state variables
     //////////////////////////////////////////////////////////////*/
@@ -19,10 +18,10 @@ contract CollectionStateManagement {
 
     /// @notice Possible states in which the collection contract will be
     enum State {
-        IDLE,           // 0; default as state variables are set to 0
+        IDLE, // 0; default as state variables are set to 0
         MARKETING_MINT, // 1
         ALLOWLIST_MINT, // 2
-        PUBLIC_MINT     // 3
+        PUBLIC_MINT // 3
     }
 
     /*//////////////////////////////////////////////////////////////
