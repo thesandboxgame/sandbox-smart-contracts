@@ -33,6 +33,8 @@ contract PolygonLandTunnelV2 is
     /// @notice set the limit of estimated gas we accept when sending a batch of quads to L1
     /// @param _maxGasLimit maximum accepted gas limit
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
+        require(_maxGasLimit > 0, "PolygonLandTunnelV2: max limit on L1 cannot be zero");
+
         maxGasLimitOnL1 = _maxGasLimit;
         emit SetMaxGasLimit(_maxGasLimit);
     }
@@ -41,6 +43,7 @@ contract PolygonLandTunnelV2 is
     /// @param _maxAllowedQuads maximum number of quads accepted
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
         require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
+
         maxAllowedQuads = _maxAllowedQuads;
         emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
@@ -49,6 +52,8 @@ contract PolygonLandTunnelV2 is
     /// @param  size the size of the quad
     /// @param  limit the estimated gas that the L1 tx will use
     function setLimit(uint8 size, uint32 limit) external onlyOwner {
+        require(size == 1 | size == 3 | size == 6 | size == 12 | size == 24, "PolygonLandTunnelV2: invalid data");
+
         _setLimit(size, limit);
     }
 
@@ -104,6 +109,7 @@ contract PolygonLandTunnelV2 is
             sizes.length == xs.length && sizes.length == ys.length,
             "PolygonLandTunnelV2: sizes, xs, ys must be same length"
         );
+        require(sizes.length > 0, "PolygonLandTunnelV2: invalid data");
 
         uint32 gasLimit = 0;
         uint256 quads = 0;

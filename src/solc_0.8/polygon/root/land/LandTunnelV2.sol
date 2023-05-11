@@ -77,6 +77,8 @@ contract LandTunnelV2 is
     ) public whenNotPaused() {
         require(to != address(0), "LandTunnelV2: can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "LandTunnelV2: invalid data");
+        require(sizes.length > 0, "LandTunnelV2: invalid data");
+
         transferringToL2 = true;
         rootToken.batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
         transferringToL2 = false;
