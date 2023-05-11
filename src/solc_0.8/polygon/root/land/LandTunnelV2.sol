@@ -112,7 +112,7 @@ contract LandTunnelV2 is
         }
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
 
