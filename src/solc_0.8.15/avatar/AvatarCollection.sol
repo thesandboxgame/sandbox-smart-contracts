@@ -26,8 +26,23 @@ import { IERC4906 } from "../common/IERC4906.sol";
 import { CollectionAccessControl } from "./CollectionAccessControl.sol";
 import { ERC721BurnMemoryEnumerableUpgradeable } from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
-
-/* solhint-disable max-states-count */
+/**
+ * @title AvatarCollection
+ * @author qed.team x The Sandbox
+ * @notice ERC721 contract for future Avatar collections.
+ *         Is expected to be initialize via {CollectionFactory} or other similar factories
+ *
+ * Some features:
+ * - upgradable
+ * - ownable (2 step transfer) and multi-role support for simplifying logistics
+ * - OpenSea royalty compliant
+ * - ERC4906 compliant
+ * - ERC165 compliant
+ * - supports ERC2771 for services like Biconomy
+ * - supports "burn memory" - keeping track of who burned what token for faster in-game gating checks
+ * - minting is only supported via an ERC20 token contract that supports approveAndCall
+ *   as mint price is in non-native tokens
+ */
 contract AvatarCollection is
     ReentrancyGuardUpgradeable,
     CollectionAccessControl,
@@ -75,13 +90,19 @@ contract AvatarCollection is
     /// @notice max token supply
     uint256 public maxSupply;
 
+    /// @notice treasury address where mint tokens are sent
+    address public mintTreasury;
+
+    /// @notice standard base token URL for ERC721 metadata
+    string public baseTokenURI;
+
     /// @notice max tokens to buy per wave, cumulating all addresses
     uint256 public waveMaxTokensOverall;
 
     /// @notice max tokens to buy, per wallet in a given wave
     uint256 public waveMaxTokensPerWallet;
 
-    /// @notice price of one token mint (in the token owned by the mintTreasury which in our case is SAND)
+    /// @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
     uint256 public waveSingleTokenPrice;
 
     /// @notice number of total minted tokens in the current running wave
@@ -90,22 +111,30 @@ contract AvatarCollection is
     /// @notice mapping of [owner -> wave index -> minted count]
     mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
 
-    /// @notice stores the personalization for a tokenId
-    mapping(uint256 => uint256) public personalizationTraits;
-
     /// @notice each wave has an index to help track minting/tokens per wallet
     uint256 public indexWave;
 
-    /// @notice default* are used when calling predefined wave setup functions:
+    /// @notice default are used when calling predefined wave setup functions:
     ///         setMarketingMint, setAllowlistMint and setPublicMint
+    ///         see struct MintingDefaults for more details
     MintingDefaults public mintingDefaults;
-    mapping(uint256 => uint256) private signatureIds;
-    mapping(uint256 => uint256) private availableIds;
 
+    /// @notice ERC20 contract through which the minting will be done
     address public allowedToExecuteMint;
-    address public mintTreasury;
+
+    /// @notice all signatures must come from this specific address, otherwise are invalid
     address public signAddress;
-    string public baseTokenURI;
+
+    /// @notice stores the personalization for a tokenId
+    mapping(uint256 => uint256) public personalizationTraits;
+
+    /// @dev map used to mark if a specific signatureId was used
+    ///      values are 0 (default, unused) and 1 (used)
+    ///      Used to mitigate a possible signature reuse attack
+    mapping(uint256 => uint256) private _signatureIds;
+
+    /// @dev helper mapping used to determine which IDs are available for minting
+    mapping(uint256 => uint256) private _availableIds;
 
     /*//////////////////////////////////////////////////////////////
                                 Events
@@ -125,8 +154,8 @@ contract AvatarCollection is
      * @param baseURI an URI that will be used as the base for token URI
      * @param _name name of the ERC721 token
      * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury address belonging to SAND token owner
-     * @param _signAddress signer address that is allowed to mint
+     * @param _mintTreasury collection treasury address
+     * @param _signAddress signer address that is allowed to create mint signatures
      * @param _allowedToExecuteMint token address that is allowed to execute the mint function
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
@@ -152,7 +181,7 @@ contract AvatarCollection is
      * @dev emitted when setupWave is called
      * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
-     * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
+     * @param _waveSingleTokenPrice the price to mint a token in a given wave, in wei
      */
     event WaveSetup(
         uint256 indexed _waveMaxTokens,
@@ -215,6 +244,22 @@ contract AvatarCollection is
         _disableInitializers();
     }
 
+    /**
+     * @notice external entry point initialization function in accordance with the upgradable pattern
+     * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
+     * @param _collectionOwner the address that will be set as the owner of the collection
+     * @param _initialBaseURI an URI that will be used as the base for token URI
+     * @param _name name of the ERC721 token
+     * @param _symbol token symbol of the ERC721 token
+     * @param _mintTreasury collection treasury address
+     * @param _signAddress signer address that is allowed to create mint signatures
+     * @param _initialTrustedForwarder trusted forwarder address
+     * @param _allowedToExecuteMint ERC20 token contract through which mint will be done
+     *                              It is the only one allowed to call mint
+     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
+     * @param _filterParams Opensea registry filter initialization parameters
+     * @param _mintingDefaults default minting values for predefined wave helpers
+     */
     function initialize(
         address _collectionOwner,
         string memory _initialBaseURI,
@@ -250,15 +295,18 @@ contract AvatarCollection is
     /**
      * @notice initialization function in accordance with the upgradable pattern
      * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
+     * @param _collectionOwner the address that will be set as the owner of the collection
      * @param _initialBaseURI an URI that will be used as the base for token URI
      * @param _name name of the ERC721 token
      * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury address belonging to SAND token owner
-     * @param _signAddress signer address that is allowed to mint
+     * @param _mintTreasury collection treasury address
+     * @param _signAddress signer address that is allowed to create mint signatures
      * @param _initialTrustedForwarder trusted forwarder address
+     * @param _allowedToExecuteMint ERC20 token contract through which mint will be done
+     *                              It is the only one allowed to call mint
+     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _filterParams Opensea registry filter initialization parameters
      * @param _mintingDefaults default minting values for predefined wave helpers
-     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      */
     function __AvatarCollection_init(
         address _collectionOwner,
@@ -341,10 +389,11 @@ contract AvatarCollection is
     /**
      * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
      *         minted in total, per wallet and minting price
-     * @dev emits {WaveSetup} event
+     * @custom:event {WaveSetup}
      * @param _waveMaxTokensOverall the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param _waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
-     * @param _waveSingleTokenPrice the price to mint a token in a given wave. In SAND wei
+     * @param _waveSingleTokenPrice the price to mint a token in a given wave, in wei
+     *                              denoted by the allowedToExecuteMint contract
      */
     function setupWave(
         uint256 _waveMaxTokensOverall,
@@ -369,6 +418,13 @@ contract AvatarCollection is
         emit WaveSetup(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
     }
 
+    /**
+     * @notice helper function to set all token configs to that of the marketing minting phase.
+     *         Can be called by owner or specially designated role, CONFIGURATOR.
+     *         Uses default values set on contract initialization
+     * @dev reverts if not authorized
+     * @custom:event {WaveSetup}
+     */
     function setMarketingMint()
         external
         whenNotPaused
@@ -383,6 +439,13 @@ contract AvatarCollection is
         emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
     }
 
+    /**
+     * @notice helper function to set all token configs to that of the allowlist minting phase.
+     *         Can be called by owner or specially designated role, CONFIGURATOR.
+     *         Uses default values set on contract initialization
+     * @dev reverts if not authorized
+     * @custom:event {WaveSetup}
+     */
     function setAllowlistMint()
         external
         whenNotPaused
@@ -397,6 +460,13 @@ contract AvatarCollection is
         emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
     }
 
+    /**
+     * @notice helper function to set all token configs to that of the public minting phase.
+     *         Can be called by owner or specially designated role, CONFIGURATOR.
+     *         Uses default values set on contract initialization
+     * @dev reverts if not authorized
+     * @custom:event {WaveSetup}
+     */
     function setPublicMint()
         external
         whenNotPaused
@@ -412,7 +482,9 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice token minting function. Price is set by wave and is paid in SAND tokens
+     * @notice token minting function. Price is set by wave and is paid in tokens denoted
+     *         by the allowedToExecuteMint contract
+     * @custom:event {Transfer}
      * @param _wallet minting wallet
      * @param _amount number of token to mint
      * @param _signatureId signing signature ID
@@ -424,7 +496,9 @@ contract AvatarCollection is
         uint256 _signatureId,
         bytes memory _signature
     )
-        external whenNotPaused nonReentrant
+        external
+        whenNotPaused
+        nonReentrant
     {
         require(indexWave > 0, "AvatarCollection: contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "AvatarCollection: caller is not allowed");
@@ -459,9 +533,11 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice Helper function to emit the {MetadataUpdate} event in order for marketplaces to, on demand,
-     *         refresh metadata, for the provided token ID
+     * @notice helper function to emit the {MetadataUpdate} event in order for marketplaces to, on demand,
+     *         refresh metadata, for the provided token ID. Off-chain, gaming mechanics are done and this
+     *         function is ultimately called to signal the end of a reveal.
      * @dev will revert if owner of token is not caller or if signature is not valid
+     * @custom:event {MetadataUpdate}
      * @param _tokenId the ID belonging to the NFT token for which to emit the event
      * @param _signatureId validation signature ID
      * @param _signature validation signature
@@ -487,18 +563,27 @@ contract AvatarCollection is
         emit MetadataUpdate(_tokenId);
     }
 
+    /**
+     * @notice pauses the contract
+     * @dev reverts if not owner of the collection or if not un-paused
+     */
     function pause() external onlyOwner {
         super._pause();
     }
 
+    /**
+     * @notice unpauses the contract
+     * @dev reverts if not owner of the collection or if not paused
+     */
     function unpause() external onlyOwner {
         super._unpause();
     }
 
     /**
-     * @notice personalize token traits
+     * @notice personalize token traits according to the provided personalization bit-mask
      * @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
-     *      emits {Personalized} event
+     * @custom:event {Personalized}
+     * @custom:event {MetadataUpdate}
      * @param _signatureId the ID of the provided signature
      * @param _signature signing signature
      * @param _tokenId what token to personalize
@@ -514,7 +599,7 @@ contract AvatarCollection is
     {
         require(ownerOf(_tokenId) == _msgSender(), "AvatarCollection: sender is not owner");
 
-        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
+        require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
             _checkPersonalizationSignature(
                 _msgSender(),
@@ -528,11 +613,20 @@ contract AvatarCollection is
             "AvatarCollection: signature check failed"
         );
 
-        signatureIds[_signatureId] = 1;
+        _signatureIds[_signatureId] = 1;
 
         _updateTokenTraits(_tokenId, _personalizationMask);
     }
 
+    /**
+     * @notice personalize token traits but can be called by owner or special roles address
+     *         Used to change the traits of a token based on an in-game action
+     * @dev reverts if token does not exist or if not authorized
+     * @custom:event {Personalized}
+     * @custom:event {MetadataUpdate}
+     * @param _tokenId what token to personalize
+     * @param _personalizationMask a mask where each bit has a custom meaning in-game
+     */
     function operatorPersonalize(
         uint256 _tokenId,
         uint256 _personalizationMask
@@ -546,7 +640,7 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice saving locally the SAND token owner
+     * @notice saving locally the treasury address
      * @dev sets mintTreasury = _treasury
      * @custom:event {TreasurySet}
      * @param _treasury new treasury address to be saved
@@ -560,6 +654,7 @@ contract AvatarCollection is
     /**
      * @notice sets the sign address. Emits {SignAddressSet} event
      * @dev sets signAddress = _signAddress; address can't be 0
+     * @custom:event {SignAddressSet}
      * @param _signAddress new signer address to be set
      */
     function setSignAddress(address _signAddress) external onlyOwner {
@@ -570,8 +665,8 @@ contract AvatarCollection is
 
     /**
      * @notice sets which address is allowed to execute the mint function.
-     *         Emits {AllowedExecuteMintSet} event
-     * @dev sets allowedToExecuteMint = _address; address must belong to a contract
+     * @dev sets allowedToExecuteMint = _address; address must belong to a contract or reverts
+     * @custom:event {AllowedExecuteMintSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
     function setAllowedExecuteMint(address _minterToken) external onlyOwner {
@@ -581,8 +676,9 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice sets the base token URI for the contract. Emits a {BaseURISet} event.
+     * @notice sets the base token URI for the contract
      * @dev sets baseTokenURI = baseURI
+     * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
     function setBaseURI(string memory baseURI) external authorizedRole(CONFIGURATOR_ROLE) {
@@ -598,7 +694,7 @@ contract AvatarCollection is
      * @notice get the personalization of the indicated tokenID
      * @dev returns personalizationTraits[_tokenId]
      * @param _tokenId the token ID to check
-     * @return uint256 the personalization data as uint256
+     * @return the personalization data as uint256
      */
     function personalizationOf(uint256 _tokenId) external view returns (uint256) {
         return personalizationTraits[_tokenId];
@@ -619,7 +715,7 @@ contract AvatarCollection is
      * @dev returns waveSingleTokenPrice * _count; Does not check if it is possible
      *      to actually mint that much
      * @param _count the number of tokens to estimate mint price for
-     * @return uint256 price of minting all the tokens
+     * @return price of minting all the tokens
      */
     function price(uint256 _count) public view virtual returns (uint256) {
         return waveSingleTokenPrice * _count;
@@ -628,7 +724,7 @@ contract AvatarCollection is
     /**
      * @notice helper automation function
      * @dev returns block.chainid
-     * @return uint256 current chainID for the blockchain
+     * @return current chainID for the blockchain
      */
     function chain() external view returns (uint256) {
         return block.chainid;
@@ -771,12 +867,19 @@ contract AvatarCollection is
         sender = ERC2771HandlerUpgradeable._msgSender();
     }
 
+    /**
+     * @notice checks that the provided signature is valid, while also taking into
+     *         consideration the provided address and signatureId
+     * @param _address address to be used in validating the signature
+     * @param _signatureId signing signature ID
+     * @param _signature signing signature value
+     */
     function _checkAndSetSignature(
         address _address,
         uint256 _signatureId,
         bytes memory _signature) internal
     {
-        require(signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
+        require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
             _checkSignature(
                 _address,
@@ -787,7 +890,7 @@ contract AvatarCollection is
             ) == signAddress,
             "AvatarCollection: signature failed"
         );
-        signatureIds[_signatureId] = 1;
+        _signatureIds[_signatureId] = 1;
     }
 
     /**
@@ -895,7 +998,14 @@ contract AvatarCollection is
             totalSupply() + _amount <= maxSupply;
     }
 
-
+    /**
+     * @notice actually updates the variables that store the personalization traits per token.
+     * @dev no checks are done on input validations. Calling functions are expected to do them
+     * @custom:event {Personalized}
+     * @custom:event {MetadataUpdate}
+     * @param _tokenId the ID for the token to personalize
+     * @param _personalizationMask the personalization mask that will be applied
+     */
     function _updateTokenTraits(
         uint256 _tokenId,
         uint256 _personalizationMask
@@ -930,19 +1040,24 @@ contract AvatarCollection is
             ) % remaining;
         uint256 value = rand;
 
-        if (availableIds[rand] != 0) {
-            value = availableIds[rand];
+        if (_availableIds[rand] != 0) {
+            value = _availableIds[rand];
         }
 
-        if (availableIds[remaining - 1] == 0) {
-            availableIds[rand] = remaining - 1;
+        if (_availableIds[remaining - 1] == 0) {
+            _availableIds[rand] = remaining - 1;
         } else {
-            availableIds[rand] = availableIds[remaining - 1];
+            _availableIds[rand] = _availableIds[remaining - 1];
         }
 
         return value;
     }
 
+    /**
+     * @notice verifies it the provided address is a smart contract (by code size)
+     * @dev can be bypassed if called from contract constructors
+     * @param account account address to verify if it is a contract
+     */
     function _isContract(address account) internal view returns (bool) {
         // This method relies on extcodesize/address.code.length, which returns 0
         // for contracts in construction, since the code is only stored at the end
@@ -952,8 +1067,8 @@ contract AvatarCollection is
     }
 
     /**
-    Empty storage space in contracts for future enhancements
-    ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
+     * Empty storage space in contracts for future enhancements
+     * ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
      */
     uint256[50] private __gap;
 }

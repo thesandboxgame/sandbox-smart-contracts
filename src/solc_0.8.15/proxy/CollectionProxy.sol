@@ -1,9 +1,27 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.15;
 
 import { BeaconProxy } from "openzeppelin-contracts/proxy/beacon/BeaconProxy.sol";
 
-
+/**
+ * @title CollectionProxy
+ * @author qed.team x The Sandbox
+ * @notice Beacon Proxy extension that supports having an admin (owner equivalent) that can
+ *         change the beacon to which this proxy points to. Initial admin is set to the deployer
+ *
+ * @dev as there are several functions added directly in the proxy, any contract behind it (implementation)
+ *      must be aware that functions with the following sighash will not be reached, as they will hit the
+ *      proxy and not be delegate-called to the implementation
+ *
+ *      Sighash   |   Function Signature
+ *      =========================================
+ *      f8ab7198  =>  changeBeacon(address,bytes)
+ *      aac96d4b  =>  changeCollectionProxyAdmin(address)
+ *      59659e90  =>  beacon()
+ *      3e47158c  =>  proxyAdmin()
+ *
+ */
 contract CollectionProxy is BeaconProxy {
 
     /*//////////////////////////////////////////////////////////////

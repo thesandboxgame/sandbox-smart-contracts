@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
+/**
+ * @title CollectionStateManagement
+ * @author qed.team x The Sandbox
+ * @notice helper contract used to manage avatar collection states with regards to minting phases
+ *         Warning, {changeState} must be overwritten in the inheriting contract and added accesses
+ *         control limitations as this version is called by anybody as it is
+ */
 contract CollectionStateManagement {
 
     /*//////////////////////////////////////////////////////////////

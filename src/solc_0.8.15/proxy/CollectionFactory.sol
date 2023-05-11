@@ -9,7 +9,16 @@ import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { CollectionProxy } from "./CollectionProxy.sol";
 import { IERC5313 } from "../common/IERC5313.sol";
 
-
+/**
+ * @title CollectionFactory
+ * @author qed.team x The Sandbox
+ * @notice Collection Factory used to manage (mostly) avatar collections
+ *
+ * - it's purpose is to allow for easy deployment of new collections and easy upgrade of existing ones
+ * - factory can launch (or be added to) a beacon {UpgradeableBeacon} to which collection may point
+ * - each collection is represented by a {CollectionProxy} that points to a beacon
+ * - collections (proxies) can have the beacon they are pointing to changed
+ */
 contract CollectionFactory is Ownable2Step {
 
     using EnumerableSet for EnumerableSet.AddressSet;
