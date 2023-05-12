@@ -1,8 +1,9 @@
 import { HardhatUserConfig } from "hardhat/config";
-
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy";
+import dotenv from "dotenv";
+dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -26,6 +27,8 @@ const config: HardhatUserConfig = {
       default: 1,
     },
     assetAdmin: "upgradeAdmin",
+    catalystAdmin: "upgradeAdmin",
+    catalystMinter: "upgradeAdmin",
     uriSetter: "upgradeAdmin",
     revealer: "upgradeAdmin",
   },
@@ -45,6 +48,17 @@ const config: HardhatUserConfig = {
         interval: 1000,
         mempool: {
           order: "fifo",
+        },
+      },
+    },
+    "polygon-mumbai": {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [process.env.PRIVATE_KEY!],
+      chainId: 80001,
+      verify: {
+        etherscan: {
+          apiKey: process.env.ETHERSCAN_API_KEY,
+          apiUrl: "https://api-mumbai.polygonscan.com/",
         },
       },
     },
