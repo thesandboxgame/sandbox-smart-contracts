@@ -6,18 +6,18 @@ import "./IPolygonLand.sol";
 /**
  * @title IPolygonLandV2
  * @author The Sandbox
- * @notice Interface of the LAND v2 based on IPolygonLand
+ * @notice interface of the LAND v2 based on IPolygonLand
  */
 interface IPolygonLandV2 is IPolygonLand {
     /**
-     * @notice Checks if an address if an operator
+     * @notice checks if an address if an operator
      * @param who address checked
      * @return is it super operator
      */
     function isSuperOperator(address who) external view returns (bool);
 
     /**
-     * @notice Checks if a parent quad has child quads already minted.
+     * @notice checks if a parent quad has child quads already minted.
      *  Then mints the rest child quads and transfers the parent quad.
      *  Should only be called by the tunnel.
      * @param to The recipient of the new quad

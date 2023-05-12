@@ -7,7 +7,7 @@ import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721M
 
 /// @title Tunnel migration on L2
 /// @author The Sandbox
-/// @notice Contract handling the migration of LAND tokens from a tunnel to a new one
+/// @notice contract handling the migration of LAND tokens from a tunnel to a new one
 contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     struct OwnerWithLandIds {
         address owner;
@@ -45,7 +45,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit AdminChanged(_newAdmin);
     }
 
-    /// @notice Constructor of the tunnel migration contract
+    /// @notice constructor of the tunnel migration contract
     /// @param _polygonLand LAND token address on the child chain
     /// @param _newLandTunnel tunnel address to migrate to
     /// @param _oldLandTunnel tunnel address to migrate from
