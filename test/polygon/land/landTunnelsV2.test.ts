@@ -482,7 +482,6 @@ describe('PolygonLand', function () {
           [y],
           bytes
         );
-        // .to.be.revertedWith('Exceeds max allowed quads');
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.balanceOf(LandTunnelV2.address)).to.be.equal(
           plotCount
@@ -1597,7 +1596,7 @@ describe('PolygonLand', function () {
             [y_1, y_2],
             bytes
           )
-        ).to.be.revertedWith('Exceeds max allowed quads.');
+        ).to.be.revertedWith('Exceeds max allowed lands.');
       });
 
       it('should be able to transfer 3x3 Land', async function () {
