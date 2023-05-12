@@ -188,6 +188,49 @@ contract Catalyst is
         return ERC2771Handler._msgData();
     }
 
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param value amount of token transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) public override onlyAllowedOperator(from) {
+        super._safeTransferFrom(from, to, id, value, data);
+    }
+
+    /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
+    /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param ids ids of each token type transfered.
+    /// @param values amount of each token type transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values,
+        bytes memory data
+    ) public override onlyAllowedOperator(from) {
+        super._safeBatchTransferFrom(from, to, ids, values, data);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override onlyAllowedOperatorApproval(operator) {
+        super._setApprovalForAll(_msgSender(), operator, approved);
+    }
+
     /// @notice Implementation of EIP-2981 royalty standard
     /// @param _tokenId The token id to check
     /// @param _salePrice The sale price of the token id
