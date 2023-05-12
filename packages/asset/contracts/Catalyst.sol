@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/ICatalyst.sol";
 
@@ -17,7 +18,8 @@ contract Catalyst is
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC2771Handler,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    OperatorFiltererUpgradeable
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
 
@@ -33,6 +35,9 @@ contract Catalyst is
         string memory _baseUri,
         address _trustedForwarder,
         address _royaltyRecipient,
+        address _subscription,
+        address _defaultAdmin,
+        address _defaultMinter,
         uint256[] memory _catalystRoyaltyBps
     ) public initializer {
         __ERC1155_init(_baseUri);
@@ -40,9 +45,10 @@ contract Catalyst is
         __ERC1155Burnable_init();
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(_trustedForwarder);
+        __OperatorFilterer_init(_subscription, true);
 
-        // TODO currently setting the deployer as the admin, but we can change this
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
+        _grantRole(MINTER_ROLE, _defaultMinter);
 
         _royaltyRecipient = _royaltyRecipient;
         for (uint256 i = 0; i < _catalystRoyaltyBps.length; i++) {
