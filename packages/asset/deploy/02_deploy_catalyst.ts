@@ -11,23 +11,31 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
 
-  const { deployer, upgradeAdmin } = await getNamedAccounts();
+  const { deployer, upgradeAdmin, catalystAdmin, catalystMinter } =
+    await getNamedAccounts();
+
+  const OperatorFilterSubscription = await deployments.get(
+    "OperatorFilterSubscription"
+  );
 
   await deploy("Catalyst", {
     from: deployer,
     log: true,
-    contract : "Catalyst",
+    contract: "Catalyst",
     proxy: {
       owner: upgradeAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
-          methodName: "initialize",
-          args: [
-            CATALYST_BASE_URI,
-            TRUSTED_FORWARDER_ADDRESS,
-            CATALYST_ROYALTY_TREASURY_ADDRESS,
-            CATALYST_ROYALTY_BPS_PER_TIER,
-          ],
+        methodName: "initialize",
+        args: [
+          CATALYST_BASE_URI,
+          TRUSTED_FORWARDER_ADDRESS,
+          CATALYST_ROYALTY_TREASURY_ADDRESS,
+          OperatorFilterSubscription.address,
+          catalystAdmin,
+          catalystMinter,
+          CATALYST_ROYALTY_BPS_PER_TIER,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -36,4 +44,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["Catalyst"];
-func.dependencies = ["ProxyAdmin"];
+func.dependencies = ["ProxyAdmin", "OperatorFilterSubscription"];
