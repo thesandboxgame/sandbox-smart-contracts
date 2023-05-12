@@ -123,8 +123,12 @@ contract PolygonLandTunnelV2 is
         transferringToL1 = false;
     }
 
+    /// @notice sets the fx-root tunnel
+    /// @dev only owner can call this funtion
+    /// @param _fxRootTunnel address of the fx-root tunnel
     function setFxRootTunnel(address _fxRootTunnel) external override onlyOwner {
-        require(fxRootTunnel == address(0x0), "FxBaseChildTunnel: ROOT_TUNNEL_ALREADY_SET");
+        require(fxRootTunnel == address(0), "PolygonLandTunnelV2: ROOT_TUNNEL_ALREADY_SET");
+
         fxRootTunnel = _fxRootTunnel;
     }
 
