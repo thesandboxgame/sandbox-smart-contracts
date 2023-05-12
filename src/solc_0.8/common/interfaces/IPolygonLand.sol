@@ -18,7 +18,7 @@ interface IPolygonLand is ILandToken {
      * @param data extra data to pass to the transfer
      */
     function mintQuad(
-        address user,
+        address to,
         uint256 size,
         uint256 x,
         uint256 y,
