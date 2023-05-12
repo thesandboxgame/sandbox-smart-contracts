@@ -19,9 +19,5 @@
                 "test"
             ]
         }
-    },
-    "defaultBase": "origin/master",
-    "affected": {
-        "defaultBase": "origin/master"
     }
 }
