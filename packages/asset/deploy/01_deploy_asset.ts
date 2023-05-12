@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { TRUSTED_FORWARDER_ADDRESS } from "../constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, uriSetter, upgradeAdmin } = await getNamedAccounts();
+  const { deployer, uriSetter, upgradeAdmin, trustedForwarder } =
+    await getNamedAccounts();
 
   await deploy("Asset", {
     from: deployer,
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: "initialize",
         args: [
           "https://test.com",
-          TRUSTED_FORWARDER_ADDRESS,
+          trustedForwarder,
           uriSetter,
           1, // chain index for polygon network
           [1, 2, 3, 4, 5, 6],

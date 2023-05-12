@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
     },
     "polygon-mumbai": {
       url: "https://rpc-mumbai.maticvigil.com",
-      accounts: [process.env.PRIVATE_KEY!],
+      accounts: [process.env.PRIVATE_KEY || ""],
       chainId: 80001,
       verify: {
         etherscan: {
