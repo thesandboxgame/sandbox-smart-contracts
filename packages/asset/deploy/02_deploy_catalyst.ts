@@ -2,18 +2,22 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import {
   CATALYST_BASE_URI,
+  CATALYST_IPFS_CID_PER_TIER,
   CATALYST_ROYALTY_BPS_PER_TIER,
-  CATALYST_ROYALTY_TREASURY_ADDRESS,
-  TRUSTED_FORWARDER_ADDRESS,
 } from "../constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
 
-  const { deployer, upgradeAdmin, catalystAdmin, catalystMinter } =
-    await getNamedAccounts();
-
+  const {
+    deployer,
+    upgradeAdmin,
+    catalystAdmin,
+    catalystMinter,
+    catalystRoyaltyRecipient,
+    trustedForwarder,
+  } = await getNamedAccounts();
   const OperatorFilterSubscription = await deployments.get(
     "OperatorFilterSubscription"
   );
@@ -29,12 +33,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: "initialize",
         args: [
           CATALYST_BASE_URI,
-          TRUSTED_FORWARDER_ADDRESS,
-          CATALYST_ROYALTY_TREASURY_ADDRESS,
+          trustedForwarder,
+          catalystRoyaltyRecipient,
           OperatorFilterSubscription.address,
           catalystAdmin,
           catalystMinter,
           CATALYST_ROYALTY_BPS_PER_TIER,
+          CATALYST_IPFS_CID_PER_TIER,
         ],
       },
       upgradeIndex: 0,

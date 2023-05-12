@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import "./ERC2771Handler.sol";
@@ -17,6 +18,7 @@ contract Catalyst is
     ERC1155Upgradeable,
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
+    ERC1155URIStorageUpgradeable,
     ERC2771Handler,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable
@@ -24,7 +26,6 @@ contract Catalyst is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
 
     uint256 public catalystTierCount;
-
     address private royaltyRecipient;
     mapping(uint256 => uint256) private catalystRoyaltyBps;
 
@@ -38,33 +39,61 @@ contract Catalyst is
         address _subscription,
         address _defaultAdmin,
         address _defaultMinter,
-        uint256[] memory _catalystRoyaltyBps
+        uint256[] memory _catalystRoyaltyBps,
+        string[] memory _catalystIpfsCID
     ) public initializer {
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
         __ERC1155Supply_init();
+        __ERC1155URIStorage_init();
+        ERC1155URIStorageUpgradeable._setBaseURI(_baseUri);
         __ERC2771Handler_initialize(_trustedForwarder);
         __OperatorFilterer_init(_subscription, true);
 
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
 
-        _royaltyRecipient = _royaltyRecipient;
+        royaltyRecipient = _royaltyRecipient;
         for (uint256 i = 0; i < _catalystRoyaltyBps.length; i++) {
             catalystRoyaltyBps[i + 1] = _catalystRoyaltyBps[i];
+            ERC1155URIStorageUpgradeable._setURI(i + 1, _catalystIpfsCID[i]);
             unchecked {
                 catalystTierCount++;
             }
         }
     }
 
-    /// @notice Set a new base URI, limited to DEFAULT_ADMIN_ROLE only
-    /// @param newuri The new base URI
+    /// @notice Set a new URI for specific tokenid
+    /// @param tokenId The token id to set URI for
+    /// @param tokenURI The new URI
     function setURI(
-        string memory newuri
+        uint256 tokenId,
+        string memory tokenURI
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setURI(newuri);
+        _setURI(tokenId, tokenURI);
+    }
+
+    /// @notice Set a new base URI, limited to DEFAULT_ADMIN_ROLE only
+    /// @param baseURI The new base URI
+    function setBaseURI(
+        string memory baseURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setBaseURI(baseURI);
+    }
+
+    /// @notice returns token URI
+    /// @param tokenId The token id to get URI for
+    /// @return tokenURI the URI of the token
+    function uri(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
     /// @notice Mints a new token, limited to MINTER_ROLE only
@@ -119,10 +148,12 @@ contract Catalyst is
     /// @param royaltyBps The royalty bps for the catalyst
     function addNewCatalystType(
         uint256 catalystId,
-        uint256 royaltyBps
+        uint256 royaltyBps,
+        string memory ipfsCID
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         catalystTierCount++;
         catalystRoyaltyBps[catalystId] = royaltyBps;
+        ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId, royaltyBps);
     }
 
