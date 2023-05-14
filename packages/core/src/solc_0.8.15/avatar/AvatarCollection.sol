@@ -94,6 +94,10 @@ contract AvatarCollection is
                            Global state variables
     //////////////////////////////////////////////////////////////*/
 
+    /// @notice default minting price in full tokens (not WEI) when used, this must be
+    ///         multiplied by the token "allowedToExecuteMint" token decimals
+    uint256 public constant DEFAULT_MINT_PRICE_FULL = 100;
+
     /// @notice max token supply
     uint256 public maxSupply;
 
@@ -626,14 +630,23 @@ contract AvatarCollection is
     }
 
     /**
-     * @notice sets which address is allowed to execute the mint function.
+     * @notice sets which address is allowed to execute the mint function. Also resets default mint price
      * @dev sets allowedToExecuteMint = _address; address must belong to a contract or reverts
      * @custom:event {AllowedExecuteMintSet}
+     * @custom:event {DefaultMintingValuesSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
     function setAllowedExecuteMint(address _minterToken) external onlyOwner {
         require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
+        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * IERC20Metadata(_minterToken).decimals();
+
+        emit DefaultMintingValuesSet(
+            mintingDefaults.mintPrice,
+            mintingDefaults.maxPublicTokensPerWallet,
+            mintingDefaults.maxAllowlistTokensPerWallet,
+            mintingDefaults.maxMarketingTokens
+        );
         emit AllowedExecuteMintSet(_minterToken);
     }
 
