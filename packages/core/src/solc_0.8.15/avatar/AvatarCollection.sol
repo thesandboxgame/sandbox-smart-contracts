@@ -22,7 +22,6 @@ import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 
-// import { UpdatableOperatorFiltererUpgradeable } from "operator-filter-registry/src/upgradeable/UpdatableOperatorFiltererUpgradeable.sol";
 import {
     UpdatableOperatorFiltererUpgradeable
 } from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
