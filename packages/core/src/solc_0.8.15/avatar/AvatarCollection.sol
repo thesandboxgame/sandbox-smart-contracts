@@ -639,7 +639,7 @@ contract AvatarCollection is
     function setAllowedExecuteMint(address _minterToken) external onlyOwner {
         require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
-        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * IERC20Metadata(_minterToken).decimals();
+        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
         emit DefaultMintingValuesSet(
             mintingDefaults.mintPrice,
