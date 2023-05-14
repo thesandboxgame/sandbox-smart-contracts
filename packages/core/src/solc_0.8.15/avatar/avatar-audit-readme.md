@@ -115,11 +115,6 @@ Note, each phase can occur more then once, this is intended. Phases are on-chain
 
 # Scope
 
-File|blank|comment|code
---------|--------|--------|--------
-SUM:|576|1183|2224
--------------------------------------------------------------------------------
-
 | File | Type | Blank Lines | Comment Lines | SLOC | Short description |
 |:-|:-|:-|:-|:-|:-:|
 | [packages/core/src/solc_0.8.15/common/IERC4906.sol](../common/IERC4906.sol) | Interface | 3 | 8 | 5 | IERC4906 Interface | 
