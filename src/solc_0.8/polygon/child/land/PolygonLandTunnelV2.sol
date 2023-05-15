@@ -17,10 +17,10 @@ contract PolygonLandTunnelV2 is
     OwnableUpgradeable,
     PausableUpgradeable
 {
-    IPolygonLandV2 public childToken;
+    bool internal transferringToL1;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
-    bool internal transferringToL1;
+    IPolygonLandV2 public childToken;
 
     mapping(uint8 => uint32) public gasLimits;
 
@@ -29,38 +29,6 @@ contract PolygonLandTunnelV2 is
     event SetMaxAllowedQuads(uint256 maxQuads);
     event Deposit(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address indexed user, uint256 size, uint256 x, uint256 y, bytes data);
-
-    /// @notice set the limit of estimated gas we accept when sending a batch of quads to L1
-    /// @param _maxGasLimit maximum accepted gas limit
-    function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
-        maxGasLimitOnL1 = _maxGasLimit;
-        emit SetMaxGasLimit(_maxGasLimit);
-    }
-
-    /// @notice set the limit of quads we can send in one tx to L1
-    /// @param _maxAllowedQuads maximum number of quads accepted
-    function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
-        require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
-        maxAllowedQuads = _maxAllowedQuads;
-        emit SetMaxAllowedQuads(_maxAllowedQuads);
-    }
-
-    /// @notice set the estimate of gas that the L1 transaction will use per quad size
-    /// @param  size the size of the quad
-    /// @param  limit the estimated gas that the L1 tx will use
-    function setLimit(uint8 size, uint32 limit) external onlyOwner {
-        _setLimit(size, limit);
-    }
-
-    /// @notice set the estimate of gas that the L1 transaction will use per quad size
-    /// @param  limits the estimated gas that the L1 tx will use per quad size
-    function setupLimits(uint32[5] memory limits) public onlyOwner {
-        _setLimit(1, limits[0]);
-        _setLimit(3, limits[1]);
-        _setLimit(6, limits[2]);
-        _setLimit(12, limits[3]);
-        _setLimit(24, limits[4]);
-    }
 
     /// @notice initialize the contract
     /// @param  _fxChild fx child tunnel contract address
@@ -134,6 +102,38 @@ contract PolygonLandTunnelV2 is
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    /// @notice set the limit of estimated gas we accept when sending a batch of quads to L1
+    /// @param _maxGasLimit maximum accepted gas limit
+    function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
+        maxGasLimitOnL1 = _maxGasLimit;
+        emit SetMaxGasLimit(_maxGasLimit);
+    }
+
+    /// @notice set the limit of quads we can send in one tx to L1
+    /// @param _maxAllowedQuads maximum number of quads accepted
+    function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
+        require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
+        maxAllowedQuads = _maxAllowedQuads;
+        emit SetMaxAllowedQuads(_maxAllowedQuads);
+    }
+
+    /// @notice set the estimate of gas that the L1 transaction will use per quad size
+    /// @param  size the size of the quad
+    /// @param  limit the estimated gas that the L1 tx will use
+    function setLimit(uint8 size, uint32 limit) external onlyOwner {
+        _setLimit(size, limit);
+    }
+
+    /// @notice set the estimate of gas that the L1 transaction will use per quad size
+    /// @param  limits the estimated gas that the L1 tx will use per quad size
+    function setupLimits(uint32[5] memory limits) public onlyOwner {
+        _setLimit(1, limits[0]);
+        _setLimit(3, limits[1]);
+        _setLimit(6, limits[2]);
+        _setLimit(12, limits[3]);
+        _setLimit(24, limits[4]);
     }
 
     /// @dev Pauses all token transfers across bridge

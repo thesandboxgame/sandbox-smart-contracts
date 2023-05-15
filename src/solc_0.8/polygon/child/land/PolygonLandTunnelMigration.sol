@@ -37,14 +37,6 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         _;
     }
 
-    /// @notice changes admin to new admin
-    /// @param _newAdmin the new admin to be set
-    function changeAdmin(address _newAdmin) external isAdmin {
-        require(_newAdmin != address(0), "PolygonLandTunnelMigration: admin can't be zero address");
-        admin = _newAdmin;
-        emit AdminChanged(_newAdmin);
-    }
-
     constructor(
         address _polygonLand,
         address _newLandTunnel,
@@ -112,6 +104,14 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     ) external isAdmin {
         polygonLand.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "");
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
+    }
+
+    /// @notice changes admin to new admin
+    /// @param _newAdmin the new admin to be set
+    function changeAdmin(address _newAdmin) external isAdmin {
+        require(_newAdmin != address(0), "PolygonLandTunnelMigration: admin can't be zero address");
+        admin = _newAdmin;
+        emit AdminChanged(_newAdmin);
     }
 
     function onERC721Received(
