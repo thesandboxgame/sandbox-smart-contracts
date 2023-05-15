@@ -65,7 +65,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     /// @notice This method needs super operator role to execute
     /// @param ids of land tokens to be migrated
     function migrateLandsToTunnel(uint256[] memory ids) external isAdmin {
-        polygonLand.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, "0x");
+        polygonLand.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, "");
         emit TunnelLandsMigrated(oldLandTunnel, newLandTunnel, ids);
     }
 
@@ -81,7 +81,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             _ownerWithLandIds.sizes,
             _ownerWithLandIds.x,
             _ownerWithLandIds.y,
-            "0x"
+            ""
         );
         // Withdraw tokens to L1
         IPolygonLandTunnel(newLandTunnel).batchTransferQuadToL1(
@@ -89,7 +89,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
             _ownerWithLandIds.sizes,
             _ownerWithLandIds.x,
             _ownerWithLandIds.y,
-            "0x"
+            ""
         );
 
         emit TunnelLandsMigratedWithWithdraw(_ownerWithLandIds);
@@ -110,7 +110,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         uint256[] memory x,
         uint256[] memory y
     ) external isAdmin {
-        polygonLand.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "0x");
+        polygonLand.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "");
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
     }
 
