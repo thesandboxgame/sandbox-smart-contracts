@@ -121,6 +121,15 @@ contract PolygonLandTunnelV2 is
         transferringToL1 = false;
     }
 
+    /// @notice sets the fx-root tunnel
+    /// @dev only owner can call this funtion
+    /// @param _fxRootTunnel address of the fx-root tunnel
+    function setFxRootTunnel(address _fxRootTunnel) external override onlyOwner {
+        require(fxRootTunnel == address(0), "PolygonLandTunnelV2: ROOT_TUNNEL_ALREADY_SET");
+
+        fxRootTunnel = _fxRootTunnel;
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {

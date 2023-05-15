@@ -88,6 +88,13 @@ contract LandTunnelV2 is
         }
     }
 
+    /// @notice sets the fx-child tunnel
+    /// @dev only owner can call this funtion
+    /// @param _fxChildTunnel address of the fx-child tunnel
+    function setFxChildTunnel(address _fxChildTunnel) public override onlyOwner {
+        super.setFxChildTunnel(_fxChildTunnel);
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
