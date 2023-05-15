@@ -9,9 +9,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Supp
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
+import "./RoyaltyHandler.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/ICatalyst.sol";
 
+/// @title Catalyst
+/// @dev A ERC1155 contract that manages catalysts, extends multiple OpenZeppelin contracts to
+/// provide a variety of features including, AccessControl, URIStorage, Burnable and more.
+/// The contract includes support for meta transactions.
 contract Catalyst is
     ICatalyst,
     Initializable,
@@ -20,18 +25,26 @@ contract Catalyst is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     ERC2771Handler,
+    RoyaltyHandler,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
 
-    uint256 public catalystTierCount;
-    address private royaltyRecipient;
-    mapping(uint256 => uint256) private catalystRoyaltyBps;
+    uint256 public tokenCount;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
     event NewCatalystTypeAdded(uint256 catalystId, uint256 royaltyBps);
 
+    /// @dev Initialize the contract, setting up initial values for various features.
+    /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
+    /// @param _trustedForwarder The trusted forwarder for meta transactions.
+    /// @param _royaltyRecipient The recipient of the royalties.
+    /// @param _subscription The subscription address.
+    /// @param _defaultAdmin The default admin address.
+    /// @param _defaultMinter The default minter address.
+    /// @param _catalystRoyaltyBps The royalties for each catalyst.
+    /// @param _catalystIpfsCID The IPFS content identifiers for each catalyst.
     function initialize(
         string memory _baseUri,
         address _trustedForwarder,
@@ -50,16 +63,16 @@ contract Catalyst is
         ERC1155URIStorageUpgradeable._setBaseURI(_baseUri);
         __ERC2771Handler_initialize(_trustedForwarder);
         __OperatorFilterer_init(_subscription, true);
+        __RoyaltyHandler_init(_royaltyRecipient);
 
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
 
-        royaltyRecipient = _royaltyRecipient;
         for (uint256 i = 0; i < _catalystRoyaltyBps.length; i++) {
-            catalystRoyaltyBps[i + 1] = _catalystRoyaltyBps[i];
+            RoyaltyHandler.setRoyaltyBps(i + 1, _catalystRoyaltyBps[i]);
             ERC1155URIStorageUpgradeable._setURI(i + 1, _catalystIpfsCID[i]);
             unchecked {
-                catalystTierCount++;
+                tokenCount++;
             }
         }
     }
@@ -74,7 +87,7 @@ contract Catalyst is
         _setURI(tokenId, metadataHash);
     }
 
-    /// @notice Set a new base URI, limited to DEFAULT_ADMIN_ROLE only
+    /// @notice Set a new base URI
     /// @param baseURI The new base URI
     function setBaseURI(
         string memory baseURI
@@ -82,7 +95,7 @@ contract Catalyst is
         _setBaseURI(baseURI);
     }
 
-    /// @notice returns token URI
+    /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
     function uri(
@@ -105,7 +118,7 @@ contract Catalyst is
         uint256 id,
         uint256 amount
     ) external onlyRole(MINTER_ROLE) {
-        require(id > 0 && id <= catalystTierCount, "INVALID_CATALYST_ID");
+        require(id > 0 && id <= tokenCount, "INVALID_CATALYST_ID");
         _mint(to, id, amount, "");
     }
 
@@ -119,14 +132,15 @@ contract Catalyst is
         uint256[] memory amounts
     ) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < ids.length; i++) {
-            require(
-                ids[i] > 0 && ids[i] <= catalystTierCount,
-                "INVALID_CATALYST_ID"
-            );
+            require(ids[i] > 0 && ids[i] <= tokenCount, "INVALID_CATALYST_ID");
         }
         _mintBatch(to, ids, amounts, "");
     }
 
+    /// @notice Burns a specified amount of tokens from a specific address
+    /// @param account The address to burn from
+    /// @param id The token id to burn
+    /// @param amount The amount to be burned
     function burnFrom(
         address account,
         uint256 id,
@@ -135,6 +149,10 @@ contract Catalyst is
         _burn(account, id, amount);
     }
 
+    /// @notice Burns a batch of tokens from a specific address
+    /// @param account The address to burn from
+    /// @param ids The token ids to burn
+    /// @param amounts The amounts to be burned
     function burnBatchFrom(
         address account,
         uint256[] memory ids,
@@ -151,8 +169,8 @@ contract Catalyst is
         uint256 royaltyBps,
         string memory ipfsCID
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        catalystTierCount++;
-        catalystRoyaltyBps[catalystId] = royaltyBps;
+        tokenCount++;
+        RoyaltyHandler.setRoyaltyBps(catalystId, royaltyBps);
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId, royaltyBps);
     }
@@ -231,23 +249,12 @@ contract Catalyst is
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Implementation of EIP-2981 royalty standard
-    /// @param _tokenId The token id to check
-    /// @param _salePrice The sale price of the token id
-    /// @return receiver The address that should receive the royalty payment
-    /// @return royaltyAmount The royalty payment amount for the token id
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) external view returns (address receiver, uint256 royaltyAmount) {
-        uint256 royaltyBps = catalystRoyaltyBps[_tokenId];
-        return (royaltyRecipient, (_salePrice * royaltyBps) / 10000);
-    }
-
+    /// @notice Change the royalty recipient address, limited to DEFAULT_ADMIN_ROLE only
+    /// @param newRoyaltyRecipient The new royalty recipient address
     function changeRoyaltyRecipient(
         address newRoyaltyRecipient
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        royaltyRecipient = newRoyaltyRecipient;
+        RoyaltyHandler.setRoyaltyRecipient(newRoyaltyRecipient);
     }
 
     function _beforeTokenTransfer(
@@ -261,6 +268,9 @@ contract Catalyst is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    /// @notice Query if a contract implements interface `id`.
+    /// @param interfaceId the interface identifier, as specified in ERC-165.
+    /// @return `true` if the contract implements `id`.
     function supportsInterface(
         bytes4 interfaceId
     )
