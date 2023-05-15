@@ -7,9 +7,9 @@ import "../../../common/interfaces/ILandToken.sol";
 contract LandTunnelMigration {
     uint256 private constant GRID_SIZE = 408;
 
-    ILandToken public landToken;
-    address public newLandTunnel;
-    address public oldLandTunnel;
+    ILandToken public immutable landToken;
+    address public immutable newLandTunnel;
+    address public immutable oldLandTunnel;
     address private admin;
 
     event TunnelLandsMigrated(address indexed oldLandTunnel, address indexed newLandTunnel, uint256[] ids);
