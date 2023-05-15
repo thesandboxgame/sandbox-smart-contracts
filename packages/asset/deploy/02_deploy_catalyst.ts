@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-  CATALYST_ROYALTY_BPS_PER_TIER,
+  CATALYST_DEFAULT_ROYALTY,
 } from "../constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           OperatorFilterSubscription.address,
           catalystAdmin,
           catalystMinter,
-          CATALYST_ROYALTY_BPS_PER_TIER,
+          CATALYST_DEFAULT_ROYALTY,
           CATALYST_IPFS_CID_PER_TIER,
         ],
       },

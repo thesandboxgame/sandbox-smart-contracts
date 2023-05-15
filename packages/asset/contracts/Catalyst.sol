@@ -7,14 +7,16 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
-import "./RoyaltyHandler.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/ICatalyst.sol";
 
 /// @title Catalyst
-/// @dev A ERC1155 contract that manages catalysts, extends multiple OpenZeppelin contracts to
+/// @author The Sandbox
+/// @notice THis contract manages catalysts which are used to mint new assets.
+/// @dev An ERC1155 contract that manages catalysts, extends multiple OpenZeppelin contracts to
 /// provide a variety of features including, AccessControl, URIStorage, Burnable and more.
 /// The contract includes support for meta transactions.
 contract Catalyst is
@@ -25,7 +27,7 @@ contract Catalyst is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     ERC2771Handler,
-    RoyaltyHandler,
+    ERC2981Upgradeable,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable
 {
@@ -33,17 +35,19 @@ contract Catalyst is
 
     uint256 public tokenCount;
 
-    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
-    event NewCatalystTypeAdded(uint256 catalystId, uint256 royaltyBps);
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
-    /// @dev Initialize the contract, setting up initial values for various features.
+    /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
     /// @param _trustedForwarder The trusted forwarder for meta transactions.
     /// @param _royaltyRecipient The recipient of the royalties.
     /// @param _subscription The subscription address.
     /// @param _defaultAdmin The default admin address.
     /// @param _defaultMinter The default minter address.
-    /// @param _catalystRoyaltyBps The royalties for each catalyst.
+    /// @param _defaultCatalystsRoyalty The royalties for each catalyst.
     /// @param _catalystIpfsCID The IPFS content identifiers for each catalyst.
     function initialize(
         string memory _baseUri,
@@ -52,7 +56,7 @@ contract Catalyst is
         address _subscription,
         address _defaultAdmin,
         address _defaultMinter,
-        uint256[] memory _catalystRoyaltyBps,
+        uint96 _defaultCatalystsRoyalty,
         string[] memory _catalystIpfsCID
     ) public initializer {
         __ERC1155_init(_baseUri);
@@ -60,53 +64,19 @@ contract Catalyst is
         __ERC1155Burnable_init();
         __ERC1155Supply_init();
         __ERC1155URIStorage_init();
-        ERC1155URIStorageUpgradeable._setBaseURI(_baseUri);
         __ERC2771Handler_initialize(_trustedForwarder);
         __OperatorFilterer_init(_subscription, true);
-        __RoyaltyHandler_init(_royaltyRecipient);
-
+        __ERC2981_init();
+        _setBaseURI(_baseUri);
+        _setDefaultRoyalty(_royaltyRecipient, _defaultCatalystsRoyalty);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
-
-        for (uint256 i = 0; i < _catalystRoyaltyBps.length; i++) {
-            RoyaltyHandler.setRoyaltyBps(i + 1, _catalystRoyaltyBps[i]);
-            ERC1155URIStorageUpgradeable._setURI(i + 1, _catalystIpfsCID[i]);
+        for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
+            _setURI(i + 1, _catalystIpfsCID[i]);
             unchecked {
                 tokenCount++;
             }
         }
-    }
-
-    /// @notice Set a new URI for specific tokenid
-    /// @param tokenId The token id to set URI for
-    /// @param metadataHash The new URI
-    function setMetadataHash(
-        uint256 tokenId,
-        string memory metadataHash
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setURI(tokenId, metadataHash);
-    }
-
-    /// @notice Set a new base URI
-    /// @param baseURI The new base URI
-    function setBaseURI(
-        string memory baseURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setBaseURI(baseURI);
-    }
-
-    /// @notice returns full token URI, including baseURI and token metadata URI
-    /// @param tokenId The token id to get URI for
-    /// @return tokenURI the URI of the token
-    function uri(
-        uint256 tokenId
-    )
-        public
-        view
-        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
-    {
-        return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
     /// @notice Mints a new token, limited to MINTER_ROLE only
@@ -163,16 +133,14 @@ contract Catalyst is
 
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param catalystId The catalyst id to add
-    /// @param royaltyBps The royalty bps for the catalyst
+    /// @param ipfsCID The royalty bps for the catalyst
     function addNewCatalystType(
         uint256 catalystId,
-        uint256 royaltyBps,
         string memory ipfsCID
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tokenCount++;
-        RoyaltyHandler.setRoyaltyBps(catalystId, royaltyBps);
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
-        emit NewCatalystTypeAdded(catalystId, royaltyBps);
+        emit NewCatalystTypeAdded(catalystId);
     }
 
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
@@ -186,6 +154,39 @@ contract Catalyst is
         emit TrustedForwarderChanged(trustedForwarder);
     }
 
+    /// @notice Set a new URI for specific tokenid
+    /// @param tokenId The token id to set URI for
+    /// @param metadataHash The new URI
+    function setMetadataHash(
+        uint256 tokenId,
+        string memory metadataHash
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setURI(tokenId, metadataHash);
+    }
+
+    /// @notice Set a new base URI
+    /// @param baseURI The new base URI
+    function setBaseURI(
+        string memory baseURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setBaseURI(baseURI);
+    }
+
+    /// @notice returns full token URI, including baseURI and token metadata URI
+    /// @param tokenId The token id to get URI for
+    /// @return tokenURI the URI of the token
+    function uri(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return ERC1155URIStorageUpgradeable.uri(tokenId);
+    }
+
+    /// @dev Needed for meta transactions (see EIP-2771)
     function _msgSender()
         internal
         view
@@ -196,6 +197,7 @@ contract Catalyst is
         return ERC2771Handler._msgSender();
     }
 
+    /// @dev Needed for meta transactions (see EIP-2771)
     function _msgData()
         internal
         view
@@ -249,12 +251,15 @@ contract Catalyst is
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Change the royalty recipient address, limited to DEFAULT_ADMIN_ROLE only
-    /// @param newRoyaltyRecipient The new royalty recipient address
+    /// @notice Change the default royalty settings
+    /// @param defaultRoyaltyRecipient The new royalty recipient address
+    /// @param defaultRoyaltyBps The new royalty bps
     function changeRoyaltyRecipient(
-        address newRoyaltyRecipient
+        address defaultRoyaltyRecipient,
+        uint96 defaultRoyaltyBps
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        RoyaltyHandler.setRoyaltyRecipient(newRoyaltyRecipient);
+        _setDefaultRoyalty(defaultRoyaltyRecipient, defaultRoyaltyBps);
+        emit DefaultRoyaltyChanged(defaultRoyaltyRecipient, defaultRoyaltyBps);
     }
 
     function _beforeTokenTransfer(
@@ -276,9 +281,16 @@ contract Catalyst is
     )
         public
         view
-        override(ERC1155Upgradeable, AccessControlUpgradeable)
+        override(
+            ERC1155Upgradeable,
+            AccessControlUpgradeable,
+            ERC2981Upgradeable
+        )
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return
+            ERC1155Upgradeable.supportsInterface(interfaceId) ||
+            AccessControlUpgradeable.supportsInterface(interfaceId) ||
+            ERC2981Upgradeable.supportsInterface(interfaceId);
     }
 }
