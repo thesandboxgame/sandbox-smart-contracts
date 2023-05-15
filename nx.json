@@ -12,12 +12,5 @@
                 ]
             }
         }
-    },
-    "targetDefaults": {
-        "coverage": {
-            "dependsOn": [
-                "test"
-            ]
-        }
     }
 }
