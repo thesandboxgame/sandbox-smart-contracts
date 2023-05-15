@@ -66,12 +66,12 @@ contract Catalyst is
 
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
-    /// @param tokenURI The new URI
-    function setURI(
+    /// @param metadataHash The new URI
+    function setMetadataHash(
         uint256 tokenId,
-        string memory tokenURI
+        string memory metadataHash
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setURI(tokenId, tokenURI);
+        _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI, limited to DEFAULT_ADMIN_ROLE only
