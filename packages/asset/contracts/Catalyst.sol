@@ -192,7 +192,7 @@ contract Catalyst is
         view
         virtual
         override(ContextUpgradeable, ERC2771Handler)
-        returns (address sender)
+        returns (address)
     {
         return ERC2771Handler._msgSender();
     }
