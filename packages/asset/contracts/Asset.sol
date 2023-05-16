@@ -355,9 +355,10 @@ contract Asset is
         returns (bool)
     {
         return
-            id == 0x01ffc9a7 || //ERC165
-            id == 0xd9b67a26 || // ERC1155
-            id == 0x0e89341c || // ERC1155 metadata
+            id == type(IERC165Upgradeable).interfaceId ||
+            id == type(IERC1155Upgradeable).interfaceId ||
+            id == type(IERC1155MetadataURIUpgradeable).interfaceId ||
+            id == type(IAccessControlUpgradeable).interfaceId ||
             id == 0x572b6c05; // ERC2771
     }
 
@@ -428,6 +429,9 @@ contract Asset is
         return tokenId;
     }
 
+    /// @notice Extracts the creator address from a given token id
+    /// @param tokenId The token id to extract the creator address from
+    /// @return creator The asset creator address
     function extractCreatorFromId(
         uint256 tokenId
     ) public pure returns (address creator) {
@@ -435,13 +439,19 @@ contract Asset is
         return creator;
     }
 
+    /// @notice Extracts the chain index from a given token id
+    /// @param tokenId The token id to extract the chain index from
+    /// @return chainIdx The chain index
     function extractChainIndexFromId(
         uint256 tokenId
-    ) public view returns (uint8 value) {
-        value = uint8((tokenId >> CHAIN_SHIFT) & CHAIN_MASK);
-        return chainIndex;
+    ) public view returns (uint8 chainIdx) {
+        chainIdx = uint8((tokenId >> CHAIN_SHIFT) & CHAIN_MASK);
+        return chainIdx;
     }
 
+    /// @notice Extracts the tier from a given token id
+    /// @param tokenId The token id to extract the tier from
+    /// @return tier The asset tier, determined by the catalyst used to create it
     function extractTierFromId(
         uint256 tokenId
     ) public view returns (uint8 tier) {
@@ -449,6 +459,9 @@ contract Asset is
         return tier;
     }
 
+    /// @notice Extracts the revealed flag from a given token id
+    /// @param tokenId The token id to extract the revealed flag from
+    /// @return isRevealed Whether the asset is revealed or not
     function extractIsRevealedFromId(
         uint256 tokenId
     ) public view returns (bool) {
@@ -456,6 +469,9 @@ contract Asset is
         return isRevealed == 1;
     }
 
+    /// @notice Extracts the asset nonce from a given token id
+    /// @param tokenId The token id to extract the asset nonce from
+    /// @return creatorNonce The asset creator nonce
     function extractCreatorNonceFromId(
         uint256 tokenId
     ) public view returns (uint16 creatorNonce) {
@@ -463,6 +479,9 @@ contract Asset is
         return creatorNonce;
     }
 
+    /// @notice Extracts the abilities and enhancements hash from a given token id
+    /// @param tokenId The token id to extract the abilities and enhancements hash from
+    /// @return revealHash The reveal hash of the abilities and enhancements of the asset
     function extractRevealHashFromId(
         uint256 tokenId
     ) public view returns (uint40 revealHash) {
@@ -470,6 +489,9 @@ contract Asset is
         return revealHash;
     }
 
+    /// @notice Extracts the asset data from a given token id
+    /// @dev Created to limit the number of functions that need to be called when revealing an asset
+    /// @param tokenId The token id to extract the asset data from
     function getDataFromTokenId(
         uint256 tokenId
     ) public view returns (AssetData memory data) {
