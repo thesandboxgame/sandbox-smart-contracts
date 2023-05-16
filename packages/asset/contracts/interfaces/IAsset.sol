@@ -80,19 +80,19 @@ interface IAsset {
         uint256 tokenId
     ) external pure returns (address creator);
 
-    function extractTierFromId(uint256 tokenId) external pure returns (uint256);
+    function extractTierFromId(uint256 tokenId) external view returns (uint8);
 
     function extractIsRevealedFromId(
         uint256 tokenId
-    ) external pure returns (bool);
+    ) external view returns (bool);
 
     function extractCreatorNonceFromId(
         uint256 tokenId
-    ) external pure returns (uint16);
+    ) external view returns (uint16);
 
     function getDataFromTokenId(
         uint256 tokenId
-    ) external pure returns (AssetData memory data);
+    ) external view returns (AssetData memory data);
 
     function getRecyclingAmount(
         uint256 catalystTokenId
