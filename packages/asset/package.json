@@ -5,6 +5,8 @@
   "scripts": {
     "node": "hardhat node --no-deploy",
     "deploy": "hardhat deploy",
+    "deploy:catalyst": "hardhat deploy --tags Catalyst --network polygon-mumbai",
+    "verify:catalyst": "hardhat etherscan-verify --network polygon-mumbai",
     "test": "hardhat test"
   },
   "devDependencies": {

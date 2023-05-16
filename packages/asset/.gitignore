@@ -8,5 +8,8 @@ typechain-types
 # Hardhat files
 cache
 artifacts
+./artifacts
+./cache
+./typechain
 
 deployments

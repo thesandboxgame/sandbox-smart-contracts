@@ -291,8 +291,7 @@ contract AssetMinter is
         ICatalyst(catalystContract).mint(
             _msgSender(),
             catalystTier,
-            amountOfCatalystExtracted,
-            ""
+            amountOfCatalystExtracted
         );
     }
 

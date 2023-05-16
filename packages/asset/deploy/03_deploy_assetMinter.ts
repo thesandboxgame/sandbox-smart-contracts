@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { TRUSTED_FORWARDER_ADDRESS } from "../constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, revealer, upgradeAdmin } = await getNamedAccounts();
+  const { deployer, revealer, upgradeAdmin, trustedForwarder } =
+    await getNamedAccounts();
 
   const AssetContract = await deployments.get("Asset");
   const CatalystContract = await deployments.get("Catalyst");
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         methodName: "initialize",
         args: [
-          TRUSTED_FORWARDER_ADDRESS,
+          trustedForwarder,
           AssetContract.address,
           CatalystContract.address,
           deployer,
