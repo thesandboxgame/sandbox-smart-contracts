@@ -5,19 +5,21 @@ import {ethers, getNamedAccounts} from 'hardhat';
 import {withSnapshot, waitFor} from '../../utils';
 import {depositViaChildChainManager} from '../sand/fixtures';
 
-export {assert};
-
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const contractName = 'AvatarCollection';
+export const avatarCollectionContractName = 'AvatarCollection';
+export const factoryContractName = 'CollectionFactory';
 export const COLLECTION_MAX_SUPPLY = 500;
 
-export const setupRaffle = withSnapshot([contractName], async function (hre) {
+export const setupRaffle = withSnapshot([avatarCollectionContractName], async function (hre) {
+
   const {sandAdmin} = await getNamedAccounts();
 
-  const avatarCollectionContract = await ethers.getContract(contractName);
+  const avatarCollectionContract = await ethers.getContract(avatarCollectionContractName);
+
+
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
@@ -49,6 +51,7 @@ export const setupRaffle = withSnapshot([contractName], async function (hre) {
     ),
   };
 });
+
 
 async function setupWave(
   raffle: Contract,

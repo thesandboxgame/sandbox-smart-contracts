@@ -1,20 +1,18 @@
-import {expect} from 'chai';
+import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
-
 import {waitFor} from '../../utils';
 
 import {
   raffleSignWallet,
   setupRaffle,
-  assert,
   COLLECTION_MAX_SUPPLY,
-  contractName,
+  avatarCollectionContractName,
 } from './AvatarCollection.fixtures';
 
 const BATCH_SIZE = 50;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe(contractName, function () {
+describe(avatarCollectionContractName, function () {
   it.only('should be able to mint with valid signature', async function () {
     const {
       avatarCollectionContract,
