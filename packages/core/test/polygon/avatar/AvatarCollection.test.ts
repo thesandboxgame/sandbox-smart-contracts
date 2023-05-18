@@ -6,14 +6,14 @@ import {
   raffleSignWallet,
   setupRaffle,
   COLLECTION_MAX_SUPPLY,
-  avatarCollectionContractName,
+  implementationContractName,
 } from './AvatarCollection.fixtures';
 
 const BATCH_SIZE = 50;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe(avatarCollectionContractName, function () {
-  it.only('should be able to mint with valid signature', async function () {
+describe.only(implementationContractName, function () {
+  it('should be able to mint with valid signature', async function () {
     const {
       avatarCollectionContract,
       transferSand,
@@ -292,7 +292,7 @@ describe(avatarCollectionContractName, function () {
         tokenId,
         personalizationMask
       )
-    ).to.be.revertedWith('Signature failed');
+    ).to.be.revertedWith('AvatarCollection: signature check failed');
   });
 
   it('should be able to differentiate a personalized asset', async function () {
@@ -430,7 +430,7 @@ describe(avatarCollectionContractName, function () {
 
     await expect(
       contract.personalize(1, signature, tokenId, personalizationMask)
-    ).to.be.revertedWith('SignatureId already used');
+    ).to.be.revertedWith('AvatarCollection: signatureId already used');
   });
 });
 

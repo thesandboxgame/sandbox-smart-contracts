@@ -1,24 +1,29 @@
 import {assert} from 'chai';
 import {BigNumber, Contract, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import {ethers, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts, deployments} from 'hardhat';
 import {withSnapshot, waitFor} from '../../utils';
 import {depositViaChildChainManager} from '../sand/fixtures';
+
 
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const avatarCollectionContractName = 'AvatarCollection';
-export const factoryContractName = 'CollectionFactory';
+export const implementationContractName = 'AvatarCollection';
 export const COLLECTION_MAX_SUPPLY = 500;
 
-export const setupRaffle = withSnapshot([avatarCollectionContractName], async function (hre) {
+const implementationDeployTag = 'AvatarCollection_deploy';
+
+export const setupRaffle = withSnapshot([implementationDeployTag], async function (hre) {
 
   const {sandAdmin} = await getNamedAccounts();
 
-  const avatarCollectionContract = await ethers.getContract(avatarCollectionContractName);
+  const implementationContract = await ethers.getContract(implementationContractName);
 
+  const cachedContractProxyArtifact = await deployments.get(`${implementationContractName}Proxy`);
+  const avatarCollectionContract = new ethers.Contract(cachedContractProxyArtifact.address,
+    implementationContract.interface, ethers.provider);
 
   const sandContract = await ethers.getContract('PolygonSand');
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -72,7 +77,7 @@ async function setupWave(
     waveSingleTokenPrice
   );
   assert.equal(
-    (await raffle.waveMaxTokens()).toString(),
+    (await raffle.waveMaxTokensOverall()).toString(),
     waveMaxTokens.toString()
   );
   assert.equal(
@@ -80,7 +85,7 @@ async function setupWave(
     raffleSignWallet.toString()
   );
   assert.equal(
-    (await raffle.waveMaxTokensToBuy()).toString(),
+    (await raffle.waveMaxTokensPerWallet()).toString(),
     waveMaxTokensToBuy.toString()
   );
   assert.equal(
