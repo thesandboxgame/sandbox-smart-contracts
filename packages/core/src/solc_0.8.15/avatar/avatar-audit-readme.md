@@ -115,16 +115,16 @@ Note, each phase can occur more then once, this is intended. Phases are on-chain
 
 # Scope
 
-| File | Type | Lines | SLOC | Comment Lines | Blank lines | Coverage | Short description |
-|:-|:-|:-|:-|:-|:-|:-|:-:|
-| [packages/core/src/solc_0.8.15/common/IERC4906.sol](../common/IERC4906.sol) | Interface |  |  |  |  | - | IERC4906 Interface | 
-| [packages/core/src/solc_0.8.15/common/IERC5313.sol](../common/IERC5313.sol) | Interface |  |  |  |  | - | IERC5313 Interface |
-| [packages/core/src/solc_0.8.15/avatar/AvatarCollection.sol](AvatarCollection.sol) | Contract |  |  |  |  |  | The new Avatar Collection contract. Will be used as the default implementation in the beacon proxy pattern | 
-| [packages/core/src/solc_0.8.15/avatar/ERC721BurnMemoryEnumerableUpgradeable.sol](C721BurnMemoryEnumerableUpgradeable.sol) | Contract |  |  |  |  |  | ERC721EnumerableUpgradeable extension that supports storing information about *who burned what token* to be used more easily off-chain then replying only on Events |
-| [packages/core/src/solc_0.8.15/avatar/CollectionAccessControl.sol](CollectionAccessControl.sol) | Abstract |  |  |  |  |  | Hybrid Owner + Role access control management for collections |
-| [packages/core/src/solc_0.8.15/proxy/CollectionFactory.sol](../proxy/CollectionFactory.sol) | Contract |  |  |  |  |  | Deployer factory for collection proxies and beacon contracts, main deployment code |
-| [packages/core/src/solc_0.8.15/proxy/CollectionProxy.sol](../proxy/CollectionProxy.sol) | Contract |  |  |  |  |  | BeaconProxy extension that supports changing beacon by an admin |
-| Totals | - |  |  |  |   |   |  |
+| File | Type | Blank Lines | Comment Lines | SLOC | Short description |
+|:-|:-|:-|:-|:-|:-:|
+| [packages/core/src/solc_0.8.15/common/IERC4906.sol](../common/IERC4906.sol) | Interface | 3 | 8 | 5 | IERC4906 Interface | 
+| [packages/core/src/solc_0.8.15/common/IERC5313.sol](../common/IERC5313.sol) | Interface | 3 | 13 | 4 | IERC5313 Interface |
+| [packages/core/src/solc_0.8.15/avatar/AvatarCollection.sol](AvatarCollection.sol) | Contract | 109 | 395 | 488 | The new Avatar Collection contract. Will be used as the default implementation in the beacon proxy pattern | 
+| [packages/core/src/solc_0.8.15/avatar/ERC721BurnMemoryEnumerableUpgradeable.sol](C721BurnMemoryEnumerableUpgradeable.sol) | Contract | 13 | 50 | 27 | ERC721EnumerableUpgradeable extension that supports storing information about *who burned what token* to be used more easily off-chain then replying only on Events |
+| [packages/core/src/solc_0.8.15/avatar/CollectionAccessControl.sol](CollectionAccessControl.sol) | Abstract | 28 | 121 | 60 | Hybrid Owner + Role access control management for collections |
+| [packages/core/src/solc_0.8.15/proxy/CollectionFactory.sol](../proxy/CollectionFactory.sol) | Contract | 62 | 212 | 174 | Deployer factory for collection proxies and beacon contracts, main deployment code |
+| [packages/core/src/solc_0.8.15/proxy/CollectionProxy.sol](../proxy/CollectionProxy.sol) | Contract | 9 | 66 | 22 | BeaconProxy extension that supports changing beacon by an admin |
+| Totals | - | 227 | 865 | 780 | -  |
 
 
 # Known and Acknowledged Issues
