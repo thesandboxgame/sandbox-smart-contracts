@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./ERC2771Handler.sol";
@@ -19,7 +20,8 @@ contract Asset is
     ERC1155Upgradeable,
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
-    ERC1155SupplyUpgradeable
+    ERC1155SupplyUpgradeable,
+    ERC1155URIStorageUpgradeable
 {
     using TokenIdUtils for uint256;
 
@@ -37,6 +39,8 @@ contract Asset is
     mapping(address => uint16) public creatorNonces;
     // mapping of old bridged tokenId to creator nonce
     mapping(uint256 => uint16) public bridgedTokensNonces;
+    // mapping of ipfs token uri to token ids
+    mapping(string => uint256) public ipfsStringUsed;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -44,15 +48,17 @@ contract Asset is
     }
 
     function initialize(
-        string memory uri,
+        string memory _uri,
         address forwarder,
         address uriSetter,
         uint8 _chainIndex,
         uint256[] calldata catalystTiers,
-        uint256[] calldata catalystRecycleCopiesNeeded
+        uint256[] calldata catalystRecycleCopiesNeeded,
+        string memory baseUri
     ) external initializer {
         chainIndex = _chainIndex;
-        __ERC1155_init(uri);
+        _setBaseURI(baseUri);
+        __ERC1155_init(_uri);
         __AccessControl_init();
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(forwarder);
@@ -68,7 +74,10 @@ contract Asset is
     /// @notice Mint new token with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetData The address of the creator
-    function mint(AssetData calldata assetData) external onlyRole(MINTER_ROLE) {
+    function mint(
+        AssetData calldata assetData,
+        string memory assetUri
+    ) external onlyRole(MINTER_ROLE) {
         // increment nonce
         unchecked {
             creatorNonces[assetData.creator]++;
@@ -86,13 +95,17 @@ contract Asset is
         );
         // mint the tokens
         _mint(assetData.creator, id, assetData.amount, "");
+        require(ipfsStringUsed[assetUri] == 0, "ipfs already used");
+        ipfsStringUsed[assetUri] = id;
+        _setURI(id, assetUri);
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetDataArray The array of asset data
     function mintBatch(
-        AssetData[] calldata assetDataArray
+        AssetData[] calldata assetDataArray,
+        string[] memory assetUris
     ) external onlyRole(MINTER_ROLE) {
         // generate token ids by providing the creator address, the amount, catalyst tier and if it should mint as revealed
         uint256[] memory tokenIds = new uint256[](assetDataArray.length);
@@ -115,6 +128,9 @@ contract Asset is
                 0
             );
             amounts[i] = assetDataArray[i].amount;
+            require(ipfsStringUsed[assetUris[i]] == 0, "ipfs already used");
+            ipfsStringUsed[assetUris[i]] = tokenIds[i];
+            _setURI(tokenIds[i], assetUris[i]);
             i++;
         }
         // finally mint the tokens
@@ -128,7 +144,8 @@ contract Asset is
     /// @param assetData The data of the asset to mint
     function mintSpecial(
         address recipient,
-        AssetData calldata assetData
+        AssetData calldata assetData,
+        string memory assetUri
     ) external onlyRole(MINTER_ROLE) {
         // increment nonce
         unchecked {
@@ -146,13 +163,17 @@ contract Asset is
             assetData.revealHash
         );
         _mint(recipient, id, assetData.amount, "");
+        require(ipfsStringUsed[assetUri] == 0, "ipfs already used");
+        ipfsStringUsed[assetUri] = id;
+        _setURI(id, assetUri);
     }
 
     function revealMint(
         address recipient,
         uint256 amount,
         uint256 prevTokenId,
-        uint40[] calldata revealHashes
+        uint40[] calldata revealHashes,
+        string[] memory assetUris
     ) external onlyRole(MINTER_ROLE) returns (uint256[] memory tokenIds) {
         // get data from the previous token id
         AssetData memory data = prevTokenId.getData();
@@ -171,6 +192,15 @@ contract Asset is
                 revealHashes[i]
             );
             amounts[i] = 1;
+            if (ipfsStringUsed[assetUris[i]] != 0) {
+                require(
+                    ipfsStringUsed[assetUris[i]] == tokenIds[i],
+                    "ipfs already used"
+                );
+            } else {
+                ipfsStringUsed[assetUris[i]] = tokenIds[i];
+            }
+            _setURI(tokenIds[i], assetUris[i]);
             unchecked {
                 i++;
             }
@@ -195,7 +225,8 @@ contract Asset is
         uint8 tier,
         address recipient,
         bool revealed,
-        uint40 revealHash
+        uint40 revealHash,
+        string memory assetUri
     ) external onlyRole(BRIDGE_MINTER_ROLE) {
         // extract creator address from the last 160 bits of the original token id
         address originalCreator = address(uint160(originalTokenId));
@@ -227,6 +258,12 @@ contract Asset is
             revealHash
         );
         _mint(recipient, id, amount, "");
+        if (ipfsStringUsed[assetUri] != 0) {
+            require(ipfsStringUsed[assetUri] == id, "ipfs already used");
+        } else {
+            ipfsStringUsed[assetUri] = id;
+        }
+        _setURI(id, assetUri);
     }
 
     /// @notice Extract the catalyst by burning assets of the same tier
@@ -324,6 +361,38 @@ contract Asset is
         // catalyst 0 is restricted for tsb exclusive tokens
         require(catalystTokenId > 0, "Catalyst token id cannot be 0");
         recyclingAmounts[catalystTokenId] = amount;
+    }
+
+    /// @notice Set a new URI for specific tokenid
+    /// @param tokenId The token id to set URI for
+    /// @param uri The new URI
+    function setTokenUri(
+        uint256 tokenId,
+        string memory uri
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setURI(tokenId, uri);
+    }
+
+    /// @notice Set a new base URI
+    /// @param baseURI The new base URI
+    function setBaseURI(
+        string memory baseURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setBaseURI(baseURI);
+    }
+
+    /// @notice returns full token URI, including baseURI and token metadata URI
+    /// @param tokenId The token id to get URI for
+    /// @return tokenURI the URI of the token
+    function uri(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
     function setURI(string memory newuri) external onlyRole(URI_SETTER_ROLE) {

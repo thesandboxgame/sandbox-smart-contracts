@@ -70,7 +70,8 @@ contract AssetMinter is
     /// @param mintableAsset The asset to mint
     function mintAsset(
         bytes memory signature,
-        MintableAsset memory mintableAsset
+        MintableAsset memory mintableAsset,
+        string memory assetUri
     ) external {
         address creator = _msgSender();
         require(creator == mintableAsset.creator, "Creator mismatch");
@@ -114,7 +115,7 @@ contract AssetMinter is
             0
         );
 
-        IAsset(assetContract).mint(assetData);
+        IAsset(assetContract).mint(assetData, assetUri);
     }
 
     /// @notice Mints a batch of new assets, the assets are minted to the caller of the function, the caller must have enough catalysts to mint the assets
@@ -123,7 +124,8 @@ contract AssetMinter is
     /// @param mintableAssets The assets to mint
     function mintAssetBatch(
         bytes memory signature,
-        MintableAsset[] memory mintableAssets
+        MintableAsset[] memory mintableAssets,
+        string[] memory assetUris
     ) external {
         address creator = _msgSender();
         require(!bannedCreators[creator], "Creator is banned");
@@ -174,7 +176,7 @@ contract AssetMinter is
                 );
             }
         }
-        IAsset(assetContract).mintBatch(assets);
+        IAsset(assetContract).mintBatch(assets, assetUris);
     }
 
     /// @notice Special mint function for TSB exculsive assets
@@ -189,7 +191,8 @@ contract AssetMinter is
     function mintExclusive(
         address creator,
         address recipient,
-        uint256 amount
+        uint256 amount,
+        string memory assetUri
     ) external onlyRole(EXCLUSIVE_MINTER_ROLE) {
         require(amount > 0, "Amount must be > 0");
         IAsset.AssetData memory asset = IAsset.AssetData(
@@ -200,12 +203,12 @@ contract AssetMinter is
             true,
             0
         );
-        IAsset(assetContract).mintSpecial(recipient, asset);
+        IAsset(assetContract).mintSpecial(recipient, asset, assetUri);
     }
 
     /// @notice Reveal an asset to view its abilities and enhancements
     /// @dev the reveal mechanism works through burning the asset and minting a new one with updated tokenId
-    /// @param tokenId the tokenId of the asset to reveal
+    /// @param tokenId the tokenId of id idasset to reveal
     /// @param amount the amount of tokens to reveal
     function revealBurn(uint256 tokenId, uint256 amount) external {
         // amount should be greater than 0
@@ -242,7 +245,8 @@ contract AssetMinter is
         uint256 prevTokenId,
         address recipient,
         uint256 amount,
-        uint40[] calldata revealHashes
+        uint40[] calldata revealHashes,
+        string[] memory assetUris
     ) external {
         // verify the signature
         require(
@@ -260,7 +264,8 @@ contract AssetMinter is
             recipient,
             amount,
             prevTokenId,
-            revealHashes
+            revealHashes,
+            assetUris
         );
 
         emit AssetsRevealed(recipient, creator, prevTokenId, newIds);

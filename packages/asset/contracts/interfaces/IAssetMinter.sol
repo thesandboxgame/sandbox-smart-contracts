@@ -32,18 +32,21 @@ interface IAssetMinter {
     // Functions
     function mintAsset(
         bytes memory signature,
-        MintableAsset memory asset
+        MintableAsset memory asset,
+        string memory assetUri
     ) external;
 
     function mintAssetBatch(
         bytes memory signature,
-        MintableAsset[] memory mintableAssets
+        MintableAsset[] memory mintableAssets,
+        string[] memory assetUris
     ) external;
 
     function mintExclusive(
         address creator,
         address recipient,
-        uint256 amount
+        uint256 amount,
+        string memory assetUri
     ) external;
 
     function recycleAssets(
