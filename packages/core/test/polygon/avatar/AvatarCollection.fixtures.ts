@@ -5,7 +5,6 @@ import {ethers, getNamedAccounts, deployments} from 'hardhat';
 import {withSnapshot, waitFor} from '../../utils';
 import {depositViaChildChainManager} from '../sand/fixtures';
 
-
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
@@ -15,48 +14,56 @@ export const COLLECTION_MAX_SUPPLY = 500;
 
 const implementationDeployTag = 'AvatarCollection_deploy_new_beacon';
 
-export const setupRaffle = withSnapshot([implementationDeployTag], async function (hre) {
+export const setupRaffle = withSnapshot(
+  [implementationDeployTag],
+  async function (hre) {
+    const {sandAdmin} = await getNamedAccounts();
 
-  const {sandAdmin} = await getNamedAccounts();
+    const implementationContract = await ethers.getContract(
+      implementationContractName
+    );
 
-  const implementationContract = await ethers.getContract(implementationContractName);
+    const cachedContractProxyArtifact = await deployments.get(
+      `${implementationContractName}Proxy`
+    );
+    const avatarCollectionContract = new ethers.Contract(
+      cachedContractProxyArtifact.address,
+      implementationContract.interface,
+      ethers.provider
+    );
 
-  const cachedContractProxyArtifact = await deployments.get(`${implementationContractName}Proxy`);
-  const avatarCollectionContract = new ethers.Contract(cachedContractProxyArtifact.address,
-    implementationContract.interface, ethers.provider);
+    const sandContract = await ethers.getContract('PolygonSand');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-  const sandContract = await ethers.getContract('PolygonSand');
-  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+    const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
 
-  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+    await depositViaChildChainManager(
+      {sand: sandContract, childChainManager},
+      sandAdmin,
+      SAND_AMOUNT
+    );
 
-  await depositViaChildChainManager(
-    {sand: sandContract, childChainManager},
-    sandAdmin,
-    SAND_AMOUNT
-  );
-
-  return {
-    avatarCollectionContract,
-    sandContract,
-    hre,
-    getNamedAccounts,
-    setupWave,
-    signAuthMessageAs,
-    transferSand,
-    mint: mintSetup(avatarCollectionContract, sandContract),
-    personalizeSignature: validPersonalizeSignature,
-    personalize: personalizeSetup(
+    return {
       avatarCollectionContract,
-      validPersonalizeSignature
-    ),
-    personalizeInvalidSignature: personalizeSetup(
-      avatarCollectionContract,
-      invalidPersonalizeSignature
-    ),
-  };
-});
-
+      sandContract,
+      hre,
+      getNamedAccounts,
+      setupWave,
+      signAuthMessageAs,
+      transferSand,
+      mint: mintSetup(avatarCollectionContract, sandContract),
+      personalizeSignature: validPersonalizeSignature,
+      personalize: personalizeSetup(
+        avatarCollectionContract,
+        validPersonalizeSignature
+      ),
+      personalizeInvalidSignature: personalizeSetup(
+        avatarCollectionContract,
+        invalidPersonalizeSignature
+      ),
+    };
+  }
+);
 
 async function setupWave(
   raffle: Contract,

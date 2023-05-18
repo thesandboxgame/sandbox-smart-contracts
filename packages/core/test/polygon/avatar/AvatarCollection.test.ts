@@ -12,7 +12,7 @@ import {
 const BATCH_SIZE = 50;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only(implementationContractName, function () {
+describe(implementationContractName, function () {
   it('should be able to mint with valid signature', async function () {
     const {
       avatarCollectionContract,
