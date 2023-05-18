@@ -337,7 +337,7 @@ contract AvatarCollection is
         require(_maxSupply > 0, "AvatarCollection: max supply should be more than 0");
 
         // totalSupply() should be 0 and just maxSupply could be used here; paranoia
-        uint256 remaining = maxSupply - totalSupply();
+        uint256 remaining = _maxSupply - totalSupply();
 
         require(_mintingDefaults.mintPrice > 0, "AvatarCollection: public mint price cannot be 0");
         require(
