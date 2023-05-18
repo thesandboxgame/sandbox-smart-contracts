@@ -13,7 +13,7 @@ export const raffleSignWallet = new ethers.Wallet(
 export const implementationContractName = 'AvatarCollection';
 export const COLLECTION_MAX_SUPPLY = 500;
 
-const implementationDeployTag = 'AvatarCollection_deploy';
+const implementationDeployTag = 'AvatarCollection_deploy_new_beacon';
 
 export const setupRaffle = withSnapshot([implementationDeployTag], async function (hre) {
 

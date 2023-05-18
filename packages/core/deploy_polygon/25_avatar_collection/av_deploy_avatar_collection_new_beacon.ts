@@ -3,7 +3,6 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
-  //const {deploy, read, get, execute, catchUnknownSigner, save} = deployments;
   const {
     deployer,
     sandAdmin,
@@ -24,16 +23,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'https://contracts-demo.sandbox.game/unrevealed/';
   }
 
-  const contractName = 'AvatarCollection';
-  await deployments.deploy(contractName, {
+  const implementationContractName = 'AvatarCollection';
+
+  // deploying the implementation
+  await deployments.deploy(implementationContractName, {
     from: deployer,
-    contract: contractName,
+    contract: implementationContractName,
     log: true,
     skipIfAlreadyDeployed: true,
   });
 
-  const avatarCollectionImplementationContract = await ethers.getContract(contractName);
-
+  // setup arguments
   const sandContract = await deployments.get('PolygonSand');
 
   const filterParams = {
@@ -49,6 +49,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     maxMarketingTokens: 100
   }
 
+  const avatarCollectionImplementationContract = await ethers.getContract(implementationContractName);
+
+  // encode arguments to be used as initialize data for the collection
   const encodedInitializationArgs = avatarCollectionImplementationContract.interface.encodeFunctionData('initialize',
     [
       nftCollectionAdmin,
@@ -75,17 +78,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const owner = await deployments.read('CollectionFactory', 'owner');
-
   const factoryContractAsOwner = await ethers.getContract('CollectionFactory', owner);
 
   console.log("CollectionFactory:", factoryContractAsOwner.address);
   console.log("CollectionFactory owner:", owner);
 
-  const mainImplementationAlias = ethers.utils.formatBytes32String("main-avatar");
+  const implementationAlias = ethers.utils.formatBytes32String("main-avatar");
 
+  // deploying beacon
   const deployBeaconTx = await factoryContractAsOwner.deployBeacon(
     avatarCollectionImplementationContract.address,
-    mainImplementationAlias
+    implementationAlias
     );
 
   const deployBeaconTxResult = await deployBeaconTx.wait(); // 0ms, as tx is already confirmed
@@ -99,7 +102,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log("Newly launched beacon:", beaconAddress);
 
   const deployCollectionTx = await factoryContractAsOwner.deployCollection(
-    mainImplementationAlias,
+    implementationAlias,
     encodedInitializationArgs
     );
 
@@ -112,16 +115,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const [, collectionAddress] = collectionAddedEvent.args;
 
-  await deployments.save(`${contractName}Proxy`, {
+  await deployments.save(`${implementationContractName}Proxy`, {
     address: collectionAddress,
     abi: JSON.stringify(avatarCollectionImplementationContract.interface) as unknown as ABI
   });
-  const collectionProxyContract = await deployments.get(`${contractName}Proxy`);
+  const collectionProxyContract = await deployments.get(`${implementationContractName}Proxy`);
 
   console.log("Newly launched collection (proxy):", collectionProxyContract.address); // or collectionAddress
 
 };
 
 export default func;
-func.tags = ['AvatarCollection', 'AvatarCollection_deploy'];
+func.tags = ['AvatarCollection', 'AvatarCollection_deploy_new_beacon'];
 func.dependencies = ['PolygonSand_deploy', 'CollectionFactory_deploy', 'TRUSTED_FORWARDER_V2'];
