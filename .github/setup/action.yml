@@ -1,0 +1,24 @@
+name: setup
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.17.0
+        cache: 'yarn'
+
+    - name: Installing dependencies
+      run: yarn install --frozen-lockfile
+      shell: bash
+
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      run: |
+        echo "NX_HEAD=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        echo "NX_BASE=$(git merge-base origin/master HEAD)" >> $GITHUB_ENV
+      shell: bash
+
