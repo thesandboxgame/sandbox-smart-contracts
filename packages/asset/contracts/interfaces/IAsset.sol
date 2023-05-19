@@ -68,32 +68,6 @@ interface IAsset {
 
     function setURI(string memory newuri) external;
 
-    function generateTokenId(
-        address creator,
-        uint8 tier,
-        uint16 assetNonce,
-        bool revealed,
-        uint40 abilitiesAndEnhancementsHash
-    ) external view returns (uint256);
-
-    function extractCreatorFromId(
-        uint256 tokenId
-    ) external pure returns (address creator);
-
-    function extractTierFromId(uint256 tokenId) external pure returns (uint256);
-
-    function extractIsRevealedFromId(
-        uint256 tokenId
-    ) external pure returns (bool);
-
-    function extractCreatorNonceFromId(
-        uint256 tokenId
-    ) external pure returns (uint16);
-
-    function getDataFromTokenId(
-        uint256 tokenId
-    ) external pure returns (AssetData memory data);
-
     function getRecyclingAmount(
         uint256 catalystTokenId
     ) external view returns (uint256);

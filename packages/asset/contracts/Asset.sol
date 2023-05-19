@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Supp
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./ERC2771Handler.sol";
+import "./libraries/TokenIdUtils.sol";
 import "./interfaces/IAsset.sol";
 import "./interfaces/ICatalyst.sol";
 
@@ -20,6 +21,8 @@ contract Asset is
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable
 {
+    using TokenIdUtils for uint256;
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
@@ -74,7 +77,7 @@ contract Asset is
         uint16 nonce = creatorNonces[assetData.creator];
         require(assetData.creatorNonce == nonce, "INVALID_NONCE");
         // generate token id by providing the creator address, the amount, catalyst tier and if it should mint as revealed
-        uint256 id = generateTokenId(
+        uint256 id = TokenIdUtils.generateTokenId(
             assetData.creator,
             assetData.tier,
             nonce,
@@ -104,7 +107,7 @@ contract Asset is
                 assetDataArray[i].creatorNonce == creatorNonces[creator],
                 "INVALID_NONCE"
             );
-            tokenIds[i] = generateTokenId(
+            tokenIds[i] = TokenIdUtils.generateTokenId(
                 creator,
                 assetDataArray[i].tier,
                 creatorNonces[creator],
@@ -135,7 +138,7 @@ contract Asset is
         uint16 creatorNonce = creatorNonces[assetData.creator];
 
         // minting a tsb exclusive token which are already revealed, have their supply increased and are not recyclable
-        uint256 id = generateTokenId(
+        uint256 id = TokenIdUtils.generateTokenId(
             assetData.creator,
             assetData.tier,
             creatorNonce,
@@ -152,7 +155,7 @@ contract Asset is
         uint40[] calldata revealHashes
     ) external onlyRole(MINTER_ROLE) returns (uint256[] memory tokenIds) {
         // get data from the previous token id
-        AssetData memory data = getDataFromTokenId(prevTokenId);
+        AssetData memory data = prevTokenId.getData();
 
         // check if the token is already revealed
         require(!data.revealed, "Asset: already revealed");
@@ -160,7 +163,7 @@ contract Asset is
         uint256[] memory amounts = new uint256[](amount);
         tokenIds = new uint256[](amount);
         for (uint256 i = 0; i < amount; ) {
-            tokenIds[i] = generateTokenId(
+            tokenIds[i] = TokenIdUtils.generateTokenId(
                 data.creator,
                 data.tier,
                 data.creatorNonce,
@@ -216,7 +219,7 @@ contract Asset is
             bridgedTokensNonces[originalTokenId] = nonce;
         }
 
-        uint256 id = generateTokenId(
+        uint256 id = TokenIdUtils.generateTokenId(
             originalCreator,
             tier,
             bridgedTokensNonces[originalTokenId],
@@ -250,7 +253,7 @@ contract Asset is
         );
         // make sure the tokens that user is trying to extract are of correct tier and user has enough tokens
         for (uint i = 0; i < tokenIds.length; i++) {
-            uint256 extractedTier = extractTierFromId(tokenIds[i]);
+            uint256 extractedTier = (tokenIds[i]).getTier();
             require(
                 extractedTier == catalystTier,
                 "Catalyst id does not match"
@@ -340,9 +343,10 @@ contract Asset is
         returns (bool)
     {
         return
-            id == 0x01ffc9a7 || //ERC165
-            id == 0xd9b67a26 || // ERC1155
-            id == 0x0e89341c || // ERC1155 metadata
+            id == type(IERC165Upgradeable).interfaceId ||
+            id == type(IERC1155Upgradeable).interfaceId ||
+            id == type(IERC1155MetadataURIUpgradeable).interfaceId ||
+            id == type(IAccessControlUpgradeable).interfaceId ||
             id == 0x572b6c05; // ERC2771
     }
 
@@ -375,74 +379,6 @@ contract Asset is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-    }
-
-    function generateTokenId(
-        address creator,
-        uint8 tier,
-        uint16 assetNonce,
-        bool revealed,
-        uint40 abilitiesAndEnhancementsHash
-    ) public view returns (uint256) {
-        /// the token id will be a uint256 with the following structure:
-        /// 0-159 bits: creator address
-        /// 160-167 bits: chain id
-        /// 168-175 bits: tier
-        /// 176-176 bits: revealed 0 | 1
-        /// 177-193 bits: creator nonce
-        /// 194-234 bits: hash of the abilities and enhancements
-        /// 235-255 bits: reserved for future use
-
-        // convert the address to uint160
-        uint160 creatorAddress = uint160(creator);
-        // convert the mint as revealed to uint8
-        uint8 revealedUint8 = revealed ? 1 : 0;
-
-        // create the token id
-        uint256 tokenId = uint256(
-            creatorAddress |
-                (chainIndex << 160) |
-                (uint256(tier) << 168) |
-                (uint256(revealedUint8) << 176) |
-                (uint256(assetNonce) << 177) |
-                (uint256(abilitiesAndEnhancementsHash) << 194)
-        );
-
-        return tokenId;
-    }
-
-    function extractCreatorFromId(
-        uint256 tokenId
-    ) public pure returns (address creator) {
-        creator = address(uint160(tokenId));
-    }
-
-    function extractTierFromId(uint256 tokenId) public pure returns (uint256) {
-        uint256 tier = (tokenId >> 168) & 0xFF;
-        return tier;
-    }
-
-    function extractIsRevealedFromId(
-        uint256 tokenId
-    ) public pure returns (bool) {
-        uint8 isRevealed = uint8((tokenId >> 176) & 0x1);
-        return isRevealed == 1;
-    }
-
-    function extractCreatorNonceFromId(
-        uint256 tokenId
-    ) public pure returns (uint16) {
-        uint16 creatorNonce = uint16((tokenId >> 177) & 0x3FF);
-        return creatorNonce;
-    }
-
-    function getDataFromTokenId(
-        uint256 tokenId
-    ) public pure returns (AssetData memory data) {
-        data.creator = address(uint160(tokenId));
-        data.tier = uint8((tokenId >> 168) & 0xFF);
-        data.revealed = uint8((tokenId >> 176) & 0x1) == 1;
-        data.creatorNonce = uint16((tokenId >> 177) & 0x3FF);
     }
 
     function getRecyclingAmount(
