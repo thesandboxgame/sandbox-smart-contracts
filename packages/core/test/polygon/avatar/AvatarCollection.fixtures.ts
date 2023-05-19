@@ -4,6 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-
 import {ethers, getNamedAccounts, deployments} from 'hardhat';
 import {withSnapshot, waitFor} from '../../utils';
 import {depositViaChildChainManager} from '../sand/fixtures';
+import ERC20Mock from '@openzeppelin/contracts-0.8.15/build/contracts/ERC20PresetMinterPauser.json';
 
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
@@ -14,7 +15,7 @@ export const COLLECTION_MAX_SUPPLY = 500;
 
 const implementationDeployTag = 'AvatarCollection_deploy_new_beacon';
 
-export const setupRaffle = withSnapshot(
+export const setupAvatar = withSnapshot(
   [implementationDeployTag],
   async function (hre) {
     const {sandAdmin} = await getNamedAccounts();
@@ -64,6 +65,21 @@ export const setupRaffle = withSnapshot(
     };
   }
 );
+
+export const setupMockERC20 = withSnapshot([], async function () {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {deployer} = await getNamedAccounts();
+
+  await deployments.deploy('RandomToken', {
+    from: deployer,
+    contract: ERC20Mock,
+    args: ['RToken', 'RAND'],
+    proxy: false,
+  });
+  return {
+    randomTokenContract: await ethers.getContract('RandomToken', deployer)
+  }
+});
 
 async function setupWave(
   raffle: Contract,
