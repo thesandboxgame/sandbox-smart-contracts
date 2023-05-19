@@ -403,7 +403,7 @@ contract AvatarCollection is
         uint256 _waveMaxTokensOverall,
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
-    ) external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
+    ) external authorizedRole(CONFIGURATOR_ROLE) {
         require(_waveMaxTokensOverall <= maxSupply, "AvatarCollection: _waveMaxTokens exceeds maxSupply");
         require(_waveMaxTokensOverall > 0, "AvatarCollection: max tokens to mint is 0");
         require(_waveMaxTokensPerWallet > 0, "AvatarCollection: max tokens to mint per wallet is 0");
@@ -425,7 +425,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setMarketingMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
+    function setMarketingMint() external authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = mintingDefaults.maxMarketingTokens;
         waveMaxTokensPerWallet = mintingDefaults.maxMarketingTokens;
         waveSingleTokenPrice = 0;
@@ -442,7 +442,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setAllowlistMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
+    function setAllowlistMint() external authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = maxSupply - totalSupply();
         waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -459,7 +459,7 @@ contract AvatarCollection is
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setPublicMint() external whenNotPaused authorizedRole(CONFIGURATOR_ROLE) {
+    function setPublicMint() external authorizedRole(CONFIGURATOR_ROLE) {
         waveMaxTokensOverall = maxSupply - totalSupply();
         waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -524,7 +524,7 @@ contract AvatarCollection is
         uint256 _tokenId,
         uint256 _signatureId,
         bytes memory _signature
-    ) external {
+    ) external whenNotPaused {
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "AvatarCollection: sender is not owner");
 
@@ -564,7 +564,7 @@ contract AvatarCollection is
         bytes memory _signature,
         uint256 _tokenId,
         uint256 _personalizationMask
-    ) external {
+    ) external whenNotPaused {
         require(ownerOf(_tokenId) == _msgSender(), "AvatarCollection: sender is not owner");
 
         require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
