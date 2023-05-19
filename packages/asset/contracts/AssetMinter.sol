@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-
+import "./libraries/TokenIdUtils.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/IAsset.sol";
 import "./interfaces/IAssetMinter.sol";
@@ -20,6 +20,7 @@ contract AssetMinter is
     ERC2771Handler,
     AccessControlUpgradeable
 {
+    using TokenIdUtils for uint256;
     address public assetContract;
     address public catalystContract;
     bytes32 public constant REVEAL_TYPEHASH =
@@ -210,9 +211,7 @@ contract AssetMinter is
         // amount should be greater than 0
         require(amount > 0, "Amount should be greater than 0");
         // make sure the token is not already revealed
-        IAsset.AssetData memory data = IAsset(assetContract).getDataFromTokenId(
-            tokenId
-        );
+        IAsset.AssetData memory data = tokenId.getData();
 
         require(!data.revealed, "Token is already revealed");
 
