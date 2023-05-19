@@ -1,5 +1,6 @@
 import {DeployFunction, ABI} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {BigNumber} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
@@ -41,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   };
 
   const mintingDefaults = {
-    mintPrice: 1,
+    mintPrice: BigNumber.from(100).mul('1000000000000000000'),
     maxPublicTokensPerWallet: 4,
     maxAllowlistTokensPerWallet: 2,
     maxMarketingTokens: 100,
