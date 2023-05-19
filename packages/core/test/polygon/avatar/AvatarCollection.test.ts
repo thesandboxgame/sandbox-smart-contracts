@@ -2,14 +2,14 @@ import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
 import {waitFor} from '../../utils';
 const {BigNumber} = ethers;
-const AddressZero = ethers.constants.AddressZero
+const AddressZero = ethers.constants.AddressZero;
 
 import {
   raffleSignWallet,
   setupAvatar,
   COLLECTION_MAX_SUPPLY,
   implementationContractName,
-  setupMockERC20
+  setupMockERC20,
 } from './AvatarCollection.fixtures';
 
 const BATCH_SIZE = 50;
@@ -17,95 +17,99 @@ const BATCH_SIZE = 50;
 // eslint-disable-next-line mocha/no-skipped-tests
 describe(implementationContractName, function () {
   it('setMarketingMint sets appropriate data', async function () {
-    const {
-      avatarCollectionContract,
-    } = await setupAvatar();
+    const {avatarCollectionContract} = await setupAvatar();
 
     const owner = await avatarCollectionContract.owner();
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
     await contract.setMarketingMint();
 
     const expectedWaveMaxTokens = 100;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensOverall()).toString(),
       expectedWaveMaxTokens.toString(),
-      "waveMaxTokensOverall is not set correctly"
+      'waveMaxTokensOverall is not set correctly'
     );
 
     const expectedWaveMaxTokensPerWallet = 100;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensPerWallet()).toString(),
       expectedWaveMaxTokensPerWallet.toString(),
-      "waveMaxTokensPerWallet is not set correctly"
+      'waveMaxTokensPerWallet is not set correctly'
     );
 
     const expectedWaveSingleTokenPrice = 0;
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
-      "waveSingleTokenPrice is not set correctly"
+      'waveSingleTokenPrice is not set correctly'
     );
   });
 
   it('setAllowlistMint sets appropriate data', async function () {
-    const {
-      avatarCollectionContract,
-    } = await setupAvatar();
+    const {avatarCollectionContract} = await setupAvatar();
 
     const owner = await avatarCollectionContract.owner();
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
     await contract.setAllowlistMint();
 
     const expectedWaveMaxTokens = await contract.maxSupply();
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensOverall()).toString(),
       expectedWaveMaxTokens.toString(),
-      "waveMaxTokensOverall is not set correctly"
+      'waveMaxTokensOverall is not set correctly'
     );
 
     const expectedWaveMaxTokensPerWallet = 2;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensPerWallet()).toString(),
       expectedWaveMaxTokensPerWallet.toString(),
-      "waveMaxTokensPerWallet is not set correctly"
+      'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul('1000000000000000000');
+    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul(
+      '1000000000000000000'
+    );
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
-      "waveSingleTokenPrice is not set correctly"
+      'waveSingleTokenPrice is not set correctly'
     );
   });
 
   it('setPublicMint sets appropriate data', async function () {
-    const {
-      avatarCollectionContract,
-    } = await setupAvatar();
+    const {avatarCollectionContract} = await setupAvatar();
 
     const owner = await avatarCollectionContract.owner();
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
     await contract.setPublicMint();
 
     const expectedWaveMaxTokens = await contract.maxSupply();
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensOverall()).toString(),
       expectedWaveMaxTokens.toString(),
-      "waveMaxTokensOverall is not set correctly"
+      'waveMaxTokensOverall is not set correctly'
     );
 
     const expectedWaveMaxTokensPerWallet = 4;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensPerWallet()).toString(),
       expectedWaveMaxTokensPerWallet.toString(),
-      "waveMaxTokensPerWallet is not set correctly"
+      'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul('1000000000000000000');
+    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul(
+      '1000000000000000000'
+    );
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
-      "waveSingleTokenPrice is not set correctly"
+      'waveSingleTokenPrice is not set correctly'
     );
   });
 
@@ -147,15 +151,13 @@ describe(implementationContractName, function () {
       deployer,
       1,
       avatarCollectionContract.address,
-      hre.network.config.chainId || 31337,
+      hre.network.config.chainId || 31337
     );
 
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(deployer));
-    await contract.reveal(
-      mintedTokenId,
-      1,
-      signature
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(deployer)
     );
+    await contract.reveal(mintedTokenId, 1, signature);
 
     // checking that the event was properly sent
     const metadataUpdateEvents = await avatarCollectionContract.queryFilter(
@@ -164,7 +166,6 @@ describe(implementationContractName, function () {
 
     assert.equal(metadataUpdateEvents.length, 1);
   });
-
 
   it('relevant functions should not work when paused', async function () {
     const {
@@ -179,7 +180,9 @@ describe(implementationContractName, function () {
 
     const {deployer} = await getNamedAccounts();
     const owner = await avatarCollectionContract.owner();
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
     await transferSand(deployer, '1000');
     await setupWave(avatarCollectionContract, 1, 1, '1');
 
@@ -192,36 +195,30 @@ describe(implementationContractName, function () {
       deployer,
       1,
       avatarCollectionContract.address,
-      hre.network.config.chainId || 31337,
+      hre.network.config.chainId || 31337
     );
 
     await expect(
-      contract.mint(
-        raffleSignWallet.address,
-        1,
-        0,
-        signature,
-    )).to.be.revertedWith('Pausable: paused');
+      contract.mint(raffleSignWallet.address, 1, 0, signature)
+    ).to.be.revertedWith('Pausable: paused');
 
     // reveal should revert (it would of reverted because token was not minted regardless)
-    await expect(
-      contract.reveal(
-        1,
-        0,
-        signature,
-    )).to.be.revertedWith('Pausable: paused');
+    await expect(contract.reveal(1, 0, signature)).to.be.revertedWith(
+      'Pausable: paused'
+    );
 
     // personalize should revert (it would of reverted because token was not minted regardless)
     const personalizationMask = 32;
-    await expect(personalize(
+    await expect(
+      personalize(
         raffleSignWallet,
         deployer,
         1,
         hre.network.config.chainId || 31337,
         0,
         personalizationMask
-      )).to.be.revertedWith('Pausable: paused');
-
+      )
+    ).to.be.revertedWith('Pausable: paused');
   });
 
   it('operatorPersonalize should work from owner', async function () {
@@ -254,32 +251,37 @@ describe(implementationContractName, function () {
     const mintedTokenId = transferEvents[0].args?.[2];
 
     const owner = await avatarCollectionContract.owner();
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
     const personalizationMask = 32;
 
     const oldPersonalization = await contract.personalizationOf(mintedTokenId);
     // sanity check
     assert.equal(oldPersonalization, 0);
 
-    await contract.operatorPersonalize(mintedTokenId, personalizationMask)
+    await contract.operatorPersonalize(mintedTokenId, personalizationMask);
 
-    const currentPersonalization = await contract.personalizationOf(mintedTokenId);
+    const currentPersonalization = await contract.personalizationOf(
+      mintedTokenId
+    );
     assert.equal(currentPersonalization, personalizationMask);
     assert.notEqual(currentPersonalization, oldPersonalization);
-
   });
 
   it('config setters work (plus invalidations)', async function () {
-    const {
-      avatarCollectionContract,
-      getNamedAccounts,
-    } = await setupAvatar();
+    const {avatarCollectionContract, getNamedAccounts} = await setupAvatar();
 
     const {deployer} = await getNamedAccounts();
     const owner = await avatarCollectionContract.owner();
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider).address;
-    const contract = avatarCollectionContract.connect(ethers.provider.getSigner(owner));
-    const contractAsUser = avatarCollectionContract.connect(ethers.provider.getSigner(deployer));
+    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
+      .address;
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
+    const contractAsUser = avatarCollectionContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
 
     // setTreasury // // // // // // // // // // // // // // // // // // // // // //
     const oldTreasury = await contract.mintTreasury();
@@ -289,13 +291,13 @@ describe(implementationContractName, function () {
     assert.notEqual(oldTreasury, newTreasury);
     assert.equal(randomAddress, newTreasury);
 
-    await expect(
-      contractAsUser.setTreasury(randomAddress)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    await expect(contractAsUser.setTreasury(randomAddress)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
 
-    await expect(
-      contract.setTreasury(AddressZero)
-    ).to.be.revertedWith("AvatarCollection: owner is zero address");
+    await expect(contract.setTreasury(AddressZero)).to.be.revertedWith(
+      'AvatarCollection: owner is zero address'
+    );
 
     // setSignAddress // // // // // // // // // // // // // // // // // // // // // //
     const oldSignAddress = await contract.signAddress();
@@ -309,26 +311,26 @@ describe(implementationContractName, function () {
       contractAsUser.setSignAddress(randomAddress)
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    await expect(
-      contract.setSignAddress(AddressZero)
-    ).to.be.revertedWith("AvatarCollection: sign address is zero address");
+    await expect(contract.setSignAddress(AddressZero)).to.be.revertedWith(
+      'AvatarCollection: sign address is zero address'
+    );
 
     // setBaseURI // // // // // // // // // // // // // // // // // // // // // //
     const oldBaseURI = await contract.baseTokenURI();
-    const toSetNewURI = "http://test.test";
+    const toSetNewURI = 'http://test.test';
     await contract.setBaseURI(toSetNewURI);
     const newBaseURI = await contract.baseTokenURI();
 
     assert.notEqual(oldBaseURI, newBaseURI);
     assert.equal(toSetNewURI, newBaseURI);
 
-    await expect(
-      contractAsUser.setBaseURI(randomAddress)
-    ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
+    await expect(contractAsUser.setBaseURI(randomAddress)).to.be.revertedWith(
+      'CollectionAccessControl: sender not authorized'
+    );
 
-    await expect(
-      contract.setBaseURI("")
-    ).to.be.revertedWith("AvatarCollection: baseURI is not set");
+    await expect(contract.setBaseURI('')).to.be.revertedWith(
+      'AvatarCollection: baseURI is not set'
+    );
 
     // setAllowedExecuteMint // // // // // // // // // // // // // // // // // // // // // //
 
@@ -347,10 +349,10 @@ describe(implementationContractName, function () {
 
     await expect(
       contract.setAllowedExecuteMint(randomAddress)
-    ).to.be.revertedWith("AvatarCollection: executor address is not a contract");
-
+    ).to.be.revertedWith(
+      'AvatarCollection: executor address is not a contract'
+    );
   });
-
 
   it('should be able to mint with valid signature', async function () {
     const {

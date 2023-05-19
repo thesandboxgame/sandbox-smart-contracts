@@ -77,8 +77,8 @@ export const setupMockERC20 = withSnapshot([], async function () {
     proxy: false,
   });
   return {
-    randomTokenContract: await ethers.getContract('RandomToken', deployer)
-  }
+    randomTokenContract: await ethers.getContract('RandomToken', deployer),
+  };
 });
 
 async function setupWave(
