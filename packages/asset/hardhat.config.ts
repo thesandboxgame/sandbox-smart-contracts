@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         blockNumber: 16000000,
-        url: "https://mainnet.infura.io/v3/f24e105566724643bd574ed65ff8bd5e",
+        url: process.env.RPC_URL || "http://localhost:8545",
       },
       loggingEnabled: false,
       chainId: 1337,
