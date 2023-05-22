@@ -7,17 +7,15 @@ library TokenIdUtils {
     // Layer masks
     uint256 constant CHAIN_MASK = 0xFF;
     uint256 constant TIER_MASK = 0xFF;
-    uint256 constant REVEALED_MASK = 0x1;
     uint256 constant NONCE_MASK = 0x3FF;
-    uint256 constant HASH_MASK = 0xFFFFFFFFFF;
+    uint256 constant REVEAL_NONCE_MASK = 0x3FF;
 
     // Bit shifts
     uint256 constant CREATOR_SHIFT = 0;
     uint256 constant CHAIN_SHIFT = 160;
     uint256 constant TIER_SHIFT = 168;
-    uint256 constant REVEALED_SHIFT = 176;
-    uint256 constant NONCE_SHIFT = 177;
-    uint256 constant HASH_SHIFT = 194;
+    uint256 constant NONCE_SHIFT = 176;
+    uint256 constant REVEAL_NONCE_SHIFT = 193;
 
     uint8 constant chainIndex = 137;
 
@@ -27,32 +25,27 @@ library TokenIdUtils {
     /// @dev The first 160 bits are the creator address
     /// @dev The next 8 bits are the chain index
     /// @dev The next 8 bits are the tier
-    /// @dev The next 1 bit is the revealed flag
     /// @dev The next 16 bits are the asset nonce
-    /// @dev The next 40 bits are the abilities and enhancements hash
+    /// @dev The next 16 bits are creator nonce shift.
     /// @param creator The address of the creator of the asset
     /// @param tier The tier of the asset determined by the catalyst used to create it
     /// @param assetNonce The nonce of the asset creator
-    /// @param revealed Whether the asset is revealed or not
-    /// @param ipfsHash The ipfs hash of the abilities and enhancements of the asset
+    /// @param revealNonce The reveal nonce of the asset
     /// @return tokenId The generated token id
     function generateTokenId(
         address creator,
         uint8 tier,
         uint16 assetNonce,
-        bool revealed,
-        uint40 ipfsHash
+        uint16 revealNonce
     ) internal pure returns (uint256 tokenId) {
         uint160 creatorAddress = uint160(creator);
-        uint8 revealedUint8 = revealed ? 1 : 0;
 
         tokenId = tokenId =
             uint256(creatorAddress) |
             (uint256(chainIndex) << CHAIN_SHIFT) |
             (uint256(tier) << TIER_SHIFT) |
-            (uint256(revealedUint8) << REVEALED_SHIFT) |
             (uint256(assetNonce) << NONCE_SHIFT) |
-            (uint256(ipfsHash) << HASH_SHIFT);
+            (uint256(revealNonce) << REVEAL_NONCE_SHIFT);
 
         return tokenId;
     }
@@ -86,8 +79,8 @@ library TokenIdUtils {
     /// @param tokenId The token id to extract the revealed flag from
     /// @return isRevealed Whether the asset is revealed or not
     function getIsRevealed(uint256 tokenId) internal pure returns (bool) {
-        uint8 isRevealed = uint8((tokenId >> REVEALED_SHIFT) & REVEALED_MASK);
-        return isRevealed == 1;
+        uint16 revealNonce = uint16((tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK);
+        return revealNonce != 0;
     }
 
     /// @notice Extracts the asset nonce from a given token id
@@ -99,11 +92,11 @@ library TokenIdUtils {
     }
 
     /// @notice Extracts the abilities and enhancements hash from a given token id
-    /// @param tokenId The token id to extract the abilities and enhancements hash from
-    /// @return revealHash The reveal hash of the abilities and enhancements of the asset
-    function getRevealHash(uint256 tokenId) internal pure returns (uint40) {
-        uint40 ipfsHash = uint40((tokenId >> HASH_SHIFT) & HASH_MASK);
-        return ipfsHash;
+    /// @param tokenId The token id to extract reveal nonce from
+    /// @return revealNonce The reveal nonce of the asset
+    function getRevealNonce(uint256 tokenId) internal pure returns (uint16) {
+        uint16 revealNonce = uint16((tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK);
+        return revealNonce;
     }
 
     /// @notice Extracts the asset data from a given token id
