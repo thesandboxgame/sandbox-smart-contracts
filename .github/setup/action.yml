@@ -18,7 +18,10 @@ runs:
 
     - name: Derive appropriate SHAs for base and head for `nx affected` commands
       run: |
-        echo "NX_HEAD=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        echo "NX_BASE=$(git merge-base origin/master HEAD)" >> $GITHUB_ENV
+        NX_HEAD=$(git rev-parse HEAD)
+        NX_BASE=$(git merge-base origin/master HEAD)
+        if [ "$NX_HEAD" = "$NX_BASE" ]; then NX_BASE=$(git rev-parse origin/master~1); fi
+        echo "NX_HEAD=$NX_HEAD" >> $GITHUB_ENV
+        echo "NX_BASE=$NX_BASE" >> $GITHUB_ENV
       shell: bash
 
