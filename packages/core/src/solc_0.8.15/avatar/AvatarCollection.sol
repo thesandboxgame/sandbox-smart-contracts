@@ -605,6 +605,17 @@ contract AvatarCollection is
     }
 
     /**
+     * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
+     * @dev See {ERC721BurnMemoryEnumerableUpgradeable.burn}.
+     *      Inherited in order to add the whenNotPaused modifier
+     * @custom:event TokenBurned
+     * @param tokenId the token id to be burned
+     */
+    function burn(uint256 tokenId) public override whenNotPaused {
+        super.burn(tokenId);
+    }
+
+    /**
      * @notice saving locally the treasury address
      * @dev sets mintTreasury = _treasury
      * @custom:event {TreasurySet}
