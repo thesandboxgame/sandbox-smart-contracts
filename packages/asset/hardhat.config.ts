@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         blockNumber: 16000000,
-        url: process.env.RPC_URL || "http://localhost:8545",
+        url: process.env.ETH_NODE_URI_POLYGON || "http://localhost:8545",
       },
       loggingEnabled: false,
       chainId: 1337,

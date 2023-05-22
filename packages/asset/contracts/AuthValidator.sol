@@ -11,6 +11,9 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract AuthValidator is AccessControl {
     bytes32 public constant AUTH_SIGNER_ROLE = keccak256("AUTH_ROLE");
 
+    /// @dev Constructor
+    /// @param admin Address of the admin that will be able to grant roles
+    /// @param initialSigningWallet Address of the initial signing wallet that will be signing on behalf of the backend
     constructor(address admin, address initialSigningWallet) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(AUTH_SIGNER_ROLE, initialSigningWallet);
