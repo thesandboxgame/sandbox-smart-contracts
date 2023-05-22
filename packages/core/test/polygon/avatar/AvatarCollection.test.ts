@@ -7,9 +7,11 @@ const AddressZero = ethers.constants.AddressZero;
 import {
   raffleSignWallet,
   setupAvatar,
+  setupAvatarAndMint,
   COLLECTION_MAX_SUPPLY,
   implementationContractName,
   setupMockERC20,
+  topUpAddress,
 } from './AvatarCollection.fixtures';
 
 const BATCH_SIZE = 50;
@@ -201,6 +203,9 @@ describe(implementationContractName, function () {
     await expect(
       contract.mint(raffleSignWallet.address, 1, 0, signature)
     ).to.be.revertedWith('Pausable: paused');
+
+    // burn should revert (would revert because not tokens are minted if not paused)
+    await expect(contract.burn(0)).to.be.revertedWith('Pausable: paused');
 
     // reveal should revert (it would of reverted because token was not minted regardless)
     await expect(contract.reveal(1, 0, signature)).to.be.revertedWith(
@@ -772,6 +777,251 @@ describe(implementationContractName, function () {
     await expect(
       contract.personalize(1, signature, tokenId, personalizationMask)
     ).to.be.revertedWith('AvatarCollection: signatureId already used');
+  });
+
+  /*////////////////////////////////////////////////////////
+                    Burn functionality tests
+  ////////////////////////////////////////////////////////*/
+
+  it('burn logic should work in call cases', async function () {
+    // setup
+    const {
+      avatarCollectionContract,
+      mintedIdx,
+      minterAddress,
+    } = await setupAvatarAndMint(3);
+    const tokenId = mintedIdx[0];
+
+    const avatarContractAsMinter = avatarCollectionContract.connect(
+      ethers.provider.getSigner(minterAddress)
+    );
+
+    const randomAddress = raffleSignWallet.address;
+    await topUpAddress(randomAddress, 100);
+
+    const avatarContractAsRandomAddress = avatarCollectionContract.connect(
+      ethers.provider.getSigner(randomAddress)
+    );
+
+    // check that the owner (minter) of the token is indeed minterAddress
+    assert.equal(await avatarContractAsMinter.ownerOf(tokenId), minterAddress);
+
+    // sanity check that the random address is not the minter address
+    assert.notEqual(randomAddress, minterAddress);
+
+    // validated that only the minter can burn an token (access control check)
+    await expect(
+      avatarContractAsRandomAddress.burn(tokenId)
+    ).to.be.revertedWith('ERC721: caller is not token owner or approved');
+
+    // actually do a host burn
+    await avatarContractAsMinter.burn(tokenId);
+
+    // check that a random address was not set, for whatever reason, as the minter
+    assert.equal(
+      await avatarContractAsMinter.didBurnTokens(randomAddress),
+      false,
+      'only minter could burn'
+    );
+
+    // check that it was actually burned
+    await expect(avatarContractAsMinter.ownerOf(tokenId)).to.be.revertedWith(
+      'ERC721: invalid token ID'
+    );
+
+    // check that the burner is correctly attributed
+    assert.equal(await avatarContractAsMinter.burnerOf(tokenId), minterAddress);
+
+    // check that minter was the one to burn a token
+    assert.equal(
+      await avatarContractAsMinter.didBurnTokens(minterAddress),
+      true,
+      'minter was the one to burn a token'
+    );
+
+    // another check that a random address was not somehow set as burner
+    assert.equal(
+      await avatarContractAsMinter.didBurnTokens(randomAddress),
+      false,
+      'only minter could burn'
+    );
+
+    // check that burn count is correct for minter
+    assert.equal(
+      (
+        await avatarContractAsMinter.burnedTokensCount(minterAddress)
+      ).toString(),
+      '1',
+      'minter burned 1 NFT'
+    );
+
+    // check that burn count is correct for random address
+    assert.equal(
+      (
+        await avatarContractAsMinter.burnedTokensCount(randomAddress)
+      ).toString(),
+      '0',
+      'random address burned 0 NFTs'
+    );
+
+    // burn the rest
+    await avatarContractAsMinter.burn(mintedIdx[1]);
+    await avatarContractAsMinter.burn(mintedIdx[2]);
+
+    // check that new burn count is correct for minter
+    assert.equal(
+      (
+        await avatarContractAsMinter.burnedTokensCount(minterAddress)
+      ).toString(),
+      '3',
+      'minter burned 3 (all) NFT'
+    );
+
+    // check that all noted tokens as being burned were in the minted list. Count is already checked
+    const burnedTokensCount = (
+      await avatarContractAsMinter.burnedTokensCount(minterAddress)
+    ).toNumber();
+    for (const burnedTokenId of [...Array(burnedTokensCount).keys()]) {
+      const burnedToken = await avatarContractAsMinter.burnedTokens(
+        minterAddress,
+        burnedTokenId
+      );
+      assert.isTrue(
+        mintedIdx.includes(burnedToken.toString()),
+        `burned tokenId:${burnedToken} not found in minted list`
+      );
+    }
+  });
+
+  /*////////////////////////////////////////////////////////
+                CollectionAccessControl tests
+  ////////////////////////////////////////////////////////*/
+
+  it('CollectionAccess control: adding, revoking and checking roles for CONFIGURATOR_ROLE', async function () {
+    // setup
+    const {avatarCollectionContract} = await setupAvatar();
+
+    const owner = await avatarCollectionContract.owner();
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
+    const toSetNewURI = 'http://test.test';
+
+    const randomAddress = raffleSignWallet.address;
+    await topUpAddress(randomAddress, 100);
+
+    const contractAsUser = avatarCollectionContract.connect(
+      ethers.provider.getSigner(randomAddress)
+    );
+
+    // check owner can't set 0 address
+    await expect(contract.addConfigurator(AddressZero)).to.be.revertedWith(
+      'CollectionAccessControl: account is zero address'
+    );
+
+    // check simple operation restriction
+    await expect(contractAsUser.setBaseURI(toSetNewURI)).to.be.revertedWith(
+      'CollectionAccessControl: sender not authorized'
+    );
+
+    // check that role is not given
+    assert.equal(
+      await contract.hasRole(contract.CONFIGURATOR_ROLE(), randomAddress),
+      false
+    );
+    await contract.addConfigurator(randomAddress);
+
+    // check that role was given
+    assert.equal(
+      await contract.hasRole(contract.CONFIGURATOR_ROLE(), randomAddress),
+      true
+    );
+
+    // check that now, with this role, the user can set the Base URI
+    await contract.setBaseURI(toSetNewURI);
+
+    // verify that it was actually modified
+    assert.equal(await contract.baseTokenURI(), toSetNewURI);
+
+    // revoke role for random address
+    await contract.revokeConfiguratorRole(randomAddress);
+
+    // check that role was removed
+    assert.equal(
+      await contract.hasRole(contract.CONFIGURATOR_ROLE(), randomAddress),
+      false
+    );
+
+    // check that user now can't redo the action
+    await expect(contractAsUser.setBaseURI('bad_link')).to.be.revertedWith(
+      'CollectionAccessControl: sender not authorized'
+    );
+  });
+
+  it('CollectionAccess control: adding, revoking and checking roles for TRANSFORMER_ROLE', async function () {
+    // setup
+    const {avatarCollectionContract, mintedIdx} = await setupAvatarAndMint(1);
+
+    const owner = await avatarCollectionContract.owner();
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
+
+    const randomAddress = raffleSignWallet.address;
+    await topUpAddress(randomAddress, 100);
+
+    const contractAsUser = avatarCollectionContract.connect(
+      ethers.provider.getSigner(randomAddress)
+    );
+
+    const tokenId = mintedIdx[0];
+    const personalizationMask = 42;
+
+    // check owner can't set 0 address for transformer role
+    await expect(contract.addTransformer(AddressZero)).to.be.revertedWith(
+      'CollectionAccessControl: account is zero address'
+    );
+
+    // check simple operation restriction
+    await expect(
+      contractAsUser.operatorPersonalize(tokenId, personalizationMask)
+    ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
+
+    // check that role is not given
+    assert.equal(
+      await contract.hasRole(contract.TRANSFORMER_ROLE(), randomAddress),
+      false
+    );
+    await contract.addTransformer(randomAddress);
+
+    // check that role was given
+    assert.equal(
+      await contract.hasRole(contract.TRANSFORMER_ROLE(), randomAddress),
+      true
+    );
+
+    // now it should actually work
+    await contractAsUser.operatorPersonalize(tokenId, personalizationMask);
+
+    // verify that it was actually modified
+    assert.equal(
+      await contract.personalizationOf(tokenId),
+      personalizationMask
+    );
+
+    // revoke role for random address
+    await contract.revokeTransformerRole(randomAddress);
+
+    // check that role was removed
+    assert.equal(
+      await contract.hasRole(contract.TRANSFORMER_ROLE(), randomAddress),
+      false
+    );
+
+    // check that user now can't redo the action
+    await expect(
+      contractAsUser.operatorPersonalize(tokenId, 32)
+    ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
   });
 });
 

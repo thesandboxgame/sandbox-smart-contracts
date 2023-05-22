@@ -117,6 +117,54 @@ async function setupWave(
   );
 }
 
+export async function setupAvatarAndMint(mintCount: number): Promise<unknown> {
+  const avatarSetup = await setupAvatar();
+
+  const {
+    avatarCollectionContract,
+    transferSand,
+    setupWave,
+    getNamedAccounts,
+    hre,
+    mint,
+  } = avatarSetup;
+  const {deployer} = await getNamedAccounts();
+  await transferSand(deployer, '1000');
+  await setupWave(avatarCollectionContract, mintCount * 2, mintCount, '1');
+
+  await mint(
+    raffleSignWallet,
+    deployer,
+    0,
+    avatarCollectionContract.address,
+    hre.network.config.chainId || 31337,
+    mintCount.toString(),
+    mintCount
+  );
+
+  const transferEvents = await avatarCollectionContract.queryFilter(
+    avatarCollectionContract.filters.Transfer()
+  );
+
+  const mintedIdx = [];
+  for (const eventIndex in transferEvents) {
+    const event = transferEvents[eventIndex];
+    const tokenId = event?.args?.tokenId.toString();
+    mintedIdx.push(tokenId);
+  }
+
+  const owner = await avatarCollectionContract.owner();
+  const avatarContractAsOwner = avatarCollectionContract.connect(
+    ethers.provider.getSigner(owner)
+  );
+  return {
+    ...avatarSetup,
+    avatarContractAsOwner,
+    mintedIdx,
+    minterAddress: deployer,
+  };
+}
+
 function validPersonalizeSignature(
   wallet: Wallet | SignerWithAddress,
   address: string,
@@ -259,4 +307,20 @@ function personalizeSetup(
       contract.personalize(signatureId, signature, tokenId, personalizationMask)
     );
   };
+}
+
+export async function topUpAddress(
+  recipientAddress: string,
+  nativeTokenAmount: number
+): Promise<void> {
+  const signer = ethers.provider.getSigner();
+
+  // Set the amount of ETH to send
+  const amountToSend = ethers.utils.parseEther(nativeTokenAmount.toString());
+
+  // Send the transaction
+  await signer.sendTransaction({
+    to: recipientAddress,
+    value: amountToSend,
+  });
 }
