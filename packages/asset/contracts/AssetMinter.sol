@@ -25,7 +25,7 @@ contract AssetMinter is
     address public catalystContract;
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address creator,uint256 prevTokenId, uint256 amount, uint40[] calldata revealHashes)"
+            "Reveal(address creator,uint256 prevTokenId, uint256 amount)"
         );
     bytes32 public constant MINT_TYPEHASH =
         keccak256("Mint(MintableAsset mintableAsset)");
@@ -68,10 +68,11 @@ contract AssetMinter is
     /// @dev The amount of catalysts owned by the caller must be equal or greater than the amount of tokens being minted
     /// @param signature Signature created on the TSB backend containing MINT_TYPEHASH and MintableAsset data, must be signed by authorized signer
     /// @param mintableAsset The asset to mint
+    /// @param metadata the uri string for asset's metadata
     function mintAsset(
         bytes memory signature,
         MintableAsset memory mintableAsset,
-        string memory assetUri
+        string memory metadata
     ) external {
         address creator = _msgSender();
         require(creator == mintableAsset.creator, "Creator mismatch");
@@ -111,21 +112,21 @@ contract AssetMinter is
             mintableAsset.amount,
             mintableAsset.tier,
             mintableAsset.creatorNonce,
-            mintAsRevealed,
-            0
+            mintAsRevealed
         );
 
-        IAsset(assetContract).mint(assetData, assetUri);
+        IAsset(assetContract).mint(assetData, metadata);
     }
 
     /// @notice Mints a batch of new assets, the assets are minted to the caller of the function, the caller must have enough catalysts to mint the assets
     /// @dev The amount of catalysts owned by the caller must be equal or greater than the amount of tokens being minted
     /// @param signature Signature created on the TSB backend containing MINT_BATCH_TYPEHASH and MintableAsset[] data, must be signed by authorized signer
     /// @param mintableAssets The assets to mint
+    /// @param metadatas The array of uri for asset metadata
     function mintAssetBatch(
         bytes memory signature,
         MintableAsset[] memory mintableAssets,
-        string[] memory assetUris
+        string[] memory metadatas
     ) external {
         address creator = _msgSender();
         require(!bannedCreators[creator], "Creator is banned");
@@ -161,8 +162,7 @@ contract AssetMinter is
                 mintableAssets[i].amount,
                 mintableAssets[i].tier,
                 mintableAssets[i].creatorNonce,
-                !(mintableAssets[i].tier > 1),
-                0
+                !(mintableAssets[i].tier > 1)
             );
         }
 
@@ -176,7 +176,7 @@ contract AssetMinter is
                 );
             }
         }
-        IAsset(assetContract).mintBatch(assets, assetUris);
+        IAsset(assetContract).mintBatch(assets, metadatas);
     }
 
     /// @notice Special mint function for TSB exculsive assets
@@ -188,11 +188,12 @@ contract AssetMinter is
     /// @param creator The address to use as the creator of the asset
     /// @param recipient The recipient of the asset
     /// @param amount The amount of assets to mint
+    /// @param metadata The uri for asset metadata
     function mintExclusive(
         address creator,
         address recipient,
         uint256 amount,
-        string memory assetUri
+        string memory metadata
     ) external onlyRole(EXCLUSIVE_MINTER_ROLE) {
         require(amount > 0, "Amount must be > 0");
         IAsset.AssetData memory asset = IAsset.AssetData(
@@ -200,10 +201,9 @@ contract AssetMinter is
             amount,
             0,
             0,
-            true,
-            0
+            true
         );
-        IAsset(assetContract).mintSpecial(recipient, asset, assetUri);
+        IAsset(assetContract).mintSpecial(recipient, asset, metadata);
     }
 
     /// @notice Reveal an asset to view its abilities and enhancements
@@ -238,34 +238,30 @@ contract AssetMinter is
     /// @param prevTokenId The tokenId of the unrevealed asset
     /// @param recipient The recipient of the revealed assets
     /// @param amount The amount of assets to reveal (must be equal to the length of revealHashes)
-    /// @param revealHashes The hashes of the revealed attributes and enhancements
+    /// @param metadatas The array of uri for asset metadata
     function revealMint(
         bytes memory signature,
         address creator,
         uint256 prevTokenId,
         address recipient,
         uint256 amount,
-        uint40[] calldata revealHashes,
-        string[] memory assetUris
+        string[] memory metadatas
     ) external {
         // verify the signature
         require(
             _verify(
                 signature,
-                _hashReveal(creator, prevTokenId, amount, revealHashes)
+                _hashReveal(creator, prevTokenId, amount)
             ),
             "Invalid signature"
         );
-        // the amount must be the same as the length of the reveal hashes
-        require(amount == revealHashes.length, "Invalid amount");
-
+    
         // mint the tokens
         uint256[] memory newIds = IAsset(assetContract).revealMint(
             recipient,
             amount,
             prevTokenId,
-            revealHashes,
-            assetUris
+            metadatas
         );
 
         emit AssetsRevealed(recipient, creator, prevTokenId, newIds);
@@ -365,8 +361,7 @@ contract AssetMinter is
     function _hashReveal(
         address creator,
         uint256 prevTokenId,
-        uint256 amount,
-        uint40[] calldata revealHashes
+        uint256 amount
     ) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
             keccak256(
@@ -374,8 +369,7 @@ contract AssetMinter is
                     REVEAL_TYPEHASH,
                     creator,
                     prevTokenId,
-                    amount,
-                    revealHashes
+                    amount
                 )
             )
         );
