@@ -17,13 +17,12 @@ interface IAsset {
         uint8 tier;
         uint16 creatorNonce;
         bool revealed;
-        uint40 revealHash;
     }
 
     // Functions
     function mint(
         AssetData calldata assetData,
-        string memory assetUri
+        string memory metadata
     ) external;
 
     function bridgeMint(
@@ -31,28 +30,25 @@ interface IAsset {
         uint256 amount,
         uint8 tier,
         address recipient,
-        bool revealed,
-        uint40 revealHash,
-        string memory assetUri
+        string memory metadata
     ) external;
 
     function mintBatch(
         AssetData[] calldata assetData,
-        string[] memory assetUris
+        string[] memory metadatas
     ) external;
 
     function revealMint(
         address recipient,
         uint256 amount,
         uint256 prevTokenId,
-        uint40[] calldata revealHashes,
-        string[] memory assetUris
+        string[] memory metadatas
     ) external returns (uint256[] memory tokenIds);
 
     function mintSpecial(
         address recipient,
         AssetData calldata assetData,
-        string memory assetUri
+        string memory metadata
     ) external;
 
     function burnFrom(address account, uint256 id, uint256 amount) external;
