@@ -58,6 +58,8 @@ jobs:
 
       - name: Running tests
         run: yarn test:ci
+        env:
+          ETH_NODE_URI_POLYGON: ${{ secrets.ETH_NODE_URI_POLYGON }}
 
   coverage:
     runs-on: ubuntu-latest
@@ -121,3 +123,4 @@ jobs:
         run: yarn deploy:ci
         env:
           ETH_NODE_URI_GOERLI: ${{ secrets.ETH_NODE_URI_GOERLI }}
+          ETH_NODE_URI_POLYGON: ${{ secrets.ETH_NODE_URI_POLYGON }}
