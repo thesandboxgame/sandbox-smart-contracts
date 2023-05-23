@@ -22,7 +22,7 @@ interface IAsset {
     // Functions
     function mint(
         AssetData calldata assetData,
-        string memory metadata
+        string memory metadataHash
     ) external;
 
     function bridgeMint(
@@ -30,25 +30,25 @@ interface IAsset {
         uint256 amount,
         uint8 tier,
         address recipient,
-        string memory metadata
+        string memory metadataHash
     ) external;
 
     function mintBatch(
         AssetData[] calldata assetData,
-        string[] memory metadatas
+        string[] memory metadataHashs
     ) external;
 
     function revealMint(
         address recipient,
         uint256 amount,
         uint256 prevTokenId,
-        string[] memory metadatas
+        string[] memory metadataHashes
     ) external returns (uint256[] memory tokenIds);
 
     function mintSpecial(
         address recipient,
         AssetData calldata assetData,
-        string memory metadata
+        string memory metadataHash
     ) external;
 
     function burnFrom(address account, uint256 id, uint256 amount) external;
