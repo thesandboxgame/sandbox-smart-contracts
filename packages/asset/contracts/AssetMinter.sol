@@ -255,7 +255,7 @@ contract AssetMinter is
             ),
             "Invalid signature"
         );
-    
+
         // mint the tokens
         uint256[] memory newIds = IAsset(assetContract).revealMint(
             recipient,

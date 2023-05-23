@@ -28,7 +28,6 @@ contract Asset is
         keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
 
-
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
     // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
@@ -85,7 +84,7 @@ contract Asset is
             assetData.creator,
             assetData.tier,
             nonce,
-            assetData.revealed? 1 : 0
+            assetData.revealed ? 1 : 0
         );
         // mint the tokens
         _mint(assetData.creator, id, assetData.amount, "");
@@ -119,7 +118,7 @@ contract Asset is
                 creator,
                 assetData[i].tier,
                 creatorNonces[creator],
-                assetData[i].revealed? 1 : 0
+                assetData[i].revealed ? 1 : 0
             );
             amounts[i] = assetData[i].amount;
             require(hashUsed[metadatas[i]] == 0, "metadata hash already used");

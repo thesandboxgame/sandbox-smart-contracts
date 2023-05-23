@@ -95,7 +95,9 @@ library TokenIdUtils {
     /// @param tokenId The token id to extract reveal nonce from
     /// @return revealNonce The reveal nonce of the asset
     function getRevealNonce(uint256 tokenId) internal pure returns (uint16) {
-        uint16 revealNonce = uint16((tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK);
+        uint16 revealNonce = uint16(
+            (tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK
+        );
         return revealNonce;
     }
 
