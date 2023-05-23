@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
@@ -17,7 +16,6 @@ contract Asset is
     IAsset,
     Initializable,
     ERC2771Handler,
-    ERC1155Upgradeable,
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
@@ -30,8 +28,6 @@ contract Asset is
         keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
 
-    // chain id of the chain the contract is deployed on
-    uint8 chainIndex;
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
@@ -39,8 +35,8 @@ contract Asset is
     mapping(address => uint16) public creatorNonces;
     // mapping of old bridged tokenId to creator nonce
     mapping(uint256 => uint16) public bridgedTokensNonces;
-    // mapping of ipfs token uri to token ids
-    mapping(string => uint256) public ipfsStringUsed;
+    // mapping of ipfs metadata token hash to token ids
+    mapping(string => uint256) public hashUsed;
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) revealNonce;
 
@@ -50,17 +46,13 @@ contract Asset is
     }
 
     function initialize(
-        string memory _uri,
         address forwarder,
         address uriSetter,
-        uint8 _chainIndex,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
         string memory baseUri
     ) external initializer {
-        chainIndex = _chainIndex;
         _setBaseURI(baseUri);
-        __ERC1155_init(_uri);
         __AccessControl_init();
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(forwarder);
@@ -76,10 +68,10 @@ contract Asset is
     /// @notice Mint new token with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetData The address of the creator
-    /// @param metadata the uri string for asset's metadata
+    /// @param metadataHash the uri string for asset's metadata
     function mint(
         AssetData calldata assetData,
-        string memory metadata
+        string memory metadataHash
     ) external onlyRole(MINTER_ROLE) {
         // increment nonce
         unchecked {
@@ -93,13 +85,13 @@ contract Asset is
             assetData.creator,
             assetData.tier,
             nonce,
-            0
+            assetData.revealed? 1 : 0
         );
         // mint the tokens
         _mint(assetData.creator, id, assetData.amount, "");
-        require(ipfsStringUsed[metadata] == 0, "ipfs already used");
-        ipfsStringUsed[metadata] = id;
-        _setURI(id, metadata);
+        require(hashUsed[metadataHash] == 0, "metadata hash already used");
+        hashUsed[metadataHash] = id;
+        _setURI(id, metadataHash);
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
@@ -127,11 +119,11 @@ contract Asset is
                 creator,
                 assetData[i].tier,
                 creatorNonces[creator],
-                0
+                assetData[i].revealed? 1 : 0
             );
             amounts[i] = assetData[i].amount;
-            require(ipfsStringUsed[metadatas[i]] == 0, "ipfs already used");
-            ipfsStringUsed[metadatas[i]] = tokenIds[i];
+            require(hashUsed[metadatas[i]] == 0, "metadata hash already used");
+            hashUsed[metadatas[i]] = tokenIds[i];
             _setURI(tokenIds[i], metadatas[i]);
             i++;
         }
@@ -144,11 +136,11 @@ contract Asset is
     /// @dev Those tokens are minted by TSB admins and do not adhere to the normal minting rules
     /// @param recipient The address of the recipient
     /// @param assetData The data of the asset to mint
-    /// @param metadata the uri string for asset's metadata
+    /// @param metadataHash The ipfs hash for asset's metadata
     function mintSpecial(
         address recipient,
         AssetData calldata assetData,
-        string memory metadata
+        string memory metadataHash
     ) external onlyRole(MINTER_ROLE) {
         // increment nonce
         unchecked {
@@ -165,16 +157,16 @@ contract Asset is
             1
         );
         _mint(recipient, id, assetData.amount, "");
-        require(ipfsStringUsed[metadata] == 0, "ipfs already used");
-        ipfsStringUsed[metadata] = id;
-        _setURI(id, metadata);
+        require(hashUsed[metadataHash] == 0, "metadata hash already used");
+        hashUsed[metadataHash] = id;
+        _setURI(id, metadataHash);
     }
 
     function revealMint(
         address recipient,
         uint256 amount,
         uint256 prevTokenId,
-        string[] memory metadatas
+        string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) returns (uint256[] memory tokenIds) {
         // get data from the previous token id
         AssetData memory data = prevTokenId.getData();
@@ -186,8 +178,8 @@ contract Asset is
         tokenIds = new uint256[](amount);
         for (uint256 i = 0; i < amount; ) {
             amounts[i] = 1;
-            if (ipfsStringUsed[metadatas[i]] != 0) {
-                tokenIds[i] = ipfsStringUsed[metadatas[i]];
+            if (hashUsed[metadataHashes[i]] != 0) {
+                tokenIds[i] = hashUsed[metadataHashes[i]];
             } else {
                 uint16 nonce = revealNonce[data.creator][prevTokenId]++;
 
@@ -198,9 +190,9 @@ contract Asset is
                     nonce
                 );
 
-                ipfsStringUsed[metadatas[i]] = tokenIds[i];
+                hashUsed[metadataHashes[i]] = tokenIds[i];
             }
-            _setURI(tokenIds[i], metadatas[i]);
+            _setURI(tokenIds[i], metadataHashes[i]);
             unchecked {
                 i++;
             }
@@ -217,13 +209,13 @@ contract Asset is
     /// @param amount The amount of assets to mint
     /// @param tier The tier of the catalysts to burn
     /// @param recipient The recipient of the asset
-    /// @param metadata the uri string for asset's metadata
+    /// @param metadataHash The ipfs Hash of asset's metadata
     function bridgeMint(
         uint256 originalTokenId,
         uint256 amount,
         uint8 tier,
         address recipient,
-        string memory metadata
+        string memory metadataHash
     ) external onlyRole(BRIDGE_MINTER_ROLE) {
         // extract creator address from the last 160 bits of the original token id
         address originalCreator = address(uint160(originalTokenId));
@@ -254,12 +246,12 @@ contract Asset is
             1
         );
         _mint(recipient, id, amount, "");
-        if (ipfsStringUsed[metadata] != 0) {
-            require(ipfsStringUsed[metadata] == id, "ipfs already used");
+        if (hashUsed[metadataHash] != 0) {
+            require(hashUsed[metadataHash] == id, "metadata hash already used");
         } else {
-            ipfsStringUsed[metadata] = id;
+            hashUsed[metadataHash] = id;
         }
-        _setURI(id, metadata);
+        _setURI(id, metadataHash);
     }
 
     /// @notice Extract the catalyst by burning assets of the same tier
@@ -362,7 +354,7 @@ contract Asset is
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
     /// @param metadata The new uri for asset's metadata
-    function setTokenMetadata(
+    function setTokenUri(
         uint256 tokenId,
         string memory metadata
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
