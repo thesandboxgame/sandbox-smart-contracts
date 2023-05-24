@@ -93,10 +93,10 @@ contract Asset is
     /// @notice Mint new tokens with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetData The array of asset data
-    /// @param metadatas The array of hashes for asset metadata
+    /// @param metadataHashes The array of hashes for asset metadata
     function mintBatch(
         AssetData[] calldata assetData,
-        string[] memory metadatas
+        string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
         // generate token ids by providing the creator address, the amount, catalyst tier and if it should mint as revealed
         uint256[] memory tokenIds = new uint256[](assetData.length);
@@ -118,9 +118,12 @@ contract Asset is
                 assetData[i].revealed ? 1 : 0
             );
             amounts[i] = assetData[i].amount;
-            require(hashUsed[metadatas[i]] == 0, "metadata hash already used");
-            hashUsed[metadatas[i]] = tokenIds[i];
-            _setURI(tokenIds[i], metadatas[i]);
+            require(
+                hashUsed[metadataHashes[i]] == 0,
+                "metadata hash already used"
+            );
+            hashUsed[metadataHashes[i]] = tokenIds[i];
+            _setURI(tokenIds[i], metadataHashes[i]);
             i++;
         }
         // finally mint the tokens
