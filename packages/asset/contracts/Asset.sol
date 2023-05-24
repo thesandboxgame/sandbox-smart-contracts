@@ -243,7 +243,10 @@ contract Asset is
         );
         _mint(recipient, id, amount, "");
         if (hashUsed[metadataHash] != 0) {
-            require(hashUsed[metadataHash] == id, "metadata hash already used");
+            require(
+                hashUsed[metadataHash] == id,
+                "metadata hash mismatch for tokenId"
+            );
         } else {
             hashUsed[metadataHash] = id;
         }
