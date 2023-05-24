@@ -71,8 +71,6 @@ interface IAsset {
         uint256 amount
     ) external;
 
-    function setURI(string memory newuri) external;
-
     function getRecyclingAmount(
         uint256 catalystTokenId
     ) external view returns (uint256);
