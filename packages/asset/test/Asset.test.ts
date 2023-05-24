@@ -72,7 +72,6 @@ const runAssetSetup = deployments.createFixture(
     const Asset = await ethers.getContract("Asset");
     const minterRole = await AssetContract.MINTER_ROLE();
     const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
-    const uriSetterRole = await AssetContract.URI_SETTER_ROLE();
     await AssetContract.grantRole(minterRole, deployer);
     await AssetContract.grantRole(bridgeMinterRole, bridgeMinter);
     const uris = [
@@ -96,7 +95,6 @@ const runAssetSetup = deployments.createFixture(
       bridgeMinter,
       minterRole,
       bridgeMinterRole,
-      uriSetterRole,
       uris,
       baseUri,
     };
@@ -173,7 +171,7 @@ describe("AssetContract", () => {
       );
     });
 
-    it.only("no two asset can have same uri ", async () => {
+    it("no two asset can have same uri ", async () => {
       const { AssetContract, owner, uris, baseUri } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       await AssetContract.mint(assetData, uris[0]);
