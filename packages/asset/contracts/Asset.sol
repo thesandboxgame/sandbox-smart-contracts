@@ -45,7 +45,6 @@ contract Asset is
 
     function initialize(
         address forwarder,
-        address uriSetter,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
         string memory baseUri
