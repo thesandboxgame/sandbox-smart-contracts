@@ -26,7 +26,6 @@ contract Asset is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
-    bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
@@ -57,7 +56,6 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(URI_SETTER_ROLE, uriSetter);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -67,7 +65,7 @@ contract Asset is
     /// @notice Mint new token with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetData The address of the creator
-    /// @param metadataHash the uri string for asset's metadata
+    /// @param metadataHash The hash string for asset's metadata
     function mint(
         AssetData calldata assetData,
         string memory metadataHash
@@ -96,7 +94,7 @@ contract Asset is
     /// @notice Mint new tokens with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
     /// @param assetData The array of asset data
-    /// @param metadatas The array of uri for asset metadata
+    /// @param metadatas The array of hashes for asset metadata
     function mintBatch(
         AssetData[] calldata assetData,
         string[] memory metadatas
@@ -208,7 +206,7 @@ contract Asset is
     /// @param amount The amount of assets to mint
     /// @param tier The tier of the catalysts to burn
     /// @param recipient The recipient of the asset
-    /// @param metadataHash The ipfs Hash of asset's metadata
+    /// @param metadataHash The ipfs hash of asset's metadata
     function bridgeMint(
         uint256 originalTokenId,
         uint256 amount,
@@ -380,10 +378,6 @@ contract Asset is
         returns (string memory)
     {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
-    }
-
-    function setURI(string memory newuri) external onlyRole(URI_SETTER_ROLE) {
-        _setURI(newuri);
     }
 
     /// @notice Query if a contract implements interface `id`.
