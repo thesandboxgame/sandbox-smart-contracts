@@ -31,8 +31,9 @@ const config: HardhatUserConfig = {
     catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
     assetAdmin: "upgradeAdmin",
+    tsbAssetMinter: "upgradeAdmin",
     uriSetter: "upgradeAdmin",
-    revealer: "upgradeAdmin",
+    backendSigner: "upgradeAdmin",
   },
   defaultNetwork: "hardhat",
   networks: {
@@ -40,7 +41,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         blockNumber: 16000000,
-        url: "https://mainnet.infura.io/v3/f24e105566724643bd574ed65ff8bd5e",
+        url: process.env.ETH_NODE_URI_POLYGON || "http://localhost:8545",
       },
       loggingEnabled: false,
       chainId: 1337,

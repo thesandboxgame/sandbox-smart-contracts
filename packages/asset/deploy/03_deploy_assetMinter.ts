@@ -4,11 +4,12 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, revealer, upgradeAdmin, trustedForwarder } =
+  const { deployer, upgradeAdmin, trustedForwarder, tsbAssetMinter } =
     await getNamedAccounts();
 
   const AssetContract = await deployments.get("Asset");
   const CatalystContract = await deployments.get("Catalyst");
+  const AuthValidator = await deployments.get("AuthValidator");
 
   await deploy("AssetMinter", {
     from: deployer,
@@ -22,8 +23,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           trustedForwarder,
           AssetContract.address,
           CatalystContract.address,
-          deployer,
-          revealer,
+          tsbAssetMinter,
+          AuthValidator.address,
         ],
       },
       upgradeIndex: 0,
@@ -32,5 +33,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.dependencies = ["Asset", "Catalyst"];
+func.dependencies = ["Asset", "Catalyst", "AuthValidator"];
 func.tags = ["AssetMinter"];

@@ -3,8 +3,8 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import "./AuthValidator.sol";
 import "./libraries/TokenIdUtils.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/IAsset.sol";
@@ -20,6 +20,7 @@ contract AssetMinter is
     ERC2771Handler,
     AccessControlUpgradeable
 {
+    AuthValidator private authValidator;
     using TokenIdUtils for uint256;
     address public assetContract;
     address public catalystContract;
@@ -39,8 +40,6 @@ contract AssetMinter is
 
     bytes32 public constant EXCLUSIVE_MINTER_ROLE =
         keccak256("EXCLUSIVE_MINTER_ROLE");
-    bytes32 public constant BACKEND_SIGNER_ROLE =
-        keccak256("BACKEND_SIGNER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -52,16 +51,16 @@ contract AssetMinter is
         address _assetContract,
         address _catalystContract,
         address _exclusiveMinter,
-        address _backendSigner
+        AuthValidator _authValidator
     ) external initializer {
         __AccessControl_init();
         __ERC2771Handler_initialize(_forwarder);
         __EIP712_init(name, version);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(EXCLUSIVE_MINTER_ROLE, _exclusiveMinter);
-        _grantRole(BACKEND_SIGNER_ROLE, _backendSigner);
         assetContract = _assetContract;
         catalystContract = _catalystContract;
+        authValidator = _authValidator;
     }
 
     /// @notice Mints a new asset, the asset is minted to the caller of the function, the caller must have enough catalysts to mint the asset
@@ -78,7 +77,7 @@ contract AssetMinter is
 
         // verify signature
         require(
-            _verify(signature, _hashMint(mintableAsset)),
+            authValidator.verify(signature, _hashMint(mintableAsset)),
             "Invalid signature"
         );
 
@@ -130,7 +129,7 @@ contract AssetMinter is
 
         // verify signature
         require(
-            _verify(signature, _hashMintBatch(mintableAssets)),
+            authValidator.verify(signature, _hashMintBatch(mintableAssets)),
             "Invalid signature"
         );
 
@@ -246,7 +245,7 @@ contract AssetMinter is
     ) external {
         // verify the signature
         require(
-            _verify(
+            authValidator.verify(
                 signature,
                 _hashReveal(creator, prevTokenId, amount, revealHashes)
             ),
@@ -337,19 +336,6 @@ contract AssetMinter is
         returns (bytes calldata)
     {
         return ERC2771Handler._msgData();
-    }
-
-    /// @notice Takes the signature and the digest and returns if the signer has a backend signer role assigned
-    /// @dev Multipurpose function that can be used to verify signatures with different digests
-    /// @param signature Signature hash
-    /// @param digest Digest hash
-    /// @return bool
-    function _verify(
-        bytes memory signature,
-        bytes32 digest
-    ) internal view returns (bool) {
-        address recoveredSigner = ECDSAUpgradeable.recover(digest, signature);
-        return hasRole(BACKEND_SIGNER_ROLE, recoveredSigner);
     }
 
     /// @notice Creates a hash of the reveal data
