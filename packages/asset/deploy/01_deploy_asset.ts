@@ -17,7 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: "initialize",
         args: [
           trustedForwarder,
-          1, // chain index for polygon network
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
           "ipfs://",
