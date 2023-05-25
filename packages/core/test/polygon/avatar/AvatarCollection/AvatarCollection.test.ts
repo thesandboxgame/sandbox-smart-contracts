@@ -17,7 +17,7 @@ import {
 const BATCH_SIZE = 50;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only(implementationContractName, function () {
+describe(implementationContractName, function () {
   it('setMarketingMint sets appropriate data', async function () {
     const {avatarCollectionContract} = await setupAvatar();
 

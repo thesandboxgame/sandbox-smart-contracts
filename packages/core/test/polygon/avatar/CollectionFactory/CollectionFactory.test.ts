@@ -15,7 +15,7 @@ import {
 } from './CollectionFactory.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only(targetContractName, function () {
+describe(targetContractName, function () {
   it('deployBeacon works accordingly', async function () {
     const {
       factoryContractAsOwner,
