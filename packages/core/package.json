@@ -94,7 +94,7 @@
     "deploy": "npm run void:deploy && npm run fork:deploy goerli",
     "local:dev": "hardhat --network localhost deploy --watch",
     "execute": "node ./scripts.js run",
-    "deploy:all": "NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" node ./scripts.js deploy",
+    "live:deploy": "NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" node ./scripts.js deploy",
     "export": "node ./scripts.js export",
     "fork:execute": "node ./scripts.js fork:run",
     "fork:deploy": "node ./scripts.js fork:deploy",
