@@ -2,8 +2,8 @@ import {assert} from 'chai';
 import {BigNumber, Contract, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, getNamedAccounts, deployments} from 'hardhat';
-import {withSnapshot, waitFor} from '../../utils';
-import {depositViaChildChainManager} from '../sand/fixtures';
+import {withSnapshot, waitFor} from '../../../utils';
+import {depositViaChildChainManager} from '../../sand/fixtures';
 import ERC20Mock from '@openzeppelin/contracts-0.8.15/build/contracts/ERC20PresetMinterPauser.json';
 
 export const raffleSignWallet = new ethers.Wallet(
@@ -66,7 +66,9 @@ export const setupAvatar = withSnapshot(
   }
 );
 
-export const setupMockERC20 = withSnapshot([], async function () {
+export async function setupMockERC20(): Promise<{
+  randomTokenContract: Contract;
+}> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer} = await getNamedAccounts();
 
@@ -79,7 +81,7 @@ export const setupMockERC20 = withSnapshot([], async function () {
   return {
     randomTokenContract: await ethers.getContract('RandomToken', deployer),
   };
-});
+}
 
 async function setupWave(
   raffle: Contract,
@@ -117,7 +119,17 @@ async function setupWave(
   );
 }
 
-export async function setupAvatarAndMint(mintCount: number): Promise<unknown> {
+export type AvatarMintingSetup = {
+  avatarCollectionContract: Contract;
+  mintedIdx: string[];
+  minterAddress: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [k: string]: any;
+};
+
+export async function setupAvatarAndMint(
+  mintCount: number
+): Promise<AvatarMintingSetup> {
   const avatarSetup = await setupAvatar();
 
   const {
@@ -146,7 +158,7 @@ export async function setupAvatarAndMint(mintCount: number): Promise<unknown> {
     avatarCollectionContract.filters.Transfer()
   );
 
-  const mintedIdx = [];
+  const mintedIdx: string[] = [];
   for (const eventIndex in transferEvents) {
     const event = transferEvents[eventIndex];
     const tokenId = event?.args?.tokenId.toString();
