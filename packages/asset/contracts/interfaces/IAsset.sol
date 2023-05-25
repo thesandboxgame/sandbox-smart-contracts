@@ -17,33 +17,38 @@ interface IAsset {
         uint8 tier;
         uint16 creatorNonce;
         bool revealed;
-        uint40 revealHash;
     }
 
     // Functions
-    function mint(AssetData calldata assetData) external;
+    function mint(
+        AssetData calldata assetData,
+        string memory metadataHash
+    ) external;
 
     function bridgeMint(
         uint256 originalTokenId,
         uint256 amount,
         uint8 tier,
         address recipient,
-        bool revealed,
-        uint40 revealHash
+        string memory metadataHash
     ) external;
 
-    function mintBatch(AssetData[] calldata assetData) external;
+    function mintBatch(
+        AssetData[] calldata assetData,
+        string[] memory metadataHashs
+    ) external;
 
     function revealMint(
         address recipient,
         uint256 amount,
         uint256 prevTokenId,
-        uint40[] calldata revealHashes
+        string[] memory metadataHashes
     ) external returns (uint256[] memory tokenIds);
 
     function mintSpecial(
         address recipient,
-        AssetData calldata assetData
+        AssetData calldata assetData,
+        string memory metadataHash
     ) external;
 
     function burnFrom(address account, uint256 id, uint256 amount) external;
@@ -65,8 +70,6 @@ interface IAsset {
         uint256 catalystTokenId,
         uint256 amount
     ) external;
-
-    function setURI(string memory newuri) external;
 
     function getRecyclingAmount(
         uint256 catalystTokenId
