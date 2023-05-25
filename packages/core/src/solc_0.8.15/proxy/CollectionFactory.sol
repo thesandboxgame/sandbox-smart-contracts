@@ -293,7 +293,7 @@ contract CollectionFactory is Ownable2Step {
             require(success, "CollectionFactory: failed to add collection");
 
             beacon = collection.beacon();
-            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
+            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: beacon ownership must be given to factory");
 
             emit CollectionAdded(collection.beacon(), address(collection));
 
@@ -327,13 +327,12 @@ contract CollectionFactory is Ownable2Step {
      * @custom:event {CollectionRemoved} for each removed collection
      * @custom:event {CollectionProxyAdminChanged}
      * @param _collections list of collections to transfer
-     * @param newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
+     * @param _newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
      */
-    function transferCollections(address[] calldata _collections, address newCollectionOwner) external onlyOwner {
-        require(newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
+    function transferCollections(address[] calldata _collections, address _newCollectionOwner) external onlyOwner {
+        require(_newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
         bool success;
         uint256 collectionsLength = _collections.length;
-        collectionCount -= collectionsLength;
 
         for (uint256 index; index < collectionsLength; ) {
             CollectionProxy collection = CollectionProxy(payable(_collections[index]));
@@ -342,11 +341,13 @@ contract CollectionFactory is Ownable2Step {
             require(success, "CollectionFactory: failed to remove collection");
             emit CollectionRemoved(collection.beacon(), address(collection));
 
-            collection.changeCollectionProxyAdmin(newCollectionOwner);
-            emit CollectionProxyAdminChanged(address(this), newCollectionOwner);
+            collection.changeCollectionProxyAdmin(_newCollectionOwner);
+            emit CollectionProxyAdminChanged(address(this), _newCollectionOwner);
 
             unchecked {++index;}
         }
+
+        collectionCount -= collectionsLength;
     }
 
     /*//////////////////////////////////////////////////////////////
