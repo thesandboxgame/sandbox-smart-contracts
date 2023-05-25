@@ -18,4 +18,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['CollectionFactory', 'CollectionFactory_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER_V2'];
