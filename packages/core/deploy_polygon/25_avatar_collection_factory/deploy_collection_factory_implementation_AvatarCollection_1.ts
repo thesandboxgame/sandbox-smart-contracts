@@ -5,9 +5,7 @@ const implementationContractName = 'AvatarCollection';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {
-    deployer,
-  } = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   // deploying the implementation
   await deployments.deploy(implementationContractName, {
@@ -19,5 +17,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['CollectionFactory', `CollectionFactory_implementation_AvatarCollection_1_deploy`];
+func.tags = [
+  'CollectionFactory',
+  `CollectionFactory_implementation_AvatarCollection_1_deploy`,
+];
 func.dependencies = ['CollectionFactory_deploy'];

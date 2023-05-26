@@ -10,7 +10,7 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const collectionName = "MockAvatarTesting";
+export const collectionName = 'MockAvatarTesting';
 export const COLLECTION_MAX_SUPPLY = 500;
 
 const implementationDeployTag = 'AvatarCollectionTest_deploy';

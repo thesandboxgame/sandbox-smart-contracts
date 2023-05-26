@@ -5,7 +5,6 @@ import {BigNumber} from 'ethers';
 // the same as `skipIfAlreadyDeployed` from deployments.deploy but applied to our on-chain logic
 const skipIfAlreadyDeployed = true;
 
-
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers, artifacts} = hre;
 
@@ -24,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // nftCollectionAdmin (taken from name accounts): owner of collection
   // sandAdmin (taken from name accounts): treasury
   const collectionName = 'MockAvatarTesting';
-  const collectionSymbol = "MAT";
+  const collectionSymbol = 'MAT';
   const MAX_SUPPLY = 500;
 
   let metadataUrl;
@@ -50,21 +49,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const implementationContractName = 'AvatarCollection';
 
   // check if particular collection was already deployed, if yes, will not deploy again
-  if(skipIfAlreadyDeployed) {
+  if (skipIfAlreadyDeployed) {
     console.log(
-      "skipIfAlreadyDeployed is true: checking if collection, " +
-      `${collectionName} was already deployed`
+      'skipIfAlreadyDeployed is true: checking if collection, ' +
+        `${collectionName} was already deployed`
     );
     try {
       const deploymentFile = await deployments.get(collectionName);
       console.log(`Deployment file already exists for ${collectionName}`);
       console.log(`reusing ${collectionName} at ${deploymentFile.address}`);
       return;
-
     } catch (e) {
       const errorMessage: string = (e as Error).message;
       console.log(errorMessage);
-      console.log("Continuing with deployment")
+      console.log('Continuing with deployment');
     }
   }
 
@@ -120,17 +118,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`deployed at ${collectionAddress} (tx: ${deployTx.hash})`);
 
   // save collection proxy in deployments
-  const collectionProxyDeploymentsName = `${collectionName}Proxy` // `<CollectionName>Proxy`
-  const collectionProxyInterface = await artifacts.readArtifact('CollectionProxy');
+  const collectionProxyDeploymentsName = `${collectionName}Proxy`; // `<CollectionName>Proxy`
+  const collectionProxyInterface = await artifacts.readArtifact(
+    'CollectionProxy'
+  );
   await deployments.save(collectionProxyDeploymentsName, {
     address: collectionAddress,
-    abi: collectionProxyInterface.abi
+    abi: collectionProxyInterface.abi,
   });
 
   // save collection address as implementation (even though it is through a proxy)
   // warning, if beacon is changed or implementation of beacon is changed then these address is still ok
   // but the ABI, on chain, will be of the new implementation. Manually save it in deployment
-  const implementationInterface = await artifacts.readArtifact(implementationContractName);
+  const implementationInterface = await artifacts.readArtifact(
+    implementationContractName
+  );
   await deployments.save(collectionName, {
     address: collectionAddress,
     abi: implementationInterface.abi,
@@ -138,7 +140,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // sanity check
   const collectionProxyContract = await deployments.get(collectionName);
-  console.log('Newly launched collection (proxy):', collectionProxyContract.address);
+  console.log(
+    'Newly launched collection (proxy):',
+    collectionProxyContract.address
+  );
 };
 
 export default func;
