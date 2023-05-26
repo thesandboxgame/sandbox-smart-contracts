@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config: HardhatUserConfig = {
+  paths: {
+    sources: "./contracts",
+  },
   solidity: {
     compilers: [
       {
