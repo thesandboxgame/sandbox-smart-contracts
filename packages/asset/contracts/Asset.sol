@@ -35,8 +35,6 @@ contract Asset is
     mapping(uint256 => uint16) public bridgedTokensNonces;
     // mapping of ipfs metadata token hash to token ids
     mapping(string => uint256) public hashUsed;
-    // mapping of creator to asset id to asset's reveal nonce
-    mapping(address => mapping(uint256 => uint16)) revealNonce;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -61,73 +59,25 @@ contract Asset is
         }
     }
 
-    /// @notice Mint new token with catalyst tier chosen by the creator
-    /// @dev Only callable by the minter role
-    /// @param assetData The address of the creator
-    /// @param metadataHash The hash string for asset's metadata
     function mint(
-        AssetData calldata assetData,
-        string memory metadataHash
+        address to,
+        uint256 id,
+        uint256 amount
     ) external onlyRole(MINTER_ROLE) {
-        // increment nonce
-        unchecked {
-            creatorNonces[assetData.creator]++;
-        }
-        // get current creator nonce
-        uint16 nonce = creatorNonces[assetData.creator];
-        require(assetData.creatorNonce == nonce, "INVALID_NONCE");
-        // generate token id by providing the creator address, the amount, catalyst tier and if it should mint as revealed
-        uint256 id = TokenIdUtils.generateTokenId(
-            assetData.creator,
-            assetData.tier,
-            nonce,
-            assetData.revealed ? 1 : 0
-        );
-        // mint the tokens
-        _mint(assetData.creator, id, assetData.amount, "");
-        require(hashUsed[metadataHash] == 0, "metadata hash already used");
-        hashUsed[metadataHash] = id;
-        _setURI(id, metadataHash);
+        _mint(to, id, amount, "");
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
-    /// @param assetData The array of asset data
-    /// @param metadataHashes The array of hashes for asset metadata
+    /// @param to The address of the recipient
+    /// @param ids The ids of the tokens to mint
+    /// @param amounts The amounts of the tokens to mint
     function mintBatch(
-        AssetData[] calldata assetData,
-        string[] memory metadataHashes
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
     ) external onlyRole(MINTER_ROLE) {
-        // generate token ids by providing the creator address, the amount, catalyst tier and if it should mint as revealed
-        uint256[] memory tokenIds = new uint256[](assetData.length);
-        uint256[] memory amounts = new uint256[](assetData.length);
-        address creator = assetData[0].creator;
-        // generate token ids
-        for (uint256 i = 0; i < assetData.length; ) {
-            unchecked {
-                creatorNonces[creator]++;
-            }
-            require(
-                assetData[i].creatorNonce == creatorNonces[creator],
-                "INVALID_NONCE"
-            );
-            tokenIds[i] = TokenIdUtils.generateTokenId(
-                creator,
-                assetData[i].tier,
-                creatorNonces[creator],
-                assetData[i].revealed ? 1 : 0
-            );
-            amounts[i] = assetData[i].amount;
-            require(
-                hashUsed[metadataHashes[i]] == 0,
-                "metadata hash already used"
-            );
-            hashUsed[metadataHashes[i]] = tokenIds[i];
-            _setURI(tokenIds[i], metadataHashes[i]);
-            i++;
-        }
-        // finally mint the tokens
-        _mintBatch(creator, tokenIds, amounts, "");
+        _mintBatch(to, ids, amounts, "");
     }
 
     /// @notice Mint TSB special tokens
@@ -159,45 +109,6 @@ contract Asset is
         require(hashUsed[metadataHash] == 0, "metadata hash already used");
         hashUsed[metadataHash] = id;
         _setURI(id, metadataHash);
-    }
-
-    function revealMint(
-        address recipient,
-        uint256 amount,
-        uint256 prevTokenId,
-        string[] memory metadataHashes
-    ) external onlyRole(MINTER_ROLE) returns (uint256[] memory tokenIds) {
-        // get data from the previous token id
-        AssetData memory data = prevTokenId.getData();
-
-        // check if the token is already revealed
-        require(!data.revealed, "Asset: already revealed");
-
-        uint256[] memory amounts = new uint256[](amount);
-        tokenIds = new uint256[](amount);
-        for (uint256 i = 0; i < amount; ) {
-            amounts[i] = 1;
-            if (hashUsed[metadataHashes[i]] != 0) {
-                tokenIds[i] = hashUsed[metadataHashes[i]];
-            } else {
-                uint16 nonce = revealNonce[data.creator][prevTokenId]++;
-
-                tokenIds[i] = TokenIdUtils.generateTokenId(
-                    data.creator,
-                    data.tier,
-                    data.creatorNonce,
-                    nonce
-                );
-
-                hashUsed[metadataHashes[i]] = tokenIds[i];
-            }
-            _setURI(tokenIds[i], metadataHashes[i]);
-            unchecked {
-                i++;
-            }
-        }
-
-        _mintBatch(recipient, tokenIds, amounts, "");
     }
 
     /// @notice Special mint function for the bridge contract to mint assets originally created on L1
@@ -383,6 +294,30 @@ contract Asset is
         returns (string memory)
     {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
+    }
+
+    function getTokenIdByMetadataHash(
+        string memory metadataHash
+    ) public view returns (uint256) {
+        return hashUsed[metadataHash];
+    }
+
+    function setMetadataHashUsed(
+        uint256 tokenId,
+        string memory metadataHash
+    ) public onlyRole(MINTER_ROLE) {
+        require(hashUsed[metadataHash] == 0, "metadata hash already used");
+        hashUsed[metadataHash] = tokenId;
+        _setURI(tokenId, metadataHash);
+    }
+
+    function getIncrementedCreatorNonce(
+        address creator
+    ) public onlyRole(MINTER_ROLE) returns (uint16) {
+        unchecked {
+            creatorNonces[creator]++;
+        }
+        return creatorNonces[creator];
     }
 
     /// @notice Query if a contract implements interface `id`.
