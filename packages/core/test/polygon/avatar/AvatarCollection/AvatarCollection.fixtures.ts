@@ -10,26 +10,21 @@ export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const implementationContractName = 'AvatarCollection';
+export const collectionName = "MockAvatarTesting";
 export const COLLECTION_MAX_SUPPLY = 500;
 
-const implementationDeployTag = 'AvatarCollection_deploy_new_beacon';
+const implementationDeployTag = 'AvatarCollectionTest_deploy';
 
 export const setupAvatar = withSnapshot(
   [implementationDeployTag],
   async function (hre) {
     const {sandAdmin} = await getNamedAccounts();
 
-    const implementationContract = await ethers.getContract(
-      implementationContractName
-    );
-
-    const cachedContractProxyArtifact = await deployments.get(
-      `${implementationContractName}Proxy`
-    );
+    // const deploymentName = `${collectionName}Proxy`;
+    const collectionDeployment = await deployments.get(collectionName);
     const avatarCollectionContract = new ethers.Contract(
-      cachedContractProxyArtifact.address,
-      implementationContract.interface,
+      collectionDeployment.address,
+      collectionDeployment.abi,
       ethers.provider
     );
 

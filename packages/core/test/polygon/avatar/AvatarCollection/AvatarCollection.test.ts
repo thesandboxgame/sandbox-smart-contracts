@@ -9,7 +9,7 @@ import {
   setupAvatar,
   setupAvatarAndMint,
   COLLECTION_MAX_SUPPLY,
-  implementationContractName,
+  collectionName,
   setupMockERC20,
   topUpAddress,
 } from './AvatarCollection.fixtures';
@@ -17,7 +17,7 @@ import {
 const BATCH_SIZE = 50;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe(implementationContractName, function () {
+describe(collectionName, function () {
   it('setMarketingMint sets appropriate data', async function () {
     const {avatarCollectionContract} = await setupAvatar();
 
