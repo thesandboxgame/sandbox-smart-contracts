@@ -80,7 +80,7 @@ contract AvatarCollection is
      * @notice Structure used to group registry filter parameters in order to avoid stack too deep error
      * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param operatorFiltererSubscription subscription address to use as a template for
-     * @param operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     * @param operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
      *                                              just copy entries from it
      */
     struct OpenseaRegistryFilterParameters {
@@ -170,7 +170,7 @@ contract AvatarCollection is
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param _operatorFiltererSubscription subscription address to use as a template for
-     * @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     * @param _operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
      *                                               just copy entries from it
      */
     event ContractInitialized(
