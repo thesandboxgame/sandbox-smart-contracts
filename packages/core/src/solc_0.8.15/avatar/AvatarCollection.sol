@@ -957,11 +957,11 @@ contract AvatarCollection is
      * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
      * @dev standard pseudo-random implementation using keccak256 over various parameters.
      * @param _wallet the calling account address
-     * @param _totalMinted total minted tokens up to this point
+     * @param _totalSupply total amount of tokens stored by the contract up until this point.
      * @return pseudo-random value
      */
-    function _getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
-        uint256 remaining = maxSupply - _totalMinted;
+    function _getRandomToken(address _wallet, uint256 _totalSupply) private returns (uint256) {
+        uint256 remaining = maxSupply - _totalSupply;
         uint256 rand =
             uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;
