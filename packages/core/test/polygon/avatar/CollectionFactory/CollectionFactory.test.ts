@@ -241,7 +241,7 @@ describe(targetContractName, function () {
     // new beacon cannot be 0 address
     await expect(
       factoryContractAsOwner.transferBeacon(implementationAlias, AddressZero)
-    ).to.be.revertedWith('CollectionFactory: new owner cannot be 0 address');
+    ).to.be.revertedWith('Ownable: new owner is the zero address');
 
     // sanity check beacon owner is address
     const oldOwnership = await beaconAddress.owner();
@@ -468,120 +468,120 @@ describe(targetContractName, function () {
     );
   });
 
-  // it('transferCollections works accordingly', async function () {
-  //   const {
-  //     randomAddress,
-  //     factoryContractAsOwner,
-  //     factoryContractAsRandomWallet,
-  //     mockUpgradableContract,
-  //   } = await setupFactory();
+  it('transferCollections works accordingly', async function () {
+    const {
+      randomAddress,
+      factoryContractAsOwner,
+      factoryContractAsRandomWallet,
+      mockUpgradableContract,
+    } = await setupFactory();
 
-  //   const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
-  //   const initializationArgs = getMockInitializationArgs(
-  //     mockUpgradableContract
-  //   );
-  //   await deployBeacon(
-  //     factoryContractAsOwner,
-  //     mockUpgradableContract.address,
-  //     implementationAlias
-  //   );
-  //   await factoryContractAsOwner.deployCollection(
-  //     implementationAlias,
-  //     initializationArgs
-  //   );
-  //   const collectionAddedEvents = await factoryContractAsOwner.queryFilter(
-  //     factoryContractAsOwner.filters.CollectionAdded()
-  //   );
-  //   const collectionAddress = collectionAddedEvents[0].args?.[1];
+    const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
+    const initializationArgs = getMockInitializationArgs(
+      mockUpgradableContract
+    );
+    await deployBeacon(
+      factoryContractAsOwner,
+      mockUpgradableContract.address,
+      implementationAlias
+    );
+    await factoryContractAsOwner.deployCollection(
+      implementationAlias,
+      initializationArgs
+    );
+    const collectionAddedEvents = await factoryContractAsOwner.queryFilter(
+      factoryContractAsOwner.filters.CollectionAdded()
+    );
+    const collectionAddress = collectionAddedEvents[0].args?.[1];
 
-  //   const collections: string[] = [collectionAddress];
+    const collections: string[] = [collectionAddress];
 
-  //   // input validations
-  //   await expect(
-  //     factoryContractAsRandomWallet.transferCollections(
-  //       collections,
-  //       randomAddress
-  //     )
-  //   ).to.be.revertedWith('Ownable: caller is not the owner');
+    // input validations
+    await expect(
+      factoryContractAsRandomWallet.transferCollections(
+        collections,
+        randomAddress
+      )
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
-  //   await expect(
-  //     factoryContractAsOwner.transferCollections(collections, AddressZero)
-  //   ).to.be.revertedWith('CollectionFactory: new owner cannot be 0 address');
+    await expect(
+      factoryContractAsOwner.transferCollections(collections, AddressZero)
+    ).to.be.revertedWith('ERC1967: new admin is the zero address');
 
-  //   // sanity checks
-  //   const collectionContract = await collectionProxyAsContract(
-  //     collectionAddress
-  //   );
-  //   const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-  //   const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
-  //   assert.isTrue(
-  //     beforeCollections.includes(collectionAddress),
-  //     'beforeCollections includes sanity check failed'
-  //   );
-  //   assert.equal(
-  //     beforeCollections.length,
-  //     1,
-  //     'beforeCollections sanity check failed'
-  //   );
-  //   assert.equal(
-  //     beforeCollectionCount,
-  //     1,
-  //     'beforeCollectionCount sanity check failed'
-  //   );
-  //   assert.equal(
-  //     await collectionContract.proxyAdmin(),
-  //     factoryContractAsOwner.address,
-  //     'initial proxyAdmin address set ok'
-  //   );
+    // sanity checks
+    const collectionContract = await collectionProxyAsContract(
+      collectionAddress
+    );
+    const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
+    const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    assert.isTrue(
+      beforeCollections.includes(collectionAddress),
+      'beforeCollections includes sanity check failed'
+    );
+    assert.equal(
+      beforeCollections.length,
+      1,
+      'beforeCollections sanity check failed'
+    );
+    assert.equal(
+      beforeCollectionCount,
+      1,
+      'beforeCollectionCount sanity check failed'
+    );
+    assert.equal(
+      await collectionContract.proxyAdmin(),
+      factoryContractAsOwner.address,
+      'initial proxyAdmin address set ok'
+    );
 
-  //   // normal usage
-  //   await factoryContractAsOwner.transferCollections(
-  //     collections,
-  //     randomAddress
-  //   );
+    // normal usage
+    await factoryContractAsOwner.transferCollections(
+      collections,
+      randomAddress
+    );
 
-  //   // check that the admin address was actually changed
-  //   assert.equal(
-  //     await collectionContract.proxyAdmin(),
-  //     randomAddress,
-  //     'proxyAdmin failed to change'
-  //   );
+    // check that the admin address was actually changed
+    assert.equal(
+      await collectionContract.proxyAdmin(),
+      randomAddress,
+      'proxyAdmin failed to change'
+    );
 
-  //   // check that internal accounting changed
-  //   const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-  //   const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    // check that internal accounting changed
+    const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
+    const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
 
-  //   assert.equal(afterCollections.length, 0, 'afterCollections check failed');
-  //   assert.equal(
-  //     afterCollectionCount.toNumber(),
-  //     0,
-  //     'afterCollectionCount check failed'
-  //   );
+    assert.equal(afterCollections.length, 0, 'afterCollections check failed');
+    assert.equal(
+      afterCollectionCount.toNumber(),
+      0,
+      'afterCollectionCount check failed'
+    );
 
-  //   // check events were sent
-  //   const collectionRemovedEvents = await factoryContractAsOwner.queryFilter(
-  //     factoryContractAsOwner.filters.CollectionRemoved()
-  //   );
-  //   assert.equal(
-  //     collectionRemovedEvents.length,
-  //     1,
-  //     'collectionRemovedEvents check event failed'
-  //   );
+    // check events were sent
+    const collectionRemovedEvents = await factoryContractAsOwner.queryFilter(
+      factoryContractAsOwner.filters.CollectionRemoved()
+    );
+    assert.equal(
+      collectionRemovedEvents.length,
+      1,
+      'collectionRemovedEvents check event failed'
+    );
 
-  //   const collectionProxyAdminChangedEvents = await factoryContractAsOwner.queryFilter(
-  //     factoryContractAsOwner.filters.CollectionProxyAdminChanged()
-  //   );
-  //   assert.equal(
-  //     collectionProxyAdminChangedEvents.length,
-  //     1,
-  //     'collectionProxyAdminChangedEvents check event failed'
-  //   );
+    const collectionProxyAdminChangedEvents = await factoryContractAsOwner.queryFilter(
+      factoryContractAsOwner.filters.CollectionProxyAdminChanged()
+    );
+    assert.equal(
+      collectionProxyAdminChangedEvents.length,
+      1,
+      'collectionProxyAdminChangedEvents check event failed'
+    );
 
-  //   // check that removing an inexistent collection fails
-  //   await expect(
-  //     factoryContractAsOwner.transferCollections(collections, randomAddress)
-  //   ).to.be.revertedWith('CollectionFactory: failed to remove collection');
-  // });
+    // check that removing an inexistent collection fails
+    await expect(
+      factoryContractAsOwner.transferCollections(collections, randomAddress)
+    ).to.be.revertedWith('CollectionFactory: failed to remove collection');
+  });
 
   it('addCollections works accordingly', async function () {
     // setup start
