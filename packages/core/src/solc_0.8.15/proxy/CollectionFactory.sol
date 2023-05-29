@@ -293,7 +293,7 @@ contract CollectionFactory is Ownable2Step {
             require(success, "CollectionFactory: failed to add collection");
 
             beacon = collection.beacon();
-            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: ownership must be given to factory");
+            require(_isFactoryBeaconOwner(beacon), "CollectionFactory: beacon ownership must be given to factory");
 
             emit CollectionAdded(collection.beacon(), address(collection));
 
