@@ -169,62 +169,62 @@ describe(collectionName, function () {
     assert.equal(metadataUpdateEvents.length, 1);
   });
 
-  // it('relevant functions should not work when paused', async function () {
-  //   const {
-  //     avatarCollectionContract,
-  //     transferSand,
-  //     setupWave,
-  //     getNamedAccounts,
-  //     hre,
-  //     signAuthMessageAs,
-  //     personalize,
-  //   } = await setupAvatar();
+  it('relevant functions should not work when paused', async function () {
+    const {
+      avatarCollectionContract,
+      transferSand,
+      setupWave,
+      getNamedAccounts,
+      hre,
+      signAuthMessageAs,
+      personalize,
+    } = await setupAvatar();
 
-  //   const {deployer} = await getNamedAccounts();
-  //   const owner = await avatarCollectionContract.owner();
-  //   const contract = avatarCollectionContract.connect(
-  //     ethers.provider.getSigner(owner)
-  //   );
-  //   await transferSand(deployer, '1000');
-  //   await setupWave(avatarCollectionContract, 1, 1, '1');
+    const {deployer} = await getNamedAccounts();
+    const owner = await avatarCollectionContract.owner();
+    const contract = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
+    await transferSand(deployer, '1000');
+    await setupWave(avatarCollectionContract, 1, 1, '1');
 
-  //   // pause contract
-  //   await contract.pause();
+    // pause contract
+    await contract.pause();
 
-  //   // mint should revert
-  //   const signature = await signAuthMessageAs(
-  //     raffleSignWallet,
-  //     deployer,
-  //     1,
-  //     avatarCollectionContract.address,
-  //     hre.network.config.chainId || 31337
-  //   );
+    // mint should revert
+    const signature = await signAuthMessageAs(
+      raffleSignWallet,
+      deployer,
+      1,
+      avatarCollectionContract.address,
+      hre.network.config.chainId || 31337
+    );
 
-  //   await expect(
-  //     contract.mint(raffleSignWallet.address, 1, 0, signature)
-  //   ).to.be.revertedWith('Pausable: paused');
+    await expect(
+      contract.mint(raffleSignWallet.address, 1, 0, signature)
+    ).to.be.revertedWith('Pausable: paused');
 
-  //   // burn should revert (would revert because not tokens are minted if not paused)
-  //   await expect(contract.burn(0)).to.be.revertedWith('Pausable: paused');
+    // burn should revert (would revert because not tokens are minted if not paused)
+    await expect(contract.burn(0)).to.be.revertedWith('Pausable: paused');
 
-  //   // reveal should revert (it would of reverted because token was not minted regardless)
-  //   await expect(contract.reveal(1, 0, signature)).to.be.revertedWith(
-  //     'Pausable: paused'
-  //   );
+    // reveal should revert (it would of reverted because token was not minted regardless)
+    await expect(contract.reveal(1, 0, signature)).to.be.revertedWith(
+      'Pausable: paused'
+    );
 
-  //   // personalize should revert (it would of reverted because token was not minted regardless)
-  //   const personalizationMask = 32;
-  //   await expect(
-  //     personalize(
-  //       raffleSignWallet,
-  //       deployer,
-  //       1,
-  //       hre.network.config.chainId || 31337,
-  //       0,
-  //       personalizationMask
-  //     )
-  //   ).to.be.revertedWith('Pausable: paused');
-  // });
+    // personalize should revert (it would of reverted because token was not minted regardless)
+    const personalizationMask = 32;
+    await expect(
+      personalize(
+        raffleSignWallet,
+        deployer,
+        1,
+        hre.network.config.chainId || 31337,
+        0,
+        personalizationMask
+      )
+    ).to.be.revertedWith('Pausable: paused');
+  });
 
   it('operatorPersonalize should work from owner', async function () {
     const {
