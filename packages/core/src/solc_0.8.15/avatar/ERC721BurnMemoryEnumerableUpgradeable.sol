@@ -45,7 +45,7 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
-    function burn(uint256 tokenId) external {
+    function burn(uint256 tokenId) public virtual {
         address sender = _msgSender();
         require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
         super._burn(tokenId);
