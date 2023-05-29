@@ -955,7 +955,10 @@ contract AvatarCollection is
 
     /**
      * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
-     * @dev standard pseudo-random implementation using keccak256 over various parameters.
+     * @dev pseudo-random implementation using keccak256 over various parameters.
+     *      This function does not provide true randomness, it is pseudo-random. A determined attacker
+     *      can identify what token ID will be generated but this has no impact as we shuffle metadata
+     *      off-chain before any minting.
      * @param _wallet the calling account address
      * @param _totalSupply total amount of tokens stored by the contract up until this point.
      * @return pseudo-random value
