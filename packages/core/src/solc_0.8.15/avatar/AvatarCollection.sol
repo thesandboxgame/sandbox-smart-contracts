@@ -336,16 +336,13 @@ contract AvatarCollection is
         require(_isContract(_allowedToExecuteMint), "AvatarCollection: executor address is not a contract");
         require(_maxSupply > 0, "AvatarCollection: max supply should be more than 0");
 
-        // totalSupply() should be 0 and just maxSupply could be used here; paranoia
-        uint256 remaining = maxSupply - totalSupply();
-
         require(_mintingDefaults.mintPrice > 0, "AvatarCollection: public mint price cannot be 0");
         require(
-            _mintingDefaults.maxPublicTokensPerWallet <= remaining &&
-                _mintingDefaults.maxAllowlistTokensPerWallet <= remaining,
+            _mintingDefaults.maxPublicTokensPerWallet <= _maxSupply &&
+                _mintingDefaults.maxAllowlistTokensPerWallet <= _maxSupply,
             "AvatarCollection: invalid tokens per wallet configuration"
         );
-        require(_mintingDefaults.maxMarketingTokens <= remaining, "AvatarCollection: invalid marketing share");
+        require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "AvatarCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
         __InitializeAccessControl(_collectionOwner); // owner is also initialized here
