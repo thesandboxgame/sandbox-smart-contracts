@@ -221,7 +221,7 @@ contract CollectionFactory is Ownable2Step {
         onlyOwner
         beaconIsAvailable(beaconAlias)
     {
-        require(newBeaconOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
+        // "owner not zero address" check is done in UpgradeableBeacon::Ownable::transferOwnership
         address beacon = aliasToBeacon[beaconAlias];
         delete aliasToBeacon[beaconAlias];
         beaconCount -= 1;
@@ -330,10 +330,9 @@ contract CollectionFactory is Ownable2Step {
      * @param newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
      */
     function transferCollections(address[] calldata _collections, address newCollectionOwner) external onlyOwner {
-        require(newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
+        // "owner not zero address" check done in CollectionProxy::changeCollectionProxyAdmin::_changeAdmin::_setAdmin
         bool success;
         uint256 collectionsLength = _collections.length;
-        collectionCount -= collectionsLength;
 
         for (uint256 index; index < collectionsLength; ) {
             CollectionProxy collection = CollectionProxy(payable(_collections[index]));
@@ -347,6 +346,8 @@ contract CollectionFactory is Ownable2Step {
 
             unchecked {++index;}
         }
+
+        collectionCount -= collectionsLength;
     }
 
     /*//////////////////////////////////////////////////////////////
