@@ -60,7 +60,7 @@ contract AssetReveal is
     function revealBurn(uint256 tokenId, uint256 amount) public {
         require(amount > 0, "Amount should be greater than 0");
         IAsset.AssetData memory data = tokenId.getData();
-        require(!data.revealed, "Token is already revealed");
+        require(!data.revealed, "Asset is already revealed");
         assetContract.burnFrom(_msgSender(), tokenId, amount);
         emit AssetRevealBurn(
             _msgSender(),
@@ -236,5 +236,17 @@ contract AssetReveal is
                 )
             )
         );
+    }
+
+    /// @notice Get the asset contract address
+    /// @return The asset contract address
+    function getAssetContract() external view returns (address) {
+        return address(assetContract);
+    }
+
+    /// @notice Get the auth validator address
+    /// @return The auth validator address
+    function getAuthValidator() external view returns (address) {
+        return address(authValidator);
     }
 }

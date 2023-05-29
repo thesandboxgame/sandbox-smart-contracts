@@ -6,19 +6,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
   const { deployer, upgradeAdmin, trustedForwarder } = await getNamedAccounts();
 
-  await deploy("Asset", {
+  const AssetContract = await deployments.get("Asset");
+  const AuthValidatorContract = await deployments.get("AuthValidator");
+
+  await deploy("AssetReveal", {
     from: deployer,
-    contract: "Asset",
+    contract: "AssetReveal",
     proxy: {
       owner: upgradeAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         methodName: "initialize",
         args: [
+          AssetContract.address,
+          AuthValidatorContract.address,
           trustedForwarder,
-          [1, 2, 3, 4, 5, 6],
-          [2, 4, 6, 8, 10, 12],
-          "ipfs://",
         ],
       },
       upgradeIndex: 0,
@@ -28,4 +30,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 
-func.tags = ["Asset"];
+func.tags = ["AssetReveal"];
+func.dependencies = ["Asset", "AuthValidator"];

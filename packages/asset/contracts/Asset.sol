@@ -59,6 +59,11 @@ contract Asset is
         }
     }
 
+    /// @notice Mint new tokens
+    /// @dev Only callable by the minter role
+    /// @param to The address of the recipient
+    /// @param id The id of the token to mint
+    /// @param amount The amount of the token to mint
     function mint(
         address to,
         uint256 id,
