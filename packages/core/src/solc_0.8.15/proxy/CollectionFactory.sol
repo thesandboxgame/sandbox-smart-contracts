@@ -333,7 +333,6 @@ contract CollectionFactory is Ownable2Step {
         // "owner not zero address" check done in CollectionProxy::changeCollectionProxyAdmin::_changeAdmin::_setAdmin
         bool success;
         uint256 collectionsLength = _collections.length;
-        collectionCount -= collectionsLength;
 
         for (uint256 index; index < collectionsLength; ) {
             CollectionProxy collection = CollectionProxy(payable(_collections[index]));
@@ -347,6 +346,8 @@ contract CollectionFactory is Ownable2Step {
 
             unchecked {++index;}
         }
+
+        collectionCount -= collectionsLength;
     }
 
     /*//////////////////////////////////////////////////////////////
