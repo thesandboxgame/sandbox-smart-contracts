@@ -1,10 +1,10 @@
 import {expect, assert} from 'chai';
-import {ethers, artifacts} from 'hardhat';
+import {ethers} from 'hardhat';
 
 const AddressZero = ethers.constants.AddressZero;
 
 import {
-  randomWallet,
+  // randomWallet,
   setupFactory,
   targetContractName,
   deployBeacon,
@@ -583,132 +583,132 @@ describe(targetContractName, function () {
   //   ).to.be.revertedWith('CollectionFactory: failed to remove collection');
   // });
 
-//   it('addCollections works accordingly', async function () {
-//     // setup start
-//     const {
-//       randomAddress,
-//       factoryContractAsOwner,
-//       factoryContractAsRandomWallet,
-//       mockUpgradableContract,
-//     } = await setupFactory();
-//     const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
-//     const initializationArgs = getMockInitializationArgs(
-//       mockUpgradableContract
-//     );
-//     const beaconContract = await deployBeacon(
-//       factoryContractAsOwner,
-//       mockUpgradableContract.address,
-//       implementationAlias
-//     );
-//     await factoryContractAsOwner.deployCollection(
-//       implementationAlias,
-//       initializationArgs
-//     );
-//     const collectionAddedEventsBefore = await factoryContractAsOwner.queryFilter(
-//       factoryContractAsOwner.filters.CollectionAdded()
-//     );
-//     const collectionAddress = collectionAddedEventsBefore[0].args?.[1];
-//     const collections: string[] = [collectionAddress];
+  //   it('addCollections works accordingly', async function () {
+  //     // setup start
+  //     const {
+  //       randomAddress,
+  //       factoryContractAsOwner,
+  //       factoryContractAsRandomWallet,
+  //       mockUpgradableContract,
+  //     } = await setupFactory();
+  //     const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
+  //     const initializationArgs = getMockInitializationArgs(
+  //       mockUpgradableContract
+  //     );
+  //     const beaconContract = await deployBeacon(
+  //       factoryContractAsOwner,
+  //       mockUpgradableContract.address,
+  //       implementationAlias
+  //     );
+  //     await factoryContractAsOwner.deployCollection(
+  //       implementationAlias,
+  //       initializationArgs
+  //     );
+  //     const collectionAddedEventsBefore = await factoryContractAsOwner.queryFilter(
+  //       factoryContractAsOwner.filters.CollectionAdded()
+  //     );
+  //     const collectionAddress = collectionAddedEventsBefore[0].args?.[1];
+  //     const collections: string[] = [collectionAddress];
 
-//     // transfer ownerships to imitate real life
-//     await factoryContractAsOwner.transferCollections(
-//       collections,
-//       randomAddress
-//     );
-//     await factoryContractAsOwner.transferBeacon(
-//       implementationAlias,
-//       randomAddress
-//     );
-//     // setup ended
+  //     // transfer ownerships to imitate real life
+  //     await factoryContractAsOwner.transferCollections(
+  //       collections,
+  //       randomAddress
+  //     );
+  //     await factoryContractAsOwner.transferBeacon(
+  //       implementationAlias,
+  //       randomAddress
+  //     );
+  //     // setup ended
 
-//     // input validations
-//     await expect(
-//       factoryContractAsRandomWallet.addCollections(collections)
-//     ).to.be.revertedWith('Ownable: caller is not the owner');
+  //     // input validations
+  //     await expect(
+  //       factoryContractAsRandomWallet.addCollections(collections)
+  //     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-//     await expect(factoryContractAsOwner.addCollections([])).to.be.revertedWith(
-//       'CollectionFactory: empty collection list'
-//     );
+  //     await expect(factoryContractAsOwner.addCollections([])).to.be.revertedWith(
+  //       'CollectionFactory: empty collection list'
+  //     );
 
-//     await expect(
-//       factoryContractAsOwner.addCollections([AddressZero])
-//     ).to.be.revertedWith('CollectionFactory: collection is zero address');
+  //     await expect(
+  //       factoryContractAsOwner.addCollections([AddressZero])
+  //     ).to.be.revertedWith('CollectionFactory: collection is zero address');
 
-//     await expect(
-//       factoryContractAsOwner.addCollections(collections)
-//     ).to.be.revertedWith(
-//       'CollectionFactory: owner of collection must be factory'
-//     );
+  //     await expect(
+  //       factoryContractAsOwner.addCollections(collections)
+  //     ).to.be.revertedWith(
+  //       'CollectionFactory: owner of collection must be factory'
+  //     );
 
-//     const collectionProxyInterface = await artifacts.readArtifact(
-//       'CollectionProxy'
-//     );
+  //     const collectionProxyInterface = await artifacts.readArtifact(
+  //       'CollectionProxy'
+  //     );
 
-//     const signer = randomWallet.connect(ethers.provider);
-//     const collectionAsOwner = new ethers.Contract(
-//       collectionAddress,
-//       collectionProxyInterface.abi,
-//       signer
-//     );
+  //     const signer = randomWallet.connect(ethers.provider);
+  //     const collectionAsOwner = new ethers.Contract(
+  //       collectionAddress,
+  //       collectionProxyInterface.abi,
+  //       signer
+  //     );
 
-//     // give ownership back to contract (collection)
-//     await collectionAsOwner.changeCollectionProxyAdmin(
-//       factoryContractAsOwner.address
-//     );
+  //     // give ownership back to contract (collection)
+  //     await collectionAsOwner.changeCollectionProxyAdmin(
+  //       factoryContractAsOwner.address
+  //     );
 
-//     await expect(
-//       factoryContractAsOwner.addCollections(collections)
-//     ).to.be.revertedWith(
-//       'CollectionFactory: beacon ownership must be given to factory'
-//     );
+  //     await expect(
+  //       factoryContractAsOwner.addCollections(collections)
+  //     ).to.be.revertedWith(
+  //       'CollectionFactory: beacon ownership must be given to factory'
+  //     );
 
-//     // give ownership back to contract (beacon)
-//     const contractInterface = await artifacts.readArtifact('UpgradeableBeacon');
-//     const beaconContractAsOwner = new ethers.Contract(
-//       beaconContract.address,
-//       contractInterface.abi,
-//       signer
-//     );
-//     await beaconContractAsOwner.transferOwnership(
-//       factoryContractAsOwner.address
-//     );
+  //     // give ownership back to contract (beacon)
+  //     const contractInterface = await artifacts.readArtifact('UpgradeableBeacon');
+  //     const beaconContractAsOwner = new ethers.Contract(
+  //       beaconContract.address,
+  //       contractInterface.abi,
+  //       signer
+  //     );
+  //     await beaconContractAsOwner.transferOwnership(
+  //       factoryContractAsOwner.address
+  //     );
 
-//     // sanity checks
-//     const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-//     const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
-//     assert.equal(
-//       beforeCollections.length,
-//       0,
-//       'beforeCollections sanity check failed'
-//     );
-//     assert.equal(
-//       beforeCollectionCount,
-//       0,
-//       'beforeCollectionCount sanity check failed'
-//     );
+  //     // sanity checks
+  //     const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
+  //     const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+  //     assert.equal(
+  //       beforeCollections.length,
+  //       0,
+  //       'beforeCollections sanity check failed'
+  //     );
+  //     assert.equal(
+  //       beforeCollectionCount,
+  //       0,
+  //       'beforeCollectionCount sanity check failed'
+  //     );
 
-//     // normal use case
-//     await factoryContractAsOwner.addCollections(collections);
+  //     // normal use case
+  //     await factoryContractAsOwner.addCollections(collections);
 
-//     // check events were sent
-//     const collectionAddedEventsAfter = await factoryContractAsOwner.queryFilter(
-//       factoryContractAsOwner.filters.CollectionAdded()
-//     );
-//     assert.equal(
-//       collectionAddedEventsAfter.length,
-//       2,
-//       'collectionAddedEvents check event failed'
-//     );
+  //     // check events were sent
+  //     const collectionAddedEventsAfter = await factoryContractAsOwner.queryFilter(
+  //       factoryContractAsOwner.filters.CollectionAdded()
+  //     );
+  //     assert.equal(
+  //       collectionAddedEventsAfter.length,
+  //       2,
+  //       'collectionAddedEvents check event failed'
+  //     );
 
-//     // check that internal accounting changed
-//     const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-//     const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+  //     // check that internal accounting changed
+  //     const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
+  //     const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
 
-//     assert.isTrue(
-//       afterCollections.includes(collectionAddress),
-//       'afterCollections includes check failed'
-//     );
-//     assert.equal(afterCollections.length, 1, 'afterCollections check failed');
-//     assert.equal(afterCollectionCount, 1, 'afterCollectionCount check failed');
-//   });
+  //     assert.isTrue(
+  //       afterCollections.includes(collectionAddress),
+  //       'afterCollections includes check failed'
+  //     );
+  //     assert.equal(afterCollections.length, 1, 'afterCollections check failed');
+  //     assert.equal(afterCollectionCount, 1, 'afterCollectionCount check failed');
+  //   });
 });
