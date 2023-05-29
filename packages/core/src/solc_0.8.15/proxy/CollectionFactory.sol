@@ -210,7 +210,7 @@ contract CollectionFactory is Ownable2Step {
     }
 
     /**
-     * @notice Transfers a beacon from the factory and all linked collections. Sets the owner to the provided one.
+     * @notice Transfers a beacon from the factory. Sets the owner to the provided one.
      * @custom:event {BeaconOwnershipChanged}
      * @custom:event {BeaconRemoved}
      * @param beaconAlias alias for the beacon to remove
