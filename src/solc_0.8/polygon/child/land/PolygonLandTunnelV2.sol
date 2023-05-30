@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../../../common/interfaces/IPolygonLandV2.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
-import "./PolygonLandBaseToken.sol";
 
 contract PolygonLandTunnelV2 is
     FxBaseChildTunnelUpgradeable,
