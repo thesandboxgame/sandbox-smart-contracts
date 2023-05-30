@@ -299,4 +299,18 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, Initializable, Op
     {
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, AssetBaseERC1155)
+        returns (address sender)
+    {
+        return AssetBaseERC1155._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, AssetBaseERC1155) returns (bytes calldata) {
+        return AssetBaseERC1155._msgData();
+    }
 }

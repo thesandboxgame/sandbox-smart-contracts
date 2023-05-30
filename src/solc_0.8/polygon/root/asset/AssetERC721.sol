@@ -10,6 +10,7 @@ import {
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
@@ -175,5 +176,13 @@ contract AssetERC721 is BaseERC721, IAssetERC721, OperatorFiltererUpgradeable {
         uint256 id
     ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
+    }
+
+    function _msgSender() internal view virtual override(ContextUpgradeable, BaseERC721) returns (address sender) {
+        return BaseERC721._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, BaseERC721) returns (bytes calldata) {
+        return BaseERC721._msgData();
     }
 }
