@@ -30,7 +30,7 @@ contract AssetReveal is
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address creator,uint256 prevTokenId, uint256 amount,string[] metadataHashes)"
+            "Reveal(address creator, uint256 prevTokenId, uint256 amount, string[] memory metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
