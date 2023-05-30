@@ -21,7 +21,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
 
     mapping(address => bool) internal _minters;
 
-    event Minter(address minter, bool enabled);
+    event Minter(address indexed minter, bool enabled);
 
     struct Land {
         uint256 x;

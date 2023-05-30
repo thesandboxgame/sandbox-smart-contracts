@@ -20,7 +20,7 @@ contract LandTunnelMigration {
         uint256[] x,
         uint256[] y
     );
-    event AdminChanged(address _newAdmin);
+    event AdminChanged(address indexed _newAdmin);
 
     modifier isAdmin() {
         require(admin == msg.sender, "LandTunnelMigration: !AUTHORISED");
