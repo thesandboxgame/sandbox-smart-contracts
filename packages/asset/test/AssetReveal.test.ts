@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
+import { createEIP712RevealSignature } from "./utils/revealSignature";
 
 const runTestSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
@@ -9,7 +10,7 @@ const runTestSetup = deployments.createFixture(
       "AuthValidator",
       "MockMinter",
     ]);
-    const { deployer, trustedForwarder, upgradeAdmin } =
+    const { deployer, trustedForwarder, upgradeAdmin, backendSigner } =
       await getNamedAccounts();
     const AssetContract = await ethers.getContract("Asset", deployer);
     const AuthValidatorContract = await ethers.getContract(
@@ -78,6 +79,9 @@ const runTestSetup = deployments.createFixture(
       unrevealedtokenId2,
       revealedtokenId,
       testAccount: upgradeAdmin,
+      backendSigner,
+      ethers,
+      chainId: 1337,
     };
   }
 );
@@ -207,5 +211,39 @@ describe.only("AssetReveal", () => {
       expect(deployerBalance2.toString()).to.equal("5");
     });
   });
-  describe("Minting", () => {});
+  describe("Minting", () => {
+    it("Should allow minting with valid signature", async () => {
+      const {
+        backendSigner,
+        chainId,
+        ethers,
+        deployer,
+        unrevealedtokenId,
+        AssetRevealContract,
+      } = await runTestSetup();
+      const newMetadataHash = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      console.log("backendSigner", backendSigner);
+      const signer = ethers.provider.getSigner(backendSigner);
+      const signature = await createEIP712RevealSignature(
+        signer,
+        chainId,
+        deployer,
+        1,
+        unrevealedtokenId,
+        newMetadataHash,
+        AssetRevealContract.address
+      );
+
+      await AssetRevealContract.revealMint(
+        signature,
+        deployer,
+        unrevealedtokenId,
+        1,
+        newMetadataHash,
+        deployer
+      );
+    });
+  });
 });
