@@ -202,7 +202,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// @param owner The address of the owner.
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
-    function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
+    function isApprovedForAll(address owner, address operator) external view override returns (bool) {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
@@ -422,7 +422,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address from,
         address to,
         uint256 id
-    ) internal view returns (bool isMetaTx) {
+    ) internal view returns (bool) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");

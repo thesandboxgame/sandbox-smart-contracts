@@ -17,7 +17,7 @@ abstract contract ERC2771Handler {
         return forwarder == _trustedForwarder;
     }
 
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
+    function getTrustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
 

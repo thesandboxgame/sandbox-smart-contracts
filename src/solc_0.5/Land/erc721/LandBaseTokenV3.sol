@@ -607,8 +607,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 layer,
         uint256 x,
         uint256 y
-    ) internal pure returns (uint256 quadId) {
-        quadId = layer + x + y * GRID_SIZE;
+    ) internal pure returns (uint256) {
+        return layer + x + y * GRID_SIZE;
     }
 
     function _ownerOfQuad(
