@@ -39,6 +39,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         bytes calldata data
     ) external {
         require(to != address(0), "to is zero address");
+        require(size != 0, "size cannot be zero");
         require(isMinter(msg.sender), "Only a minter can mint");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
@@ -224,6 +225,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) public view returns (bool) {
+        require(size != 0, "size cannot be zero");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
         return _ownerOfQuad(size, x, y) != address(0);
@@ -417,6 +419,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) internal {
+        require(size != 0, "size cannot be zero");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
         if (size == 3 || size == 6 || size == 12 || size == 24) {
