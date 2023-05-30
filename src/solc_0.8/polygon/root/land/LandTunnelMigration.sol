@@ -55,7 +55,7 @@ contract LandTunnelMigration {
     /// @notice This method needs super operator role to execute
     /// @param ids of land tokens to be migrated
     function migrateLandsToTunnel(uint256[] memory ids) external isAdmin {
-        landToken.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, "0x");
+        landToken.batchTransferFrom(oldLandTunnel, newLandTunnel, ids, "");
         emit TunnelLandsMigrated(oldLandTunnel, newLandTunnel, ids);
     }
 
@@ -69,7 +69,7 @@ contract LandTunnelMigration {
         uint256[] memory x,
         uint256[] memory y
     ) external isAdmin {
-        landToken.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "0x");
+        landToken.batchTransferQuad(oldLandTunnel, newLandTunnel, sizes, x, y, "");
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
     }
 }
