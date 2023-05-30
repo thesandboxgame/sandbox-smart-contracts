@@ -210,7 +210,7 @@ contract CollectionFactory is Ownable2Step {
     }
 
     /**
-     * @notice Transfers a beacon from the factory and all linked collections. Sets the owner to the provided one.
+     * @notice Transfers a beacon from the factory. Sets the owner to the provided one.
      * @custom:event {BeaconOwnershipChanged}
      * @custom:event {BeaconRemoved}
      * @param beaconAlias alias for the beacon to remove
@@ -221,7 +221,7 @@ contract CollectionFactory is Ownable2Step {
         onlyOwner
         beaconIsAvailable(beaconAlias)
     {
-        require(newBeaconOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
+        // "owner not zero address" check is done in UpgradeableBeacon::Ownable::transferOwnership
         address beacon = aliasToBeacon[beaconAlias];
         delete aliasToBeacon[beaconAlias];
         beaconCount -= 1;
@@ -327,10 +327,10 @@ contract CollectionFactory is Ownable2Step {
      * @custom:event {CollectionRemoved} for each removed collection
      * @custom:event {CollectionProxyAdminChanged}
      * @param _collections list of collections to transfer
-     * @param _newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
+     * @param newCollectionOwner the new owner of the beacon. It will be changed to this before transfer
      */
-    function transferCollections(address[] calldata _collections, address _newCollectionOwner) external onlyOwner {
-        require(_newCollectionOwner != address(0), "CollectionFactory: new owner cannot be 0 address");
+    function transferCollections(address[] calldata _collections, address newCollectionOwner) external onlyOwner {
+        // "owner not zero address" check done in CollectionProxy::changeCollectionProxyAdmin::_changeAdmin::_setAdmin
         bool success;
         uint256 collectionsLength = _collections.length;
 
@@ -341,8 +341,8 @@ contract CollectionFactory is Ownable2Step {
             require(success, "CollectionFactory: failed to remove collection");
             emit CollectionRemoved(collection.beacon(), address(collection));
 
-            collection.changeCollectionProxyAdmin(_newCollectionOwner);
-            emit CollectionProxyAdminChanged(address(this), _newCollectionOwner);
+            collection.changeCollectionProxyAdmin(newCollectionOwner);
+            emit CollectionProxyAdminChanged(address(this), newCollectionOwner);
 
             unchecked {++index;}
         }

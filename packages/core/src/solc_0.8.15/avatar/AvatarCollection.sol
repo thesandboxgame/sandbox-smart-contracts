@@ -80,7 +80,7 @@ contract AvatarCollection is
      * @notice Structure used to group registry filter parameters in order to avoid stack too deep error
      * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param operatorFiltererSubscription subscription address to use as a template for
-     * @param operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     * @param operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
      *                                              just copy entries from it
      */
     struct OpenseaRegistryFilterParameters {
@@ -170,7 +170,7 @@ contract AvatarCollection is
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param _operatorFiltererSubscription subscription address to use as a template for
-     * @param _operatorFiltererSubscriptionSubscribe if to subscribe tot the operatorFiltererSubscription address or
+     * @param _operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
      *                                               just copy entries from it
      */
     event ContractInitialized(
@@ -336,16 +336,13 @@ contract AvatarCollection is
         require(_isContract(_allowedToExecuteMint), "AvatarCollection: executor address is not a contract");
         require(_maxSupply > 0, "AvatarCollection: max supply should be more than 0");
 
-        // totalSupply() should be 0 and just maxSupply could be used here; paranoia
-        uint256 remaining = _maxSupply - totalSupply();
-
         require(_mintingDefaults.mintPrice > 0, "AvatarCollection: public mint price cannot be 0");
         require(
-            _mintingDefaults.maxPublicTokensPerWallet <= remaining &&
-                _mintingDefaults.maxAllowlistTokensPerWallet <= remaining,
+            _mintingDefaults.maxPublicTokensPerWallet <= _maxSupply &&
+                _mintingDefaults.maxAllowlistTokensPerWallet <= _maxSupply,
             "AvatarCollection: invalid tokens per wallet configuration"
         );
-        require(_mintingDefaults.maxMarketingTokens <= remaining, "AvatarCollection: invalid marketing share");
+        require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "AvatarCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
         __InitializeAccessControl(_collectionOwner); // owner is also initialized here
@@ -958,13 +955,16 @@ contract AvatarCollection is
 
     /**
      * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
-     * @dev standard pseudo-random implementation using keccak256 over various parameters.
+     * @dev pseudo-random implementation using keccak256 over various parameters.
+     *      This function does not provide true randomness, it is pseudo-random. A determined attacker
+     *      can identify what token ID will be generated but this has no impact as we shuffle metadata
+     *      off-chain before any minting.
      * @param _wallet the calling account address
-     * @param _totalMinted total minted tokens up to this point
+     * @param _totalSupply total amount of tokens stored by the contract up until this point.
      * @return pseudo-random value
      */
-    function _getRandomToken(address _wallet, uint256 _totalMinted) private returns (uint256) {
-        uint256 remaining = maxSupply - _totalMinted;
+    function _getRandomToken(address _wallet, uint256 _totalSupply) private returns (uint256) {
+        uint256 remaining = maxSupply - _totalSupply;
         uint256 rand =
             uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;

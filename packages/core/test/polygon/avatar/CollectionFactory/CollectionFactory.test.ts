@@ -241,7 +241,7 @@ describe(targetContractName, function () {
     // new beacon cannot be 0 address
     await expect(
       factoryContractAsOwner.transferBeacon(implementationAlias, AddressZero)
-    ).to.be.revertedWith('CollectionFactory: new owner cannot be 0 address');
+    ).to.be.revertedWith('Ownable: new owner is the zero address');
 
     // sanity check beacon owner is address
     const oldOwnership = await beaconAddress.owner();
@@ -506,7 +506,7 @@ describe(targetContractName, function () {
 
     await expect(
       factoryContractAsOwner.transferCollections(collections, AddressZero)
-    ).to.be.revertedWith('CollectionFactory: new owner cannot be 0 address');
+    ).to.be.revertedWith('ERC1967: new admin is the zero address');
 
     // sanity checks
     const collectionContract = await collectionProxyAsContract(
