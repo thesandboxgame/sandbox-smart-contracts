@@ -42,7 +42,10 @@ describe('LandTunnel V2', function () {
   it('validPayloadFor105 fails with fxTunnel 1.0.3 and must pass on 1.0.5', async function () {
     const {contract} = await setupLandTunnelV2();
     const goerliChildTunnel = '0xf3390C7351695DBF9B5c09CC5FF1d3564761A519';
-    await contract.setFxChildTunnel(goerliChildTunnel);
+    const owner = await contract.owner();
+    await contract
+      .connect(await ethers.provider.getSigner(owner))
+      .setFxChildTunnel(goerliChildTunnel);
     // If used with v1.0.3 of fx portal we get a revert with arithmetic error.
     await expect(
       contract.receiveMessage(validPayloadFor105)

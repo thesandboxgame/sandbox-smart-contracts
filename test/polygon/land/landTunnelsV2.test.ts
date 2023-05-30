@@ -5,6 +5,8 @@ import {sendMetaTx} from '../../sendMetaTx';
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
 import {zeroAddress} from '../../land/fixtures';
+import {deployments, getNamedAccounts, ethers} from 'hardhat';
+const {deploy} = deployments;
 
 describe('PolygonLand', function () {
   describe('Land <> PolygonLand: Transfer', function () {
@@ -16,6 +18,81 @@ describe('PolygonLand', function () {
         await expect(landHolder.LandTunnelV2.pause()).to.be.revertedWith(
           'Ownable: caller is not the owner'
         );
+      });
+
+      it('only owner can set fx-child and fx-root tunnel', async function () {
+        const {users} = await setupLandTunnelV2();
+        const {deployer, upgradeAdmin} = await getNamedAccounts();
+        const Land = await deployments.get('Land');
+        const FXROOT = await deployments.get('FXROOT');
+        const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
+        const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+
+        await deploy('MockLandTunnel', {
+          from: deployer,
+          contract: 'LandTunnelV2',
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: 'OptimizedTransparentProxy',
+            execute: {
+              methodName: 'initialize',
+              args: [
+                CHECKPOINTMANAGER.address,
+                FXROOT.address,
+                Land.address,
+                TRUSTED_FORWARDER.address,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          log: true,
+          skipIfAlreadyDeployed: true,
+        });
+
+        const FXCHILD = await deployments.get('FXCHILD');
+        const PolygonLand = await deployments.get('PolygonLand');
+        const maxGasLimit = 500;
+        const maxAllowedQuads = 144;
+        const limits = [5, 10, 20, 90, 340];
+        await deploy('MockPolygonLandTunnelV2', {
+          from: deployer,
+          contract: 'PolygonLandTunnelV2',
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: 'OptimizedTransparentProxy',
+            execute: {
+              methodName: 'initialize',
+              args: [
+                FXCHILD.address,
+                PolygonLand.address,
+                TRUSTED_FORWARDER.address,
+                maxGasLimit,
+                maxAllowedQuads,
+                limits,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          log: true,
+          skipIfAlreadyDeployed: true,
+        });
+
+        const MockLandTunnelV2 = await ethers.getContract('MockLandTunnelV2');
+        const MockPolygonLandTunnelV2 = await ethers.getContract(
+          'MockPolygonLandTunnelV2'
+        );
+
+        await expect(
+          MockLandTunnelV2.connect(
+            await ethers.provider.getSigner(users[0].address)
+          ).setFxChildTunnel(MockPolygonLandTunnelV2.address)
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+
+        await expect(
+          MockPolygonLandTunnelV2.connect(
+            await ethers.provider.getSigner(users[0].address)
+          ).setFxRootTunnel(MockLandTunnelV2.address)
+        ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('only owner can set trusted forwarder', async function () {
