@@ -58,7 +58,7 @@ describe('MockLandV2WithMint.sol', function () {
     const {MockLandV2WithMint, landOwners} = await setupTest();
     await expect(
       MockLandV2WithMint.setMinter(landOwners[0].address, true)
-    ).to.be.revertedWith('only admin is allowed to add minters');
+    ).to.be.revertedWith('ADMIN_ONLY');
   });
 
   it('cannot set polygon Land Tunnel to zero address', async function () {
