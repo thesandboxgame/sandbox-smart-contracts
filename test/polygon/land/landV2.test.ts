@@ -764,7 +764,7 @@ describe('MockLandV2WithMint.sol', function () {
           0,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('x out of bounds');
     });
 
     it('should revert for mint if y co-ordinates are out of bound', async function () {
@@ -780,7 +780,7 @@ describe('MockLandV2WithMint.sol', function () {
           411,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for mint if size is out of bound', async function () {
@@ -2723,7 +2723,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 2, 2);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'x coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -2731,7 +2731,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 2, 0);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'x coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -2739,7 +2739,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 0, 2);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'y coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 

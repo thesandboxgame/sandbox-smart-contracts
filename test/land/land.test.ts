@@ -557,7 +557,7 @@ describe('LandV3', function () {
       const {landContract} = await setupLand();
       const id = getId(3, 3, 0);
       await expect(landContract.ownerOf(id)).to.be.revertedWith(
-        'x coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -565,7 +565,7 @@ describe('LandV3', function () {
       const {landContract} = await setupLand();
       const id = getId(3, 0, 3);
       await expect(landContract.ownerOf(id)).to.be.revertedWith(
-        'y coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
