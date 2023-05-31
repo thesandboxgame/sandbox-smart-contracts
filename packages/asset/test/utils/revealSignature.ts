@@ -1,14 +1,21 @@
-import { JsonRpcSigner } from "@ethersproject/providers";
+import hre, { ethers } from "hardhat";
 
 async function createEIP712RevealSignature(
-  signer: JsonRpcSigner,
-  chainId: number,
   creator: string,
   amount: number,
   prevTokenId: number,
-  metadataHashes: string[],
-  verifyingContract: string
+  metadataHashes: string[]
 ): Promise<string> {
+  // get named accounts from hardhat
+  const { getNamedAccounts } = hre;
+  const { backendSigner } = await getNamedAccounts();
+
+  const AssetRevealContract = await ethers.getContract(
+    "AssetReveal",
+    backendSigner
+  );
+
+  const signer = ethers.provider.getSigner(backendSigner);
   const data = {
     types: {
       Reveal: [
@@ -21,14 +28,14 @@ async function createEIP712RevealSignature(
     domain: {
       name: "Sandbox Asset Reveal",
       version: "1.0",
-      chainId,
-      verifyingContract,
+      chainId: hre.network.config.chainId,
+      verifyingContract: AssetRevealContract.address,
     },
     message: {
       creator: creator,
       prevTokenId: prevTokenId,
       amount,
-      metadataHashes: metadataHashes,
+      metadataHashes,
     },
   };
 

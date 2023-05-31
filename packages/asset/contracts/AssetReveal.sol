@@ -30,7 +30,7 @@ contract AssetReveal is
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address creator, uint256 prevTokenId, uint256 amount, string[] memory metadataHashes)"
+            "Reveal(address creator,uint256 prevTokenId,uint256 amount,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -232,10 +232,24 @@ contract AssetReveal is
                     creator,
                     prevTokenId,
                     amount,
-                    metadataHashes
+                    _encodeHashes(metadataHashes)
                 )
             )
         );
+    }
+
+    /// @notice Encodes the hashes of the metadata for signature verification
+    /// @param metadataHashes The hashes of the metadata
+    /// @return encodedHashes The encoded hashes of the metadata
+    function _encodeHashes(
+        string[] memory metadataHashes
+    ) internal pure returns (bytes32) {
+        bytes32[] memory encodedHashes = new bytes32[](metadataHashes.length);
+        for (uint256 i = 0; i < metadataHashes.length; i++) {
+            encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
+        }
+
+        return keccak256(abi.encodePacked(encodedHashes));
     }
 
     /// @notice Get the asset contract address

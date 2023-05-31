@@ -5,8 +5,6 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "hardhat/console.sol";
-
 /// @title AuthValidator
 /// @author The Sandbox
 /// @notice This contract is used to validate the signature of the backend
@@ -31,7 +29,6 @@ contract AuthValidator is AccessControl {
         bytes32 digest
     ) public view returns (bool) {
         address recoveredSigner = ECDSA.recover(digest, signature);
-        console.log("recovered signer ", recoveredSigner);
         return hasRole(AUTH_SIGNER_ROLE, recoveredSigner);
     }
 }
