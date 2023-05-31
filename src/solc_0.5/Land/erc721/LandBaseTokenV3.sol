@@ -395,6 +395,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) internal {
+        _isValidQuad(size, x, y);
         if (size == 1) {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
@@ -402,7 +403,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             require(owner == from, "not owner in _transferQuad");
             _owners[id1x1] = uint256(to);
         } else {
-            _regroup(from, to, size, x, y);
+            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
         for (uint256 i = 0; i < size * size; i++) {
             emit Transfer(from, to, _idInPath(i, size, x, y));
@@ -459,26 +460,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             return true;
         }
         return false;
-    }
-
-    /// @param from current owner of the quad
-    /// @param to recipient
-    /// @param size size of the quad
-    /// @param x The top left x coordinate of the quad
-    /// @param y The top left y coordinate of the quad
-    function _regroup(
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal {
-        _isValidQuad(size, x, y);
-        if (size == 3 || size == 6 || size == 12 || size == 24) {
-            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
-        } else {
-            require(false, "Invalid size");
-        }
     }
 
     /// @param land land to be cleared
