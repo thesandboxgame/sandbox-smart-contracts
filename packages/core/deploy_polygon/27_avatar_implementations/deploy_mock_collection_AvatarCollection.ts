@@ -25,12 +25,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const collectionName = 'MockAvatarTesting';
   const collectionSymbol = 'MAT';
   const MAX_SUPPLY = 500;
+  const maxMarketingTokens = 50;
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
-    metadataUrl = 'https://contracts.sandbox.game/madballs-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/avatarcollection-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/madballs-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
   }
 
   // OpenSea configurations // // //
@@ -42,7 +43,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const mintPrice = BigNumber.from(100).mul('1000000000000000000');
   const maxPublicTokensPerWallet = 4;
   const maxAllowlistTokensPerWallet = 2;
-  const maxMarketingTokens = 100;
 
   // references to implementation
   const implementationAlias = ethers.utils.formatBytes32String('main-avatar');

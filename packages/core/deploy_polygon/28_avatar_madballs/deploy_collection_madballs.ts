@@ -25,6 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const collectionName = 'MadBallsFactory';
   const collectionSymbol = 'MAD';
   const MAX_SUPPLY = 2023;
+  const maxMarketingTokens = 100;
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
@@ -42,7 +43,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const mintPrice = BigNumber.from(100).mul('1000000000000000000');
   const maxPublicTokensPerWallet = 4;
   const maxAllowlistTokensPerWallet = 2;
-  const maxMarketingTokens = 100;
 
   // references to implementation
   const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
