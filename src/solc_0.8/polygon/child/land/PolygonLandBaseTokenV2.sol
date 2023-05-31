@@ -300,7 +300,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             require(owner == from, "not owner in _transferQuad");
             _owners[id1x1] = uint256(uint160(address(to)));
         } else {
-            _regroup(from, to, size, x, y);
+            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
         for (uint256 i = 0; i < size * size; i++) {
             emit Transfer(from, to, _idInPath(i, size, x, y));
@@ -608,24 +608,6 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
         } else {
             return _getQuadId(LAYER_1x1, (x + size) - (1 + (i % size)), (y + row));
-        }
-    }
-
-    function _regroup(
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal {
-        require(x % size == 0, "Invalid x coordinate");
-        require(y % size == 0, "Invalid y coordinate");
-        require(x <= GRID_SIZE - size, "Out of bounds");
-        require(y <= GRID_SIZE - size, "Out of bounds");
-        if (size == 3 || size == 6 || size == 12 || size == 24) {
-            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
-        } else {
-            require(false, "Invalid size");
         }
     }
 
