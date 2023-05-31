@@ -48,8 +48,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         require(to != address(0), "to is zero address");
         require(size != 0, "size cannot be zero");
         require(isMinter(msg.sender), "Only a minter can mint");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        _isValidQuad(size, x, y);
 
         (uint256 layer, , ) = _getQuadLayer(size);
         uint256 quadId = _getQuadId(layer, x, y);
@@ -145,7 +145,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
+        require(sizes.length == xs.length, "LandBaseTokenV3: sizes's and x's length are different");
+        require(xs.length == ys.length, "LandBaseTokenV3: x's and y's length are different");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
             require(
@@ -232,10 +233,16 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) public view returns (bool) {
-        require(size != 0, "size cannot be zero");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+        _isValidQuad(size, x, y);
         return _ownerOfQuad(size, x, y) != address(0);
+    }
+
+    function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
+        require(x % size == 0, "Invalid x coordinate");
+        require(y % size == 0, "Invalid y coordinate");
+        require(x <= GRID_SIZE - size, "x out of bounds");
+        require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
     /**
@@ -388,6 +395,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         uint256 x,
         uint256 y
     ) internal {
+        _isValidQuad(size, x, y);
         if (size == 1) {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
@@ -395,7 +403,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             require(owner == from, "not owner in _transferQuad");
             _owners[id1x1] = uint256(to);
         } else {
-            _regroup(from, to, size, x, y);
+            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
         for (uint256 i = 0; i < size * size; i++) {
             emit Transfer(from, to, _idInPath(i, size, x, y));
@@ -452,28 +460,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             return true;
         }
         return false;
-    }
-
-    /// @param from current owner of the quad
-    /// @param to recipient
-    /// @param size size of the quad
-    /// @param x The top left x coordinate of the quad
-    /// @param y The top left y coordinate of the quad
-    function _regroup(
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal {
-        require(size != 0, "size cannot be zero");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
-        if (size == 3 || size == 6 || size == 12 || size == 24) {
-            _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
-        } else {
-            require(false, "Invalid size");
-        }
     }
 
     /// @param land land to be cleared
@@ -744,7 +730,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @return address of the owner
     function _ownerOf(uint256 id) internal view returns (address) {
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
-        require(x % size == 0 && y % size == 0, "Invalid token id");
+        require(x % size == 0, "x coordinate: Invalid token id");
+        require(y % size == 0, "y coordinate: Invalid token id");
         return _ownerOfQuad(size, x, y);
     }
 
