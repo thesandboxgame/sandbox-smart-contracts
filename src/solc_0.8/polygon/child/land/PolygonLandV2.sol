@@ -102,14 +102,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         uint256 id,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        _checkTransfer(from, to, id);
-        _transferFrom(from, to, id);
-        if (to.isContract()) {
-            require(
-                _checkOnERC721Received(_msgSender(), from, to, id, data),
-                "PolygonLandV2: ERC721_TRANSFER_REJECTED"
-            );
-        }
+        super.safeTransferFrom(from, to, id, data);
     }
 
     /**
@@ -123,7 +116,7 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         address to,
         uint256 id
     ) external override onlyAllowedOperator(from) {
-        safeTransferFrom(from, to, id, "");
+        super.safeTransferFrom(from, to, id, "");
     }
 
     /**
