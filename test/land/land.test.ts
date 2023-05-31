@@ -763,7 +763,7 @@ describe('LandV3', function () {
         landContract
           .connect(ethers.provider.getSigner(landAdmin))
           .transferQuad(landAdmin, deployer, 0, 0, 0, '0x')
-      ).to.be.revertedWith('size cannot be zero');
+      ).to.be.revertedWith('Invalid size');
     });
 
     it('should revert when from is not owner of Quad (transferQuad)', async function () {
