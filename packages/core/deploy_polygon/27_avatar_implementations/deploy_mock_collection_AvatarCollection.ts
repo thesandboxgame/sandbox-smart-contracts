@@ -31,7 +31,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (hre.network.name === 'polygon') {
     metadataUrl = 'https://contracts.sandbox.game/avatarcollection-unrevealed/';
   } else {
-    metadataUrl = 'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
+    metadataUrl =
+      'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
   }
 
   // OpenSea configurations // // //
