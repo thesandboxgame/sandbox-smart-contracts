@@ -5,6 +5,9 @@ pragma solidity 0.8.2;
 import {WithAdminV2} from "./WithAdminV2.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
+/// @title WithSuperOperatorsV2
+/// @author The Sandbox
+/// @notice Add super operators handled by an admin
 contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
     mapping(address => bool) internal _superOperators;
 

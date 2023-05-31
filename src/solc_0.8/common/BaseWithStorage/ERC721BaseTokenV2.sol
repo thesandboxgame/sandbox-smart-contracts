@@ -12,6 +12,10 @@ import {WithSuperOperatorsV2} from "./WithSuperOperatorsV2.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
+/// @title ERC721BaseTokenV2
+/// @author The Sandbox
+/// @notice Basic functionalities of a NFT
+/// @dev ERC721 implementation that supports meta-transactions and super operators
 contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2 {
     using AddressUpgradeable for address;
 

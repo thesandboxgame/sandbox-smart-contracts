@@ -5,6 +5,12 @@ pragma solidity 0.5.9;
 import {LandBaseTokenV3} from "./Land/erc721/LandBaseTokenV3.sol";
 import {OperatorFiltererUpgradeable, IOperatorFilterRegistry} from "./OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
 
+/**
+ * @title LandV3
+ * @author The Sandbox
+ * @notice LAND contract
+ * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+ */
 contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     /**
      * @notice Return the name of the token contract

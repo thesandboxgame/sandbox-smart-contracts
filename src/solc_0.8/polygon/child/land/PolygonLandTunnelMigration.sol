@@ -6,6 +6,8 @@ import {IPolygonLandTunnel} from "../../../common/interfaces/IPolygonLandTunnel.
 import {IERC721MandatoryTokenReceiver} from "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
 /// @title Tunnel migration on L2
+/// @author The Sandbox
+/// @notice contract handling the migration of LAND tokens from a tunnel to a new one
 contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
     struct OwnerWithLandIds {
         address owner;
@@ -43,6 +45,11 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit AdminChanged(_newAdmin);
     }
 
+    /// @notice constructor of the tunnel migration contract
+    /// @param _polygonLand LAND token address on the child chain
+    /// @param _newLandTunnel tunnel address to migrate to
+    /// @param _oldLandTunnel tunnel address to migrate from
+    /// @param _admin admin of the contract
     constructor(
         address _polygonLand,
         address _newLandTunnel,
@@ -112,6 +119,8 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         emit TunnelQuadsMigrated(oldLandTunnel, newLandTunnel, sizes, x, y);
     }
 
+    /// @dev called on ERC721 transfer to this contract
+    /// @return onERC721Received function selector
     function onERC721Received(
         address, /* operator */
         address, /* from */
@@ -121,6 +130,8 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         return this.onERC721Received.selector;
     }
 
+    /// @dev called on ERC721 batch transfer to this contract
+    /// @return onERC721BatchReceived function selector
     function onERC721BatchReceived(
         address, /* operator */
         address, /* from */
@@ -132,7 +143,7 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
 
     /// @dev to be called by external contact to check if this contract supports ERC721 token and batch token receive
     /// @param interfaceId the interface to be checked if supported by the contract
-    /// 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
+    /// @return 0x5e8bf644 is the interface of IERC721MandatoryTokenReceiver and 0x01ffc9a7 for the Eip 165 supports interface's interface id
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }

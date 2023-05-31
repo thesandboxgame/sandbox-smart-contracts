@@ -4,6 +4,12 @@ pragma solidity 0.5.9;
 
 import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
 
+/**
+ * @title LandBaseTokenV3
+ * @author The Sandbox
+ * @notice Implement LAND and quad functionalities on top of an ERC721 token
+ * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
+ */
 contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
@@ -217,7 +223,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     /// @notice checks if Land has been minted or not
-    /// @param size size of the
+    /// @param size size of the quad
     /// @param x x coordinate of the quad
     /// @param y y coordinate of the quad
     /// @return bool for if Land has been minted or not
@@ -232,6 +238,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return _ownerOfQuad(size, x, y) != address(0);
     }
 
+    /**
+     * @param to The recipient of the new quad
+     * @param size The size of the new quad
+     * @param x The top left x coordinate of the new quad
+     * @param y The top left y coordinate of the new quad
+     * @param data extra data to pass to the transfer
+     */
     function _mintAndTransferQuad(
         address to,
         uint256 size,
@@ -283,6 +296,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         _numNFTPerAddress[msg.sender] -= landMinted;
     }
 
+    /// @param operator sender of the tx
+    /// @param from owner of the token
+    /// @param to recipient
+    /// @param size The size of the new quad
+    /// @param x The top left x coordinate of the new quad
+    /// @param y The top left y coordinate of the new quad
+    /// @param data extra data
     function _checkBatchReceiverAcceptQuad(
         address operator,
         address from,
@@ -301,6 +321,14 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param quadMinted array of lands
+    /// @param index array size
+    /// @param landMinted number of lands transferred
+    /// @param to recipient
+    /// @param size The size of the new quad
+    /// @param x The top left x coordinate of the new quad
+    /// @param y The top left y coordinate of the new quad
+    /// @param data extra data
     function _checkBatchReceiverAcceptQuadAndClearOwner(
         Land[] memory quadMinted,
         uint256 index,
@@ -348,6 +376,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param size size of the quad
+    /// @param x The top left x coordinate of the quad
+    /// @param y The top left y coordinate of the quad
     function _transferQuad(
         address from,
         address to,
@@ -369,6 +402,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @dev checks if the quad is already minted compared to another quad size
+    /// @param size size of the quad
+    /// @param x The top left x coordinate of the quad
+    /// @param y The top left y coordinate of the quad
+    /// @param quadCompareSize size to compare with
     function _checkOwner(
         uint256 size,
         uint256 x,
@@ -403,6 +441,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         if (quadCompareSize >= 3) _checkOwner(size, x, y, quadCompareSize);
     }
 
+    /// @param from owner of the token
+    /// @param id token id
+    /// @return if the address is the owner of the token
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
         uint256 owner = _owners[id];
         if (owner != 0) {
@@ -413,6 +454,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return false;
     }
 
+    /// @param from current owner of the quad
+    /// @param to recipient
+    /// @param size size of the quad
+    /// @param x The top left x coordinate of the quad
+    /// @param y The top left y coordinate of the quad
     function _regroup(
         address from,
         address to,
@@ -430,6 +476,13 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param land land to be cleared
+    /// @param quadMinted array of lands minted
+    /// @param index array size
+    /// @param landMinted number of lands transferred
+    /// @param quadCompareSize size to compare with
+    /// @return the index of last quad pushed in quadMinted array and the total land already minted
+    /// @return the number of lands minted
     function _checkAndClearOwner(
         Land memory land,
         Land[] memory quadMinted,
@@ -533,6 +586,12 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return ownerOfAll;
     }
 
+    /// @notice Goes through every token id of a quad id
+    /// @param i ith token of the quad
+    /// @param size size of the quad
+    /// @param x The top left x coordinate of the quad
+    /// @param y The top left y coordinate of the quad
+    /// @return the "ith" token id of the quad
     function _idInPath(
         uint256 i,
         uint256 size,
@@ -548,6 +607,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param mintedLand array of lands
+    /// @param quad quad to check
+    /// @param index size of the array
+    /// @return is the quad minted
     function _isQuadMinted(
         Land[] memory mintedLand,
         Land memory quad,
@@ -568,14 +631,22 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return false;
     }
 
+    /// @param id token id
+    /// @return the x coordinate
     function _getX(uint256 id) internal pure returns (uint256) {
         return ((id << 8) >> 8) % GRID_SIZE;
     }
 
+    /// @param id token id
+    /// @return the y coordinate
     function _getY(uint256 id) internal pure returns (uint256) {
         return ((id << 8) >> 8) / GRID_SIZE;
     }
 
+    /// @param size of the quad
+    /// @return layer the layer associated to that quad size
+    /// @return parentSize size of the parent quad
+    /// @return childLayer layer of the child quad size
     function _getQuadLayer(uint256 size)
         internal
         pure
@@ -607,6 +678,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param layer of the quad size
+    /// @param x coordinate of the quad
+    /// @param y coordinate of the quad
+    /// @return the quad id
     function _getQuadId(
         uint256 layer,
         uint256 x,
@@ -615,6 +690,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return layer + x + y * GRID_SIZE;
     }
 
+    /// @param size of the quad
+    /// @param x coordinate of the quad
+    /// @param y coordinate of the quad
+    /// @return address of the owner of the quad
     function _ownerOfQuad(
         uint256 size,
         uint256 x,
@@ -630,6 +709,10 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         return address(0);
     }
 
+    /// @param id quad id
+    /// @return size of the quad
+    /// @return x coordinate
+    /// @return y coordinate
     function _getQuadById(uint256 id)
         internal
         pure
@@ -657,12 +740,17 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         }
     }
 
+    /// @param id quad id
+    /// @return address of the owner
     function _ownerOf(uint256 id) internal view returns (address) {
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
         require(x % size == 0 && y % size == 0, "Invalid token id");
         return _ownerOfQuad(size, x, y);
     }
 
+    /// @param id token id
+    /// @return owner owner of the token
+    /// @return operatorEnabled is operator enabled
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = _getX(id);
