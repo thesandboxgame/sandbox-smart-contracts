@@ -494,11 +494,11 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     }
 
     function _getX(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) % GRID_SIZE;
+        return (id & ~LAYER) % GRID_SIZE;
     }
 
     function _getY(uint256 id) internal pure returns (uint256) {
-        return ((id << 8) >> 8) / GRID_SIZE;
+        return (id & ~LAYER) / GRID_SIZE;
     }
 
     function _isQuadMinted(

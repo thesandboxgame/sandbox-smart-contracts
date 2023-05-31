@@ -185,13 +185,15 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param id The id of the token
      * @return is it a meta-tx
      */
-    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
+    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
-        isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
-        if (msg.sender != from && !isMetaTx) {
+        if (msg.sender != from) {
+            if(_metaTransactionContracts[msg.sender]) {
+                return true;
+            }
             require(
                 _operatorsForAll[from][msg.sender] ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
