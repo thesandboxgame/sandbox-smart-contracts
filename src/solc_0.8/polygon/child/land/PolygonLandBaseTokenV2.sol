@@ -281,8 +281,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
         require(x % size == 0, "Invalid x coordinate");
         require(y % size == 0, "Invalid y coordinate");
-        require(x <= GRID_SIZE - size, "Out of bounds");
-        require(y <= GRID_SIZE - size, "Out of bounds");
+        require(x <= GRID_SIZE - size, "x out of bounds");
+        require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
     function _transferQuad(
