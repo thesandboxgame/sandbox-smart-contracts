@@ -5,8 +5,6 @@ import {ILandToken} from "../../../common/interfaces/ILandToken.sol";
 
 /// @title Tunnel migration on L1
 contract LandTunnelMigration {
-    uint256 private constant GRID_SIZE = 408;
-
     ILandToken public immutable landToken;
     address public immutable newLandTunnel;
     address public immutable oldLandTunnel;
