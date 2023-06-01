@@ -184,32 +184,32 @@ describe('PolygonLand', function () {
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
-      it('set Max Allowed Quads', async function () {
+      it('set Max Allowed Lands', async function () {
         const {deployer} = await setupLandTunnelV2();
 
         expect(
-          await deployer.PolygonLandTunnelV2.maxAllowedQuads()
+          await deployer.PolygonLandTunnelV2.maxAllowedLands()
         ).to.be.equal(BigNumber.from('144'));
-        await deployer.PolygonLandTunnelV2.setMaxAllowedQuads(
+        await deployer.PolygonLandTunnelV2.setMaxAllowedLands(
           BigNumber.from('500')
         );
         expect(
-          await deployer.PolygonLandTunnelV2.maxAllowedQuads()
+          await deployer.PolygonLandTunnelV2.maxAllowedLands()
         ).to.be.equal(BigNumber.from('500'));
       });
 
-      it('cannot Max Allowed Quads if not owner', async function () {
+      it('cannot Max Allowed Lands if not owner', async function () {
         const {PolygonLandTunnelV2} = await setupLandTunnelV2();
         await expect(
-          PolygonLandTunnelV2.setMaxAllowedQuads(100000)
+          PolygonLandTunnelV2.setMaxAllowedLands(100000)
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
-      it('cannot set Max Allowed Quads to zero', async function () {
+      it('cannot set Max Allowed Lands to zero', async function () {
         const {deployer} = await setupLandTunnelV2();
 
         await expect(
-          deployer.PolygonLandTunnelV2.setMaxAllowedQuads(0)
+          deployer.PolygonLandTunnelV2.setMaxAllowedLands(0)
         ).to.be.revertedWith(
           'PolygonLandTunnelV2: max allowed value cannot be zero'
         );
@@ -482,7 +482,6 @@ describe('PolygonLand', function () {
           [y],
           bytes
         );
-        // .to.be.revertedWith('Exceeds max allowed quads');
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await Land.balanceOf(LandTunnelV2.address)).to.be.equal(
           plotCount
@@ -1597,7 +1596,7 @@ describe('PolygonLand', function () {
             [y_1, y_2],
             bytes
           )
-        ).to.be.revertedWith('Exceeds max allowed quads.');
+        ).to.be.revertedWith('Exceeds max allowed lands.');
       });
 
       it('should be able to transfer 3x3 Land', async function () {
@@ -1904,7 +1903,7 @@ describe('PolygonLand', function () {
         );
 
         // Transfer to L2 Tunnel
-        await deployer.MockPolygonLandTunnelV2.setLimit(1, 400);
+        await deployer.MockPolygonLandTunnelV2.setGasLimit(1, 400);
 
         // Check if limit is set
         expect(await MockPolygonLandTunnelV2.maxGasLimitOnL1()).to.eq(500);

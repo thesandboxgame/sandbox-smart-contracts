@@ -420,12 +420,12 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         return (index, landMinted);
     }
 
-    function _checkAndClear(address from, uint256 id) internal returns (bool) {
-        uint256 owner = _owners[id];
-        if (owner != 0) {
-            require((owner & BURNED_FLAG) != BURNED_FLAG, "not owner");
-            require(address(uint160(owner)) == from, "not owner");
-            _owners[id] = 0;
+    function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
+        uint256 currentOwner = _owners[tokenId];
+        if (currentOwner != 0) {
+            require((currentOwner & BURNED_FLAG) != BURNED_FLAG, "not owner");
+            require(address(uint160(currentOwner)) == from, "not owner");
+            _owners[tokenId] = 0;
             return true;
         }
         return false;
@@ -639,7 +639,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                     bool ownAllIndividual;
                     if (childQuadSize < 3) {
                         // case when the smaller quad is 1x1,
-                        ownAllIndividual = _checkAndClear(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
+                        ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
                     } else {
                         // recursively calling the _regroupQuad function to check the owner of child quads.
                         ownAllIndividual = _regroupQuad(
