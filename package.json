@@ -12,7 +12,7 @@
         "lint": "nx run-many --target=lint",
         "format": "nx run-many --target=format",
         "deploy": "nx run-many --target=deploy",
-        "all": " nx run-many --all --parallel --targets=test,coverage,lint,format,deploy",
+        "all": "nx run-many --all --parallel --targets=lint,format,test,deploy && nx run-many --all --targets=coverage",
         "test:ci": "nx affected --target=test",
         "coverage:ci": "nx affected --target=coverage && istanbul-combine -r lcov -r html packages/*/coverage.json",
         "lint:ci": "nx affected --target=lint",
@@ -21,7 +21,6 @@
         "clean": "rimraf coverage/* && nx run-many --target=clean"
     },
     "repository": "https://github.com/thesandboxgame/contracts.git",
-    "keywords": [],
     "author": "",
     "license": "MIT",
     "bugs": {
@@ -34,5 +33,10 @@
         "nx": "15.8.6",
         "rimraf": "^4.4.0"
     },
-    "main": "index.js"
+    "keywords": [
+        "ethereum",
+        "polygon",
+        "smart-contracts",
+        "The Sandbox"
+    ]
 }
