@@ -20,13 +20,13 @@
         "deploy:ci": "nx affected --target=deploy",
         "clean": "rimraf coverage/* && nx run-many --target=clean"
     },
-    "repository": "https://github.com/thesandboxgame/contracts.git",
+    "repository": "https://github.com/thesandboxgame/sandbox-smart-contracts",
     "author": "",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/thesandboxgame/contracts/issues"
+        "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
     },
-    "homepage": "https://github.com/thesandboxgame/contracts#readme",
+    "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "packageManager": "yarn@3.4.1",
     "devDependencies": {
         "istanbul-combine": "^0.3.0",
