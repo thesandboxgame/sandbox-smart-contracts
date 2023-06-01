@@ -364,9 +364,6 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         // checks if to is a contract and supports ERC721_MANDATORY_RECEIVER interfaces.
         // if it doesn't it just clears the owner of 1x1 lands in quad(size, x, y)
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            uint256[] memory idsToTransfer = new uint256[](numLandMinted);
-            uint256 transferIndex;
-            uint256[] memory idsToMint = new uint256[]((size * size) - numLandMinted);
             // array to push minted 1x1 land
             uint256[] memory idsToTransfer = new uint256[](numLandMinted);
             // index of last land pushed in idsToTransfer array

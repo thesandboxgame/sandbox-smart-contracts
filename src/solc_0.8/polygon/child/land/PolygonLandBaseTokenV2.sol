@@ -2,6 +2,7 @@
 // solhint-disable code-complexity
 
 pragma solidity 0.8.2;
+
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseTokenV2.sol";
@@ -460,9 +461,9 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         return (index, landMinted);
     }
 
-    /// @dev checks the owner of land of token id 'id' to be 'from' and clears it
+    /// @dev checks the owner of land with 'tokenId' to be 'from' and clears it
     /// @param from the address to be checked agains the owner of the land
-    /// @param id th id of land
+    /// @param tokenId th id of land
     /// @return bool for if land is owned by 'from' or not.
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
         uint256 currentOwner = _owners[tokenId];
