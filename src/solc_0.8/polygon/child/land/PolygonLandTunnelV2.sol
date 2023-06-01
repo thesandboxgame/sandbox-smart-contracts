@@ -39,19 +39,13 @@ contract PolygonLandTunnelV2 is
     /// @notice set the limit of estimated gas we accept when sending a batch of quads to L1
     /// @param _maxGasLimit maximum accepted gas limit
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
-        require(_maxGasLimit > 0, "PolygonLandTunnelV2: max limit on L1 cannot be zero");
-
-        maxGasLimitOnL1 = _maxGasLimit;
-        emit SetMaxGasLimit(_maxGasLimit);
+        _setMaxLimitOnL1(_maxGasLimit);
     }
 
     /// @notice set the limit of quads we can send in one tx to L1
     /// @param _maxAllowedQuads maximum number of quads accepted
     function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
-        require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
-
-        maxAllowedQuads = _maxAllowedQuads;
-        emit SetMaxAllowedQuads(_maxAllowedQuads);
+        _setMaxAllowedQuads(_maxAllowedQuads);
     }
 
     /// @notice set the estimate of gas that the L1 transaction will use per quad size
@@ -91,8 +85,8 @@ contract PolygonLandTunnelV2 is
         __Ownable_init();
         __Pausable_init();
         childToken = _childToken;
-        maxGasLimitOnL1 = _maxGasLimit;
-        maxAllowedQuads = _maxAllowedQuads;
+        _setMaxLimitOnL1(_maxGasLimit);
+        _setMaxAllowedQuads(_maxAllowedQuads);
         setupLimits(limits);
         __FxBaseChildTunnelUpgradeable_initialize(_fxChild);
         __ERC2771Handler_initialize(_trustedForwarder);
@@ -146,6 +140,8 @@ contract PolygonLandTunnelV2 is
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @dev Pauses all token transfers across bridge
@@ -197,6 +193,17 @@ contract PolygonLandTunnelV2 is
         bytes memory data
     ) internal override validateSender(sender) {
         _syncDeposit(data);
+    }
+
+    function _setMaxLimitOnL1(uint32 _maxGasLimit) internal {
+        maxGasLimitOnL1 = _maxGasLimit;
+        emit SetMaxGasLimit(_maxGasLimit);
+    }
+
+    function _setMaxAllowedQuads(uint256 _maxAllowedQuads) internal {
+        require(_maxAllowedQuads > 0, "PolygonLandTunnelV2: max allowed value cannot be zero");
+        maxAllowedQuads = _maxAllowedQuads;
+        emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
 
     function _syncDeposit(bytes memory syncData) internal {

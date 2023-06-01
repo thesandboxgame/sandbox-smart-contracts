@@ -64,6 +64,8 @@ contract PolygonLandTunnelMigration is IERC721MandatoryTokenReceiver {
         polygonLand = IPolygonLandWithSetApproval(_polygonLand);
         newLandTunnel = _newLandTunnel;
         oldLandTunnel = _oldLandTunnel;
+
+        emit AdminChanged(_admin);
     }
 
     /// @dev Transfers all the passed land ids from the old land tunnel to the new land tunnel
