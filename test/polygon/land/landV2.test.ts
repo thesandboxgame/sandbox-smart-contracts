@@ -764,7 +764,7 @@ describe('MockLandV2WithMint.sol', function () {
           0,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('x out of bounds');
     });
 
     it('should revert for mint if y co-ordinates are out of bound', async function () {
@@ -780,7 +780,7 @@ describe('MockLandV2WithMint.sol', function () {
           411,
           bytes
         )
-      ).to.be.revertedWith('Out of bounds');
+      ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for mint if size is out of bound', async function () {
@@ -839,10 +839,11 @@ describe('MockLandV2WithMint.sol', function () {
         0,
         '0x'
       );
-      const id = getId(3, 0, 0);
-      expect(await MockLandV2WithMint.ownerOf(id)).to.be.equal(
-        TestERC1155ERC721TokenReceiver.address
-      );
+      expect(
+        await MockLandV2WithMint.balanceOf(
+          TestERC1155ERC721TokenReceiver.address
+        )
+      ).to.be.equal(36);
     });
 
     it('should revert when size is invalid', async function () {
@@ -1087,34 +1088,13 @@ describe('MockLandV2WithMint.sol', function () {
     );
   });
 
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  sizes.forEach((quadSize) => {
-    it('should return correct ownerOf ${quadSize}x${quadSize} quad  minted', async function () {
-      const {MockLandV2WithMint, landOwners} = await setupTest();
-      const bytes = '0x3333';
-      await MockLandV2WithMint.mintQuad(
-        landOwners[0].address,
-        quadSize,
-        quadSize,
-        quadSize,
-        bytes
-      );
-      let layer;
-      if (quadSize == 1) {
-        layer = 1;
-      } else if (quadSize == 3) {
-        layer = 2;
-      } else if (quadSize == 6) {
-        layer = 3;
-      } else if (quadSize == 12) {
-        layer = 4;
-      } else {
-        layer = 5;
-      }
-      expect(
-        await MockLandV2WithMint.ownerOf(getId(layer, quadSize, quadSize))
-      ).to.be.equal(landOwners[0].address);
-    });
+  it('should return correct ownerOf 1*1 quad minted', async function () {
+    const {MockLandV2WithMint, landOwners} = await setupTest();
+    const bytes = '0x3333';
+    await MockLandV2WithMint.mintQuad(landOwners[0].address, 1, 1, 1, bytes);
+    expect(await MockLandV2WithMint.ownerOf(getId(1, 1, 1))).to.be.equal(
+      landOwners[0].address
+    );
   });
 
   describe('Mint and transfer a smaller quad', function () {
@@ -2743,7 +2723,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 2, 2);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'x coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -2751,7 +2731,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 2, 0);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'x coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -2759,7 +2739,7 @@ describe('MockLandV2WithMint.sol', function () {
       const {PolygonLand} = await setupLand();
       const id = getId(3, 0, 2);
       await expect(PolygonLand.ownerOf(id)).to.be.revertedWith(
-        'y coordinate: Invalid token id'
+        'Invalid token id'
       );
     });
 
@@ -2768,12 +2748,12 @@ describe('MockLandV2WithMint.sol', function () {
 
       await landOwners[0].MockLandV2WithMint.mintQuad(
         landOwners[0].address,
-        24,
+        1,
         0,
         0,
         '0x'
       );
-      const id = getId(5, 0, 0);
+      const id = getId(1, 0, 0);
       expect(await landOwners[0].MockLandV2WithMint.ownerOf(id)).to.be.equal(
         landOwners[0].address
       );

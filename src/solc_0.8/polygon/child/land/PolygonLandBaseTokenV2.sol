@@ -101,7 +101,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     /// @param size size of the quad
     /// @param x The top left x coordinate of the quad
     /// @param y The top left y coordinate of the quad
-    /// @param data additional data
+    /// @param data additional data for transfer
     function transferQuad(
         address from,
         address to,
@@ -281,8 +281,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
         require(x % size == 0, "Invalid x coordinate");
         require(y % size == 0, "Invalid y coordinate");
-        require(x <= GRID_SIZE - size, "Out of bounds");
-        require(y <= GRID_SIZE - size, "Out of bounds");
+        require(x <= GRID_SIZE - size, "x out of bounds");
+        require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
     function _transferQuad(
@@ -721,6 +721,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     }
 
     function _ownerOf(uint256 id) internal view override returns (address) {
+        require(id & LAYER == 0, "Invalid token id");
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
         require(x % size == 0, "x coordinate: Invalid token id");
         require(y % size == 0, "y coordinate: Invalid token id");

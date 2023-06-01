@@ -2637,9 +2637,8 @@ describe('PolygonLand', function () {
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(143);
         expect(await Land.exists(12, x, y)).to.be.equal(false);
-
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             landHolder.address
           );
         }
@@ -2654,9 +2653,8 @@ describe('PolygonLand', function () {
           bytes
         );
         await tx.wait();
-
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             MockLandTunnelV2.address
           );
         }
@@ -2696,11 +2694,9 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(144);
         expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(0);
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
-            landHolder.address
-          );
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(zeroAddress);
         }
-        expect(await Land.ownerOf(getId(4, x, y))).to.be.equal(
+        expect(await Land._owners(getId(4, x, y))).to.be.equal(
           landHolder.address
         );
         expect(await Land.exists(12, x, y)).to.be.equal(true);
@@ -2757,7 +2753,7 @@ describe('PolygonLand', function () {
         await tx.wait();
 
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             MockLandTunnelV2.address
           );
         }
@@ -2804,7 +2800,7 @@ describe('PolygonLand', function () {
             landHolder.address
           );
         }
-        expect(await Land.ownerOf(getId(4, x, y))).to.be.equal(
+        expect(await Land._owners(getId(4, x, y))).to.be.equal(
           landHolder.address
         );
         expect(await Land.exists(12, x, y)).to.be.equal(true);
@@ -2836,7 +2832,7 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(10);
         expect(await Land.exists(6, x, y)).to.be.equal(false);
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             landHolder.address
           );
         }
@@ -2851,13 +2847,13 @@ describe('PolygonLand', function () {
           bytes
         );
         await tx.wait();
-
-        for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
-            MockLandTunnelV2.address
-          );
+        for (let i = 3; i < 6; i++) {
+          for (let j = 0; j < 3; j++) {
+            expect(await Land.ownerOf(getId(1, i, j))).to.be.equal(
+              MockLandTunnelV2.address
+            );
+          }
         }
-
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
             if (!(i == 0 && j == 0)) {
@@ -2920,14 +2916,11 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(36);
         expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(0);
         expect(await Land.exists(6, x, y)).to.be.equal(true);
-        expect(await Land.ownerOf(getId(3, x, y))).to.be.equal(
+        expect(await Land._owners(getId(3, x, y))).to.be.equal(
           landHolder.address
         );
-
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
-            landHolder.address
-          );
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(zeroAddress);
         }
       });
 
@@ -3006,7 +2999,7 @@ describe('PolygonLand', function () {
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(9);
         expect(await Land.balanceOf(MockLandTunnelV2.address)).to.be.equal(0);
         expect(await Land.exists(3, x, y)).to.be.equal(true);
-        expect(await Land.ownerOf(getId(2, x, y))).to.be.equal(
+        expect(await Land._owners(getId(2, x, y))).to.be.equal(
           landHolder.address
         );
       });
@@ -3089,11 +3082,13 @@ describe('PolygonLand', function () {
           143
         );
         expect(await PolygonLand.exists(12, x, y)).to.be.equal(false);
-
-        for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
-            landHolder.address
-          );
+        for (let i = 0; i < 12; i++) {
+          for (let j = 0; j < 12; j++) {
+            if (i == 11 && j == 11) break;
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              landHolder.address
+            );
+          }
         }
 
         await landHolder.PolygonLand.setApprovalForAll(
@@ -3109,11 +3104,13 @@ describe('PolygonLand', function () {
           bytes
         );
         await tx.wait();
-
-        for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
-            MockPolygonLandTunnelV2.address
-          );
+        for (let i = 0; i < 12; i++) {
+          for (let j = 0; j < 12; j++) {
+            if (i == 11 && j == 11) break;
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              MockPolygonLandTunnelV2.address
+            );
+          }
         }
 
         console.log('DUMMY CHECKPOINT. moving on...');
@@ -3129,7 +3126,7 @@ describe('PolygonLand', function () {
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(143);
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             landHolder.address
           );
         }
@@ -3148,9 +3145,14 @@ describe('PolygonLand', function () {
         expect(
           await PolygonLand.balanceOf(MockPolygonLandTunnelV2.address)
         ).to.be.equal(0);
-        expect(await PolygonLand.ownerOf(getId(4, x, y))).to.be.equal(
-          landHolder.address
-        );
+        for (let i = 0; i < 12; i++) {
+          for (let j = 0; j < 12; j++) {
+            if (i == 11 && j == 11) break;
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              landHolder.address
+            );
+          }
+        }
         expect(await PolygonLand.exists(12, x, y)).to.be.equal(true);
       });
       it('should be able to transfer 12x12 Land with child quads already minted : worst case', async function () {
@@ -3254,10 +3256,13 @@ describe('PolygonLand', function () {
         expect(
           await PolygonLand.balanceOf(MockPolygonLandTunnelV2.address)
         ).to.be.equal(0);
-
-        expect(await PolygonLand.ownerOf(getId(4, x, y))).to.be.equal(
-          landHolder.address
-        );
+        for (let i = 0; i < 12; i = i + 1) {
+          for (let j = 0; j < 12; j = j + 1) {
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              landHolder.address
+            );
+          }
+        }
         expect(await PolygonLand.exists(12, x, y)).to.be.equal(true);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
           144
@@ -3302,10 +3307,12 @@ describe('PolygonLand', function () {
 
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(10);
         expect(await PolygonLand.exists(6, x, y)).to.be.equal(false);
-        for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
-            landHolder.address
-          );
+        for (let i = 3; i < 6; i = i + 1) {
+          for (let j = 0; j < 3; j = j + 1) {
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              landHolder.address
+            );
+          }
         }
 
         await landHolder.PolygonLand.setApprovalForAll(
@@ -3322,12 +3329,13 @@ describe('PolygonLand', function () {
         );
         await tx.wait();
 
-        for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await PolygonLand.ownerOf(mintedLandIds[i])).to.be.equal(
-            MockPolygonLandTunnelV2.address
-          );
+        for (let i = 3; i < 6; i = i + 1) {
+          for (let j = 0; j < 3; j = j + 1) {
+            expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+              MockPolygonLandTunnelV2.address
+            );
+          }
         }
-
         console.log('DUMMY CHECKPOINT. moving on...');
 
         const abiCoder = new AbiCoder();
@@ -3340,11 +3348,10 @@ describe('PolygonLand', function () {
         );
         await tnx.wait();
         for (let i = 0; i < mintedLandIds.length; i++) {
-          expect(await Land.ownerOf(mintedLandIds[i])).to.be.equal(
+          expect(await Land._owners(mintedLandIds[i])).to.be.equal(
             landHolder.address
           );
         }
-
         for (let i = 0; i < 3; i = i + 1) {
           for (let j = 0; j < 3; j = j + 1) {
             if (!(i == 0 && j == 0)) {
@@ -3376,9 +3383,15 @@ describe('PolygonLand', function () {
 
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(36);
         expect(await PolygonLand.exists(6, x, y)).to.be.equal(true);
-        expect(await PolygonLand.ownerOf(getId(3, x, y))).to.be.equal(
-          landHolder.address
-        );
+        for (let i = 0; i < 6; i = i + 1) {
+          for (let j = 0; j < 6; j = j + 1) {
+            if (!(i == 0 && j == 0)) {
+              expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+                landHolder.address
+              );
+            }
+          }
+        }
       });
 
       it('should be able to transfer 3x3 Land with child quads already minted', async function () {
@@ -3462,9 +3475,15 @@ describe('PolygonLand', function () {
 
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(9);
         expect(await PolygonLand.exists(3, x, y)).to.be.equal(true);
-        expect(await PolygonLand.ownerOf(getId(2, x, y))).to.be.equal(
-          landHolder.address
-        );
+        for (let i = 0; i < 3; i = i + 1) {
+          for (let j = 0; j < 3; j = j + 1) {
+            if (!(i == 0 && j == 0)) {
+              expect(await PolygonLand.ownerOf(getId(1, i, j))).to.be.equal(
+                landHolder.address
+              );
+            }
+          }
+        }
       });
     });
   });
