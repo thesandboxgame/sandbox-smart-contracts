@@ -339,12 +339,12 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
      * the parent quad is minted or not. While checking if the every child Quad and Land is minted it
      * also checks and clear the owner for quads which are minted. Finally it checks if the new owner
      * if is a contract can handle ERC721 tokens or not and transfers the parent quad to new owner.
+     * @param to The address to which the ownership of the quad will be transferred
+     * @param size The size of the quad being minted and transfered
+     * @param x The x-coordinate of the top-left corner of the quad being minted.
+     * @param y The y-coordinate of the top-left corner of the quad being minted.
+     * @param y The y-coordinate of the top-left corner of the quad being minted.
      */
-    /// @param to The address to which the ownership of the quad will be transferred
-    /// @param size The size of the quad being minted and transfered
-    /// @param x The x-coordinate of the top-left corner of the quad being minted.
-    /// @param y The y-coordinate of the top-left corner of the quad being minted.
-    /// @param y The y-coordinate of the top-left corner of the quad being minted.
     function _mintAndTransferQuad(
         address to,
         uint256 size,
@@ -408,13 +408,13 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
      * @dev recursivly checks if the child quads are minted in land and push them to the quadMinted array.
      * if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
      * in quads which are minted. it clears the minted child quads owners.
+     * @param land the stuct which has the size x and y co-ordinate of Quad to be checked
+     * @param quadMinted array in which the minted child quad would be pushed
+     * @param landMinted total 1x1 land already minted
+     * @param index index of last element of quadMinted array
+     * @param quadCompareSize the size of the child quads to be checked.
+     * @return the index of last quad pushed in quadMinted array and the total land already minted
      */
-    /// @param land the stuct which has the size x and y co-ordinate of Quad to be checked
-    /// @param quadMinted array in which the minted child quad would be pushed
-    /// @param landMinted total 1x1 land already minted
-    /// @param index index of last element of quadMinted array
-    /// @param quadCompareSize the size of the child quads to be checked.
-    /// @return the index of last quad pushed in quadMinted array and the total land already minted
     function _checkAndClearOwner(
         Land memory land,
         Land[] memory quadMinted,
