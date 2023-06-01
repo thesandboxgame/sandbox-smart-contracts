@@ -11,7 +11,7 @@ import {ILandToken} from "./ILandToken.sol";
 interface IPolygonLand is ILandToken {
     /**
      * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
-     * @param user The recipient of the new quad
+     * @param to The recipient of the new quad
      * @param size The size of the new quad
      * @param x The top left x coordinate of the new quad
      * @param y The top left y coordinate of the new quad

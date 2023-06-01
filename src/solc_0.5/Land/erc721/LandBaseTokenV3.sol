@@ -331,7 +331,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     /// @param quadMinted array of lands
     /// @param index array size
-    /// @param landMinted number of lands transferred
+    /// @param numLandMinted number of lands transferred
     /// @param to recipient
     /// @param size The size of the new quad
     /// @param x The top left x coordinate of the new quad
@@ -451,7 +451,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     }
 
     /// @param from owner of the token
-    /// @param id token id
+    /// @param tokenId token id
     /// @return if the address is the owner of the token
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
         uint256 currentOwner = _owners[tokenId];
@@ -465,8 +465,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     /// @param land land to be cleared
     /// @param quadMinted array of lands minted
+    /// @param numLandMinted number of lands transferred
     /// @param index array size
-    /// @param landMinted number of lands transferred
     /// @param quadCompareSize size to compare with
     /// @return the index of last quad pushed in quadMinted array and the total land already minted
     /// @return the number of lands minted
