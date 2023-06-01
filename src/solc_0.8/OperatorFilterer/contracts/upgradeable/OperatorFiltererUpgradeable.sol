@@ -5,7 +5,9 @@ import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
+///@author The Sandbox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
+///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
@@ -15,6 +17,11 @@ abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
+    /**
+     * @notice Register this contract into the registry
+     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in

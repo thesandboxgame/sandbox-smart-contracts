@@ -4,14 +4,21 @@ pragma solidity 0.5.9;
 import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.sol";
 import {AddressUtils} from "../../../contracts_common/Libraries/AddressUtils.sol";
 
-///@title OperatorFiltererUpgradeable
-///@notice This contract would subscribe or copy the subscription provided or just register to default subscription list
+/// @title OperatorFiltererUpgradeable
+/// @author The Sandbox
+/// @notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
+/// @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 contract OperatorFiltererUpgradeable {
     using AddressUtils for address;
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
+    /**
+     * @notice Register this contract into the registry
+     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
