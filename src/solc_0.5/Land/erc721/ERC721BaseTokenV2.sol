@@ -63,7 +63,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param to Recipient address
      * @param id Token id to transfer
      */
-    function _transferFrom(address from, address to, uint256 id) internal {
+    function _transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
         _owners[id] = uint256(to);
@@ -114,9 +118,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function _approveFor(address owner, address operator, uint256 id) internal {
-        if(operator == address(0)) {
-            _owners[id] = uint256(owner); // no need to reset the operator, it will be overridden next time
+    function _approveFor(
+        address owner,
+        address operator,
+        uint256 id
+    ) internal {
+        if (operator == address(0)) {
+            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
         } else {
             _owners[id] = uint256(owner) + 2**255;
             _operators[id] = operator;
@@ -134,14 +142,14 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         address sender,
         address operator,
         uint256 id
-    ) external {
+    ) public {
         address owner = _ownerOf(id);
         require(sender != address(0), "sender is zero address");
         require(
             msg.sender == sender ||
-            _metaTransactionContracts[msg.sender] ||
-            _operatorsForAll[sender][msg.sender] ||
-            _superOperators[msg.sender],
+                _metaTransactionContracts[msg.sender] ||
+                _operatorsForAll[sender][msg.sender] ||
+                _superOperators[msg.sender],
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
@@ -153,13 +161,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approve(address operator, uint256 id) external {
+    function approve(address operator, uint256 id) public {
         address owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
         require(
-            owner == msg.sender ||
-            _operatorsForAll[owner][msg.sender] ||
-            _superOperators[msg.sender],
+            owner == msg.sender || _operatorsForAll[owner][msg.sender] || _superOperators[msg.sender],
             "not authorized to approve"
         );
         _approveFor(owner, operator, id);
@@ -186,7 +192,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param id The id of the token
      * @return is it a meta-tx
      */
-    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool) {
+    function _checkTransfer(
+        address from,
+        address to,
+        uint256 id
+    ) internal view returns (bool isMetaTx) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
@@ -197,8 +207,8 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
             }
             require(
                 _operatorsForAll[from][msg.sender] ||
-                (operatorEnabled && _operators[id] == msg.sender) ||
-                _superOperators[msg.sender],
+                    (operatorEnabled && _operators[id] == msg.sender) ||
+                    _superOperators[msg.sender],
                 "not approved to transfer"
             );
         }
@@ -217,24 +227,14 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
     {
         bool success;
         bool result;
-        bytes memory call_data = abi.encodeWithSelector(
-            ERC165ID,
-            interfaceId
-        );
+        bytes memory call_data = abi.encodeWithSelector(ERC165ID, interfaceId);
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let call_ptr := add(0x20, call_data)
             let call_size := mload(call_data)
             let output := mload(0x40) // Find empty storage location using "free memory pointer"
             mstore(output, 0x0)
-            success := staticcall(
-                10000,
-                _contract,
-                call_ptr,
-                call_size,
-                output,
-                0x20
-            ) // 32 bytes
+            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
             result := mload(output)
         }
         // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
@@ -247,8 +247,12 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param id The id of the token
-    */
-    function transferFrom(address from, address to, uint256 id) external {
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
@@ -266,7 +270,12 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param id The id of the token
      * @param data Additional data
      */
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public {
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) public {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
@@ -283,7 +292,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param to The recipient of the token
      * @param id The id of the token
      */
-    function safeTransferFrom(address from, address to, uint256 id) external {
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external {
         safeTransferFrom(from, to, id, "");
     }
 
@@ -293,8 +306,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param to The recipient of the token
      * @param ids The ids of the tokens
      * @param data additional data
-    */
-    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
+     */
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external {
         _batchTransferFrom(from, to, ids, data, false);
     }
 
@@ -305,18 +323,22 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param data additional data
      * @param safe checks the target contract
      */
-    function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
+    function _batchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        bytes memory data,
+        bool safe
+    ) internal {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
-        bool authorized = msg.sender == from ||
-            metaTx ||
-            _operatorsForAll[from][msg.sender] ||
-            _superOperators[msg.sender];
+        bool authorized =
+            msg.sender == from || metaTx || _operatorsForAll[from][msg.sender] || _superOperators[msg.sender];
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
 
         uint256 numTokens = ids.length;
-        for(uint256 i = 0; i < numTokens; i ++) {
+        for (uint256 i = 0; i < numTokens; i++) {
             uint256 id = ids[i];
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "not owner in batchTransferFrom");
@@ -336,7 +358,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
                     "erc721 batch transfer rejected by to"
                 );
             } else if (safe) {
-                for (uint256 i = 0; i < numTokens; i ++) {
+                for (uint256 i = 0; i < numTokens; i++) {
                     require(
                         _checkOnERC721Received(metaTx ? from : msg.sender, from, to, ids[i], ""),
                         "erc721 transfer rejected by to"
@@ -352,8 +374,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param to The recipient of the token
      * @param ids The ids of the tokens
      * @param data additional data
-    */
-    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
+     */
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external {
         _batchTransferFrom(from, to, ids, data, true);
     }
 
@@ -378,12 +405,10 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         address sender,
         address operator,
         bool approved
-    ) external {
+    ) public {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender ||
-            _metaTransactionContracts[msg.sender] ||
-            _superOperators[msg.sender],
+            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
             "not authorized to approve for all"
         );
 
@@ -395,7 +420,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved) external {
+    function setApprovalForAll(address operator, bool approved) public {
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
@@ -409,10 +434,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         address operator,
         bool approved
     ) internal {
-        require(
-            !_superOperators[operator],
-            "super operator can't have their approvalForAll changed"
-        );
+        require(!_superOperators[operator], "super operator can't have their approvalForAll changed");
         _operatorsForAll[sender][operator] = approved;
 
         emit ApprovalForAll(sender, operator, approved);
@@ -437,7 +459,11 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param owner owner address of the token
      * @param id token id to burn
      */
-    function _burn(address from, address owner, uint256 id) internal {
+    function _burn(
+        address from,
+        address owner,
+        uint256 id
+    ) internal {
         require(from == owner, "not owner");
         _owners[id] = 2**160; // cannot mint it again
         _numNFTPerAddress[from]--;
@@ -458,10 +484,10 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
-            _metaTransactionContracts[msg.sender] ||
-            (operatorEnabled && _operators[id] == msg.sender) ||
-            _operatorsForAll[from][msg.sender] ||
-            _superOperators[msg.sender],
+                _metaTransactionContracts[msg.sender] ||
+                (operatorEnabled && _operators[id] == msg.sender) ||
+                _operatorsForAll[from][msg.sender] ||
+                _superOperators[msg.sender],
             "not authorized to burn"
         );
         _burn(from, owner, id);
@@ -474,9 +500,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param tokenId Token id
      * @param _data extra data
      */
-    function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
-        internal returns (bool)
-    {
+    function _checkOnERC721Received(
+        address operator,
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) internal returns (bool) {
         bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
@@ -490,9 +520,13 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
      * @param _data extra data
      * @return Whether the expected value of 0x4b808c46 is returned.
      */
-    function _checkOnERC721BatchReceived(address operator, address from, address to, uint256[] memory ids, bytes memory _data)
-        internal returns (bool)
-    {
+    function _checkOnERC721BatchReceived(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        bytes memory _data
+    ) internal returns (bool) {
         bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }

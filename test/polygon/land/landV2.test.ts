@@ -704,6 +704,34 @@ describe('MockLandV2WithMint.sol', function () {
       ).to.be.revertedWith('to is zero address');
     });
 
+    it('should clear operator for Land when parent Quad is mintAndTransfer', async function () {
+      const {deployer, landAdmin, landMinter} = await setupLand();
+      const bytes = '0x3333';
+      await deployer.PolygonLand.setMinter(deployer.address, true);
+      await deployer.PolygonLand.mintQuad(deployer.address, 1, 0, 0, bytes);
+      const id = getId(1, 0, 0);
+      await deployer.PolygonLand.approve(landAdmin.address, id);
+      expect(await deployer.PolygonLand.ownerOf(id)).to.be.equal(
+        deployer.address
+      );
+      expect(await deployer.PolygonLand.getApproved(id)).to.be.equal(
+        landAdmin.address
+      );
+      await deployer.PolygonLand.mintAndTransferQuad(
+        landMinter.address,
+        3,
+        0,
+        0,
+        bytes
+      );
+      expect(await deployer.PolygonLand.getApproved(id)).to.be.equal(
+        zeroAddress
+      );
+      expect(await deployer.PolygonLand.ownerOf(id)).to.be.equal(
+        landMinter.address
+      );
+    });
+
     it('should revert for mint if to address zero', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
@@ -979,7 +1007,7 @@ describe('MockLandV2WithMint.sol', function () {
           mockMarketPlace3.address,
           true
         )
-      ).to.be.revertedWith('PolygonLandV2: Invalid sender address');
+      ).to.be.revertedWith('Invalid sender address');
     });
 
     it('should revert setApprovalForAllFor for unauthorized users', async function () {
@@ -990,7 +1018,7 @@ describe('MockLandV2WithMint.sol', function () {
           mockMarketPlace3.address,
           true
         )
-      ).to.be.revertedWith('PolygonLandV2: UNAUTHORIZED_APPROVE_FOR_ALL');
+      ).to.be.revertedWith('UNAUTHORIZED_APPROVE_FOR_ALL');
     });
 
     it('should revert approvalFor for same sender and spender', async function () {
@@ -1014,7 +1042,7 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2
           .connect(await ethers.getSigner(deployer))
           .register(zeroAddress, true)
-      ).to.be.revertedWith("PolygonLandV2: subscription can't be zero address");
+      ).to.be.revertedWith("subscription can't be zero address");
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
