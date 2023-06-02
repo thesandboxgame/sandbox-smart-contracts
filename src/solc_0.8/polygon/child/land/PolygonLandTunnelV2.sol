@@ -73,6 +73,8 @@ contract PolygonLandTunnelV2 is
     /// @param  size the size of the quad
     /// @param  limit the estimated gas that the L1 tx will use
     function setGasLimit(uint8 size, uint32 limit) external onlyOwner {
+        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "PolygonLandTunnelV2: invalid data");
+
         _setGasLimit(size, limit);
     }
 
@@ -142,31 +144,6 @@ contract PolygonLandTunnelV2 is
     /// @param _maxGasLimit maximum accepted gas limit
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         _setMaxLimitOnL1(_maxGasLimit);
-    }
-
-    /// @notice set the limit of quads we can send in one tx to L1
-    /// @param _maxAllowedLands maximum number of quads accepted
-    function setMaxAllowedQuads(uint256 _maxAllowedLands) external onlyOwner {
-        _setMaxAllowedLands(_maxAllowedLands);
-    }
-
-    /// @notice set the estimate of gas that the L1 transaction will use per quad size
-    /// @param  size the size of the quad
-    /// @param  limit the estimated gas that the L1 tx will use
-    function setLimit(uint8 size, uint32 limit) external onlyOwner {
-        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "PolygonLandTunnelV2: invalid data");
-
-        _setGasLimit(size, limit);
-    }
-
-    /// @notice set the estimate of gas that the L1 transaction will use per quad size
-    /// @param  limits the estimated gas that the L1 tx will use per quad size
-    function setupLimits(uint32[5] memory limits) public onlyOwner {
-        _setGasLimit(1, limits[0]);
-        _setGasLimit(3, limits[1]);
-        _setGasLimit(6, limits[2]);
-        _setGasLimit(12, limits[3]);
-        _setGasLimit(24, limits[4]);
     }
 
     /// @dev Pauses all token transfers across bridge
