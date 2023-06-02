@@ -4,9 +4,7 @@ pragma solidity 0.8.18;
 
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import {
-    AccessControlEnumerableUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 /// @title This contract give rewards in any ERC20, ERC721 or ERC1155 when the backend authorize it via message signing.
 /// @dev The whole contract is split in this base one and implementation to facilitate the reading and split
@@ -19,7 +17,16 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         bytes32 s;
     }
 
-    enum TokenType {INVALID, ERC20, ERC721, ERC721_BATCH, ERC721_SAFE, ERC721_SAFE_BATCH, ERC1155, ERC1155_BATCH}
+    enum TokenType {
+        INVALID,
+        ERC20,
+        ERC721,
+        ERC721_BATCH,
+        ERC721_SAFE,
+        ERC721_SAFE_BATCH,
+        ERC1155,
+        ERC1155_BATCH
+    }
     /// @dev this is a union type, data depends on the tokenType it can be amount, amount + tokenId, etc.
     struct ClaimEntry {
         TokenType tokenType;
@@ -78,11 +85,7 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         }
     }
 
-    function _checkSig(
-        uint256 numberOfSignatures,
-        bytes32 digest,
-        Signature[] calldata sigs
-    ) internal virtual {
+    function _checkSig(uint256 numberOfSignatures, bytes32 digest, Signature[] calldata sigs) internal virtual {
         require(numberOfSignatures == sigs.length, "not enough signatures");
         address lastSig = address(0);
         for (uint256 i; i < numberOfSignatures; i++) {
@@ -127,8 +130,9 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         address to,
         ClaimEntry[] calldata claims
     ) internal view virtual returns (bytes32) {
-        bytes32 structHash =
-            keccak256(abi.encode(CLAIM_TYPEHASH, _hashClaimIds(claimIds), expiration, from, to, _hashClaims(claims)));
+        bytes32 structHash = keccak256(
+            abi.encode(CLAIM_TYPEHASH, _hashClaimIds(claimIds), expiration, from, to, _hashClaims(claims))
+        );
         return _hashTypedDataV4(structHash);
     }
 

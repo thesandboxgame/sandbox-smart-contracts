@@ -9,12 +9,7 @@ contract FakeMintableERC1155 is ERC1155Upgradeable {
         super.__ERC1155_init("http://test.test");
     }
 
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) public {
+    function mint(address account, uint256 id, uint256 amount, bytes memory data) public {
         _mint(account, id, amount, data);
     }
 }

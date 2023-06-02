@@ -9,17 +9,9 @@ import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC7
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
-import {
-    ERC1155HolderUpgradeable,
-    ERC1155ReceiverUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
-import {
-    ERC721HolderUpgradeable,
-    IERC721ReceiverUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
-import {
-    AccessControlEnumerableUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {ERC1155HolderUpgradeable, ERC1155ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
+import {ERC721HolderUpgradeable, IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 /// @title This contract give rewards in any ERC20, ERC721 or ERC1155 when the backend authorize it via message signing.
 /// @dev The whole contract is split in the base one this implementation to facilitate the reading and split
@@ -180,11 +172,7 @@ contract SignedMultiGiveaway is
     /// @param tokenId for ERC1155 is the id of the token, else it must be zero
     /// @param maxWeiPerClaim the max amount per each claim, for example 0.01eth per claim
     /// @dev even tokenId is kind of inconsistent for tokenType!=ERC1155 it doesn't harm
-    function setMaxWeiPerClaim(
-        address token,
-        uint256 tokenId,
-        uint256 maxWeiPerClaim
-    ) external onlyAdmin {
+    function setMaxWeiPerClaim(address token, uint256 tokenId, uint256 maxWeiPerClaim) external onlyAdmin {
         require(token != address(0), "invalid token address");
         _perTokenLimitData[token][tokenId].maxWeiPerClaim = maxWeiPerClaim;
         emit MaxWeiPerClaimSet(token, tokenId, maxWeiPerClaim, _msgSender());
@@ -240,21 +228,13 @@ contract SignedMultiGiveaway is
     }
 
     /// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(AccessControlEnumerableUpgradeable, ERC1155ReceiverUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControlEnumerableUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
         return (interfaceId == type(IERC721ReceiverUpgradeable).interfaceId) || super.supportsInterface(interfaceId);
     }
 
-    function _transfer(
-        address from,
-        address to,
-        ClaimEntry[] calldata claims
-    ) internal {
+    function _transfer(address from, address to, ClaimEntry[] calldata claims) internal {
         uint256 len = claims.length;
         require(len <= _limits.maxClaimEntries + 1, "too many claims");
         for (uint256 i; i < len; i++) {
@@ -263,11 +243,7 @@ contract SignedMultiGiveaway is
     }
 
     // solhint-disable code-complexity
-    function _transferEntry(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferEntry(address from, address to, ClaimEntry calldata claimEntry) internal {
         if (claimEntry.tokenType == TokenType.ERC20) {
             _transferERC20(from, to, claimEntry);
         } else if (claimEntry.tokenType == TokenType.ERC721) {
@@ -287,11 +263,7 @@ contract SignedMultiGiveaway is
         }
     }
 
-    function _transferERC20(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC20(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         uint256 amount = abi.decode(claimEntry.data, (uint256));
         _checkLimits(_perTokenLimitData[tokenAddress][0], amount);
@@ -302,11 +274,7 @@ contract SignedMultiGiveaway is
         }
     }
 
-    function _transferERC721(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC721(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         uint256 tokenId = abi.decode(claimEntry.data, (uint256));
         // We want a global limit, not per tokenId.
@@ -314,11 +282,7 @@ contract SignedMultiGiveaway is
         IERC721Upgradeable(tokenAddress).transferFrom(from, to, tokenId);
     }
 
-    function _transferERC721Batch(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC721Batch(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         uint256[] memory tokenIds = abi.decode(claimEntry.data, (uint256[]));
         uint256 len = tokenIds.length;
@@ -329,11 +293,7 @@ contract SignedMultiGiveaway is
         }
     }
 
-    function _transferERC721Safe(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC721Safe(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         uint256 tokenId = abi.decode(claimEntry.data, (uint256));
         // We want a global limit, not per tokenId.
@@ -341,11 +301,7 @@ contract SignedMultiGiveaway is
         IERC721Upgradeable(tokenAddress).safeTransferFrom(from, to, tokenId);
     }
 
-    function _transferERC721SafeBatch(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC721SafeBatch(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         uint256[] memory tokenIds = abi.decode(claimEntry.data, (uint256[]));
         uint256 len = tokenIds.length;
@@ -356,25 +312,19 @@ contract SignedMultiGiveaway is
         }
     }
 
-    function _transferERC1155(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC1155(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
         (uint256 tokenId, uint256 amount, bytes memory data) = abi.decode(claimEntry.data, (uint256, uint256, bytes));
         _checkLimits(_perTokenLimitData[tokenAddress][tokenId], amount);
         IERC1155Upgradeable(tokenAddress).safeTransferFrom(from, to, tokenId, amount, data);
     }
 
-    function _transferERC1155Batch(
-        address from,
-        address to,
-        ClaimEntry calldata claimEntry
-    ) internal {
+    function _transferERC1155Batch(address from, address to, ClaimEntry calldata claimEntry) internal {
         address tokenAddress = claimEntry.tokenAddress;
-        (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
-            abi.decode(claimEntry.data, (uint256[], uint256[], bytes));
+        (uint256[] memory ids, uint256[] memory amounts, bytes memory data) = abi.decode(
+            claimEntry.data,
+            (uint256[], uint256[], bytes)
+        );
 
         uint256 len = ids.length;
         require(len > 0, "invalid data len");
