@@ -1,53 +1,46 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const operatorFilterSubscription = await deployments.get(
-    'OperatorFilterSubscription'
+    'PolygonOperatorFilterSubscription'
   );
 
-  await deploy('Land', {
+  await deploy('PolygonLand', {
     from: deployer,
-    contract: 'LandV3',
+    contract: 'PolygonLandV2',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      upgradeIndex: 2,
+      upgradeIndex: 1,
     },
     log: true,
   });
 
-  const admin = await deployments.read('Land', 'getAdmin');
+  const admin = await deployments.read('PolygonLand', 'getAdmin');
 
   const operatorFilterRegistry = await deployments.get(
-    'OperatorFilterRegistry'
+    'PolygonOperatorFilterRegistry'
   );
 
   await deployments.execute(
-    'Land',
+    'PolygonLand',
     {from: admin},
     'setOperatorRegistry',
     operatorFilterRegistry.address
   );
 
   await deployments.execute(
-    'Land',
+    'PolygonLand',
     {from: admin},
     'register',
     operatorFilterSubscription.address,
     true
   );
 };
-
 export default func;
-func.tags = ['Land', 'LandV3', 'LandV3_deploy'];
-func.dependencies = [
-  'Land_deploy',
-  'Land_Old_deploy',
-  'LandV2_deploy',
-  'operatorFilterSubscription',
-];
+func.tags = ['PolygonLand', 'PolygonLandV2', 'L2'];
+func.dependencies = ['PolygonLand_deploy', 'polygonOperatorFilterSubscription'];
