@@ -9,6 +9,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const AssetContract = await deployments.get("Asset");
   const AuthValidatorContract = await deployments.get("AuthValidator");
 
+  const name = "Sandbox Asset Reveal";
+  const version = "1.0";
+
   await deploy("AssetReveal", {
     from: deployer,
     contract: "AssetReveal",
@@ -18,6 +21,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         methodName: "initialize",
         args: [
+          name,
+          version,
           AssetContract.address,
           AuthValidatorContract.address,
           trustedForwarder,

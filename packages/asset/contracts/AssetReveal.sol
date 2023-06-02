@@ -25,9 +25,6 @@ contract AssetReveal is
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) revealNonces;
 
-    string public constant name = "Sandbox Asset Reveal";
-    string public constant version = "1.0";
-
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
             "Reveal(uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
@@ -43,6 +40,8 @@ contract AssetReveal is
     /// @param _authValidator The address of the AuthValidator contract
     /// @param _forwarder The address of the forwarder contract
     function initialize(
+        string memory _name,
+        string memory _version,
         address _assetContract,
         address _authValidator,
         address _forwarder
@@ -50,7 +49,7 @@ contract AssetReveal is
         assetContract = IAsset(_assetContract);
         authValidator = AuthValidator(_authValidator);
         __ERC2771Handler_initialize(_forwarder);
-        __EIP712_init(name, version);
+        __EIP712_init(_name, _version);
     }
 
     /// @notice Reveal an asset to view its abilities and enhancements
