@@ -7,7 +7,6 @@ import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev AssetERC721 will be minted only on L2 and can be transferred to L1 but not minted on L1.
@@ -173,5 +172,13 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OperatorFilterer
         uint256 id
     ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
+    }
+
+    function _msgSender() internal view virtual override(ContextUpgradeable, BaseERC721) returns (address sender) {
+        return BaseERC721._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, BaseERC721) returns (bytes calldata) {
+        return BaseERC721._msgData();
     }
 }

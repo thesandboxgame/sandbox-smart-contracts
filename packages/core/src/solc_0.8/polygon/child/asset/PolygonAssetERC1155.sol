@@ -1,15 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../../assetERC1155/AssetBaseERC1155.sol";
-import "../../../common/interfaces/pos-portal/child/IChildToken.sol";
-import {
-    DefaultOperatorFiltererUpgradeable
-} from "../../../OperatorFilterer/contracts/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
+import {AssetBaseERC1155} from "../../../assetERC1155/AssetBaseERC1155.sol";
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IChildToken} from "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 
 /// @title This contract is for AssetERC1155 which can be minted by a minter role.
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
@@ -297,5 +293,19 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererU
         onlyAllowedOperatorApproval(operator)
     {
         super._setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, AssetBaseERC1155)
+        returns (address sender)
+    {
+        return AssetBaseERC1155._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, AssetBaseERC1155) returns (bytes calldata) {
+        return AssetBaseERC1155._msgData();
     }
 }
