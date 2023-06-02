@@ -13,8 +13,8 @@ interface IAssetReveal {
 
     event AssetsRevealed(
         address recipient,
-        address creator,
         uint256 oldTokenId,
+        uint256[] amounts,
         uint256[] newTokenIds
     );
 }

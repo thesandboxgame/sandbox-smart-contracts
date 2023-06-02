@@ -1,8 +1,7 @@
 import hre, { ethers } from "hardhat";
 
 async function createEIP712RevealSignature(
-  creator: string,
-  amount: number,
+  amounts: number[],
   prevTokenId: number,
   metadataHashes: string[]
 ): Promise<string> {
@@ -19,9 +18,8 @@ async function createEIP712RevealSignature(
   const data = {
     types: {
       Reveal: [
-        { name: "creator", type: "address" },
         { name: "prevTokenId", type: "uint256" },
-        { name: "amount", type: "uint256" },
+        { name: "amounts", type: "uint256[]" },
         { name: "metadataHashes", type: "string[]" },
       ],
     },
@@ -32,9 +30,8 @@ async function createEIP712RevealSignature(
       verifyingContract: AssetRevealContract.address,
     },
     message: {
-      creator: creator,
       prevTokenId: prevTokenId,
-      amount,
+      amounts,
       metadataHashes,
     },
   };

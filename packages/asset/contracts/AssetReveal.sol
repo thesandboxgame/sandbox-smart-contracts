@@ -30,7 +30,7 @@ contract AssetReveal is
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address creator,uint256 prevTokenId,uint256 amount,string[] metadataHashes)"
+            "Reveal(uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -89,115 +89,58 @@ contract AssetReveal is
     /// @notice Reveal assets to view their abilities and enhancements
     /// @dev Can be used to reveal multiple copies of the same token id
     /// @param signature Signature created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
-    /// @param creator The original creator of the assets
     /// @param prevTokenId The tokenId of the unrevealed asset
-    /// @param amount The amount of assets to reveal (must be equal to the length of revealHashes)
+    /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
     /// @param metadataHashes The array of hashes for asset metadata
     /// @param recipient The recipient of the revealed assets
     function revealMint(
         bytes memory signature,
-        address creator,
         uint256 prevTokenId,
-        uint256 amount,
-        string[] memory metadataHashes,
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes,
         address recipient
     ) public {
         require(
             authValidator.verify(
                 signature,
-                _hashReveal(creator, prevTokenId, amount, metadataHashes)
+                _hashReveal(prevTokenId, amounts, metadataHashes)
             ),
             "Invalid signature"
         );
 
-        IAsset.AssetData memory data = prevTokenId.getData();
-        require(!data.revealed, "Asset: already revealed");
-        require(
-            data.creator == creator,
-            "Asset: creator does not match prevTokenId"
+        require(amounts.length == metadataHashes.length, "Invalid amount");
+
+        uint256[] memory tokenIds = getRevealedTokenIds(
+            amounts,
+            metadataHashes,
+            prevTokenId
         );
-        require(amount == metadataHashes.length, "Invalid amount");
 
-        uint256[] memory tokenIdArray = new uint256[](amount);
-        uint256[] memory tokenCountArray = new uint256[](amount);
-        uint256 uniqueTokenCount = 0;
-
-        // for each asset, set the data
-        for (uint256 i = 0; i < amount; i++) {
-            uint256 tokenId;
-            if (
-                assetContract.getTokenIdByMetadataHash(metadataHashes[i]) != 0
-            ) {
-                tokenId = assetContract.getTokenIdByMetadataHash(
-                    metadataHashes[i]
-                );
-            } else {
-                uint16 revealNonce = ++revealNonces[data.creator][prevTokenId];
-
-                tokenId = TokenIdUtils.generateTokenId(
-                    data.creator,
-                    data.tier,
-                    data.creatorNonce,
-                    revealNonce
-                );
-
-                assetContract.setMetadataHashUsed(tokenId, metadataHashes[i]);
-            }
-            // Check if the tokenId already exists in the array
-            bool exists = false;
-            for (uint256 j = 0; j < uniqueTokenCount; j++) {
-                if (tokenIdArray[j] == tokenId) {
-                    tokenCountArray[j]++;
-                    exists = true;
-                    break;
-                }
-            }
-
-            // If it doesn't exist, add it to the array and increase the count
-            if (!exists) {
-                tokenIdArray[uniqueTokenCount] = tokenId;
-                tokenCountArray[uniqueTokenCount]++;
-                uniqueTokenCount++;
-            }
-        }
-
-        // Copy over the unique tokenIds and their counts to new arrays of the correct length
-        uint256[] memory newTokenIds = new uint256[](uniqueTokenCount);
-        uint256[] memory newAmounts = new uint256[](uniqueTokenCount);
-
-        for (uint256 k = 0; k < uniqueTokenCount; k++) {
-            newTokenIds[k] = tokenIdArray[k];
-            newAmounts[k] = tokenCountArray[k];
-        }
-
-        if (uniqueTokenCount == 1) {
-            assetContract.mint(recipient, newTokenIds[0], newAmounts[0]);
+        if (tokenIds.length == 1) {
+            assetContract.mint(recipient, tokenIds[0], amounts[0]);
         } else {
-            assetContract.mintBatch(recipient, newTokenIds, newAmounts);
+            assetContract.mintBatch(recipient, tokenIds, amounts);
         }
 
-        emit AssetsRevealed(recipient, creator, prevTokenId, newTokenIds);
+        emit AssetsRevealed(recipient, prevTokenId, amounts, tokenIds);
     }
 
     /// @notice Mint multiple assets with revealed abilities and enhancements
     /// @dev Can be used to reveal multiple copies of the same token id
     /// @param signatures Signatures created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
-    /// @param creators The original creator of the assets
     /// @param prevTokenIds The tokenId of the unrevealed asset
     /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
     /// @param metadataHashes The array of hashes for asset metadata
     /// @param recipient The recipient of the revealed assets
     function revealBatchMint(
-        bytes[] memory signatures,
-        address[] memory creators,
-        uint256[] memory prevTokenIds,
-        uint256[] memory amounts,
-        string[][] memory metadataHashes,
+        bytes[] calldata signatures,
+        uint256[] calldata prevTokenIds,
+        uint256[][] calldata amounts,
+        string[][] calldata metadataHashes,
         address recipient
     ) public {
         require(
-            signatures.length == creators.length &&
-                creators.length == prevTokenIds.length &&
+            signatures.length == prevTokenIds.length &&
                 prevTokenIds.length == amounts.length &&
                 amounts.length == metadataHashes.length,
             "Invalid input"
@@ -205,7 +148,6 @@ contract AssetReveal is
         for (uint256 i = 0; i < signatures.length; i++) {
             revealMint(
                 signatures[i],
-                creators[i],
                 prevTokenIds[i],
                 amounts[i],
                 metadataHashes[i],
@@ -215,23 +157,20 @@ contract AssetReveal is
     }
 
     /// @notice Creates a hash of the reveal data
-    /// @param creator The creator of the asset
     /// @param prevTokenId The previous token id
-    /// @param amount The amount of tokens to mint
+    /// @param amounts The amount of tokens to mint
     /// @return digest The hash of the reveal data
     function _hashReveal(
-        address creator,
         uint256 prevTokenId,
-        uint256 amount,
-        string[] memory metadataHashes
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
                     REVEAL_TYPEHASH,
-                    creator,
                     prevTokenId,
-                    amount,
+                    keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)
                 )
             )
@@ -250,6 +189,57 @@ contract AssetReveal is
         }
 
         return keccak256(abi.encodePacked(encodedHashes));
+    }
+
+    function _encodeAmounts(
+        uint256[] memory amounts
+    ) internal pure returns (bytes32) {
+        bytes32[] memory encodedAmounts = new bytes32[](amounts.length);
+        for (uint256 i = 0; i < amounts.length; i++) {
+            encodedAmounts[i] = keccak256(abi.encodePacked(amounts[i]));
+        }
+
+        return keccak256(abi.encodePacked(encodedAmounts));
+    }
+
+    /// @notice Checks if each metadatahash has been used before to either get the tokenId that was already created for it or generate a new one if it hasn't
+    /// @dev This function also validates that we're not trying to reveal a tokenId that has already been revealed
+    /// @param amounts The amounts of tokens to mint
+    /// @param metadataHashes The hashes of the metadata
+    /// @param prevTokenId The previous token id from which the assets are revealed
+    /// @return tokenIdArray The array of tokenIds to mint
+    function getRevealedTokenIds(
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes,
+        uint256 prevTokenId
+    ) internal returns (uint256[] memory) {
+        IAsset.AssetData memory data = prevTokenId.getData();
+        require(!data.revealed, "Asset: already revealed");
+
+        uint256[] memory tokenIdArray = new uint256[](amounts.length);
+        for (uint256 i = 0; i < amounts.length; i++) {
+            uint256 tokenId = assetContract.getTokenIdByMetadataHash(
+                metadataHashes[i]
+            );
+            if (tokenId != 0) {
+                tokenId = assetContract.getTokenIdByMetadataHash(
+                    metadataHashes[i]
+                );
+            } else {
+                uint16 revealNonce = ++revealNonces[data.creator][prevTokenId];
+                tokenId = TokenIdUtils.generateTokenId(
+                    data.creator,
+                    data.tier,
+                    data.creatorNonce,
+                    revealNonce
+                );
+
+                assetContract.setMetadataHashUsed(tokenId, metadataHashes[i]);
+            }
+            tokenIdArray[i] = tokenId;
+        }
+
+        return tokenIdArray;
     }
 
     /// @notice Get the asset contract address
