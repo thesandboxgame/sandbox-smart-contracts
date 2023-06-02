@@ -67,8 +67,10 @@ contract Asset is
     function mint(
         address to,
         uint256 id,
-        uint256 amount
+        uint256 amount,
+        string memory metadataHash
     ) external onlyRole(MINTER_ROLE) {
+        _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
     }
 
@@ -80,8 +82,16 @@ contract Asset is
     function mintBatch(
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts
+        uint256[] memory amounts,
+        string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
+        require(
+            ids.length == metadataHashes.length,
+            "ids and metadataHash length mismatch"
+        );
+        for (uint256 i = 0; i < ids.length; i++) {
+            _setMetadataHash(ids[i], metadataHashes[i]);
+        }
         _mintBatch(to, ids, amounts, "");
     }
 
@@ -307,13 +317,19 @@ contract Asset is
         return hashUsed[metadataHash];
     }
 
-    function setMetadataHashUsed(
+    function _setMetadataHash(
         uint256 tokenId,
         string memory metadataHash
-    ) public onlyRole(MINTER_ROLE) {
-        require(hashUsed[metadataHash] == 0, "metadata hash already used");
-        hashUsed[metadataHash] = tokenId;
-        _setURI(tokenId, metadataHash);
+    ) internal onlyRole(MINTER_ROLE) {
+        if (hashUsed[metadataHash] != 0) {
+            require(
+                hashUsed[metadataHash] == tokenId,
+                "metadata hash mismatch for tokenId"
+            );
+        } else {
+            hashUsed[metadataHash] = tokenId;
+            _setURI(tokenId, metadataHash);
+        }
     }
 
     function getIncrementedCreatorNonce(

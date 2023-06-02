@@ -30,12 +30,18 @@ interface IAsset {
         string memory metadataHash
     ) external;
 
-    function mint(address to, uint256 id, uint256 amount) external;
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        string memory metadataHash
+    ) external;
 
     function mintBatch(
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts
+        uint256[] memory amounts,
+        string[] memory metadataHashes
     ) external;
 
     function mintSpecial(
@@ -71,11 +77,6 @@ interface IAsset {
     function getTokenIdByMetadataHash(
         string memory metadataHash
     ) external view returns (uint256);
-
-    function setMetadataHashUsed(
-        uint256 tokenId,
-        string memory metadataHash
-    ) external;
 
     function getIncrementedCreatorNonce(
         address creator

@@ -117,9 +117,19 @@ contract AssetReveal is
         );
 
         if (tokenIds.length == 1) {
-            assetContract.mint(recipient, tokenIds[0], amounts[0]);
+            assetContract.mint(
+                recipient,
+                tokenIds[0],
+                amounts[0],
+                metadataHashes[0]
+            );
         } else {
-            assetContract.mintBatch(recipient, tokenIds, amounts);
+            assetContract.mintBatch(
+                recipient,
+                tokenIds,
+                amounts,
+                metadataHashes
+            );
         }
 
         emit AssetsRevealed(recipient, prevTokenId, amounts, tokenIds);
@@ -233,8 +243,6 @@ contract AssetReveal is
                     data.creatorNonce,
                     revealNonce
                 );
-
-                assetContract.setMetadataHashUsed(tokenId, metadataHashes[i]);
             }
             tokenIdArray[i] = tokenId;
         }

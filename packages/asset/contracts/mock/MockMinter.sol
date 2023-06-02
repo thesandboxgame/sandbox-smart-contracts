@@ -38,8 +38,7 @@ contract MockMinter {
             revealed ? 1 : 0
         );
 
-        assetContract.setMetadataHashUsed(tokenId, metadataHash);
-        assetContract.mint(recipient, tokenId, amount);
+        assetContract.mint(recipient, tokenId, amount, metadataHash);
         emit Minted(tokenId, amount);
     }
 }
