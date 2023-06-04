@@ -2155,9 +2155,7 @@ describe('MockLandV2WithMint.sol', function () {
                   y,
                   bytes
                 )
-              ).to.be.revertedWith(
-                'not owner in _transferQuad'
-              );
+              ).to.be.revertedWith('not owner in _transferQuad');
             }
           }
         }

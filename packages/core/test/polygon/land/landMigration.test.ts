@@ -417,7 +417,9 @@ describe('Land Migration', function () {
       const {deployer} = await setupLandMigration();
       await expect(
         deployer.MockPolygonLandTunnelMigration.changeAdmin(zeroAddress)
-      ).to.revertedWith("PolygonLandTunnelMigration: admin can't be zero address");
+      ).to.revertedWith(
+        "PolygonLandTunnelMigration: admin can't be zero address"
+      );
     });
 
     it('admin can set new admin and only admin can set new admin', async function () {
