@@ -85,7 +85,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         address from,
         address to,
         uint256 id
-    ) external override {
+    ) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {

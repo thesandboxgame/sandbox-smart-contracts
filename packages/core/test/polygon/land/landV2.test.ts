@@ -1042,7 +1042,7 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2
           .connect(await ethers.getSigner(deployer))
           .register(zeroAddress, true)
-      ).to.be.revertedWith("subscription can't be zero address");
+      ).to.be.revertedWith("PolygonLandV2: subscription can't be zero address");
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -2155,7 +2155,9 @@ describe('MockLandV2WithMint.sol', function () {
                   y,
                   bytes
                 )
-              ).to.be.revertedWith('not owner');
+              ).to.be.revertedWith(
+                'not owner in _transferQuad'
+              );
             }
           }
         }
