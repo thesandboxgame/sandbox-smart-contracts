@@ -63,4 +63,3 @@ interface ILandTokenV2 is ILandToken {
         bytes calldata data
     ) external;
 }
-

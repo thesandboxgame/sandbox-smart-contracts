@@ -296,7 +296,13 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, ContextUpgradeable, OperatorFi
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, AssetBaseERC1155) returns (address sender) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, AssetBaseERC1155)
+        returns (address sender)
+    {
         return AssetBaseERC1155._msgSender();
     }
 
