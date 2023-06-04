@@ -259,7 +259,7 @@ describe('Land Migration', function () {
       );
       await expect(
         users[0].MockLandTunnelMigration.migrateLandsToTunnel(ids)
-      ).to.revertedWith('!AUTHORISED');
+      ).to.revertedWith('LandTunnelMigration: !AUTHORISED');
     });
 
     it('quads Migration from old land Tunnel to new land Tunnel', async function () {
@@ -408,7 +408,7 @@ describe('Land Migration', function () {
           [x, x + 3, x + 6, x + 9, x + 12],
           [y, y + 3, y + 6, y + 9, y + 12]
         )
-      ).to.revertedWith('!AUTHORISED');
+      ).to.revertedWith('LandTunnelMigration: !AUTHORISED');
     });
   });
 
@@ -417,7 +417,7 @@ describe('Land Migration', function () {
       const {deployer} = await setupLandMigration();
       await expect(
         deployer.MockPolygonLandTunnelMigration.changeAdmin(zeroAddress)
-      ).to.revertedWith("LandTunnelMigration: admin can't be zero address");
+      ).to.revertedWith("PolygonLandTunnelMigration: admin can't be zero address");
     });
 
     it('admin can set new admin and only admin can set new admin', async function () {
@@ -741,7 +741,7 @@ describe('Land Migration', function () {
       );
       await expect(
         users[0].MockPolygonLandTunnelMigration.migrateLandsToTunnel(ids)
-      ).to.be.revertedWith('!AUTHORISED');
+      ).to.be.revertedWith('PolygonLandTunnelMigration: !AUTHORISED');
     });
 
     it('quad Migration from old Polygon land Tunnel to new Polygon land Tunnel', async function () {
@@ -955,7 +955,7 @@ describe('Land Migration', function () {
           [x, x + 3, x + 6, x + 9, x + 12],
           [y, y + 3, y + 6, y + 9, y + 12]
         )
-      ).to.be.revertedWith('!AUTHORISED');
+      ).to.be.revertedWith('PolygonLandTunnelMigration: !AUTHORISED');
     });
 
     it('land Migration and withdrawn from old Polygon land Tunnel to new land Tunnel', async function () {
@@ -1209,7 +1209,7 @@ describe('Land Migration', function () {
           x: [x],
           y: [y],
         })
-      ).to.be.revertedWith('!AUTHORISED');
+      ).to.be.revertedWith('PolygonLandTunnelMigration: !AUTHORISED');
     });
   });
 });

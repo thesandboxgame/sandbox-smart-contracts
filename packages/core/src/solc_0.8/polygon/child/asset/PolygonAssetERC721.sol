@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 import {IPolygonAssetERC721} from "../../../common/interfaces/IPolygonAssetERC721.sol";
 import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
@@ -174,11 +175,11 @@ contract PolygonAssetERC721 is BaseERC721, IPolygonAssetERC721, OperatorFilterer
         BaseERC721.approveFor(from, operator, id);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, BaseERC721) returns (address sender) {
+    function _msgSender() internal view virtual override(BaseERC721, ContextUpgradeable) returns (address sender) {
         return BaseERC721._msgSender();
     }
 
-    function _msgData() internal view virtual override(ContextUpgradeable, BaseERC721) returns (bytes calldata) {
+    function _msgData() internal view virtual override(BaseERC721, ContextUpgradeable) returns (bytes calldata) {
         return BaseERC721._msgData();
     }
 }

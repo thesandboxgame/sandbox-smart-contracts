@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {AssetBaseERC1155} from "../../../assetERC1155/AssetBaseERC1155.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {AssetBaseERC1155, ERC1155ERC721Helper, IAssetERC721} from "../../../assetERC1155/AssetBaseERC1155.sol";
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
@@ -11,7 +12,7 @@ import {IChildToken} from "../../../common/interfaces/pos-portal/child/IChildTok
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererUpgradeable {
+contract PolygonAssetERC1155 is AssetBaseERC1155, ContextUpgradeable, OperatorFiltererUpgradeable, IChildToken {
     address public _childChainManager;
 
     function initialize(
@@ -289,19 +290,13 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken, OperatorFiltererU
     /// @param approved whether to approve or revoke
     function setApprovalForAll(address operator, bool approved)
         external
-        override(IERC1155)
+        override
         onlyAllowedOperatorApproval(operator)
     {
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, AssetBaseERC1155)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, AssetBaseERC1155) returns (address sender) {
         return AssetBaseERC1155._msgSender();
     }
 

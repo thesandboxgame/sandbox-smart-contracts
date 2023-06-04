@@ -299,7 +299,7 @@ describe('PolygonLand', function () {
             [y],
             bytes
           )
-        ).to.be.revertedWith("can't send to zero address");
+        ).to.be.revertedWith("LandTunnelV2: can't send to zero address");
       });
 
       it('should be able to transfer 1x1 Land', async function () {
@@ -1354,7 +1354,7 @@ describe('PolygonLand', function () {
             [y],
             bytes
           )
-        ).to.revertedWith("can't send to zero address");
+        ).to.revertedWith("PolygonLandTunnelV2: can't send to zero address");
       });
 
       it('should be able to transfer 1x1 Land', async function () {
@@ -1596,7 +1596,7 @@ describe('PolygonLand', function () {
             [y_1, y_2],
             bytes
           )
-        ).to.be.revertedWith('Exceeds max allowed lands.');
+        ).to.be.revertedWith('PolygonLandTunnelV2: Exceeds max allowed lands.');
       });
 
       it('should be able to transfer 3x3 Land', async function () {
@@ -1917,7 +1917,7 @@ describe('PolygonLand', function () {
             ...mintingData,
             bytes
           )
-        ).to.be.revertedWith('Exceeds gas limit on L1.');
+        ).to.be.revertedWith('PolygonLandTunnelV2: Exceeds gas limit on L1.');
       });
     });
     describe('Through meta Tx', function () {
