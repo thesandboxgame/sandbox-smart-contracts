@@ -36,5 +36,8 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "operator-filter-registry": "^1.4.1"
   }
 }
