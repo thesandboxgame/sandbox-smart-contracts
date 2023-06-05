@@ -26,6 +26,7 @@ const config: HardhatUserConfig = {
     upgradeAdmin: {
       default: 1,
     },
+    filterOperatorSubscription: "deployer",
     catalystAdmin: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
     catalystMinter: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
     catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
@@ -40,7 +41,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         enabled: true,
-        blockNumber: 16000000,
+        blockNumber: 35779412,
         url: process.env.ETH_NODE_URI_POLYGON || "http://localhost:8545",
       },
       loggingEnabled: false,
