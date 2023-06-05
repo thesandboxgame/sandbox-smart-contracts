@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Supp
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import "./ERC2771Handler.sol";
 import "./libraries/TokenIdUtils.sol";
 import "./interfaces/IAsset.sol";
@@ -19,7 +20,8 @@ contract Asset is
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
-    ERC1155URIStorageUpgradeable
+    ERC1155URIStorageUpgradeable,
+    OperatorFiltererUpgradeable
 {
     using TokenIdUtils for uint256;
 
@@ -47,7 +49,8 @@ contract Asset is
         address forwarder,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
-        string memory baseUri
+        string memory baseUri,
+        address commonSubscription
     ) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
@@ -55,6 +58,7 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        __OperatorFilterer_init(commonSubscription, false);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -440,5 +444,42 @@ contract Asset is
         uint256 catalystTokenId
     ) public view returns (uint256) {
         return recyclingAmounts[catalystTokenId];
+    }
+
+    /**
+     * @dev See {IERC1onlyAllowedOperator155-safeBatchTransferFrom}.
+     */
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public virtual override onlyAllowedOperator(from){
+        super.safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    /**
+     * @dev See {IERC1155-setApprovalForAll}.
+     */
+    function setApprovalForAll(address operator, bool approved) public virtual override onlyAllowedOperatorApproval(operator){
+        _setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    /**
+     * @dev See {IERC1155-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public virtual override onlyAllowedOperator(from){
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: caller is not token owner or approved"
+        );
+        _safeTransferFrom(from, to, id, amount, data);
     }
 }
