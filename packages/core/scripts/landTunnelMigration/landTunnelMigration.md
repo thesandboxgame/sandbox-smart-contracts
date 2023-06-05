@@ -22,12 +22,12 @@ And wait for the all the current transfers to be checkpointed
 
 - On ethereum
 ```shell
-yarn deploy mainnet --tags OperatorFilterSubscription
+yarn deploy mainnet --tags operatorFilterSubscription
 ```
 
 - On polygon
 ```shell
-yarn deploy polygon --tags OperatorFilterSubscription
+yarn deploy polygon --tags polygonOperatorFilterSubscription
 ```
 
 ### Upgrade land contracts
