@@ -1,9 +1,11 @@
 {
     "name": "contracts",
     "version": "0.0.1",
-    "workspaces": [
-        "packages/*"
-    ],
+    "workspaces": {
+        "packages": [
+            "packages/*"
+        ]
+    },
     "private": true,
     "description": "The Sandbox smart contracts",
     "scripts": {
@@ -27,7 +29,7 @@
         "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
     },
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
-    "packageManager": "yarn@3.4.1",
+    "packageManager": "yarn@3.6.0",
     "devDependencies": {
         "istanbul-combine": "^0.3.0",
         "nx": "15.8.6",
