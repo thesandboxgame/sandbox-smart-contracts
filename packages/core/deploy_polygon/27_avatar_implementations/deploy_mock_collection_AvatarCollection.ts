@@ -41,7 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const operatorFiltererSubscriptionSubscribe = true; // if to actually subscribe or just copy
 
   // default values used for minting setups // // //
-  const mintPrice = BigNumber.from(100).mul('1000000000000000000');
+  const mintPrice = ethers.utils.parseUnits('100', 'ether');
   const maxPublicTokensPerWallet = 4;
   const maxAllowlistTokensPerWallet = 2;
 

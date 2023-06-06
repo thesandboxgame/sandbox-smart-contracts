@@ -31,7 +31,7 @@ export const setupAvatar = withSnapshot(
     const sandContract = await ethers.getContract('PolygonSand');
     const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-    const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
+    const SAND_AMOUNT = ethers.utils.parseUnits('100000', 'ether');
 
     await depositViaChildChainManager(
       {sand: sandContract, childChainManager},

@@ -1,7 +1,6 @@
 import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
 import {waitFor} from '../../../utils';
-const {BigNumber} = ethers;
 const AddressZero = ethers.constants.AddressZero;
 
 import {
@@ -27,14 +26,14 @@ describe(collectionName, function () {
     );
     await contract.setMarketingMint();
 
-    const expectedWaveMaxTokens = 100;
+    const expectedWaveMaxTokens = 50;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensOverall()).toString(),
       expectedWaveMaxTokens.toString(),
       'waveMaxTokensOverall is not set correctly'
     );
 
-    const expectedWaveMaxTokensPerWallet = 100;
+    const expectedWaveMaxTokensPerWallet = 50;
     assert.equal(
       (await avatarCollectionContract.waveMaxTokensPerWallet()).toString(),
       expectedWaveMaxTokensPerWallet.toString(),
@@ -42,6 +41,7 @@ describe(collectionName, function () {
     );
 
     const expectedWaveSingleTokenPrice = 0;
+
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
@@ -72,8 +72,9 @@ describe(collectionName, function () {
       'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul(
-      '1000000000000000000'
+    const expectedWaveSingleTokenPrice = ethers.utils.parseUnits(
+      '100',
+      'ether'
     );
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
@@ -105,8 +106,9 @@ describe(collectionName, function () {
       'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = BigNumber.from(100).mul(
-      '1000000000000000000'
+    const expectedWaveSingleTokenPrice = ethers.utils.parseUnits(
+      '100',
+      'ether'
     );
     assert.equal(
       (await avatarCollectionContract.waveSingleTokenPrice()).toString(),
