@@ -11,5 +11,3 @@ artifacts
 ./artifacts
 ./cache
 ./typechain
-
-deployments
