@@ -30,6 +30,7 @@
     "hardhat": "^2.14.1",
     "hardhat-deploy": "^0.11.25",
     "hardhat-gas-reporter": "^1.0.9",
+    "operator-filter-registry": "^1.4.1",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "1.0.0-beta.11",
     "solhint-plugin-prettier": "^0.0.5",
@@ -37,8 +38,5 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
     "typescript": "^5.0.4"
-  },
-  "dependencies": {
-    "operator-filter-registry": "^1.4.1"
   }
 }

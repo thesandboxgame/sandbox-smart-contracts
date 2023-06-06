@@ -3,7 +3,7 @@ import { deployments, getUnnamedAccounts } from "hardhat";
 import { expectEventWithArgs } from "../util";
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
-import {setupOperatorFilter} from "./fixture"
+import { setupOperatorFilter } from "./fixture";
 
 const catalystArray = [1, 2, 3, 4, 5, 6];
 
@@ -63,7 +63,7 @@ function generateOldAssetId(
 
 const runAssetSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
-    console.log("deploy")
+    console.log("deploy");
     await deployments.fixture(["Asset"]);
     const { deployer, revealer } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
@@ -901,13 +901,12 @@ describe("AssetContract", () => {
     });
   });
 
-
-  describe('OperatorFilterer', function () {
-    it.only('should be registered', async function () {
-      const {operatorFilterRegistry, Asset} = await setupOperatorFilter();
+  describe("OperatorFilterer", function () {
+    it.only("should be registered", async function () {
+      const { operatorFilterRegistry, Asset } = await setupOperatorFilter();
       expect(
         await operatorFilterRegistry.isRegistered(Asset.address)
       ).to.be.equal(true);
-    }); 
+    });
   });
 });

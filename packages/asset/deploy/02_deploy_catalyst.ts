@@ -21,6 +21,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const OperatorFilterSubscription = await deployments.get(
     "OperatorFilterSubscription"
   );
+  const OperatorFilterRegistry = await deployments.get(
+    "OperatorFilterRegistry"
+  );
+  // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
+  // unless using local network, where we make our own deployment of it
 
   await deploy("Catalyst", {
     from: deployer,
@@ -36,6 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           trustedForwarder,
           catalystRoyaltyRecipient,
           OperatorFilterSubscription.address,
+          OperatorFilterRegistry.address,
           catalystAdmin,
           catalystMinter,
           CATALYST_DEFAULT_ROYALTY,
