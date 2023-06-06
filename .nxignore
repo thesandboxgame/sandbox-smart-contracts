@@ -3,3 +3,7 @@ artifacts/
 cache/
 secret/
 .proof*
+
+# We don't want the CI to run over all the packages, we decided to ignore it for now
+yarn.lock
+.yarn/*
