@@ -29,8 +29,6 @@ contract Asset is
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
-    // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
-    mapping(address => uint16) public creatorNonces;
     // mapping of old bridged tokenId to creator nonce
     mapping(uint256 => uint16) public bridgedTokensNonces;
     // mapping of ipfs metadata token hash to token ids
@@ -93,93 +91,6 @@ contract Asset is
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
         _mintBatch(to, ids, amounts, "");
-    }
-
-    /// @notice Mint TSB special tokens
-    /// @dev Only callable by the minter role
-    /// @dev Those tokens are minted by TSB admins and do not adhere to the normal minting rules
-    /// @param recipient The address of the recipient
-    /// @param assetData The data of the asset to mint
-    /// @param metadataHash The ipfs hash for asset's metadata
-    function mintSpecial(
-        address recipient,
-        AssetData calldata assetData,
-        string memory metadataHash
-    ) external onlyRole(MINTER_ROLE) {
-        // increment nonce
-        unchecked {
-            creatorNonces[assetData.creator]++;
-        }
-        // get current creator nonce
-        uint16 creatorNonce = creatorNonces[assetData.creator];
-
-        // minting a tsb exclusive token which are already revealed, have their supply increased and are not recyclable
-        uint256 id = TokenIdUtils.generateTokenId(
-            assetData.creator,
-            assetData.tier,
-            creatorNonce,
-            1
-        );
-        _mint(recipient, id, assetData.amount, "");
-        require(hashUsed[metadataHash] == 0, "metadata hash already used");
-        hashUsed[metadataHash] = id;
-        _setURI(id, metadataHash);
-    }
-
-    /// @notice Special mint function for the bridge contract to mint assets originally created on L1
-    /// @dev Only the special minter role can call this function
-    /// @dev This function skips the catalyst burn step
-    /// @dev Bridge should be able to mint more copies of the same asset
-    /// @param originalTokenId The original token id of the asset
-    /// @param amount The amount of assets to mint
-    /// @param tier The tier of the catalysts to burn
-    /// @param recipient The recipient of the asset
-    /// @param metadataHash The ipfs hash of asset's metadata
-    function bridgeMint(
-        uint256 originalTokenId,
-        uint256 amount,
-        uint8 tier,
-        address recipient,
-        string memory metadataHash
-    ) external onlyRole(BRIDGE_MINTER_ROLE) {
-        // extract creator address from the last 160 bits of the original token id
-        address originalCreator = address(uint160(originalTokenId));
-        // extract isNFT from 1 bit after the creator address
-        bool isNFT = (originalTokenId >> 95) & 1 == 1;
-        require(amount > 0, "Amount must be > 0");
-        if (isNFT) {
-            require(amount == 1, "Amount must be 1 for NFTs");
-        }
-        // check if this asset has been bridged before to make sure that we increase the copies count for the same assers rather than minting a new one
-        // we also do this to avoid a clash between bridged asset nonces and non-bridged asset nonces
-        if (bridgedTokensNonces[originalTokenId] == 0) {
-            // increment nonce
-            unchecked {
-                creatorNonces[originalCreator]++;
-            }
-            // get current creator nonce
-            uint16 nonce = creatorNonces[originalCreator];
-
-            // store the nonce
-            bridgedTokensNonces[originalTokenId] = nonce;
-        }
-
-        uint256 id = TokenIdUtils.generateTokenId(
-            originalCreator,
-            tier,
-            bridgedTokensNonces[originalTokenId],
-            1
-        );
-        _mint(recipient, id, amount, "");
-        if (hashUsed[metadataHash] != 0) {
-            require(
-                hashUsed[metadataHash] == id,
-                "metadata hash mismatch for tokenId"
-            );
-        } else {
-            hashUsed[metadataHash] = id;
-        }
-        _setURI(id, metadataHash);
     }
 
     /// @notice Extract the catalyst by burning assets of the same tier
@@ -330,15 +241,6 @@ contract Asset is
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
         }
-    }
-
-    function getIncrementedCreatorNonce(
-        address creator
-    ) public onlyRole(MINTER_ROLE) returns (uint16) {
-        unchecked {
-            creatorNonces[creator]++;
-        }
-        return creatorNonces[creator];
     }
 
     /// @notice Query if a contract implements interface `id`.

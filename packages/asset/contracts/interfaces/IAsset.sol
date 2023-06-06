@@ -22,14 +22,6 @@ interface IAsset {
     }
 
     // Functions
-    function bridgeMint(
-        uint256 originalTokenId,
-        uint256 amount,
-        uint8 tier,
-        address recipient,
-        string memory metadataHash
-    ) external;
-
     function mint(
         address to,
         uint256 id,
@@ -42,12 +34,6 @@ interface IAsset {
         uint256[] memory ids,
         uint256[] memory amounts,
         string[] memory metadataHashes
-    ) external;
-
-    function mintSpecial(
-        address recipient,
-        AssetData calldata assetData,
-        string memory metadataHash
     ) external;
 
     function burnFrom(address account, uint256 id, uint256 amount) external;
@@ -77,8 +63,4 @@ interface IAsset {
     function getTokenIdByMetadataHash(
         string memory metadataHash
     ) external view returns (uint256);
-
-    function getIncrementedCreatorNonce(
-        address creator
-    ) external returns (uint16);
 }
