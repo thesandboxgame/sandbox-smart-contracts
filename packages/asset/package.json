@@ -25,6 +25,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.1.2",
     "chai": "^4.3.7",
+    "dotenv": "^16.1.4",
     "ethers": "^5.7.2",
     "hardhat": "^2.14.1",
     "hardhat-deploy": "^0.11.25",
