@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     "OperatorFilterSubscription"
   );
   const OperatorFilterRegistry = await deployments.get(
-    "OperatorFilterRegistry"
+    "OPERATOR_FILTER_REGISTRY"
   );
   // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
   // unless using local network, where we make our own deployment of it
@@ -55,4 +55,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["Catalyst"];
-func.dependencies = ["ProxyAdmin", "OperatorFilterSubscription"];
+func.dependencies = [
+  "ProxyAdmin",
+  "OPERATOR_FILTER_REGISTRY",
+  "OperatorFilterSubscription",
+];
