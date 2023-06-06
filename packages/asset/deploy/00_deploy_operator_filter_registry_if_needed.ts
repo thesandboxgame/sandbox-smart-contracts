@@ -8,10 +8,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
 
   let operatorFilterRegistry = await deployments.getOrNull(
-    "OperatorFilterRegistry"
+    "OPERATOR_FILTER_REGISTRY"
   );
+  // Deploy if needed: external contract is not available on local network
   if (!operatorFilterRegistry) {
-    operatorFilterRegistry = await deploy("OperatorFilterRegistry", {
+    operatorFilterRegistry = await deploy("OPERATOR_FILTER_REGISTRY", {
       from: deployer,
       contract: "OperatorFilterRegistry",
       log: true,
@@ -19,4 +20,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ["OperatorFilterRegistry"];
+func.tags = ["OPERATOR_FILTER_REGISTRY"];

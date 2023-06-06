@@ -17,7 +17,7 @@ export const setupOperatorFilter = withSnapshot(
     const { deploy } = deployments;
 
     const operatorFilterRegistry = await ethers.getContract(
-      "OperatorFilterRegistry"
+      "OPERATOR_FILTER_REGISTRY"
     );
 
     await deploy("MockERC1155MarketPlace1", {

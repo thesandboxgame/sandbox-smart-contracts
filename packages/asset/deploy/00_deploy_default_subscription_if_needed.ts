@@ -7,9 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer, filterOperatorSubscription } = await getNamedAccounts();
 
-  let defaultSubscription = await deployments.getOrNull("DefaultSubscription");
+  let defaultSubscription = await deployments.getOrNull("DEFAULT_SUBSCRIPTION");
+  // Deploy if needed: external contract is not available on local network
   if (!defaultSubscription) {
-    defaultSubscription = await deploy("DefaultSubscription", {
+    defaultSubscription = await deploy("DEFAULT_SUBSCRIPTION", {
       from: deployer,
       contract: "OwnedRegistrant",
       args: [filterOperatorSubscription],
@@ -18,4 +19,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ["DefaultSubscription"];
+func.tags = ["DEFAULT_SUBSCRIPTION"];

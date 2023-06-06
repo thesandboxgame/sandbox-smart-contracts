@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { filterOperatorSubscription, deployer } = await getNamedAccounts();
 
   const operatorFilterRegistry = await hre.ethers.getContract(
-    "OperatorFilterRegistry"
+    "OPERATOR_FILTER_REGISTRY"
   );
 
   const registered = await operatorFilterRegistry.isRegistered(
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const defaultSubscription = await hre.ethers.getContract(
-    "DefaultSubscription"
+    "DEFAULT_SUBSCRIPTION"
   );
 
   const registeredDefault = await operatorFilterRegistry.isRegistered(
@@ -53,4 +53,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ["OperatorSubscriber"];
-func.dependencies = ["OperatorFilterRegistry", "DefaultSubscription"];
+func.dependencies = ["OPERATOR_FILTER_REGISTRY", "DEFAULT_SUBSCRIPTION"];
