@@ -188,18 +188,18 @@ contract AssetCreate is
     /// @notice Create a bridged asset
     /// @dev Only callable by the bridge minter
     /// @dev Bridge contract
-    /// @param creator The address of the creator
+    /// @param recipient The address of the creator
     /// @param tokenId Id of the token to mint
     /// @param amount The amount of copies to mint
     /// @param metadataHash The metadata hash of the asset
     function createBridgedAsset(
-        address creator,
+        address recipient,
         uint256 tokenId,
         uint256 amount,
         string calldata metadataHash
     ) external onlyRole(BRIDGE_MINTER_ROLE) {
-        assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit AssetBridged(creator, tokenId, amount, metadataHash);
+        assetContract.mint(recipient, tokenId, amount, metadataHash);
+        emit AssetBridged(recipient, tokenId, amount, metadataHash);
     }
 
     /// @notice Get the next available creator nonce
