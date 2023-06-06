@@ -96,6 +96,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ]
   );
 
+  console.log(`encodedInitializationArgs:`, encodedInitializationArgs);
   const owner = await deployments.read('CollectionFactory', 'owner');
   const factoryContractAsOwner = await ethers.getContract(
     'CollectionFactory',
