@@ -16,6 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       contract: "OperatorFilterRegistry",
       log: true,
+      skipIfAlreadyDeployed: true,
     });
   }
 };

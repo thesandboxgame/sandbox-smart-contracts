@@ -18,10 +18,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     catalystRoyaltyRecipient,
     trustedForwarder,
   } = await getNamedAccounts();
-  const OperatorFilterSubscription = await deployments.get(
+  const operatorFilterSubscription = await deployments.get(
     "OperatorFilterSubscription"
   );
-  const OperatorFilterRegistry = await deployments.get(
+  const operatorFilterRegistry = await deployments.get(
     "OPERATOR_FILTER_REGISTRY"
   );
   // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
@@ -40,8 +40,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           CATALYST_BASE_URI,
           trustedForwarder,
           catalystRoyaltyRecipient,
-          OperatorFilterSubscription.address,
-          OperatorFilterRegistry.address,
+          operatorFilterSubscription.address,
+          operatorFilterRegistry.address,
           catalystAdmin,
           catalystMinter,
           CATALYST_DEFAULT_ROYALTY,
@@ -55,8 +55,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["Catalyst"];
-func.dependencies = [
-  "ProxyAdmin",
-  "OPERATOR_FILTER_REGISTRY",
-  "OperatorFilterSubscription",
-];
+func.dependencies = ["OPERATOR_FILTER_REGISTRY", "OperatorSubscriber"];

@@ -6,8 +6,12 @@ import { abi } from "../test/operatorRegistryABI";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, filterOperatorSubscription, trustedForwarder } =
-    await getNamedAccounts();
+  const {
+    deployer,
+    filterOperatorSubscription,
+    trustedForwarder,
+    upgradeAdmin,
+  } = await getNamedAccounts();
 
   // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
   // unless using local network, where we make our own deployment of it
@@ -19,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     contract: "Asset",
     proxy: {
-      owner: deployer,
+      owner: upgradeAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         methodName: "initialize",
@@ -35,6 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       upgradeIndex: 0,
     },
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;

@@ -15,6 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       contract: "OwnedRegistrant",
       args: [filterOperatorSubscription],
       log: true,
+      skipIfAlreadyDeployed: true,
     });
   }
 };

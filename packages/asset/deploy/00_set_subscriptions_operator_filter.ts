@@ -5,8 +5,8 @@ import { factoryABI, factoryByteCode } from "../test/factoryABI";
 import { OPERATOR_FILTER_REGISTRY, DEFAULT_SUBSCRIPTION } from "../constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { getNamedAccounts, deployments, ethers } = hre;
-  const { filterOperatorSubscription, deployer } = await getNamedAccounts();
+  const { getNamedAccounts } = hre;
+  const { filterOperatorSubscription } = await getNamedAccounts();
 
   const operatorFilterRegistry = await hre.ethers.getContract(
     "OPERATOR_FILTER_REGISTRY"
@@ -24,6 +24,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     defaultSubscription.address
   );
 
+  const operatorFilterSubscription = await hre.ethers.getContract(
+    "OperatorFilterSubscription"
+  );
+
+  const registeredOperatorFilterSubscription =
+    await operatorFilterRegistry.isRegistered(
+      operatorFilterSubscription.address
+    );
+
   // register default subscription
   // needed for local network since OwnedRegistrant cannot register at CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS
   // (registry cannot be deployed at this address locally)
@@ -35,7 +44,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await tn.wait();
   }
 
-  // this registered check is there so that the asset minter test setup doesn't fail.
+  // register operatorFilterSubscription
+  if (!registeredOperatorFilterSubscription) {
+    const tn = await operatorFilterRegistry.register(
+      operatorFilterSubscription.address
+    );
+
+    await tn.wait();
+  }
 
   // register filterOperatorSubscription
   if (!registered) {
@@ -53,4 +69,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ["OperatorSubscriber"];
-func.dependencies = ["OPERATOR_FILTER_REGISTRY", "DEFAULT_SUBSCRIPTION"];
+func.dependencies = [
+  "OPERATOR_FILTER_REGISTRY",
+  "DEFAULT_SUBSCRIPTION",
+  "OperatorFilterSubscription",
+];
