@@ -187,7 +187,7 @@ contract AssetCreate is
 
     /// @notice Create a bridged asset
     /// @dev Only callable by the bridge minter
-    /// @dev Bridge contract
+    /// @dev Bridge contract should keep track of the tokenIds generated so that copies of the same asset on L1 are minted with the same tokenIds on L2
     /// @param recipient The address of the creator
     /// @param tokenId Id of the token to mint
     /// @param amount The amount of copies to mint
