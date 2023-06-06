@@ -1,5 +1,5 @@
 import {assert} from 'chai';
-import {BigNumber, Contract, Wallet} from 'ethers';
+import {Contract, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, getNamedAccounts, deployments} from 'hardhat';
 import {withSnapshot, waitFor} from '../../../utils';
@@ -20,7 +20,6 @@ export const setupAvatar = withSnapshot(
   async function (hre) {
     const {sandAdmin} = await getNamedAccounts();
 
-    // const deploymentName = `${collectionName}Proxy`;
     const collectionDeployment = await deployments.get(collectionName);
     const avatarCollectionContract = new ethers.Contract(
       collectionDeployment.address,

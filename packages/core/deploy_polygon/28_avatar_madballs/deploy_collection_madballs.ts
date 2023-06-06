@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {BigNumber} from 'ethers';
 
 // the same as `skipIfAlreadyDeployed` from deployments.deploy but applied to our on-chain logic
 const skipIfAlreadyDeployed = false;

@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {BigNumber} from 'ethers';
 
 // the same as `skipIfAlreadyDeployed` from deployments.deploy but applied to our on-chain logic
 const skipIfAlreadyDeployed = false;
@@ -22,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // raffleSignWallet (taken from name accounts): wallet that can sign
   // nftCollectionAdmin (taken from name accounts): owner of collection
   // sandAdmin (taken from name accounts): treasury
-  const collectionName = 'ZeptoLabsOmNom ';
+  const collectionName = 'ZeptoLabsOmNom';
   const collectionSymbol = 'ZOM';
   const MAX_SUPPLY = 3000;
   const maxMarketingTokens = 60;
