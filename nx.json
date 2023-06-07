@@ -12,16 +12,5 @@
                 ]
             }
         }
-    },
-    "targetDefaults": {
-        "coverage": {
-            "dependsOn": [
-                "test"
-            ]
-        }
-    },
-    "defaultBase": "origin/master",
-    "affected": {
-        "defaultBase": "origin/master"
     }
 }

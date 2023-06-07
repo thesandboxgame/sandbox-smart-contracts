@@ -1,6 +1,7 @@
 module.exports = {
   singleQuote: true,
   bracketSpacing: false,
+  plugins: ['prettier-plugin-solidity'],
   overrides: [
     {
       files: '*.sol',

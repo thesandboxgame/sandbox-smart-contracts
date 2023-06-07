@@ -8,8 +8,7 @@ import { abi } from "../test/operatorRegistryABI";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, filterOperatorSubscription, upgradeAdmin, trustedForwarder } =
-    await getNamedAccounts();
+  const { deployer, upgradeAdmin, trustedForwarder } = await getNamedAccounts();
 
  await deploy("Asset", {
     from: deployer,
