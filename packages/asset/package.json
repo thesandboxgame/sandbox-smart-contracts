@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Asset L2 smart contracts",
   "scripts": {
+    "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "node": "hardhat node --no-deploy",
     "deploy": "hardhat deploy",
     "deploy:catalyst": "hardhat deploy --tags Catalyst --network polygon-mumbai",

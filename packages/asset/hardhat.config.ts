@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
+import "solidity-coverage";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -46,7 +47,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        enabled: true,
+        enabled: false, // note: if set to true then CI will fail
         blockNumber: 16000000,
         url: process.env.ETH_NODE_URI_POLYGON || "http://localhost:8545",
       },
