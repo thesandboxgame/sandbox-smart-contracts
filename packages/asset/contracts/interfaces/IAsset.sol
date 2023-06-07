@@ -12,19 +12,16 @@ interface IAsset {
     );
 
     struct AssetData {
+        uint256 tokenId;
         address creator;
         uint256 amount;
         uint8 tier;
         uint16 creatorNonce;
         bool revealed;
+        string metadataHash;
     }
 
     // Functions
-    function mint(
-        AssetData calldata assetData,
-        string memory metadataHash
-    ) external;
-
     function bridgeMint(
         uint256 originalTokenId,
         uint256 amount,
@@ -33,17 +30,19 @@ interface IAsset {
         string memory metadataHash
     ) external;
 
-    function mintBatch(
-        AssetData[] calldata assetData,
-        string[] memory metadataHashs
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        string memory metadataHash
     ) external;
 
-    function revealMint(
-        address recipient,
-        uint256 amount,
-        uint256 prevTokenId,
+    function mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
         string[] memory metadataHashes
-    ) external returns (uint256[] memory tokenIds);
+    ) external;
 
     function mintSpecial(
         address recipient,
@@ -74,4 +73,12 @@ interface IAsset {
     function getRecyclingAmount(
         uint256 catalystTokenId
     ) external view returns (uint256);
+
+    function getTokenIdByMetadataHash(
+        string memory metadataHash
+    ) external view returns (uint256);
+
+    function getIncrementedCreatorNonce(
+        address creator
+    ) external returns (uint16);
 }

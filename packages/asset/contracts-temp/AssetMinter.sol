@@ -24,10 +24,7 @@ contract AssetMinter is
     using TokenIdUtils for uint256;
     address public assetContract;
     address public catalystContract;
-    bytes32 public constant REVEAL_TYPEHASH =
-        keccak256(
-            "Reveal(address creator,uint256 prevTokenId, uint256 amount,string[] metadataHashes)"
-        );
+
     bytes32 public constant MINT_TYPEHASH =
         keccak256("Mint(MintableAsset mintableAsset)");
     bytes32 public constant MINT_BATCH_TYPEHASH =
@@ -205,67 +202,6 @@ contract AssetMinter is
         IAsset(assetContract).mintSpecial(recipient, asset, metadataHash);
     }
 
-    /// @notice Reveal an asset to view its abilities and enhancements
-    /// @dev the reveal mechanism works through burning the asset and minting a new one with updated tokenId
-    /// @param tokenId the tokenId of id idasset to reveal
-    /// @param amount the amount of tokens to reveal
-    function revealBurn(uint256 tokenId, uint256 amount) external {
-        // amount should be greater than 0
-        require(amount > 0, "Amount should be greater than 0");
-        // make sure the token is not already revealed
-        IAsset.AssetData memory data = tokenId.getData();
-
-        require(!data.revealed, "Token is already revealed");
-
-        // burn the tokens
-        IAsset(assetContract).burnFrom(_msgSender(), tokenId, amount);
-        // generate the revealed token id
-        emit AssetRevealBurn(
-            _msgSender(),
-            tokenId,
-            data.creator,
-            data.tier,
-            data.creatorNonce,
-            amount
-        );
-    }
-
-    /// @notice Reveal assets to view their abilities and enhancements
-    /// @dev Can be used to reveal multiple copies of the same token id
-    /// @param signature Signature created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
-    /// @param creator The original creator of the assets
-    /// @param prevTokenId The tokenId of the unrevealed asset
-    /// @param recipient The recipient of the revealed assets
-    /// @param amount The amount of assets to reveal (must be equal to the length of revealHashes)
-    /// @param metadataHashes The array of hashes for asset metadata
-    function revealMint(
-        bytes memory signature,
-        address creator,
-        uint256 prevTokenId,
-        address recipient,
-        uint256 amount,
-        string[] memory metadataHashes
-    ) external {
-        // verify the signature
-        require(
-            authValidator.verify(
-                signature,
-                _hashReveal(creator, prevTokenId, amount, metadataHashes)
-            ),
-            "Invalid signature"
-        );
-
-        // mint the tokens
-        uint256[] memory newIds = IAsset(assetContract).revealMint(
-            recipient,
-            amount,
-            prevTokenId,
-            metadataHashes
-        );
-
-        emit AssetsRevealed(recipient, creator, prevTokenId, newIds);
-    }
-
     /// @notice Recycles a batch of assets, to retireve catalyst at a defined ratio, the catalysts are minted to the caller of the function
     /// @dev The amount of copies that need to be burned in order to get the catalysts is defined in the asset contract
     /// @dev All tokensIds must be owned by the caller of the function
@@ -337,30 +273,6 @@ contract AssetMinter is
         returns (bytes calldata)
     {
         return ERC2771Handler._msgData();
-    }
-
-    /// @notice Creates a hash of the reveal data
-    /// @param creator The creator of the asset
-    /// @param prevTokenId The previous token id
-    /// @param amount The amount of tokens to mint
-    /// @return digest The hash of the reveal data
-    function _hashReveal(
-        address creator,
-        uint256 prevTokenId,
-        uint256 amount,
-        string[] memory metadataHashes
-    ) internal view returns (bytes32 digest) {
-        digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    REVEAL_TYPEHASH,
-                    creator,
-                    prevTokenId,
-                    amount,
-                    metadataHashes
-                )
-            )
-        );
     }
 
     /// @notice Creates a hash of the mint data

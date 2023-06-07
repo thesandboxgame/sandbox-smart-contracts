@@ -4,27 +4,28 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, upgradeAdmin, trustedForwarder, tsbAssetMinter } =
-    await getNamedAccounts();
+  const { deployer, upgradeAdmin, trustedForwarder } = await getNamedAccounts();
 
   const AssetContract = await deployments.get("Asset");
-  const CatalystContract = await deployments.get("Catalyst");
-  const AuthValidator = await deployments.get("AuthValidator");
+  const AuthValidatorContract = await deployments.get("AuthValidator");
 
-  await deploy("AssetMinter", {
+  const name = "Sandbox Asset Reveal";
+  const version = "1.0";
+
+  await deploy("AssetReveal", {
     from: deployer,
-    contract: "AssetMinter",
+    contract: "AssetReveal",
     proxy: {
       owner: upgradeAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         methodName: "initialize",
         args: [
-          trustedForwarder,
+          name,
+          version,
           AssetContract.address,
-          CatalystContract.address,
-          tsbAssetMinter,
-          AuthValidator.address,
+          AuthValidatorContract.address,
+          trustedForwarder,
         ],
       },
       upgradeIndex: 0,
@@ -34,5 +35,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.dependencies = ["Asset", "Catalyst", "AuthValidator"];
-func.tags = ["AssetMinter"];
+
+func.tags = ["AssetReveal"];
+func.dependencies = ["Asset", "AuthValidator"];

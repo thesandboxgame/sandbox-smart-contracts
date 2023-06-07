@@ -1226,10 +1226,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.8.2":
+"@openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.9.0":
   version: 4.9.0
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.0"
   checksum: c94eb8fc6761e17a245cee586eeaa74a098200f8508c56eda5ccbe1612fbe754f42f91ef1fea768f49295e1507dcb9cb72d33682949d84659ef63846cf83e26b
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts-upgradeable@npm:^4.8.2":
+  version: 4.9.1
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.1"
+  checksum: 4dff468b7de51701da8f46ca16e44831109e2602e80c96d68e3fba8ea1ae4ac498e60d38829e0d2d8494bb8cfc274adc7adc2dab566b929319dfe76a5c3af017
   languageName: node
   linkType: hard
 
@@ -1270,7 +1277,7 @@ __metadata:
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13"
     "@nomiclabs/hardhat-etherscan": ^3.1.7
     "@openzeppelin/contracts": ^4.8.2
-    "@openzeppelin/contracts-upgradeable": ^4.8.2
+    "@openzeppelin/contracts-upgradeable": ^4.9.0
     "@typechain/ethers-v5": ^10.2.1
     "@typechain/hardhat": ^6.1.6
     "@types/chai": ^4.3.5
@@ -8902,13 +8909,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"operator-filter-registry@npm:^1.3.1, operator-filter-registry@npm:^1.4.1":
+"operator-filter-registry@npm:^1.3.1":
   version: 1.4.1
   resolution: "operator-filter-registry@npm:1.4.1"
   dependencies:
     "@openzeppelin/contracts": ^4.7.3
     "@openzeppelin/contracts-upgradeable": ^4.8.0
   checksum: 586b268cc0075e2cc0865cf8efecd2f10a3d64f1eeda713fbb19f1e77043cb466e1250f03b706475cc57bc0ad18cef3fccb04a846f40be748732eb7a929018e6
+  languageName: node
+  linkType: hard
+
+"operator-filter-registry@npm:^1.4.1":
+  version: 1.4.2
+  resolution: "operator-filter-registry@npm:1.4.2"
+  dependencies:
+    "@openzeppelin/contracts": ^4.7.3
+    "@openzeppelin/contracts-upgradeable": ^4.8.2
+  checksum: b0e16a6bd608a3b3e35a3cf37757a669b6b3c5d34cc763a0f3a016e7e688b209b3b59e78169b9dc1b75e37aba1d37e27bc59c00f18b765170ad637b07d7ac81d
   languageName: node
   linkType: hard
 
