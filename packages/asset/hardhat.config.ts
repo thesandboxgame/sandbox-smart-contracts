@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
+import "solidity-coverage";
 import dotenv from "dotenv";
 dotenv.config();
 
