@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "src/solc_0.8/test/FakeFxChild.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n// IFxMessageProcessor represents interface to process message\ninterface IFxMessageProcessor {\n    function processMessageFromRoot(\n        uint256 stateId,\n        address rootMessageSender,\n        bytes calldata data\n    ) external;\n}\n\n/// @dev This is NOT a secure FxChild contract implementation!\n/// DO NOT USE in production.\n\n/**\n * @title FxChild child contract for state receiver\n */\ncontract FakeFxChild {\n    function onStateReceive(\n        uint256 stateId,\n        address receiver,\n        address rootMessageSender,\n        bytes memory data\n    ) external {\n        IFxMessageProcessor(receiver).processMessageFromRoot(stateId, rootMessageSender, data);\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 2000
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
