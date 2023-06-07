@@ -43,7 +43,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        enabled: true,
+        enabled: false, // note: if set to true then CI will fail
         blockNumber: 16000000,
         url: process.env.ETH_NODE_URI_POLYGON || "http://localhost:8545",
       },
