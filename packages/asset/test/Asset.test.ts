@@ -900,13 +900,13 @@ describe.skip("AssetContract", () => {
       ).to.be.equal(10);
     });
   });
+});
 
-  describe("OperatorFilterer", function () {
-    it("should be registered", async function () {
-      const { operatorFilterRegistry, Asset } = await setupOperatorFilter();
-      expect(
-        await operatorFilterRegistry.isRegistered(Asset.address)
-      ).to.be.equal(true);
-    });
+describe("OperatorFilterer", function () {
+  it("should be registered", async function () {
+    const { operatorFilterRegistry, Asset } = await setupOperatorFilter();
+    expect(
+      await operatorFilterRegistry.isRegistered(Asset.address)
+    ).to.be.equal(true);
   });
 });

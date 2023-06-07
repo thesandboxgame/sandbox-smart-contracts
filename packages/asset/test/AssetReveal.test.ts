@@ -83,7 +83,7 @@ const runTestSetup = deployments.createFixture(
   }
 );
 
-describe.only("AssetReveal", () => {
+describe("AssetReveal", () => {
   describe("General", () => {
     it("Should deploy correctly", async () => {
       const { AssetRevealContract } = await runTestSetup();
