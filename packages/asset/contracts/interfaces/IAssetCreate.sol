@@ -6,6 +6,7 @@ interface IAssetCreate {
     event AssetMinted(
         address indexed creator,
         uint256 tokenId,
+        uint16 tier,
         uint256 amount,
         string metadataHash
     );
@@ -24,6 +25,7 @@ interface IAssetCreate {
     event AssetBatchMinted(
         address indexed creator,
         uint256[] tokenIds,
+        uint8[] tiers,
         uint256[] amounts,
         string[] metadataHashes
     );

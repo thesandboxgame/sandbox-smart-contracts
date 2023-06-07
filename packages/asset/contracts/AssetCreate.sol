@@ -37,11 +37,11 @@ contract AssetCreate is
         keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
         keccak256(
-            "Mint(address creator,uint8 tier,uint256 amount,string metadataHash)"
+            "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,string metadataHash)"
         );
     bytes32 public constant MINT_BATCH_TYPEHASH =
         keccak256(
-            "Mint(address creator,uint8[] tiers,uint256[] amounts,string[] metadataHashes)"
+            "Mint(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -102,7 +102,7 @@ contract AssetCreate is
         catalystContract.burnFrom(creator, tier, amount);
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit AssetMinted(creator, tokenId, amount, metadataHash);
+        emit AssetMinted(creator, tokenId, tier, amount, metadataHash);
     }
 
     /// @notice Create multiple assets at once
@@ -110,7 +110,7 @@ contract AssetCreate is
     /// @param tiers The tiers of the assets to mint
     /// @param amounts The amounts of the assets to mint
     /// @param metadataHashes The metadata hashes of the assets to mint
-    function batchCreateAsset(
+    function createMultipleAssets(
         bytes memory signature,
         uint8[] calldata tiers,
         uint256[] calldata amounts,
@@ -120,7 +120,13 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashBatchMint(creator, tiers, amounts, metadataHashes)
+                _hashBatchMint(
+                    creator,
+                    creatorNonces[creator],
+                    tiers,
+                    amounts,
+                    metadataHashes
+                )
             ),
             "Invalid signature"
         );
@@ -148,7 +154,13 @@ contract AssetCreate is
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit AssetBatchMinted(creator, tokenIds, amounts, metadataHashes);
+        emit AssetBatchMinted(
+            creator,
+            tokenIds,
+            tiers,
+            amounts,
+            metadataHashes
+        );
     }
 
     /// @notice Create special assets, like TSB exclusive tokens
@@ -205,7 +217,7 @@ contract AssetCreate is
     /// @notice Get the next available creator nonce
     /// @param creator The address of the creator
     /// @return nonce The next available creator nonce
-    function getCreatorNonce(address creator) public returns (uint16) {
+    function getCreatorNonce(address creator) internal returns (uint16) {
         creatorNonces[creator]++;
         emit CreatorNonceIncremented(creator, creatorNonces[creator]);
         return creatorNonces[creator];
@@ -248,7 +260,14 @@ contract AssetCreate is
     ) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
             keccak256(
-                abi.encode(MINT_TYPEHASH, creator, tier, amount, metadataHash)
+                abi.encode(
+                    MINT_TYPEHASH,
+                    creator,
+                    creatorNonces[creator],
+                    tier,
+                    amount,
+                    keccak256((abi.encodePacked(metadataHash)))
+                )
             )
         );
     }
@@ -261,6 +280,7 @@ contract AssetCreate is
     /// @return digest The hash of the mint batch data
     function _hashBatchMint(
         address creator,
+        uint16 nonce,
         uint8[] calldata tiers,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
@@ -270,6 +290,7 @@ contract AssetCreate is
                 abi.encode(
                     MINT_BATCH_TYPEHASH,
                     creator,
+                    nonce,
                     keccak256(abi.encodePacked(tiers)),
                     keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)

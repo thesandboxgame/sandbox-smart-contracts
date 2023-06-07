@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
-import { createEIP712RevealSignature } from "./utils/revealSignature";
+import { createEIP712RevealSignature } from "./utils/signatures";
 
 const runTestSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
@@ -83,7 +83,7 @@ const runTestSetup = deployments.createFixture(
   }
 );
 
-describe.only("AssetReveal", () => {
+describe("AssetReveal", () => {
   describe("General", () => {
     it("Should deploy correctly", async () => {
       const { AssetRevealContract } = await runTestSetup();
