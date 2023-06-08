@@ -59,10 +59,10 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
      * @custom:event TokenBurningEnabled
      */
     function enableBurning() public virtual {
-       require(!isBurnEnabled, "Burning already enabled");
-       isBurnEnabled = true;
+        require(!isBurnEnabled, "Burning already enabled");
+        isBurnEnabled = true;
 
-       emit TokenBurningEnabled();
+        emit TokenBurningEnabled();
     }
 
     /**
@@ -72,10 +72,10 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
      * @custom:event TokenBurningDisabled
      */
     function disableBurning() public virtual {
-       require(isBurnEnabled, "Burning already disabled");
-       isBurnEnabled = false;
+        require(isBurnEnabled, "Burning already disabled");
+        isBurnEnabled = false;
 
-       emit TokenBurningDisabled();
+        emit TokenBurningDisabled();
     }
 
     /**

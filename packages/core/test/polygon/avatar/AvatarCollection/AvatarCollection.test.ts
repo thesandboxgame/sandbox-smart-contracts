@@ -862,7 +862,10 @@ describe(collectionName, function () {
     assert.notEqual(randomAddress, minterAddress);
 
     // validated that burning is not allowed by default
-    assert.isNotTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should be disabled by default");
+    assert.isNotTrue(
+      await avatarContractAsRandomAddress.isBurnEnabled(),
+      'burning should be disabled by default'
+    );
     await expect(
       avatarContractAsRandomAddress.burn(tokenId)
     ).to.be.revertedWith('Burning is not enabled');
@@ -870,7 +873,10 @@ describe(collectionName, function () {
     // enable burning
     await contractAsOwner.enableBurning();
 
-    assert.isTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should of been enabled");
+    assert.isTrue(
+      await avatarContractAsRandomAddress.isBurnEnabled(),
+      'burning should of been enabled'
+    );
 
     // validated that only the minter can burn an token (access control check)
     await expect(
@@ -958,8 +964,10 @@ describe(collectionName, function () {
     // check that disable burning also works
     await contractAsOwner.disableBurning();
 
-    assert.isNotTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should now be disabled");
-
+    assert.isNotTrue(
+      await avatarContractAsRandomAddress.isBurnEnabled(),
+      'burning should now be disabled'
+    );
   });
 
   /*////////////////////////////////////////////////////////
