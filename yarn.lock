@@ -1289,7 +1289,7 @@ __metadata:
     hardhat: ^2.14.1
     hardhat-deploy: ^0.11.25
     hardhat-gas-reporter: ^1.0.9
-    operator-filter-registry: ^1.4.1
+    operator-filter-registry: ^1.4.2
     prettier: ^2.8.8
     prettier-plugin-solidity: 1.0.0-beta.11
     solhint-plugin-prettier: ^0.0.5
@@ -8919,7 +8919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"operator-filter-registry@npm:^1.4.1":
+"operator-filter-registry@npm:^1.4.2":
   version: 1.4.2
   resolution: "operator-filter-registry@npm:1.4.2"
   dependencies:

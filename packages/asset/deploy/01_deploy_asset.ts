@@ -8,10 +8,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
   const {
     deployer,
-    upgradeAdmin,
-    trustedForwarder,
     filterOperatorSubscription,
+    trustedForwarder,
+    upgradeAdmin,
   } = await getNamedAccounts();
+
+  // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
+  // unless using local network, where we make our own deployment of it
+  const operatorFilterRegistry = await deployments.get(
+    "OPERATOR_FILTER_REGISTRY"
+  );
 
   await deploy("Asset", {
     from: deployer,
@@ -27,35 +33,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           [2, 4, 6, 8, 10, 12],
           "ipfs://",
           filterOperatorSubscription,
+          operatorFilterRegistry.address,
         ],
       },
       upgradeIndex: 0,
     },
     log: true,
+    skipIfAlreadyDeployed: true,
   });
-
-  // get asset from deployment
-  const asset = await deployments.get("Asset");
-
-  // get asset from ethers
-  const asset2 = await hre.ethers.getContract("Asset");
-
-  if (asset.address == asset2.address)
-    console.log("asset address is same from both ethers and deployments");
-
-  const operatorFilterRegistry = await hre.ethers.getContractAt(
-    abi,
-    OPERATOR_FILTER_REGISTRY
-  );
-
-  const registered = await operatorFilterRegistry.isRegistered(
-    filterOperatorSubscription
-  );
-
-  if (registered) console.log("Asset is registered. Checked in deployment");
 };
 export default func;
 
 func.tags = ["Asset"];
-
-func.dependencies = ["Operator_Subscriber"];
+func.dependencies = ["OPERATOR_FILTER_REGISTRY", "OperatorSubscriber"];

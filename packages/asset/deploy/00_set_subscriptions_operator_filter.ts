@@ -1,0 +1,61 @@
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
+import { abi, byteCode } from "../test/operatorRegistryABI";
+import { factoryABI, factoryByteCode } from "../test/factoryABI";
+import { OPERATOR_FILTER_REGISTRY, DEFAULT_SUBSCRIPTION } from "../constants";
+
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  const { getNamedAccounts } = hre;
+  const { filterOperatorSubscription } = await getNamedAccounts();
+
+  const operatorFilterRegistry = await hre.ethers.getContract(
+    "OPERATOR_FILTER_REGISTRY"
+  );
+
+  const registered = await operatorFilterRegistry.isRegistered(
+    filterOperatorSubscription
+  );
+
+  const defaultSubscription = await hre.ethers.getContract(
+    "DEFAULT_SUBSCRIPTION"
+  );
+
+  const operatorFilterSubscription = await hre.ethers.getContract(
+    "OperatorFilterSubscription"
+  );
+
+  const registeredOperatorFilterSubscription =
+    await operatorFilterRegistry.isRegistered(
+      operatorFilterSubscription.address
+    );
+
+  // register operatorFilterSubscription
+  if (!registeredOperatorFilterSubscription) {
+    const tn = await operatorFilterRegistry.register(
+      operatorFilterSubscription.address
+    );
+
+    await tn.wait();
+  }
+
+  // register filterOperatorSubscription
+  if (!registered) {
+    const tnx = await operatorFilterRegistry
+      .connect(hre.ethers.provider.getSigner(filterOperatorSubscription))
+      .registerAndCopyEntries(
+        filterOperatorSubscription,
+        defaultSubscription.address
+      );
+
+    await tnx.wait();
+    console.log("common subscription registered on operator filter registry");
+  }
+};
+export default func;
+
+func.tags = ["OperatorSubscriber"];
+func.dependencies = [
+  "OPERATOR_FILTER_REGISTRY",
+  "DEFAULT_SUBSCRIPTION",
+  "OperatorFilterSubscription",
+];
