@@ -75,7 +75,8 @@
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^10.9.1",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "defender-relay-client": "^1.44.0"
   },
   "scripts": {
     "postinstall": "node ./.setup.js",
@@ -124,8 +125,5 @@
   "bugs": {
     "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
   },
-  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
-  "dependencies": {
-    "defender-relay-client": "^1.44.0"
-  }
+  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme"
 }

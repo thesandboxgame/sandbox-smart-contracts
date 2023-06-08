@@ -5,12 +5,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, ozdRelayer} = await getNamedAccounts();
 
   const polygonLandTunnel = await deployments.get('PolygonLandTunnel');
   const polygonLand = await deployments.get('PolygonLand');
   const polygonLandTunnelV2 = await deployments.get('PolygonLandTunnelV2');
-  const defender = await deployments.get('DEFENDER');
 
   await deploy('PolygonLandTunnelMigration', {
     from: deployer,
@@ -19,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       polygonLand.address,
       polygonLandTunnelV2.address,
       polygonLandTunnel.address,
-      defender.address,
+      ozdRelayer,
     ],
     log: true,
   });
