@@ -20,10 +20,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     "DEFAULT_SUBSCRIPTION"
   );
 
-  const registeredDefault = await operatorFilterRegistry.isRegistered(
-    defaultSubscription.address
-  );
-
   const operatorFilterSubscription = await hre.ethers.getContract(
     "OperatorFilterSubscription"
   );
@@ -32,17 +28,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await operatorFilterRegistry.isRegistered(
       operatorFilterSubscription.address
     );
-
-  // register default subscription
-  // needed for local network since OwnedRegistrant cannot register at CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS
-  // (registry cannot be deployed at this address locally)
-  if (!registeredDefault) {
-    const tn = await operatorFilterRegistry.register(
-      defaultSubscription.address
-    );
-
-    await tn.wait();
-  }
 
   // register operatorFilterSubscription
   if (!registeredOperatorFilterSubscription) {
