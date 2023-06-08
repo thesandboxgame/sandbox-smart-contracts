@@ -24,6 +24,9 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
     /// @notice burner to list of burned tokens mapping; to see what tokens who burned
     mapping(address => uint256[]) public burnedTokens;
 
+    /// @notice flag that gates burning
+    bool public isBurnEnabled;
+
     /*//////////////////////////////////////////////////////////////
                                 Events
     //////////////////////////////////////////////////////////////*/
@@ -35,17 +38,55 @@ contract ERC721BurnMemoryEnumerableUpgradeable is ERC721EnumerableUpgradeable {
      */
     event TokenBurned(uint256 indexed tokenId, address indexed burner);
 
+    /**
+     * @notice event emitted when token burning was enabled
+     */
+    event TokenBurningEnabled();
+
+    /**
+     * @notice event emitted when token burning was disabled
+     */
+    event TokenBurningDisabled();
+
     /*//////////////////////////////////////////////////////////////
                     External and public functions
     //////////////////////////////////////////////////////////////*/
 
     /**
+     * @notice enables burning of tokens
+     * @dev must be inherited if access control is to be added
+     *      reverts if burning already enabled
+     * @custom:event TokenBurningEnabled
+     */
+    function enableBurning() public virtual {
+       require(!isBurnEnabled, "Burning already enabled");
+       isBurnEnabled = true;
+
+       emit TokenBurningEnabled();
+    }
+
+    /**
+     * @notice disables burning of tokens
+     * @dev must be inherited if access control is to be added
+     *      reverts if burning already disabled
+     * @custom:event TokenBurningDisabled
+     */
+    function disableBurning() public virtual {
+       require(isBurnEnabled, "Burning already disabled");
+       isBurnEnabled = false;
+
+       emit TokenBurningDisabled();
+    }
+
+    /**
      * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
      * @dev See {ERC721EnumerableUpgradeable-_burn}.
+     *      Reverts if burning is not enabled
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
     function burn(uint256 tokenId) public virtual {
+        require(isBurnEnabled, "Burning is not enabled");
         address sender = _msgSender();
         require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
         super._burn(tokenId);

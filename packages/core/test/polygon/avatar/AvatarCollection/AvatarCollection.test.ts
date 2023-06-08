@@ -843,6 +843,11 @@ describe(collectionName, function () {
       ethers.provider.getSigner(minterAddress)
     );
 
+    const owner = await avatarCollectionContract.owner();
+    const contractAsOwner = avatarCollectionContract.connect(
+      ethers.provider.getSigner(owner)
+    );
+
     const randomAddress = raffleSignWallet.address;
     await topUpAddress(randomAddress, 100);
 
@@ -855,6 +860,17 @@ describe(collectionName, function () {
 
     // sanity check that the random address is not the minter address
     assert.notEqual(randomAddress, minterAddress);
+
+    // validated that burning is not allowed by default
+    assert.isNotTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should be disabled by default");
+    await expect(
+      avatarContractAsRandomAddress.burn(tokenId)
+    ).to.be.revertedWith('Burning is not enabled');
+
+    // enable burning
+    await contractAsOwner.enableBurning();
+
+    assert.isTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should of been enabled");
 
     // validated that only the minter can burn an token (access control check)
     await expect(
@@ -938,6 +954,12 @@ describe(collectionName, function () {
         `burned tokenId:${burnedToken} not found in minted list`
       );
     }
+
+    // check that disable burning also works
+    await contractAsOwner.disableBurning();
+
+    assert.isNotTrue(await avatarContractAsRandomAddress.isBurnEnabled(), "burning should now be disabled");
+
   });
 
   /*////////////////////////////////////////////////////////
