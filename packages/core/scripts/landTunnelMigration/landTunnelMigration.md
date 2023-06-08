@@ -83,7 +83,7 @@ tunnel-polygon.json
 ### Split LAND IDs
 
 ```shell
-npx ts-node ./scripts/utils/splitLandIdsForTunnelMigration.ts
+npx ts-node ./scripts/landTunnelMigration/splitLandIdsForTunnelMigration.ts
 ```
 
 ### Load LandTunnelV2 contracts on the backend database with sync disabled
@@ -93,7 +93,7 @@ npx ts-node ./scripts/utils/splitLandIdsForTunnelMigration.ts
 This script takes the files containing Land ands quads on the old Land Tunnel on mainnet and transfers them to new Land Tunnel which we deployed on mainnet using migration contract.
 
 ```shell
-yarn execute mainnet ./scripts/transact/migrateTunnelLandOnL1.ts
+yarn execute mainnet ./scripts/landTunnelMigration/migrateTunnelLandOnL1.ts
 ```
 
 ### Withdraw locked LANDs to their owners
@@ -101,7 +101,7 @@ yarn execute mainnet ./scripts/transact/migrateTunnelLandOnL1.ts
 This script takes the common Land on both polygon and mainnet the old Land Tunnels and migrate common Land on old polygon Land Tunnel and first migrate them to migration contract on polygon and with draw those Land back on mainnet to their designated owners. This is done through migration contract on polygon.
 
 ```shell
-yarn execute polygon ./scripts/transact/migrateAndWithdrawTunnelLandOnL2.ts {Old land tunnel's address} {Block number when the old land tunnel was deployed}
+yarn execute polygon ./scripts/landTunnelMigration/migrateAndWithdrawTunnelLandOnL2.ts {Old land tunnel's address} {Block number when the old land tunnel was deployed}
 ```
 
 ### Migrate the LANDs to the new tunnel on polygon
@@ -109,7 +109,7 @@ yarn execute polygon ./scripts/transact/migrateAndWithdrawTunnelLandOnL2.ts {Old
 This scripts Takes uinque Land and quads present on Old polygon Land Tunnel and migrate it to new polygon Land Tunnel using migration contract. Input file land id on tunnels config
 
 ```shell
-yarn execute polygon ./scripts/transact/migrateTunnelLandOnL2.ts
+yarn execute polygon ./scripts/landTunnelMigration/migrateTunnelLandOnL2.ts
 ```
 
 ### Remove minter role from the old tunnels
