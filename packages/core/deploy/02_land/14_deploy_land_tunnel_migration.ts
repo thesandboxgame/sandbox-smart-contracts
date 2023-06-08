@@ -14,12 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('LandTunnelMigration', {
     from: deployer,
     contract: 'LandTunnelMigration',
-    args: [
-      land.address,
-      landTunnelV2.address,
-      landTunnel.address,
-      ozdRelayer,
-    ],
+    args: [land.address, landTunnelV2.address, landTunnel.address, ozdRelayer],
     log: true,
   });
 };
