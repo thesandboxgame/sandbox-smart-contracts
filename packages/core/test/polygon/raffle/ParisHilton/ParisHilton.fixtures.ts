@@ -1,81 +1,55 @@
 import {assert} from 'chai';
-import {Contract, Wallet} from 'ethers';
+import {BigNumber, Contract, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import {ethers, getNamedAccounts, deployments} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {withSnapshot, waitFor} from '../../../utils';
 import {depositViaChildChainManager} from '../../sand/fixtures';
-import ERC20Mock from '@openzeppelin/contracts-0.8.15/build/contracts/ERC20PresetMinterPauser.json';
+
+export {assert};
 
 export const raffleSignWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
 );
 
-export const collectionName = 'MockAvatarTesting';
-export const COLLECTION_MAX_SUPPLY = 500;
+export const contractName = 'ParisHilton';
+export const COLLECTION_MAX_SUPPLY = 5555;
 
-const implementationDeployTag = 'AvatarCollectionTest_deploy';
+export const setupRaffle = withSnapshot([contractName], async function (hre) {
+  const {sandAdmin} = await getNamedAccounts();
 
-export const setupAvatar = withSnapshot(
-  [implementationDeployTag],
-  async function (hre) {
-    const {sandAdmin} = await getNamedAccounts();
+  const raffleCollectionContract = await ethers.getContract(contractName);
 
-    const collectionDeployment = await deployments.get(collectionName);
-    const avatarCollectionContract = new ethers.Contract(
-      collectionDeployment.address,
-      collectionDeployment.abi,
-      ethers.provider
-    );
+  const sandContract = await ethers.getContract('PolygonSand');
+  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
 
-    const sandContract = await ethers.getContract('PolygonSand');
-    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  const SAND_AMOUNT = BigNumber.from(100000).mul('1000000000000000000');
 
-    const SAND_AMOUNT = ethers.utils.parseUnits('100000', 'ether');
+  await depositViaChildChainManager(
+    {sand: sandContract, childChainManager},
+    sandAdmin,
+    SAND_AMOUNT
+  );
 
-    await depositViaChildChainManager(
-      {sand: sandContract, childChainManager},
-      sandAdmin,
-      SAND_AMOUNT
-    );
-
-    return {
-      avatarCollectionContract,
-      sandContract,
-      hre,
-      getNamedAccounts,
-      setupWave,
-      signAuthMessageAs,
-      transferSand,
-      mint: mintSetup(avatarCollectionContract, sandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        avatarCollectionContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        avatarCollectionContract,
-        invalidPersonalizeSignature
-      ),
-    };
-  }
-);
-
-export async function setupMockERC20(): Promise<{
-  randomTokenContract: Contract;
-}> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {deployer} = await getNamedAccounts();
-
-  await deployments.deploy('RandomToken', {
-    from: deployer,
-    contract: ERC20Mock,
-    args: ['RToken', 'RAND'],
-    proxy: false,
-  });
   return {
-    randomTokenContract: await ethers.getContract('RandomToken', deployer),
+    raffleCollectionContract,
+    sandContract,
+    hre,
+    getNamedAccounts,
+    setupWave,
+    signAuthMessageAs,
+    transferSand,
+    mint: mintSetup(raffleCollectionContract, sandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
+      raffleCollectionContract,
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      raffleCollectionContract,
+      invalidPersonalizeSignature
+    ),
   };
-}
+});
 
 async function setupWave(
   raffle: Contract,
@@ -96,7 +70,7 @@ async function setupWave(
     waveSingleTokenPrice
   );
   assert.equal(
-    (await raffle.waveMaxTokensOverall()).toString(),
+    (await raffle.waveMaxTokens()).toString(),
     waveMaxTokens.toString()
   );
   assert.equal(
@@ -104,71 +78,13 @@ async function setupWave(
     raffleSignWallet.toString()
   );
   assert.equal(
-    (await raffle.waveMaxTokensPerWallet()).toString(),
+    (await raffle.waveMaxTokensToBuy()).toString(),
     waveMaxTokensToBuy.toString()
   );
   assert.equal(
     (await raffle.waveSingleTokenPrice()).toString(),
     waveSingleTokenPrice.toString()
   );
-}
-
-export type AvatarMintingSetup = {
-  avatarCollectionContract: Contract;
-  mintedIdx: string[];
-  minterAddress: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [k: string]: any;
-};
-
-export async function setupAvatarAndMint(
-  mintCount: number
-): Promise<AvatarMintingSetup> {
-  const avatarSetup = await setupAvatar();
-
-  const {
-    avatarCollectionContract,
-    transferSand,
-    setupWave,
-    getNamedAccounts,
-    hre,
-    mint,
-  } = avatarSetup;
-  const {deployer} = await getNamedAccounts();
-  await transferSand(deployer, '1000');
-  await setupWave(avatarCollectionContract, mintCount * 2, mintCount, '1');
-
-  await mint(
-    raffleSignWallet,
-    deployer,
-    0,
-    avatarCollectionContract.address,
-    hre.network.config.chainId || 31337,
-    mintCount.toString(),
-    mintCount
-  );
-
-  const transferEvents = await avatarCollectionContract.queryFilter(
-    avatarCollectionContract.filters.Transfer()
-  );
-
-  const mintedIdx: string[] = [];
-  for (const eventIndex in transferEvents) {
-    const event = transferEvents[eventIndex];
-    const tokenId = event?.args?.tokenId.toString();
-    mintedIdx.push(tokenId);
-  }
-
-  const owner = await avatarCollectionContract.owner();
-  const avatarContractAsOwner = avatarCollectionContract.connect(
-    ethers.provider.getSigner(owner)
-  );
-  return {
-    ...avatarSetup,
-    avatarContractAsOwner,
-    mintedIdx,
-    minterAddress: deployer,
-  };
 }
 
 function validPersonalizeSignature(
@@ -253,6 +169,7 @@ function mintSetup(raffleContract: Contract, sandContract: Contract) {
     approvalAmount: string | number,
     amount: number
   ) => {
+    // console.log("ABA: ", approvalAmount);
     const signature = await signAuthMessageAs(
       wallet,
       address,
@@ -313,20 +230,4 @@ function personalizeSetup(
       contract.personalize(signatureId, signature, tokenId, personalizationMask)
     );
   };
-}
-
-export async function topUpAddress(
-  recipientAddress: string,
-  nativeTokenAmount: number
-): Promise<void> {
-  const signer = ethers.provider.getSigner();
-
-  // Set the amount of ETH to send
-  const amountToSend = ethers.utils.parseEther(nativeTokenAmount.toString());
-
-  // Send the transaction
-  await signer.sendTransaction({
-    to: recipientAddress,
-    value: amountToSend,
-  });
 }

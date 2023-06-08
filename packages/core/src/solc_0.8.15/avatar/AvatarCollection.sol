@@ -613,6 +613,26 @@ contract AvatarCollection is
     }
 
     /**
+     * @notice enables burning of tokens
+     * @dev reverts if burning already enabled.
+     *      Inherited in order to add the onlyOwner modifier
+     * @custom:event TokenBurningEnabled
+     */
+    function enableBurning() public override onlyOwner {
+        super.enableBurning();
+    }
+
+    /**
+     * @notice disables burning of tokens
+     * @dev reverts if burning already disabled.
+     *      Inherited in order to add the onlyOwner modifier
+     * @custom:event TokenBurningDisabled
+     */
+    function disableBurning() public override onlyOwner {
+        super.disableBurning();
+    }
+
+    /**
      * @notice saving locally the treasury address
      * @dev sets mintTreasury = _treasury
      * @custom:event {TreasurySet}

@@ -2,7 +2,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 // the same as `skipIfAlreadyDeployed` from deployments.deploy but applied to our on-chain logic
-const skipIfAlreadyDeployed = true;
+const skipIfAlreadyDeployed = false;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers, artifacts} = hre;
@@ -21,17 +21,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // raffleSignWallet (taken from name accounts): wallet that can sign
   // nftCollectionAdmin (taken from name accounts): owner of collection
   // sandAdmin (taken from name accounts): treasury
-  const collectionName = 'MockAvatarTesting';
-  const collectionSymbol = 'MAT';
-  const MAX_SUPPLY = 500;
-  const maxMarketingTokens = 50;
+  const collectionName = 'ZeptoLabsOmNom';
+  const collectionSymbol = 'ZOM';
+  const MAX_SUPPLY = 3000;
+  const maxMarketingTokens = 60;
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
-    metadataUrl = 'https://contracts.sandbox.game/avatarcollection-unrevealed/';
+    metadataUrl = 'https://contracts.sandbox.game/zeptolabs-unrevealed/';
   } else {
-    metadataUrl =
-      'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
+    metadataUrl = 'https://contracts-demo.sandbox.game/zeptolabs-unrevealed/';
   }
 
   // OpenSea configurations // // //
@@ -148,7 +147,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['AvatarCollectionTest', 'AvatarCollectionTest_deploy'];
+func.tags = ['Zeptolabs', 'Zeptolabs_deploy'];
 func.dependencies = [
   'PolygonSand_deploy',
   'CollectionFactory_deploy_beacon_main_avatar',
