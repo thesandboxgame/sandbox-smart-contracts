@@ -133,10 +133,10 @@ contract AssetCreate is
             ),
             "Invalid signature"
         );
-        // all arrays must be same length
+
+        require(tiers.length == amounts.length, "Arrays must be same length");
         require(
-            tiers.length == amounts.length &&
-                amounts.length == metadataHashes.length,
+            amounts.length == metadataHashes.length,
             "Arrays must be same length"
         );
 
