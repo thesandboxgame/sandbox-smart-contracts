@@ -23,11 +23,17 @@ contract AssetReveal is
     AuthValidator private authValidator;
 
     // mapping of creator to asset id to asset's reveal nonce
-    mapping(address => mapping(uint256 => uint16)) revealNonces;
+    mapping(address => mapping(uint256 => uint16)) revealIds;
+    // nonces of creators used in signature validation
+    mapping(bytes => bool) usedSignatures;
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
+            "Reveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
+        );
+    bytes32 public constant INSTANT_REVEAL_TYPEHASH =
+        keccak256(
+            "InstantReveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -91,23 +97,109 @@ contract AssetReveal is
     /// @param prevTokenId The tokenId of the unrevealed asset
     /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
     /// @param metadataHashes The array of hashes for asset metadata
-    /// @param recipient The recipient of the revealed assets
     function revealMint(
         bytes memory signature,
         uint256 prevTokenId,
         uint256[] calldata amounts,
-        string[] calldata metadataHashes,
-        address recipient
+        string[] calldata metadataHashes
     ) public {
         require(
             authValidator.verify(
                 signature,
-                _hashReveal(prevTokenId, amounts, metadataHashes)
+                _hashReveal(_msgSender(), prevTokenId, amounts, metadataHashes)
             ),
             "Invalid signature"
         );
+        require(!usedSignatures[signature], "Signature has already been used");
+        usedSignatures[signature] = true;
 
         require(amounts.length == metadataHashes.length, "Invalid amount");
+        uint256[] memory tokenIds = getRevealedTokenIds(
+            amounts,
+            metadataHashes,
+            prevTokenId
+        );
+
+        if (tokenIds.length == 1) {
+            assetContract.mint(
+                _msgSender(),
+                tokenIds[0],
+                amounts[0],
+                metadataHashes[0]
+            );
+        } else {
+            assetContract.mintBatch(
+                _msgSender(),
+                tokenIds,
+                amounts,
+                metadataHashes
+            );
+        }
+
+        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, tokenIds);
+    }
+
+    /// @notice Mint multiple assets with revealed abilities and enhancements
+    /// @dev Can be used to reveal multiple copies of the same token id
+    /// @param signatures Signatures created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
+    /// @param prevTokenIds The tokenId of the unrevealed asset
+    /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
+    /// @param metadataHashes The array of hashes for asset metadata
+    function revealBatchMint(
+        bytes[] calldata signatures,
+        uint256[] calldata prevTokenIds,
+        uint256[][] calldata amounts,
+        string[][] calldata metadataHashes
+    ) public {
+        require(signatures.length == prevTokenIds.length, "Invalid input");
+        require(amounts.length == metadataHashes.length, "Invalid input");
+        require(prevTokenIds.length == amounts.length, "Invalid input");
+
+        for (uint256 i = 0; i < signatures.length; i++) {
+            revealMint(
+                signatures[i],
+                prevTokenIds[i],
+                amounts[i],
+                metadataHashes[i]
+            );
+        }
+    }
+
+    /// @notice Reveal assets to view their abilities and enhancements and mint them in a single transaction
+    /// @dev Should be used where it is not required to keep the metadata secret, e.g. mythical assets where users select their desired abilities and enhancements
+    /// @param signature Signature created on the TSB backend containing INSTANT_REVEAL_TYPEHASH and associated data, must be signed by authorized signer
+    /// @param prevTokenId The tokenId of the unrevealed asset
+    /// @param burnAmount The amount of assets to burn
+    /// @param amounts The amount of assets to reveal (sum must be equal to the burnAmount)
+    /// @param metadataHashes The array of hashes for asset metadata
+    function burnAndReveal(
+        bytes memory signature,
+        uint256 prevTokenId,
+        uint256 burnAmount,
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes
+    ) external {
+        require(
+            authValidator.verify(
+                signature,
+                _hashInstantReveal(
+                    _msgSender(),
+                    prevTokenId,
+                    amounts,
+                    metadataHashes
+                )
+            ),
+            "Invalid signature"
+        );
+        require(!usedSignatures[signature], "Signature has already been used");
+        usedSignatures[signature] = true;
+
+        require(burnAmount > 0, "Amount should be greater than 0");
+
+        IAsset.AssetData memory data = prevTokenId.getData();
+        require(!data.revealed, "Asset is already revealed");
+        require(data.tier == 0, "Only tier 0 assets can be burned");
+        assetContract.burnFrom(_msgSender(), prevTokenId, burnAmount);
 
         uint256[] memory tokenIds = getRevealedTokenIds(
             amounts,
@@ -117,50 +209,17 @@ contract AssetReveal is
 
         if (tokenIds.length == 1) {
             assetContract.mint(
-                recipient,
+                _msgSender(),
                 tokenIds[0],
                 amounts[0],
                 metadataHashes[0]
             );
         } else {
             assetContract.mintBatch(
-                recipient,
+                _msgSender(),
                 tokenIds,
                 amounts,
                 metadataHashes
-            );
-        }
-
-        emit AssetsRevealed(recipient, prevTokenId, amounts, tokenIds);
-    }
-
-    /// @notice Mint multiple assets with revealed abilities and enhancements
-    /// @dev Can be used to reveal multiple copies of the same token id
-    /// @param signatures Signatures created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
-    /// @param prevTokenIds The tokenId of the unrevealed asset
-    /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
-    /// @param metadataHashes The array of hashes for asset metadata
-    /// @param recipient The recipient of the revealed assets
-    function revealBatchMint(
-        bytes[] calldata signatures,
-        uint256[] calldata prevTokenIds,
-        uint256[][] calldata amounts,
-        string[][] calldata metadataHashes,
-        address recipient
-    ) public {
-        require(
-            signatures.length == prevTokenIds.length &&
-                prevTokenIds.length == amounts.length &&
-                amounts.length == metadataHashes.length,
-            "Invalid input"
-        );
-        for (uint256 i = 0; i < signatures.length; i++) {
-            revealMint(
-                signatures[i],
-                prevTokenIds[i],
-                amounts[i],
-                metadataHashes[i],
-                recipient
             );
         }
     }
@@ -170,6 +229,7 @@ contract AssetReveal is
     /// @param amounts The amount of tokens to mint
     /// @return digest The hash of the reveal data
     function _hashReveal(
+        address recipient,
         uint256 prevTokenId,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
@@ -178,6 +238,26 @@ contract AssetReveal is
             keccak256(
                 abi.encode(
                     REVEAL_TYPEHASH,
+                    recipient,
+                    prevTokenId,
+                    keccak256(abi.encodePacked(amounts)),
+                    _encodeHashes(metadataHashes)
+                )
+            )
+        );
+    }
+
+    function _hashInstantReveal(
+        address recipient,
+        uint256 prevTokenId,
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes
+    ) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    INSTANT_REVEAL_TYPEHASH,
+                    recipient,
                     prevTokenId,
                     keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)
@@ -235,7 +315,7 @@ contract AssetReveal is
                     metadataHashes[i]
                 );
             } else {
-                uint16 revealNonce = ++revealNonces[data.creator][prevTokenId];
+                uint16 revealNonce = ++revealIds[data.creator][prevTokenId];
                 tokenId = TokenIdUtils.generateTokenId(
                     data.creator,
                     data.tier,
