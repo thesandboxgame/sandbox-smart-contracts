@@ -49,6 +49,7 @@ const createAssetMintSignature = async (
   creator: string,
   tier: number,
   amount: number,
+  revealed: boolean,
   metadataHash: string
 ) => {
   const { getNamedAccounts } = hre;
@@ -69,6 +70,7 @@ const createAssetMintSignature = async (
         { name: "nonce", type: "uint16" },
         { name: "tier", type: "uint8" },
         { name: "amount", type: "uint256" },
+        { name: "revealed", type: "bool" },
         { name: "metadataHash", type: "string" },
       ],
     },
@@ -83,6 +85,7 @@ const createAssetMintSignature = async (
       nonce,
       tier,
       amount,
+      revealed,
       metadataHash,
     },
   };
@@ -98,6 +101,7 @@ const createMultipleAssetsMintSignature = async (
   creator: string,
   tiers: number[],
   amounts: number[],
+  revealed: boolean[],
   metadataHashes: string[]
 ) => {
   const { getNamedAccounts } = hre;
@@ -117,6 +121,7 @@ const createMultipleAssetsMintSignature = async (
         { name: "nonce", type: "uint16" },
         { name: "tiers", type: "uint8[]" },
         { name: "amounts", type: "uint256[]" },
+        { name: "revealed", type: "bool[]" },
         { name: "metadataHashes", type: "string[]" },
       ],
     },
@@ -131,6 +136,7 @@ const createMultipleAssetsMintSignature = async (
       nonce,
       tiers,
       amounts,
+      revealed,
       metadataHashes,
     },
   };

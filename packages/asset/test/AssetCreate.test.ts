@@ -18,6 +18,10 @@ const runTestSetup = deployments.createFixture(
       "AssetCreate",
       deployer
     );
+    const AuthValidatorContract = await ethers.getContract(
+      "AuthValidator",
+      deployer
+    );
     await AssetContract.grantRole(MinterRole, AssetCreateContract.address);
 
     const CatalystContract = await ethers.getContract("Catalyst", deployer);
@@ -41,12 +45,14 @@ const runTestSetup = deployments.createFixture(
       signature: string,
       tier: number,
       amount: number,
+      revealed: boolean,
       metadataHash: string
     ) => {
       await AssetCreateContract.createAsset(
         signature,
         tier,
         amount,
+        revealed,
         metadataHash
       );
     };
@@ -55,12 +61,14 @@ const runTestSetup = deployments.createFixture(
       signature: string,
       tiers: number[],
       amounts: number[],
+      revealed: boolean[],
       metadataHashes: string[]
     ) => {
       await AssetCreateContract.createMultipleAssets(
         signature,
         tiers,
         amounts,
+        revealed,
         metadataHashes
       );
     };
@@ -74,12 +82,14 @@ const runTestSetup = deployments.createFixture(
       creator: string,
       tier: number,
       amount: number,
+      revealed: boolean,
       metadataHash: string
     ) => {
       const signature = await createAssetMintSignature(
         creator,
         tier,
         amount,
+        revealed,
         metadataHash
       );
       return signature;
@@ -89,12 +99,14 @@ const runTestSetup = deployments.createFixture(
       creator: string,
       tiers: number[],
       amounts: number[],
+      revealed: boolean[],
       metadataHashes: string[]
     ) => {
       const signature = await createMultipleAssetsMintSignature(
         creator,
         tiers,
         amounts,
+        revealed,
         metadataHashes
       );
       return signature;
@@ -110,6 +122,8 @@ const runTestSetup = deployments.createFixture(
       otherWallet: catalystMinter,
       AssetContract,
       AssetCreateContract,
+      AuthValidatorContract,
+      CatalystContract,
       mintCatalyst,
       mintSingleAsset,
       mintMultipleAssets,
@@ -121,6 +135,25 @@ const runTestSetup = deployments.createFixture(
 );
 
 describe("AssetCreate", () => {
+  describe("General", async () => {
+    it("should initialize with the correct values", async () => {
+      const {
+        AssetCreateContract,
+        AssetContract,
+        CatalystContract,
+        AuthValidatorContract,
+      } = await runTestSetup();
+      expect(await AssetCreateContract.getAssetContract()).to.equal(
+        AssetContract.address
+      );
+      expect(await AssetCreateContract.getCatalystContract()).to.equal(
+        CatalystContract.address
+      );
+      expect(await AssetCreateContract.getAuthValidator()).to.equal(
+        AuthValidatorContract.address
+      );
+    });
+  });
   describe("Single asset mint", async () => {
     it("should revert if the signature is invalid", async () => {
       const { mintCatalyst, mintSingleAsset, metadataHashes } =
@@ -130,7 +163,7 @@ describe("AssetCreate", () => {
         "0x45956f9a4b3f24fcc1a7c1a64f5fe7d21c00dd224a44f868ad8a67fd7b7cf6601e3a69a6a78a6a74377dddd1fa8c0c0f64b766d4a75842c1653b2a1a76c3a0ce1c";
 
       await expect(
-        mintSingleAsset(signature, 4, 1, metadataHashes[0])
+        mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if tier mismatches signed tier", async () => {
@@ -148,11 +181,12 @@ describe("AssetCreate", () => {
         deployer,
         signedTier,
         1,
+        true,
         metadataHashes[0]
       );
 
       await expect(
-        mintSingleAsset(signature, txSuppliedTier, 1, metadataHashes[0])
+        mintSingleAsset(signature, txSuppliedTier, 1, true, metadataHashes[0])
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if amount mismatches signed amount", async () => {
@@ -170,11 +204,12 @@ describe("AssetCreate", () => {
         deployer,
         4,
         signedAmount,
+        true,
         metadataHashes[0]
       );
 
       await expect(
-        mintSingleAsset(signature, 4, txSuppliedAmount, metadataHashes[0])
+        mintSingleAsset(signature, 4, txSuppliedAmount, true, metadataHashes[0])
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if metadataHash mismatches signed metadataHash", async () => {
@@ -190,11 +225,12 @@ describe("AssetCreate", () => {
         deployer,
         4,
         1,
+        true,
         metadataHashes[0]
       );
 
       await expect(
-        mintSingleAsset(signature, 4, 1, "0x1234")
+        mintSingleAsset(signature, 4, 1, true, "0x1234")
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if the signature has been used before", async () => {
@@ -210,15 +246,16 @@ describe("AssetCreate", () => {
         deployer,
         4,
         1,
+        true,
         metadataHashes[0]
       );
 
       // expect mint tx not to revert
-      await expect(mintSingleAsset(signature, 4, 1, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
+        .not.be.reverted;
 
       await expect(
-        mintSingleAsset(signature, 4, 1, metadataHashes[0])
+        mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if user doesn't have enough catalysts", async () => {
@@ -235,11 +272,12 @@ describe("AssetCreate", () => {
         deployer,
         4,
         1,
+        true,
         metadataHashes[0]
       );
 
       await expect(
-        mintSingleAsset(signature, 4, 1, metadataHashes[0])
+        mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
       ).to.be.revertedWith("ERC1155: burn amount exceeds balance");
     });
     it("should mint a single asset successfully if all conditions are met", async () => {
@@ -255,11 +293,12 @@ describe("AssetCreate", () => {
         deployer,
         4,
         1,
+        true,
         metadataHashes[0]
       );
 
-      await expect(mintSingleAsset(signature, 4, 1, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
+        .not.be.reverted;
     });
     it("should increment the creator nonce correctly", async () => {
       const {
@@ -275,11 +314,12 @@ describe("AssetCreate", () => {
         deployer,
         4,
         1,
+        true,
         metadataHashes[0]
       );
 
-      await expect(mintSingleAsset(signature, 4, 1, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
+        .not.be.reverted;
 
       expect(await getCreatorNonce(deployer)).to.equal(BigNumber.from(1));
     });
@@ -298,10 +338,11 @@ describe("AssetCreate", () => {
         deployer,
         4,
         5,
+        true,
         metadataHashes[0]
       );
-      await expect(mintSingleAsset(signature, 4, 5, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 5, true, metadataHashes[0])).to
+        .not.be.reverted;
 
       // get tokenId from the event
       // @ts-ignore
@@ -326,10 +367,11 @@ describe("AssetCreate", () => {
         deployer,
         4,
         5,
+        true,
         metadataHashes[0]
       );
-      await expect(mintSingleAsset(signature, 4, 5, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 5, true, metadataHashes[0])).to
+        .not.be.reverted;
 
       // get tokenId from the event
       // @ts-ignore
@@ -352,10 +394,11 @@ describe("AssetCreate", () => {
         deployer,
         4,
         5,
+        true,
         metadataHashes[0]
       );
-      await expect(mintSingleAsset(signature, 4, 5, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature, 4, 5, true, metadataHashes[0])).to
+        .not.be.reverted;
 
       // get tokenId from the event
       // @ts-ignore
@@ -377,11 +420,18 @@ describe("AssetCreate", () => {
         deployer,
         4,
         5,
+        true,
         metadataHashes[0]
       );
 
       await expect(
-        AssetCreateContract.createAsset(signature, 4, 5, metadataHashes[0])
+        AssetCreateContract.createAsset(
+          signature,
+          4,
+          5,
+          true,
+          metadataHashes[0]
+        )
       ).to.emit(AssetCreateContract, "AssetMinted");
     });
     it;
@@ -398,18 +448,20 @@ describe("AssetCreate", () => {
         deployer,
         4,
         2,
+        true,
         metadataHashes[0]
       );
-      await expect(mintSingleAsset(signature1, 4, 2, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature1, 4, 2, true, metadataHashes[0]))
+        .to.not.be.reverted;
       const signature2 = await generateSingleMintSignature(
         deployer,
         4,
         2,
+        true,
         metadataHashes[0]
       );
       await expect(
-        mintSingleAsset(signature2, 4, 2, metadataHashes[0])
+        mintSingleAsset(signature2, 4, 2, true, metadataHashes[0])
       ).to.be.revertedWith("metadata hash mismatch for tokenId");
     });
     it("should NOT mint same token ids", async () => {
@@ -426,18 +478,20 @@ describe("AssetCreate", () => {
         deployer,
         4,
         2,
+        true,
         metadataHashes[0]
       );
-      await expect(mintSingleAsset(signature1, 4, 2, metadataHashes[0])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature1, 4, 2, true, metadataHashes[0]))
+        .to.not.be.reverted;
       const signature2 = await generateSingleMintSignature(
         deployer,
         4,
         2,
+        true,
         metadataHashes[1]
       );
-      await expect(mintSingleAsset(signature2, 4, 2, metadataHashes[1])).to.not
-        .be.reverted;
+      await expect(mintSingleAsset(signature2, 4, 2, true, metadataHashes[1]))
+        .to.not.be.reverted;
 
       // @ts-ignore
       const tokenId1 = (await AssetCreateContract.queryFilter("AssetMinted"))[0]
@@ -455,7 +509,13 @@ describe("AssetCreate", () => {
       const signature =
         "0x45956f9a4b3f24fcc1a7c1a64f5fe7d21c00dd224a44f868ad8a67fd7b7cf6601e3a69a6a78a6a74377dddd1fa8c0c0f64b766d4a75842c1653b2a1a76c3a0ce1c";
       await expect(
-        mintMultipleAssets(signature, [3, 4], [1, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if tiers mismatch signed values", async () => {
@@ -473,10 +533,17 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
       await expect(
-        mintMultipleAssets(signature, [5, 4], [1, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [5, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if tiers, amounts and metadatahashes are not of the same length", async () => {
@@ -495,6 +562,7 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         [...metadataHashes, additionalMetadataHash]
       );
       await expect(
@@ -502,6 +570,7 @@ describe("AssetCreate", () => {
           signature,
           [3, 4],
           [1, 1],
+          [true, true],
           [...metadataHashes, additionalMetadataHash]
         )
       ).to.be.revertedWith("Arrays must be same length");
@@ -521,10 +590,17 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
       await expect(
-        mintMultipleAssets(signature, [3, 4], [2, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [2, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if metadataHashes mismatch signed values", async () => {
@@ -543,6 +619,7 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
       await expect(
@@ -550,6 +627,7 @@ describe("AssetCreate", () => {
           signature,
           [3, 4],
           [1, 1],
+          [true, true],
           [metadataHashes[1], additionalMetadataHash]
         )
       ).to.be.revertedWith("Invalid signature");
@@ -569,11 +647,24 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
-      await mintMultipleAssets(signature, [3, 4], [1, 1], metadataHashes);
+      await mintMultipleAssets(
+        signature,
+        [3, 4],
+        [1, 1],
+        [true, true],
+        metadataHashes
+      );
       await expect(
-        mintMultipleAssets(signature, [3, 4], [1, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("Invalid signature");
     });
     it("should revert if user doesn't have enough catalysts", async () => {
@@ -591,10 +682,17 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
       await expect(
-        mintMultipleAssets(signature, [3, 4], [1, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("ERC1155: burn amount exceeds balance");
     });
     it("should correctly mint multiple assets if all conditions are met", async () => {
@@ -612,10 +710,17 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [1, 1],
+        [true, true],
         metadataHashes
       );
       await expect(
-        mintMultipleAssets(signature, [3, 4], [1, 1], metadataHashes)
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
       ).to.not.be.reverted;
     });
     it("should mint correct amounts of assets", async () => {
@@ -635,9 +740,16 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
-      await mintMultipleAssets(signature, [3, 4], [3, 5], metadataHashes);
+      await mintMultipleAssets(
+        signature,
+        [3, 4],
+        [3, 5],
+        [true, true],
+        metadataHashes
+      );
       const events = await AssetCreateContract.queryFilter("AssetBatchMinted");
       const event = events[0];
       const args = event.args;
@@ -663,9 +775,16 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
-      await mintMultipleAssets(signature, [3, 4], [3, 5], metadataHashes);
+      await mintMultipleAssets(
+        signature,
+        [3, 4],
+        [3, 5],
+        [true, true],
+        metadataHashes
+      );
       const events = await AssetCreateContract.queryFilter("AssetBatchMinted");
       const event = events[0];
       const args = event.args;
@@ -692,9 +811,16 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
-      await mintMultipleAssets(signature, [3, 4], [3, 5], metadataHashes);
+      await mintMultipleAssets(
+        signature,
+        [3, 4],
+        [3, 5],
+        [true, true],
+        metadataHashes
+      );
       const events = await AssetCreateContract.queryFilter("AssetBatchMinted");
       const event = events[0];
       const args = event.args;
@@ -710,7 +836,6 @@ describe("AssetCreate", () => {
     });
     it("should emit an AssetBatchMinted event", async () => {
       const {
-        mintMultipleAssets,
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
@@ -724,6 +849,7 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
       await expect(
@@ -731,6 +857,7 @@ describe("AssetCreate", () => {
           signature,
           [3, 4],
           [3, 5],
+          [true, true],
           metadataHashes
         )
       ).to.emit(AssetCreateContract, "AssetBatchMinted");
@@ -750,18 +877,32 @@ describe("AssetCreate", () => {
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
 
-      await mintMultipleAssets(signature1, [3, 4], [3, 5], metadataHashes);
+      await mintMultipleAssets(
+        signature1,
+        [3, 4],
+        [3, 5],
+        [true, true],
+        metadataHashes
+      );
       const signature2 = await generateMultipleMintSignature(
         deployer,
         [3, 4],
         [3, 5],
+        [true, true],
         metadataHashes
       );
       expect(
-        mintMultipleAssets(signature2, [3, 4], [3, 5], metadataHashes)
+        mintMultipleAssets(
+          signature2,
+          [3, 4],
+          [3, 5],
+          [true, true],
+          metadataHashes
+        )
       ).to.be.revertedWith("metadata hash mismatch for tokenId");
     });
   });

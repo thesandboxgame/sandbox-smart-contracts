@@ -29,19 +29,17 @@ contract AssetCreate is
 
     // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
-    // mapping indicating if a tier should be minted as already revealed
-    mapping(uint8 => bool) public tierRevealed;
 
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
         keccak256(
-            "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,string metadataHash)"
+            "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)"
         );
     bytes32 public constant MINT_BATCH_TYPEHASH =
         keccak256(
-            "Mint(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,string[] metadataHashes)"
+            "Mint(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -78,24 +76,24 @@ contract AssetCreate is
         bytes memory signature,
         uint8 tier,
         uint256 amount,
+        bool revealed,
         string calldata metadataHash
     ) external {
         address creator = _msgSender();
         require(
             authValidator.verify(
                 signature,
-                _hashMint(creator, tier, amount, metadataHash)
+                _hashMint(creator, tier, amount, revealed, metadataHash)
             ),
             "Invalid signature"
         );
 
         uint16 creatorNonce = getCreatorNonce(creator);
-        uint16 revealNonce = getRevealNonce(tier);
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
             creatorNonce,
-            revealNonce
+            revealed ? 1 : 0
         );
 
         // burn catalyst of a given tier
@@ -114,6 +112,7 @@ contract AssetCreate is
         bytes memory signature,
         uint8[] calldata tiers,
         uint256[] calldata amounts,
+        bool[] calldata revealed,
         string[] calldata metadataHashes
     ) external {
         address creator = _msgSender();
@@ -125,6 +124,7 @@ contract AssetCreate is
                     creatorNonces[creator],
                     tiers,
                     amounts,
+                    revealed,
                     metadataHashes
                 )
             ),
@@ -141,13 +141,12 @@ contract AssetCreate is
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
         for (uint256 i = 0; i < tiers.length; i++) {
             uint16 creatorNonce = getCreatorNonce(creator);
-            uint16 revealNonce = getRevealNonce(tiers[i]);
             tiersToBurn[i] = tiers[i];
             tokenIds[i] = TokenIdUtils.generateTokenId(
                 creator,
                 tiers[i],
                 creatorNonce,
-                revealNonce
+                revealed[i] ? 1 : 0
             );
         }
 
@@ -173,24 +172,24 @@ contract AssetCreate is
         bytes memory signature,
         uint8 tier,
         uint256 amount,
+        bool revealed,
         string calldata metadataHash
     ) external onlyRole(SPECIAL_MINTER_ROLE) {
         address creator = _msgSender();
         require(
             authValidator.verify(
                 signature,
-                _hashMint(creator, tier, amount, metadataHash)
+                _hashMint(creator, tier, amount, revealed, metadataHash)
             ),
             "Invalid signature"
         );
 
         uint16 creatorNonce = getCreatorNonce(creator);
-        uint16 revealNonce = getRevealNonce(tier);
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
             creatorNonce,
-            revealNonce
+            revealed ? 1 : 0
         );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
@@ -223,21 +222,16 @@ contract AssetCreate is
         return creatorNonces[creator];
     }
 
-    /// @notice Returns non-zero value for assets that should be minted as revealed and zero for assets that should be minted as unrevealed
-    /// @param tier The tier of the asset
-    /// @return nonce The reveal nonce, zero for unrevealed assets and one for revealed assets
-    function getRevealNonce(uint8 tier) internal view returns (uint16) {
-        if (tierRevealed[tier]) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
     /// @notice Get the asset contract address
     /// @return The asset contract address
     function getAssetContract() external view returns (address) {
         return address(assetContract);
+    }
+
+    /// @notice Get the catalyst contract address
+    /// @return The catalyst contract address
+    function getCatalystContract() external view returns (address) {
+        return address(catalystContract);
     }
 
     /// @notice Get the auth validator address
@@ -256,6 +250,7 @@ contract AssetCreate is
         address creator,
         uint8 tier,
         uint256 amount,
+        bool revealed,
         string calldata metadataHash
     ) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
@@ -266,6 +261,7 @@ contract AssetCreate is
                     creatorNonces[creator],
                     tier,
                     amount,
+                    revealed,
                     keccak256((abi.encodePacked(metadataHash)))
                 )
             )
@@ -283,6 +279,7 @@ contract AssetCreate is
         uint16 nonce,
         uint8[] calldata tiers,
         uint256[] calldata amounts,
+        bool[] calldata revealed,
         string[] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
@@ -293,6 +290,7 @@ contract AssetCreate is
                     nonce,
                     keccak256(abi.encodePacked(tiers)),
                     keccak256(abi.encodePacked(amounts)),
+                    keccak256(abi.encodePacked(revealed)),
                     _encodeHashes(metadataHashes)
                 )
             )
