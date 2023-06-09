@@ -53,7 +53,8 @@ const runTestSetup = deployments.createFixture(
         tier,
         amount,
         revealed,
-        metadataHash
+        metadataHash,
+        deployer
       );
     };
 
@@ -69,7 +70,8 @@ const runTestSetup = deployments.createFixture(
         tiers,
         amounts,
         revealed,
-        metadataHashes
+        metadataHashes,
+        deployer
       );
     };
 
@@ -95,7 +97,8 @@ const runTestSetup = deployments.createFixture(
         tier,
         amount,
         revealed,
-        metadataHash
+        metadataHash,
+        deployer
       );
     };
     const getCreatorNonce = async (creator: string) => {
@@ -458,7 +461,8 @@ describe("AssetCreate", () => {
           4,
           5,
           true,
-          metadataHashes[0]
+          metadataHashes[0],
+          deployer
         )
       ).to.emit(AssetCreateContract, "AssetMinted");
     });
@@ -886,7 +890,8 @@ describe("AssetCreate", () => {
           [3, 4],
           [3, 5],
           [true, true],
-          metadataHashes
+          metadataHashes,
+          deployer
         )
       ).to.emit(AssetCreateContract, "AssetBatchMinted");
     });

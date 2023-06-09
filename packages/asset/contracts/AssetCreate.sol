@@ -80,9 +80,9 @@ contract AssetCreate is
         uint8 tier,
         uint256 amount,
         bool revealed,
-        string calldata metadataHash
+        string calldata metadataHash,
+        address creator
     ) external {
-        address creator = _msgSender();
         require(
             authValidator.verify(
                 signature,
@@ -116,9 +116,9 @@ contract AssetCreate is
         uint8[] calldata tiers,
         uint256[] calldata amounts,
         bool[] calldata revealed,
-        string[] calldata metadataHashes
+        string[] calldata metadataHashes,
+        address creator
     ) external {
-        address creator = _msgSender();
         require(
             authValidator.verify(
                 signature,
@@ -137,6 +137,10 @@ contract AssetCreate is
         require(tiers.length == amounts.length, "Arrays must be same length");
         require(
             amounts.length == metadataHashes.length,
+            "Arrays must be same length"
+        );
+        require(
+            metadataHashes.length == revealed.length,
             "Arrays must be same length"
         );
 
@@ -176,9 +180,9 @@ contract AssetCreate is
         uint8 tier,
         uint256 amount,
         bool revealed,
-        string calldata metadataHash
+        string calldata metadataHash,
+        address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) {
-        address creator = _msgSender();
         require(
             authValidator.verify(
                 signature,
