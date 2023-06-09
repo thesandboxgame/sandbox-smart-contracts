@@ -28,6 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           CatalystContract.address,
           AuthValidatorContract.address,
           trustedForwarder,
+          deployer, // DEFAULT_ADMIN_ROLE
         ],
       },
       upgradeIndex: 0,

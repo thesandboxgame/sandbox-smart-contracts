@@ -4,7 +4,7 @@ import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
 } from "./utils/signatures";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 const runTestSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
@@ -73,6 +73,31 @@ const runTestSetup = deployments.createFixture(
       );
     };
 
+    const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
+    const BridgeMinterRole = await AssetCreateContract.BRIDGE_MINTER_ROLE();
+    const grantSpecialMinterRole = async (address: string) => {
+      await AssetCreateContract.grantRole(SpecialMinterRole, address);
+    };
+
+    const grantBridgeMinterRole = async (address: string) => {
+      await AssetCreateContract.grantRole(BridgeMinterRole, address);
+    };
+
+    const mintSpecialAsset = async (
+      signature: string,
+      tier: number,
+      amount: number,
+      revealed: boolean,
+      metadataHash: string
+    ) => {
+      await AssetCreateContract.createSpecialAsset(
+        signature,
+        tier,
+        amount,
+        revealed,
+        metadataHash
+      );
+    };
     const getCreatorNonce = async (creator: string) => {
       const nonce = await AssetCreateContract.creatorNonces(creator);
       return nonce;
@@ -127,6 +152,9 @@ const runTestSetup = deployments.createFixture(
       mintCatalyst,
       mintSingleAsset,
       mintMultipleAssets,
+      mintSpecialAsset,
+      grantSpecialMinterRole,
+      grantBridgeMinterRole,
       generateSingleMintSignature,
       generateMultipleMintSignature,
       getCreatorNonce,
@@ -904,6 +932,88 @@ describe("AssetCreate", () => {
           metadataHashes
         )
       ).to.be.revertedWith("metadata hash mismatch for tokenId");
+    });
+  });
+  describe("Special asset mint", () => {
+    it("should allow special minter role to mint special assets", async () => {
+      const {
+        mintSpecialAsset,
+        generateSingleMintSignature,
+        deployer,
+        metadataHashes,
+        grantSpecialMinterRole,
+      } = await runTestSetup();
+
+      await grantSpecialMinterRole(deployer);
+      const signature = await generateSingleMintSignature(
+        deployer,
+        1,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await expect(mintSpecialAsset(signature, 1, 1, true, metadataHashes[0]))
+        .to.not.be.reverted;
+    });
+    it("should NOT ALLOW unauthorized wallets to mint special assets", async () => {
+      const {
+        mintSpecialAsset,
+        generateSingleMintSignature,
+        deployer,
+        metadataHashes,
+      } = await runTestSetup();
+
+      const signature = await generateSingleMintSignature(
+        deployer,
+        1,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await expect(
+        mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
+      ).to.be.revertedWith(
+        "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6"
+      );
+    });
+  });
+  describe("Bridged asset mint", () => {
+    it("should allow bridge minter role to mint bridged assets", async () => {
+      const {
+        AssetCreateContract,
+        deployer,
+        AssetContract,
+        metadataHashes,
+        grantBridgeMinterRole,
+      } = await runTestSetup();
+
+      await grantBridgeMinterRole(deployer);
+      const randomUint256 = utils.randomBytes(32);
+      await expect(
+        AssetCreateContract.createBridgedAsset(
+          deployer,
+          randomUint256,
+          10,
+          metadataHashes[0]
+        )
+      ).to.not.be.reverted;
+      // balance should be 10
+      expect(await AssetContract.balanceOf(deployer, randomUint256)).to.eq(10);
+    });
+    it("should NOT ALLOW unauthorized wallets to mint bridged assets", async () => {
+      const { AssetCreateContract, deployer, metadataHashes } =
+        await runTestSetup();
+      const randomUint256 = utils.randomBytes(32);
+      await expect(
+        AssetCreateContract.createBridgedAsset(
+          deployer,
+          randomUint256,
+          10,
+          metadataHashes[0]
+        )
+      ).to.be.revertedWith(
+        "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x60400965d90814aa36ab657cbeca3e3b701e320f6373ae1db85824fee2a79822"
+      );
     });
   });
 });

@@ -30,7 +30,8 @@ contract AssetCreate is
     // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
 
-    bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant SPECIAL_MINTER_ROLE =
+        keccak256("SPECIAL_MINTER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
@@ -57,7 +58,8 @@ contract AssetCreate is
         address _assetContract,
         address _catalystContract,
         address _authValidator,
-        address _forwarder
+        address _forwarder,
+        address _defaultAdmin
     ) public initializer {
         assetContract = IAsset(_assetContract);
         catalystContract = ICatalyst(_catalystContract);
@@ -65,6 +67,7 @@ contract AssetCreate is
         __ERC2771Handler_initialize(_forwarder);
         __EIP712_init(_name, _version);
         __AccessControl_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     }
 
     /// @notice Create a new asset
