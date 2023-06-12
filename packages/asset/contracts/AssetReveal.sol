@@ -24,12 +24,14 @@ contract AssetReveal is
 
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) revealIds;
-    // nonces of creators used in signature validation
-    mapping(bytes => bool) usedSignatures;
+    // signature nonces to prevent replay attacks
+    mapping(address => uint32) public nonce;
+    // nonces used in signature validation
+    mapping(address => mapping(uint32 => bool)) noncesUsed;
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
+            "Reveal(address recipient,uint256 prevTokenId,uint32 nonce,uint256[] amounts,string[] metadataHashes)"
         );
     bytes32 public constant INSTANT_REVEAL_TYPEHASH =
         keccak256(
@@ -67,9 +69,11 @@ contract AssetReveal is
         IAsset.AssetData memory data = tokenId.getData();
         require(!data.revealed, "Asset is already revealed");
         assetContract.burnFrom(_msgSender(), tokenId, amount);
+        nonce[_msgSender()]++;
         emit AssetRevealBurn(
             _msgSender(),
             tokenId,
+            nonce[_msgSender()],
             data.creator,
             data.tier,
             data.creatorNonce,
@@ -100,18 +104,28 @@ contract AssetReveal is
     function revealMint(
         bytes memory signature,
         uint256 prevTokenId,
+        uint32 signatureNonce,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) public {
         require(
             authValidator.verify(
                 signature,
-                _hashReveal(_msgSender(), prevTokenId, amounts, metadataHashes)
+                _hashReveal(
+                    _msgSender(),
+                    prevTokenId,
+                    signatureNonce,
+                    amounts,
+                    metadataHashes
+                )
             ),
             "Invalid signature"
         );
-        require(!usedSignatures[signature], "Signature has already been used");
-        usedSignatures[signature] = true;
+        require(
+            !noncesUsed[_msgSender()][signatureNonce],
+            "Signature has already been used"
+        );
+        noncesUsed[_msgSender()][signatureNonce] = true;
 
         require(amounts.length == metadataHashes.length, "Invalid amount");
         uint256[] memory tokenIds = getRevealedTokenIds(
@@ -148,6 +162,7 @@ contract AssetReveal is
     function revealBatchMint(
         bytes[] calldata signatures,
         uint256[] calldata prevTokenIds,
+        uint32[] calldata signatureNonces,
         uint256[][] calldata amounts,
         string[][] calldata metadataHashes
     ) public {
@@ -159,6 +174,7 @@ contract AssetReveal is
             revealMint(
                 signatures[i],
                 prevTokenIds[i],
+                signatureNonces[i],
                 amounts[i],
                 metadataHashes[i]
             );
@@ -191,14 +207,9 @@ contract AssetReveal is
             ),
             "Invalid signature"
         );
-        require(!usedSignatures[signature], "Signature has already been used");
-        usedSignatures[signature] = true;
-
         require(burnAmount > 0, "Amount should be greater than 0");
-
         IAsset.AssetData memory data = prevTokenId.getData();
         require(!data.revealed, "Asset is already revealed");
-        require(data.tier == 0, "Only tier 0 assets can be burned");
         assetContract.burnFrom(_msgSender(), prevTokenId, burnAmount);
 
         uint256[] memory tokenIds = getRevealedTokenIds(
@@ -222,6 +233,8 @@ contract AssetReveal is
                 metadataHashes
             );
         }
+
+        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, tokenIds);
     }
 
     /// @notice Creates a hash of the reveal data
@@ -231,6 +244,7 @@ contract AssetReveal is
     function _hashReveal(
         address recipient,
         uint256 prevTokenId,
+        uint32 signatureNonce,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
@@ -240,6 +254,7 @@ contract AssetReveal is
                     REVEAL_TYPEHASH,
                     recipient,
                     prevTokenId,
+                    signatureNonce,
                     keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)
                 )

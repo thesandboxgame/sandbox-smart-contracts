@@ -5,6 +5,7 @@ interface IAssetReveal {
     event AssetRevealBurn(
         address revealer,
         uint256 tokenId,
+        uint32 nonce,
         address assetCreator,
         uint8 tier,
         uint16 assetNonce,
