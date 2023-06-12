@@ -126,6 +126,7 @@ export const setupOperatorFilter = withSnapshot(
       deployer,
       upgradeAdmin,
       Asset,
+      DEFAULT_SUBSCRIPTION
     };
   }
 );

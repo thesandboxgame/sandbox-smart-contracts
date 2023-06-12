@@ -4,6 +4,7 @@ import { expectEventWithArgs } from "../util";
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { setupOperatorFilter } from "./fixture";
+import { mock } from "node:test";
 
 const catalystArray = [1, 2, 3, 4, 5, 6];
 
@@ -908,6 +909,161 @@ describe("OperatorFilterer", function () {
     expect(
       await operatorFilterRegistry.isRegistered(Asset.address)
     ).to.be.equal(true);
+  });
+
+  it("should be subscribed to common subscription", async function () {
+    const { operatorFilterRegistry, Asset, filterOperatorSubscription } =
+      await setupOperatorFilter();
+    expect(
+      await operatorFilterRegistry.subscriptionOf(Asset.address)
+    ).to.be.equal(filterOperatorSubscription);
+  });
+
+  it("default subscription should blacklist Mock Market places 1, 2 and not 3, 4", async function () {
+    const {
+      operatorFilterRegistry,
+      Asset,
+      mockMarketPlace1,
+      mockMarketPlace2,
+      mockMarketPlace3,
+      mockMarketPlace4,
+      DEFAULT_SUBSCRIPTION,
+    } = await setupOperatorFilter();
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        DEFAULT_SUBSCRIPTION,
+        mockMarketPlace1.address
+      )
+    ).to.be.equal(true);
+    const MockERC1155MarketPlace1CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        DEFAULT_SUBSCRIPTION,
+        MockERC1155MarketPlace1CodeHash
+      )
+    ).to.be.equal(true);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        DEFAULT_SUBSCRIPTION,
+        mockMarketPlace2.address
+      )
+    ).to.be.equal(true);
+
+    const MockERC1155MarketPlace2CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace2.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        DEFAULT_SUBSCRIPTION,
+        MockERC1155MarketPlace2CodeHash
+      )
+    ).to.be.equal(true);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        DEFAULT_SUBSCRIPTION,
+        mockMarketPlace3.address
+      )
+    ).to.be.equal(false);
+
+    const MockERC1155MarketPlace3CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        DEFAULT_SUBSCRIPTION,
+        MockERC1155MarketPlace3CodeHash
+      )
+    ).to.be.equal(false);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        DEFAULT_SUBSCRIPTION,
+        mockMarketPlace4.address
+      )
+    ).to.be.equal(false);
+
+    const MockERC1155MarketPlace4CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace4.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        DEFAULT_SUBSCRIPTION,
+        MockERC1155MarketPlace4CodeHash
+      )
+    ).to.be.equal(false);
+  });
+
+  it("common subscription should blacklist Mock Market places 1, 2 and not 3, 4 like default subscription", async function () {
+    const {
+      operatorFilterRegistry,
+      mockMarketPlace1,
+      mockMarketPlace2,
+      mockMarketPlace3,
+      mockMarketPlace4,
+      filterOperatorSubscription,
+    } = await setupOperatorFilter();
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        filterOperatorSubscription,
+        mockMarketPlace1.address
+      )
+    ).to.be.equal(true);
+    const MockERC1155MarketPlace1CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        filterOperatorSubscription,
+        MockERC1155MarketPlace1CodeHash
+      )
+    ).to.be.equal(true);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        filterOperatorSubscription,
+        mockMarketPlace2.address
+      )
+    ).to.be.equal(true);
+
+    const MockERC1155MarketPlace2CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace2.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        filterOperatorSubscription,
+        MockERC1155MarketPlace2CodeHash
+      )
+    ).to.be.equal(true);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        filterOperatorSubscription,
+        mockMarketPlace3.address
+      )
+    ).to.be.equal(false);
+
+    const MockERC1155MarketPlace3CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        filterOperatorSubscription,
+        MockERC1155MarketPlace3CodeHash
+      )
+    ).to.be.equal(false);
+
+    expect(
+      await operatorFilterRegistry.isOperatorFiltered(
+        filterOperatorSubscription,
+        mockMarketPlace4.address
+      )
+    ).to.be.equal(false);
+
+    const MockERC1155MarketPlace4CodeHash =
+      await operatorFilterRegistry.codeHashOf(mockMarketPlace4.address);
+    expect(
+      await operatorFilterRegistry.isCodeHashFiltered(
+        filterOperatorSubscription,
+        MockERC1155MarketPlace4CodeHash
+      )
+    ).to.be.equal(false);
   });
 
   it("should be able to safe transfer asset if from is the owner of token", async function () {
