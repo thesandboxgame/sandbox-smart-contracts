@@ -76,7 +76,6 @@ contract AssetReveal is
             nonce[_msgSender()],
             data.creator,
             data.tier,
-            data.creatorNonce,
             amount
         );
     }
@@ -128,29 +127,29 @@ contract AssetReveal is
         noncesUsed[_msgSender()][signatureNonce] = true;
 
         require(amounts.length == metadataHashes.length, "Invalid amount");
-        uint256[] memory tokenIds = getRevealedTokenIds(
+        uint256[] memory newTokenIds = getRevealedTokenIds(
             amounts,
             metadataHashes,
             prevTokenId
         );
 
-        if (tokenIds.length == 1) {
+        if (newTokenIds.length == 1) {
             assetContract.mint(
                 _msgSender(),
-                tokenIds[0],
+                newTokenIds[0],
                 amounts[0],
                 metadataHashes[0]
             );
         } else {
             assetContract.mintBatch(
                 _msgSender(),
-                tokenIds,
+                newTokenIds,
                 amounts,
                 metadataHashes
             );
         }
 
-        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, tokenIds);
+        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, newTokenIds);
     }
 
     /// @notice Mint multiple assets with revealed abilities and enhancements

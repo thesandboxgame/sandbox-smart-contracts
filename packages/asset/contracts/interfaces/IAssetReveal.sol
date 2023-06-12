@@ -8,7 +8,6 @@ interface IAssetReveal {
         uint32 nonce,
         address assetCreator,
         uint8 tier,
-        uint16 assetNonce,
         uint256 amount
     );
 
