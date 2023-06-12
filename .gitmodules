@@ -1,0 +1,3 @@
+[submodule "sandbox-smart-contracts-fork"]
+	url = git@github.com:OpenZeppelin/sandbox-smart-contracts.git
+	branch = defender-testing
