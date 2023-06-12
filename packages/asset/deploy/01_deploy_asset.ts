@@ -1,7 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { OPERATOR_FILTER_REGISTRY, DEFAULT_SUBSCRIPTION } from "../constants";
-import { abi } from "../test/operatorRegistryABI";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
@@ -27,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
           "ipfs://",
-          filterOperatorSubscription
+          filterOperatorSubscription // new subscription for asset or asset like UGC contract
         ],
       },
       upgradeIndex: 0,
@@ -39,4 +37,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ["Asset"];
-func.dependencies = ["OPERATOR_FILTER_REGISTRY", "OperatorSubscriber"];
+func.dependencies = [ "OperatorSubscriber"];

@@ -1,8 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { abi, byteCode } from "../test/operatorRegistryABI";
-import { factoryABI, factoryByteCode } from "../test/factoryABI";
-import { OPERATOR_FILTER_REGISTRY, DEFAULT_SUBSCRIPTION } from "../constants";
+import { DEFAULT_SUBSCRIPTION } from "../constants";
 import { deployments } from "hardhat";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -59,7 +57,5 @@ export default func;
 
 func.tags = ["OperatorSubscriber"];
 func.dependencies = [
-  "OPERATOR_FILTER_REGISTRY",
-  "DEFAULT_SUBSCRIPTION",
   "OperatorFilterSubscription",
 ];
