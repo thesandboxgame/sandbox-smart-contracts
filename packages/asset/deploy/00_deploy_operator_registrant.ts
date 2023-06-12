@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
   const { deployer } = await getNamedAccounts();
-
+  // deploying OperatorFilterSubscription for as not available in Local deployment. TODO we need to decide which blacklist to be needed for catalyst.
   await deploy("OperatorFilterSubscription", {
     from: deployer,
     contract: "OperatorFilterSubscription",

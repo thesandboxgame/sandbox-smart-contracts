@@ -13,11 +13,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     upgradeAdmin,
   } = await getNamedAccounts();
 
-  // OperatorFilterRegistry address is 0x000000000000AAeB6D7670E522A718067333cd4E
-  // unless using local network, where we make our own deployment of it
-  const operatorFilterRegistry = await deployments.get(
-    "OPERATOR_FILTER_REGISTRY"
-  );
 
   await deploy("Asset", {
     from: deployer,
@@ -32,8 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
           "ipfs://",
-          filterOperatorSubscription,
-          operatorFilterRegistry.address,
+          filterOperatorSubscription
         ],
       },
       upgradeIndex: 0,

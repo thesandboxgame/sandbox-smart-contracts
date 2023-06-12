@@ -3,52 +3,56 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { abi, byteCode } from "../test/operatorRegistryABI";
 import { factoryABI, factoryByteCode } from "../test/factoryABI";
 import { OPERATOR_FILTER_REGISTRY, DEFAULT_SUBSCRIPTION } from "../constants";
+import { deployments } from "hardhat";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts } = hre;
   const { filterOperatorSubscription } = await getNamedAccounts();
 
-  const operatorFilterRegistry = await hre.ethers.getContract(
+  const operatorFilterRegistry = await deployments.getOrNull(
     "OPERATOR_FILTER_REGISTRY"
   );
 
-  const registered = await operatorFilterRegistry.isRegistered(
-    filterOperatorSubscription
-  );
-
-  const defaultSubscription = await hre.ethers.getContract(
-    "DEFAULT_SUBSCRIPTION"
-  );
-
-  const operatorFilterSubscription = await hre.ethers.getContract(
-    "OperatorFilterSubscription"
-  );
-
-  const registeredOperatorFilterSubscription =
-    await operatorFilterRegistry.isRegistered(
-      operatorFilterSubscription.address
+  if (operatorFilterRegistry) {
+    const operatorFilterRegistry = await hre.ethers.getContract(
+    "OPERATOR_FILTER_REGISTRY"
+    );
+    const registered = await operatorFilterRegistry.isRegistered(
+      filterOperatorSubscription
     );
 
-  // register operatorFilterSubscription
-  if (!registeredOperatorFilterSubscription) {
-    const tn = await operatorFilterRegistry.register(
-      operatorFilterSubscription.address
+    const operatorFilterSubscription = await hre.ethers.getContract(
+      "OperatorFilterSubscription"
     );
 
-    await tn.wait();
-  }
-
-  // register filterOperatorSubscription
-  if (!registered) {
-    const tnx = await operatorFilterRegistry
-      .connect(hre.ethers.provider.getSigner(filterOperatorSubscription))
-      .registerAndCopyEntries(
-        filterOperatorSubscription,
-        defaultSubscription.address
+    const registeredOperatorFilterSubscription =
+      await operatorFilterRegistry.isRegistered(
+        operatorFilterSubscription.address
       );
 
-    await tnx.wait();
-    console.log("common subscription registered on operator filter registry");
+    // register operatorFilterSubscription
+    if (!registeredOperatorFilterSubscription) {
+      const tn = await operatorFilterRegistry.register(
+        operatorFilterSubscription.address
+      );
+
+      await tn.wait();
+    }
+
+    // register filterOperatorSubscription
+    if (!registered) {
+      const tnx = await operatorFilterRegistry
+        .connect(hre.ethers.provider.getSigner(filterOperatorSubscription))
+        .registerAndCopyEntries(
+          filterOperatorSubscription,
+          DEFAULT_SUBSCRIPTION
+        );
+
+      await tnx.wait();
+      console.log(
+        "common subscription registered on operator filter registry and opensea's blacklist copied"
+      );
+    }
   }
 };
 export default func;
