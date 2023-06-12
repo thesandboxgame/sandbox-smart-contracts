@@ -45,7 +45,6 @@ contract Catalyst is
   /// @param _trustedForwarder The trusted forwarder for meta transactions.
   /// @param _royaltyRecipient The recipient of the royalties.
   /// @param _subscription The subscription address.
-  /// @param _registry The operator filter registry address.
   /// @param _defaultAdmin The default admin address.
   /// @param _defaultMinter The default minter address.
   /// @param _defaultCatalystsRoyalty The royalties for each catalyst.
@@ -55,7 +54,6 @@ contract Catalyst is
     address _trustedForwarder,
     address _royaltyRecipient,
     address _subscription,
-    address _registry,
     address _defaultAdmin,
     address _defaultMinter,
     uint96 _defaultCatalystsRoyalty,
@@ -67,7 +65,7 @@ contract Catalyst is
     __ERC1155Supply_init();
     __ERC1155URIStorage_init();
     __ERC2771Handler_initialize(_trustedForwarder);
-    __OperatorFilterer_init(_subscription, true, _registry);
+    __OperatorFilterer_init(_subscription, true);
     __ERC2981_init();
     _setBaseURI(_baseUri);
     _setDefaultRoyalty(_royaltyRecipient, _defaultCatalystsRoyalty);
