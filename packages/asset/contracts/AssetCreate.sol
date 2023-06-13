@@ -32,8 +32,6 @@ contract AssetCreate is
 
     bytes32 public constant SPECIAL_MINTER_ROLE =
         keccak256("SPECIAL_MINTER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE =
-        keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
         keccak256(
             "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)"
@@ -96,7 +94,8 @@ contract AssetCreate is
             creator,
             tier,
             creatorNonce,
-            revealed ? 1 : 0
+            revealed ? 1 : 0,
+            false
         );
 
         // burn catalyst of a given tier
@@ -153,7 +152,8 @@ contract AssetCreate is
                 creator,
                 tiers[i],
                 creatorNonce,
-                revealed[i] ? 1 : 0
+                revealed[i] ? 1 : 0,
+                false
             );
         }
 
@@ -196,28 +196,12 @@ contract AssetCreate is
             creator,
             tier,
             creatorNonce,
-            revealed ? 1 : 0
+            revealed ? 1 : 0,
+            false
         );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, amount, metadataHash);
-    }
-
-    /// @notice Create a bridged asset
-    /// @dev Only callable by the bridge minter
-    /// @dev Bridge contract should keep track of the tokenIds generated so that copies of the same asset on L1 are minted with the same tokenIds on L2
-    /// @param recipient The address of the creator
-    /// @param tokenId Id of the token to mint
-    /// @param amount The amount of copies to mint
-    /// @param metadataHash The metadata hash of the asset
-    function createBridgedAsset(
-        address recipient,
-        uint256 tokenId,
-        uint256 amount,
-        string calldata metadataHash
-    ) external onlyRole(BRIDGE_MINTER_ROLE) {
-        assetContract.mint(recipient, tokenId, amount, metadataHash);
-        emit AssetBridged(recipient, tokenId, amount, metadataHash);
     }
 
     /// @notice Get the next available creator nonce

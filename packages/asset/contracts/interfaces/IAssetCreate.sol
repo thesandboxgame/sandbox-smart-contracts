@@ -10,12 +10,6 @@ interface IAssetCreate {
         uint256 amount,
         string metadataHash
     );
-    event AssetBridged(
-        address indexed recipient,
-        uint256 tokenId,
-        uint256 amount,
-        string metadataHash
-    );
     event SpecialAssetMinted(
         address indexed creator,
         uint256 tokenId,
