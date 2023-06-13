@@ -289,16 +289,14 @@ describe.only("AssetReveal", () => {
       expect(burnEvent.args[0]).to.equal(deployer);
       // tokenId
       expect(burnEvent.args[1]).to.equal(unrevealedtokenId);
-      // nonce
+      // reveal nonce
       expect(burnEvent.args[2].toString()).to.equal("1");
       // creator
       expect(burnEvent.args[3]).to.equal(deployer);
       // tier
       expect(burnEvent.args[4].toString()).to.equal("5");
-      // nonce
-      expect(burnEvent.args[5].toString()).to.equal("1");
       // amount
-      expect(burnEvent.args[6].toString()).to.equal("1");
+      expect(burnEvent.args[5].toString()).to.equal("1");
     });
     it("Should be able to burn multiple unrevealed owned assets", async () => {
       const {
