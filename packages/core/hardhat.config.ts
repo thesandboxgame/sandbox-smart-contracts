@@ -365,24 +365,24 @@ const config: HardhatUserConfig = {
       },
     },
 
-    goerli_defender: {
+    goerli: {
       url: node_url('goerli'),
-      accounts: accounts('goerli_defender'),
+      accounts: accounts('goerli'),
       tags: ['mainnet', 'L1'],
       deploy: ['deploy'],
       // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
-        l2: 'mumbai_defender',
+        l2: 'mumbai',
       },
     },
-    mumbai_defender: {
+    mumbai: {
       url: node_url('mumbai'),
-      accounts: accounts('mumbai_defender'),
+      accounts: accounts('mumbai'),
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
-        l1: 'goerli_defender',
+        l1: 'goerli',
       },
     },
   },
