@@ -41,6 +41,7 @@ contract Asset is
 
     function initialize(
         address forwarder,
+        address assetAdmin,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
         string memory baseUri
@@ -50,7 +51,7 @@ contract Asset is
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];

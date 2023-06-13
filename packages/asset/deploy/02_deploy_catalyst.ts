@@ -14,6 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer,
     upgradeAdmin,
     catalystMinter,
+    catalystAdmin,
     catalystRoyaltyRecipient,
     trustedForwarder,
   } = await getNamedAccounts();
@@ -35,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           trustedForwarder,
           catalystRoyaltyRecipient,
           OperatorFilterSubscription.address,
-          deployer, // DEFAULT_ADMIN_ROLE
+          catalystAdmin, // DEFAULT_ADMIN_ROLE
           catalystMinter, // MINTER_ROLE
           CATALYST_DEFAULT_ROYALTY,
           CATALYST_IPFS_CID_PER_TIER,

@@ -4,7 +4,8 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, upgradeAdmin, trustedForwarder } = await getNamedAccounts();
+  const { deployer, assetCreateAdmin, upgradeAdmin, trustedForwarder } =
+    await getNamedAccounts();
 
   const AssetContract = await deployments.get("Asset");
   const AuthValidatorContract = await deployments.get("AuthValidator");
@@ -28,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           CatalystContract.address,
           AuthValidatorContract.address,
           trustedForwarder,
-          deployer, // DEFAULT_ADMIN_ROLE
+          assetCreateAdmin, // DEFAULT_ADMIN_ROLE
         ],
       },
       upgradeIndex: 0,
