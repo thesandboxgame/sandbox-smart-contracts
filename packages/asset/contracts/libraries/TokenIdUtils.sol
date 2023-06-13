@@ -112,5 +112,6 @@ library TokenIdUtils {
         data.tier = getTier(tokenId);
         data.revealed = isRevealed(tokenId);
         data.creatorNonce = getCreatorNonce(tokenId);
+        data.bridged = isBridged(tokenId);
     }
 }

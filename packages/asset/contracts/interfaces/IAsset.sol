@@ -19,6 +19,7 @@ interface IAsset {
         uint16 creatorNonce;
         bool revealed;
         string metadataHash;
+        bool bridged;
     }
 
     // Functions
