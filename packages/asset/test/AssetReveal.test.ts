@@ -118,7 +118,7 @@ describe("AssetReveal", () => {
         deployer,
         revealedtokenId
       );
-      expect(unRevealedDeployerBalance.toString()).to.equal("9");
+      expect(unRevealedDeployerBalance.toString()).to.equal("10");
       expect(revealedDeployerBalance.toString()).to.equal("10");
     });
     it("Should not be able to burn amount less than one", async () => {
@@ -134,10 +134,19 @@ describe("AssetReveal", () => {
       ).to.be.revertedWith("Asset is already revealed");
     });
     it("Should not be able to burn more than owned by the caller", async () => {
-      const { AssetRevealContract, unrevealedtokenId } = await runTestSetup();
+      const {
+        deployer,
+        AssetRevealContract,
+        AssetContract,
+        unrevealedtokenId,
+      } = await runTestSetup();
+      const balance = await AssetContract.balanceOf(
+        deployer,
+        unrevealedtokenId
+      );
       await expect(
-        AssetRevealContract.revealBurn(unrevealedtokenId, 10)
-      ).to.be.revertedWith("ERC1155: burn amount exceeds balance");
+        AssetRevealContract.revealBurn(unrevealedtokenId, balance + 1)
+      ).to.be.revertedWith("ERC1155: burn amount exceeds totalSupply");
     });
     it("Should not be able to burn a token that doesn't exist", async () => {
       const { AssetRevealContract } = await runTestSetup();
@@ -159,7 +168,7 @@ describe("AssetReveal", () => {
         deployer,
         unrevealedtokenId
       );
-      expect(deployerBalance.toString()).to.equal("8");
+      expect(deployerBalance.toString()).to.equal("9");
     });
     it("Should emit burn event with correct data", async () => {
       const { AssetRevealContract, unrevealedtokenId, deployer } =
@@ -199,7 +208,7 @@ describe("AssetReveal", () => {
         deployer,
         unrevealedtokenId
       );
-      expect(deployerBalance1.toString()).to.equal("4");
+      expect(deployerBalance1.toString()).to.equal("5");
 
       const deployerBalance2 = await AssetContract.balanceOf(
         deployer,
@@ -216,21 +225,21 @@ describe("AssetReveal", () => {
         AssetRevealContract,
         AssetContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
       const amountToMint = [1];
       const signature = await createEIP712RevealSignature(
         amountToMint,
         unrevealedtokenId,
-        newMetadataHash
+        newMetadataHashes
       );
 
       const tx = await AssetRevealContract.revealMint(
         signature,
         unrevealedtokenId,
         amountToMint,
-        newMetadataHash,
+        newMetadataHashes,
         deployer
       );
 
@@ -244,21 +253,21 @@ describe("AssetReveal", () => {
     it("Should allow mintingw when multiple copies revealed to the same metadata hash", async () => {
       const { deployer, unrevealedtokenId, AssetRevealContract } =
         await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
       const amountToMint = [2];
       const signature = await createEIP712RevealSignature(
         amountToMint,
         unrevealedtokenId,
-        newMetadataHash
+        newMetadataHashes
       );
 
       const tx = await AssetRevealContract.revealMint(
         signature,
         unrevealedtokenId,
         amountToMint,
-        newMetadataHash,
+        newMetadataHashes,
         deployer
       );
 
@@ -273,10 +282,10 @@ describe("AssetReveal", () => {
         unrevealedtokenId2,
         AssetRevealContract,
       } = await runTestSetup();
-      const newMetadataHash1 = [
+      const newMetadataHashes1 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const newMetadataHash2 = [
+      const newMetadataHashes2 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJZ",
       ];
       const amountToMint1 = [1];
@@ -284,20 +293,20 @@ describe("AssetReveal", () => {
       const signature1 = await createEIP712RevealSignature(
         amountToMint1,
         unrevealedtokenId,
-        newMetadataHash1
+        newMetadataHashes1
       );
 
       const signature2 = await createEIP712RevealSignature(
         amountToMint2,
         unrevealedtokenId2,
-        newMetadataHash2
+        newMetadataHashes2
       );
 
       const tx = await AssetRevealContract.revealBatchMint(
         [signature1, signature2],
         [unrevealedtokenId, unrevealedtokenId2],
         [amountToMint1, amountToMint2],
-        [newMetadataHash1, newMetadataHash2],
+        [newMetadataHashes1, newMetadataHashes2],
         deployer
       );
 

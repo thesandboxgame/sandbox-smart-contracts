@@ -7,14 +7,14 @@ async function createEIP712RevealSignature(
 ): Promise<string> {
   // get named accounts from hardhat
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
+  const { backendAuthWallet } = await getNamedAccounts();
 
   const AssetRevealContract = await ethers.getContract(
     "AssetReveal",
-    backendSigner
+    backendAuthWallet
   );
 
-  const signer = ethers.provider.getSigner(backendSigner);
+  const signer = ethers.provider.getSigner(backendAuthWallet);
   const data = {
     types: {
       Reveal: [
@@ -53,15 +53,15 @@ const createAssetMintSignature = async (
   metadataHash: string
 ) => {
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
-  const signer = ethers.provider.getSigner(backendSigner);
+  const { backendAuthWallet } = await getNamedAccounts();
+  const signer = ethers.provider.getSigner(backendAuthWallet);
 
-  const AssetCretelContract = await ethers.getContract(
+  const AssetCreateContract = await ethers.getContract(
     "AssetCreate",
-    backendSigner
+    backendAuthWallet
   );
 
-  const nonce = await AssetCretelContract.creatorNonces(creator);
+  const nonce = await AssetCreateContract.creatorNonces(creator);
 
   const data = {
     types: {
@@ -78,7 +78,7 @@ const createAssetMintSignature = async (
       name: "Sandbox Asset Create",
       version: "1.0",
       chainId: hre.network.config.chainId,
-      verifyingContract: AssetCretelContract.address,
+      verifyingContract: AssetCreateContract.address,
     },
     message: {
       creator,
@@ -105,18 +105,18 @@ const createMultipleAssetsMintSignature = async (
   metadataHashes: string[]
 ) => {
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
-  const signer = ethers.provider.getSigner(backendSigner);
+  const { backendAuthWallet } = await getNamedAccounts();
+  const signer = ethers.provider.getSigner(backendAuthWallet);
 
-  const AssetCretelContract = await ethers.getContract(
+  const AssetCreateContract = await ethers.getContract(
     "AssetCreate",
-    backendSigner
+    backendAuthWallet
   );
 
-  const nonce = await AssetCretelContract.creatorNonces(creator);
+  const nonce = await AssetCreateContract.creatorNonces(creator);
   const data = {
     types: {
-      Mint: [
+      MintBatch: [
         { name: "creator", type: "address" },
         { name: "nonce", type: "uint16" },
         { name: "tiers", type: "uint8[]" },
@@ -129,7 +129,7 @@ const createMultipleAssetsMintSignature = async (
       name: "Sandbox Asset Create",
       version: "1.0",
       chainId: hre.network.config.chainId,
-      verifyingContract: AssetCretelContract.address,
+      verifyingContract: AssetCreateContract.address,
     },
     message: {
       creator,

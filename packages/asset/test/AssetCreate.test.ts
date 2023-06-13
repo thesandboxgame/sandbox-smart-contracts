@@ -4,7 +4,7 @@ import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
 } from "./utils/signatures";
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 
 const runTestSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
@@ -76,13 +76,9 @@ const runTestSetup = deployments.createFixture(
     };
 
     const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
-    const BridgeMinterRole = await AssetCreateContract.BRIDGE_MINTER_ROLE();
+
     const grantSpecialMinterRole = async (address: string) => {
       await AssetCreateContract.grantRole(SpecialMinterRole, address);
-    };
-
-    const grantBridgeMinterRole = async (address: string) => {
-      await AssetCreateContract.grantRole(BridgeMinterRole, address);
     };
 
     const mintSpecialAsset = async (
@@ -147,7 +143,7 @@ const runTestSetup = deployments.createFixture(
       ],
       additionalMetadataHash: "QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L",
       deployer,
-      otherWallet: catalystMinter,
+      otherWallet: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B",
       AssetContract,
       AssetCreateContract,
       AuthValidatorContract,
@@ -157,7 +153,6 @@ const runTestSetup = deployments.createFixture(
       mintMultipleAssets,
       mintSpecialAsset,
       grantSpecialMinterRole,
-      grantBridgeMinterRole,
       generateSingleMintSignature,
       generateMultipleMintSignature,
       getCreatorNonce,
@@ -979,45 +974,6 @@ describe("AssetCreate", () => {
         mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
       ).to.be.revertedWith(
         "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6"
-      );
-    });
-  });
-  describe("Bridged asset mint", () => {
-    it("should allow bridge minter role to mint bridged assets", async () => {
-      const {
-        AssetCreateContract,
-        deployer,
-        AssetContract,
-        metadataHashes,
-        grantBridgeMinterRole,
-      } = await runTestSetup();
-
-      await grantBridgeMinterRole(deployer);
-      const randomUint256 = utils.randomBytes(32);
-      await expect(
-        AssetCreateContract.createBridgedAsset(
-          deployer,
-          randomUint256,
-          10,
-          metadataHashes[0]
-        )
-      ).to.not.be.reverted;
-      // balance should be 10
-      expect(await AssetContract.balanceOf(deployer, randomUint256)).to.eq(10);
-    });
-    it("should NOT ALLOW unauthorized wallets to mint bridged assets", async () => {
-      const { AssetCreateContract, deployer, metadataHashes } =
-        await runTestSetup();
-      const randomUint256 = utils.randomBytes(32);
-      await expect(
-        AssetCreateContract.createBridgedAsset(
-          deployer,
-          randomUint256,
-          10,
-          metadataHashes[0]
-        )
-      ).to.be.revertedWith(
-        "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x60400965d90814aa36ab657cbeca3e3b701e320f6373ae1db85824fee2a79822"
       );
     });
   });
