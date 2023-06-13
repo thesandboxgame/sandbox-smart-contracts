@@ -38,7 +38,7 @@ contract AssetCreate is
         );
     bytes32 public constant MINT_BATCH_TYPEHASH =
         keccak256(
-            "Mint(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes)"
+            "MintBatch(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
