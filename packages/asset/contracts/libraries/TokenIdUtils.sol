@@ -27,14 +27,14 @@ library TokenIdUtils {
     /// @dev The next 16 bits are assets reveal nonce.
     /// @param creator The address of the creator of the asset
     /// @param tier The tier of the asset determined by the catalyst used to create it
-    /// @param assetNonce The nonce of the asset creator
+    /// @param creatorNonce The nonce of the asset creator
     /// @param revealNonce The reveal nonce of the asset
     /// @param bridged Whether the asset is bridged or not
     /// @return tokenId The generated token id
     function generateTokenId(
         address creator,
         uint8 tier,
-        uint16 assetNonce,
+        uint16 creatorNonce,
         uint16 revealNonce,
         bool bridged
     ) internal pure returns (uint256 tokenId) {
@@ -43,7 +43,7 @@ library TokenIdUtils {
         tokenId = tokenId =
             uint256(creatorAddress) |
             (uint256(tier) << TIER_SHIFT) |
-            (uint256(assetNonce) << NONCE_SHIFT) |
+            (uint256(creatorNonce) << NONCE_SHIFT) |
             (uint256(revealNonce) << REVEAL_NONCE_SHIFT) |
             (uint256(bridged ? 1 : 0) << BRIDGED_SHIFT);
 
