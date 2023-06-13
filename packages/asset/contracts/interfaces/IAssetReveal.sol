@@ -4,8 +4,8 @@ pragma solidity 0.8.18;
 interface IAssetReveal {
     event AssetRevealBurn(
         address revealer,
-        uint256 tokenId,
-        uint32 nonce,
+        uint256 unrevealedTokenId,
+        uint32 signatureNonce,
         address assetCreator,
         uint8 tier,
         uint256 amount
@@ -13,7 +13,15 @@ interface IAssetReveal {
 
     event AssetsRevealed(
         address recipient,
-        uint256 oldTokenId,
+        uint256 unrevealedTokenId,
+        uint32 signatureNonce,
+        uint256[] amounts,
+        uint256[] newTokenIds
+    );
+
+    event AssetInstantlyRevealed(
+        address recipient,
+        uint256 unrevealedTokenId,
         uint256[] amounts,
         uint256[] newTokenIds
     );

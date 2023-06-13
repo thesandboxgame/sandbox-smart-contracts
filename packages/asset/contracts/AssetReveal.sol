@@ -149,7 +149,13 @@ contract AssetReveal is
             );
         }
 
-        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, newTokenIds);
+        emit AssetsRevealed(
+            _msgSender(),
+            prevTokenId,
+            signatureNonce,
+            amounts,
+            newTokenIds
+        );
     }
 
     /// @notice Mint multiple assets with revealed abilities and enhancements
@@ -233,7 +239,12 @@ contract AssetReveal is
             );
         }
 
-        emit AssetsRevealed(_msgSender(), prevTokenId, amounts, tokenIds);
+        emit AssetInstantlyRevealed(
+            _msgSender(),
+            prevTokenId,
+            amounts,
+            tokenIds
+        );
     }
 
     /// @notice Creates a hash of the reveal data
