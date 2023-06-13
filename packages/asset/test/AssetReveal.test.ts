@@ -554,7 +554,7 @@ describe.only("AssetReveal", () => {
         [amount],
         newMetadataHash
       );
-      expect(result.events[3].event).to.equal("AssetsRevealed");
+      expect(result.events[3].event).to.equal("AssetInstantlyRevealed");
     });
     it("Should not allow minting with invalid signature", async () => {
       const { revealAsset, unrevealedtokenId } = await runTestSetup();
