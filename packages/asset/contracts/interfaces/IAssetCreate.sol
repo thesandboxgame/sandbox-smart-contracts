@@ -2,7 +2,6 @@
 pragma solidity 0.8.18;
 
 interface IAssetCreate {
-    event CreatorNonceIncremented(address indexed creator, uint16 nonce);
     event AssetMinted(
         address indexed creator,
         uint256 tokenId,

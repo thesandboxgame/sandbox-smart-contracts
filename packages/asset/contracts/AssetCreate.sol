@@ -32,6 +32,8 @@ contract AssetCreate is
 
     bytes32 public constant SPECIAL_MINTER_ROLE =
         keccak256("SPECIAL_MINTER_ROLE");
+    bytes32 public constant BRIDGE_MINTER_ROLE =
+        keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
         keccak256(
             "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)"
@@ -209,7 +211,17 @@ contract AssetCreate is
     /// @return nonce The next available creator nonce
     function getCreatorNonce(address creator) internal returns (uint16) {
         creatorNonces[creator]++;
-        emit CreatorNonceIncremented(creator, creatorNonces[creator]);
+        return creatorNonces[creator];
+    }
+
+    /// @notice Get the next available creator nonce
+    /// @dev Called from the bridge contract
+    /// @param creator The address of the creator
+    /// @return nonce The next available creator nonce
+    function bridgeGetCreatorNonce(
+        address creator
+    ) external onlyRole(BRIDGE_MINTER_ROLE) returns (uint16) {
+        creatorNonces[creator]++;
         return creatorNonces[creator];
     }
 
