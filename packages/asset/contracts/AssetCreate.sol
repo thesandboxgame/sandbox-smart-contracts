@@ -86,7 +86,14 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashMint(creator, tier, amount, revealed, metadataHash)
+                _hashMint(
+                    creator,
+                    creatorNonces[creator],
+                    tier,
+                    amount,
+                    revealed,
+                    metadataHash
+                )
             ),
             "Invalid signature"
         );
@@ -188,7 +195,14 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashMint(creator, tier, amount, revealed, metadataHash)
+                _hashMint(
+                    creator,
+                    creatorNonces[creator],
+                    tier,
+                    amount,
+                    revealed,
+                    metadataHash
+                )
             ),
             "Invalid signature"
         );
@@ -251,6 +265,7 @@ contract AssetCreate is
     /// @return digest The hash of the mint data
     function _hashMint(
         address creator,
+        uint16 nonce,
         uint8 tier,
         uint256 amount,
         bool revealed,
@@ -261,7 +276,7 @@ contract AssetCreate is
                 abi.encode(
                     MINT_TYPEHASH,
                     creator,
-                    creatorNonces[creator],
+                    nonce,
                     tier,
                     amount,
                     revealed,
