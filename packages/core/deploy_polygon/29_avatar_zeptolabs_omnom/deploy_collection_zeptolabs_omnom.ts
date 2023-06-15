@@ -147,7 +147,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['Zeptolabs', 'Zeptolabs_deploy'];
+func.tags = ['ZeptolabsOmNom', 'ZeptolabsOmNom_deploy'];
 func.dependencies = [
   'PolygonSand_deploy',
   'CollectionFactory_deploy_beacon_main_avatar',
