@@ -1,5 +1,5 @@
 {
-  "address": "0x832441F88ef2670bA6Bd11468c8B0464dadd746f",
+  "address": "0x57e5925257e42EC33fe2A8a35e493e18840BcFBf",
   "abi": [
     {
       "inputs": [],
@@ -420,6 +420,18 @@
     },
     {
       "anonymous": false,
+      "inputs": [],
+      "name": "TokenBurningDisabled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "TokenBurningEnabled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
       "inputs": [
         {
           "indexed": true,
@@ -806,6 +818,20 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "disableBurning",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "enableBurning",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -1027,6 +1053,19 @@
         }
       ],
       "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isBurnEnabled",
       "outputs": [
         {
           "internalType": "bool",
