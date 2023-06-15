@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers, artifacts} = hre;
 
   const {
-    sandAdmin,
+    treasury,
     raffleSignWallet,
     defaultOperatorFiltererRegistry,
     defaultOperatorFiltererSubscription,
@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const sandContract = await deployments.get('PolygonSand'); // allowedToExecuteMint address
   // raffleSignWallet (taken from name accounts): wallet that can sign
   // nftCollectionAdmin (taken from name accounts): owner of collection
-  // sandAdmin (taken from name accounts): treasury
+  // treasury (taken from name accounts): treasury
   const collectionName = 'MadBallsFactory';
   const collectionSymbol = 'MAD';
   const MAX_SUPPLY = 2023;
@@ -76,7 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       metadataUrl,
       collectionName,
       collectionSymbol,
-      sandAdmin,
+      treasury,
       raffleSignWallet,
       TRUSTED_FORWARDER.address,
       sandContract.address,

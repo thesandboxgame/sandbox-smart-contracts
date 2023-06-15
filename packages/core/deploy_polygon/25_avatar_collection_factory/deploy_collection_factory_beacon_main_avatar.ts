@@ -62,6 +62,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const beaconAddress = beaconAddedEvents.slice(-1)[0].args?.[1];
 
+  console.log(`deployed at ${beaconAddress} (tx: ${deployTx.hash})`);
+
   // save beacon in deployments
   const beaconContractInterface = await artifacts.readArtifact(
     'UpgradeableBeacon'
