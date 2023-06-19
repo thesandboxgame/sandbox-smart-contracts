@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 import {
+  createBatchRevealSignature,
   createBurnAndRevealSignature,
   createRevealSignature,
 } from "./utils/revealSignature";
@@ -75,14 +76,12 @@ const runTestSetup = deployments.createFixture(
     const revealAsset = async (
       signature: string,
       tokenId: number,
-      nonce: number,
       amounts: number[],
       metadataHashes: string[]
     ) => {
       const tx = await AssetRevealContract.revealMint(
         signature,
         tokenId,
-        nonce,
         amounts,
         metadataHashes
       );
@@ -98,16 +97,14 @@ const runTestSetup = deployments.createFixture(
     };
 
     const revealAssetBatch = async (
-      signatures: string[],
+      signature: string,
       tokenIds: number[],
-      nonces: number[],
       amounts: number[][],
       metadataHashes: string[][]
     ) => {
       const tx = await AssetRevealContract.revealBatchMint(
-        signatures,
+        signature,
         tokenIds,
-        nonces,
         amounts,
         metadataHashes
       );
@@ -147,17 +144,34 @@ const runTestSetup = deployments.createFixture(
       return result;
     };
 
-    const generateSignature = async (
+    const generateRevealSignature = async (
       recipient: string,
       amounts: number[],
       prevTokenId: number,
-      nonce: number,
       metadataHashes: string[]
     ) => {
+      const nonce = await AssetRevealContract.nonce(recipient);
       const signature = await createRevealSignature(
         recipient,
         amounts,
         prevTokenId,
+        nonce,
+        metadataHashes
+      );
+      return signature;
+    };
+
+    const generateBatchRevealSignature = async (
+      recipient: string,
+      amounts: number[][],
+      prevTokenIds: number[],
+      metadataHashes: string[][]
+    ) => {
+      const nonce = await AssetRevealContract.nonce(recipient);
+      const signature = await createBatchRevealSignature(
+        recipient,
+        amounts,
+        prevTokenIds,
         nonce,
         metadataHashes
       );
@@ -170,10 +184,12 @@ const runTestSetup = deployments.createFixture(
       prevTokenId: number,
       metadataHashes: string[]
     ) => {
+      const nonce = await AssetRevealContract.nonce(recipient);
       const signature = await createBurnAndRevealSignature(
         recipient,
         amounts,
         prevTokenId,
+        nonce,
         metadataHashes
       );
       return signature;
@@ -181,7 +197,8 @@ const runTestSetup = deployments.createFixture(
 
     return {
       deployer,
-      generateSignature,
+      generateRevealSignature,
+      generateBatchRevealSignature,
       generateBurnAndRevealSignature,
       revealAsset,
       revealAssetBatch,
@@ -285,18 +302,14 @@ describe.only("AssetReveal", () => {
       const burnResult = await burnTx.wait();
       const burnEvent = burnResult.events[1];
       expect(burnEvent.event).to.equal("AssetRevealBurn");
-      // msgSender
+      // revealer
       expect(burnEvent.args[0]).to.equal(deployer);
-      // tokenId
+      // token id that is being revealed
       expect(burnEvent.args[1]).to.equal(unrevealedtokenId);
-      // reveal nonce
-      expect(burnEvent.args[2].toString()).to.equal("1");
-      // creator
-      expect(burnEvent.args[3]).to.equal(deployer);
       // tier
-      expect(burnEvent.args[4].toString()).to.equal("5");
+      expect(burnEvent.args[2].toString()).to.equal("5");
       // amount
-      expect(burnEvent.args[5].toString()).to.equal("1");
+      expect(burnEvent.args[3].toString()).to.equal("1");
     });
     it("Should be able to burn multiple unrevealed owned assets", async () => {
       const {
@@ -306,23 +319,42 @@ describe.only("AssetReveal", () => {
         unrevealedtokenId2,
         deployer,
       } = await runTestSetup();
-      const burnTx = await AssetRevealContract.revealBatchBurn(
-        [unrevealedtokenId, unrevealedtokenId2],
-        [5, 5]
-      );
-      await burnTx.wait();
-
-      const deployerBalance1 = await AssetContract.balanceOf(
+      const amountToBurn1 = 2;
+      const amountToBurn2 = 3;
+      const tk1BalanceBeforeBurn = await AssetContract.balanceOf(
         deployer,
         unrevealedtokenId
       );
-      expect(deployerBalance1.toString()).to.equal("4");
 
-      const deployerBalance2 = await AssetContract.balanceOf(
+      const tk2BalanceBeforeBurn = await AssetContract.balanceOf(
         deployer,
         unrevealedtokenId2
       );
-      expect(deployerBalance2.toString()).to.equal("5");
+
+      const burnTx = await AssetRevealContract.revealBatchBurn(
+        [unrevealedtokenId, unrevealedtokenId2],
+        [amountToBurn1, amountToBurn2]
+      );
+      await burnTx.wait();
+
+      const tk1BalanceAfterBurn = await AssetContract.balanceOf(
+        deployer,
+        unrevealedtokenId
+      );
+
+      // expect(tk1BalanceBeforeBurn.sub(5)).to.equal(tk1BalanceAfterBurn);
+
+      const tk2BalanceAfterBurn = await AssetContract.balanceOf(
+        deployer,
+        unrevealedtokenId2
+      );
+
+      expect(tk1BalanceBeforeBurn.sub(amountToBurn1)).to.equal(
+        tk1BalanceAfterBurn
+      );
+      expect(tk2BalanceBeforeBurn.sub(amountToBurn2)).to.equal(
+        tk2BalanceAfterBurn
+      );
     });
   });
   describe("Minting", () => {
@@ -330,32 +362,28 @@ describe.only("AssetReveal", () => {
       const {
         deployer,
         unrevealedtokenId,
-        burnAsset,
-        generateSignature,
+        generateRevealSignature,
         revealAsset,
         AssetContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
+      const amounts = [1];
 
-      const signature = await generateSignature(
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        nonce,
-        [amount],
-        newMetadataHash
+        amounts,
+        newMetadataHashes
       );
-      expect(result.events[2].event).to.equal("AssetsRevealed");
+      expect(result.events[2].event).to.equal("AssetRevealMint");
 
       const newTokenId = result.events[2].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(deployer, newTokenId);
@@ -365,80 +393,69 @@ describe.only("AssetReveal", () => {
       const {
         deployer,
         unrevealedtokenId,
-        burnAsset,
         revealAsset,
-        generateSignature,
+        generateRevealSignature,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 2;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [2];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
 
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        nonce,
-        [amount],
-        newMetadataHash
+        amounts,
+        newMetadataHashes
       );
 
-      expect(result.events[2].event).to.equal("AssetsRevealed");
+      expect(result.events[2].event).to.equal("AssetRevealMint");
       expect(result.events[2].args["newTokenIds"].length).to.equal(1);
     });
     it("should increase the tokens supply for tokens with same metadata hash", async () => {
       const {
         deployer,
         unrevealedtokenId,
-        burnAsset,
-        generateSignature,
+        generateRevealSignature,
         revealAsset,
         AssetContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce: firstNonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [1];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        firstNonce,
-        newMetadataHash
+        newMetadataHashes
       );
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        firstNonce,
-        [amount],
-        newMetadataHash
+        amounts,
+        newMetadataHashes
       );
       const newTokenId = result.events[2].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(deployer, newTokenId);
       expect(balance.toString()).to.equal("1");
 
-      const { nonce: secondNonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature2 = await generateSignature(
+      const signature2 = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        secondNonce,
-        newMetadataHash
+        newMetadataHashes
       );
       await revealAsset(
         signature2,
         unrevealedtokenId,
-        secondNonce,
-        [amount],
-        newMetadataHash
+        amounts,
+        newMetadataHashes
       );
       const balance2 = await AssetContract.balanceOf(deployer, newTokenId);
       expect(balance2.toString()).to.equal("2");
@@ -447,56 +464,41 @@ describe.only("AssetReveal", () => {
       const {
         deployer,
         revealAssetBatch,
-        burnAssetBatch,
-        generateSignature,
+        generateBatchRevealSignature,
         unrevealedtokenId,
         unrevealedtokenId2,
       } = await runTestSetup();
-      const newMetadataHash1 = [
+      const newMetadataHashes1 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const newMetadataHash2 = [
+      const newMetadataHashes2 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJZ",
       ];
-      const amount1 = 1;
-      const amount2 = 1;
+      const amounts1 = [1];
+      const amounts2 = [1];
 
-      const { nonces } = await burnAssetBatch(
+      const signature = await generateBatchRevealSignature(
+        deployer,
+        [amounts1, amounts2],
         [unrevealedtokenId, unrevealedtokenId2],
-        [amount1, amount2]
-      );
-      const signature1 = await generateSignature(
-        deployer,
-        [amount1],
-        unrevealedtokenId,
-        nonces[0],
-        newMetadataHash1
+        [newMetadataHashes1, newMetadataHashes2]
       );
 
-      const signature2 = await generateSignature(
-        deployer,
-        [amount2],
-        unrevealedtokenId2,
-        nonces[1],
-        newMetadataHash2
-      );
       const result = await revealAssetBatch(
-        [signature1, signature2],
+        signature,
         [unrevealedtokenId, unrevealedtokenId2],
-        nonces,
-        [[amount1], [amount2]],
-        [newMetadataHash1, newMetadataHash2]
+        [amounts1, amounts2],
+        [newMetadataHashes1, newMetadataHashes2]
       );
 
       // expect two events with name AssetsRevealed
-      expect(result.events[2].event).to.equal("AssetsRevealed");
-      expect(result.events[5].event).to.equal("AssetsRevealed");
+      expect(result.events[2].event).to.equal("AssetRevealMint");
+      expect(result.events[5].event).to.equal("AssetRevealMint");
     });
     it("Should allow revealing multiple copies at the same time", async () => {
       const {
         deployer,
-        generateSignature,
-        burnAsset,
+        generateRevealSignature,
         revealAsset,
         unrevealedtokenId,
       } = await runTestSetup();
@@ -509,23 +511,20 @@ describe.only("AssetReveal", () => {
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJ6",
       ];
       const amountToMint = [1, 2, 1, 7, 1, 2];
-      const { nonce } = await burnAsset(unrevealedtokenId, 1);
-      const signature = await generateSignature(
+      const signature = await generateRevealSignature(
         deployer,
         amountToMint,
         unrevealedtokenId,
-        nonce,
         newMetadataHashes
       );
 
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        nonce,
         amountToMint,
         newMetadataHashes
       );
-      expect(result.events[7].event).to.equal("AssetsRevealed");
+      expect(result.events[7].event).to.equal("AssetRevealMint");
       expect(result.events[7].args["newTokenIds"].length).to.equal(6);
     });
     it("Should allow instant reveal when authorized by the backed", async () => {
@@ -538,11 +537,11 @@ describe.only("AssetReveal", () => {
       const newMetadataHash = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
+      const amounts = [1];
 
       const signature = await generateBurnAndRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
         newMetadataHash
       );
@@ -550,148 +549,106 @@ describe.only("AssetReveal", () => {
       const result = await instantReveal(
         signature,
         unrevealedtokenId,
-        amount,
-        [amount],
+        amounts[0],
+        amounts,
         newMetadataHash
       );
-      expect(result.events[3].event).to.equal("AssetInstantlyRevealed");
+      expect(result.events[4].event).to.equal("AssetRevealMint");
     });
     it("Should not allow minting with invalid signature", async () => {
       const { revealAsset, unrevealedtokenId } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
+      const amounts = [1];
       await expect(
         revealAsset(
           "0x1556a70d76cc452ae54e83bb167a9041f0d062d000fa0dcb42593f77c544f6471643d14dbd6a6edc658f4b16699a585181a08dba4f6d16a9273e0e2cbed622da1b",
           unrevealedtokenId,
-          0,
-          amountToMint,
-          newMetadataHash
+          amounts,
+          newMetadataHashes
         )
       ).to.be.revertedWith("Invalid signature");
     });
     it("Should not allow minting with invalid prevTokenId", async () => {
       const {
         deployer,
-        generateSignature,
-        burnAsset,
+        generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [1];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           123,
-          nonce,
-          [amount],
-          newMetadataHash
+          amounts,
+          newMetadataHashes
         )
       ).to.be.revertedWith("Invalid signature");
     });
     it("Should not allow minting with invalid amount", async () => {
       const {
         deployer,
-        generateSignature,
-        burnAsset,
+        generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [1];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           unrevealedtokenId,
-          nonce,
+
           [123],
-          newMetadataHash
+          newMetadataHashes
         )
       ).to.be.revertedWith("Invalid signature");
     });
     it("Should not allow minting with invalid metadataHashes", async () => {
       const {
         deployer,
-        generateSignature,
-        burnAsset,
+        generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [1];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           unrevealedtokenId,
-          nonce,
-          [amount],
-          ["QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE"]
-        )
-      ).to.be.revertedWith("Invalid signature");
-    });
-    it("Should not allow minting with invalid nonce", async () => {
-      const {
-        deployer,
-        generateSignature,
-        burnAsset,
-        unrevealedtokenId,
-        AssetRevealContract,
-      } = await runTestSetup();
-      const newMetadataHash = [
-        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
-      ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
-        deployer,
-        [amount],
-        unrevealedtokenId,
-        nonce,
-        newMetadataHash
-      );
 
-      await expect(
-        AssetRevealContract.revealMint(
-          signature,
-          unrevealedtokenId,
-          3,
-          [amount],
+          amounts,
           ["QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE"]
         )
       ).to.be.revertedWith("Invalid signature");
@@ -699,42 +656,37 @@ describe.only("AssetReveal", () => {
     it("Should not allow using the same signature twice", async () => {
       const {
         deployer,
-        generateSignature,
-        burnAsset,
+        generateRevealSignature,
         revealAsset,
         unrevealedtokenId,
         AssetRevealContract,
       } = await runTestSetup();
-      const newMetadataHash = [
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amount = 1;
-      const { nonce } = await burnAsset(unrevealedtokenId, amount);
-      const signature = await generateSignature(
+      const amounts = [1];
+      const signature = await generateRevealSignature(
         deployer,
-        [amount],
+        amounts,
         unrevealedtokenId,
-        nonce,
-        newMetadataHash
+        newMetadataHashes
       );
 
       await revealAsset(
         signature,
         unrevealedtokenId,
-        nonce,
-        [amount],
-        newMetadataHash
+        amounts,
+        newMetadataHashes
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           unrevealedtokenId,
-          nonce,
-          [amount],
-          newMetadataHash
+          amounts,
+          newMetadataHashes
         )
-      ).to.be.revertedWith("Signature has already been used");
+      ).to.be.revertedWith("Invalid signature");
     });
   });
 });
