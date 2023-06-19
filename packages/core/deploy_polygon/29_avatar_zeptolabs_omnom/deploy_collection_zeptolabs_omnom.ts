@@ -23,8 +23,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // treasury (taken from name accounts): treasury
   const collectionName = 'ZeptoLabsOmNom';
   const collectionSymbol = 'ZOM';
-  const MAX_SUPPLY = 3000;
-  const maxMarketingTokens = 60;
+  const MAX_SUPPLY = 2000;
+  const maxMarketingTokens = 40;
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
