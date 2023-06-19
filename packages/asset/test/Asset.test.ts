@@ -64,7 +64,6 @@ function generateOldAssetId(
 
 const runAssetSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
-    console.log("deploy");
     await deployments.fixture(["Asset"]);
     const { deployer, revealer } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
