@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 
-import "../Catalyst.sol";
+import {Catalyst,IOperatorFilterRegistry} from "../Catalyst.sol";
 
 contract MockCatalyst is Catalyst {
     /// @notice sets registry and subscribe to subscription
