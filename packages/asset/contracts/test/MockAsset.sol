@@ -2,7 +2,7 @@
 pragma solidity 0.8.18;
 
 import {Asset} from "../Asset.sol";
-import "../OperatorFilter/interfaces/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../OperatorFilter/interfaces/IOperatorFilterRegistry.sol";
 
 contract MockAsset is Asset {
     /// @notice sets registry and subscribe to subscription
