@@ -2,9 +2,10 @@
 pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interfaces/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 
 ///@title OperatorFiltererUpgradeable
+///@author The SandBox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
 abstract contract OperatorFiltererUpgradeable is Initializable {
   IOperatorFilterRegistry public operatorFilterRegistry =
