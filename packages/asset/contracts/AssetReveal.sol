@@ -25,7 +25,7 @@ contract AssetReveal is
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) revealIds;
     // signature nonces to prevent replay attacks
-    mapping(address => uint32) public nonce;
+    mapping(address => uint32) public signatureNonces;
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
@@ -102,7 +102,7 @@ contract AssetReveal is
                 _hashReveal(
                     _msgSender(),
                     prevTokenId,
-                    nonce[_msgSender()]++,
+                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )
@@ -131,7 +131,7 @@ contract AssetReveal is
                 _hashBatchReveal(
                     _msgSender(),
                     prevTokenIds,
-                    nonce[_msgSender()]++,
+                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )
@@ -167,7 +167,7 @@ contract AssetReveal is
                 _hashInstantReveal(
                     _msgSender(),
                     prevTokenId,
-                    nonce[_msgSender()]++,
+                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )

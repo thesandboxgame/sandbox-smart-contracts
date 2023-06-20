@@ -145,14 +145,14 @@ const runTestSetup = deployments.createFixture(
     };
 
     const generateRevealSignature = async (
-      recipient: string,
+      revealer: string,
       amounts: number[],
       prevTokenId: number,
       metadataHashes: string[]
     ) => {
-      const nonce = await AssetRevealContract.nonce(recipient);
+      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createRevealSignature(
-        recipient,
+        revealer,
         amounts,
         prevTokenId,
         nonce,
@@ -162,14 +162,14 @@ const runTestSetup = deployments.createFixture(
     };
 
     const generateBatchRevealSignature = async (
-      recipient: string,
+      revealer: string,
       amounts: number[][],
       prevTokenIds: number[],
       metadataHashes: string[][]
     ) => {
-      const nonce = await AssetRevealContract.nonce(recipient);
+      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createBatchRevealSignature(
-        recipient,
+        revealer,
         amounts,
         prevTokenIds,
         nonce,
@@ -179,14 +179,14 @@ const runTestSetup = deployments.createFixture(
     };
 
     const generateBurnAndRevealSignature = async (
-      recipient: string,
+      revealer: string,
       amounts: number[],
       prevTokenId: number,
       metadataHashes: string[]
     ) => {
-      const nonce = await AssetRevealContract.nonce(recipient);
+      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createBurnAndRevealSignature(
-        recipient,
+        revealer,
         amounts,
         prevTokenId,
         nonce,
