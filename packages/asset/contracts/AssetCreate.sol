@@ -29,6 +29,7 @@ contract AssetCreate is
 
     // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
+    mapping(address => uint16) public signatureNonces;
 
     bytes32 public constant SPECIAL_MINTER_ROLE =
         keccak256("SPECIAL_MINTER_ROLE");
@@ -88,7 +89,7 @@ contract AssetCreate is
                 signature,
                 _hashMint(
                     creator,
-                    creatorNonces[creator],
+                    signatureNonces[_msgSender()]++,
                     tier,
                     amount,
                     revealed,
@@ -98,18 +99,16 @@ contract AssetCreate is
             "Invalid signature"
         );
 
-        uint16 creatorNonce = getCreatorNonce(creator);
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            creatorNonce,
+            ++creatorNonces[creator],
             revealed ? 1 : 0,
             false
         );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
-
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit AssetMinted(creator, tokenId, tier, amount, metadataHash);
     }
@@ -132,7 +131,7 @@ contract AssetCreate is
                 signature,
                 _hashBatchMint(
                     creator,
-                    creatorNonces[creator],
+                    signatureNonces[_msgSender()]++,
                     tiers,
                     amounts,
                     revealed,
@@ -155,12 +154,11 @@ contract AssetCreate is
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
         for (uint256 i = 0; i < tiers.length; i++) {
-            uint16 creatorNonce = getCreatorNonce(creator);
             tiersToBurn[i] = tiers[i];
             tokenIds[i] = TokenIdUtils.generateTokenId(
                 creator,
                 tiers[i],
-                creatorNonce,
+                ++creatorNonces[creator],
                 revealed[i] ? 1 : 0,
                 false
             );
@@ -197,7 +195,7 @@ contract AssetCreate is
                 signature,
                 _hashMint(
                     creator,
-                    creatorNonces[creator],
+                    signatureNonces[_msgSender()]++,
                     tier,
                     amount,
                     revealed,
@@ -207,11 +205,10 @@ contract AssetCreate is
             "Invalid signature"
         );
 
-        uint16 creatorNonce = getCreatorNonce(creator);
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            creatorNonce,
+            ++creatorNonces[creator],
             revealed ? 1 : 0,
             false
         );
@@ -221,22 +218,13 @@ contract AssetCreate is
     }
 
     /// @notice Get the next available creator nonce
-    /// @param creator The address of the creator
-    /// @return nonce The next available creator nonce
-    function getCreatorNonce(address creator) internal returns (uint16) {
-        creatorNonces[creator]++;
-        return creatorNonces[creator];
-    }
-
-    /// @notice Get the next available creator nonce
     /// @dev Called from the bridge contract
     /// @param creator The address of the creator
     /// @return nonce The next available creator nonce
-    function bridgeGetCreatorNonce(
+    function bridgeIncrementCreatorNonce(
         address creator
     ) external onlyRole(BRIDGE_MINTER_ROLE) returns (uint16) {
-        creatorNonces[creator]++;
-        return creatorNonces[creator];
+        return ++creatorNonces[creator];
     }
 
     /// @notice Get the asset contract address

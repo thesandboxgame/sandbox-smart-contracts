@@ -61,7 +61,7 @@ const createAssetMintSignature = async (
     backendAuthWallet
   );
 
-  const nonce = await AssetCreateContract.creatorNonces(creator);
+  const nonce = await AssetCreateContract.signatureNonces(creator);
 
   const data = {
     types: {
@@ -113,7 +113,7 @@ const createMultipleAssetsMintSignature = async (
     backendAuthWallet
   );
 
-  const nonce = await AssetCreateContract.creatorNonces(creator);
+  const nonce = await AssetCreateContract.signatureNonces(creator);
   const data = {
     types: {
       MintBatch: [
