@@ -108,7 +108,8 @@ export const setupOperatorFilter = withSnapshot([], async function () {
 
   await deploy("MockOperatorFilterSubscription", {
     from: deployer,
-    contract: "OperatorFilterSubscription",
+    contract: "MockOperatorFilterSubscription",
+    args: [deployer, operatorFilterRegistry.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
@@ -120,15 +121,6 @@ export const setupOperatorFilter = withSnapshot([], async function () {
   const operatorFilterRegistryAsDeployer = await operatorFilterRegistry.connect(
     await ethers.getSigner(deployer)
   );
-  console.log("here");
-  const tnx1 = await operatorFilterRegistryAsDeployer.registerAndCopyEntries(
-    operatorFilterSubscription.address,
-    DEFAULT_SUBSCRIPTION
-  );
-
-  await tnx1.wait();
-
-  console.log("here2");
 
   await deploy("MockCatalyst", {
     from: deployer,
