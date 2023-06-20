@@ -6,7 +6,7 @@ import {IOperatorFilterRegistry} from "../OperatorFilter/interfaces/IOperatorFil
 
 contract MockAsset is Asset {
     /// @notice sets registry and subscribe to subscription
-    /// @param registry address of registry 
+    /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(
         address registry,
@@ -33,7 +33,7 @@ contract MockAsset is Asset {
 
     /// @notice set approval for asset transfer without filteration
     /// @param operator operator to be approved
-    /// @param approved bool value for giving and canceling approval
+    /// @param approved bool value for giving (true) and canceling (false) approval
     function setApprovalForAllWithoutFilter(
         address operator,
         bool approved

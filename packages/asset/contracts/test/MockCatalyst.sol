@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.18;
 
-import {Catalyst,IOperatorFilterRegistry} from "../Catalyst.sol";
+import {Catalyst, IOperatorFilterRegistry} from "../Catalyst.sol";
 
 contract MockCatalyst is Catalyst {
     /// @notice sets registry and subscribe to subscription
-    /// @param registry address of registry 
+    /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(
         address registry,
@@ -33,7 +33,7 @@ contract MockCatalyst is Catalyst {
 
     /// @notice set approval for asset transfer without filteration
     /// @param operator operator to be approved
-    /// @param approved bool value for giving and canceling approval
+    /// @param approved bool value for giving (true) and canceling (false) approval
     function setApprovalForAllWithoutFilter(
         address operator,
         bool approved

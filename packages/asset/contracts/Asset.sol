@@ -402,12 +402,13 @@ contract Asset is
         return recyclingAmounts[catalystTokenId];
     }
 
-    /// @notice batch transfers assets
-    /// @param from address of the owner of assets
-    /// @param to address of the new owner of assets
-    /// @param ids of assets to be transfered
-    /// @param amounts of assets to be transfered
-    /// @param data for trasfer
+    /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
+    /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param ids ids of each token type transfered.
+    /// @param amounts amount of each token type transfered.
+    /// @param data aditional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -418,9 +419,9 @@ contract Asset is
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    /// @notice set approval for asset transfer
-    /// @param operator operator to be approved
-    /// @param approved bool value for giving and canceling approval
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
     function setApprovalForAll(
         address operator,
         bool approved
@@ -428,12 +429,12 @@ contract Asset is
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice transfers asset
-    /// @param from address of the owner of asset
-    /// @param to address of the new owner of asset
-    /// @param id of asset to be transfered
-    /// @param amount of asset to be transfered
-    /// @param data for trasfer
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param amount amount of token transfered.
+    /// @param data aditional data accompanying the transfer.
     function safeTransferFrom(
         address from,
         address to,
