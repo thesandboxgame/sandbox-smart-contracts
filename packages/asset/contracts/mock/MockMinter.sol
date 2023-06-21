@@ -35,7 +35,8 @@ contract MockMinter {
             msg.sender,
             tier,
             creatorNonce,
-            revealed ? 1 : 0
+            revealed ? 1 : 0,
+            false
         );
 
         assetContract.mint(recipient, tokenId, amount, metadataHash);

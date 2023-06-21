@@ -4,7 +4,8 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, upgradeAdmin, trustedForwarder } = await getNamedAccounts();
+  const { deployer, assetAdmin, upgradeAdmin, trustedForwarder } =
+    await getNamedAccounts();
 
   await deploy("Asset", {
     from: deployer,
@@ -16,6 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: "initialize",
         args: [
           trustedForwarder,
+          assetAdmin,
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
           "ipfs://",

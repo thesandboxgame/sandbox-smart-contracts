@@ -27,17 +27,23 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
-    upgradeAdmin: {
-      default: 1,
+    sandAdmin: {
+      default: 0,
     },
-    catalystAdmin: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
-    catalystMinter: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
+    upgradeAdmin: "sandAdmin",
     catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
-    assetAdmin: "upgradeAdmin",
-    tsbAssetMinter: "upgradeAdmin",
-    uriSetter: "upgradeAdmin",
-    backendSigner: "upgradeAdmin",
+    assetAdmin: "sandAdmin",
+    assetCreateAdmin: "sandAdmin",
+    assetReavealAdmin: "sandAdmin",
+    catalystMinter: "sandAdmin",
+    catalystAdmin: "sandAdmin",
+    tsbAssetMinter: "sandAdmin",
+    authValidatorAdmin: "sandAdmin",
+    uriSetter: "sandAdmin",
+    backendAuthWallet: {
+      default: 2,
+    },
   },
   defaultNetwork: "hardhat",
   networks: {

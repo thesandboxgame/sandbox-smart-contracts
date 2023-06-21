@@ -7,7 +7,7 @@ interface IAssetReveal {
         uint256 tokenId,
         address assetCreator,
         uint8 tier,
-        uint16 assetNonce,
+        uint16 creatorNonce,
         uint256 amount
     );
 
