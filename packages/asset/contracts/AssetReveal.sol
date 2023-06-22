@@ -367,7 +367,8 @@ contract AssetReveal is
                     data.creator,
                     data.tier,
                     data.creatorNonce,
-                    revealNonce
+                    revealNonce,
+                    data.bridged
                 );
             }
             tokenIdArray[i] = tokenId;

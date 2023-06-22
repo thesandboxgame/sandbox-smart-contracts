@@ -217,7 +217,7 @@ const runTestSetup = deployments.createFixture(
   }
 );
 
-describe.only("AssetReveal", () => {
+describe("AssetReveal", () => {
   describe("General", () => {
     it("Should deploy correctly", async () => {
       const { AssetRevealContract } = await runTestSetup();
@@ -252,7 +252,7 @@ describe.only("AssetReveal", () => {
         deployer,
         revealedtokenId
       );
-      expect(unRevealedDeployerBalance.toString()).to.equal("9");
+      expect(unRevealedDeployerBalance.toString()).to.equal("10");
       expect(revealedDeployerBalance.toString()).to.equal("10");
     });
     it("Should not be able to burn amount less than one", async () => {
@@ -268,10 +268,19 @@ describe.only("AssetReveal", () => {
       ).to.be.revertedWith("Asset is already revealed");
     });
     it("Should not be able to burn more than owned by the caller", async () => {
-      const { AssetRevealContract, unrevealedtokenId } = await runTestSetup();
+      const {
+        deployer,
+        AssetRevealContract,
+        AssetContract,
+        unrevealedtokenId,
+      } = await runTestSetup();
+      const balance = await AssetContract.balanceOf(
+        deployer,
+        unrevealedtokenId
+      );
       await expect(
-        AssetRevealContract.revealBurn(unrevealedtokenId, 10)
-      ).to.be.revertedWith("ERC1155: burn amount exceeds balance");
+        AssetRevealContract.revealBurn(unrevealedtokenId, balance + 1)
+      ).to.be.revertedWith("ERC1155: burn amount exceeds totalSupply");
     });
     it("Should not be able to burn a token that doesn't exist", async () => {
       const { AssetRevealContract } = await runTestSetup();
@@ -293,7 +302,7 @@ describe.only("AssetReveal", () => {
         deployer,
         unrevealedtokenId
       );
-      expect(deployerBalance.toString()).to.equal("8");
+      expect(deployerBalance.toString()).to.equal("9");
     });
     it("Should emit burn event with correct data", async () => {
       const { AssetRevealContract, unrevealedtokenId, deployer } =
