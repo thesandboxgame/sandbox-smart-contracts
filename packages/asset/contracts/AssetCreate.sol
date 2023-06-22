@@ -99,11 +99,19 @@ contract AssetCreate is
             "Invalid signature"
         );
 
+        // function generateTokenId(
+        // address creator,
+        // uint8 tier,
+        // uint16 creatorNonce,
+        // uint16 revealNonce,
+        // bool bridged
+        // ) internal pure returns (uint256 tokenId)
+
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            revealed ? 1 : 0,
-            0,
+            ++creatorNonces[creator],
+            0, // revealNonce is always 0 for a newly created asset
             false
         );
 
@@ -158,7 +166,7 @@ contract AssetCreate is
             tokenIds[i] = TokenIdUtils.generateTokenId(
                 creator,
                 tiers[i],
-                revealed[i] ? 1 : 0,
+                ++creatorNonces[creator],
                 0,
                 false
             );
@@ -208,7 +216,7 @@ contract AssetCreate is
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            revealed ? 1 : 0,
+            ++creatorNonces[creator],
             0,
             false
         );
