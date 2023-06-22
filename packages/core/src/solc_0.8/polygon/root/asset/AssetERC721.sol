@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 import {IERC721Base} from "../../../common/interfaces/IERC721Base.sol";
 import {IAssetERC721} from "../../../common/interfaces/IAssetERC721.sol";
@@ -10,7 +11,6 @@ import {
 import {
     OperatorFiltererUpgradeable
 } from "../../../OperatorFilterer/contracts/upgradeable/OperatorFiltererUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
@@ -175,5 +175,13 @@ contract AssetERC721 is BaseERC721, IAssetERC721, OperatorFiltererUpgradeable {
         uint256 id
     ) public override(BaseERC721, IERC721Base) onlyAllowedOperatorApproval(operator) {
         BaseERC721.approveFor(from, operator, id);
+    }
+
+    function _msgSender() internal view virtual override(BaseERC721, ContextUpgradeable) returns (address sender) {
+        return BaseERC721._msgSender();
+    }
+
+    function _msgData() internal view virtual override(BaseERC721, ContextUpgradeable) returns (bytes calldata) {
+        return BaseERC721._msgData();
     }
 }

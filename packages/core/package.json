@@ -46,6 +46,7 @@
     "chai": "^4.2.0",
     "cross-env": "^7.0.2",
     "csv-parser": "^3.0.0",
+    "defender-relay-client": "^1.44.0",
     "dotenv": "^8.2.0",
     "dotenv-cli": "^4.0.0",
     "eslint": "^7.7.0",

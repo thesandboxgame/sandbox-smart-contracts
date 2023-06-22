@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.5.9;
 
-import "./AdminV2.sol";
-import "../../contracts_common/Libraries/AddressUtils.sol";
+import {AdminV2} from "./AdminV2.sol";
+import {AddressUtils} from "../../contracts_common/Libraries/AddressUtils.sol";
 
+/// @title MetaTransactionReceiverV2
+/// @author The Sandbox
+/// @notice Implements meta-transactions
+/// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
 contract MetaTransactionReceiverV2 is AdminV2 {
     using AddressUtils for address;
 
@@ -20,6 +25,8 @@ contract MetaTransactionReceiverV2 is AdminV2 {
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
+    /// @param metaTransactionProcessor address of the operator
+    /// @param enabled is it enabled
     function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {
         _metaTransactionContracts[metaTransactionProcessor] = enabled;
         emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
