@@ -102,8 +102,8 @@ contract AssetCreate is
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            ++creatorNonces[creator],
             revealed ? 1 : 0,
+            0,
             false
         );
 
@@ -158,8 +158,8 @@ contract AssetCreate is
             tokenIds[i] = TokenIdUtils.generateTokenId(
                 creator,
                 tiers[i],
-                ++creatorNonces[creator],
                 revealed[i] ? 1 : 0,
+                0,
                 false
             );
         }
@@ -208,8 +208,8 @@ contract AssetCreate is
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
-            ++creatorNonces[creator],
             revealed ? 1 : 0,
+            0,
             false
         );
 
