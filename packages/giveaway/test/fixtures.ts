@@ -1,16 +1,24 @@
 import {BigNumber, BigNumberish, Contract, Signer} from 'ethers';
+import {signedClaimSignature, signedMultiGiveawaySignature} from './signature';
+import {ethers} from 'hardhat';
+import {expect} from 'chai';
 import {
   Claim,
-  compareClaim,
   ERC1155BatchClaim,
   ERC1155Claim,
   ERC20Claim,
-  getClaimEntires,
-  signedMultiGiveawaySignature,
+  getClaimData,
+  getClaimEntries,
+  getPopulatedTx,
   TokenType,
-} from './signature';
-import {ethers} from 'hardhat';
-import {expect} from 'chai';
+} from './claim';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ANY = any;
+type AsyncReturnType<T extends (...args: ANY) => Promise<ANY>> = T extends (
+  ...args: ANY
+) => Promise<infer R>
+  ? R
+  : ANY;
 
 async function deploy(name: string, users: Signer[] = []): Promise<Contract[]> {
   const Contract = await ethers.getContractFactory(name);
@@ -24,8 +32,36 @@ async function deploy(name: string, users: Signer[] = []): Promise<Contract[]> {
   return ret;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function setupSignedMultiGiveaway() {
+type ClaimEntry = {
+  tokenType: TokenType;
+  tokenAddress: string;
+  data: string;
+};
+
+function compareClaim(a: Claim[]): (b: ClaimEntry[]) => boolean {
+  return (b: ClaimEntry[]) =>
+    a.every(
+      (x, idx) =>
+        x.tokenType === b[idx].tokenType &&
+        x.token.address === b[idx].tokenAddress &&
+        getClaimData(x) === b[idx].data
+    );
+}
+
+type TransferEntry = {
+  tokenAddress: string;
+  data: string;
+};
+
+function compareTransfers(a: TransferEntry[]): (b: TransferEntry[]) => boolean {
+  return (b: TransferEntry[]) =>
+    a.every(
+      (x, idx) =>
+        x.tokenAddress === b[idx].tokenAddress && x.data === b[idx].data
+    );
+}
+
+async function setupEnv() {
   const [
     ,
     deployer,
@@ -33,6 +69,7 @@ export async function setupSignedMultiGiveaway() {
     trustedForwarder,
     admin,
     backofficeAdmin,
+    operator,
     seller,
     signer,
     other,
@@ -44,26 +81,6 @@ export async function setupSignedMultiGiveaway() {
   ]);
   const [landToken] = await deploy('FakeMintableERC721', [deployer]);
   const [assetToken] = await deploy('FakeMintableERC1155', [deployer]);
-  const [
-    contractAsDeployer,
-    contract,
-    contractAsAdmin,
-    contractAsBackofficeAdmin,
-    signedGiveaway,
-  ] = await deploy('SignedMultiGiveaway', [
-    deployer,
-    other,
-    admin,
-    backofficeAdmin,
-  ]);
-
-  // Initialize
-  await contractAsDeployer.initialize(trustedForwarder.address, admin.address);
-  // Grant roles.
-  const signerRole = await contractAsAdmin.SIGNER_ROLE();
-  await contractAsAdmin.grantRole(signerRole, signer.address);
-  const backofficeRole = await contractAsAdmin.BACKOFFICE_ROLE();
-  await contractAsAdmin.grantRole(backofficeRole, backofficeAdmin.address);
 
   interface ERC721Balance {
     tokenType: TokenType.ERC721 | TokenType.ERC721_SAFE;
@@ -111,7 +128,7 @@ export async function setupSignedMultiGiveaway() {
           {
             const r = pre[idx] as ERC721Balance;
             const s = pos[idx] as ERC721Balance;
-            expect(r.owner).to.be.equal(contract.address);
+            expect(r.owner).to.be.equal(source);
             expect(s.owner).to.be.equal(dest.address);
           }
           break;
@@ -162,7 +179,7 @@ export async function setupSignedMultiGiveaway() {
     return ret;
   }
 
-  async function mintToContract(address: string, claims: Claim[]) {
+  async function mintTo(address: string, claims: Claim[]) {
     for (const c of claims) {
       switch (c.tokenType) {
         case TokenType.ERC20:
@@ -197,52 +214,9 @@ export async function setupSignedMultiGiveaway() {
   }
 
   return {
-    mintToContract,
+    mintTo,
     balances,
     checkBalances,
-    signAndClaim: async (
-      claimIds: BigNumberish[],
-      claims: Claim[],
-      signerUser = signer,
-      expiration = 0
-    ) => {
-      await mintToContract(contract.address, claims);
-      const pre = await balances(contract.address, claims);
-      const preDest = await balances(dest.address, claims);
-      const {v, r, s} = await signedMultiGiveawaySignature(
-        contract,
-        signerUser.address,
-        claimIds,
-        expiration,
-        contract.address,
-        dest.address,
-        getClaimEntires(claims)
-      );
-      await expect(
-        contract.claim(
-          [{v, r, s}],
-          claimIds,
-          expiration,
-          contract.address,
-          dest.address,
-          getClaimEntires(claims)
-        )
-      )
-        .to.emit(contract, 'Claimed')
-        .withArgs(
-          claimIds,
-          contract.address,
-          dest.address,
-          compareClaim(claims),
-          other.address
-        );
-      await checkBalances(contract.address, pre, preDest, claims);
-    },
-    signedGiveaway,
-    contract,
-    contractAsDeployer,
-    contractAsAdmin,
-    contractAsBackofficeAdmin,
     sandToken,
     sandTokenAsOther,
     landToken,
@@ -252,9 +226,350 @@ export async function setupSignedMultiGiveaway() {
     trustedForwarder,
     admin,
     backofficeAdmin,
+    operator,
     seller,
     signer,
     other,
     dest,
+  };
+}
+
+export async function setupSignedMultiGiveaway() {
+  const ret = await setupEnv();
+  const [
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsBackofficeAdmin,
+    contractAsOperator,
+    contactDeploy,
+  ] = await deploy('SignedMultiGiveaway', [
+    ret.deployer,
+    ret.other,
+    ret.admin,
+    ret.backofficeAdmin,
+    ret.operator,
+  ]);
+  // Initialize
+  await contractAsDeployer.initialize(
+    ret.trustedForwarder.address,
+    ret.admin.address
+  );
+
+  const backofficeRole = await contractAsAdmin.BACKOFFICE_ROLE();
+  await contractAsAdmin.grantRole(backofficeRole, ret.backofficeAdmin.address);
+  const signerRole = await contractAsAdmin.SIGNER_ROLE();
+  await contractAsAdmin.grantRole(signerRole, ret.signer.address);
+  return {
+    ...ret,
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsBackofficeAdmin,
+    contractAsOperator,
+    contactDeploy,
+    signAndClaim: async (
+      claimIds: BigNumberish[],
+      claims: Claim[],
+      signerUser = ret.signer,
+      expiration = 0
+    ) => {
+      await ret.mintTo(contract.address, claims);
+      const pre = await ret.balances(contract.address, claims);
+      const preDest = await ret.balances(ret.dest.address, claims);
+      const {v, r, s} = await signedMultiGiveawaySignature(
+        contract,
+        signerUser.address,
+        claimIds,
+        expiration,
+        contract.address,
+        ret.dest.address,
+        claims
+      );
+      await expect(
+        contract.claim(
+          [{v, r, s}],
+          claimIds,
+          expiration,
+          contract.address,
+          ret.dest.address,
+          getClaimEntries(claims)
+        )
+      )
+        .to.emit(contract, 'Claimed')
+        .withArgs(
+          claimIds,
+          contract.address,
+          ret.dest.address,
+          compareClaim(claims),
+          ret.other.address
+        );
+      await ret.checkBalances(contract.address, pre, preDest, claims);
+    },
+  };
+}
+
+async function getSignerCaller(ret: AsyncReturnType<typeof setupEnv>) {
+  const [
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsOperator,
+    contactDeploy,
+  ] = await deploy('SignedCaller', [
+    ret.deployer,
+    ret.other,
+    ret.admin,
+    ret.operator,
+  ]);
+  // Initialize
+  await contractAsDeployer.initialize(
+    ret.trustedForwarder.address,
+    ret.admin.address
+  );
+
+  const signerRole = await contractAsAdmin.SIGNER_ROLE();
+  await contractAsAdmin.grantRole(signerRole, ret.signer.address);
+  return {
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsOperator,
+    contactDeploy,
+  };
+}
+
+export async function setupSignedCaller() {
+  const ret = await setupEnv();
+  const signerCaller = await getSignerCaller(ret);
+
+  async function getTxData(
+    from: string,
+    to: string,
+    claim: Claim
+  ): Promise<string> {
+    const tx = await getPopulatedTx(from, to, claim, signerCaller.contract, {
+      erc20: ret.sandToken,
+      erc721: ret.landToken,
+      erc1155: ret.assetToken,
+    });
+    if (!tx.data) {
+      throw new Error('Error populating tx');
+    }
+    return tx.data;
+  }
+
+  return {
+    ...ret,
+    ...signerCaller,
+    getTxData,
+    signAndClaim: async (
+      claimIds: BigNumberish[],
+      claim: Claim,
+      signerUser = ret.signer,
+      expiration = 0
+    ) => {
+      await ret.mintTo(signerCaller.contract.address, [claim]);
+      const pre = await ret.balances(signerCaller.contract.address, [claim]);
+      const preDest = await ret.balances(ret.dest.address, [claim]);
+      const data = await getTxData(
+        signerCaller.contract.address,
+        ret.dest.address,
+        claim
+      );
+      const {v, r, s} = await signedClaimSignature(
+        signerCaller.contract,
+        signerUser.address,
+        claimIds,
+        expiration,
+        claim.token.address,
+        data
+      );
+      await expect(
+        signerCaller.contract.claim(
+          [{v, r, s}],
+          claimIds,
+          expiration,
+          claim.token.address,
+          data
+        )
+      )
+        .to.emit(signerCaller.contract, 'Claimed')
+        .withArgs(claimIds, claim.token.address, data, ret.other.address);
+      await ret.checkBalances(signerCaller.contract.address, pre, preDest, [
+        claim,
+      ]);
+    },
+  };
+}
+
+async function getTokenHolder(ret: AsyncReturnType<typeof setupEnv>) {
+  const [
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsBackofficeAdmin,
+    contractAsOperator,
+    contactDeploy,
+  ] = await deploy('TokenHolder', [
+    ret.deployer,
+    ret.other,
+    ret.admin,
+    ret.backofficeAdmin,
+    ret.operator,
+  ]);
+  // Initialize
+  await contractAsDeployer.initialize(
+    ret.trustedForwarder.address,
+    ret.admin.address
+  );
+  const backofficeRole = await contractAsAdmin.BACKOFFICE_ROLE();
+  await contractAsAdmin.grantRole(backofficeRole, ret.backofficeAdmin.address);
+  const operatorRole = await contractAsAdmin.OPERATOR_ROLE();
+  await contractAsAdmin.grantRole(operatorRole, ret.operator.address);
+
+  async function getTransfers(
+    claims: Claim[],
+    from: string,
+    to: string
+  ): Promise<TransferEntry[]> {
+    const tranfers: TransferEntry[] = [];
+    for (const c of claims) {
+      const tx = await getPopulatedTx(from, to, c, contract, {
+        erc20: ret.sandToken,
+        erc721: ret.landToken,
+        erc1155: ret.assetToken,
+      });
+      if (!tx.data) {
+        throw new Error('Error populating tx');
+      }
+      tranfers.push({
+        tokenAddress: c.token.address,
+        data: tx.data,
+      });
+    }
+    return tranfers;
+  }
+
+  return {
+    contractAsDeployer,
+    contract,
+    contractAsAdmin,
+    contractAsBackofficeAdmin,
+    contractAsOperator,
+    contactDeploy,
+    operatorRole,
+    getTransfers,
+  };
+}
+
+export async function setupTokenHolder() {
+  const ret = await setupEnv();
+  const tokenHolder = await getTokenHolder(ret);
+  return {
+    ...ret,
+    ...tokenHolder,
+    mintAndTransfer: async (from: string, claims: Claim[]) => {
+      await ret.mintTo(from, claims);
+      const pre = await ret.balances(from, claims);
+      const preDest = await ret.balances(ret.dest.address, claims);
+      const transfers: TransferEntry[] = await tokenHolder.getTransfers(
+        claims,
+        from,
+        ret.dest.address
+      );
+      await expect(tokenHolder.contractAsOperator.transfer(transfers))
+        .to.emit(tokenHolder.contract, 'Transferred')
+        .withArgs(compareTransfers(transfers), ret.operator.address);
+      await ret.checkBalances(from, pre, preDest, claims);
+    },
+  };
+}
+
+export async function setupSignedCallerWithTokenHolder() {
+  const ret = await setupEnv();
+  const tokenHolder = await getTokenHolder(ret);
+  const signerCaller = await getSignerCaller(ret);
+  await tokenHolder.contractAsAdmin.grantRole(
+    tokenHolder.operatorRole,
+    signerCaller.contract.address
+  );
+
+  async function prepareTxData(
+    claims: Claim[],
+    from: string,
+    to: string
+  ): Promise<{data: string; transfers: TransferEntry[]}> {
+    const transfers: TransferEntry[] = await tokenHolder.getTransfers(
+      claims,
+      from,
+      to
+    );
+    const tx = await tokenHolder.contract.populateTransaction.transfer(
+      transfers
+    );
+    if (!tx.data) {
+      throw new Error('Error populating tx');
+    }
+    return {data: tx.data, transfers};
+  }
+
+  return {
+    ...ret,
+    tokenHolder,
+    signerCaller,
+    getTxData: async (claims: Claim[], from: string, to: string) => {
+      const {data} = await prepareTxData(claims, from, to);
+      return data;
+    },
+    signAndClaim: async (
+      claimIds: BigNumberish[],
+      claims: Claim[],
+      signerUser = ret.signer,
+      expiration = 0
+    ) => {
+      await ret.mintTo(tokenHolder.contract.address, claims);
+      const pre = await ret.balances(tokenHolder.contract.address, claims);
+      const preDest = await ret.balances(ret.dest.address, claims);
+      const {data, transfers} = await prepareTxData(
+        claims,
+        tokenHolder.contract.address,
+        ret.dest.address
+      );
+      const {v, r, s} = await signedClaimSignature(
+        signerCaller.contract,
+        signerUser.address,
+        claimIds,
+        expiration,
+        tokenHolder.contract.address, // We will call tokenHolder through signerCaller
+        data
+      );
+      const receipt = expect(
+        signerCaller.contract.claim(
+          [{v, r, s}],
+          claimIds,
+          expiration,
+          tokenHolder.contract.address,
+          data
+        )
+      );
+      await receipt.to
+        .emit(signerCaller.contract, 'Claimed')
+        .withArgs(
+          claimIds,
+          tokenHolder.contract.address,
+          data,
+          ret.other.address
+        );
+      await receipt.to
+        .emit(tokenHolder.contract, 'Transferred')
+        .withArgs(compareTransfers(transfers), signerCaller.contract.address);
+      await ret.checkBalances(
+        tokenHolder.contract.address,
+        pre,
+        preDest,
+        claims
+      );
+    },
   };
 }

@@ -6,16 +6,11 @@ import {
   toUtf8Bytes,
 } from 'ethers/lib/utils';
 import {BigNumber, constants} from 'ethers';
-import {
-  Claim,
-  ClaimEntry,
-  getClaimEntires,
-  signedMultiGiveawaySignature,
-  TokenType,
-} from './signature';
+import {signedMultiGiveawaySignature} from './signature';
 import {expect} from 'chai';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
 import {setupSignedMultiGiveaway} from './fixtures';
+import {Claim, getClaimEntries, TokenType} from './claim';
 
 describe('SignedMultiGiveaway.sol', function () {
   describe('initialization', function () {
@@ -153,7 +148,7 @@ describe('SignedMultiGiveaway.sol', function () {
         expiration,
         from,
         to,
-        getClaimEntires(claims),
+        claims,
         pk
       );
       const ret = await contract.populateTransaction.claim(
@@ -162,7 +157,7 @@ describe('SignedMultiGiveaway.sol', function () {
         expiration,
         from,
         to,
-        getClaimEntires(claims)
+        getClaimEntries(claims)
       );
       console.log(ret);
     });
@@ -241,7 +236,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
       await fixtures.contract.claim(
         [sig],
@@ -249,7 +244,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        getClaimEntries(claims)
       );
       await fixtures.checkBalances(
         fixtures.other.address,
@@ -272,7 +267,7 @@ describe('SignedMultiGiveaway.sol', function () {
             amount,
           },
         ];
-        await fixtures.mintToContract(fixtures.contract.address, claims);
+        await fixtures.mintTo(fixtures.contract.address, claims);
         const pre = await fixtures.balances(fixtures.contract.address, claims);
         const preDest = await fixtures.balances(fixtures.dest.address, claims);
         const sig1 = await signedMultiGiveawaySignature(
@@ -282,7 +277,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          claims
         );
         const signerRole = await fixtures.contractAsAdmin.SIGNER_ROLE();
         await fixtures.contractAsAdmin.grantRole(
@@ -296,7 +291,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          claims
         );
         await fixtures.contractAsAdmin.setNumberOfSignaturesNeeded(2);
         await fixtures.contract.claim(
@@ -305,7 +300,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         );
         await fixtures.checkBalances(
           fixtures.contract.address,
@@ -326,7 +321,7 @@ describe('SignedMultiGiveaway.sol', function () {
             amount,
           },
         ];
-        await fixtures.mintToContract(fixtures.contract.address, claims);
+        await fixtures.mintTo(fixtures.contract.address, claims);
         const sig1 = await signedMultiGiveawaySignature(
           fixtures.contract,
           fixtures.signer.address,
@@ -334,7 +329,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          claims
         );
         const signerRole = await fixtures.contractAsAdmin.SIGNER_ROLE();
         await fixtures.contractAsAdmin.grantRole(
@@ -348,7 +343,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          claims
         );
         await fixtures.contractAsAdmin.setNumberOfSignaturesNeeded(2);
 
@@ -360,7 +355,7 @@ describe('SignedMultiGiveaway.sol', function () {
             0,
             fixtures.contract.address,
             fixtures.dest.address,
-            getClaimEntires(claims)
+            getClaimEntries(claims)
           )
         ).to.revertedWith('invalid order');
       });
@@ -415,7 +410,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
       await expect(
         fixtures.contract.claim(
@@ -424,7 +419,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.revertedWith('invalid data');
     });
@@ -456,7 +451,7 @@ describe('SignedMultiGiveaway.sol', function () {
           amount: ethers.utils.parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
         fixtures.contract,
         fixtures.signer.address,
@@ -464,7 +459,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
       await expect(
         fixtures.contract.claim(
@@ -473,7 +468,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.be.revertedWith('invalid signer');
     });
@@ -505,7 +500,7 @@ describe('SignedMultiGiveaway.sol', function () {
           amount,
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const pre = await fixtures.balances(fixtures.contract.address, claims);
       const preDest = await fixtures.balances(fixtures.dest.address, claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
@@ -515,10 +510,10 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
 
-      const contractAsTrustedForwarder = await fixtures.signedGiveaway.connect(
+      const contractAsTrustedForwarder = await fixtures.contactDeploy.connect(
         fixtures.trustedForwarder
       );
       const txData = await contractAsTrustedForwarder.populateTransaction.claim(
@@ -527,7 +522,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        getClaimEntries(claims)
       );
       // The msg.sender goes at the end.
       txData.data = solidityPack(
@@ -567,7 +562,7 @@ describe('SignedMultiGiveaway.sol', function () {
           data: [],
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const pre = await fixtures.balances(fixtures.contract.address, claims);
       const preDest = await fixtures.balances(fixtures.dest.address, claims);
       const args = [];
@@ -580,7 +575,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires([c])
+          [c]
         );
         args.push({
           sigs: [{v, r, s}],
@@ -588,7 +583,7 @@ describe('SignedMultiGiveaway.sol', function () {
           expiration: 0,
           from: fixtures.contract.address,
           to: fixtures.dest.address,
-          claims: getClaimEntires([c]),
+          claims: getClaimEntries([c]),
         });
       }
       await fixtures.contract.batchClaim(args);
@@ -613,13 +608,13 @@ describe('SignedMultiGiveaway.sol', function () {
           amount,
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const pre = BigNumber.from(
         await fixtures.sandToken.balanceOf(fixtures.contract.address)
       );
       await fixtures.contractAsAdmin.recoverAssets(
         fixtures.other.address,
-        getClaimEntires(claims)
+        getClaimEntries(claims)
       );
       const pos = BigNumber.from(
         await fixtures.sandToken.balanceOf(fixtures.contract.address)
@@ -636,17 +631,17 @@ describe('SignedMultiGiveaway.sol', function () {
           amount: ethers.utils.parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       await expect(
         fixtures.contract.recoverAssets(
           fixtures.other.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.be.revertedWith('only admin');
       await expect(
         fixtures.contractAsBackofficeAdmin.recoverAssets(
           fixtures.other.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.be.revertedWith('only admin');
     });
@@ -733,7 +728,7 @@ describe('SignedMultiGiveaway.sol', function () {
           data: [],
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const args = [];
       for (const [i, c] of claims.entries()) {
         const claimId = baseClaimId.add(i);
@@ -744,7 +739,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires([c])
+          [c]
         );
         args.push({
           sigs: [{v, r, s}],
@@ -752,7 +747,7 @@ describe('SignedMultiGiveaway.sol', function () {
           expiration: 0,
           from: fixtures.contract.address,
           to: fixtures.dest.address,
-          claims: getClaimEntires([c]),
+          claims: getClaimEntries([c]),
         });
       }
       await fixtures.contractAsBackofficeAdmin.pause();
@@ -1021,7 +1016,7 @@ describe('SignedMultiGiveaway.sol', function () {
           amount: ethers.utils.parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintTo(fixtures.contract.address, claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
         fixtures.contract,
         fixtures.signer.address,
@@ -1029,7 +1024,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
 
       expect(
@@ -1039,7 +1034,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.equal(fixtures.signer.address);
     });
@@ -1133,11 +1128,10 @@ describe('SignedMultiGiveaway.sol', function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
       const claimId = BigNumber.from(0x123);
-      const claims: ClaimEntry[] = [
+      const claims: Claim[] = [
         {
-          tokenType: 0,
-          tokenAddress: fixtures.sandToken.address,
-          data: '0x',
+          tokenType: TokenType.INVALID,
+          token: fixtures.sandToken,
         },
       ];
       const {v, r, s} = await signedMultiGiveawaySignature(
@@ -1156,7 +1150,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          claims
+          getClaimEntries(claims)
         )
       ).to.be.revertedWith('invalid token type');
     });
@@ -1179,7 +1173,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.contract.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
       await expect(
         fixtures.contract.claim(
@@ -1188,7 +1182,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.contract.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.revertedWith('ERC20: transfer amount exceeds balance');
     });
@@ -1215,7 +1209,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        claims
       );
       await expect(
         fixtures.contract.claim(
@@ -1224,7 +1218,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.other.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          getClaimEntries(claims)
         )
       ).to.revertedWith('ERC20: transfer amount exceeds balance');
     });
