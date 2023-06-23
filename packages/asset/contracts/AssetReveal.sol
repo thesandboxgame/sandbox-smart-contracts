@@ -24,20 +24,18 @@ contract AssetReveal is
 
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) revealIds;
-    // signature nonces to prevent replay attacks
-    mapping(address => uint32) public signatureNonces;
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
-            "Reveal(address recipient,uint256 prevTokenId,uint32 nonce,uint256[] amounts,string[] metadataHashes)"
+            "Reveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
         );
     bytes32 public constant BATCH_REVEAL_TYPEHASH =
         keccak256(
-            "BatchReveal(address recipient,uint256[] prevTokenIds,uint32 nonce,uint256[][] amounts,string[][] metadataHashes)"
+            "BatchReveal(address recipient,uint256[] prevTokenIds,uint256[][] amounts,string[][] metadataHashes)"
         );
     bytes32 public constant INSTANT_REVEAL_TYPEHASH =
         keccak256(
-            "InstantReveal(address recipient,uint256 prevTokenId,uint32 nonce,uint256[] amounts,string[] metadataHashes)"
+            "InstantReveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -89,27 +87,26 @@ contract AssetReveal is
     /// @param signature Signature created on the TSB backend containing REVEAL_TYPEHASH and associated data, must be signed by authorized signer
     /// @param prevTokenId The tokenId of the unrevealed asset
     /// @param amounts The amount of assets to reveal (must be equal to the length of revealHashes)
-    /// @param metadataHashes The array of hashes for asset metadata
+    /// @param metadataHashes The array of hashes for revealed asset metadata
     function revealMint(
         bytes memory signature,
         uint256 prevTokenId,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) public {
+        require(amounts.length == metadataHashes.length, "Invalid amount");
         require(
             authValidator.verify(
                 signature,
                 _hashReveal(
                     _msgSender(),
                     prevTokenId,
-                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )
             ),
-            "Invalid signature"
+            "Invalid revealMint signature"
         );
-        require(amounts.length == metadataHashes.length, "Invalid amount");
         _revealAsset(prevTokenId, metadataHashes, amounts);
     }
 
@@ -125,23 +122,21 @@ contract AssetReveal is
         uint256[][] calldata amounts,
         string[][] calldata metadataHashes
     ) public {
+        require(amounts.length == metadataHashes.length, "Invalid amount");
+        require(prevTokenIds.length == amounts.length, "Invalid input");
         require(
             authValidator.verify(
                 signature,
                 _hashBatchReveal(
                     _msgSender(),
                     prevTokenIds,
-                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )
             ),
-            "Invalid signature"
+            "Invalid revealBatchMint signature"
         );
-        require(amounts.length == metadataHashes.length, "Invalid amount");
-        require(amounts.length == metadataHashes.length, "Invalid input");
-        require(prevTokenIds.length == amounts.length, "Invalid input");
-
+        
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
             _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i]);
         }
@@ -161,18 +156,18 @@ contract AssetReveal is
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) external {
+        require(amounts.length == metadataHashes.length, "Invalid amount");
         require(
             authValidator.verify(
                 signature,
                 _hashInstantReveal(
                     _msgSender(),
                     prevTokenId,
-                    signatureNonces[_msgSender()]++,
                     amounts,
                     metadataHashes
                 )
             ),
-            "Invalid signature"
+            "Invalid burnAndReveal signature"
         );
         _burnAsset(prevTokenId, burnAmount);
         _revealAsset(prevTokenId, metadataHashes, amounts);
@@ -225,13 +220,11 @@ contract AssetReveal is
     /// @notice Creates a hash of the reveal data
     /// @param recipient The address of the recipient
     /// @param prevTokenId The unrevealed token id
-    /// @param signatureNonce The nonce of the signature
     /// @param amounts The amount of tokens to mint
     /// @param metadataHashes The array of hashes for new asset metadata
     function _hashInstantReveal(
         address recipient,
         uint256 prevTokenId,
-        uint32 signatureNonce,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
@@ -241,7 +234,6 @@ contract AssetReveal is
                     INSTANT_REVEAL_TYPEHASH,
                     recipient,
                     prevTokenId,
-                    signatureNonce,
                     keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)
                 )
@@ -256,7 +248,6 @@ contract AssetReveal is
     function _hashReveal(
         address recipient,
         uint256 prevTokenId,
-        uint32 signatureNonce,
         uint256[] calldata amounts,
         string[] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
@@ -266,7 +257,6 @@ contract AssetReveal is
                     REVEAL_TYPEHASH,
                     recipient,
                     prevTokenId,
-                    signatureNonce,
                     keccak256(abi.encodePacked(amounts)),
                     _encodeHashes(metadataHashes)
                 )
@@ -281,7 +271,6 @@ contract AssetReveal is
     function _hashBatchReveal(
         address recipient,
         uint256[] calldata prevTokenIds,
-        uint32 signatureNonce,
         uint256[][] calldata amounts,
         string[][] calldata metadataHashes
     ) internal view returns (bytes32 digest) {
@@ -291,7 +280,6 @@ contract AssetReveal is
                     BATCH_REVEAL_TYPEHASH,
                     recipient,
                     keccak256(abi.encodePacked(prevTokenIds)),
-                    signatureNonce,
                     _encodeBatchAmounts(amounts),
                     _encodeBatchHashes(metadataHashes)
                 )

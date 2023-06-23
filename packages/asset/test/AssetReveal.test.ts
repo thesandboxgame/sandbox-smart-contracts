@@ -34,10 +34,10 @@ const runTestSetup = deployments.createFixture(
     // mint a tier 5 asset with 10 copies
     const unRevMintTx = await MockMinterContract.mintAsset(
       deployer,
-      10,
-      5,
-      false,
-      "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA"
+      10, // amount
+      5, // tier
+      false, // revealed TODO: update MockMinter minting to use revealNonce
+      "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA" // metadata hash
     );
     const unRevResult = await unRevMintTx.wait();
     const unrevealedtokenId = unRevResult.events[2].args.tokenId.toString();
@@ -61,12 +61,12 @@ const runTestSetup = deployments.createFixture(
     const unRevResult2 = await unRevMintTx2.wait();
     const unrevealedtokenId2 = unRevResult2.events[2].args.tokenId.toString();
 
-    // mint a tier 2 asset with 5 copies
+    // mint a revealed version, tier 5 asset with 10 copies
     const revMintTx = await MockMinterContract.mintAsset(
       deployer,
       10,
       5,
-      true,
+      true, // TODO: get revealed to work with MockMinter
       "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC"
     );
 
@@ -150,12 +150,10 @@ const runTestSetup = deployments.createFixture(
       prevTokenId: number,
       metadataHashes: string[]
     ) => {
-      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createRevealSignature(
         revealer,
         amounts,
         prevTokenId,
-        nonce,
         metadataHashes
       );
       return signature;
@@ -167,12 +165,10 @@ const runTestSetup = deployments.createFixture(
       prevTokenIds: number[],
       metadataHashes: string[][]
     ) => {
-      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createBatchRevealSignature(
         revealer,
         amounts,
         prevTokenIds,
-        nonce,
         metadataHashes
       );
       return signature;
@@ -184,12 +180,10 @@ const runTestSetup = deployments.createFixture(
       prevTokenId: number,
       metadataHashes: string[]
     ) => {
-      const nonce = await AssetRevealContract.signatureNonces(revealer);
       const signature = await createBurnAndRevealSignature(
         revealer,
         amounts,
         prevTokenId,
-        nonce,
         metadataHashes
       );
       return signature;
