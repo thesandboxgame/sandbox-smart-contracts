@@ -7,7 +7,7 @@ const catalystArray = [1, 2, 3, 4, 5, 6];
 
 const catalystBurnAmount = [2, 4, 6, 8, 10, 12];
 
-describe.skip("AssetContract", () => {
+describe("AssetContract", () => {
   it("Should deploy correctly", async () => {
     const { AssetContract } = await runAssetSetup();
     expect(AssetContract.address).to.be.properAddress;
@@ -71,7 +71,7 @@ describe.skip("AssetContract", () => {
       );
     });
 
-    it.skip("no two asset can have same uri ", async () => {
+    it("no two asset can have same uri ", async () => {
       const { AssetContract, owner, uris, baseUri } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       await AssetContract.mint(assetData, uris[0]);
@@ -202,7 +202,7 @@ describe.skip("AssetContract", () => {
   });
 
   describe("Reveal Mint", () => {
-    it.skip("Should not mint new revealed token when the reveal hash is same for tokens with same creator and same catalyst tier", async () => {
+    it("Should not mint new revealed token when the reveal hash is same for tokens with same creator and same catalyst tier", async () => {
       const { AssetContract, owner, uris } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       const tnx = await AssetContract.mint(assetData, uris[0]);
@@ -233,7 +233,7 @@ describe.skip("AssetContract", () => {
       ).to.be.equal(2);
     });
 
-    it.skip("only minter can reveal mint", async () => {
+    it("only minter can reveal mint", async () => {
       const { AssetContract, owner, Asset, minterRole, uris } =
         await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
@@ -289,7 +289,7 @@ describe.skip("AssetContract", () => {
     });
   });
 
-  describe.skip("Bridge minting", () => {
+  describe("Bridge minting", () => {
     it("Should bridge mint asset", async () => {
       const { Asset, owner, bridgeMinter, uris } = await runAssetSetup();
       const oldAssetId = generateOldAssetId(owner, 1, false);
@@ -675,7 +675,7 @@ describe.skip("AssetContract", () => {
       });
     }
 
-    it.skip("can get creator address from tokenId", async () => {
+    it("can get creator address from tokenId", async () => {
       const { AssetContract, owner, uris } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       const tnx = await AssetContract.mint(assetData, uris[0]);
@@ -691,7 +691,7 @@ describe.skip("AssetContract", () => {
       expect(creator).to.be.equals(owner);
     });
 
-    it.skip("can get tier from tokenId", async () => {
+    it("can get tier from tokenId", async () => {
       const { AssetContract, owner, uris } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       const tnx = await AssetContract.mint(assetData, uris[0]);
@@ -707,7 +707,7 @@ describe.skip("AssetContract", () => {
       expect(tier).to.be.equals(3);
     });
 
-    it.skip("can get revealed from tokenId", async () => {
+    it("can get revealed from tokenId", async () => {
       const { AssetContract, owner, uris } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       const tnx = await AssetContract.mint(assetData, uris[0]);
@@ -723,7 +723,7 @@ describe.skip("AssetContract", () => {
       expect(isRevealed).to.be.equals(false);
     });
 
-    it.skip("can get creator nonce from tokenId", async () => {
+    it("can get creator nonce from tokenId", async () => {
       const { AssetContract, owner, uris } = await runAssetSetup();
       const assetData = getAssetData(owner, 10, 3, 1, false, false, 0);
       const tnx = await AssetContract.mint(assetData, uris[0]);
