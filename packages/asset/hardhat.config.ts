@@ -35,7 +35,7 @@ const config: HardhatUserConfig = {
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
     assetAdmin: "sandAdmin",
     assetCreateAdmin: "sandAdmin",
-    assetReavealAdmin: "sandAdmin",
+    assetRevealAdmin: "sandAdmin",
     catalystMinter: "sandAdmin",
     catalystAdmin: "sandAdmin",
     tsbAssetMinter: "sandAdmin",

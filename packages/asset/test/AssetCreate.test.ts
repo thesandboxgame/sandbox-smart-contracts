@@ -1,164 +1,6 @@
-import { deployments } from "hardhat";
 import { expect } from "chai";
-import {
-  createAssetMintSignature,
-  createMultipleAssetsMintSignature,
-} from "./utils/signatures";
 import { BigNumber } from "ethers";
-
-const runTestSetup = deployments.createFixture(
-  async ({ deployments, getNamedAccounts, ethers }) => {
-    await deployments.fixture(["Asset", "AssetCreate", "AuthValidator"]);
-    const { deployer, catalystMinter } = await getNamedAccounts();
-    const AssetContract = await ethers.getContract("Asset", deployer);
-
-    // SETUP ROLES
-    const MinterRole = await AssetContract.MINTER_ROLE();
-    const AssetCreateContract = await ethers.getContract(
-      "AssetCreate",
-      deployer
-    );
-    const AuthValidatorContract = await ethers.getContract(
-      "AuthValidator",
-      deployer
-    );
-    await AssetContract.grantRole(MinterRole, AssetCreateContract.address);
-
-    const CatalystContract = await ethers.getContract("Catalyst", deployer);
-    const CatalystMinterRole = await CatalystContract.MINTER_ROLE();
-    await CatalystContract.grantRole(
-      CatalystMinterRole,
-      AssetCreateContract.address
-    );
-    // END SETUP ROLES
-
-    const mintCatalyst = async (
-      tier: number,
-      amount: number,
-      to = deployer
-    ) => {
-      const signer = ethers.provider.getSigner(catalystMinter);
-      await CatalystContract.connect(signer).mint(to, tier, amount);
-    };
-
-    const mintSingleAsset = async (
-      signature: string,
-      tier: number,
-      amount: number,
-      revealed: boolean,
-      metadataHash: string
-    ) => {
-      await AssetCreateContract.createAsset(
-        signature,
-        tier,
-        amount,
-        revealed,
-        metadataHash,
-        deployer
-      );
-    };
-
-    const mintMultipleAssets = async (
-      signature: string,
-      tiers: number[],
-      amounts: number[],
-      revealed: boolean[],
-      metadataHashes: string[]
-    ) => {
-      await AssetCreateContract.createMultipleAssets(
-        signature,
-        tiers,
-        amounts,
-        revealed,
-        metadataHashes,
-        deployer
-      );
-    };
-
-    const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
-
-    const grantSpecialMinterRole = async (address: string) => {
-      await AssetCreateContract.grantRole(SpecialMinterRole, address);
-    };
-
-    const mintSpecialAsset = async (
-      signature: string,
-      tier: number,
-      amount: number,
-      revealed: boolean,
-      metadataHash: string
-    ) => {
-      await AssetCreateContract.createSpecialAsset(
-        signature,
-        tier,
-        amount,
-        revealed,
-        metadataHash,
-        deployer
-      );
-    };
-    const getCreatorNonce = async (creator: string) => {
-      const nonce = await AssetCreateContract.creatorNonces(creator);
-      return nonce;
-    };
-
-    const generateSingleMintSignature = async (
-      creator: string,
-      tier: number,
-      amount: number,
-      revealed: boolean,
-      metadataHash: string
-    ) => {
-      const signature = await createAssetMintSignature(
-        creator,
-        tier,
-        amount,
-        revealed,
-        metadataHash
-      );
-      return signature;
-    };
-
-    const generateMultipleMintSignature = async (
-      creator: string,
-      tiers: number[],
-      amounts: number[],
-      revealed: boolean[],
-      metadataHashes: string[]
-    ) => {
-      const signature = await createMultipleAssetsMintSignature(
-        creator,
-        tiers,
-        amounts,
-        revealed,
-        metadataHashes
-      );
-      return signature;
-    };
-
-    return {
-      metadataHashes: [
-        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA",
-        "QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1Fja",
-      ],
-      additionalMetadataHash: "QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L",
-      deployer,
-      otherWallet: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B",
-      AssetContract,
-      AssetCreateContract,
-      AuthValidatorContract,
-      CatalystContract,
-      mintCatalyst,
-      mintSingleAsset,
-      mintMultipleAssets,
-      mintSpecialAsset,
-      grantSpecialMinterRole,
-      generateSingleMintSignature,
-      generateMultipleMintSignature,
-      getCreatorNonce,
-    };
-  }
-);
+import { runCreateTestSetup } from "./fixtures/createFixtures";
 
 describe("AssetCreate", () => {
   describe("General", async () => {
@@ -168,7 +10,7 @@ describe("AssetCreate", () => {
         AssetContract,
         CatalystContract,
         AuthValidatorContract,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       expect(await AssetCreateContract.getAssetContract()).to.equal(
         AssetContract.address
       );
@@ -183,7 +25,7 @@ describe("AssetCreate", () => {
   describe("Single asset mint", async () => {
     it("should revert if the signature is invalid", async () => {
       const { mintCatalyst, mintSingleAsset, metadataHashes } =
-        await runTestSetup();
+        await runCreateTestSetup();
       await mintCatalyst(4, 1);
       const signature =
         "0x45956f9a4b3f24fcc1a7c1a64f5fe7d21c00dd224a44f868ad8a67fd7b7cf6601e3a69a6a78a6a74377dddd1fa8c0c0f64b766d4a75842c1653b2a1a76c3a0ce1c";
@@ -199,7 +41,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(5, 1);
       const signedTier = 4;
       const txSuppliedTier = 5;
@@ -222,7 +64,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 2);
       const signedAmount = 1;
       const txSuppliedAmount = 2;
@@ -245,7 +87,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 2);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -266,7 +108,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 2);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -292,7 +134,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         metadataHashes,
         otherWallet,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 1, otherWallet);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -313,7 +155,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 1);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -334,7 +176,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         getCreatorNonce,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 1);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -358,7 +200,7 @@ describe("AssetCreate", () => {
         AssetContract,
         AssetCreateContract,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -387,7 +229,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         AssetCreateContract,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -414,7 +256,7 @@ describe("AssetCreate", () => {
         AssetContract,
         AssetCreateContract,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -440,7 +282,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         AssetCreateContract,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
         deployer,
@@ -469,7 +311,7 @@ describe("AssetCreate", () => {
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 4);
       const signature1 = await generateSingleMintSignature(
         deployer,
@@ -499,7 +341,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         AssetCreateContract,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(4, 4);
       const signature1 = await generateSingleMintSignature(
         deployer,
@@ -532,7 +374,7 @@ describe("AssetCreate", () => {
   });
   describe("Multiple assets mint", async () => {
     it("should revert if signature is invalid", async () => {
-      const { mintMultipleAssets, metadataHashes } = await runTestSetup();
+      const { mintMultipleAssets, metadataHashes } = await runCreateTestSetup();
       const signature =
         "0x45956f9a4b3f24fcc1a7c1a64f5fe7d21c00dd224a44f868ad8a67fd7b7cf6601e3a69a6a78a6a74377dddd1fa8c0c0f64b766d4a75842c1653b2a1a76c3a0ce1c";
       await expect(
@@ -552,7 +394,7 @@ describe("AssetCreate", () => {
         mintCatalyst,
         metadataHashes,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(5, 1);
 
@@ -581,7 +423,7 @@ describe("AssetCreate", () => {
         metadataHashes,
         additionalMetadataHash,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
@@ -609,7 +451,7 @@ describe("AssetCreate", () => {
         mintCatalyst,
         metadataHashes,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
@@ -638,7 +480,7 @@ describe("AssetCreate", () => {
         metadataHashes,
         additionalMetadataHash,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
@@ -666,7 +508,7 @@ describe("AssetCreate", () => {
         mintCatalyst,
         metadataHashes,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
@@ -702,7 +544,7 @@ describe("AssetCreate", () => {
         metadataHashes,
         deployer,
         otherWallet,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       mintCatalyst(3, 1);
       mintCatalyst(4, 1, otherWallet);
       const signature = await generateMultipleMintSignature(
@@ -729,7 +571,7 @@ describe("AssetCreate", () => {
         mintCatalyst,
         metadataHashes,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
@@ -759,7 +601,7 @@ describe("AssetCreate", () => {
         AssetContract,
         AssetCreateContract,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
@@ -794,7 +636,7 @@ describe("AssetCreate", () => {
         metadataHashes,
         AssetCreateContract,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
@@ -830,7 +672,7 @@ describe("AssetCreate", () => {
         AssetContract,
         AssetCreateContract,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
@@ -868,7 +710,7 @@ describe("AssetCreate", () => {
         metadataHashes,
         AssetCreateContract,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
@@ -897,7 +739,7 @@ describe("AssetCreate", () => {
         mintCatalyst,
         metadataHashes,
         deployer,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
       await mintCatalyst(3, 6);
       await mintCatalyst(4, 10);
 
@@ -942,7 +784,7 @@ describe("AssetCreate", () => {
         deployer,
         metadataHashes,
         grantSpecialMinterRole,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
 
       await grantSpecialMinterRole(deployer);
       const signature = await generateSingleMintSignature(
@@ -961,7 +803,7 @@ describe("AssetCreate", () => {
         generateSingleMintSignature,
         deployer,
         metadataHashes,
-      } = await runTestSetup();
+      } = await runCreateTestSetup();
 
       const signature = await generateSingleMintSignature(
         deployer,

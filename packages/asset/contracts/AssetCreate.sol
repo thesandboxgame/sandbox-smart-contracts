@@ -174,6 +174,7 @@ contract AssetCreate is
             amounts,
             metadataHashes
         );
+        // TODO: put revealed in event
     }
 
     /// @notice Create special assets, like TSB exclusive tokens

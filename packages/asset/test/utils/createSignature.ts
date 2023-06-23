@@ -1,49 +1,6 @@
 import hre, { ethers } from "hardhat";
 
-async function createEIP712RevealSignature(
-  amounts: number[],
-  prevTokenId: number,
-  metadataHashes: string[]
-): Promise<string> {
-  // get named accounts from hardhat
-  const { getNamedAccounts } = hre;
-  const { backendAuthWallet } = await getNamedAccounts();
-
-  const AssetRevealContract = await ethers.getContract(
-    "AssetReveal",
-    backendAuthWallet
-  );
-
-  const signer = ethers.provider.getSigner(backendAuthWallet);
-  const data = {
-    types: {
-      Reveal: [
-        { name: "prevTokenId", type: "uint256" },
-        { name: "amounts", type: "uint256[]" },
-        { name: "metadataHashes", type: "string[]" },
-      ],
-    },
-    domain: {
-      name: "Sandbox Asset Reveal",
-      version: "1.0",
-      chainId: hre.network.config.chainId,
-      verifyingContract: AssetRevealContract.address,
-    },
-    message: {
-      prevTokenId: prevTokenId,
-      amounts,
-      metadataHashes,
-    },
-  };
-
-  // @ts-ignore
-  const signature = await signer._signTypedData(
-    data.domain,
-    data.types,
-    data.message
-  );
-  return signature;
-}
+// TODO: why aren't we using backendAuthWallet default same as core?
 
 const createAssetMintSignature = async (
   creator: string,
@@ -57,8 +14,7 @@ const createAssetMintSignature = async (
   const signer = ethers.provider.getSigner(backendAuthWallet);
 
   const AssetCreateContract = await ethers.getContract(
-    "AssetCreate",
-    backendAuthWallet
+    "AssetCreate"
   );
 
   const nonce = await AssetCreateContract.signatureNonces(creator);
@@ -97,6 +53,7 @@ const createAssetMintSignature = async (
   );
   return signature;
 };
+
 const createMultipleAssetsMintSignature = async (
   creator: string,
   tiers: number[],
@@ -109,8 +66,7 @@ const createMultipleAssetsMintSignature = async (
   const signer = ethers.provider.getSigner(backendAuthWallet);
 
   const AssetCreateContract = await ethers.getContract(
-    "AssetCreate",
-    backendAuthWallet
+    "AssetCreate"
   );
 
   const nonce = await AssetCreateContract.signatureNonces(creator);
@@ -148,10 +104,11 @@ const createMultipleAssetsMintSignature = async (
   );
   return signature;
 };
+
+// TODO: 
 const createSpecialAssetMintSignature = async () => {};
 
 export {
-  createEIP712RevealSignature,
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
   createSpecialAssetMintSignature,
