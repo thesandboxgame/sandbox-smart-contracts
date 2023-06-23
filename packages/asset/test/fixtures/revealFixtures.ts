@@ -79,13 +79,15 @@ export const runRevealTestSetup = deployments.createFixture(
         signature: string,
         tokenId: number,
         amounts: number[],
-        metadataHashes: string[]
+        metadataHashes: string[],
+        revealHash: string
       ) => {
         const tx = await AssetRevealContract.revealMint(
           signature,
           tokenId,
           amounts,
-          metadataHashes
+          metadataHashes,
+          revealHash
         );
         const result = await tx.wait();
         return result;
@@ -102,13 +104,15 @@ export const runRevealTestSetup = deployments.createFixture(
         signature: string,
         tokenIds: number[],
         amounts: number[][],
-        metadataHashes: string[][]
+        metadataHashes: string[][],
+        revealHashes: string[]
       ) => {
         const tx = await AssetRevealContract.revealBatchMint(
           signature,
           tokenIds,
           amounts,
-          metadataHashes
+          metadataHashes,
+          revealHashes
         );
         const result = await tx.wait();
         return result;
@@ -133,14 +137,16 @@ export const runRevealTestSetup = deployments.createFixture(
         tokenId: number,
         burnAmount: number,
         mintAmounts: number[],
-        metadataHashes: string[]
+        metadataHashes: string[],
+        revealHash: string
       ) => {
         const tx = await AssetRevealContract.burnAndReveal(
           signature,
           tokenId,
           burnAmount,
           mintAmounts,
-          metadataHashes
+          metadataHashes,
+          revealHash
         );
         const result = await tx.wait();
         return result;
@@ -150,13 +156,15 @@ export const runRevealTestSetup = deployments.createFixture(
         revealer: string,
         prevTokenId: number,
         amounts: number[],
-        metadataHashes: string[]
+        metadataHashes: string[],
+        revealHash: string
       ) => {
         const signature = await revealSignature(
           revealer,
           prevTokenId,
           amounts,
-          metadataHashes
+          metadataHashes,
+          revealHash
         );
         return signature;
       };
@@ -165,13 +173,15 @@ export const runRevealTestSetup = deployments.createFixture(
         revealer: string,
         prevTokenIds: number[],
         amounts: number[][],
-        metadataHashes: string[][]
+        metadataHashes: string[][],
+        revealHashes: string[]
       ) => {
         const signature = await batchRevealSignature(
           revealer,
           prevTokenIds,
           amounts,
-          metadataHashes
+          metadataHashes,
+          revealHashes
         );
         return signature;
       };
@@ -180,13 +190,15 @@ export const runRevealTestSetup = deployments.createFixture(
         revealer: string,
         prevTokenId: number,
         amounts: number[],
-        metadataHashes: string[]
+        metadataHashes: string[],
+        revealHash: string
       ) => {
         const signature = await burnAndRevealSignature(
           revealer,
           prevTokenId,
           amounts,
-          metadataHashes
+          metadataHashes,
+          revealHash
         );
         return signature;
       };
@@ -208,7 +220,7 @@ export const runRevealTestSetup = deployments.createFixture(
         unrevealedtokenId,
         unrevealedtokenId2,
         revealedtokenId,
-        users,
+        users
       };
     }
   );

@@ -13,6 +13,7 @@ interface IAssetReveal {
         address recipient,
         uint256 unrevealedTokenId,
         uint256[] amounts,
-        uint256[] newTokenIds
+        uint256[] newTokenIds,
+        bytes32 revealHash
     );
 }
