@@ -1,19 +1,20 @@
 import hre, { ethers } from "hardhat";
 
-async function createBurnAndRevealSignature(
+// TODO: why aren't we using backendAuthWallet default same as core?
+
+async function burnAndRevealSignature(
   recipient: string,
-  amounts: number[],
   prevTokenId: number,
+  amounts: number[],
   metadataHashes: string[]
 ): Promise<string> {
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
+  const { backendAuthWallet } = await getNamedAccounts();
 
   const AssetRevealContract = await ethers.getContract(
-    "AssetReveal",
-    backendSigner
+    "AssetReveal"
   );
-  const signer = ethers.provider.getSigner(backendSigner);
+  const signer = ethers.provider.getSigner(backendAuthWallet);
 
   const data = {
     types: {
@@ -47,22 +48,21 @@ async function createBurnAndRevealSignature(
   return signature;
 }
 
-async function createBatchRevealSignature(
+async function batchRevealSignature(
   recipient: string,
-  amounts: number[][],
   prevTokenIds: number[],
+  amounts: number[][],
   metadataHashes: string[][]
 ): Promise<string> {
   // get named accounts from hardhat
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
+  const { backendAuthWallet } = await getNamedAccounts();
 
   const AssetRevealContract = await ethers.getContract(
-    "AssetReveal",
-    backendSigner
+    "AssetReveal"
   );
 
-  const signer = ethers.provider.getSigner(backendSigner);
+  const signer = ethers.provider.getSigner(backendAuthWallet);
   const data = {
     types: {
       BatchReveal: [
@@ -95,22 +95,23 @@ async function createBatchRevealSignature(
   return signature;
 }
 
-async function createRevealSignature(
+async function revealSignature(
   recipient: string,
-  amounts: number[],
   prevTokenId: number,
+  amounts: number[],
   metadataHashes: string[]
 ): Promise<string> {
   // get named accounts from hardhat
   const { getNamedAccounts } = hre;
-  const { backendSigner } = await getNamedAccounts();
+  const { backendAuthWallet } = await getNamedAccounts();
 
   const AssetRevealContract = await ethers.getContract(
-    "AssetReveal",
-    backendSigner
+    "AssetReveal"
   );
 
-  const signer = ethers.provider.getSigner(backendSigner);
+  const signer = ethers.provider.getSigner(backendAuthWallet);
+
+  // "Reveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
   const data = {
     types: {
       Reveal: [
@@ -144,7 +145,7 @@ async function createRevealSignature(
 }
 
 export {
-  createBurnAndRevealSignature,
-  createBatchRevealSignature,
-  createRevealSignature,
+  burnAndRevealSignature,
+  batchRevealSignature,
+  revealSignature,
 };

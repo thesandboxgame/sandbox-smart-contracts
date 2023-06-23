@@ -1,12 +1,9 @@
 import { deployments } from "hardhat";
 import {
-  createBatchRevealSignature,
-  createBurnAndRevealSignature,
-  createRevealSignature,
-} from "./utils/revealSignature";
-
-// TODO: deployer should not be the signer for tests. 
-// A 'user' with no special permissions should be set up.
+  batchRevealSignature,
+  burnAndRevealSignature,
+  revealSignature,
+} from "../utils/revealSignature";
 
 export const runRevealTestSetup = deployments.createFixture(
     async ({ deployments, getNamedAccounts, getUnnamedAccounts, ethers }) => {
@@ -14,9 +11,10 @@ export const runRevealTestSetup = deployments.createFixture(
         "AssetReveal",
         "Asset",
         "AuthValidator",
-        "MockMinter",
+        "MockMinter", // reveal tests use MockMinter instead of AssetCreate
       ]);
-      const { deployer, trustedForwarder, upgradeAdmin } =
+      // SET UP ROLES
+      const { deployer, trustedForwarder } =
         await getNamedAccounts();
       const users = await getUnnamedAccounts();
       const AssetContract = await ethers.getContract("Asset", deployer);
@@ -33,6 +31,7 @@ export const runRevealTestSetup = deployments.createFixture(
         users[0]
       );
       await AssetContract.grantRole(MinterRole, AssetRevealContract.address);
+      // END SET UP ROLES
   
       // mint a tier 5 asset with 10 copies
       const unRevMintTx = await MockMinterContract.mintAsset(
@@ -149,14 +148,14 @@ export const runRevealTestSetup = deployments.createFixture(
   
       const generateRevealSignature = async (
         revealer: string,
-        amounts: number[],
         prevTokenId: number,
+        amounts: number[],
         metadataHashes: string[]
       ) => {
-        const signature = await createRevealSignature(
+        const signature = await revealSignature(
           revealer,
-          amounts,
           prevTokenId,
+          amounts,
           metadataHashes
         );
         return signature;
@@ -164,14 +163,14 @@ export const runRevealTestSetup = deployments.createFixture(
   
       const generateBatchRevealSignature = async (
         revealer: string,
-        amounts: number[][],
         prevTokenIds: number[],
+        amounts: number[][],
         metadataHashes: string[][]
       ) => {
-        const signature = await createBatchRevealSignature(
+        const signature = await batchRevealSignature(
           revealer,
-          amounts,
           prevTokenIds,
+          amounts,
           metadataHashes
         );
         return signature;
@@ -179,14 +178,14 @@ export const runRevealTestSetup = deployments.createFixture(
   
       const generateBurnAndRevealSignature = async (
         revealer: string,
-        amounts: number[],
         prevTokenId: number,
+        amounts: number[],
         metadataHashes: string[]
       ) => {
-        const signature = await createBurnAndRevealSignature(
+        const signature = await burnAndRevealSignature(
           revealer,
-          amounts,
           prevTokenId,
+          amounts,
           metadataHashes
         );
         return signature;

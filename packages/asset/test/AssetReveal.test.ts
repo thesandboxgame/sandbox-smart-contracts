@@ -1,5 +1,10 @@
 import { expect } from "chai";
-import { runRevealTestSetup } from './revealFixtures'
+import { runRevealTestSetup } from './fixtures/revealFixtures'
+import {
+  batchRevealSignature,
+  burnAndRevealSignature,
+  revealSignature,
+} from "./utils/revealSignature";
 
 describe("AssetReveal", () => {
   describe("General", () => {
@@ -158,6 +163,8 @@ describe("AssetReveal", () => {
         generateRevealSignature,
         revealAsset,
         AssetContract,
+        AssetRevealContract,
+
       } = await runRevealTestSetup();
       const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
@@ -165,9 +172,9 @@ describe("AssetReveal", () => {
       const amounts = [1];
 
       const signature = await generateRevealSignature(
-        users[0],
+        users[0], // revealer
+        unrevealedtokenId, // prevTokenId
         amounts,
-        unrevealedtokenId,
         newMetadataHashes
       );
       const result = await revealAsset(
@@ -177,7 +184,6 @@ describe("AssetReveal", () => {
         newMetadataHashes
       );
       expect(result.events[2].event).to.equal("AssetRevealMint");
-
       const newTokenId = result.events[2].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance.toString()).to.equal("1");
@@ -195,18 +201,16 @@ describe("AssetReveal", () => {
       const amounts = [2];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
-
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
         amounts,
         newMetadataHashes
       );
-
       expect(result.events[2].event).to.equal("AssetRevealMint");
       expect(result.events[2].args["newTokenIds"].length).to.equal(1);
     });
@@ -224,8 +228,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
       const result = await revealAsset(
@@ -237,11 +241,10 @@ describe("AssetReveal", () => {
       const newTokenId = result.events[2].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance.toString()).to.equal("1");
-
       const signature2 = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
       await revealAsset(
@@ -272,8 +275,8 @@ describe("AssetReveal", () => {
 
       const signature = await generateBatchRevealSignature(
         users[0],
-        [amounts1, amounts2],
         [unrevealedtokenId, unrevealedtokenId2],
+        [amounts1, amounts2],
         [newMetadataHashes1, newMetadataHashes2]
       );
 
@@ -306,8 +309,8 @@ describe("AssetReveal", () => {
       const amountToMint = [1, 2, 1, 7, 1, 2];
       const signature = await generateRevealSignature(
         users[0],
-        amountToMint,
         unrevealedtokenId,
+        amountToMint,
         newMetadataHashes
       );
 
@@ -334,8 +337,8 @@ describe("AssetReveal", () => {
 
       const signature = await generateBurnAndRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHash
       );
 
@@ -356,7 +359,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       await expect(
         revealAsset(
-          "0x1556a70d76cc452ae54e83bb167a9041f0d062d000fa0dcb42593f77c544f6471643d14dbd6a6edc658f4b16699a585181a08dba4f6d16a9273e0e2cbed622da1b", // TODO: write down how is this a bad sig
+          "0x1556a70d76cc452ae54e83bb167a9041f0d062d000fa0dcb42593f77c544f6471643d14dbd6a6edc658f4b16699a585181a08dba4f6d16a9273e0e2cbed622da1b", 
+          // TODO: write down how is this a bad sig here so it's clear
           unrevealedtokenId,
           amounts,
           newMetadataHashes
@@ -376,8 +380,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
 
@@ -403,8 +407,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
 
@@ -430,8 +434,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
 
@@ -444,6 +448,7 @@ describe("AssetReveal", () => {
         )
       ).to.be.revertedWith("Invalid revealMint signature");
     });
+    // TODO: fix: add revealHash param to smart contract
     it("Should not allow using the same signature twice", async () => {
       const {
         users,
@@ -458,8 +463,8 @@ describe("AssetReveal", () => {
       const amounts = [1];
       const signature = await generateRevealSignature(
         users[0],
-        amounts,
         unrevealedtokenId,
+        amounts,
         newMetadataHashes
       );
 
