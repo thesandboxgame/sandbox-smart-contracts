@@ -133,8 +133,9 @@ contract AssetReveal is
         string[][] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) public {
-        require(amounts.length == metadataHashes.length, "Invalid amount");
-        require(prevTokenIds.length == amounts.length, "Invalid input");
+        require(prevTokenIds.length == amounts.length, "Invalid amounts");
+        require(amounts.length == metadataHashes.length, "Invalid metadataHashes");
+        require(prevTokenIds.length == revealHashes.length, "Invalid revealHashes");
         require(
             authValidator.verify(
                 signature,
