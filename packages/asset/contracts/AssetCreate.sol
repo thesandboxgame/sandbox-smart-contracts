@@ -99,19 +99,11 @@ contract AssetCreate is
             "Invalid signature"
         );
 
-        // function generateTokenId(
-        // address creator,
-        // uint8 tier,
-        // uint16 creatorNonce,
-        // uint16 revealNonce,
-        // bool bridged
-        // ) internal pure returns (uint256 tokenId)
-
         uint256 tokenId = TokenIdUtils.generateTokenId(
             creator,
             tier,
             ++creatorNonces[creator],
-            0, // revealNonce is always 0 for a newly created asset
+            revealed ? 1 : 0,
             false
         );
 
@@ -167,7 +159,7 @@ contract AssetCreate is
                 creator,
                 tiers[i],
                 ++creatorNonces[creator],
-                0,
+                revealed[i] ? 1 : 0,
                 false
             );
         }
@@ -182,6 +174,7 @@ contract AssetCreate is
             amounts,
             metadataHashes
         );
+        // TODO: put revealed in event
     }
 
     /// @notice Create special assets, like TSB exclusive tokens
@@ -217,7 +210,7 @@ contract AssetCreate is
             creator,
             tier,
             ++creatorNonces[creator],
-            0,
+            revealed ? 1 : 0,
             false
         );
 
