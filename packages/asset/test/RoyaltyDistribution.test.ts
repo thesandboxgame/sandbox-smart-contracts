@@ -140,7 +140,7 @@ async function royaltyDistribution() {
   };
 }
 
-describe("Token", () => {
+describe("Asset and catalyst Royalties", () => {
   it("should split ERC20 using EIP2981", async function () {
     const {
       Asset,
