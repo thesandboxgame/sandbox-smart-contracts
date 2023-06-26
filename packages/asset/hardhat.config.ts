@@ -30,6 +30,15 @@ const config: HardhatUserConfig = {
     sandAdmin: {
       default: 0, // TODO: make same as core
     },
+    commonRoyaltyReceiver : {
+      default: 1,
+    },
+    contractRoyaltySetter: {
+      default: 2,
+    },
+    managerAdmin: {
+      default: 3,
+    },
     upgradeAdmin: "sandAdmin",
     catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet // TODO: from where ????
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
