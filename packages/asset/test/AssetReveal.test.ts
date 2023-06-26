@@ -4,6 +4,10 @@ import { runRevealTestSetup } from './fixtures/revealFixtures'
 
 const revealHashA = formatBytes32String("revealHashA");
 const revealHashB = formatBytes32String("revealHashB");
+const revealHashC = formatBytes32String("revealHashC");
+const revealHashD = formatBytes32String("revealHashD");
+const revealHashE = formatBytes32String("revealHashE");
+const revealHashF = formatBytes32String("revealHashF");
 
 describe("AssetReveal", () => {
   describe("General", () => {
@@ -162,7 +166,6 @@ describe("AssetReveal", () => {
         generateRevealSignature,
         revealAsset,
         AssetContract,
-        AssetRevealContract,
 
       } = await runRevealTestSetup();
       const newMetadataHashes = [
@@ -175,14 +178,14 @@ describe("AssetReveal", () => {
         unrevealedtokenId, // prevTokenId
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       expect(result.events[2].event).to.equal("AssetRevealMint");
       const newTokenId = result.events[2].args.newTokenIds[0];
@@ -205,17 +208,61 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       expect(result.events[2].event).to.equal("AssetRevealMint");
       expect(result.events[2].args["newTokenIds"].length).to.equal(1);
+      // TODO: check supply with new metadataHash has incremented by 2
+    });
+    it("Should not allow minting for multiple copies revealed to the same metadata hash if revealHash is used", async () => {
+      const {
+        users,
+        unrevealedtokenId,
+        revealAsset,
+        generateRevealSignature,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      const amounts = [2];
+      const signature = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+
+      const signature2 = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await expect(
+        revealAsset(
+          signature2,
+          unrevealedtokenId,
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
+        )
+      ).to.be.revertedWith("Invalid revealHash");
     });
     it("should increase the tokens supply for tokens with same metadata hash", async () => {
       const {
@@ -234,14 +281,14 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       const result = await revealAsset(
         signature,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
       const newTokenId = result.events[2].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(users[0], newTokenId);
@@ -251,14 +298,14 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashB
+        [revealHashB]
       );
       await revealAsset(
         signature2,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashB
+        [revealHashB]
       );
       const balance2 = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance2.toString()).to.equal("2");
@@ -285,7 +332,7 @@ describe("AssetReveal", () => {
         [unrevealedtokenId, unrevealedtokenId2],
         [amounts1, amounts2],
         [newMetadataHashes1, newMetadataHashes2],
-        [revealHashA, revealHashB]
+        [[revealHashA], [revealHashB]]
       );
 
       const result = await revealAssetBatch(
@@ -293,7 +340,7 @@ describe("AssetReveal", () => {
         [unrevealedtokenId, unrevealedtokenId2],
         [amounts1, amounts2],
         [newMetadataHashes1, newMetadataHashes2],
-        [revealHashA, revealHashB]
+        [[revealHashA], [revealHashB]]
       );
 
       // expect two events with name AssetsRevealed
@@ -321,7 +368,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amountToMint,
         newMetadataHashes,
-        revealHashA
+        [revealHashA, revealHashB, revealHashC, revealHashD, revealHashE, revealHashF]
       );
 
       const result = await revealAsset(
@@ -329,12 +376,12 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amountToMint,
         newMetadataHashes,
-        revealHashA
+        [revealHashA, revealHashB, revealHashC, revealHashD, revealHashE, revealHashF]
       );
       expect(result.events[7].event).to.equal("AssetRevealMint");
       expect(result.events[7].args["newTokenIds"].length).to.equal(6);
     });
-    it("Should allow instant reveal when authorized by the backed", async () => {
+    it("Should allow instant reveal when authorized by the backend", async () => {
       const {
         users,
         generateBurnAndRevealSignature,
@@ -351,7 +398,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHash,
-        revealHashA
+        [revealHashA]
       );
 
       const result = await instantReveal(
@@ -360,7 +407,7 @@ describe("AssetReveal", () => {
         amounts[0],
         amounts,
         newMetadataHash,
-        revealHashA
+        [revealHashA]
       );
       expect(result.events[4].event).to.equal("AssetRevealMint");
     });
@@ -377,7 +424,7 @@ describe("AssetReveal", () => {
           unrevealedtokenId,
           amounts,
           newMetadataHashes,
-          revealHashA
+          [revealHashA]
         )
       ).to.be.revertedWith("Invalid revealMint signature");
     });
@@ -397,7 +444,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
 
       await expect(
@@ -406,7 +453,7 @@ describe("AssetReveal", () => {
           123, // invalid
           amounts,
           newMetadataHashes,
-          revealHashA
+          [revealHashA]
         )
       ).to.be.revertedWith("Invalid revealMint signature");
     });
@@ -426,7 +473,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
 
       await expect(
@@ -435,7 +482,7 @@ describe("AssetReveal", () => {
           unrevealedtokenId,
           [123], // invalid
           newMetadataHashes,
-          revealHashA
+          [revealHashA]
         )
       ).to.be.revertedWith("Invalid revealMint signature");
     });
@@ -455,7 +502,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
 
       await expect(
@@ -464,7 +511,7 @@ describe("AssetReveal", () => {
           unrevealedtokenId,
           amounts,
           ["QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE"], // invalid
-          revealHashA
+          [revealHashA]
         )
       ).to.be.revertedWith("Invalid revealMint signature");
     });
@@ -485,7 +532,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
 
       await revealAsset(
@@ -493,7 +540,7 @@ describe("AssetReveal", () => {
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
-        revealHashA
+        [revealHashA]
       );
 
       await expect(
@@ -502,7 +549,7 @@ describe("AssetReveal", () => {
           unrevealedtokenId,
           amounts,
           newMetadataHashes,
-          revealHashA
+          [revealHashA]
         )
       ).to.be.revertedWith("Invalid revealHash");
     });

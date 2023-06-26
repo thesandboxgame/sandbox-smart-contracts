@@ -7,7 +7,7 @@ async function burnAndRevealSignature(
   prevTokenId: number,
   amounts: number[],
   metadataHashes: string[],
-  revealHash: string
+  revealHashes: string[]
 ): Promise<string> {
   const { getNamedAccounts } = hre;
   const { backendAuthWallet } = await getNamedAccounts();
@@ -24,7 +24,7 @@ async function burnAndRevealSignature(
         { name: "prevTokenId", type: "uint256" },
         { name: "amounts", type: "uint256[]" },
         { name: "metadataHashes", type: "string[]" },
-        { name: "revealHash", type: "bytes32" }
+        { name: "revealHashes", type: "bytes32[]" }
       ],
     },
     domain: {
@@ -38,7 +38,7 @@ async function burnAndRevealSignature(
       prevTokenId,
       amounts,
       metadataHashes,
-      revealHash
+      revealHashes
     },
   };
 
@@ -56,7 +56,7 @@ async function batchRevealSignature(
   prevTokenIds: number[],
   amounts: number[][],
   metadataHashes: string[][],
-  revealHashes: string[]
+  revealHashes: string[][]
 ): Promise<string> {
   // get named accounts from hardhat
   const { getNamedAccounts } = hre;
@@ -74,7 +74,7 @@ async function batchRevealSignature(
         { name: "prevTokenIds", type: "uint256[]" },
         { name: "amounts", type: "uint256[][]" },
         { name: "metadataHashes", type: "string[][]" },
-        { name: "revealHashes", type: "bytes32[]" }
+        { name: "revealHashes", type: "bytes32[][]" }
       ],
     },
     domain: {
@@ -106,7 +106,7 @@ async function revealSignature(
   prevTokenId: number,
   amounts: number[],
   metadataHashes: string[],
-  revealHash: string
+  revealHashes: string[]
 ): Promise<string> {
   // get named accounts from hardhat
   const { getNamedAccounts } = hre;
@@ -126,7 +126,7 @@ async function revealSignature(
         { name: "prevTokenId", type: "uint256" },
         { name: "amounts", type: "uint256[]" },
         { name: "metadataHashes", type: "string[]" },
-        { name: "revealHash", type: "bytes32" }
+        { name: "revealHashes", type: "bytes32[]" }
       ],
     },
     domain: {
@@ -140,7 +140,7 @@ async function revealSignature(
       prevTokenId,
       amounts,
       metadataHashes,
-      revealHash
+      revealHashes
     },
   };
 

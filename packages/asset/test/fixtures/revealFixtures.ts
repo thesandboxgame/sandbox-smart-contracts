@@ -80,14 +80,14 @@ export const runRevealTestSetup = deployments.createFixture(
         tokenId: number,
         amounts: number[],
         metadataHashes: string[],
-        revealHash: string
+        revealHashes: string[]
       ) => {
         const tx = await AssetRevealContract.revealMint(
           signature,
           tokenId,
           amounts,
           metadataHashes,
-          revealHash
+          revealHashes
         );
         const result = await tx.wait();
         return result;
@@ -105,7 +105,7 @@ export const runRevealTestSetup = deployments.createFixture(
         tokenIds: number[],
         amounts: number[][],
         metadataHashes: string[][],
-        revealHashes: string[]
+        revealHashes: string[][]
       ) => {
         const tx = await AssetRevealContract.revealBatchMint(
           signature,
@@ -138,7 +138,7 @@ export const runRevealTestSetup = deployments.createFixture(
         burnAmount: number,
         mintAmounts: number[],
         metadataHashes: string[],
-        revealHash: string
+        revealHashes: string[]
       ) => {
         const tx = await AssetRevealContract.burnAndReveal(
           signature,
@@ -146,7 +146,7 @@ export const runRevealTestSetup = deployments.createFixture(
           burnAmount,
           mintAmounts,
           metadataHashes,
-          revealHash
+          revealHashes
         );
         const result = await tx.wait();
         return result;
@@ -157,14 +157,14 @@ export const runRevealTestSetup = deployments.createFixture(
         prevTokenId: number,
         amounts: number[],
         metadataHashes: string[],
-        revealHash: string
+        revealHashes: string[]
       ) => {
         const signature = await revealSignature(
           revealer,
           prevTokenId,
           amounts,
           metadataHashes,
-          revealHash
+          revealHashes
         );
         return signature;
       };
@@ -174,7 +174,7 @@ export const runRevealTestSetup = deployments.createFixture(
         prevTokenIds: number[],
         amounts: number[][],
         metadataHashes: string[][],
-        revealHashes: string[]
+        revealHashes: string[][]
       ) => {
         const signature = await batchRevealSignature(
           revealer,
@@ -191,14 +191,14 @@ export const runRevealTestSetup = deployments.createFixture(
         prevTokenId: number,
         amounts: number[],
         metadataHashes: string[],
-        revealHash: string
+        revealHashes: string[]
       ) => {
         const signature = await burnAndRevealSignature(
           revealer,
           prevTokenId,
           amounts,
           metadataHashes,
-          revealHash
+          revealHashes
         );
         return signature;
       };

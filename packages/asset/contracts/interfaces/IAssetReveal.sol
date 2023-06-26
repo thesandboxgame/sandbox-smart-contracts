@@ -14,6 +14,6 @@ interface IAssetReveal {
         uint256 unrevealedTokenId,
         uint256[] amounts,
         uint256[] newTokenIds,
-        bytes32 revealHash
+        bytes32[] revealHashes
     );
 }
