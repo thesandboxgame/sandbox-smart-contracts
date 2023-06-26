@@ -4,30 +4,27 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, assetAdmin, upgradeAdmin, trustedForwarder } =
-    await getNamedAccounts();
 
-  await deploy("Asset", {
+  const { deployer, commonRoyaltyReceiver, managerAdmin, contractRoyaltySetter } = await getNamedAccounts();
+  const customSplitter = await deployments.get('CustomRoyaltySplitter');
+
+
+  await deploy("Manager", {
     from: deployer,
-    contract: "Asset",
+    contract: "Manager",
     proxy: {
-      owner: upgradeAdmin,
+      owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         methodName: "initialize",
-        args: [
-          trustedForwarder,
-          assetAdmin,
-          [1, 2, 3, 4, 5, 6],
-          [2, 4, 6, 8, 10, 12],
-          "ipfs://",
-        ],
+        args: [commonRoyaltyReceiver, 5000, customSplitter.address, managerAdmin, contractRoyaltySetter],
       },
       upgradeIndex: 0,
     },
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
-
-func.tags = ["Asset"];
+func.tags = ["Manager"];
+func.dependencies = ['CustomRoyaltySplitter'];

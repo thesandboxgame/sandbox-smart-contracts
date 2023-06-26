@@ -22,6 +22,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     "OperatorFilterSubscription"
   );
 
+  const manager = await deployments.get(
+    "Manager"
+  );
+
   await deploy("Catalyst", {
     from: deployer,
     log: true,
@@ -40,6 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           catalystMinter, // MINTER_ROLE
           CATALYST_DEFAULT_ROYALTY,
           CATALYST_IPFS_CID_PER_TIER,
+          manager.address
         ],
       },
       upgradeIndex: 0,
@@ -49,4 +54,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["Catalyst"];
-func.dependencies = ["ProxyAdmin", "OperatorFilterSubscription"];
+func.dependencies = ["ProxyAdmin", "OperatorFilterSubscription", "Manager"];
