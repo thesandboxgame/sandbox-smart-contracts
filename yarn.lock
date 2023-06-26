@@ -662,6 +662,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@manifoldxyz/libraries-solidity@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@manifoldxyz/libraries-solidity@npm:1.0.4"
+  dependencies:
+    "@openzeppelin/contracts": 4.7.3
+    "@openzeppelin/contracts-upgradeable": 4.7.3
+  checksum: fdc8c5cbbc004aa40ee8ab819b66d4880ea2fd641b18b7cc487cefea0173060f1451c9203961cc83a007893900c9afd5d1fb6e531c7e38e8eed44bea52e22d43
+  languageName: node
+  linkType: hard
+
+"@manifoldxyz/royalty-registry-solidity@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@manifoldxyz/royalty-registry-solidity@npm:2.0.3"
+  dependencies:
+    "@manifoldxyz/libraries-solidity": ^1.0.4
+    "@openzeppelin/contracts": ^4.8.0
+    "@openzeppelin/contracts-upgradeable": ^4.8.0
+  checksum: a44111cb7f8baacf00cbe9d2290680622d97c4188c2b9d95e11b6372da8e3740a2b2a75abbb226df272ac2a76b2ec6420cf9d408f42c768840645964d018fe9d
+  languageName: node
+  linkType: hard
+
 "@maticnetwork/fx-portal@npm:^1.0.5":
   version: 1.0.5
   resolution: "@maticnetwork/fx-portal@npm:1.0.5"
@@ -1226,10 +1247,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts-upgradeable@npm:4.7.3":
+  version: 4.7.3
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.7.3"
+  checksum: c9ffb40cb847a975d440204fc6a811f43af960050242f707332b984d29bd16dc242ffa0935de61867aeb9e0357fadedb16b09b276deda5e9775582face831021
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.9.0":
   version: 4.9.0
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.0"
   checksum: c94eb8fc6761e17a245cee586eeaa74a098200f8508c56eda5ccbe1612fbe754f42f91ef1fea768f49295e1507dcb9cb72d33682949d84659ef63846cf83e26b
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts@npm:4.7.3":
+  version: 4.7.3
+  resolution: "@openzeppelin/contracts@npm:4.7.3"
+  checksum: 18382fcacf7cfd652f5dd0e70c08f08ea74eaa8ff11e9f9850639ada70198ae01a3f9493d89a52d724f2db394e9616bf6258017804612ba273167cf657fbb073
   languageName: node
   linkType: hard
 
@@ -1244,6 +1279,13 @@ __metadata:
   version: 4.9.0
   resolution: "@openzeppelin/contracts@npm:4.9.0"
   checksum: aa1499897f85821f9184497f5201152a4a272b05749c85c209e9e553d734467a78557bcd2efe35f07994d6e14f30c545b239a4f63622f27f808182efb3103658
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts@npm:^4.8.0":
+  version: 4.9.2
+  resolution: "@openzeppelin/contracts@npm:4.9.2"
+  checksum: 0538b18fe222e5414a5a539c240b155e0bef2a23c5182fb8e137d71a0c390fe899160f2d55701f75b127f54cc61aee4375370acc832475f19829368ac65c1fc6
   languageName: node
   linkType: hard
 
@@ -1264,6 +1306,8 @@ __metadata:
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/providers": ^5.7.2
+    "@manifoldxyz/libraries-solidity": ^1.0.4
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
     "@nomicfoundation/hardhat-chai-matchers": ^1.0.6
     "@nomicfoundation/hardhat-network-helpers": ^1.0.0
     "@nomicfoundation/hardhat-toolbox": ^2.0.2
