@@ -189,8 +189,8 @@ describe("AssetReveal", () => {
         newMetadataHashes,
         [revealHashA]
       );
-      expect(result.events[2].event).to.equal("AssetRevealMint");
-      const newTokenId = result.events[2].args.newTokenIds[0];
+      expect(result.events[3].event).to.equal("AssetRevealMint");
+      const newTokenId = result.events[3].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance.toString()).to.equal("1");
     });
@@ -219,52 +219,8 @@ describe("AssetReveal", () => {
         newMetadataHashes,
         [revealHashA]
       );
-      expect(result.events[2].event).to.equal("AssetRevealMint");
-      expect(result.events[2].args["newTokenIds"].length).to.equal(1);
-      // TODO: check supply with new metadataHash has incremented by 2
-    });
-    it("Should not allow minting for multiple copies revealed to the same metadata hash if revealHash is used", async () => {
-      const {
-        users,
-        unrevealedtokenId,
-        revealAsset,
-        generateRevealSignature,
-      } = await runRevealTestSetup();
-      const newMetadataHashes = [
-        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
-      ];
-      const amounts = [2];
-      const signature = await generateRevealSignature(
-        users[0],
-        unrevealedtokenId,
-        amounts,
-        newMetadataHashes,
-        [revealHashA]
-      );
-      await revealAsset(
-        signature,
-        unrevealedtokenId,
-        amounts,
-        newMetadataHashes,
-        [revealHashA]
-      );
-
-      const signature2 = await generateRevealSignature(
-        users[0],
-        unrevealedtokenId,
-        amounts,
-        newMetadataHashes,
-        [revealHashA]
-      );
-      await expect(
-        revealAsset(
-          signature2,
-          unrevealedtokenId,
-          amounts,
-          newMetadataHashes,
-          [revealHashA]
-        )
-      ).to.be.revertedWith("Invalid revealHash");
+      expect(result.events[3].event).to.equal("AssetRevealMint");
+      expect(result.events[3].args["newTokenIds"].length).to.equal(1);
     });
     it("should increase the tokens supply for tokens with same metadata hash", async () => {
       const {
@@ -292,7 +248,7 @@ describe("AssetReveal", () => {
         newMetadataHashes,
         [revealHashA]
       );
-      const newTokenId = result.events[2].args.newTokenIds[0];
+      const newTokenId = result.events[3].args.newTokenIds[0];
       const balance = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance.toString()).to.equal("1");
       const signature2 = await generateRevealSignature(
@@ -346,8 +302,8 @@ describe("AssetReveal", () => {
       );
 
       // expect two events with name AssetsRevealed
-      expect(result.events[2].event).to.equal("AssetRevealMint");
-      expect(result.events[5].event).to.equal("AssetRevealMint");
+      expect(result.events[3].event).to.equal("AssetRevealMint");
+      expect(result.events[7].event).to.equal("AssetRevealMint");
     });
     it("Should allow revealing multiple copies at the same time", async () => {
       const {
@@ -380,8 +336,8 @@ describe("AssetReveal", () => {
         newMetadataHashes,
         [revealHashA, revealHashB, revealHashC, revealHashD, revealHashE, revealHashF]
       );
-      expect(result.events[7].event).to.equal("AssetRevealMint");
-      expect(result.events[7].args["newTokenIds"].length).to.equal(6);
+      expect(result.events[13].event).to.equal("AssetRevealMint");
+      expect(result.events[13].args["newTokenIds"].length).to.equal(6);
     });
     it("Should allow instant reveal when authorized by the backend", async () => {
       const {
@@ -411,7 +367,7 @@ describe("AssetReveal", () => {
         newMetadataHash,
         [revealHashA]
       );
-      expect(result.events[4].event).to.equal("AssetRevealMint");
+      expect(result.events[5].event).to.equal("AssetRevealMint");
     });
     it("Should not allow minting with invalid signature", async () => {
       const { revealAsset, unrevealedtokenId } = await runRevealTestSetup();

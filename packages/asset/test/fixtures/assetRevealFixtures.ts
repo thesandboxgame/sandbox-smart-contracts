@@ -45,7 +45,7 @@ export const runRevealTestSetup = deployments.createFixture(
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA" // metadata hash
       );
       const unRevResult = await unRevMintTx.wait();
-      const unrevealedtokenId = unRevResult.events[2].args.tokenId.toString();
+      const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
   
       // await AssetContract.safeTransferFrom(
       //   users[0],
@@ -64,8 +64,7 @@ export const runRevealTestSetup = deployments.createFixture(
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJD"
       );
       const unRevResult2 = await unRevMintTx2.wait();
-      const unrevealedtokenId2 = unRevResult2.events[2].args.tokenId.toString();
-  
+      const unrevealedtokenId2 = unRevResult2.events[3].args.tokenId.toString();
       // mint a revealed version, tier 5 asset with 10 copies
       const revMintTx = await MockMinterContract.mintAsset(
         users[0],
@@ -76,7 +75,7 @@ export const runRevealTestSetup = deployments.createFixture(
       );
   
       const revResult = await revMintTx.wait();
-      const revealedtokenId = revResult.events[2].args.tokenId.toString();
+      const revealedtokenId = revResult.events[3].args.tokenId.toString();
   
       const revealAsset = async (
         signature: string,
