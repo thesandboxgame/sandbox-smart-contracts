@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIS
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./ERC2771Handler.sol";
+import "./MultiReceiverRoyaltyOverrideCore.sol";
 import "./libraries/TokenIdUtils.sol";
 import "./interfaces/IAsset.sol";
 import "./interfaces/ICatalyst.sol";
@@ -19,7 +20,8 @@ contract Asset is
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
-    ERC1155URIStorageUpgradeable
+    ERC1155URIStorageUpgradeable,
+    MultiReceiverRoyaltyOverrideCore
 {
     using TokenIdUtils for uint256;
 
@@ -45,7 +47,10 @@ contract Asset is
         address assetAdmin,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
-        string memory baseUri
+        string memory baseUri,
+        address payable defaultRecipient,
+        uint16 defaultBps,
+        address _manager
     ) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
@@ -53,6 +58,10 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
+
+        _defaultRoyaltyReceiver = defaultRecipient;
+        _defaultRoyaltyBPS = defaultBps;
+        manager = _manager;
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -72,6 +81,8 @@ contract Asset is
     ) external onlyRole(MINTER_ROLE) {
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
+        address creator = id.getCreatorAddress();
+        _setTokenRoyalties(id, _defaultRoyaltyBPS, payable(creator), creator);
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
@@ -93,6 +104,10 @@ contract Asset is
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
         _mintBatch(to, ids, amounts, "");
+        for (uint256 i; i < ids.length; i++) {
+            address creator = ids[i].getCreatorAddress();
+            _setTokenRoyalties(ids[i], _defaultRoyaltyBPS, payable(creator), creator);
+        }
     }
 
     /// @notice Burn a token from a given account
@@ -186,7 +201,11 @@ contract Asset is
         public
         view
         virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable)
+        override(
+            ERC1155Upgradeable,
+            AccessControlUpgradeable,
+            MultiReceiverRoyaltyOverrideCore
+        )
         returns (bool)
     {
         return
@@ -226,5 +245,44 @@ contract Asset is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    function getRecyclingAmount(
+        uint256 catalystTokenId
+    ) public view returns (uint256) {
+        return recyclingAmounts[catalystTokenId];
+    }
+
+    /// @notice Not in our use case
+    /// @dev Explain to a developer any extra details
+    /// @param tokenId a parameter just like in doxygen (must be followed by parameter name)
+    /// @param royaltyBPS should be defult of use case.
+    /// @param recipient the royalty recipient for the splitter of the creator.
+    /// @param creator the creactor of the tokens.
+    function setTokenRoyalties(
+        uint256 tokenId,
+        uint16 royaltyBPS,
+        address payable recipient,
+        address creator
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setTokenRoyalties(tokenId, royaltyBPS, recipient, creator);
+    }
+
+    /// @notice sets default royalty bps for EIP2981
+    /// @dev only owner can call.
+    /// @param bps royalty bps base 10000
+    function setDefaultRoyaltyBps(
+        uint16 bps
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setDefaultRoyaltyBps(bps);
+    }
+
+    /// @notice sets default royalty receiver for EIP2981
+    /// @dev only owner can call.
+    /// @param defaultReceiver address of default royalty recipient.
+    function setDefaultRoyaltyReceiver(
+        address payable defaultReceiver
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setDefaultRoyaltyReceiver(defaultReceiver);
     }
 }
