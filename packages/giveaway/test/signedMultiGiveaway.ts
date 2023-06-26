@@ -1043,7 +1043,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.equal(fixtures.signer.address);
     });
-    it('check the trusted forwarder', async function () {
+    it('admin should be able to set the trusted forwarder', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
         fixtures.trustedForwarder.address
@@ -1051,7 +1051,32 @@ describe('SignedMultiGiveaway.sol', function () {
       expect(await fixtures.contract.trustedForwarder()).to.be.equal(
         fixtures.trustedForwarder.address
       );
+      await expect(
+        fixtures.contractAsAdmin.setTrustedForwarder(fixtures.other.address)
+      )
+        .to.emit(fixtures.contract, 'TrustedForwarderSet')
+        .withArgs(fixtures.other.address);
+      expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
+        fixtures.other.address
+      );
+      expect(await fixtures.contract.trustedForwarder()).to.be.equal(
+        fixtures.other.address
+      );
     });
+
+    it('others should fail to set the trusted forwarder', async function () {
+      const fixtures = await loadFixture(setupSignedMultiGiveaway);
+
+      await expect(
+        fixtures.contractAsBackofficeAdmin.setTrustedForwarder(
+          fixtures.other.address
+        )
+      ).to.be.revertedWith('only admin');
+      await expect(
+        fixtures.contract.setTrustedForwarder(fixtures.other.address)
+      ).to.be.revertedWith('only admin');
+    });
+
     it('check the domain separator', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 

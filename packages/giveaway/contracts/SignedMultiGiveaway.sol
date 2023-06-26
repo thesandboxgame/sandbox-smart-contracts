@@ -62,6 +62,7 @@ contract SignedMultiGiveaway is
     event MaxWeiPerClaimSet(address token, uint256 tokenId, uint256 maxWeiPerClaim, address operator);
     event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address operator);
     event MaxClaimEntriesSet(uint256 maxClaimEntries, address operator);
+    event TrustedForwarderSet(address indexed newForwarder);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -176,6 +177,13 @@ contract SignedMultiGiveaway is
         require(token != address(0), "invalid token address");
         _perTokenLimitData[token][tokenId].maxWeiPerClaim = maxWeiPerClaim;
         emit MaxWeiPerClaimSet(token, tokenId, maxWeiPerClaim, _msgSender());
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder_ The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder_) external onlyAdmin {
+        _trustedForwarder = trustedForwarder_;
+        emit TrustedForwarderSet(_trustedForwarder);
     }
 
     /// @notice return true if already claimed
