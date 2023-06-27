@@ -6,6 +6,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:mocha/recommended',
     'plugin:prettier/recommended',
+    'plugin:json/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2020,
