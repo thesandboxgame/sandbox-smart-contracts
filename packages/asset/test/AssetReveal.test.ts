@@ -32,8 +32,10 @@ describe("AssetReveal", () => {
       expect(forwarderAddress).to.equal(trustedForwarder);
     });
   });
+
+  // TODO: tests should NOT be performed by deployer
   describe("Burning", () => {
-    it("Deployer should have correct initial balance", async () => {
+    it("Deployer should have correct initial balance", async () => { 
       const { AssetContract, users, unrevealedtokenId, revealedtokenId } =
         await runRevealTestSetup();
       const unRevealedDeployerBalance = await AssetContract.balanceOf(

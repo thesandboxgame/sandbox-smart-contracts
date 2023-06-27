@@ -28,17 +28,17 @@ const config: HardhatUserConfig = {
       default: 0,
     },
     sandAdmin: {
-      default: 0,
+      default: 0, // TODO: make same as core
     },
     upgradeAdmin: "sandAdmin",
-    catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
+    catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet // TODO: from where ????
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
     assetAdmin: "sandAdmin",
     assetCreateAdmin: "sandAdmin",
     assetRevealAdmin: "sandAdmin",
     catalystMinter: "sandAdmin",
     catalystAdmin: "sandAdmin",
-    tsbAssetMinter: "sandAdmin",
+    tsbAssetMinter: "sandAdmin", // For Special Minting of TSB Exclusive assets only
     authValidatorAdmin: "sandAdmin",
     uriSetter: "sandAdmin",
     backendAuthWallet: {

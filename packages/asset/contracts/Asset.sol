@@ -24,14 +24,15 @@ contract Asset is
     using TokenIdUtils for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
-    // mapping of old bridged tokenId to creator nonce
+    // mapping of old bridged tokenId (original asset from L1) to creator nonce
     mapping(uint256 => uint16) public bridgedTokensNonces;
-    // mapping of ipfs metadata token hash to token ids
+    // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -94,61 +95,6 @@ contract Asset is
         _mintBatch(to, ids, amounts, "");
     }
 
-    /// @notice Extract the catalyst by burning assets of the same tier
-    /// @param tokenIds the tokenIds of the assets to extract, must be of same tier
-    /// @param amounts the amount of each asset to extract catalyst from
-    /// @param catalystTier the catalyst tier to extract
-    /// @return amountOfCatalystExtracted the amount of catalyst extracted
-    function recycleBurn(
-        address recycler,
-        uint256[] calldata tokenIds,
-        uint256[] calldata amounts,
-        uint256 catalystTier
-    )
-        external
-        onlyRole(MINTER_ROLE)
-        returns (uint256 amountOfCatalystExtracted)
-    {
-        uint256 totalAmount = 0;
-        // how many assets of a given tier are needed to recycle a catalyst
-        uint256 recyclingAmount = recyclingAmounts[catalystTier];
-        require(
-            recyclingAmount > 0,
-            "Catalyst tier is not eligible for recycling"
-        );
-        // make sure the tokens that user is trying to extract are of correct tier and user has enough tokens
-        for (uint i = 0; i < tokenIds.length; i++) {
-            uint256 extractedTier = (tokenIds[i]).getTier();
-            require(
-                extractedTier == catalystTier,
-                "Catalyst id does not match"
-            );
-            totalAmount += amounts[i];
-        }
-
-        // total amount should be a modulo of recyclingAmounts[catalystTier] to make sure user is recycling the correct amount of tokens
-        require(
-            totalAmount % recyclingAmounts[catalystTier] == 0,
-            "Incorrect amount of tokens to recycle"
-        );
-        // burn batch of tokens
-        _burnBatch(recycler, tokenIds, amounts);
-
-        // calculate how many catalysts to mint
-        uint256 catalystsExtractedCount = totalAmount /
-            recyclingAmounts[catalystTier];
-
-        emit AssetsRecycled(
-            recycler,
-            tokenIds,
-            amounts,
-            catalystTier,
-            catalystsExtractedCount
-        );
-
-        return catalystsExtractedCount;
-    }
-
     /// @notice Burn a token from a given account
     /// @dev Only the minter role can burn tokens
     /// @dev This function was added with token recycling and bridging in mind but may have other use cases
@@ -159,7 +105,7 @@ contract Asset is
         address account,
         uint256 id,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -174,21 +120,8 @@ contract Asset is
         address account,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burnBatch(account, ids, amounts);
-    }
-
-    /// @notice Set the amount of tokens that can be recycled for a given one catalyst of a given tier
-    /// @dev Only the admin role can set the recycling amount
-    /// @param catalystTokenId The catalyst token id
-    /// @param amount The amount of tokens needed to receive one catalyst
-    function setRecyclingAmount(
-        uint256 catalystTokenId,
-        uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // catalyst 0 is restricted for tsb exclusive tokens
-        require(catalystTokenId > 0, "Catalyst token id cannot be 0");
-        recyclingAmounts[catalystTokenId] = amount;
     }
 
     /// @notice Set a new URI for specific tokenid
@@ -293,11 +226,5 @@ contract Asset is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-    }
-
-    function getRecyclingAmount(
-        uint256 catalystTokenId
-    ) public view returns (uint256) {
-        return recyclingAmounts[catalystTokenId];
     }
 }

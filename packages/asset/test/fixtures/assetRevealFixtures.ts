@@ -17,20 +17,23 @@ export const runRevealTestSetup = deployments.createFixture(
       const { deployer, trustedForwarder } =
         await getNamedAccounts();
       const users = await getUnnamedAccounts();
-      const AssetContract = await ethers.getContract("Asset", deployer);
+      const AssetContract = await ethers.getContract("Asset", deployer); // TODO: why deployer
       const AuthValidatorContract = await ethers.getContract(
         "AuthValidator",
         deployer
       );
-      const MockMinterContract = await ethers.getContract("MockMinter", deployer);
+      const MockMinterContract = await ethers.getContract("MockMinter", deployer); // TODO: why deployer - shouldn't this be an admin
       // add mock minter as minter
       const MinterRole = await AssetContract.MINTER_ROLE();
+      const BurnerRole = await AssetContract.BURNER_ROLE();
       await AssetContract.grantRole(MinterRole, MockMinterContract.address);
       const AssetRevealContract = await ethers.getContract(
         "AssetReveal",
         users[0]
       );
+      // add AssetReveal contracts as both MINTER and BURNER for Asset contract
       await AssetContract.grantRole(MinterRole, AssetRevealContract.address);
+      await AssetContract.grantRole(BurnerRole, AssetRevealContract.address);
       // END SET UP ROLES
   
       // mint a tier 5 asset with 10 copies

@@ -1,34 +1,5 @@
 import { deployments, getUnnamedAccounts } from "hardhat";
 
-export type AssetMintData = {
-  creator: string;
-  amount: number;
-  tier: number;
-  isNFT: boolean;
-  revealed: boolean;
-  revealHash: number;
-};
-
-export function getAssetData(
-  creator: string,
-  amount: number,
-  tier: number,
-  creatorNonce: number,
-  isNFT: boolean,
-  revealed: boolean,
-  revealHash: number
-) {
-  return {
-    creator: creator,
-    amount: amount,
-    tier: tier,
-    creatorNonce: creatorNonce,
-    isNFT: isNFT,
-    revealed: revealed,
-    revealHash: revealHash,
-  };
-}
-
 export function generateOldAssetId(
   creator: string,
   assetNumber: number,
@@ -54,17 +25,30 @@ export function generateOldAssetId(
 
 export const runAssetSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
+    // TODO: DO NOT USE DEPLOY SCRIPTS FOR TESTS
     await deployments.fixture(["Asset"]);
-    const { deployer, revealer } = await getNamedAccounts();
+    const { deployer, assetAdmin } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
-    const owner = users[0];
-    const secondOwner = users[1];
-    const bridgeMinter = users[2];
-    const AssetContract = await ethers.getContract("Asset", deployer);
-    const Asset = await ethers.getContract("Asset");
+    const owner = users[2];
+    const secondOwner = users[3];
+    const bridgeMinter = users[4];
+    const AssetContract = await ethers.getContract("Asset");
+
+    // Asset contract is not user-facing and we block users from minting directly
+    // Contracts that interact with Asset must have the necessary ROLE
+    // Here we set up the necessary roles for testing
+    const AssetContractAsAdmin = await ethers.getContract("Asset", assetAdmin);
+    const AssetContractAsMinter = await ethers.getContract("Asset", users[0]);
+    const AssetContractAsBurner = await ethers.getContract("Asset", users[1]);
+    const AssetContractAsOwner = await ethers.getContract("Asset", users[2]); 
+    const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
     const minterRole = await AssetContract.MINTER_ROLE();
+    const burnerRole = await AssetContract.BURNER_ROLE();
     const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
-    await AssetContract.grantRole(minterRole, deployer);
+    // end set up roles
+
+    await AssetContract.grantRole(minterRole, users[0]); 
+    await AssetContract.grantRole(burnerRole, users[1]); 
     await AssetContract.grantRole(bridgeMinterRole, bridgeMinter);
     const uris = [
       "QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY",
@@ -80,12 +64,16 @@ export const runAssetSetup = deployments.createFixture(
     return {
       deployer,
       AssetContract,
-      Asset,
-      revealer,
+      AssetContractAsOwner,
+      AssetContractAsMinter,
+      AssetContractAsBurner,
+      AssetContractAsAdmin,
       owner,
       secondOwner,
       bridgeMinter,
       minterRole,
+      burnerRole,
+      defaultAdminRole,
       bridgeMinterRole,
       uris,
       baseUri,
