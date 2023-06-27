@@ -10,8 +10,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
-import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import "./interfaces/IManager.sol";
+import {IRoyaltySplitter, Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {IManager} from "./interfaces/IManager.sol";
 
 interface IERC20Approve {
     function approve(address spender, uint256 amount) external returns (bool);
@@ -166,6 +166,11 @@ contract CustomRoyaltySplitter is
             }
             Recipient memory commonRecipient = _manager.getCommonRecipient();
             uint16 creatorSplit = _manager.getCreatorSplit();
+            require(
+                commonRecipient.recipient == msg.sender ||
+                    _recipient == msg.sender,
+                "Split: Can only be called by one of the recipients"
+            );
             Recipient[] memory _recipients = new Recipient[](2);
             _recipients[0].recipient = _recipient;
             _recipients[0].bps = creatorSplit;

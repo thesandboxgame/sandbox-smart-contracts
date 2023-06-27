@@ -34,6 +34,7 @@ contract Catalyst is
     IERC2981Upgradeable
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
+    uint16 internal constant Total_BASIS_POINTS = 10000;
 
     uint256 public tokenCount;
 
@@ -288,13 +289,18 @@ contract Catalyst is
             interfaceId == type(IERC2981Upgradeable).interfaceId;
     }
 
+    /// @notice Returns how much royalty is owed and to whom based on ERC2981
+    /// @param _tokenId of catalyst for which the royalty is distributed
+    /// @param _salePrice the price of catalyst on which the royalty is calculated
+    /// @return receiver the receiver of royalty 
+    /// @return royaltyAmount the amount of royalty 
     function royaltyInfo(
-        uint256, //_tokenId
-        uint256 // _salePrice
+        uint256 _tokenId,
+        uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         uint16 royaltyBps;
         (receiver, royaltyBps) = manager.getRoyaltyInfo();
-
-        return (receiver, royaltyBps);
+        royaltyAmount =  (_salePrice * royaltyBps) / Total_BASIS_POINTS;
+        return (receiver, royaltyAmount);
     }
 }
