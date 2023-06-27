@@ -92,7 +92,7 @@ task(TASK_COMPILE_SOLIDITY_GET_DEPENDENCY_GRAPH).setAction(
         NODE_MODULES,
         _currentPkg.name
       );
-      const ret = await runSuper(args);
+      const ret = await runSuper({...args, rootPath: config.paths.root});
       config.paths.root = saved;
       return ret;
     }
