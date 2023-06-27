@@ -48,21 +48,17 @@ contract Catalyst is
     /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
     /// @param _trustedForwarder The trusted forwarder for meta transactions.
-    /// @param _royaltyRecipient The recipient of the royalties.
     /// @param _subscription The subscription address.
     /// @param _defaultAdmin The default admin address.
     /// @param _defaultMinter The default minter address.
-    /// @param _defaultCatalystsRoyalty The royalties for each catalyst.
     /// @param _catalystIpfsCID The IPFS content identifiers for each catalyst.
     /// @param _manager, the address of the Manager contract for common royalty recipient
     function initialize(
         string memory _baseUri,
         address _trustedForwarder,
-        address _royaltyRecipient,
         address _subscription,
         address _defaultAdmin,
         address _defaultMinter,
-        uint96 _defaultCatalystsRoyalty,
         string[] memory _catalystIpfsCID,
         address _manager
     ) public initializer {
