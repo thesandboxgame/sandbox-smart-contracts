@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { runCreateTestSetup } from "./fixtures/createFixtures";
+import { runCreateTestSetup } from "./fixtures/assetCreateFixtures";
 
 describe("AssetCreate", () => {
   describe("General", async () => {
