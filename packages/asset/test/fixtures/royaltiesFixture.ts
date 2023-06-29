@@ -31,6 +31,7 @@ export async function royaltyDistribution() {
     assetAdmin,
     managerAdmin,
     contractRoyaltySetter,
+    catalystMinter
   } = await getNamedAccounts();
   const { deploy } = await deployments;
   const users = await getUnnamedAccounts();
@@ -89,11 +90,11 @@ export async function royaltyDistribution() {
   });
 
   const ERC20 = await ethers.getContract("TestERC20");
-  const manager = await ethers.getContract("Manager");
+  const manager = await ethers.getContract("RoyaltyManager");
   const mockMarketplace = await ethers.getContract("MockMarketplace");
   const Asset = await ethers.getContract("Asset");
 
-  const catalyst = await ethers.getContract("Catalyst");
+  const catalyst = await ethers.getContract("Catalyst", catalystMinter);
 
   const assetAdminRole = await Asset.DEFAULT_ADMIN_ROLE();
   const assetMinterRole = await Asset.MINTER_ROLE();

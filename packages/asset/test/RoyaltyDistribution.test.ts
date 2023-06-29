@@ -1,10 +1,11 @@
-import {
-  ethers
-} from "hardhat";
+import { ethers } from "hardhat";
 import { expect } from "chai";
 import { splitterAbi } from "./Splitter.abi";
 import { BigNumber } from "ethers";
-import { generateAssetId, royaltyDistribution } from "./fixtures/royaltiesFixture"
+import {
+  generateAssetId,
+  royaltyDistribution,
+} from "./fixtures/royaltiesFixture";
 
 describe("Asset and catalyst Royalties", () => {
   describe("Royalty distribution through splitter", () => {
@@ -1082,6 +1083,94 @@ describe("Asset and catalyst Royalties", () => {
       const royaltyInfo2 = await catalyst.royaltyInfo(id2, priceToken);
       expect(royaltyInfo2[0]).to.be.equals(commonRoyaltyReceiver);
       expect(royaltyInfo2[1]).to.be.equals((500 * priceToken) / 10000);
+    });
+
+    it("should split ERC20 using EIP2981", async function () {
+      const {
+        catalyst,
+        ERC20,
+        mockMarketplace,
+        ERC20AsBuyer,
+        seller,
+        buyer,
+        commonRoyaltyReceiver,
+        managerAsRoyaltySetter,
+      } = await royaltyDistribution();
+      await catalyst.mint(seller, 1, 1);
+
+      await ERC20.mint(buyer, 1000000);
+      await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
+      await catalyst
+        .connect(await ethers.provider.getSigner(seller))
+        .setApprovalForAll(mockMarketplace.address, true);
+      expect(await catalyst.balanceOf(seller, 1)).to.be.equals(1);
+      expect(await ERC20.balanceOf(commonRoyaltyReceiver)).to.be.equals(0);
+
+      await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+
+      await mockMarketplace.distributeRoyaltyEIP2981(
+        1000000,
+        ERC20.address,
+        catalyst.address,
+        1,
+        buyer,
+        seller,
+        true
+      );
+
+      expect(await ERC20.balanceOf(commonRoyaltyReceiver)).to.be.equals(
+        (1000000 / 10000) * 500
+      );
+    });
+
+    it("should split ETh using EIP2981", async function () {
+      const {
+        catalyst,
+        ERC20,
+        mockMarketplace,
+        ERC20AsBuyer,
+        seller,
+        buyer,
+        commonRoyaltyReceiver,
+        managerAsRoyaltySetter,
+        user,
+      } = await royaltyDistribution();
+      await catalyst.mint(seller, 1, 1);
+
+      await ERC20.mint(buyer, 1000000);
+      await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
+      await catalyst
+        .connect(await ethers.provider.getSigner(seller))
+        .setApprovalForAll(mockMarketplace.address, true);
+      expect(await catalyst.balanceOf(seller, 1)).to.be.equals(1);
+      const value = ethers.utils.parseUnits("1000", "ether");
+
+      await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+      const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(commonRoyaltyReceiver);
+
+      await mockMarketplace
+        .connect(await ethers.getSigner(user))
+        .distributeRoyaltyEIP2981(
+          0,
+          ERC20.address,
+          catalyst.address,
+          1,
+          buyer,
+          seller,
+          true,
+          {
+            value: value,
+          }
+        );
+
+        const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(commonRoyaltyReceiver);
+
+      expect(
+        balanceCommonRoyaltyReceiverNew
+          .sub(balanceCommonRoyaltyReceiver)
+      ).to.be.equal(
+        value.mul(BigNumber.from(500)).div(BigNumber.from(10000))
+      );
     });
   });
 });
