@@ -35,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           CATALYST_BASE_URI,
           trustedForwarder,
           catalystRoyaltyRecipient,
-          OperatorFilterSubscription.address,
+          operatorFilterSubscription.address,
           catalystAdmin, // DEFAULT_ADMIN_ROLE
           catalystMinter, // MINTER_ROLE
           CATALYST_DEFAULT_ROYALTY,
