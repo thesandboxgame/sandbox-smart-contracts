@@ -99,7 +99,6 @@ contract Asset is
         _mintBatch(to, ids, amounts, "");
     }
 
-<<
     /// @notice Burn a token from a given account
     /// @dev Only the minter role can burn tokens
     /// @dev This function was added with token recycling and bridging in mind but may have other use cases
