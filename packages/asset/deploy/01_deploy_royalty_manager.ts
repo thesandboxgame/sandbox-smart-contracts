@@ -9,9 +9,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const customSplitter = await deployments.get('CustomRoyaltySplitter');
 
 
-  await deploy("Manager", {
+  await deploy("RoyaltyManager", {
     from: deployer,
-    contract: "Manager",
+    contract: "RoyaltyManager",
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",

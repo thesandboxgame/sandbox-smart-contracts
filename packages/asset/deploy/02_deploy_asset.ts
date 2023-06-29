@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     trustedForwarder,
     commonRoyaltyReceiver,
   } = await getNamedAccounts();
-  const Manager = await deployments.get("Manager");
+  const Manager = await deployments.get("RoyaltyManager");
 
   await deploy("Asset", {
     from: deployer,

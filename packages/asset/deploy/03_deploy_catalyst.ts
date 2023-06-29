@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const manager = await deployments.get(
-    "Manager"
+    "RoyaltyManager"
   );
 
   await deploy("Catalyst", {
