@@ -1,146 +1,83 @@
 import { expect } from "chai";
-import { deployments } from "hardhat";
-import { createEIP712RevealSignature } from "./utils/revealSignature";
+import { formatBytes32String } from "ethers/lib/utils";
+import { runRevealTestSetup } from './fixtures/assetRevealFixtures'
 
-const runTestSetup = deployments.createFixture(
-  async ({ deployments, getNamedAccounts, ethers }) => {
-    await deployments.fixture([
-      "AssetReveal",
-      "Asset",
-      "AuthValidator",
-      "MockMinter",
-    ]);
-    const { deployer, trustedForwarder, upgradeAdmin } =
-      await getNamedAccounts();
-    const AssetContract = await ethers.getContract("Asset", deployer);
-    const AuthValidatorContract = await ethers.getContract(
-      "AuthValidator",
-      deployer
-    );
-    const MockMinterContract = await ethers.getContract("MockMinter", deployer);
-    // add mock minter as minter
-    const MinterRole = await AssetContract.MINTER_ROLE();
-    await AssetContract.grantRole(MinterRole, MockMinterContract.address);
-    const AssetRevealContract = await ethers.getContract(
-      "AssetReveal",
-      deployer
-    );
-    await AssetContract.grantRole(MinterRole, AssetRevealContract.address);
-
-    // mint a tier 5 asset with 10 copies
-    const unRevMintTx = await MockMinterContract.mintAsset(
-      deployer,
-      10,
-      5,
-      false,
-      "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA"
-    );
-    const unRevResult = await unRevMintTx.wait();
-    const unrevealedtokenId = unRevResult.events[2].args.tokenId.toString();
-
-    await AssetContract.safeTransferFrom(
-      deployer,
-      upgradeAdmin,
-      unrevealedtokenId,
-      1,
-      "0x00"
-    );
-
-    // mint a tier 5 asset with 10 copies
-    const unRevMintTx2 = await MockMinterContract.mintAsset(
-      deployer,
-      10,
-      5,
-      false,
-      "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJD"
-    );
-    const unRevResult2 = await unRevMintTx2.wait();
-    const unrevealedtokenId2 = unRevResult2.events[2].args.tokenId.toString();
-
-    // mint a tier 2 asset with 5 copies
-    const revMintTx = await MockMinterContract.mintAsset(
-      deployer,
-      10,
-      5,
-      true,
-      "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC"
-    );
-
-    const revResult = await revMintTx.wait();
-    const revealedtokenId = revResult.events[2].args.tokenId.toString();
-
-    return {
-      deployer,
-      AssetRevealContract,
-      AssetContract,
-      AuthValidatorContract,
-      trustedForwarder,
-      unrevealedtokenId,
-      unrevealedtokenId2,
-      revealedtokenId,
-      testAccount: upgradeAdmin,
-    };
-  }
-);
+const revealHashA = formatBytes32String("revealHashA");
+const revealHashB = formatBytes32String("revealHashB");
+const revealHashC = formatBytes32String("revealHashC");
+const revealHashD = formatBytes32String("revealHashD");
+const revealHashE = formatBytes32String("revealHashE");
+const revealHashF = formatBytes32String("revealHashF");
 
 describe("AssetReveal", () => {
   describe("General", () => {
     it("Should deploy correctly", async () => {
-      const { AssetRevealContract } = await runTestSetup();
+      const { AssetRevealContract } = await runRevealTestSetup();
       expect(AssetRevealContract.address).to.be.properAddress;
     });
     it("Should have the asset address set correctly", async () => {
-      const { AssetRevealContract, AssetContract } = await runTestSetup();
+      const { AssetRevealContract, AssetContract } = await runRevealTestSetup();
       const assetAddress = await AssetRevealContract.getAssetContract();
       expect(assetAddress).to.equal(AssetContract.address);
     });
     it("Should have the auth validator address set correctly", async () => {
       const { AssetRevealContract, AuthValidatorContract } =
-        await runTestSetup();
+        await runRevealTestSetup();
       const authValidatorAddress = await AssetRevealContract.getAuthValidator();
       expect(authValidatorAddress).to.equal(AuthValidatorContract.address);
     });
     it("Should have the forwarder address set correctly", async () => {
-      const { AssetRevealContract, trustedForwarder } = await runTestSetup();
+      const { AssetRevealContract, trustedForwarder } = await runRevealTestSetup();
       const forwarderAddress = await AssetRevealContract.getTrustedForwarder();
       expect(forwarderAddress).to.equal(trustedForwarder);
     });
   });
+
+  // TODO: tests should NOT be performed by deployer
   describe("Burning", () => {
-    it("Deployer should have correct initial balance", async () => {
-      const { AssetContract, deployer, unrevealedtokenId, revealedtokenId } =
-        await runTestSetup();
+    it("Deployer should have correct initial balance", async () => { 
+      const { AssetContract, users, unrevealedtokenId, revealedtokenId } =
+        await runRevealTestSetup();
       const unRevealedDeployerBalance = await AssetContract.balanceOf(
-        deployer,
+        users[0],
         unrevealedtokenId
       );
       const revealedDeployerBalance = await AssetContract.balanceOf(
-        deployer,
+        users[0],
         revealedtokenId
       );
-      expect(unRevealedDeployerBalance.toString()).to.equal("9");
+      expect(unRevealedDeployerBalance.toString()).to.equal("10");
       expect(revealedDeployerBalance.toString()).to.equal("10");
     });
     it("Should not be able to burn amount less than one", async () => {
-      const { AssetRevealContract, unrevealedtokenId } = await runTestSetup();
+      const { AssetRevealContract, unrevealedtokenId } = await runRevealTestSetup();
       await expect(
         AssetRevealContract.revealBurn(unrevealedtokenId, 0)
       ).to.be.revertedWith("Amount should be greater than 0");
     });
     it("Should not be able to burn an asset that is already revealed", async () => {
-      const { AssetRevealContract, revealedtokenId } = await runTestSetup();
+      const { AssetRevealContract, revealedtokenId } = await runRevealTestSetup();
       await expect(
         AssetRevealContract.revealBurn(revealedtokenId, 1)
       ).to.be.revertedWith("Asset is already revealed");
     });
     it("Should not be able to burn more than owned by the caller", async () => {
-      const { AssetRevealContract, unrevealedtokenId } = await runTestSetup();
+      const {
+        users,
+        AssetRevealContract,
+        AssetContract,
+        unrevealedtokenId,
+      } = await runRevealTestSetup();
+      const balance = await AssetContract.balanceOf(
+        users[0],
+        unrevealedtokenId
+      );
       await expect(
-        AssetRevealContract.revealBurn(unrevealedtokenId, 10)
-      ).to.be.revertedWith("ERC1155: burn amount exceeds balance");
+        AssetRevealContract.revealBurn(unrevealedtokenId, balance + 1)
+      ).to.be.revertedWith("ERC1155: burn amount exceeds totalSupply");
     });
     it("Should not be able to burn a token that doesn't exist", async () => {
-      const { AssetRevealContract } = await runTestSetup();
+      const { AssetRevealContract } = await runRevealTestSetup();
       await expect(AssetRevealContract.revealBurn(123, 1)).to.be.revertedWith(
         "ERC1155: burn amount exceeds totalSupply"
       );
@@ -150,36 +87,32 @@ describe("AssetReveal", () => {
         AssetRevealContract,
         AssetContract,
         unrevealedtokenId,
-        deployer,
-      } = await runTestSetup();
+        users,
+      } = await runRevealTestSetup();
       const burnTx = await AssetRevealContract.revealBurn(unrevealedtokenId, 1);
       await burnTx.wait();
 
-      const deployerBalance = await AssetContract.balanceOf(
-        deployer,
+      const userBalance = await AssetContract.balanceOf(
+        users[0],
         unrevealedtokenId
       );
-      expect(deployerBalance.toString()).to.equal("8");
+      expect(userBalance.toString()).to.equal("9");
     });
     it("Should emit burn event with correct data", async () => {
-      const { AssetRevealContract, unrevealedtokenId, deployer } =
-        await runTestSetup();
+      const { AssetRevealContract, unrevealedtokenId, users } =
+        await runRevealTestSetup();
       const burnTx = await AssetRevealContract.revealBurn(unrevealedtokenId, 1);
       const burnResult = await burnTx.wait();
       const burnEvent = burnResult.events[1];
       expect(burnEvent.event).to.equal("AssetRevealBurn");
-      // msgSender
-      expect(burnEvent.args[0]).to.equal(deployer);
-      // tokenId
+      // revealer
+      expect(burnEvent.args[0]).to.equal(users[0]);
+      // token id that is being revealed
       expect(burnEvent.args[1]).to.equal(unrevealedtokenId);
-      // creator
-      expect(burnEvent.args[2]).to.equal(deployer);
       // tier
-      expect(burnEvent.args[3].toString()).to.equal("5");
-      // nonce
-      expect(burnEvent.args[4].toString()).to.equal("1");
+      expect(burnEvent.args[2].toString()).to.equal("5");
       // amount
-      expect(burnEvent.args[5].toString()).to.equal("1");
+      expect(burnEvent.args[3].toString()).to.equal("1");
     });
     it("Should be able to burn multiple unrevealed owned assets", async () => {
       const {
@@ -187,128 +120,242 @@ describe("AssetReveal", () => {
         AssetContract,
         unrevealedtokenId,
         unrevealedtokenId2,
-        deployer,
-      } = await runTestSetup();
+        users,
+      } = await runRevealTestSetup();
+      const amountToBurn1 = 2;
+      const amountToBurn2 = 3;
+      const tk1BalanceBeforeBurn = await AssetContract.balanceOf(
+        users[0],
+        unrevealedtokenId
+      );
+
+      const tk2BalanceBeforeBurn = await AssetContract.balanceOf(
+        users[0],
+        unrevealedtokenId2
+      );
+
       const burnTx = await AssetRevealContract.revealBatchBurn(
         [unrevealedtokenId, unrevealedtokenId2],
-        [5, 5]
+        [amountToBurn1, amountToBurn2]
       );
       await burnTx.wait();
 
-      const deployerBalance1 = await AssetContract.balanceOf(
-        deployer,
+      const tk1BalanceAfterBurn = await AssetContract.balanceOf(
+        users[0],
         unrevealedtokenId
       );
-      expect(deployerBalance1.toString()).to.equal("4");
 
-      const deployerBalance2 = await AssetContract.balanceOf(
-        deployer,
+      // expect(tk1BalanceBeforeBurn.sub(5)).to.equal(tk1BalanceAfterBurn);
+
+      const tk2BalanceAfterBurn = await AssetContract.balanceOf(
+        users[0],
         unrevealedtokenId2
       );
-      expect(deployerBalance2.toString()).to.equal("5");
+
+      expect(tk1BalanceBeforeBurn.sub(amountToBurn1)).to.equal(
+        tk1BalanceAfterBurn
+      );
+      expect(tk2BalanceBeforeBurn.sub(amountToBurn2)).to.equal(
+        tk2BalanceAfterBurn
+      );
     });
   });
   describe("Minting", () => {
     it("Should allow minting with valid signature", async () => {
       const {
-        deployer,
+        users,
         unrevealedtokenId,
-        AssetRevealContract,
+        generateRevealSignature,
+        revealAsset,
         AssetContract,
-      } = await runTestSetup();
-      const newMetadataHash = [
+
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
-        unrevealedtokenId,
-        newMetadataHash
-      );
+      const amounts = [1];
 
-      const tx = await AssetRevealContract.revealMint(
+      const signature = await generateRevealSignature(
+        users[0], // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        amountToMint,
-        newMetadataHash,
-        deployer
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
-
-      const result = await tx.wait();
-      expect(result.events[2].event).to.equal("AssetsRevealed");
-
+      expect(result.events[2].event).to.equal("AssetRevealMint");
       const newTokenId = result.events[2].args.newTokenIds[0];
-      const balance = await AssetContract.balanceOf(deployer, newTokenId);
+      const balance = await AssetContract.balanceOf(users[0], newTokenId);
       expect(balance.toString()).to.equal("1");
     });
-    it("Should allow mintingw when multiple copies revealed to the same metadata hash", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
-      const newMetadataHash = [
+    it("Should allow minting when multiple copies revealed to the same metadata hash", async () => {
+      const {
+        users,
+        unrevealedtokenId,
+        revealAsset,
+        generateRevealSignature,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [2];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
+      const amounts = [2];
+      const signature = await generateRevealSignature(
+        users[0],
         unrevealedtokenId,
-        newMetadataHash
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
-
-      const tx = await AssetRevealContract.revealMint(
+      const result = await revealAsset(
         signature,
         unrevealedtokenId,
-        amountToMint,
-        newMetadataHash,
-        deployer
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      expect(result.events[2].event).to.equal("AssetRevealMint");
+      expect(result.events[2].args["newTokenIds"].length).to.equal(1);
+      // TODO: check supply with new metadataHash has incremented by 2
+    });
+    it("Should not allow minting for multiple copies revealed to the same metadata hash if revealHash is used", async () => {
+      const {
+        users,
+        unrevealedtokenId,
+        revealAsset,
+        generateRevealSignature,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      const amounts = [2];
+      const signature = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
 
-      const result = await tx.wait();
-      expect(result.events[2].event).to.equal("AssetsRevealed");
-      expect(result.events[2].args["newTokenIds"].length).to.equal(1);
+      const signature2 = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await expect(
+        revealAsset(
+          signature2,
+          unrevealedtokenId,
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
+        )
+      ).to.be.revertedWith("Invalid revealHash");
+    });
+    it("should increase the tokens supply for tokens with same metadata hash", async () => {
+      const {
+        users,
+        unrevealedtokenId,
+        generateRevealSignature,
+        revealAsset,
+        AssetContract,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      const result = await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      const newTokenId = result.events[2].args.newTokenIds[0];
+      const balance = await AssetContract.balanceOf(users[0], newTokenId);
+      expect(balance.toString()).to.equal("1");
+      const signature2 = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashB]
+      );
+      await revealAsset(
+        signature2,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashB]
+      );
+      const balance2 = await AssetContract.balanceOf(users[0], newTokenId);
+      expect(balance2.toString()).to.equal("2");
     });
     it("Should allow batch reveal minting with valid signatures", async () => {
       const {
-        deployer,
+        users,
+        revealAssetBatch,
+        generateBatchRevealSignature,
         unrevealedtokenId,
         unrevealedtokenId2,
-        AssetRevealContract,
-      } = await runTestSetup();
-      const newMetadataHash1 = [
+      } = await runRevealTestSetup();
+      const newMetadataHashes1 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const newMetadataHash2 = [
+      const newMetadataHashes2 = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJZ",
       ];
-      const amountToMint1 = [1];
-      const amountToMint2 = [1];
-      const signature1 = await createEIP712RevealSignature(
-        amountToMint1,
-        unrevealedtokenId,
-        newMetadataHash1
-      );
+      const amounts1 = [1];
+      const amounts2 = [1];
 
-      const signature2 = await createEIP712RevealSignature(
-        amountToMint2,
-        unrevealedtokenId2,
-        newMetadataHash2
-      );
-
-      const tx = await AssetRevealContract.revealBatchMint(
-        [signature1, signature2],
+      const signature = await generateBatchRevealSignature(
+        users[0],
         [unrevealedtokenId, unrevealedtokenId2],
-        [amountToMint1, amountToMint2],
-        [newMetadataHash1, newMetadataHash2],
-        deployer
+        [amounts1, amounts2],
+        [newMetadataHashes1, newMetadataHashes2],
+        [[revealHashA], [revealHashB]]
       );
 
-      const result = await tx.wait();
+      const result = await revealAssetBatch(
+        signature,
+        [unrevealedtokenId, unrevealedtokenId2],
+        [amounts1, amounts2],
+        [newMetadataHashes1, newMetadataHashes2],
+        [[revealHashA], [revealHashB]]
+      );
+
       // expect two events with name AssetsRevealed
-      expect(result.events[2].event).to.equal("AssetsRevealed");
-      expect(result.events[5].event).to.equal("AssetsRevealed");
+      expect(result.events[2].event).to.equal("AssetRevealMint");
+      expect(result.events[5].event).to.equal("AssetRevealMint");
     });
     it("Should allow revealing multiple copies at the same time", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
+      const {
+        users,
+        generateRevealSignature,
+        revealAsset,
+        unrevealedtokenId,
+      } = await runRevealTestSetup();
       const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJ1",
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJ2",
@@ -318,132 +365,195 @@ describe("AssetReveal", () => {
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJ6",
       ];
       const amountToMint = [1, 2, 1, 7, 1, 2];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
+      const signature = await generateRevealSignature(
+        users[0],
         unrevealedtokenId,
-        newMetadataHashes
+        amountToMint,
+        newMetadataHashes,
+        [revealHashA, revealHashB, revealHashC, revealHashD, revealHashE, revealHashF]
       );
 
-      const tx = await AssetRevealContract.revealMint(
+      const result = await revealAsset(
         signature,
         unrevealedtokenId,
         amountToMint,
         newMetadataHashes,
-        deployer
+        [revealHashA, revealHashB, revealHashC, revealHashD, revealHashE, revealHashF]
       );
-      const result = await tx.wait();
-      expect(result.events[7].event).to.equal("AssetsRevealed");
+      expect(result.events[7].event).to.equal("AssetRevealMint");
       expect(result.events[7].args["newTokenIds"].length).to.equal(6);
     });
-
-    it("Should not allow minting with invalid signature", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
+    it("Should allow instant reveal when authorized by the backend", async () => {
+      const {
+        users,
+        generateBurnAndRevealSignature,
+        instantReveal,
+        unrevealedtokenId,
+      } = await runRevealTestSetup();
       const newMetadataHash = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
+      const amounts = [1];
+
+      const signature = await generateBurnAndRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHash,
+        [revealHashA]
+      );
+
+      const result = await instantReveal(
+        signature,
+        unrevealedtokenId,
+        amounts[0],
+        amounts,
+        newMetadataHash,
+        [revealHashA]
+      );
+      expect(result.events[4].event).to.equal("AssetRevealMint");
+    });
+    it("Should not allow minting with invalid signature", async () => {
+      const { revealAsset, unrevealedtokenId } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      const amounts = [1];
       await expect(
-        AssetRevealContract.revealMint(
-          "0x1556a70d76cc452ae54e83bb167a9041f0d062d000fa0dcb42593f77c544f6471643d14dbd6a6edc658f4b16699a585181a08dba4f6d16a9273e0e2cbed622da1b",
+        revealAsset(
+          "0x1556a70d76cc452ae54e83bb167a9041f0d062d000fa0dcb42593f77c544f6471643d14dbd6a6edc658f4b16699a585181a08dba4f6d16a9273e0e2cbed622da1b", 
+          // TODO: write down how is this a bad sig here so it's clear
           unrevealedtokenId,
-          amountToMint,
-          newMetadataHash,
-          deployer
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
         )
-      ).to.be.revertedWith("Invalid signature");
+      ).to.be.revertedWith("Invalid revealMint signature");
     });
     it("Should not allow minting with invalid prevTokenId", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
-      const newMetadataHash = [
+      const {
+        users,
+        generateRevealSignature,
+        unrevealedtokenId,
+        AssetRevealContract,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        users[0],
         unrevealedtokenId,
-        newMetadataHash
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
-          123,
-          amountToMint,
-          newMetadataHash,
-          deployer
+          123, // invalid
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
         )
-      ).to.be.revertedWith("Invalid signature");
+      ).to.be.revertedWith("Invalid revealMint signature");
     });
     it("Should not allow minting with invalid amount", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
-      const newMetadataHash = [
+      const {
+        users,
+        generateRevealSignature,
+        unrevealedtokenId,
+        AssetRevealContract,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        users[0],
         unrevealedtokenId,
-        newMetadataHash
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           unrevealedtokenId,
-          [123],
-          newMetadataHash,
-          deployer
+          [123], // invalid
+          newMetadataHashes,
+          [revealHashA]
         )
-      ).to.be.revertedWith("Invalid signature");
+      ).to.be.revertedWith("Invalid revealMint signature");
     });
     it("Should not allow minting with invalid metadataHashes", async () => {
-      const { deployer, unrevealedtokenId, AssetRevealContract } =
-        await runTestSetup();
-      const newMetadataHash = [
+      const {
+        users,
+        generateRevealSignature,
+        unrevealedtokenId,
+        AssetRevealContract,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        users[0],
         unrevealedtokenId,
-        newMetadataHash
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
           unrevealedtokenId,
-          amountToMint,
-          ["QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE"],
-          deployer
+          amounts,
+          ["QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE"], // invalid
+          [revealHashA]
         )
-      ).to.be.revertedWith("Invalid signature");
+      ).to.be.revertedWith("Invalid revealMint signature");
     });
-    it("Should not allow minting an asset that is already revealed", async () => {
-      const { deployer, revealedtokenId, AssetRevealContract } =
-        await runTestSetup();
-      const newMetadataHash = [
+    it("Should not allow using the same signature twice", async () => {
+      const {
+        users,
+        generateRevealSignature,
+        revealAsset,
+        unrevealedtokenId,
+        AssetRevealContract,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
         "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
       ];
-      const amountToMint = [1];
-      const signature = await createEIP712RevealSignature(
-        amountToMint,
-        revealedtokenId,
-        newMetadataHash
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+
+      await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
       );
 
       await expect(
         AssetRevealContract.revealMint(
           signature,
-          revealedtokenId,
-          amountToMint,
-          newMetadataHash,
-          deployer
+          unrevealedtokenId,
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
         )
-      ).to.be.revertedWith("Asset: already revealed");
+      ).to.be.revertedWith("Invalid revealHash");
     });
   });
 });

@@ -1,19 +1,20 @@
-# New Asset contract PoC
+# Asset
 
-This is a PoC for the new asset contract, all features planned and implemented will be listed here.
+TODO
 
-This project uses a mainnet fork for advanced testing purposes, interacting with other marketplaces, existing NFT collections and more.
+## Running the project locally
 
-- [x] Supports meta transactions
+Install dependencies with `yarn`
 
-## Running the project localy
+Testing
+Use `yarn test` inside `packages/asset` to run tests locally for just this package
 
-In order to run the project use below scripts
+Coverage
+Run `yarn coverage` 
 
-`npm install` - to install all packages
+Deploy
+Use `yarn deploy` and add the appropriate flags (see hardhat docs)
 
-`npm run node` - run a local node which is a mainnet fork, keep it running
 
-`npm run test` - to run the test suite on running local network
 
-`npm run deploy` - to deploy the contract on a local network
+

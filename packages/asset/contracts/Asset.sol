@@ -26,16 +26,15 @@ contract Asset is
     using TokenIdUtils for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant BRIDGE_MINTER_ROLE =
         keccak256("BRIDGE_MINTER_ROLE");
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
-    // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
-    mapping(address => uint16) public creatorNonces;
-    // mapping of old bridged tokenId to creator nonce
+    // mapping of old bridged tokenId (original asset from L1) to creator nonce
     mapping(uint256 => uint16) public bridgedTokensNonces;
-    // mapping of ipfs metadata token hash to token ids
+    // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -45,6 +44,7 @@ contract Asset is
 
     function initialize(
         address forwarder,
+        address assetAdmin,
         uint256[] calldata catalystTiers,
         uint256[] calldata catalystRecycleCopiesNeeded,
         string memory baseUri,
@@ -99,148 +99,7 @@ contract Asset is
         _mintBatch(to, ids, amounts, "");
     }
 
-    /// @notice Mint TSB special tokens
-    /// @dev Only callable by the minter role
-    /// @dev Those tokens are minted by TSB admins and do not adhere to the normal minting rules
-    /// @param recipient The address of the recipient
-    /// @param assetData The data of the asset to mint
-    /// @param metadataHash The ipfs hash for asset's metadata
-    function mintSpecial(
-        address recipient,
-        AssetData calldata assetData,
-        string memory metadataHash
-    ) external onlyRole(MINTER_ROLE) {
-        // increment nonce
-        unchecked {
-            creatorNonces[assetData.creator]++;
-        }
-        // get current creator nonce
-        uint16 creatorNonce = creatorNonces[assetData.creator];
-
-        // minting a tsb exclusive token which are already revealed, have their supply increased and are not recyclable
-        uint256 id = TokenIdUtils.generateTokenId(
-            assetData.creator,
-            assetData.tier,
-            creatorNonce,
-            1
-        );
-        _mint(recipient, id, assetData.amount, "");
-        require(hashUsed[metadataHash] == 0, "metadata hash already used");
-        hashUsed[metadataHash] = id;
-        _setURI(id, metadataHash);
-    }
-
-    /// @notice Special mint function for the bridge contract to mint assets originally created on L1
-    /// @dev Only the special minter role can call this function
-    /// @dev This function skips the catalyst burn step
-    /// @dev Bridge should be able to mint more copies of the same asset
-    /// @param originalTokenId The original token id of the asset
-    /// @param amount The amount of assets to mint
-    /// @param tier The tier of the catalysts to burn
-    /// @param recipient The recipient of the asset
-    /// @param metadataHash The ipfs hash of asset's metadata
-    function bridgeMint(
-        uint256 originalTokenId,
-        uint256 amount,
-        uint8 tier,
-        address recipient,
-        string memory metadataHash
-    ) external onlyRole(BRIDGE_MINTER_ROLE) {
-        // extract creator address from the last 160 bits of the original token id
-        address originalCreator = address(uint160(originalTokenId));
-        // extract isNFT from 1 bit after the creator address
-        bool isNFT = (originalTokenId >> 95) & 1 == 1;
-        require(amount > 0, "Amount must be > 0");
-        if (isNFT) {
-            require(amount == 1, "Amount must be 1 for NFTs");
-        }
-        // check if this asset has been bridged before to make sure that we increase the copies count for the same assers rather than minting a new one
-        // we also do this to avoid a clash between bridged asset nonces and non-bridged asset nonces
-        if (bridgedTokensNonces[originalTokenId] == 0) {
-            // increment nonce
-            unchecked {
-                creatorNonces[originalCreator]++;
-            }
-            // get current creator nonce
-            uint16 nonce = creatorNonces[originalCreator];
-
-            // store the nonce
-            bridgedTokensNonces[originalTokenId] = nonce;
-        }
-
-        uint256 id = TokenIdUtils.generateTokenId(
-            originalCreator,
-            tier,
-            bridgedTokensNonces[originalTokenId],
-            1
-        );
-        _mint(recipient, id, amount, "");
-        if (hashUsed[metadataHash] != 0) {
-            require(
-                hashUsed[metadataHash] == id,
-                "metadata hash mismatch for tokenId"
-            );
-        } else {
-            hashUsed[metadataHash] = id;
-        }
-        _setURI(id, metadataHash);
-    }
-
-    /// @notice Extract the catalyst by burning assets of the same tier
-    /// @param tokenIds the tokenIds of the assets to extract, must be of same tier
-    /// @param amounts the amount of each asset to extract catalyst from
-    /// @param catalystTier the catalyst tier to extract
-    /// @return amountOfCatalystExtracted the amount of catalyst extracted
-    function recycleBurn(
-        address recycler,
-        uint256[] calldata tokenIds,
-        uint256[] calldata amounts,
-        uint256 catalystTier
-    )
-        external
-        onlyRole(MINTER_ROLE)
-        returns (uint256 amountOfCatalystExtracted)
-    {
-        uint256 totalAmount = 0;
-        // how many assets of a given tier are needed to recycle a catalyst
-        uint256 recyclingAmount = recyclingAmounts[catalystTier];
-        require(
-            recyclingAmount > 0,
-            "Catalyst tier is not eligible for recycling"
-        );
-        // make sure the tokens that user is trying to extract are of correct tier and user has enough tokens
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 extractedTier = (tokenIds[i]).getTier();
-            require(
-                extractedTier == catalystTier,
-                "Catalyst id does not match"
-            );
-            totalAmount += amounts[i];
-        }
-
-        // total amount should be a modulo of recyclingAmounts[catalystTier] to make sure user is recycling the correct amount of tokens
-        require(
-            totalAmount % recyclingAmounts[catalystTier] == 0,
-            "Incorrect amount of tokens to recycle"
-        );
-        // burn batch of tokens
-        _burnBatch(recycler, tokenIds, amounts);
-
-        // calculate how many catalysts to mint
-        uint256 catalystsExtractedCount = totalAmount /
-            recyclingAmounts[catalystTier];
-
-        emit AssetsRecycled(
-            recycler,
-            tokenIds,
-            amounts,
-            catalystTier,
-            catalystsExtractedCount
-        );
-
-        return catalystsExtractedCount;
-    }
-
+<<
     /// @notice Burn a token from a given account
     /// @dev Only the minter role can burn tokens
     /// @dev This function was added with token recycling and bridging in mind but may have other use cases
@@ -251,7 +110,7 @@ contract Asset is
         address account,
         uint256 id,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -266,21 +125,8 @@ contract Asset is
         address account,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burnBatch(account, ids, amounts);
-    }
-
-    /// @notice Set the amount of tokens that can be recycled for a given one catalyst of a given tier
-    /// @dev Only the admin role can set the recycling amount
-    /// @param catalystTokenId The catalyst token id
-    /// @param amount The amount of tokens needed to receive one catalyst
-    function setRecyclingAmount(
-        uint256 catalystTokenId,
-        uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // catalyst 0 is restricted for tsb exclusive tokens
-        require(catalystTokenId > 0, "Catalyst token id cannot be 0");
-        recyclingAmounts[catalystTokenId] = amount;
     }
 
     /// @notice Set a new URI for specific tokenid
@@ -336,15 +182,6 @@ contract Asset is
         }
     }
 
-    function getIncrementedCreatorNonce(
-        address creator
-    ) public onlyRole(MINTER_ROLE) returns (uint16) {
-        unchecked {
-            creatorNonces[creator]++;
-        }
-        return creatorNonces[creator];
-    }
-
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
@@ -396,11 +233,6 @@ contract Asset is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function getRecyclingAmount(
-        uint256 catalystTokenId
-    ) public view returns (uint256) {
-        return recyclingAmounts[catalystTokenId];
-    }
 
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
     /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.

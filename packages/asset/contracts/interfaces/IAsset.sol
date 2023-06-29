@@ -2,15 +2,9 @@
 pragma solidity 0.8.18;
 
 interface IAsset {
-    // Events
-    event AssetsRecycled(
-        address recycler,
-        uint256[] tokenIds,
-        uint256[] amounts,
-        uint256 catalystTier,
-        uint256 catalystAmount
-    );
 
+    // AssetData reflects the asset tokenId structure
+    // Refer to TokenIdUtils.sol
     struct AssetData {
         uint256 tokenId;
         address creator;
@@ -19,17 +13,10 @@ interface IAsset {
         uint16 creatorNonce;
         bool revealed;
         string metadataHash;
+        bool bridged;
     }
 
     // Functions
-    function bridgeMint(
-        uint256 originalTokenId,
-        uint256 amount,
-        uint8 tier,
-        address recipient,
-        string memory metadataHash
-    ) external;
-
     function mint(
         address to,
         uint256 id,
@@ -44,12 +31,6 @@ interface IAsset {
         string[] memory metadataHashes
     ) external;
 
-    function mintSpecial(
-        address recipient,
-        AssetData calldata assetData,
-        string memory metadataHash
-    ) external;
-
     function burnFrom(address account, uint256 id, uint256 amount) external;
 
     function burnBatchFrom(
@@ -58,27 +39,7 @@ interface IAsset {
         uint256[] memory amounts
     ) external;
 
-    function recycleBurn(
-        address recycler,
-        uint256[] calldata tokenIds,
-        uint256[] calldata amounts,
-        uint256 catalystTier
-    ) external returns (uint256);
-
-    function setRecyclingAmount(
-        uint256 catalystTokenId,
-        uint256 amount
-    ) external;
-
-    function getRecyclingAmount(
-        uint256 catalystTokenId
-    ) external view returns (uint256);
-
     function getTokenIdByMetadataHash(
         string memory metadataHash
     ) external view returns (uint256);
-
-    function getIncrementedCreatorNonce(
-        address creator
-    ) external returns (uint16);
 }
