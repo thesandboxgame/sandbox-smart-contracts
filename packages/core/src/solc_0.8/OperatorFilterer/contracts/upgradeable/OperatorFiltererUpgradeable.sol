@@ -2,19 +2,27 @@
 pragma solidity 0.8.2;
 
 import {IOperatorFilterRegistry} from "../../interfaces/IOperatorFilterRegistry.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
+///@author The Sandbox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
-abstract contract OperatorFiltererUpgradeable is Initializable {
-    IOperatorFilterRegistry public operatorFilterRegistry =
-        // Address of the operator filterer registry
-        IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
+///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
+abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
+    IOperatorFilterRegistry public operatorFilterRegistry;
+
+    event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
-        // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
-        // will not revert, but the contract will need to be registered with the registry once it is deployed in
-        // order for the modifier to filter addresses.
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /**
+     * @notice Register this contract into the registry
+     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
+    function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         if (address(operatorFilterRegistry).code.length > 0) {
             if (!operatorFilterRegistry.isRegistered(address(this))) {
                 if (subscribe) {
@@ -28,6 +36,7 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
                 }
             }
         }
+        emit ContractRegistered(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     modifier onlyAllowedOperator(address from) virtual {
@@ -36,11 +45,11 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
             // Allow spending tokens from addresses with balance
             // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
             // from an EOA.
-            if (from == msg.sender) {
+            if (from == _msgSender()) {
                 _;
                 return;
             }
-            if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), _msgSender())) {
                 revert("Operator Not Allowed");
             }
         }

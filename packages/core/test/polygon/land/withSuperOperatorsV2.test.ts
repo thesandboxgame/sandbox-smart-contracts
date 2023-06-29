@@ -15,7 +15,7 @@ describe('PolygonLand:WithSuperOperatorsV2', function () {
 
     await expect(
       users[0].PolygonLand.setSuperOperator(users[0].address, true)
-    ).to.be.revertedWith('only admin is allowed to add super operators');
+    ).to.be.revertedWith('ADMIN_ONLY');
 
     expect(await PolygonLand.isSuperOperator(users[0].address)).to.be.false;
   });
