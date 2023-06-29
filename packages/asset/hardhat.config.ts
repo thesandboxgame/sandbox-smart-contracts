@@ -32,6 +32,7 @@ const config: HardhatUserConfig = {
     },
     filterOperatorSubscription: "deployer",
     upgradeAdmin: "sandAdmin",
+    catalystRoyaltyRecipient: "0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B", // testing wallet
     trustedForwarder: "0xf5D0aDF879b717baA5c444B23D7Df0D5e3e3cBD0", // fake
     assetAdmin: "sandAdmin",
     assetCreateAdmin: "sandAdmin",
