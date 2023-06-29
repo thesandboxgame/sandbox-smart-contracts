@@ -1504,6 +1504,40 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sandbox-smart-contracts/example_hardhat@workspace:packages/example_hardhat":
+  version: 0.0.0-use.local
+  resolution: "@sandbox-smart-contracts/example_hardhat@workspace:packages/example_hardhat"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@ethersproject/providers": ^5.7.2
+    "@nomicfoundation/hardhat-chai-matchers": ^1.0.6
+    "@nomicfoundation/hardhat-network-helpers": ^1.0.0
+    "@nomicfoundation/hardhat-toolbox": ^2.0.2
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13"
+    "@nomiclabs/hardhat-etherscan": ^3.1.7
+    "@openzeppelin/contracts": ^4.8.2
+    "@openzeppelin/contracts-upgradeable": ^4.9.0
+    "@typechain/ethers-v5": ^10.2.1
+    "@typechain/hardhat": ^6.1.6
+    "@types/chai": ^4.3.5
+    "@types/mocha": ^10.0.1
+    "@types/node": ^20.1.2
+    chai: ^4.3.7
+    dotenv: ^16.1.4
+    ethers: ^5.7.2
+    hardhat: ^2.14.1
+    hardhat-deploy: ^0.11.25
+    hardhat-gas-reporter: ^1.0.9
+    prettier: ^2.8.8
+    prettier-plugin-solidity: 1.0.0-beta.11
+    solhint-plugin-prettier: ^0.0.5
+    solidity-coverage: ^0.8.2
+    ts-node: ^10.9.1
+    typechain: ^8.1.1
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@sandbox-smart-contracts/giveaway@*, @sandbox-smart-contracts/giveaway@workspace:packages/giveaway":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/giveaway@workspace:packages/giveaway"

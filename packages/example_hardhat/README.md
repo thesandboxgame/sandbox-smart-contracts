@@ -22,7 +22,7 @@ TODO
 
 A NOTE ON DEPENDENCIES
 1. Add whatever dependencies you like inside your package; this template is for hardhat usage
-2. For most Pull Requests there should be no change to `yarn.lock` at root level
+2. For most Pull Requests there should be minimum changes to `yarn.lock` at root level
 3. Changes to root-level dependencies are permissible, however they should not be downgraded
 4. Take care to run `yarn` before pushing your changes
 
