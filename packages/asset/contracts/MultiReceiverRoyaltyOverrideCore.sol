@@ -4,38 +4,49 @@ pragma solidity ^0.8.0;
 
 /// @author: manifold.xyz
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IMultiReceiverRoyaltyOverride.sol";
 import "./CustomSplitter.sol";
 import "./interfaces/IMultiReceiverRoyaltyOverrideCore.sol";
-import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {IRoyaltySplitter, IERC165} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
-import "./interfaces/IManager.sol";
+import "./interfaces/IRoyaltyManager.sol";
 
 /// @title MultiReceiverRoyaltyOverrideCore
-/// @dev import for the Test ERC1155 Contract for Royalty distribution.
+/// @author The sandbox
+/// @dev import for Token contracts EIP3981 Royalty distribution and split for sandbox and the creator using splitters.
 abstract contract MultiReceiverRoyaltyOverrideCore is
     IEIP2981,
     IMultiReceiverRoyaltyOverrideCore,
-    ERC165
+    ERC165Upgradeable
 {
-    uint16 internal constant Total_BASIS_POINTS = 10000;
+    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     uint16 public _defaultRoyaltyBPS;
     address payable public _defaultRoyaltyReceiver;
-    address manager;
+    address royaltyManager;
 
     mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
+
+    function __MultiReceiverRoyaltyOverrideCore_init(
+        address payable defaultRecipient,
+        uint16 defaultBps,
+        address _royaltyManager
+    ) internal  {
+        _defaultRoyaltyReceiver = defaultRecipient;
+        _defaultRoyaltyBPS = defaultBps;
+        royaltyManager = _royaltyManager;
+    }
 
     /// @notice EIP 165 interface funtion
     /// @dev used to check interface implemented
     /// @param interfaceId to be checked for implementation
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165, IERC165) returns (bool) {
+    ) public view virtual override(ERC165Upgradeable, IERC165) returns (bool) {
         return
             interfaceId == type(IEIP2981).interfaceId ||
             interfaceId ==
@@ -54,8 +65,8 @@ abstract contract MultiReceiverRoyaltyOverrideCore is
         address payable recipient,
         address creator
     ) internal {
-        require(royaltyBPS < 10000, "Invalid bps");
-        address payable creatorSplitterAddress = IManager(manager)
+        require(royaltyBPS < TOTAL_BASIS_POINTS, "Invalid bps");
+        address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager)
             .deploySplitter(creator, recipient);
         _tokenRoyaltiesSplitter[tokenId] = creatorSplitterAddress;
         _tokensWithRoyalties.push(tokenId);
@@ -67,7 +78,7 @@ abstract contract MultiReceiverRoyaltyOverrideCore is
      * ensure that you access restrict it to the contract owner or admin
      */
     function _setDefaultRoyaltyBps(uint16 bps) internal {
-        require(bps < 10000, "Invalid bps");
+        require(bps < TOTAL_BASIS_POINTS, "Invalid bps");
         _defaultRoyaltyBPS = bps;
         emit DefaultRoyaltyBpsSet(bps);
     }
@@ -136,13 +147,13 @@ abstract contract MultiReceiverRoyaltyOverrideCore is
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
             return (
                 _tokenRoyaltiesSplitter[tokenId],
-                (value * _defaultRoyaltyBPS) / Total_BASIS_POINTS
+                (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS
             );
         }
         if (_defaultRoyaltyReceiver != address(0) && _defaultRoyaltyBPS != 0) {
             return (
                 _defaultRoyaltyReceiver,
-                (value * _defaultRoyaltyBPS) / Total_BASIS_POINTS
+                (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS
             );
         }
         return (address(0), 0);
@@ -188,7 +199,7 @@ abstract contract MultiReceiverRoyaltyOverrideCore is
         Recipient[] memory defaultRecipient = new Recipient[](1);
         defaultRecipient[0] = Recipient({
             recipient: _defaultRoyaltyReceiver,
-            bps: Total_BASIS_POINTS
+            bps: TOTAL_BASIS_POINTS
         });
         return defaultRecipient;
     }

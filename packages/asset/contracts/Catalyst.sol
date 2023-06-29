@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import "./ERC2771Handler.sol";
 import "./interfaces/ICatalyst.sol";
-import {IManager} from "./interfaces/IManager.sol";
+import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 /// @title Catalyst
@@ -34,11 +34,11 @@ contract Catalyst is
     IERC2981Upgradeable
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
-    uint16 internal constant Total_BASIS_POINTS = 10000;
+    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     uint256 public tokenCount;
 
-    IManager manager;
+    IRoyaltyManager royaltyManager;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -52,7 +52,7 @@ contract Catalyst is
     /// @param _defaultAdmin The default admin address.
     /// @param _defaultMinter The default minter address.
     /// @param _catalystIpfsCID The IPFS content identifiers for each catalyst.
-    /// @param _manager, the address of the Manager contract for common royalty recipient
+    /// @param _royaltyManager, the address of the Manager contract for common royalty recipient
     function initialize(
         string memory _baseUri,
         address _trustedForwarder,
@@ -60,7 +60,7 @@ contract Catalyst is
         address _defaultAdmin,
         address _defaultMinter,
         string[] memory _catalystIpfsCID,
-        address _manager
+        address _royaltyManager
     ) public initializer {
         __ERC1155_init(_baseUri);
         __AccessControl_init();
@@ -72,7 +72,7 @@ contract Catalyst is
         _setBaseURI(_baseUri);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
-        manager = IManager(_manager);
+        royaltyManager = IRoyaltyManager(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             _setURI(i + 1, _catalystIpfsCID[i]);
             unchecked {
@@ -295,8 +295,8 @@ contract Catalyst is
         uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         uint16 royaltyBps;
-        (receiver, royaltyBps) = manager.getRoyaltyInfo();
-        royaltyAmount =  (_salePrice * royaltyBps) / Total_BASIS_POINTS;
+        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
+        royaltyAmount =  (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
         return (receiver, royaltyAmount);
     }
 }

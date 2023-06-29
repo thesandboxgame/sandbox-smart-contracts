@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interfaces/IManager.sol";
+import "./interfaces/IRoyaltyManager.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import "./CustomSplitter.sol";
 
@@ -12,7 +12,7 @@ import "./CustomSplitter.sol";
 /// @author The sandbox
 /// @notice Registry contract to set the common Recipient and Split for the splitters. Also to set the royalty info
 /// for contract which don't use splitter
-contract Manager is AccessControlUpgradeable, IManager {
+contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     bytes32 public constant CONTRACT_ROYALTY_SETTER_ROLE =
         keccak256("CONTRACT_ROYALTY_SETTER");
 

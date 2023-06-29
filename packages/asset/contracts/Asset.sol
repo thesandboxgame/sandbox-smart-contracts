@@ -59,9 +59,7 @@ contract Asset is
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
 
-        _defaultRoyaltyReceiver = defaultRecipient;
-        _defaultRoyaltyBPS = defaultBps;
-        manager = _manager;
+       __MultiReceiverRoyaltyOverrideCore_init(defaultRecipient, defaultBps, _manager);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -253,10 +251,9 @@ contract Asset is
         return recyclingAmounts[catalystTokenId];
     }
 
-    /// @notice Not in our use case
-    /// @dev Explain to a developer any extra details
-    /// @param tokenId a parameter just like in doxygen (must be followed by parameter name)
-    /// @param royaltyBPS should be defult of use case.
+    /// @notice could be used to deploy splitter and set tokens royalties
+    /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
+    /// @param royaltyBPS should be defult EIP2981 roayaltie.
     /// @param recipient the royalty recipient for the splitter of the creator.
     /// @param creator the creactor of the tokens.
     function setTokenRoyalties(
@@ -270,11 +267,11 @@ contract Asset is
 
     /// @notice sets default royalty bps for EIP2981
     /// @dev only owner can call.
-    /// @param bps royalty bps base 10000
+    /// @param defaultBps royalty bps base 10000
     function setDefaultRoyaltyBps(
-        uint16 bps
+        uint16 defaultBps
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setDefaultRoyaltyBps(bps);
+        _setDefaultRoyaltyBps(defaultBps);
     }
 
     /// @notice sets default royalty receiver for EIP2981

@@ -5,13 +5,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
-import {IRoyaltySplitter, Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {IManager} from "./interfaces/IManager.sol";
+import {IRoyaltySplitter, IERC165, Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 
 interface IERC20Approve {
     function approve(address spender, uint256 amount) external returns (bool);
@@ -29,7 +29,7 @@ contract CustomRoyaltySplitter is
     Initializable,
     OwnableUpgradeable,
     IRoyaltySplitter,
-    ERC165
+    ERC165Upgradeable
 {
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
@@ -43,7 +43,7 @@ contract CustomRoyaltySplitter is
         0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public _recipient;
-    IManager _manager;
+    IRoyaltyManager _royaltyManager;
 
     event ETHTransferred(address indexed account, uint256 amount);
     event ERC20Transferred(
@@ -54,7 +54,7 @@ contract CustomRoyaltySplitter is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(IERC165, ERC165) returns (bool) {
+    ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
         return
             interfaceId == type(IRoyaltySplitter).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -66,10 +66,10 @@ contract CustomRoyaltySplitter is
      */
     function initialize(
         address payable recipient,
-        address manager
+        address royaltyManager
     ) public initializer {
         __Ownable_init();
-        _manager = IManager(manager);
+        _royaltyManager = IRoyaltyManager(royaltyManager);
         _recipient = recipient;
     }
 
@@ -97,8 +97,8 @@ contract CustomRoyaltySplitter is
         override
         returns (Recipient[] memory)
     {
-        Recipient memory commonRecipient = _manager.getCommonRecipient();
-        uint16 creatorSplit = _manager.getCreatorSplit();
+        Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
+        uint16 creatorSplit = _royaltyManager.getCreatorSplit();
         Recipient[] memory recipients = new Recipient[](2);
         recipients[0].recipient = _recipient;
         recipients[0].bps = creatorSplit;
@@ -126,8 +126,8 @@ contract CustomRoyaltySplitter is
 
     function _splitETH(uint256 value) internal {
         if (value > 0) {
-            Recipient memory commonRecipient = _manager.getCommonRecipient();
-            uint16 creatorSplit = _manager.getCreatorSplit();
+            Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
+            uint16 creatorSplit = _royaltyManager.getCreatorSplit();
             Recipient[] memory _recipients = new Recipient[](2);
             _recipients[0].recipient = _recipient;
             _recipients[0].bps = creatorSplit;
@@ -164,8 +164,8 @@ contract CustomRoyaltySplitter is
             if (balance == 0) {
                 return false;
             }
-            Recipient memory commonRecipient = _manager.getCommonRecipient();
-            uint16 creatorSplit = _manager.getCreatorSplit();
+            Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
+            uint16 creatorSplit = _royaltyManager.getCreatorSplit();
             require(
                 commonRecipient.recipient == msg.sender ||
                     _recipient == msg.sender,
@@ -232,7 +232,7 @@ contract CustomRoyaltySplitter is
         address payable target,
         bytes calldata callData
     ) external {
-        Recipient memory commonRecipient = _manager.getCommonRecipient();
+        Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         require(
             commonRecipient.recipient == msg.sender || _recipient == msg.sender,
             "Split: Can only be called by one of the recipients"
