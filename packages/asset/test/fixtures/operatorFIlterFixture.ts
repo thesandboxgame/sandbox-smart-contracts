@@ -4,13 +4,13 @@ import {
   getNamedAccounts,
   ethers,
 } from "hardhat";
-import { withSnapshot, setupUsers } from "../util";
+import { withSnapshot, setupUsers } from "../../util";
 import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
   CATALYST_DEFAULT_ROYALTY,
-} from "../constants";
+} from "../../constants";
 
 export const setupOperatorFilter = withSnapshot([], async function () {
   const {
@@ -21,6 +21,7 @@ export const setupOperatorFilter = withSnapshot([], async function () {
     catalystAdmin,
     catalystMinter,
     catalystRoyaltyRecipient,
+    assetAdmin,
   } = await getNamedAccounts();
 
   const otherAccounts = await getUnnamedAccounts();
@@ -94,6 +95,7 @@ export const setupOperatorFilter = withSnapshot([], async function () {
         methodName: "initialize",
         args: [
           trustedForwarder,
+          assetAdmin,
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
           "ipfs://",

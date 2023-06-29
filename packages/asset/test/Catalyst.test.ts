@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { setupOperatorFilter } from "./fixture";
+import { setupOperatorFilter } from "./fixtures/operatorFIlterFixture";
 
 describe("Catalyst", () => {
   describe("OperatorFilterer", function () {

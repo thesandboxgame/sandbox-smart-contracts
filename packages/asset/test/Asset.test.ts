@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { expectEventWithArgs } from "../util";
 import { ethers } from "hardhat";
-import { runAssetSetup } from "./fixtures/assetFixture"
-
+import { runAssetSetup } from "./fixtures/assetFixture";
+import { setupOperatorFilter } from "./fixtures/operatorFIlterFixture";
 
 // TODO: test all events
 // TODO: test all reverts
@@ -17,7 +17,8 @@ describe("AssetContract", () => {
 
   describe("uri_and_baseUri", () => {
     it("Should return correct asset uri ", async () => {
-      const { AssetContractAsMinter, AssetContract, owner, uris, baseUri } = await runAssetSetup();
+      const { AssetContractAsMinter, AssetContract, owner, uris, baseUri } =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -31,7 +32,14 @@ describe("AssetContract", () => {
     });
 
     it("DEFAULT_ADMIN can change an asset's uri ", async () => {
-      const { AssetContractAsMinter, AssetContract, AssetContractAsAdmin, owner, uris, baseUri } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        AssetContract,
+        AssetContractAsAdmin,
+        owner,
+        uris,
+        baseUri,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -49,15 +57,22 @@ describe("AssetContract", () => {
       );
     });
 
-
     it("DEFAULT_ADMIN can change the contract's base uri ", async () => {
       const { AssetContractAsAdmin, AssetContract } = await runAssetSetup();
-      await AssetContractAsAdmin.setBaseURI('newUri')
+      await AssetContractAsAdmin.setBaseURI("newUri");
       expect(await AssetContract.baseUri).to.not.be.reverted;
     });
 
     it("if not DEFAULT_ADMIN cannot change an asset uri ", async () => {
-      const { AssetContractAsMinter, AssetContract, AssetContractAsOwner, owner, uris, baseUri, defaultAdminRole } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        AssetContract,
+        AssetContractAsOwner,
+        owner,
+        uris,
+        baseUri,
+        defaultAdminRole,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -68,21 +83,28 @@ describe("AssetContract", () => {
       expect(await AssetContract.uri(tokenId)).to.be.equal(
         `${baseUri}${uris[0]}`
       );
-      await expect(AssetContractAsOwner.setTokenUri(tokenId, uris[2])).to.be.revertedWith(`AccessControl: account ${owner.toLocaleLowerCase()} is missing role ${defaultAdminRole}`);
+      await expect(
+        AssetContractAsOwner.setTokenUri(tokenId, uris[2])
+      ).to.be.revertedWith(
+        `AccessControl: account ${owner.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+      );
       expect(await AssetContract.uri(tokenId)).to.be.equal(
         `${baseUri}${uris[0]}`
       );
     });
 
     it("if not DEFAULT_ADMIN cannot change the contract's base uri ", async () => {
-      const { AssetContractAsOwner, owner, defaultAdminRole } = await runAssetSetup();
+      const { AssetContractAsOwner, owner, defaultAdminRole } =
+        await runAssetSetup();
       await expect(
-        AssetContractAsOwner.setBaseURI('newUri')
-      ).to.be.revertedWith(`AccessControl: account ${owner.toLocaleLowerCase()} is missing role ${defaultAdminRole}`);
+        AssetContractAsOwner.setBaseURI("newUri")
+      ).to.be.revertedWith(
+        `AccessControl: account ${owner.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+      );
     });
 
     it("no two asset can have same uri ", async () => {
-      const { AssetContractAsMinter, owner, uris} = await runAssetSetup();
+      const { AssetContractAsMinter, owner, uris } = await runAssetSetup();
       await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
 
       await expect(
@@ -93,7 +115,8 @@ describe("AssetContract", () => {
 
   describe("Minting", () => {
     it("Should mint an asset", async () => {
-      const { AssetContractAsMinter, AssetContract, owner, uris } = await runAssetSetup();
+      const { AssetContractAsMinter, AssetContract, owner, uris } =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -108,7 +131,9 @@ describe("AssetContract", () => {
       const { AssetContract, owner, minterRole, uris } = await runAssetSetup();
       await expect(
         AssetContract.connect(await ethers.provider.getSigner(owner)).mint(
-          owner, 10, 3,
+          owner,
+          10,
+          3,
           uris[0]
         )
       ).to.be.revertedWith(
@@ -117,7 +142,8 @@ describe("AssetContract", () => {
     });
 
     it("Should mint Batch assets", async () => {
-      const { AssetContractAsMinter, AssetContract, owner } = await runAssetSetup();
+      const { AssetContractAsMinter, AssetContract, owner } =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mintBatch(
         owner,
         [1, 2, 3, 4],
@@ -145,9 +171,9 @@ describe("AssetContract", () => {
       await expect(
         AssetContract.connect(await ethers.provider.getSigner(owner)).mintBatch(
           owner,
-        [1, 2, 3, 4],
-        [5, 5, 100, 1],
-        ["xyz", "abc", "anotherUri", "andAgain"]
+          [1, 2, 3, 4],
+          [5, 5, 100, 1],
+          ["xyz", "abc", "anotherUri", "andAgain"]
         )
       ).to.be.revertedWith(
         `AccessControl: account ${owner.toLocaleLowerCase()} is missing role ${minterRole}`
@@ -157,7 +183,13 @@ describe("AssetContract", () => {
 
   describe("Burn Assets", () => {
     it("BURNER_ROLE can use burnFrom to burn the asset of any owner", async () => {
-      const { AssetContractAsMinter, AssetContractAsBurner, AssetContract, owner, uris } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        AssetContractAsBurner,
+        AssetContract,
+        owner,
+        uris,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -172,8 +204,14 @@ describe("AssetContract", () => {
     });
 
     it("If not BURNER_ROLE cannot burn asset of any owner", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, secondOwner, burnerRole, uris } =
-        await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        owner,
+        AssetContract,
+        secondOwner,
+        burnerRole,
+        uris,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -185,18 +223,17 @@ describe("AssetContract", () => {
       expect(await AssetContract.balanceOf(owner, tokenId)).to.be.equal(3);
 
       await expect(
-        AssetContract.connect(await ethers.provider.getSigner(secondOwner)).burnFrom(
-          owner,
-          tokenId,
-          3
-        )
+        AssetContract.connect(
+          await ethers.provider.getSigner(secondOwner)
+        ).burnFrom(owner, tokenId, 3)
       ).to.be.revertedWith(
         `AccessControl: account ${secondOwner.toLocaleLowerCase()} is missing role ${burnerRole}`
       );
     });
 
     it("owner can burn their own asset", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, uris } = await runAssetSetup();
+      const { AssetContractAsMinter, owner, AssetContract, uris } =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -217,7 +254,14 @@ describe("AssetContract", () => {
     });
 
     it("owner cannot burn someone else's asset", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, uris, secondOwner, burnerRole } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        owner,
+        AssetContract,
+        uris,
+        secondOwner,
+        burnerRole,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -228,20 +272,17 @@ describe("AssetContract", () => {
       expect(await AssetContract.balanceOf(owner, 10)).to.be.equal(3);
 
       await expect(
-        AssetContract.connect(await ethers.provider.getSigner(secondOwner)).burn(
-          owner,
-          10,
-          3
-        )
-      ).to.be.revertedWith(
-        `ERC1155: caller is not token owner or approved`
-      );
+        AssetContract.connect(
+          await ethers.provider.getSigner(secondOwner)
+        ).burn(owner, 10, 3)
+      ).to.be.revertedWith(`ERC1155: caller is not token owner or approved`);
 
       expect(await AssetContract.balanceOf(owner, 10)).to.be.equal(3);
     });
 
     it("owner can batch burn their own assets", async () => {
-      const { AssetContractAsMinter, owner, AssetContract } = await runAssetSetup();
+      const { AssetContractAsMinter, owner, AssetContract } =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mintBatch(
         owner,
         [1, 2, 3, 4],
@@ -257,14 +298,14 @@ describe("AssetContract", () => {
 
       expect(await AssetContract.balanceOf(owner, tokenIds[0])).to.be.equal(5);
       expect(await AssetContract.balanceOf(owner, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(100);
+      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(
+        100
+      );
       expect(await AssetContract.balanceOf(owner, tokenIds[3])).to.be.equal(1);
 
-      await AssetContract.connect(await ethers.provider.getSigner(owner)).burnBatch(
-        owner,
-        [1, 2, 3, 4],
-        [4, 4, 20, 1]
-      );
+      await AssetContract.connect(
+        await ethers.provider.getSigner(owner)
+      ).burnBatch(owner, [1, 2, 3, 4], [4, 4, 20, 1]);
 
       expect(await AssetContract.balanceOf(owner, tokenIds[0])).to.be.equal(1);
       expect(await AssetContract.balanceOf(owner, tokenIds[1])).to.be.equal(1);
@@ -273,23 +314,25 @@ describe("AssetContract", () => {
     });
 
     it("owner cannot batch burn someone else's assets", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, secondOwner, burnerRole } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        owner,
+        AssetContract,
+        secondOwner,
+        burnerRole,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mintBatch(
         owner,
         [1, 2, 3, 4],
         [5, 5, 100, 1],
         ["xyz", "abc", "anotherUri", "andAgain"]
       );
-    
+
       await expect(
-        AssetContract.connect(await ethers.provider.getSigner(secondOwner)).burn(
-          owner,
-        [1, 2, 3, 4],
-        [5, 5, 100, 1],
-        )
-      ).to.be.revertedWith(
-        `ERC1155: caller is not token owner or approved`
-      );
+        AssetContract.connect(
+          await ethers.provider.getSigner(secondOwner)
+        ).burn(owner, [1, 2, 3, 4], [5, 5, 100, 1])
+      ).to.be.revertedWith(`ERC1155: caller is not token owner or approved`);
 
       expect(await AssetContract.balanceOf(owner, 1)).to.be.equal(5);
       expect(await AssetContract.balanceOf(owner, 2)).to.be.equal(5);
@@ -298,7 +341,12 @@ describe("AssetContract", () => {
     });
 
     it("BURNER_ROLE can batch burn the assets of any owner", async () => {
-      const { AssetContractAsMinter, AssetContractAsBurner, owner, AssetContract } = await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        AssetContractAsBurner,
+        owner,
+        AssetContract,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mintBatch(
         owner,
         [1, 2, 3, 4],
@@ -314,7 +362,9 @@ describe("AssetContract", () => {
 
       expect(await AssetContract.balanceOf(owner, tokenIds[0])).to.be.equal(5);
       expect(await AssetContract.balanceOf(owner, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(100);
+      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(
+        100
+      );
       expect(await AssetContract.balanceOf(owner, tokenIds[3])).to.be.equal(1);
 
       await AssetContractAsBurner.burnBatchFrom(
@@ -330,8 +380,14 @@ describe("AssetContract", () => {
     });
 
     it("If not BURNER_ROLE cannot batch burn assets of any owner", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, secondOwner, burnerRole, uris } =
-        await runAssetSetup();
+      const {
+        AssetContractAsMinter,
+        owner,
+        AssetContract,
+        secondOwner,
+        burnerRole,
+        uris,
+      } = await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
@@ -343,11 +399,9 @@ describe("AssetContract", () => {
       expect(await AssetContract.balanceOf(owner, tokenId)).to.be.equal(3);
 
       await expect(
-        AssetContract.connect(await ethers.provider.getSigner(secondOwner)).burnFrom(
-          owner,
-          tokenId,
-          3
-        )
+        AssetContract.connect(
+          await ethers.provider.getSigner(secondOwner)
+        ).burnFrom(owner, tokenId, 3)
       ).to.be.revertedWith(
         `AccessControl: account ${secondOwner.toLocaleLowerCase()} is missing role ${burnerRole}`
       );
@@ -378,14 +432,14 @@ describe("AssetContract", () => {
     });
 
     it("owner can batch transfer assets", async () => {
-      const { AssetContractAsMinter, owner, AssetContract, secondOwner} =
+      const { AssetContractAsMinter, owner, AssetContract, secondOwner } =
         await runAssetSetup();
-        const tnx = await AssetContractAsMinter.mintBatch(
-          owner,
-          [1, 2, 3, 4],
-          [5, 5, 100, 1],
-          ["xyz", "abc", "anotherUri", "andAgain"]
-        );
+      const tnx = await AssetContractAsMinter.mintBatch(
+        owner,
+        [1, 2, 3, 4],
+        [5, 5, 100, 1],
+        ["xyz", "abc", "anotherUri", "andAgain"]
+      );
       const args = await expectEventWithArgs(
         AssetContract,
         tnx,
@@ -395,7 +449,9 @@ describe("AssetContract", () => {
 
       expect(await AssetContract.balanceOf(owner, tokenIds[0])).to.be.equal(5);
       expect(await AssetContract.balanceOf(owner, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(100);
+      expect(await AssetContract.balanceOf(owner, tokenIds[2])).to.be.equal(
+        100
+      );
       expect(await AssetContract.balanceOf(owner, tokenIds[3])).to.be.equal(1);
 
       await AssetContract.connect(
@@ -416,13 +472,9 @@ describe("AssetContract", () => {
         await AssetContract.balanceOf(secondOwner, tokenIds[1])
       ).to.be.equal(5);
 
-      expect(
-        await AssetContract.balanceOf(owner, tokenIds[0])
-      ).to.be.equal(0);
+      expect(await AssetContract.balanceOf(owner, tokenIds[0])).to.be.equal(0);
 
-      expect(
-        await AssetContract.balanceOf(owner, tokenIds[1])
-      ).to.be.equal(0);
+      expect(await AssetContract.balanceOf(owner, tokenIds[1])).to.be.equal(0);
     });
   });
 });
