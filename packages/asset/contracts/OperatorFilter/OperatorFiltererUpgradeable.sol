@@ -11,26 +11,17 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
         // Address of the operator filterer registry
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
-    function __OperatorFilterer_init(
-        address subscriptionOrRegistrantToCopy,
-        bool subscribe
-    ) internal onlyInitializing {
+    function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
         // order for the modifier to filter addresses.
         if (address(operatorFilterRegistry).code.length > 0) {
             if (!operatorFilterRegistry.isRegistered(address(this))) {
                 if (subscribe) {
-                    operatorFilterRegistry.registerAndSubscribe(
-                        address(this),
-                        subscriptionOrRegistrantToCopy
-                    );
+                    operatorFilterRegistry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
                 } else {
                     if (subscriptionOrRegistrantToCopy != address(0)) {
-                        operatorFilterRegistry.registerAndCopyEntries(
-                            address(this),
-                            subscriptionOrRegistrantToCopy
-                        );
+                        operatorFilterRegistry.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);
                     } else {
                         operatorFilterRegistry.register(address(this));
                     }
@@ -49,12 +40,7 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
                 _;
                 return;
             }
-            if (
-                !operatorFilterRegistry.isOperatorAllowed(
-                    address(this),
-                    msg.sender
-                )
-            ) {
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
                 revert("Operator Not Allowed");
             }
         }
@@ -64,12 +50,7 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
     modifier onlyAllowedOperatorApproval(address operator) virtual {
         // Check registry code length to facilitate testing in environments without a deployed registry.
         if (address(operatorFilterRegistry).code.length > 0) {
-            if (
-                !operatorFilterRegistry.isOperatorAllowed(
-                    address(this),
-                    operator
-                )
-            ) {
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), operator)) {
                 revert("Operator Not Allowed");
             }
         }

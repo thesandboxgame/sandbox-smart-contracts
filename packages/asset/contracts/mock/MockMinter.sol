@@ -26,18 +26,10 @@ contract MockMinter {
         string calldata metadataHash
     ) public {
         // increment nonce
-        unchecked {
-            creatorNonces[msg.sender]++;
-        }
+        unchecked {creatorNonces[msg.sender]++;}
         // get current creator nonce
         uint16 creatorNonce = creatorNonces[msg.sender];
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            msg.sender,
-            tier,
-            creatorNonce,
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId = TokenIdUtils.generateTokenId(msg.sender, tier, creatorNonce, revealed ? 1 : 0, false);
 
         assetContract.mint(recipient, tokenId, amount, metadataHash);
         emit Minted(tokenId, amount);

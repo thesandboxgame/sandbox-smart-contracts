@@ -13,30 +13,21 @@ import "./interfaces/ICatalyst.sol";
 
 /// @title AssetMinter
 /// @notice This contract is used as a user facing contract used to mint assets
-contract AssetMinter is
-    Initializable,
-    IAssetMinter,
-    EIP712Upgradeable,
-    ERC2771Handler,
-    AccessControlUpgradeable
-{
+contract AssetMinter is Initializable, IAssetMinter, EIP712Upgradeable, ERC2771Handler, AccessControlUpgradeable {
     AuthValidator private authValidator;
     using TokenIdUtils for uint256;
     address public assetContract;
     address public catalystContract;
 
-    bytes32 public constant MINT_TYPEHASH =
-        keccak256("Mint(MintableAsset mintableAsset)");
-    bytes32 public constant MINT_BATCH_TYPEHASH =
-        keccak256("MintBatch(MintableAsset[] mintableAssets)");
+    bytes32 public constant MINT_TYPEHASH = keccak256("Mint(MintableAsset mintableAsset)");
+    bytes32 public constant MINT_BATCH_TYPEHASH = keccak256("MintBatch(MintableAsset[] mintableAssets)");
 
     string public constant name = "Sandbox Asset Minter";
     string public constant version = "1.0";
     mapping(address => bool) public bannedCreators;
     mapping(uint256 => address) public voxelCreators;
 
-    bytes32 public constant EXCLUSIVE_MINTER_ROLE =
-        keccak256("EXCLUSIVE_MINTER_ROLE");
+    bytes32 public constant EXCLUSIVE_MINTER_ROLE = keccak256("EXCLUSIVE_MINTER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -75,10 +66,7 @@ contract AssetMinter is
         require(!bannedCreators[creator], "Creator is banned");
 
         // verify signature
-        require(
-            authValidator.verify(signature, _hashMint(mintableAsset)),
-            "Invalid signature"
-        );
+        require(authValidator.verify(signature, _hashMint(mintableAsset)), "Invalid signature");
 
         // amount must be > 0
         require(mintableAsset.amount > 0, "Amount must be > 0");
@@ -89,27 +77,21 @@ contract AssetMinter is
         if (voxelCreators[mintableAsset.voxelHash] == address(0)) {
             voxelCreators[mintableAsset.voxelHash] = creator;
         } else {
-            require(
-                voxelCreators[mintableAsset.voxelHash] == creator,
-                "Voxel hash already used"
-            );
+            require(voxelCreators[mintableAsset.voxelHash] == creator, "Voxel hash already used");
         }
-        ICatalyst(catalystContract).burnFrom(
-            creator,
-            mintableAsset.tier,
-            mintableAsset.amount
-        );
+        ICatalyst(catalystContract).burnFrom(creator, mintableAsset.tier, mintableAsset.amount);
 
         // assets with catalyst id 0 - TSB Exclusive and 1 - Common are already revealed
         bool mintAsRevealed = !(mintableAsset.tier > 1);
 
-        IAsset.AssetData memory assetData = IAsset.AssetData(
-            creator,
-            mintableAsset.amount,
-            mintableAsset.tier,
-            mintableAsset.creatorNonce,
-            mintAsRevealed
-        );
+        IAsset.AssetData memory assetData =
+            IAsset.AssetData(
+                creator,
+                mintableAsset.amount,
+                mintableAsset.tier,
+                mintableAsset.creatorNonce,
+                mintAsRevealed
+            );
 
         IAsset(assetContract).mint(assetData, metadataHash);
     }
@@ -128,14 +110,9 @@ contract AssetMinter is
         require(!bannedCreators[creator], "Creator is banned");
 
         // verify signature
-        require(
-            authValidator.verify(signature, _hashMintBatch(mintableAssets)),
-            "Invalid signature"
-        );
+        require(authValidator.verify(signature, _hashMintBatch(mintableAssets)), "Invalid signature");
 
-        IAsset.AssetData[] memory assets = new IAsset.AssetData[](
-            mintableAssets.length
-        );
+        IAsset.AssetData[] memory assets = new IAsset.AssetData[](mintableAssets.length);
         uint256[] memory catalystsToBurn = new uint256[](mintableAssets.length);
         for (uint256 i = 0; i < mintableAssets.length; ) {
             require(creator == mintableAssets[i].creator, "Creator mismatch");
@@ -146,10 +123,7 @@ contract AssetMinter is
             if (voxelCreators[mintableAssets[i].voxelHash] == address(0)) {
                 voxelCreators[mintableAssets[i].voxelHash] = creator;
             } else {
-                require(
-                    voxelCreators[mintableAssets[i].voxelHash] == creator,
-                    "Voxel hash already used"
-                );
+                require(voxelCreators[mintableAssets[i].voxelHash] == creator, "Voxel hash already used");
             }
             catalystsToBurn[mintableAssets[i].tier] += mintableAssets[i].amount;
 
@@ -165,11 +139,7 @@ contract AssetMinter is
         // burn the catalysts of each tier
         for (uint256 i = 0; i < catalystsToBurn.length; ) {
             if (catalystsToBurn[i] > 0) {
-                ICatalyst(catalystContract).burnFrom(
-                    creator,
-                    i,
-                    catalystsToBurn[i]
-                );
+                ICatalyst(catalystContract).burnFrom(creator, i, catalystsToBurn[i]);
             }
         }
         IAsset(assetContract).mintBatch(assets, metadataHashes);
@@ -192,13 +162,7 @@ contract AssetMinter is
         string memory metadataHash
     ) external onlyRole(EXCLUSIVE_MINTER_ROLE) {
         require(amount > 0, "Amount must be > 0");
-        IAsset.AssetData memory asset = IAsset.AssetData(
-            creator,
-            amount,
-            0,
-            0,
-            true
-        );
+        IAsset.AssetData memory asset = IAsset.AssetData(creator, amount, 0, 0, true);
         IAsset(assetContract).mintSpecial(recipient, asset, metadataHash);
     }
 
@@ -216,27 +180,17 @@ contract AssetMinter is
         uint256 catalystTier
     ) external {
         require(catalystTier > 0, "Catalyst tier must be > 0");
-        uint256 amountOfCatalystExtracted = IAsset(assetContract).recycleBurn(
-            _msgSender(),
-            tokenIds,
-            amounts,
-            catalystTier
-        );
+        uint256 amountOfCatalystExtracted =
+            IAsset(assetContract).recycleBurn(_msgSender(), tokenIds, amounts, catalystTier);
         // mint the catalysts
-        ICatalyst(catalystContract).mint(
-            _msgSender(),
-            catalystTier,
-            amountOfCatalystExtracted
-        );
+        ICatalyst(catalystContract).mint(_msgSender(), catalystTier, amountOfCatalystExtracted);
     }
 
     /// @notice Set the address of the catalyst contract
     /// @dev Only the admin role can set the catalyst contract
     /// @dev The catalysts are used in the minting process
     /// @param _catalystContract The address of the catalyst contract
-    function changeCatalystContractAddress(
-        address _catalystContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeCatalystContractAddress(address _catalystContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
         catalystContract = _catalystContract;
         emit CatalystContractAddressChanged(_catalystContract);
     }
@@ -244,9 +198,7 @@ contract AssetMinter is
     /// @notice Set the address of the asset contract
     /// @dev Only the admin role can set the asset contract
     /// @param _catalystContract The address of the asset contract
-    function changeAssetContractAddress(
-        address _catalystContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeAssetContractAddress(address _catalystContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
         assetContract = _catalystContract;
         emit AssetContractAddressChanged(_catalystContract);
     }
@@ -255,43 +207,25 @@ contract AssetMinter is
         return _domainSeparatorV4();
     }
 
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 
     /// @notice Creates a hash of the mint data
     /// @param asset The asset to mint
     /// @return digest The hash of the mint data
-    function _hashMint(
-        MintableAsset memory asset
-    ) internal view returns (bytes32 digest) {
+    function _hashMint(MintableAsset memory asset) internal view returns (bytes32 digest) {
         digest = _hashTypedDataV4(keccak256(abi.encode(MINT_TYPEHASH, asset)));
     }
 
     /// @notice Creates a hash of the mint batch data
     /// @param assets The assets to mint
     /// @return digest The hash of the mint batch data
-    function _hashMintBatch(
-        MintableAsset[] memory assets
-    ) internal view returns (bytes32 digest) {
-        digest = _hashTypedDataV4(
-            keccak256(abi.encode(MINT_BATCH_TYPEHASH, assets))
-        );
+    function _hashMintBatch(MintableAsset[] memory assets) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(keccak256(abi.encode(MINT_BATCH_TYPEHASH, assets)));
     }
 }

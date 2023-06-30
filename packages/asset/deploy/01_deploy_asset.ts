@@ -1,26 +1,26 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
-  const { deploy } = deployments;
-  const { deployer, assetAdmin, upgradeAdmin, trustedForwarder } =
+  const {deployments, getNamedAccounts} = hre;
+  const {deploy} = deployments;
+  const {deployer, assetAdmin, upgradeAdmin, trustedForwarder} =
     await getNamedAccounts();
 
-  await deploy("Asset", {
+  await deploy('Asset', {
     from: deployer,
-    contract: "Asset",
+    contract: 'Asset',
     proxy: {
       owner: upgradeAdmin,
-      proxyContract: "OpenZeppelinTransparentProxy",
+      proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: "initialize",
+        methodName: 'initialize',
         args: [
           trustedForwarder,
           assetAdmin,
           [1, 2, 3, 4, 5, 6],
           [2, 4, 6, 8, 10, 12],
-          "ipfs://",
+          'ipfs://',
         ],
       },
       upgradeIndex: 0,
@@ -30,4 +30,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 
-func.tags = ["Asset"];
+func.tags = ['Asset'];

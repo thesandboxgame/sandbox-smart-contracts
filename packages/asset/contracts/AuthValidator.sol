@@ -24,10 +24,7 @@ contract AuthValidator is AccessControl {
     /// @param signature Signature hash
     /// @param digest Digest hash
     /// @return bool
-    function verify(
-        bytes memory signature,
-        bytes32 digest
-    ) public view returns (bool) {
+    function verify(bytes memory signature, bytes32 digest) public view returns (bool) {
         address recoveredSigner = ECDSA.recover(digest, signature);
         return hasRole(AUTH_SIGNER_ROLE, recoveredSigner);
     }

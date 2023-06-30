@@ -73,9 +73,7 @@ contract Catalyst is
         _grantRole(MINTER_ROLE, _defaultMinter);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             _setURI(i + 1, _catalystIpfsCID[i]);
-            unchecked {
-                tokenCount++;
-            }
+            unchecked {tokenCount++;}
         }
     }
 
@@ -134,10 +132,7 @@ contract Catalyst is
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(
-        uint256 catalystId,
-        string memory ipfsCID
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tokenCount++;
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId);
@@ -146,9 +141,7 @@ contract Catalyst is
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(
-        address trustedForwarder
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "ZERO_ADDRESS");
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderChanged(trustedForwarder);
@@ -157,27 +150,20 @@ contract Catalyst is
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
     /// @param metadataHash The new URI
-    function setMetadataHash(
-        uint256 tokenId,
-        string memory metadataHash
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setMetadataHash(uint256 tokenId, string memory metadataHash) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
-    function setBaseURI(
-        string memory baseURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setBaseURI(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(
-        uint256 tokenId
-    )
+    function uri(uint256 tokenId)
         public
         view
         override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
@@ -187,24 +173,12 @@ contract Catalyst is
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (address)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 
@@ -244,20 +218,17 @@ contract Catalyst is
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public override onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /// @notice Change the default royalty settings
     /// @param defaultRoyaltyRecipient The new royalty recipient address
     /// @param defaultRoyaltyBps The new royalty bps
-    function changeRoyaltyRecipient(
-        address defaultRoyaltyRecipient,
-        uint96 defaultRoyaltyBps
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeRoyaltyRecipient(address defaultRoyaltyRecipient, uint96 defaultRoyaltyBps)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _setDefaultRoyalty(defaultRoyaltyRecipient, defaultRoyaltyBps);
         emit DefaultRoyaltyChanged(defaultRoyaltyRecipient, defaultRoyaltyBps);
     }
@@ -276,16 +247,10 @@ contract Catalyst is
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(
-        bytes4 interfaceId
-    )
+    function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(
-            ERC1155Upgradeable,
-            AccessControlUpgradeable,
-            ERC2981Upgradeable
-        )
+        override(ERC1155Upgradeable, AccessControlUpgradeable, ERC2981Upgradeable)
         returns (bool)
     {
         return
