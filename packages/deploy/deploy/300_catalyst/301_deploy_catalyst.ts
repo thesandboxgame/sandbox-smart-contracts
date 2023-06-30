@@ -59,5 +59,5 @@ const func: DeployFunction = async function (
     });
   };
   export default func;
-  func.tags = ["Catalyst"];
-  func.dependencies = ["OperatorFilterRegistrant", "TRUSTED_FORWARDER_V2", 'L2'];
+  func.tags = ["Catalyst", "L2"];
+  func.dependencies = ["OperatorFilterRegistrant", "TRUSTED_FORWARDER_V2"];
