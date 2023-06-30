@@ -5,6 +5,7 @@
   "scripts": {
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "node": "hardhat node --no-deploy",
+    "compile": "hardhat compile",
     "deploy": "hardhat deploy",
     "test": "hardhat test"
   },
