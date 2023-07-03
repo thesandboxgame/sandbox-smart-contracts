@@ -16,14 +16,9 @@ export function generateAssetId(creator: string, assetNumber: number) {
   return `0x${zeroAppends}${hex}${creator.slice(2)}`;
 }
 
-export async function royaltyDistribution() {
+export async function assetRoyaltyDistribution() {
   await deployments.fixture([
     "Asset",
-    "RoyaltyEngineV1",
-    "TestERC20",
-    "MockMarketplace",
-    "Catalyst",
-    "Batch",
   ]);
   const {
     deployer,
@@ -31,7 +26,6 @@ export async function royaltyDistribution() {
     assetAdmin,
     managerAdmin,
     contractRoyaltySetter,
-    catalystMinter
   } = await getNamedAccounts();
   const { deploy } = await deployments;
   const users = await getUnnamedAccounts();
@@ -43,6 +37,7 @@ export async function royaltyDistribution() {
   const commonRoyaltyReceiver2 = users[4];
   const royaltyReceiver2 = users[5];
   const creator = users[6];
+  const assetMinter = users[7];
 
   await deploy("FallbackRegistry", {
     from: deployer,
@@ -94,14 +89,13 @@ export async function royaltyDistribution() {
   const mockMarketplace = await ethers.getContract("MockMarketplace");
   const Asset = await ethers.getContract("Asset");
 
-  const catalyst = await ethers.getContract("Catalyst", catalystMinter);
-
   const assetAdminRole = await Asset.DEFAULT_ADMIN_ROLE();
   const assetMinterRole = await Asset.MINTER_ROLE();
   await Asset.connect(await ethers.provider.getSigner(assetAdmin)).grantRole(
     assetMinterRole,
-    deployer
+    assetMinter
   );
+  const assetAsMinter = await ethers.getContract("Asset", assetMinter)
   const managerAdminRole = await manager.DEFAULT_ADMIN_ROLE();
   const contractRoyaltySetterRole =
     await manager.CONTRACT_ROYALTY_SETTER_ROLE();
@@ -131,11 +125,11 @@ export async function royaltyDistribution() {
     royaltyReceiver2,
     creator,
     assetAdminRole,
-    catalyst,
     contractRoyaltySetter,
     assetAdmin,
     managerAdminRole,
     contractRoyaltySetterRole,
     managerAsRoyaltySetter,
+    assetAsMinter
   };
 }
