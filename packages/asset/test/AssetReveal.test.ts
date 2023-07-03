@@ -221,6 +221,50 @@ describe("AssetReveal", () => {
       );
       expect(result.events[3].event).to.equal("AssetRevealMint");
       expect(result.events[3].args["newTokenIds"].length).to.equal(1);
+      // TODO: check supply with new metadataHash has incremented by 2
+    });
+    it("Should not allow minting for multiple copies revealed to the same metadata hash if revealHash is used", async () => {
+      const {
+        users,
+        unrevealedtokenId,
+        revealAsset,
+        generateRevealSignature,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        "QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF",
+      ];
+      const amounts = [2];
+      const signature = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+
+      const signature2 = await generateRevealSignature(
+        users[0],
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await expect(
+        revealAsset(
+          signature2,
+          unrevealedtokenId,
+          amounts,
+          newMetadataHashes,
+          [revealHashA]
+        )
+      ).to.be.revertedWith("Invalid revealHash");
     });
     it("should increase the tokens supply for tokens with same metadata hash", async () => {
       const {

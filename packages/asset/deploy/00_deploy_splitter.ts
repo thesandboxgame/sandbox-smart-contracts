@@ -7,12 +7,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
   
-  await deploy('CustomRoyaltySplitter', {
+  await deploy('RoyaltyCustomSplitter', {
     from: deployer,
-    contract: 'CustomRoyaltySplitter',
+    contract: 'RoyaltyCustomSplitter',
     skipIfAlreadyDeployed: true,
     log: true,
   });
 };
 export default func;
-func.tags = ['CustomRoyaltySplitter'];
+func.tags = ['RoyaltyCustomSplitter'];

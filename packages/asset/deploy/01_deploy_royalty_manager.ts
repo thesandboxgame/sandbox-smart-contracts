@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
   const { deployer, commonRoyaltyReceiver, managerAdmin, contractRoyaltySetter } = await getNamedAccounts();
-  const customSplitter = await deployments.get('CustomRoyaltySplitter');
+  const RoyaltyCustomSplitter = await deployments.get('RoyaltyCustomSplitter');
 
 
   await deploy("RoyaltyManager", {
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         methodName: "initialize",
-        args: [commonRoyaltyReceiver, 5000, customSplitter.address, managerAdmin, contractRoyaltySetter],
+        args: [commonRoyaltyReceiver, 5000, RoyaltyCustomSplitter.address, managerAdmin, contractRoyaltySetter],
       },
       upgradeIndex: 0,
     },
@@ -27,4 +27,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["Manager"];
-func.dependencies = ['CustomRoyaltySplitter'];
+func.dependencies = ['RoyaltyCustomSplitter'];
