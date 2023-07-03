@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     trustedForwarder,
   } = await getNamedAccounts();
   const OperatorFilterSubscription = await deployments.get(
-    'OperatorFilterSubscription'
+    'OperatorFilterRegistrant'
   );
 
   await deploy('Catalyst', {
@@ -49,4 +49,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Catalyst'];
-func.dependencies = ['ProxyAdmin', 'OperatorFilterSubscription'];
+func.dependencies = ['ProxyAdmin', 'OperatorFilterRegistrant'];

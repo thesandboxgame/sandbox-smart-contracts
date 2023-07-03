@@ -7,12 +7,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  await deploy('OperatorFilterSubscription', {
+  await deploy('OperatorFilterRegistrant', {
     from: deployer,
-    contract: 'OperatorFilterSubscription',
+    contract: 'OperatorFilterRegistrant',
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
 export default func;
-func.tags = ['OperatorFilterSubscription'];
+func.tags = ['OperatorFilterRegistrant'];
