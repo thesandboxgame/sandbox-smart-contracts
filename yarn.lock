@@ -1484,9 +1484,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/example_hardhat@workspace:packages/example-hardhat":
+"@sandbox-smart-contracts/example-hardhat@workspace:packages/example-hardhat":
   version: 0.0.0-use.local
-  resolution: "@sandbox-smart-contracts/example_hardhat@workspace:packages/example-hardhat"
+  resolution: "@sandbox-smart-contracts/example-hardhat@workspace:packages/example-hardhat"
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/providers": ^5.7.2
