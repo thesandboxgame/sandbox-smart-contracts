@@ -463,6 +463,30 @@ describe("catalyst Contract", () => {
         `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+    it("cant add invalid token id", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      await expect( catalystAsAdmin.addNewCatalystType(0,"0x01")).to.be.revertedWith('Catalyst: invalid catalyst id')
+    });
+    it("cant add invalid token uri", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      expect(await catalystAsAdmin.addNewCatalystType(9,zeroAddress)).to.be.revertedWith("Catalyst: CID can't be zero")
+    });
+    it("cant set invalid trusted forwarder", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      await expect( catalystAsAdmin.setTrustedForwarder(zeroAddress)).to.be.revertedWith("Catalyst: trusted forwarder can't be zero address")
+    });
+    it("cant set metadata hash for invalid catalyst", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      await expect( catalystAsAdmin.setMetadataHash(0,"0x01")).to.be.revertedWith('Catalyst: invalid catalyst id')
+    });
+    it("cant set invalid metadata hash", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      expect(await catalystAsAdmin.setMetadataHash(1,"0x01")).to.be.revertedWith("Catalyst: metadataHash can't be zero")
+    });
+    it("cant set invalid base uri", async () => {
+      const { catalystAsAdmin } = await runCatalystSetup();
+      expect(await catalystAsAdmin.setBaseURI(zeroAddress)).to.be.revertedWith("Catalyst: base uri can't be zero")
+    });
   });
   describe("Mint Token", () => {
     it("minter can mint", async () => {
