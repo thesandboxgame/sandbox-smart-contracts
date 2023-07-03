@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
 import {deployOneYearLockUpgradableFixture} from './fixtures';
 
-describe('Lock', function () {
+describe('LockUpgradable', function () {
   describe('Deployment', function () {
     it('Should set the right unlockTime', async function () {
       const {lockAsOwner, unlockTime} = await loadFixture(
