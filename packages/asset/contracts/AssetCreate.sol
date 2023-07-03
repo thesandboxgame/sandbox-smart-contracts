@@ -14,13 +14,7 @@ import "./interfaces/IAssetCreate.sol";
 /// @title AssetCreate
 /// @author The Sandbox
 /// @notice User-facing contract for creating new assets
-contract AssetCreate is
-    IAssetCreate,
-    Initializable,
-    ERC2771Handler,
-    EIP712Upgradeable,
-    AccessControlUpgradeable
-{
+contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgradeable, AccessControlUpgradeable {
     using TokenIdUtils for uint256;
 
     IAsset private assetContract;
@@ -31,14 +25,10 @@ contract AssetCreate is
     mapping(address => uint16) public creatorNonces;
     mapping(address => uint16) public signatureNonces;
 
-    bytes32 public constant SPECIAL_MINTER_ROLE =
-        keccak256("SPECIAL_MINTER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE =
-        keccak256("BRIDGE_MINTER_ROLE");
+    bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
+    bytes32 public constant BRIDGE_MINTER_ROLE = keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
-        keccak256(
-            "Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)"
-        );
+        keccak256("Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)");
     bytes32 public constant MINT_BATCH_TYPEHASH =
         keccak256(
             "MintBatch(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes)"
@@ -87,25 +77,13 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashMint(
-                    creator,
-                    signatureNonces[_msgSender()]++,
-                    tier,
-                    amount,
-                    revealed,
-                    metadataHash
-                )
+                _hashMint(creator, signatureNonces[_msgSender()]++, tier, amount, revealed, metadataHash)
             ),
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -129,27 +107,14 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashBatchMint(
-                    creator,
-                    signatureNonces[_msgSender()]++,
-                    tiers,
-                    amounts,
-                    revealed,
-                    metadataHashes
-                )
+                _hashBatchMint(creator, signatureNonces[_msgSender()]++, tiers, amounts, revealed, metadataHashes)
             ),
             "Invalid signature"
         );
 
         require(tiers.length == amounts.length, "Arrays must be same length");
-        require(
-            amounts.length == metadataHashes.length,
-            "Arrays must be same length"
-        );
-        require(
-            metadataHashes.length == revealed.length,
-            "Arrays must be same length"
-        );
+        require(amounts.length == metadataHashes.length, "Arrays must be same length");
+        require(metadataHashes.length == revealed.length, "Arrays must be same length");
 
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
@@ -167,13 +132,7 @@ contract AssetCreate is
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit AssetBatchMinted(
-            creator,
-            tokenIds,
-            tiers,
-            amounts,
-            metadataHashes
-        );
+        emit AssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes);
         // TODO: put revealed in event
     }
 
@@ -194,25 +153,13 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashMint(
-                    creator,
-                    signatureNonces[_msgSender()]++,
-                    tier,
-                    amount,
-                    revealed,
-                    metadataHash
-                )
+                _hashMint(creator, signatureNonces[_msgSender()]++, tier, amount, revealed, metadataHash)
             ),
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, amount, metadataHash);
@@ -222,9 +169,7 @@ contract AssetCreate is
     /// @dev Called from the bridge contract
     /// @param creator The address of the creator
     /// @return nonce The next available creator nonce
-    function bridgeIncrementCreatorNonce(
-        address creator
-    ) external onlyRole(BRIDGE_MINTER_ROLE) returns (uint16) {
+    function bridgeIncrementCreatorNonce(address creator) external onlyRole(BRIDGE_MINTER_ROLE) returns (uint16) {
         return ++creatorNonces[creator];
     }
 
@@ -307,9 +252,7 @@ contract AssetCreate is
     /// @notice Encodes the hashes of the metadata for signature verification
     /// @param metadataHashes The hashes of the metadata
     /// @return encodedHashes The encoded hashes of the metadata
-    function _encodeHashes(
-        string[] memory metadataHashes
-    ) internal pure returns (bytes32) {
+    function _encodeHashes(string[] memory metadataHashes) internal pure returns (bytes32) {
         bytes32[] memory encodedHashes = new bytes32[](metadataHashes.length);
         for (uint256 i = 0; i < metadataHashes.length; i++) {
             encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
@@ -318,23 +261,11 @@ contract AssetCreate is
         return keccak256(abi.encodePacked(encodedHashes));
     }
 
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 }

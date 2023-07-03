@@ -1364,7 +1364,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/asset@workspace:packages/asset":
+"@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
   dependencies:
@@ -1382,8 +1382,14 @@ __metadata:
     "@types/chai": ^4.3.5
     "@types/mocha": ^10.0.1
     "@types/node": ^20.1.2
+    "@typescript-eslint/eslint-plugin": ^5.59.8
+    "@typescript-eslint/parser": ^5.59.8
     chai: ^4.3.7
     dotenv: ^16.1.4
+    eslint: ^8.41.0
+    eslint-config-prettier: ^8.8.0
+    eslint-plugin-mocha: ^10.1.0
+    eslint-plugin-prettier: ^4.2.1
     ethers: ^5.7.2
     hardhat: ^2.14.1
     hardhat-deploy: ^0.11.25
@@ -1475,6 +1481,7 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": 1
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomiclabs/hardhat-ethers": ^2.2.3
+    "@sandbox-smart-contracts/asset": "*"
     "@sandbox-smart-contracts/giveaway": "*"
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
@@ -1495,7 +1502,7 @@ __metadata:
     eslint-plugin-mocha: ^10.1.0
     eslint-plugin-prettier: ^4.2.1
     ethers: 5
-    hardhat: ^2.16.0
+    hardhat: 2.15.0
     hardhat-deploy: ^0.11.30
     prettier: ^2.8.8
     ts-node: ^10.9.1
@@ -6076,7 +6083,75 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.12.5, hardhat@npm:^2.14.1, hardhat@npm:^2.16.0":
+"hardhat@npm:2.15.0":
+  version: 2.15.0
+  resolution: "hardhat@npm:2.15.0"
+  dependencies:
+    "@ethersproject/abi": ^5.1.2
+    "@metamask/eth-sig-util": ^4.0.0
+    "@nomicfoundation/ethereumjs-block": 5.0.1
+    "@nomicfoundation/ethereumjs-blockchain": 7.0.1
+    "@nomicfoundation/ethereumjs-common": 4.0.1
+    "@nomicfoundation/ethereumjs-evm": 2.0.1
+    "@nomicfoundation/ethereumjs-rlp": 5.0.1
+    "@nomicfoundation/ethereumjs-statemanager": 2.0.1
+    "@nomicfoundation/ethereumjs-trie": 6.0.1
+    "@nomicfoundation/ethereumjs-tx": 5.0.1
+    "@nomicfoundation/ethereumjs-util": 9.0.1
+    "@nomicfoundation/ethereumjs-vm": 7.0.1
+    "@nomicfoundation/solidity-analyzer": ^0.1.0
+    "@sentry/node": ^5.18.1
+    "@types/bn.js": ^5.1.0
+    "@types/lru-cache": ^5.1.0
+    abort-controller: ^3.0.0
+    adm-zip: ^0.4.16
+    aggregate-error: ^3.0.0
+    ansi-escapes: ^4.3.0
+    chalk: ^2.4.2
+    chokidar: ^3.4.0
+    ci-info: ^2.0.0
+    debug: ^4.1.1
+    enquirer: ^2.3.0
+    env-paths: ^2.2.0
+    ethereum-cryptography: ^1.0.3
+    ethereumjs-abi: ^0.6.8
+    find-up: ^2.1.0
+    fp-ts: 1.19.3
+    fs-extra: ^7.0.1
+    glob: 7.2.0
+    immutable: ^4.0.0-rc.12
+    io-ts: 1.10.4
+    keccak: ^3.0.2
+    lodash: ^4.17.11
+    mnemonist: ^0.38.0
+    mocha: ^10.0.0
+    p-map: ^4.0.0
+    qs: ^6.7.0
+    raw-body: ^2.4.1
+    resolve: 1.17.0
+    semver: ^6.3.0
+    solc: 0.7.3
+    source-map-support: ^0.5.13
+    stacktrace-parser: ^0.1.10
+    tsort: 0.0.1
+    undici: ^5.14.0
+    uuid: ^8.3.2
+    ws: ^7.4.6
+  peerDependencies:
+    ts-node: "*"
+    typescript: "*"
+  peerDependenciesMeta:
+    ts-node:
+      optional: true
+    typescript:
+      optional: true
+  bin:
+    hardhat: internal/cli/bootstrap.js
+  checksum: 46767f0eb75f08e1f47585d3aec3261932251b47909051bfffcbff317f7efe06fdab7cb8686cb67c46cc7ed4cedb80d0c21157fe03f103054001b2762085ef92
+  languageName: node
+  linkType: hard
+
+"hardhat@npm:^2.12.5, hardhat@npm:^2.14.1":
   version: 2.16.0
   resolution: "hardhat@npm:2.16.0"
   dependencies:

@@ -1,18 +1,18 @@
-import { DeployFunction } from "hardhat-deploy/types";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
-  const { deploy } = deployments;
+  const {deployments, getNamedAccounts} = hre;
+  const {deploy} = deployments;
 
-  const { deployer } = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
-  await deploy("OperatorFilterSubscription", {
+  await deploy('OperatorFilterSubscription', {
     from: deployer,
-    contract: "OperatorFilterSubscription",
+    contract: 'OperatorFilterSubscription',
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
 export default func;
-func.tags = ["OperatorFilterSubscription"];
+func.tags = ['OperatorFilterSubscription'];

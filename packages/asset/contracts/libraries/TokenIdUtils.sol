@@ -53,9 +53,7 @@ library TokenIdUtils {
     /// @notice Extracts the creator address from a given token id
     /// @param tokenId The token id to extract the creator address from
     /// @return creator The asset creator address
-    function getCreatorAddress(
-        uint256 tokenId
-    ) internal pure returns (address creator) {
+    function getCreatorAddress(uint256 tokenId) internal pure returns (address creator) {
         creator = address(uint160(tokenId));
         return creator;
     }
@@ -88,9 +86,7 @@ library TokenIdUtils {
     /// @param tokenId The token id to extract reveal nonce from
     /// @return revealNonce The reveal nonce of the asset
     function getRevealNonce(uint256 tokenId) internal pure returns (uint16) {
-        uint16 revealNonce = uint16(
-            (tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK
-        );
+        uint16 revealNonce = uint16((tokenId >> REVEAL_NONCE_SHIFT) & REVEAL_NONCE_MASK);
         return revealNonce;
     }
 
@@ -105,9 +101,7 @@ library TokenIdUtils {
     /// @notice Extracts the asset data from a given token id
     /// @dev Created to limit the number of functions that need to be called when revealing an asset
     /// @param tokenId The token id to extract the asset data from
-    function getData(
-        uint256 tokenId
-    ) internal pure returns (IAsset.AssetData memory data) {
+    function getData(uint256 tokenId) internal pure returns (IAsset.AssetData memory data) {
         data.creator = getCreatorAddress(tokenId);
         data.tier = getTier(tokenId);
         data.revealed = isRevealed(tokenId);

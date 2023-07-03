@@ -2,7 +2,6 @@
 pragma solidity 0.8.18;
 
 interface IAsset {
-
     // AssetData reflects the asset tokenId structure
     // Refer to TokenIdUtils.sol
     struct AssetData {
@@ -31,7 +30,11 @@ interface IAsset {
         string[] memory metadataHashes
     ) external;
 
-    function burnFrom(address account, uint256 id, uint256 amount) external;
+    function burnFrom(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external;
 
     function burnBatchFrom(
         address account,
@@ -39,7 +42,5 @@ interface IAsset {
         uint256[] memory amounts
     ) external;
 
-    function getTokenIdByMetadataHash(
-        string memory metadataHash
-    ) external view returns (uint256);
+    function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256);
 }
