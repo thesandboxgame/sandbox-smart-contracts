@@ -484,7 +484,7 @@ describe("catalyst Contract", () => {
     it("Cannot mint invalid catalyst Id", async () => {
       const { catalystAsMinter, user1 } = await runCatalystSetup();
       await expect(catalystAsMinter.mint(user1, 7, 1)).to.be.revertedWith(
-        "INVALID_CATALYST_ID"
+        'Catalyst: invalid catalyst id'
       );
     });
     it("Minter can batch mint token", async () => {
