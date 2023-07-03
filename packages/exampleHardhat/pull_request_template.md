@@ -20,7 +20,7 @@ Testing + CI
 - [ ] I've reviewed my code and CI is passing
 
 Documentation
-- [ ] I've added / updated a `.md` documentation file per smart contract (in the `packages/contracts/` directory) based on `.docs.example`
+- [ ] I've added / updated a `.md` documentation file per smart contract (in the `contracts/` directory) based on `.docs.example`
 
 Dependencies
 - [ ] I am not making any changes to `yarn.lock` at root-level, or I have good reason to require changes
