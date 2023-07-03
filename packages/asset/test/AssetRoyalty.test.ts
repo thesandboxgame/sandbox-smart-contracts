@@ -22,17 +22,12 @@ describe("Asset Royalties", () => {
         creator,
         AssetAsSeller,
         manager,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       await ERC20.mint(buyer, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
@@ -89,17 +84,12 @@ describe("Asset Royalties", () => {
         royaltyReceiver,
         creator,
         AssetAsSeller,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       await ERC20.mint(buyer, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
       expect(await Asset.balanceOf(seller, id)).to.be.equals(1);
@@ -142,17 +132,12 @@ describe("Asset Royalties", () => {
         creator,
         user,
         AssetAsSeller,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       expect(await Asset.balanceOf(seller, id)).to.be.equals(1);
       const balanceCreator = await ethers.provider.getBalance(creator);
       const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
@@ -209,17 +194,12 @@ describe("Asset Royalties", () => {
         creator,
         user,
         AssetAsSeller,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       await Asset.connect(await ethers.getSigner(seller)).setApprovalForAll(
         mockMarketplace.address,
         true
@@ -282,17 +262,12 @@ describe("Asset Royalties", () => {
         user,
         manager,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       const splitter = await manager._creatorRoyaltiesSplitter(creator);
 
@@ -373,17 +348,12 @@ describe("Asset Royalties", () => {
         user,
         AssetAsSeller,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       expect(await managerAsAdmin.commonRecipient()).to.be.equal(
         commonRoyaltyReceiver
       );
@@ -451,17 +421,12 @@ describe("Asset Royalties", () => {
         creator,
         user,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       await managerAsAdmin.setSplit(6000);
       const balanceCreator = await ethers.provider.getBalance(creator);
@@ -538,17 +503,12 @@ describe("Asset Royalties", () => {
         manager,
         creator,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       const splitter = await manager._creatorRoyaltiesSplitter(creator);
 
@@ -617,17 +577,12 @@ describe("Asset Royalties", () => {
         creator,
         AssetAsSeller,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       expect(await managerAsAdmin.commonRecipient()).to.be.equal(
         commonRoyaltyReceiver
@@ -683,17 +638,12 @@ describe("Asset Royalties", () => {
         commonRoyaltyReceiver,
         creator,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       await managerAsAdmin.setSplit(6000);
 
@@ -740,17 +690,12 @@ describe("Asset Royalties", () => {
         commonRoyaltyReceiver,
         creator,
         deployer,
-        assetAsMinter
+        assetAsMinter,
       } = await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       await managerAsAdmin.setSplit(6000);
 
@@ -786,19 +731,50 @@ describe("Asset Royalties", () => {
     });
   });
 
+  it("Can view all the royalty recipient of each asset", async function () {
+    const {
+      Asset,
+      seller,
+      commonRoyaltyReceiver,
+      creator,
+      deployer,
+      assetAsMinter,
+    } = await assetRoyaltyDistribution();
+
+    const id = generateAssetId(creator, 1);
+    assetAsMinter;
+    await assetAsMinter.mint(seller, id, 1, "0x");
+    const id2 = generateAssetId(deployer, 1);
+    assetAsMinter;
+    await assetAsMinter.mint(seller, id2, 1, "0x01");
+    const tokenRoyalties = await Asset.getTokenRoyalties();
+    expect(tokenRoyalties[0].tokenId).to.be.equal(id);
+    expect(tokenRoyalties[0].recipients[0].recipient).to.be.equal(creator);
+    expect(tokenRoyalties[0].recipients[1].recipient).to.be.equal(
+      commonRoyaltyReceiver
+    );
+    expect(tokenRoyalties[1].tokenId).to.be.equal(id2);
+    expect(tokenRoyalties[1].recipients[0].recipient).to.be.equal(deployer);
+    expect(tokenRoyalties[1].recipients[1].recipient).to.be.equal(
+      commonRoyaltyReceiver
+    );
+  });
+
   describe("Roles on Asset and Manager contract", () => {
     it("creator could change the recipient for his splitter", async function () {
-      const { Asset, seller, royaltyReceiver, manager, deployer, creator, assetAsMinter } =
-        await assetRoyaltyDistribution();
-      
-      const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
+      const {
+        Asset,
         seller,
-        id,
-        1,
-        "0x"
-      );
+        royaltyReceiver,
+        manager,
+        deployer,
+        creator,
+        assetAsMinter,
+      } = await assetRoyaltyDistribution();
+
+      const id = generateAssetId(creator, 1);
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       const splitter = await manager._creatorRoyaltiesSplitter(creator);
 
@@ -821,15 +797,10 @@ describe("Asset Royalties", () => {
     it("only creator could change the recipient for his splitter", async function () {
       const { Asset, seller, manager, deployer, creator, assetAsMinter } =
         await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
       await expect(
         manager
           .connect(await ethers.getSigner(deployer))
@@ -859,7 +830,8 @@ describe("Asset Royalties", () => {
     });
 
     it("only asset admin can set default royalty Bps", async function () {
-      const { Asset, seller, assetAdminRole } = await assetRoyaltyDistribution();
+      const { Asset, seller, assetAdminRole } =
+        await assetRoyaltyDistribution();
       await expect(
         Asset.connect(await ethers.getSigner(seller)).setDefaultRoyaltyBps(400)
       ).to.be.revertedWith(
@@ -868,7 +840,8 @@ describe("Asset Royalties", () => {
     });
 
     it("only asset admin can set default royalty address", async function () {
-      const { Asset, seller, assetAdminRole } = await assetRoyaltyDistribution();
+      const { Asset, seller, assetAdminRole } =
+        await assetRoyaltyDistribution();
       await expect(
         Asset.connect(await ethers.getSigner(seller)).setDefaultRoyaltyReceiver(
           seller
@@ -897,7 +870,8 @@ describe("Asset Royalties", () => {
     });
 
     it("Only manager admin can set common royalty recipient", async function () {
-      const { seller, manager, managerAdminRole } = await assetRoyaltyDistribution();
+      const { seller, manager, managerAdminRole } =
+        await assetRoyaltyDistribution();
       await expect(
         manager
           .connect(await ethers.provider.getSigner(seller))
@@ -908,7 +882,8 @@ describe("Asset Royalties", () => {
     });
 
     it("Only manager admin can set common split", async function () {
-      const { seller, manager, managerAdminRole } = await assetRoyaltyDistribution();
+      const { seller, manager, managerAdminRole } =
+        await assetRoyaltyDistribution();
       await expect(
         manager.connect(await ethers.provider.getSigner(seller)).setSplit(3000)
       ).to.be.revertedWith(
@@ -919,29 +894,24 @@ describe("Asset Royalties", () => {
 
   describe("Minting", () => {
     it("should have same splitter address for tokens minted by same creator", async function () {
-      const { Asset, seller, royaltyReceiver, deployer, creator, assetAsMinter } =
-        await assetRoyaltyDistribution();
-      
-      const id1 = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
+      const {
+        Asset,
         seller,
-        id1,
-        1,
-        "0x"
-      );
+        royaltyReceiver,
+        deployer,
+        creator,
+        assetAsMinter,
+      } = await assetRoyaltyDistribution();
+
+      const id1 = generateAssetId(creator, 1);
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id1, 1, "0x");
 
       const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
 
-      
       const id2 = generateAssetId(creator, 2);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id2,
-        1,
-        "0x01"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id2, 1, "0x01");
 
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
 
@@ -949,29 +919,25 @@ describe("Asset Royalties", () => {
     });
 
     it("should not have same splitter address for tokens with minted by different creator", async function () {
-      const { Asset, seller, buyer, royaltyReceiver, deployer, creator, assetAsMinter } =
-        await assetRoyaltyDistribution();
-      
-      const id1 = generateAssetId(creator, 1);
-      assetAsMinter
-      await assetAsMinter.mint(
+      const {
+        Asset,
         seller,
-        id1,
-        1,
-        "0x"
-      );
+        buyer,
+        royaltyReceiver,
+        deployer,
+        creator,
+        assetAsMinter,
+      } = await assetRoyaltyDistribution();
+
+      const id1 = generateAssetId(creator, 1);
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id1, 1, "0x");
 
       const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
 
-      
       const id2 = generateAssetId(deployer, 2);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id2,
-        1,
-        "0x01"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id2, 1, "0x01");
 
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
 
@@ -979,20 +945,20 @@ describe("Asset Royalties", () => {
     });
 
     it("should have same splitter address for tokens minted by same creator in batch mint", async function () {
-      const { Asset, seller, royaltyReceiver, deployer, creator, assetAsMinter } =
-        await assetRoyaltyDistribution();
-      
+      const {
+        Asset,
+        seller,
+        royaltyReceiver,
+        deployer,
+        creator,
+        assetAsMinter,
+      } = await assetRoyaltyDistribution();
+
       const id1 = generateAssetId(creator, 1);
 
-      
       const id2 = generateAssetId(creator, 2);
 
-      await assetAsMinter.mintBatch(
-        seller,
-        [id1, id2],
-        [1, 1],
-        ["0x", "0x01"]
-      );
+      await assetAsMinter.mintBatch(seller, [id1, id2], [1, 1], ["0x", "0x01"]);
 
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
 
@@ -1002,20 +968,20 @@ describe("Asset Royalties", () => {
     });
 
     it("should have different splitter address for tokens minted by same different creator in batch mint", async function () {
-      const { Asset, seller, royaltyReceiver, deployer, creator, assetAsMinter } =
-        await assetRoyaltyDistribution();
-      
+      const {
+        Asset,
+        seller,
+        royaltyReceiver,
+        deployer,
+        creator,
+        assetAsMinter,
+      } = await assetRoyaltyDistribution();
+
       const id1 = generateAssetId(creator, 1);
 
-      
       const id2 = generateAssetId(deployer, 2);
 
-      await assetAsMinter.mintBatch(
-        seller,
-        [id1, id2],
-        [1, 1],
-        ["0x", "0x01"]
-      );
+      await assetAsMinter.mintBatch(seller, [id1, id2], [1, 1], ["0x", "0x01"]);
 
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
 
@@ -1027,15 +993,10 @@ describe("Asset Royalties", () => {
     it("should return splitter address on for a tokenId on royaltyInfo function call", async function () {
       const { Asset, seller, royaltyReceiver, deployer, assetAsMinter } =
         await assetRoyaltyDistribution();
-      
+
       const id = generateAssetId(deployer, 2);
-      assetAsMinter
-      await assetAsMinter.mint(
-        seller,
-        id,
-        1,
-        "0x"
-      );
+      assetAsMinter;
+      await assetAsMinter.mint(seller, id, 1, "0x");
 
       const splitter = await Asset._tokenRoyaltiesSplitter(id);
 
