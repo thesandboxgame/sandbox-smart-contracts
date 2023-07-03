@@ -1,5 +1,5 @@
 {
-  "name": "@sandbox-smart-contracts/example_hardhat",
+  "name": "@sandbox-smart-contracts/example-hardhat",
   "version": "0.0.1",
   "description": "Template package - Hardhat",
   "files": [
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@nomicfoundation/hardhat-chai-matchers": "1",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.1",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",

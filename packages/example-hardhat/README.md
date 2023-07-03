@@ -9,7 +9,7 @@ and tests.
 
 ## Creating a new package
 
-You can copy-paste this example package: `cp -a packages/example_hardhat packages/<package>`
+You can copy-paste this example package: `cp -a packages/example-hardhat packages/<package>`
 
 ## Running the project locally
 
