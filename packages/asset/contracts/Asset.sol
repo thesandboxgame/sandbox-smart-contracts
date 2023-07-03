@@ -245,12 +245,6 @@ contract Asset is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function getRecyclingAmount(
-        uint256 catalystTokenId
-    ) public view returns (uint256) {
-        return recyclingAmounts[catalystTokenId];
-    }
-
     /// @notice could be used to deploy splitter and set tokens royalties
     /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
     /// @param royaltyBPS should be defult EIP2981 roayaltie.
