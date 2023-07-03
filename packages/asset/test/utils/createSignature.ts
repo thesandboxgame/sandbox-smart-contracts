@@ -101,11 +101,6 @@ const createMultipleAssetsMintSignature = async (
   return signature;
 };
 
-// TODO:
-const createSpecialAssetMintSignature = async () => {};
+// TODO: createSpecialAssetMintSignature
 
-export {
-  createAssetMintSignature,
-  createMultipleAssetsMintSignature,
-  createSpecialAssetMintSignature,
-};
+export {createAssetMintSignature, createMultipleAssetsMintSignature};

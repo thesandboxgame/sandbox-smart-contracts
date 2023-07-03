@@ -39,8 +39,6 @@ async function burnAndRevealSignature(
       revealHashes,
     },
   };
-
-  // @ts-ignore
   const signature = await signer._signTypedData(
     data.domain,
     data.types,
@@ -88,7 +86,6 @@ async function batchRevealSignature(
     },
   };
 
-  // @ts-ignore
   const signature = await signer._signTypedData(
     data.domain,
     data.types,
@@ -138,7 +135,6 @@ async function revealSignature(
     },
   };
 
-  // @ts-ignore
   const signature = await signer._signTypedData(
     data.domain,
     data.types,

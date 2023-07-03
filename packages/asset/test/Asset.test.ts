@@ -57,9 +57,9 @@ describe('AssetContract', function () {
     });
 
     it("DEFAULT_ADMIN can change the contract's base uri ", async function () {
-      const {AssetContractAsAdmin, AssetContract} = await runAssetSetup();
-      await AssetContractAsAdmin.setBaseURI('newUri');
-      expect(await AssetContract.baseUri).to.not.be.reverted;
+      const {AssetContractAsAdmin} = await runAssetSetup();
+      await expect(AssetContractAsAdmin.setBaseURI('newUri')).to.not.be
+        .reverted;
     });
 
     it('if not DEFAULT_ADMIN cannot change an asset uri ', async function () {
@@ -253,20 +253,10 @@ describe('AssetContract', function () {
     });
 
     it("owner cannot burn someone else's asset", async function () {
-      const {
-        AssetContractAsMinter,
-        owner,
-        AssetContract,
-        uris,
-        secondOwner,
-        burnerRole,
-      } = await runAssetSetup();
+      const {AssetContractAsMinter, owner, AssetContract, uris, secondOwner} =
+        await runAssetSetup();
       const tnx = await AssetContractAsMinter.mint(owner, 10, 3, uris[0]);
-      const args = await expectEventWithArgs(
-        AssetContractAsMinter,
-        tnx,
-        'TransferSingle'
-      );
+      await expectEventWithArgs(AssetContractAsMinter, tnx, 'TransferSingle');
 
       expect(await AssetContract.balanceOf(owner, 10)).to.be.equal(3);
 
@@ -313,14 +303,9 @@ describe('AssetContract', function () {
     });
 
     it("owner cannot batch burn someone else's assets", async function () {
-      const {
-        AssetContractAsMinter,
-        owner,
-        AssetContract,
-        secondOwner,
-        burnerRole,
-      } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mintBatch(
+      const {AssetContractAsMinter, owner, AssetContract, secondOwner} =
+        await runAssetSetup();
+      await AssetContractAsMinter.mintBatch(
         owner,
         [1, 2, 3, 4],
         [5, 5, 100, 1],

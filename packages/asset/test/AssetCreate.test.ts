@@ -213,7 +213,6 @@ describe('AssetCreate', function () {
         .not.be.reverted;
 
       // get tokenId from the event
-      // @ts-ignore
       const tokenId = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
         .args.tokenId;
 
@@ -242,9 +241,14 @@ describe('AssetCreate', function () {
         .not.be.reverted;
 
       // get tokenId from the event
-      // @ts-ignore
-      const tier = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
-        .args.tier;
+      let tier;
+      const events = await AssetCreateContract.queryFilter('AssetMinted');
+      if (events != undefined && events.length > 0) {
+        const event = events[0];
+        if (event != undefined && event.args) {
+          tier = event.args.tier;
+        }
+      }
       expect(tier).to.equal(4);
     });
     it('should mint an asset with correct metadataHash', async function () {
@@ -269,10 +273,15 @@ describe('AssetCreate', function () {
         .not.be.reverted;
 
       // get tokenId from the event
-      // @ts-ignore
-      const tokenId = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
-        .args.tokenId;
 
+      let tokenId;
+      const events = await AssetCreateContract.queryFilter('AssetMinted');
+      if (events != undefined && events.length > 0) {
+        const event = events[0];
+        if (event != undefined && event.args) {
+          tokenId = event.args.tokenId;
+        }
+      }
       expect(await AssetContract.hashUsed(metadataHashes[0])).to.equal(tokenId);
     });
     it('should emit an AssetMinted event', async function () {
@@ -362,12 +371,22 @@ describe('AssetCreate', function () {
       await expect(mintSingleAsset(signature2, 4, 2, true, metadataHashes[1]))
         .to.not.be.reverted;
 
-      // @ts-ignore
-      const tokenId1 = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
-        .args.tokenId;
-      // @ts-ignore
-      const tokenId2 = (await AssetCreateContract.queryFilter('AssetMinted'))[1]
-        .args.tokenId;
+      let tokenId1;
+      const events = await AssetCreateContract.queryFilter('AssetMinted');
+      if (events != undefined && events.length > 0) {
+        const event = events[0];
+        if (event != undefined && event.args) {
+          tokenId1 = event.args.tokenId;
+        }
+      }
+
+      let tokenId2;
+      if (events != undefined && events.length > 0) {
+        const event = events[1];
+        if (event != undefined && event.args) {
+          tokenId2 = event.args.tokenId;
+        }
+      }
 
       expect(tokenId1).to.not.equal(tokenId2);
     });
@@ -545,8 +564,8 @@ describe('AssetCreate', function () {
         deployer,
         otherWallet,
       } = await runCreateTestSetup();
-      mintCatalyst(3, 1);
-      mintCatalyst(4, 1, otherWallet);
+      await mintCatalyst(3, 1);
+      await mintCatalyst(4, 1, otherWallet);
       const signature = await generateMultipleMintSignature(
         deployer,
         [3, 4],
@@ -623,7 +642,10 @@ describe('AssetCreate', function () {
       const event = events[0];
       const args = event.args;
       expect(args).to.not.be.undefined;
-      const tokenIds = args![1];
+      let tokenIds;
+      if (args != undefined) {
+        tokenIds = args[1];
+      }
 
       expect(await AssetContract.balanceOf(deployer, tokenIds[0])).to.equal(3);
       expect(await AssetContract.balanceOf(deployer, tokenIds[1])).to.equal(5);
@@ -658,7 +680,10 @@ describe('AssetCreate', function () {
       const event = events[0];
       const args = event.args;
       expect(args).to.not.be.undefined;
-      const tiers = args![2];
+      let tiers;
+      if (args != undefined) {
+        tiers = args[2];
+      }
 
       expect(tiers[0]).to.equal(3);
       expect(tiers[1]).to.equal(4);
@@ -694,7 +719,10 @@ describe('AssetCreate', function () {
       const event = events[0];
       const args = event.args;
       expect(args).to.not.be.undefined;
-      const tokenIds = args![1];
+      let tokenIds;
+      if (args != undefined) {
+        tokenIds = args[1];
+      }
 
       expect(await AssetContract.hashUsed(metadataHashes[0])).to.equal(
         tokenIds[0]
@@ -765,7 +793,7 @@ describe('AssetCreate', function () {
         [true, true],
         metadataHashes
       );
-      expect(
+      await expect(
         mintMultipleAssets(
           signature2,
           [3, 4],
