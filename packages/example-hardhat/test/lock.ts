@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
 import {deployOneYearLockFixture} from './fixtures';
 
-describe('Lock', function () {
+describe('LockUpgradable', function () {
   describe('Deployment', function () {
     it('Should set the right unlockTime', async function () {
       const {lockAsOwner, unlockTime} = await loadFixture(
@@ -19,7 +19,7 @@ describe('Lock', function () {
         deployOneYearLockFixture
       );
 
-      expect(await lockAsOwner.owner()).to.equal(deployer.address);
+      expect(await lockAsOwner.owner()).to.equal(await deployer.getAddress());
     });
 
     it('Should receive and store the funds to lock', async function () {
@@ -27,9 +27,9 @@ describe('Lock', function () {
         deployOneYearLockFixture
       );
 
-      expect(await ethers.provider.getBalance(lockAsOwner.address)).to.equal(
-        lockedAmount
-      );
+      expect(
+        await ethers.provider.getBalance(lockAsOwner.getAddress())
+      ).to.equal(lockedAmount);
     });
 
     it('Should fail if the unlockTime is not in the future', async function () {

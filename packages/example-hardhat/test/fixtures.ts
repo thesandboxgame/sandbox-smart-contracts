@@ -1,8 +1,9 @@
 import {ethers} from 'hardhat';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
+import {parseUnits} from 'ethers';
 
 const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-const ONE_GWEI = ethers.utils.parseUnits('1', 'gwei');
+const ONE_GWEI = parseUnits('1', 'gwei');
 
 export async function deployOneYearLockFixture() {
   const lockedAmount = ONE_GWEI;
