@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interfaces/IRoyaltyManager.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import "./CustomSplitter.sol";
+import "./RoyaltyCustomSplitter.sol";
 
 /// @title Registry
 /// @author The sandbox
@@ -52,12 +52,12 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
             creatorSplitterAddress != address(0),
             "Manager: No splitter deployed for the creator"
         );
-        address _recipient = CustomRoyaltySplitter(creatorSplitterAddress)
+        address _recipient = RoyaltyCustomSplitter(creatorSplitterAddress)
             ._recipient();
         require(_recipient != recipient, "Recipient already set");
         Recipient[] memory newRecipient = new Recipient[](1);
         newRecipient[0] = Recipient({recipient: recipient, bps: 0});
-        CustomRoyaltySplitter(creatorSplitterAddress).setRecipients(
+        RoyaltyCustomSplitter(creatorSplitterAddress).setRecipients(
             newRecipient
         );
     }
@@ -141,7 +141,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
             creatorSplitterAddress = payable(
                 Clones.clone(_royaltySplitterCloneable)
             );
-            CustomRoyaltySplitter(creatorSplitterAddress).initialize(
+            RoyaltyCustomSplitter(creatorSplitterAddress).initialize(
                 recipient,
                 address(this)
             );

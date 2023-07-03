@@ -25,7 +25,7 @@ interface IERC20Approve {
 /**
  * Cloneable and configurable royalty splitter contract
  */
-contract CustomRoyaltySplitter is
+contract RoyaltyCustomSplitter is
     Initializable,
     OwnableUpgradeable,
     IRoyaltySplitter,
