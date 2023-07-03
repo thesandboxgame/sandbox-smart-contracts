@@ -59,6 +59,24 @@ contract Catalyst is
         uint96 _defaultCatalystsRoyalty,
         string[] memory _catalystIpfsCID
     ) public initializer {
+        require(
+            bytes(_baseUri).length != 0,
+            "Catalyst: base uri can't be zero"
+        );
+        require(
+            _trustedForwarder != address(0),
+            "Catalyst: trusted forwarder can't be zero"
+        );
+        require(
+            _subscription != address(0),
+            "Catalyst: subscription can't be zero"
+        );
+        require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
+        require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
+        require(_royaltyRecipient != address(0), "Catalyst: royalty recipient can't be zero");
+        require(_defaultCatalystsRoyalty != 0, "Catalyst: royalty can't be zero");
+
+
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
@@ -72,6 +90,11 @@ contract Catalyst is
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
+            require(
+                bytes(_catalystIpfsCID[i]).length != 0,
+                "Catalyst: CID can't be zero"
+            );
+
             _setURI(i + 1, _catalystIpfsCID[i]);
             unchecked {tokenCount++;}
         }
@@ -132,7 +155,12 @@ contract Catalyst is
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewCatalystType(
+        uint256 catalystId,
+        string memory ipfsCID
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystId > tokenCount, "Catalyst: invalid catalyst id");
+        require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be zero");
         tokenCount++;
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId);
@@ -141,8 +169,13 @@ contract Catalyst is
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "ZERO_ADDRESS");
+    function setTrustedForwarder(
+        address trustedForwarder
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(
+            trustedForwarder != address(0),
+            "Catalyst: trusted forwarder can't be zero address"
+        );
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderChanged(trustedForwarder);
     }
@@ -150,13 +183,27 @@ contract Catalyst is
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
     /// @param metadataHash The new URI
-    function setMetadataHash(uint256 tokenId, string memory metadataHash) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setMetadataHash(
+        uint256 tokenId,
+        string memory metadataHash
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(
+            tokenId > 0 && tokenId < tokenCount,
+            "Catalyst: invalid token id"
+        );
+        require(
+            bytes(metadataHash).length != 0,
+            "Catalyst: metadataHash can't be zero"
+        );
         _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
-    function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(
+        string memory baseURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(bytes(baseURI).length != 0, "Catalyst: base uri can't be zero");
         _setBaseURI(baseURI);
     }
 
