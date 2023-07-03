@@ -40,6 +40,14 @@ contract Catalyst is
         _disableInitializers();
     }
 
+    modifier validatedId(uint256 tokenId) {
+        require(
+            tokenId > 0 && tokenId <= tokenCount,
+            "Catalyst: invalid catalyst id"
+        );
+        _;
+   }
+
     /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
     /// @param _trustedForwarder The trusted forwarder for meta transactions.
@@ -108,8 +116,7 @@ contract Catalyst is
         address to,
         uint256 id,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
-        require(id > 0 && id <= tokenCount, "INVALID_CATALYST_ID");
+    ) external onlyRole(MINTER_ROLE) validatedId(id){
         _mint(to, id, amount, "");
     }
 
@@ -186,11 +193,7 @@ contract Catalyst is
     function setMetadataHash(
         uint256 tokenId,
         string memory metadataHash
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(
-            tokenId > 0 && tokenId < tokenCount,
-            "Catalyst: invalid token id"
-        );
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) validatedId(tokenId){
         require(
             bytes(metadataHash).length != 0,
             "Catalyst: metadataHash can't be zero"
