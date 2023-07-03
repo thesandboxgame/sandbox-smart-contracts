@@ -1,7 +1,7 @@
-import {BigNumber, BigNumberish, Contract, Signer} from 'ethers';
+import {BigNumberish, Contract, Signer} from 'ethers';
 import {
   Claim,
-  compareClaim,
+  compareClaimEntries,
   ERC1155BatchClaim,
   ERC1155Claim,
   ERC20Claim,
@@ -15,7 +15,6 @@ import {expect} from 'chai';
 async function deploy(name: string, users: Signer[] = []): Promise<Contract[]> {
   const Contract = await ethers.getContractFactory(name);
   const contract = await Contract.deploy();
-  await contract.deployed();
   const ret = [];
   for (const s of users) {
     ret.push(await contract.connect(s));
@@ -99,19 +98,15 @@ export async function setupSignedMultiGiveaway() {
             const rDest = preDest[idx] as ERC20Claim;
             const s = pos[idx] as ERC20Claim;
             const sDest = postDest[idx] as ERC20Claim;
-            expect(s.amount).to.be.equal(
-              BigNumber.from(r.amount).sub(c.amount)
-            );
-            expect(sDest.amount).to.be.equal(
-              BigNumber.from(rDest.amount).add(c.amount)
-            );
+            expect(s.amount).to.be.equal(r.amount - c.amount);
+            expect(sDest.amount).to.be.equal(rDest.amount + c.amount);
           }
           break;
         case TokenType.ERC721:
           {
             const r = pre[idx] as ERC721Balance;
             const s = pos[idx] as ERC721Balance;
-            expect(r.owner).to.be.equal(contract.address);
+            expect(r.owner).to.be.equal(await contract.getAddress());
             expect(s.owner).to.be.equal(dest.address);
           }
           break;
@@ -206,37 +201,38 @@ export async function setupSignedMultiGiveaway() {
       signerUser = signer,
       expiration = 0
     ) => {
-      await mintToContract(contract.address, claims);
-      const pre = await balances(contract.address, claims);
+      await mintToContract(await contract.getAddress(), claims);
+      const pre = await balances(await contract.getAddress(), claims);
       const preDest = await balances(dest.address, claims);
+      const claimEntries = await getClaimEntires(claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
         contract,
         signerUser.address,
         claimIds,
         expiration,
-        contract.address,
+        await contract.getAddress(),
         dest.address,
-        getClaimEntires(claims)
+        claimEntries
       );
       await expect(
         contract.claim(
           [{v, r, s}],
           claimIds,
           expiration,
-          contract.address,
+          await contract.getAddress(),
           dest.address,
-          getClaimEntires(claims)
+          claimEntries
         )
       )
         .to.emit(contract, 'Claimed')
         .withArgs(
           claimIds,
-          contract.address,
+          await contract.getAddress(),
           dest.address,
-          compareClaim(claims),
+          compareClaimEntries(claimEntries),
           other.address
         );
-      await checkBalances(contract.address, pre, preDest, claims);
+      await checkBalances(await contract.getAddress(), pre, preDest, claims);
     },
     signedGiveaway,
     contract,

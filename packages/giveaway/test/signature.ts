@@ -1,7 +1,6 @@
-import {BigNumberish, Contract} from 'ethers';
+import {AbiCoder, BigNumberish, Contract, Wallet} from 'ethers';
 import {Signature} from '@ethersproject/bytes';
 import {ethers} from 'hardhat';
-import {signTypedData_v4} from 'eth-sig-util';
 import {BytesLike, Hexable} from '@ethersproject/bytes/src.ts/index';
 
 export enum TokenType {
@@ -21,14 +20,17 @@ export type ClaimEntry = {
   data: string;
 };
 
-export function compareClaim(a: Claim[]): (b: ClaimEntry[]) => boolean {
-  return (b: ClaimEntry[]) =>
-    a.every(
+export function compareClaimEntries(
+  a: ClaimEntry[]
+): (b: ClaimEntry[]) => boolean {
+  return (b: ClaimEntry[]) => {
+    return a.every(
       (x, idx) =>
-        x.tokenType === b[idx].tokenType &&
-        x.token.address === b[idx].tokenAddress &&
-        getClaimData(x) === b[idx].data
+        BigInt(x.tokenType) === BigInt(b[idx].tokenType) &&
+        x.tokenAddress === b[idx].tokenAddress &&
+        x.data === b[idx].data
     );
+  };
 }
 
 export interface ClaimEntryWithContract {
@@ -81,41 +83,38 @@ export type Claim =
 export const getClaimData = function (claim: Claim): string {
   switch (claim.tokenType) {
     case TokenType.ERC20:
-      return ethers.utils.defaultAbiCoder.encode(['uint256'], [claim.amount]);
+      return AbiCoder.defaultAbiCoder().encode(['uint256'], [claim.amount]);
     case TokenType.ERC721:
     case TokenType.ERC721_SAFE:
-      return ethers.utils.defaultAbiCoder.encode(['uint256'], [claim.tokenId]);
+      return AbiCoder.defaultAbiCoder().encode(['uint256'], [claim.tokenId]);
     case TokenType.ERC721_BATCH:
     case TokenType.ERC721_SAFE_BATCH:
-      return ethers.utils.defaultAbiCoder.encode(
-        ['uint256[]'],
-        [claim.tokenIds]
-      );
+      return AbiCoder.defaultAbiCoder().encode(['uint256[]'], [claim.tokenIds]);
     case TokenType.ERC1155:
-      return ethers.utils.defaultAbiCoder.encode(
+      return AbiCoder.defaultAbiCoder().encode(
         ['uint256', 'uint256', 'bytes'],
-        [
-          claim.tokenId,
-          claim.amount.toString(),
-          ethers.utils.arrayify(claim.data),
-        ]
+        [claim.tokenId, claim.amount.toString(), ethers.getBytes(claim.data)]
       );
     case TokenType.ERC1155_BATCH:
-      return ethers.utils.defaultAbiCoder.encode(
+      return AbiCoder.defaultAbiCoder().encode(
         ['uint256[]', 'uint256[]', 'bytes'],
-        [claim.tokenIds, claim.amounts, ethers.utils.arrayify(claim.data)]
+        [claim.tokenIds, claim.amounts, ethers.getBytes(claim.data)]
       );
     default:
       throw new Error('Invalid type:' + (claim as Claim).tokenType);
   }
 };
 
-export function getClaimEntires(claims: Claim[]): ClaimEntry[] {
-  return claims.map((x) => ({
-    tokenType: x.tokenType,
-    tokenAddress: x.token.address,
-    data: getClaimData(x),
-  }));
+export async function getClaimEntires(claims: Claim[]): Promise<ClaimEntry[]> {
+  const ret: ClaimEntry[] = [];
+  for (const x of claims) {
+    ret.push({
+      tokenType: x.tokenType,
+      tokenAddress: await x.token.getAddress(),
+      data: getClaimData(x),
+    });
+  }
+  return ret;
 }
 
 export const signedMultiGiveawaySignature = async function (
@@ -128,28 +127,14 @@ export const signedMultiGiveawaySignature = async function (
   claims: ClaimEntry[],
   privateKey = ''
 ): Promise<Signature> {
-  const chainId = (await contract.provider.getNetwork()).chainId;
+  const provider = contract.runner?.provider;
+  if (!provider) {
+    throw new Error('Missing provider');
+  }
+  const chainId = (await provider.getNetwork()).chainId;
 
   const data = {
     types: {
-      EIP712Domain: [
-        {
-          name: 'name',
-          type: 'string',
-        },
-        {
-          name: 'version',
-          type: 'string',
-        },
-        {
-          name: 'chainId',
-          type: 'uint256',
-        },
-        {
-          name: 'verifyingContract',
-          type: 'address',
-        },
-      ],
       ClaimEntry: [
         {name: 'tokenType', type: 'uint256'},
         {name: 'tokenAddress', type: 'address'},
@@ -168,7 +153,7 @@ export const signedMultiGiveawaySignature = async function (
       name: 'Sandbox SignedMultiGiveaway',
       version: '1.0',
       chainId: chainId.toString(),
-      verifyingContract: contract.address,
+      verifyingContract: await contract.getAddress(),
     },
     message: {
       claimIds: claimIds.map((x) => x.toString()),
@@ -177,18 +162,18 @@ export const signedMultiGiveawaySignature = async function (
       to,
       claims,
     },
-  } as never;
+  };
 
-  let signature;
-  if (privateKey) {
-    signature = signTypedData_v4(ethers.utils.arrayify(privateKey) as Buffer, {
-      data,
-    });
-  } else {
-    signature = await ethers.provider.send('eth_signTypedData_v4', [
-      signer,
-      data,
-    ]);
-  }
-  return ethers.utils.splitSignature(signature);
+  const wallet = privateKey
+    ? new Wallet(privateKey, ethers.provider)
+    : await ethers.getSigner(signer);
+  const signature = await wallet.signTypedData(
+    data.domain,
+    {
+      ClaimEntry: data.types.ClaimEntry,
+      Claim: data.types.Claim,
+    },
+    data.message
+  );
+  return ethers.Signature.from(signature);
 };

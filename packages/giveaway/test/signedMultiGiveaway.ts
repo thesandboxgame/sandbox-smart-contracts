@@ -1,12 +1,5 @@
 import {ethers} from 'hardhat';
 import {
-  defaultAbiCoder,
-  keccak256,
-  solidityPack,
-  toUtf8Bytes,
-} from 'ethers/lib/utils';
-import {BigNumber, constants} from 'ethers';
-import {
   Claim,
   ClaimEntry,
   getClaimEntires,
@@ -16,6 +9,13 @@ import {
 import {expect} from 'chai';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
 import {setupSignedMultiGiveaway} from './fixtures';
+import {
+  AbiCoder,
+  keccak256,
+  parseEther,
+  toUtf8Bytes,
+  ZeroAddress,
+} from 'ethers';
 
 describe('SignedMultiGiveaway.sol', function () {
   describe('initialization', function () {
@@ -78,8 +78,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should be able to claim', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -134,18 +134,18 @@ describe('SignedMultiGiveaway.sol', function () {
           token,
           tokenId: '0x123',
           amount: '0x123',
-          data: [],
+          data: '0x',
         },
         {
           tokenType: TokenType.ERC1155_BATCH,
           token,
           tokenIds: ['0x123', '0x124'],
           amounts: ['0x123', '0x124'],
-          data: [],
+          data: '0x',
         },
       ];
       const expiration = 0;
-      const from = contract.address;
+      const from = await contract.getAddress();
       const {v, r, s} = await signedMultiGiveawaySignature(
         contract,
         signer.address,
@@ -153,24 +153,24 @@ describe('SignedMultiGiveaway.sol', function () {
         expiration,
         from,
         to,
-        getClaimEntires(claims),
+        await getClaimEntires(claims),
         pk
       );
-      const ret = await contract.populateTransaction.claim(
+      const ret = await contract.claim.populateTransaction(
         [{v, r, s}],
         claimIds,
         expiration,
         from,
         to,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       console.log(ret);
     });
     it('should be able to claim multiple tokens', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -202,14 +202,14 @@ describe('SignedMultiGiveaway.sol', function () {
           token: fixtures.assetToken,
           tokenId: 456,
           amount,
-          data: [],
+          data: '0x',
         },
         {
           tokenType: TokenType.ERC1155_BATCH,
           token: fixtures.assetToken,
           tokenIds: [457, 458],
           amounts: [12, 13],
-          data: [],
+          data: '0x',
         },
       ];
       await fixtures.contractAsAdmin.setMaxClaimEntries(claims.length);
@@ -218,8 +218,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should be able to claim with approve', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -229,7 +229,7 @@ describe('SignedMultiGiveaway.sol', function () {
       ];
       await fixtures.sandToken.mint(fixtures.other.address, amount);
       await fixtures.sandTokenAsOther.approve(
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         amount
       );
       const pre = await fixtures.balances(fixtures.other.address, claims);
@@ -241,7 +241,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await fixtures.contract.claim(
         [sig],
@@ -249,7 +249,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await fixtures.checkBalances(
         fixtures.other.address,
@@ -263,8 +263,8 @@ describe('SignedMultiGiveaway.sol', function () {
       it('should be able to claim with N signatures', async function () {
         const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-        const claimId = BigNumber.from(0x123);
-        const amount = ethers.utils.parseEther('5');
+        const claimId = 0x123;
+        const amount = parseEther('5');
         const claims: Claim[] = [
           {
             tokenType: TokenType.ERC20,
@@ -272,17 +272,23 @@ describe('SignedMultiGiveaway.sol', function () {
             amount,
           },
         ];
-        await fixtures.mintToContract(fixtures.contract.address, claims);
-        const pre = await fixtures.balances(fixtures.contract.address, claims);
+        await fixtures.mintToContract(
+          await fixtures.contract.getAddress(),
+          claims
+        );
+        const pre = await fixtures.balances(
+          await fixtures.contract.getAddress(),
+          claims
+        );
         const preDest = await fixtures.balances(fixtures.dest.address, claims);
         const sig1 = await signedMultiGiveawaySignature(
           fixtures.contract,
           fixtures.signer.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         );
         const signerRole = await fixtures.contractAsAdmin.SIGNER_ROLE();
         await fixtures.contractAsAdmin.grantRole(
@@ -294,21 +300,21 @@ describe('SignedMultiGiveaway.sol', function () {
           fixtures.other.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         );
         await fixtures.contractAsAdmin.setNumberOfSignaturesNeeded(2);
         await fixtures.contract.claim(
           [sig1, sig2],
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         );
         await fixtures.checkBalances(
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           pre,
           preDest,
           claims
@@ -317,8 +323,8 @@ describe('SignedMultiGiveaway.sol', function () {
       it('signatures must be in order other < signer', async function () {
         const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-        const claimId = BigNumber.from(0x123);
-        const amount = ethers.utils.parseEther('5');
+        const claimId = 0x123;
+        const amount = parseEther('5');
         const claims: Claim[] = [
           {
             tokenType: TokenType.ERC20,
@@ -326,15 +332,18 @@ describe('SignedMultiGiveaway.sol', function () {
             amount,
           },
         ];
-        await fixtures.mintToContract(fixtures.contract.address, claims);
+        await fixtures.mintToContract(
+          await fixtures.contract.getAddress(),
+          claims
+        );
         const sig1 = await signedMultiGiveawaySignature(
           fixtures.contract,
           fixtures.signer.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         );
         const signerRole = await fixtures.contractAsAdmin.SIGNER_ROLE();
         await fixtures.contractAsAdmin.grantRole(
@@ -346,9 +355,9 @@ describe('SignedMultiGiveaway.sol', function () {
           fixtures.other.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         );
         await fixtures.contractAsAdmin.setNumberOfSignaturesNeeded(2);
 
@@ -358,9 +367,9 @@ describe('SignedMultiGiveaway.sol', function () {
             [sig2, sig1],
             [claimId],
             0,
-            fixtures.contract.address,
+            await fixtures.contract.getAddress(),
             fixtures.dest.address,
-            getClaimEntires(claims)
+            await getClaimEntires(claims)
           )
         ).to.revertedWith('invalid order');
       });
@@ -368,7 +377,7 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if amount is zero', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const amount = 0;
       const claims: Claim[] = [
         {
@@ -384,7 +393,7 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should be fail to claim ERC1155 in batch if wrong len', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       await expect(
         fixtures.signAndClaim(
           [claimId],
@@ -394,7 +403,7 @@ describe('SignedMultiGiveaway.sol', function () {
               token: fixtures.assetToken,
               tokenIds: [],
               amounts: [],
-              data: [],
+              data: '0x',
             },
           ]
         )
@@ -405,7 +414,7 @@ describe('SignedMultiGiveaway.sol', function () {
           token: fixtures.assetToken,
           tokenIds: [12],
           amounts: [],
-          data: [],
+          data: '0x',
         },
       ];
       const {v, r, s} = await signedMultiGiveawaySignature(
@@ -413,18 +422,18 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.signer.address,
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await expect(
         fixtures.contract.claim(
           [{v, r, s}],
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         )
       ).to.revertedWith('invalid data');
     });
@@ -432,12 +441,12 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim the same id twice', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
       await fixtures.signAndClaim([1, 2, 3, claimId], claims);
@@ -448,44 +457,47 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if the signature is wrong', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       const {v, r, s} = await signedMultiGiveawaySignature(
         fixtures.contract,
         fixtures.signer.address,
-        [claimId.add(1)],
+        [claimId + 1],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await expect(
         fixtures.contract.claim(
           [{v, r, s}],
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         )
       ).to.be.revertedWith('invalid signer');
     });
     it('should fail to mint if the signer is invalid', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
       await expect(
@@ -496,8 +508,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('claim with metaTX trusted forwarder', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -505,38 +517,44 @@ describe('SignedMultiGiveaway.sol', function () {
           amount,
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
-      const pre = await fixtures.balances(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
+      const pre = await fixtures.balances(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       const preDest = await fixtures.balances(fixtures.dest.address, claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
         fixtures.contract,
         fixtures.signer.address,
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
 
       const contractAsTrustedForwarder = await fixtures.signedGiveaway.connect(
         fixtures.trustedForwarder
       );
-      const txData = await contractAsTrustedForwarder.populateTransaction.claim(
+      const txData = await contractAsTrustedForwarder.claim.populateTransaction(
         [{v, r, s}],
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       // The msg.sender goes at the end.
-      txData.data = solidityPack(
+      txData.data = ethers.solidityPacked(
         ['bytes', 'address'],
         [txData.data, fixtures.other.address]
       );
-      await contractAsTrustedForwarder.signer.sendTransaction(txData);
+      await fixtures.trustedForwarder.sendTransaction(txData);
       await fixtures.checkBalances(
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         pre,
         preDest,
         claims
@@ -546,8 +564,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should be able to batch claim', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const baseClaimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const baseClaimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -564,36 +582,42 @@ describe('SignedMultiGiveaway.sol', function () {
           token: fixtures.assetToken,
           tokenId: 456,
           amount,
-          data: [],
+          data: '0x',
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
-      const pre = await fixtures.balances(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
+      const pre = await fixtures.balances(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       const preDest = await fixtures.balances(fixtures.dest.address, claims);
       const args = [];
       for (const [i, c] of claims.entries()) {
-        const claimId = baseClaimId.add(i);
+        const claimId = baseClaimId + i;
         const {v, r, s} = await signedMultiGiveawaySignature(
           fixtures.contract,
           fixtures.signer.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires([c])
+          await getClaimEntires([c])
         );
         args.push({
           sigs: [{v, r, s}],
           claimIds: [claimId],
           expiration: 0,
-          from: fixtures.contract.address,
+          from: await fixtures.contract.getAddress(),
           to: fixtures.dest.address,
-          claims: getClaimEntires([c]),
+          claims: await getClaimEntires([c]),
         });
       }
       await fixtures.contract.batchClaim(args);
       await fixtures.checkBalances(
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         pre,
         preDest,
         claims
@@ -605,7 +629,7 @@ describe('SignedMultiGiveaway.sol', function () {
     it('admin should be able to recover assets', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const amount = ethers.utils.parseEther('5');
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -613,18 +637,21 @@ describe('SignedMultiGiveaway.sol', function () {
           amount,
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
-      const pre = BigNumber.from(
-        await fixtures.sandToken.balanceOf(fixtures.contract.address)
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
+      const pre = await fixtures.sandToken.balanceOf(
+        await fixtures.contract.getAddress()
       );
       await fixtures.contractAsAdmin.recoverAssets(
-        fixtures.other.address,
-        getClaimEntires(claims)
+        await fixtures.other.getAddress(),
+        await getClaimEntires(claims)
       );
-      const pos = BigNumber.from(
-        await fixtures.sandToken.balanceOf(fixtures.contract.address)
+      const pos = await fixtures.sandToken.balanceOf(
+        await fixtures.contract.getAddress()
       );
-      expect(pos).to.be.equal(pre.sub(amount));
+      expect(pos).to.be.equal(pre - amount);
     });
     it('should fail to recover assets if not admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
@@ -633,20 +660,23 @@ describe('SignedMultiGiveaway.sol', function () {
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       await expect(
         fixtures.contract.recoverAssets(
-          fixtures.other.address,
-          getClaimEntires(claims)
+          await fixtures.other.getAddress(),
+          await getClaimEntires(claims)
         )
       ).to.be.revertedWith('only admin');
       await expect(
         fixtures.contractAsBackofficeAdmin.recoverAssets(
-          fixtures.other.address,
-          getClaimEntires(claims)
+          await fixtures.other.getAddress(),
+          await getClaimEntires(claims)
         )
       ).to.be.revertedWith('only admin');
     });
@@ -656,7 +686,7 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to revoke if not admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       await expect(
         fixtures.contract.revokeClaims([claimId])
       ).to.be.revertedWith('only backoffice');
@@ -664,12 +694,12 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if the id was revoked', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
       await fixtures.contractAsBackofficeAdmin.revokeClaims([claimId]);
@@ -697,12 +727,12 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if paused by backoffice admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
       await fixtures.contractAsBackofficeAdmin.pause();
@@ -712,12 +742,13 @@ describe('SignedMultiGiveaway.sol', function () {
     });
     it('should fail to batchClaim if paused by backoffice admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
-      const baseClaimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const baseClaimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
+
           amount,
         },
         {
@@ -730,29 +761,32 @@ describe('SignedMultiGiveaway.sol', function () {
           token: fixtures.assetToken,
           tokenId: 456,
           amount,
-          data: [],
+          data: '0x',
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       const args = [];
       for (const [i, c] of claims.entries()) {
-        const claimId = baseClaimId.add(i);
+        const claimId = baseClaimId + i;
         const {v, r, s} = await signedMultiGiveawaySignature(
           fixtures.contract,
           fixtures.signer.address,
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires([c])
+          await getClaimEntires([c])
         );
         args.push({
           sigs: [{v, r, s}],
           claimIds: [claimId],
           expiration: 0,
-          from: fixtures.contract.address,
+          from: await fixtures.contract.getAddress(),
           to: fixtures.dest.address,
-          claims: getClaimEntires([c]),
+          claims: await getClaimEntires([c]),
         });
       }
       await fixtures.contractAsBackofficeAdmin.pause();
@@ -764,12 +798,12 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should be able to claim sand after pause/unpause', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
       await fixtures.contractAsAdmin.pause();
@@ -809,22 +843,27 @@ describe('SignedMultiGiveaway.sol', function () {
 
       expect(
         await fixtures.contractAsAdmin.getMaxWeiPerClaim(
-          fixtures.sandToken.address,
+          await fixtures.sandToken.getAddress(),
           12
         )
       ).to.be.equal(0);
       await expect(
         fixtures.contractAsAdmin.setMaxWeiPerClaim(
-          fixtures.sandToken.address,
+          await fixtures.sandToken.getAddress(),
           12,
           2
         )
       )
         .to.emit(fixtures.contract, 'MaxWeiPerClaimSet')
-        .withArgs(fixtures.sandToken.address, 12, 2, fixtures.admin.address);
+        .withArgs(
+          await fixtures.sandToken.getAddress(),
+          12,
+          2,
+          fixtures.admin.address
+        );
       expect(
         await fixtures.contractAsAdmin.getMaxWeiPerClaim(
-          fixtures.sandToken.address,
+          await fixtures.sandToken.getAddress(),
           12
         )
       ).to.be.equal(2);
@@ -846,7 +885,11 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contract.setNumberOfSignaturesNeeded(1)
       ).to.be.revertedWith('only admin');
       await expect(
-        fixtures.contract.setMaxWeiPerClaim(fixtures.sandToken.address, 12, 2)
+        fixtures.contract.setMaxWeiPerClaim(
+          await fixtures.sandToken.getAddress(),
+          12,
+          2
+        )
       ).to.be.revertedWith('only admin');
     });
 
@@ -868,8 +911,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if over max entries', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -886,7 +929,7 @@ describe('SignedMultiGiveaway.sol', function () {
           token: fixtures.assetToken,
           tokenId: 456,
           amount,
-          data: [],
+          data: '0x',
         },
       ];
       await fixtures.contractAsAdmin.setMaxClaimEntries(2);
@@ -901,8 +944,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim if not enough signatures', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -921,8 +964,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('signatures should expire', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -941,11 +984,11 @@ describe('SignedMultiGiveaway.sol', function () {
 
       const maxPerClaim = 10;
       await fixtures.contractAsAdmin.setMaxWeiPerClaim(
-        fixtures.sandToken.address,
+        await fixtures.sandToken.getAddress(),
         0,
         maxPerClaim
       );
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       await expect(
         fixtures.signAndClaim(
           [claimId],
@@ -964,18 +1007,18 @@ describe('SignedMultiGiveaway.sol', function () {
 
       const maxPerClaim = 1000;
       await fixtures.contractAsAdmin.setMaxWeiPerClaim(
-        fixtures.sandToken.address,
+        await fixtures.sandToken.getAddress(),
         0,
         maxPerClaim
       );
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       await fixtures.signAndClaim(
         [claimId],
         [
           {
             tokenType: TokenType.ERC20,
             token: fixtures.sandToken,
-            amount: maxPerClaim - 1,
+            amount: BigInt(maxPerClaim - 1),
           },
         ]
       );
@@ -987,11 +1030,11 @@ describe('SignedMultiGiveaway.sol', function () {
       const tokenId = 0x1233;
       const maxPerClaim = 10;
       await fixtures.contractAsAdmin.setMaxWeiPerClaim(
-        fixtures.assetToken.address,
+        await fixtures.assetToken.getAddress(),
         tokenId,
         maxPerClaim
       );
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       await expect(
         fixtures.signAndClaim(
           [claimId],
@@ -1001,7 +1044,7 @@ describe('SignedMultiGiveaway.sol', function () {
               token: fixtures.assetToken,
               tokenId,
               amount: maxPerClaim + 1,
-              data: [],
+              data: '0x',
             },
           ]
         )
@@ -1013,23 +1056,26 @@ describe('SignedMultiGiveaway.sol', function () {
     it('a valid signature must verify correctly', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
           token: fixtures.sandToken,
-          amount: ethers.utils.parseEther('5'),
+          amount: parseEther('5'),
         },
       ];
-      await fixtures.mintToContract(fixtures.contract.address, claims);
+      await fixtures.mintToContract(
+        await fixtures.contract.getAddress(),
+        claims
+      );
       const {v, r, s} = await signedMultiGiveawaySignature(
         fixtures.contract,
         fixtures.signer.address,
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
 
       expect(
@@ -1037,9 +1083,9 @@ describe('SignedMultiGiveaway.sol', function () {
           {v, r, s},
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         )
       ).to.equal(fixtures.signer.address);
     });
@@ -1085,20 +1131,22 @@ describe('SignedMultiGiveaway.sol', function () {
           'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
         )
       );
-      const hashedName = ethers.utils.keccak256(
-        toUtf8Bytes('Sandbox SignedMultiGiveaway')
-      );
-      const versionHash = ethers.utils.keccak256(toUtf8Bytes('1.0'));
-      const network = await fixtures.contract.provider.getNetwork();
-      const domainSeparator = ethers.utils.keccak256(
-        defaultAbiCoder.encode(
+      const hashedName = keccak256(toUtf8Bytes('Sandbox SignedMultiGiveaway'));
+      const versionHash = keccak256(toUtf8Bytes('1.0'));
+      const provider = fixtures.contract.runner?.provider;
+      if (!provider) {
+        throw new Error('Missing provider');
+      }
+      const network = await provider.getNetwork();
+      const domainSeparator = keccak256(
+        AbiCoder.defaultAbiCoder().encode(
           ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
           [
             typeHash,
             hashedName,
             versionHash,
             network.chainId,
-            fixtures.contract.address,
+            await fixtures.contract.getAddress(),
           ]
         )
       );
@@ -1126,17 +1174,17 @@ describe('SignedMultiGiveaway.sol', function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
       await expect(
-        fixtures.contractAsAdmin.setMaxWeiPerClaim(constants.AddressZero, 12, 2)
+        fixtures.contractAsAdmin.setMaxWeiPerClaim(ZeroAddress, 12, 2)
       ).to.be.revertedWith('invalid token address');
     });
     it('should fail if invalid token type', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
+      const claimId = 0x123;
       const claims: ClaimEntry[] = [
         {
           tokenType: 0,
-          tokenAddress: fixtures.sandToken.address,
+          tokenAddress: await fixtures.sandToken.getAddress(),
           data: '0x',
         },
       ];
@@ -1145,7 +1193,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.signer.address,
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
         claims
       );
@@ -1154,7 +1202,7 @@ describe('SignedMultiGiveaway.sol', function () {
           [{v, r, s}],
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
           claims
         )
@@ -1163,8 +1211,8 @@ describe('SignedMultiGiveaway.sol', function () {
     it('should fail to claim with no balance', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -1177,26 +1225,26 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.signer.address,
         [claimId],
         0,
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await expect(
         fixtures.contract.claim(
           [sig],
           [claimId],
           0,
-          fixtures.contract.address,
+          await fixtures.contract.getAddress(),
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         )
       ).to.revertedWith('ERC20: transfer amount exceeds balance');
     });
     it('should fail to claim with approve when no balance', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
-      const claimId = BigNumber.from(0x123);
-      const amount = ethers.utils.parseEther('5');
+      const claimId = 0x123;
+      const amount = parseEther('5');
       const claims: Claim[] = [
         {
           tokenType: TokenType.ERC20,
@@ -1205,7 +1253,7 @@ describe('SignedMultiGiveaway.sol', function () {
         },
       ];
       await fixtures.sandTokenAsOther.approve(
-        fixtures.contract.address,
+        await fixtures.contract.getAddress(),
         amount
       );
       const sig = await signedMultiGiveawaySignature(
@@ -1215,7 +1263,7 @@ describe('SignedMultiGiveaway.sol', function () {
         0,
         fixtures.other.address,
         fixtures.dest.address,
-        getClaimEntires(claims)
+        await getClaimEntires(claims)
       );
       await expect(
         fixtures.contract.claim(
@@ -1224,7 +1272,7 @@ describe('SignedMultiGiveaway.sol', function () {
           0,
           fixtures.other.address,
           fixtures.dest.address,
-          getClaimEntires(claims)
+          await getClaimEntires(claims)
         )
       ).to.revertedWith('ERC20: transfer amount exceeds balance');
     });
