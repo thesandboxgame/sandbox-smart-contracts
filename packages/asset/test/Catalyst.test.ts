@@ -1,12 +1,468 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, getNamedAccounts, deployments } from "hardhat";
 import { runCatalystSetup } from "./fixtures/catalystFixture";
-import { CATALYST_IPFS_CID_PER_TIER } from "../constants";
+import {
+  CATALYST_BASE_URI,
+  CATALYST_IPFS_CID_PER_TIER,
+  CATALYST_DEFAULT_ROYALTY,
+} from "../constants";
 const catalystArray = [1, 2, 3, 4, 5, 6];
+const { deploy } = deployments;
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 describe("catalyst Contract", () => {
-  it("Should deploy correctly", async () => {
-    const { catalyst } = await runCatalystSetup();
-    expect(catalyst.address).to.be.properAddress;
+  describe("Contract setup", () => {
+    it("Should deploy correctly", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+      } = await runCatalystSetup();
+      expect(await catalyst.getTrustedForwarder()).to.be.equal(
+        trustedForwarder
+      );
+      expect(
+        await catalyst.hasRole(catalystAdminRole, catalystAdmin)
+      ).to.be.equals(true);
+      expect(await catalyst.hasRole(minterRole, catalystMinter)).to.be.equals(
+        true
+      );
+      expect(await catalyst.tokenCount()).to.be.equals(6);
+      expect(catalyst.address).to.be.properAddress;
+    });
+    it("base uri can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: base uri can't be zero");
+    });
+    it("trusted forwarder can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                zeroAddress,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: trusted forwarder can't be zero");
+    });
+    it("subscription can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                zeroAddress,
+                catalystAdmin,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: subscription can't be zero");
+    });
+    it("admin can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                zeroAddress,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: admin can't be zero");
+    });
+    it("royalty recipient can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                zeroAddress,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: royalty recipient can't be zero");
+    });
+    it("royalty can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                catalystMinter,
+                0,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: royalty can't be zero");
+    });
+    it("minter can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                zeroAddress,
+                CATALYST_DEFAULT_ROYALTY,
+                CATALYST_IPFS_CID_PER_TIER,
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: minter can't be zero");
+    });
+    it("token CID can't be zero in initialization", async () => {
+      const {
+        catalyst,
+        trustedForwarder,
+        catalystAdmin,
+        catalystMinter,
+        catalystAdminRole,
+        minterRole,
+        deployer,
+        upgradeAdmin,
+        catalystRoyaltyRecipient,
+        OperatorFilterSubscription,
+      } = await runCatalystSetup();
+      expect(
+        await deploy("Catalyst", {
+          from: deployer,
+          log: true,
+          contract: "Catalyst",
+          proxy: {
+            owner: upgradeAdmin,
+            proxyContract: "OpenZeppelinTransparentProxy",
+            execute: {
+              methodName: "initialize",
+              args: [
+                CATALYST_BASE_URI,
+                trustedForwarder,
+                catalystRoyaltyRecipient,
+                OperatorFilterSubscription.address,
+                catalystAdmin,
+                catalystMinter,
+                CATALYST_DEFAULT_ROYALTY,
+                [zeroAddress],
+              ],
+            },
+            upgradeIndex: 0,
+          },
+          skipIfAlreadyDeployed: true,
+        })
+      ).to.revertedWith("Catalyst: base uri can't be zero");
+    });
+  });
+  describe("Admin Role", () => {
+    it("Admin can set minter", async () => {
+      const { catalystAsAdmin, user1, minterRole } = await runCatalystSetup();
+      await catalystAsAdmin.grantRole(minterRole, user1);
+      expect(await catalystAsAdmin.hasRole(minterRole, user1)).to.be.equal(
+        true
+      );
+    });
+    it("only Admin can set minter", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).grantRole(minterRole, user1)).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can remove minter", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      expect(
+        await catalystAsAdmin.hasRole(minterRole, catalystMinter)
+      ).to.be.equal(true);
+      await catalystAsAdmin.revokeRole(minterRole, catalystMinter);
+      expect(
+        await catalystAsAdmin.hasRole(minterRole, catalystMinter)
+      ).to.be.equal(false);
+    });
+    it("only Admin can remove minter", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).revokeRole(minterRole, catalystMinter)).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can add new catalyst", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      await catalystAsAdmin.addNewCatalystType(7, "0x01");
+      expect(await catalystAsAdmin.uri(7)).to.be.equal("ipfs://0x01");
+    });
+
+    it("only Admin can add new catalyst", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).addNewCatalystType(7, "0x01")).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can set trusted forwarder", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      await catalystAsAdmin.setTrustedForwarder(user1);
+      expect(await catalystAsAdmin.getTrustedForwarder()).to.be.equal(user1);
+    });
+    it("only Admin can set trusted forwarder", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).setTrustedForwarder(user1)).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can set metadata hash", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      expect(await catalystAsAdmin.uri(1)).to.be.equal(
+        `ipfs://${CATALYST_IPFS_CID_PER_TIER[0]}`
+      );
+      await catalystAsAdmin.setMetadataHash(1, "0x01");
+      expect(await catalystAsAdmin.uri(1)).to.be.equal("ipfs://0x01");
+    });
+    it("only Admin can set metadata hash", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).setMetadataHash(1, "0x01")).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can set base uri", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      expect(await catalystAsAdmin.uri(1)).to.be.equal(
+        `ipfs://${CATALYST_IPFS_CID_PER_TIER[0]}`
+      );
+      await catalystAsAdmin.setBaseURI("ipfs////");
+      expect(await catalystAsAdmin.uri(1)).to.be.equal(
+        `ipfs////${CATALYST_IPFS_CID_PER_TIER[0]}`
+      );
+    });
+    it("only Admin can set base uri", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).setBaseURI("ipfs////")).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
+    it("Admin can set royalty recipient", async () => {
+      const { catalystAsAdmin, user1, minterRole, catalystMinter } =
+        await runCatalystSetup();
+      await catalystAsAdmin.changeRoyaltyRecipient(user1, 0);
+      const royaltyInfo = await catalystAsAdmin.royaltyInfo(1, 300000);
+      expect(royaltyInfo[0]).to.be.equal(user1);
+      expect(royaltyInfo[1]).to.be.equal(0);
+    });
+    it("only Admin can set royalty recipient", async () => {
+      const { catalyst, user1, minterRole, catalystAdminRole, catalystMinter } = await runCatalystSetup();
+     
+      await expect( catalyst.connect(await ethers.getSigner(user1)).changeRoyaltyRecipient(user1, 0)).to.be.revertedWith(
+        `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
+      );
+    });
   });
   describe("Mint Token", () => {
     it("minter can mint", async () => {
@@ -175,10 +631,10 @@ describe("catalyst Contract", () => {
   describe("Metadata", () => {
     it("user can view token's metadata", async () => {
       const { catalyst } = await runCatalystSetup();
-      for(let i = 0; i < catalystArray.length; i++){
-        expect(
-          await catalyst.uri(catalystArray[i])
-        ).to.be.equal(`ipfs://${CATALYST_IPFS_CID_PER_TIER[i]}`);
+      for (let i = 0; i < catalystArray.length; i++) {
+        expect(await catalyst.uri(catalystArray[i])).to.be.equal(
+          `ipfs://${CATALYST_IPFS_CID_PER_TIER[i]}`
+        );
       }
     });
   });
@@ -205,7 +661,7 @@ describe("catalyst Contract", () => {
       expect(await catalyst.isApprovedForAll(user1, user2)).to.be.equal(true);
       await catalyst
         .connect(await ethers.provider.getSigner(user1))
-        .safeTransferFrom(user1, user2, 1, 10, "0x");
+        .safeTransferFrom(user1, user2, 1, 10, zeroAddress);
       expect(await catalyst.balanceOf(user2, 1)).to.be.equal(10);
     });
     it("approved operator can batch transfer", async () => {
@@ -222,7 +678,7 @@ describe("catalyst Contract", () => {
       expect(await catalyst.isApprovedForAll(user1, user2)).to.be.equal(true);
       await catalyst
         .connect(await ethers.provider.getSigner(user1))
-        .safeBatchTransferFrom(user1, user2, [1, 2], [10, 10], "0x");
+        .safeBatchTransferFrom(user1, user2, [1, 2], [10, 10], zeroAddress);
       expect(await catalyst.balanceOf(user2, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user2, 2)).to.be.equal(10);
     });

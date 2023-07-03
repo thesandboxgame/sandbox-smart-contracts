@@ -6,8 +6,14 @@ import {
 export const runCatalystSetup = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }) => {
     await deployments.fixture(["Catalyst"]);
-    const { deployer, catalystAdmin, catalystMinter } =
-      await getNamedAccounts();
+    const {
+      deployer,
+      upgradeAdmin,
+      catalystMinter,
+      catalystAdmin,
+      catalystRoyaltyRecipient,
+      trustedForwarder,
+    } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const user1 = users[0];
     const user2 = users[1];
@@ -16,7 +22,11 @@ export const runCatalystSetup = deployments.createFixture(
     const catalyst = await ethers.getContract("Catalyst", user3);
     const catalystAsAdmin = await ethers.getContract("Catalyst", catalystAdmin);
     const minterRole = await catalyst.MINTER_ROLE();
+    const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
     const catalystAsMinter = await ethers.getContract("Catalyst", catalystMinter);
+    const OperatorFilterSubscription = await ethers.getContract(
+      "OperatorFilterSubscription"
+    );
 
     return {
       deployer,
@@ -25,7 +35,14 @@ export const runCatalystSetup = deployments.createFixture(
       user2,
       minterRole,
       catalystAsAdmin,
-      catalystAsMinter
+      catalystAsMinter,
+      catalystAdminRole,
+      upgradeAdmin,
+      catalystMinter,
+      catalystAdmin,
+      catalystRoyaltyRecipient,
+      trustedForwarder,
+      OperatorFilterSubscription
     };
   }
 );
