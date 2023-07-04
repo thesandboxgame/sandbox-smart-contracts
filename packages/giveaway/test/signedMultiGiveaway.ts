@@ -915,7 +915,7 @@ describe('SignedMultiGiveaway.sol', function () {
         await fixtures.contractAsAdmin.getNumberOfSignaturesNeeded()
       ).to.be.equal(2);
       await expect(fixtures.signAndClaim([claimId], claims)).to.revertedWith(
-        'not enough signatures'
+        'wrong number of signatures'
       );
     });
     it('signatures should expire', async function () {
@@ -1055,7 +1055,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contractAsAdmin.setTrustedForwarder(fixtures.other.address)
       )
         .to.emit(fixtures.contract, 'TrustedForwarderSet')
-        .withArgs(fixtures.other.address);
+        .withArgs(fixtures.other.address, fixtures.admin.address);
       expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
         fixtures.other.address
       );

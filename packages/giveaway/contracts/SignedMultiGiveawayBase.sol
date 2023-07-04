@@ -34,9 +34,6 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         bytes data;
     }
 
-    string public constant name = "Sandbox SignedMultiGiveaway";
-    string public constant version = "1.0";
-
     /// @dev the address of the signers authorized to sign messages
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
@@ -47,17 +44,17 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
             "Claim(uint256[] claimIds,uint256 expiration,address from,address to,ClaimEntry[] claims)ClaimEntry(uint256 tokenType,address tokenAddress,bytes data)"
         );
 
-    uint256[49] private __preGap;
     /// @dev claimId => true if already claimed
     mapping(uint256 => bool) private _claimed;
 
     /// @notice verifies a ERC712 signature and mint a new NFT for the buyer.
+    /// @param numberOfSignatures number of signatures required
     /// @param sigs signature part
     /// @param claimIds unique claim ids
     /// @param from source user
     /// @param to destination user
     /// @param claims list of tokens to do transfer
-    function _claim(
+    function _verifyClaim(
         uint256 numberOfSignatures,
         Signature[] calldata sigs,
         uint256[] calldata claimIds,
@@ -86,7 +83,7 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
     }
 
     function _checkSig(uint256 numberOfSignatures, bytes32 digest, Signature[] calldata sigs) internal virtual {
-        require(numberOfSignatures == sigs.length, "not enough signatures");
+        require(numberOfSignatures == sigs.length, "wrong number of signatures");
         address lastSig = address(0);
         for (uint256 i; i < numberOfSignatures; i++) {
             address signer = _recover(digest, sigs[i]);
@@ -140,11 +137,11 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         return ECDSAUpgradeable.recover(digest, sig.v, sig.r, sig.s);
     }
 
-    function _hashClaimIds(uint256[] calldata claimIds) internal pure returns (bytes32 hash) {
+    function _hashClaimIds(uint256[] calldata claimIds) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(claimIds));
     }
 
-    function _hashClaims(ClaimEntry[] calldata claims) internal pure returns (bytes32 hash) {
+    function _hashClaims(ClaimEntry[] calldata claims) internal pure returns (bytes32) {
         bytes32[] memory claimHashes = new bytes32[](claims.length);
         for (uint256 i; i < claims.length; i++) {
             ClaimEntry calldata claimEntry = claims[i];
@@ -160,5 +157,5 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         return keccak256(abi.encodePacked(claimHashes));
     }
 
-    uint256[49] private __postGap;
+    uint256[49] private __gap;
 }
