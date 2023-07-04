@@ -4,6 +4,7 @@ import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import 'solidity-coverage';
 import dotenv from 'dotenv';
+import '@openzeppelin/hardhat-upgrades';
 dotenv.config();
 
 const config: HardhatUserConfig = {
