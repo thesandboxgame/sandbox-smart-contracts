@@ -1,13 +1,12 @@
 import {expect} from 'chai';
-import {ethers, upgrades, deployments} from 'hardhat';
+import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalystFixture';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
   CATALYST_DEFAULT_ROYALTY,
-} from '../constants';
+} from '../data/constants';
 const catalystArray = [1, 2, 3, 4, 5, 6];
-const {deploy} = deployments;
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('catalyst Contract', () => {

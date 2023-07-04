@@ -3,9 +3,9 @@ import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
   CATALYST_DEFAULT_ROYALTY,
-} from '../../constants';
+} from '../../data/constants';
 
-export const runCatalystSetup = async () => {
+export async function runCatalystSetup() {
   const [
     deployer,
     upgradeAdmin,
@@ -13,10 +13,9 @@ export const runCatalystSetup = async () => {
     catalystAdmin,
     catalystRoyaltyRecipient,
     trustedForwarder,
+    user1,
+    user2
   ] = await ethers.getSigners();
-  const users = await ethers.getUnnamedSigners();
-  const user1 = users[0];
-  const user2 = users[1];
 
   const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
     'OperatorFilterRegistrant'
@@ -43,14 +42,10 @@ export const runCatalystSetup = async () => {
   );
   await catalyst.deployed();
 
-  const catalystAsAdmin = await catalyst.connect(
-    ethers.provider.getSigner(catalystAdmin.address)
-  );
+  const catalystAsAdmin = await catalyst.connect(catalystAdmin)
   const minterRole = await catalyst.MINTER_ROLE();
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
-  const catalystAsMinter = await catalyst.connect(
-    ethers.provider.getSigner(catalystMinter.address)
-  );
+  const catalystAsMinter = await catalyst.connect(catalystMinter);
   return {
     deployer: deployer.address,
     catalyst,
