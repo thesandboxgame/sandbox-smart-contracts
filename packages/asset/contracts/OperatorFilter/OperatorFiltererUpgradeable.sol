@@ -10,8 +10,7 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
-        operatorFilterRegistry = // Address of the operator filterer registry
-        IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
+        operatorFilterRegistry = IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E); // Address of the operator filterer registry
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
         // order for the modifier to filter addresses.

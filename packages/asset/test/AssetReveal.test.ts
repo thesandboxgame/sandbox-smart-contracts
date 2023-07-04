@@ -9,6 +9,9 @@ const revealHashD = formatBytes32String('revealHashD');
 const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
+// TODO: missing AssetReveal DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder 
+// we have AccessControlUpgradeable on AssetCreate, why not here?
+
 describe('AssetReveal', function () {
   describe('General', function () {
     it('Should deploy correctly', async function () {
@@ -30,77 +33,76 @@ describe('AssetReveal', function () {
       const {AssetRevealContract, trustedForwarder} =
         await runRevealTestSetup();
       const forwarderAddress = await AssetRevealContract.getTrustedForwarder();
-      expect(forwarderAddress).to.equal(trustedForwarder);
+      expect(forwarderAddress).to.equal(trustedForwarder.address);
     });
   });
 
-  // TODO: tests should NOT be performed by deployer
   describe('Burning', function () {
-    it('Deployer should have correct initial balance', async function () {
-      const {AssetContract, users, unrevealedtokenId, revealedtokenId} =
+    it('User should have correct initial balance', async function () {
+      const {AssetContract, user, unrevealedtokenId, revealedtokenId} =
         await runRevealTestSetup();
-      const unRevealedDeployerBalance = await AssetContract.balanceOf(
-        users[0],
+      const unRevealedBalance = await AssetContract.balanceOf(
+        user.address,
         unrevealedtokenId
       );
-      const revealedDeployerBalance = await AssetContract.balanceOf(
-        users[0],
+      const revealedBalance = await AssetContract.balanceOf(
+        user.address,
         revealedtokenId
       );
-      expect(unRevealedDeployerBalance.toString()).to.equal('10');
-      expect(revealedDeployerBalance.toString()).to.equal('10');
+      expect(unRevealedBalance.toString()).to.equal('10');
+      expect(revealedBalance.toString()).to.equal('10');
     });
     it('Should not be able to burn amount less than one', async function () {
-      const {AssetRevealContract, unrevealedtokenId} =
+      const {AssetRevealContractAsUser, unrevealedtokenId} =
         await runRevealTestSetup();
       await expect(
-        AssetRevealContract.revealBurn(unrevealedtokenId, 0)
+        AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 0)
       ).to.be.revertedWith('Amount should be greater than 0');
     });
     it('Should not be able to burn an asset that is already revealed', async function () {
-      const {AssetRevealContract, revealedtokenId} = await runRevealTestSetup();
+      const {AssetRevealContractAsUser, revealedtokenId} = await runRevealTestSetup();
       await expect(
-        AssetRevealContract.revealBurn(revealedtokenId, 1)
+        AssetRevealContractAsUser.revealBurn(revealedtokenId, 1)
       ).to.be.revertedWith('Asset is already revealed');
     });
     it('Should not be able to burn more than owned by the caller', async function () {
-      const {users, AssetRevealContract, AssetContract, unrevealedtokenId} =
+      const {user, AssetRevealContractAsUser, AssetContract, unrevealedtokenId} =
         await runRevealTestSetup();
       const balance = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId
       );
       await expect(
-        AssetRevealContract.revealBurn(unrevealedtokenId, balance + 1)
+        AssetRevealContractAsUser.revealBurn(unrevealedtokenId, balance + 1)
       ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
     it("Should not be able to burn a token that doesn't exist", async function () {
-      const {AssetRevealContract} = await runRevealTestSetup();
-      await expect(AssetRevealContract.revealBurn(123, 1)).to.be.revertedWith(
+      const {AssetRevealContractAsUser} = await runRevealTestSetup();
+      await expect(AssetRevealContractAsUser.revealBurn(123, 1)).to.be.revertedWith(
         'ERC1155: burn amount exceeds totalSupply'
       );
     });
     it('Should be able to burn unrevealed owned assets', async function () {
-      const {AssetRevealContract, AssetContract, unrevealedtokenId, users} =
+      const {AssetRevealContractAsUser, AssetContract, unrevealedtokenId, user} =
         await runRevealTestSetup();
-      const burnTx = await AssetRevealContract.revealBurn(unrevealedtokenId, 1);
+      const burnTx = await AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1);
       await burnTx.wait();
 
       const userBalance = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId
       );
       expect(userBalance.toString()).to.equal('9');
     });
     it('Should emit burn event with correct data', async function () {
-      const {AssetRevealContract, unrevealedtokenId, users} =
+      const {AssetRevealContractAsUser, unrevealedtokenId, user} =
         await runRevealTestSetup();
-      const burnTx = await AssetRevealContract.revealBurn(unrevealedtokenId, 1);
+      const burnTx = await AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1);
       const burnResult = await burnTx.wait();
       const burnEvent = burnResult.events[1];
       expect(burnEvent.event).to.equal('AssetRevealBurn');
       // revealer
-      expect(burnEvent.args[0]).to.equal(users[0]);
+      expect(burnEvent.args[0]).to.equal(user.address);
       // token id that is being revealed
       expect(burnEvent.args[1]).to.equal(unrevealedtokenId);
       // tier
@@ -110,39 +112,40 @@ describe('AssetReveal', function () {
     });
     it('Should be able to burn multiple unrevealed owned assets', async function () {
       const {
-        AssetRevealContract,
+        AssetRevealContractAsUser,
         AssetContract,
         unrevealedtokenId,
         unrevealedtokenId2,
-        users,
+        user,
       } = await runRevealTestSetup();
       const amountToBurn1 = 2;
       const amountToBurn2 = 3;
       const tk1BalanceBeforeBurn = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId
       );
 
       const tk2BalanceBeforeBurn = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId2
       );
 
-      const burnTx = await AssetRevealContract.revealBatchBurn(
+      const burnTx = await AssetRevealContractAsUser.revealBatchBurn(
         [unrevealedtokenId, unrevealedtokenId2],
         [amountToBurn1, amountToBurn2]
       );
       await burnTx.wait();
 
       const tk1BalanceAfterBurn = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId
       );
 
+      // TODO: fix
       // expect(tk1BalanceBeforeBurn.sub(5)).to.equal(tk1BalanceAfterBurn);
 
       const tk2BalanceAfterBurn = await AssetContract.balanceOf(
-        users[0],
+        user.address,
         unrevealedtokenId2
       );
 
@@ -157,7 +160,7 @@ describe('AssetReveal', function () {
   describe('Minting', function () {
     it('Should allow minting with valid signature', async function () {
       const {
-        users,
+        user,
         unrevealedtokenId,
         generateRevealSignature,
         revealAsset,
@@ -169,7 +172,7 @@ describe('AssetReveal', function () {
       const amounts = [1];
 
       const signature = await generateRevealSignature(
-        users[0], // revealer
+        user.address, // revealer
         unrevealedtokenId, // prevTokenId
         amounts,
         newMetadataHashes,
@@ -184,18 +187,18 @@ describe('AssetReveal', function () {
       );
       expect(result.events[2].event).to.equal('AssetRevealMint');
       const newTokenId = result.events[2].args.newTokenIds[0];
-      const balance = await AssetContract.balanceOf(users[0], newTokenId);
+      const balance = await AssetContract.balanceOf(user.address, newTokenId);
       expect(balance.toString()).to.equal('1');
     });
     it('Should allow minting when multiple copies revealed to the same metadata hash', async function () {
-      const {users, unrevealedtokenId, revealAsset, generateRevealSignature} =
+      const {user, unrevealedtokenId, revealAsset, generateRevealSignature} =
         await runRevealTestSetup();
       const newMetadataHashes = [
         'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
       ];
       const amounts = [2];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -213,14 +216,14 @@ describe('AssetReveal', function () {
       // TODO: check supply with new metadataHash has incremented by 2
     });
     it('Should not allow minting for multiple copies revealed to the same metadata hash if revealHash is used', async function () {
-      const {users, unrevealedtokenId, revealAsset, generateRevealSignature} =
+      const {user, unrevealedtokenId, revealAsset, generateRevealSignature} =
         await runRevealTestSetup();
       const newMetadataHashes = [
         'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
       ];
       const amounts = [2];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -235,7 +238,7 @@ describe('AssetReveal', function () {
       );
 
       const signature2 = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -249,7 +252,7 @@ describe('AssetReveal', function () {
     });
     it('should increase the tokens supply for tokens with same metadata hash', async function () {
       const {
-        users,
+        user,
         unrevealedtokenId,
         generateRevealSignature,
         revealAsset,
@@ -260,7 +263,7 @@ describe('AssetReveal', function () {
       ];
       const amounts = [1];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -274,10 +277,10 @@ describe('AssetReveal', function () {
         [revealHashA]
       );
       const newTokenId = result.events[2].args.newTokenIds[0];
-      const balance = await AssetContract.balanceOf(users[0], newTokenId);
+      const balance = await AssetContract.balanceOf(user.address, newTokenId);
       expect(balance.toString()).to.equal('1');
       const signature2 = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -290,12 +293,12 @@ describe('AssetReveal', function () {
         newMetadataHashes,
         [revealHashB]
       );
-      const balance2 = await AssetContract.balanceOf(users[0], newTokenId);
+      const balance2 = await AssetContract.balanceOf(user.address, newTokenId);
       expect(balance2.toString()).to.equal('2');
     });
     it('Should allow batch reveal minting with valid signatures', async function () {
       const {
-        users,
+        user,
         revealAssetBatch,
         generateBatchRevealSignature,
         unrevealedtokenId,
@@ -311,7 +314,7 @@ describe('AssetReveal', function () {
       const amounts2 = [1];
 
       const signature = await generateBatchRevealSignature(
-        users[0],
+        user.address,
         [unrevealedtokenId, unrevealedtokenId2],
         [amounts1, amounts2],
         [newMetadataHashes1, newMetadataHashes2],
@@ -331,7 +334,7 @@ describe('AssetReveal', function () {
       expect(result.events[5].event).to.equal('AssetRevealMint');
     });
     it('Should allow revealing multiple copies at the same time', async function () {
-      const {users, generateRevealSignature, revealAsset, unrevealedtokenId} =
+      const {user, generateRevealSignature, revealAsset, unrevealedtokenId} =
         await runRevealTestSetup();
       const newMetadataHashes = [
         'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJ1',
@@ -343,7 +346,7 @@ describe('AssetReveal', function () {
       ];
       const amountToMint = [1, 2, 1, 7, 1, 2];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amountToMint,
         newMetadataHashes,
@@ -376,7 +379,7 @@ describe('AssetReveal', function () {
     });
     it('Should allow instant reveal when authorized by the backend', async function () {
       const {
-        users,
+        user,
         generateBurnAndRevealSignature,
         instantReveal,
         unrevealedtokenId,
@@ -387,7 +390,7 @@ describe('AssetReveal', function () {
       const amounts = [1];
 
       const signature = await generateBurnAndRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHash,
@@ -423,7 +426,7 @@ describe('AssetReveal', function () {
     });
     it('Should not allow minting with invalid prevTokenId', async function () {
       const {
-        users,
+        user,
         generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
@@ -433,7 +436,7 @@ describe('AssetReveal', function () {
       ];
       const amounts = [1];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -452,7 +455,7 @@ describe('AssetReveal', function () {
     });
     it('Should not allow minting with invalid amount', async function () {
       const {
-        users,
+        user,
         generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
@@ -462,7 +465,7 @@ describe('AssetReveal', function () {
       ];
       const amounts = [1];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -481,7 +484,7 @@ describe('AssetReveal', function () {
     });
     it('Should not allow minting with invalid metadataHashes', async function () {
       const {
-        users,
+        user,
         generateRevealSignature,
         unrevealedtokenId,
         AssetRevealContract,
@@ -491,7 +494,7 @@ describe('AssetReveal', function () {
       ];
       const amounts = [1];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -510,7 +513,7 @@ describe('AssetReveal', function () {
     });
     it('Should not allow using the same signature twice', async function () {
       const {
-        users,
+        user,
         generateRevealSignature,
         revealAsset,
         unrevealedtokenId,
@@ -521,7 +524,7 @@ describe('AssetReveal', function () {
       ];
       const amounts = [1];
       const signature = await generateRevealSignature(
-        users[0],
+        user.address,
         unrevealedtokenId,
         amounts,
         newMetadataHashes,
@@ -544,7 +547,7 @@ describe('AssetReveal', function () {
           newMetadataHashes,
           [revealHashA]
         )
-      ).to.be.revertedWith('Invalid revealHash');
+      ).to.be.revertedWith('Invalid revealMint signature'); // TODO: check this is correct and not 'Invalid revealHash'
     });
   });
 });

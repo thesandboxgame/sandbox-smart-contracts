@@ -52,47 +52,47 @@ export async function runAssetSetup() {
 
   await AssetContract.deployed();
 
-    // Asset contract is not user-facing and we block users from minting directly
-    // Contracts that interact with Asset must have the necessary ROLE
-    // Here we set up the necessary roles for testing
-    const AssetContractAsAdmin = await AssetContract.connect(assetAdmin);
-    const AssetContractAsMinter = await AssetContract.connect(minter);
-    const AssetContractAsBurner = await AssetContract.connect(burner);
-    const AssetContractAsOwner = await AssetContract.connect(owner);
-    const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
-    const minterRole = await AssetContract.MINTER_ROLE();
-    const burnerRole = await AssetContract.BURNER_ROLE();
-    const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
-    await AssetContractAsAdmin.grantRole(minterRole, minter.address);
-    await AssetContractAsAdmin.grantRole(burnerRole, burner.address);
-    await AssetContractAsAdmin.grantRole(bridgeMinterRole, bridgeMinter.address);
-    // end set up roles
+  // Asset contract is not user-facing and we block users from minting directly
+  // Contracts that interact with Asset must have the necessary ROLE
+  // Here we set up the necessary roles for testing
+  const AssetContractAsAdmin = await AssetContract.connect(assetAdmin);
+  const AssetContractAsMinter = await AssetContract.connect(minter);
+  const AssetContractAsBurner = await AssetContract.connect(burner);
+  const AssetContractAsOwner = await AssetContract.connect(owner);
+  const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
+  const minterRole = await AssetContract.MINTER_ROLE();
+  const burnerRole = await AssetContract.BURNER_ROLE();
+  const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
+  await AssetContractAsAdmin.grantRole(minterRole, minter.address);
+  await AssetContractAsAdmin.grantRole(burnerRole, burner.address);
+  await AssetContractAsAdmin.grantRole(bridgeMinterRole, bridgeMinter.address);
+  // end set up roles
 
-    const uris = [
-      'QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY',
-      'QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR',
-      'QmUxnKe5DyjxKuwq2AMGDLYeQALnQxcffCZCgtj5a41DYw',
-      'QmYQztw9x8WyrUFDxuc5D4xYaN3pBXWNGNAaguvfDhLLgg',
-      'QmUXH1JBPMYxCmzNEMRDGTPtHmePvbo4uVEBreN3sowDwG',
-      'QmdRwSPCuPGfxSYTaot9Eqz8eU9w1DGp8mY97pTCjnSWqk',
-      'QmNrwUiZfQLYaZFHNLzxqfiLxikKYRzZcdWviyDaNhrVhm',
-    ];
-    const baseUri = 'ipfs://';
+  const uris = [
+    'QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY',
+    'QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR',
+    'QmUxnKe5DyjxKuwq2AMGDLYeQALnQxcffCZCgtj5a41DYw',
+    'QmYQztw9x8WyrUFDxuc5D4xYaN3pBXWNGNAaguvfDhLLgg',
+    'QmUXH1JBPMYxCmzNEMRDGTPtHmePvbo4uVEBreN3sowDwG',
+    'QmdRwSPCuPGfxSYTaot9Eqz8eU9w1DGp8mY97pTCjnSWqk',
+    'QmNrwUiZfQLYaZFHNLzxqfiLxikKYRzZcdWviyDaNhrVhm',
+  ];
+  const baseUri = 'ipfs://';
 
-    return {
-      AssetContract,
-      AssetContractAsOwner,
-      AssetContractAsMinter,
-      AssetContractAsBurner,
-      AssetContractAsAdmin,
-      owner,
-      secondOwner,
-      bridgeMinter,
-      minterRole,
-      burnerRole,
-      defaultAdminRole,
-      bridgeMinterRole,
-      uris,
-      baseUri,
-    };
-  }
+  return {
+    AssetContract,
+    AssetContractAsOwner,
+    AssetContractAsMinter,
+    AssetContractAsBurner,
+    AssetContractAsAdmin,
+    owner,
+    secondOwner,
+    bridgeMinter,
+    minterRole,
+    burnerRole,
+    defaultAdminRole,
+    bridgeMinterRole,
+    uris,
+    baseUri,
+  };
+}

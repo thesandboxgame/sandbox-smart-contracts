@@ -18,7 +18,12 @@ describe('AssetContract', function () {
     it('Should return correct asset uri ', async function () {
       const {AssetContractAsMinter, AssetContract, owner, uris, baseUri} =
         await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -39,7 +44,12 @@ describe('AssetContract', function () {
         uris,
         baseUri,
       } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -72,7 +82,12 @@ describe('AssetContract', function () {
         baseUri,
         defaultAdminRole,
       } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -116,25 +131,27 @@ describe('AssetContract', function () {
     it('Should mint an asset', async function () {
       const {AssetContractAsMinter, AssetContract, owner, uris} =
         await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
         'TransferSingle'
       );
       const tokenId = args.args.id;
-      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(3);
+      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(
+        3
+      );
     });
 
     it('only minter can mint an asset', async function () {
       const {AssetContract, owner, minterRole, uris} = await runAssetSetup();
       await expect(
-        AssetContract.connect(owner).mint(
-          owner.address,
-          10,
-          3,
-          uris[0]
-        )
+        AssetContract.connect(owner).mint(owner.address, 10, 3, uris[0])
       ).to.be.revertedWith(
         `AccessControl: account ${owner.address.toLocaleLowerCase()} is missing role ${minterRole}`
       );
@@ -189,7 +206,12 @@ describe('AssetContract', function () {
         owner,
         uris,
       } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -197,9 +219,13 @@ describe('AssetContract', function () {
       );
       const tokenId = args.args.id;
       expect(tokenId).to.be.equal(10);
-      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(3);
+      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(
+        3
+      );
       await AssetContractAsBurner.burnFrom(owner.address, tokenId, 2);
-      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(1);
+      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(
+        1
+      );
     });
 
     it('If not BURNER_ROLE cannot burn asset of any owner', async function () {
@@ -211,7 +237,12 @@ describe('AssetContract', function () {
         burnerRole,
         uris,
       } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -219,7 +250,9 @@ describe('AssetContract', function () {
       );
       const tokenId = args.args.id;
       expect(tokenId).to.be.equal(10);
-      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(3);
+      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(
+        3
+      );
 
       await expect(
         AssetContract.connect(secondOwner).burnFrom(owner.address, tokenId, 3)
@@ -231,7 +264,12 @@ describe('AssetContract', function () {
     it('owner can burn their own asset', async function () {
       const {AssetContractAsMinter, owner, AssetContract, uris} =
         await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -239,21 +277,26 @@ describe('AssetContract', function () {
       );
       const tokenId1 = args.args.id;
 
-      expect(await AssetContract.balanceOf(owner.address, tokenId1)).to.be.equal(3);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenId1)
+      ).to.be.equal(3);
 
-      await AssetContract.connect(owner).burn(
-        owner.address,
-        tokenId1,
-        3
-      );
+      await AssetContract.connect(owner).burn(owner.address, tokenId1, 3);
 
-      expect(await AssetContract.balanceOf(owner.address, tokenId1)).to.be.equal(0);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenId1)
+      ).to.be.equal(0);
     });
 
     it("owner cannot burn someone else's asset", async function () {
       const {AssetContractAsMinter, owner, AssetContract, uris, secondOwner} =
         await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       await expectEventWithArgs(AssetContractAsMinter, tnx, 'TransferSingle');
 
       expect(await AssetContract.balanceOf(owner.address, 10)).to.be.equal(3);
@@ -283,19 +326,37 @@ describe('AssetContract', function () {
       );
       const tokenIds = args.args.ids;
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[2])).to.be.equal(
-        100
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[2])
+      ).to.be.equal(100);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[3])
+      ).to.be.equal(1);
+
+      await AssetContract.connect(owner).burnBatch(
+        owner.address,
+        [1, 2, 3, 4],
+        [4, 4, 20, 1]
       );
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[3])).to.be.equal(1);
 
-      await AssetContract.connect(owner).burnBatch(owner.address, [1, 2, 3, 4], [4, 4, 20, 1]);
-
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(1);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(1);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[2])).to.be.equal(80);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[3])).to.be.equal(0);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[2])
+      ).to.be.equal(80);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[3])
+      ).to.be.equal(0);
     });
 
     it("owner cannot batch burn someone else's assets", async function () {
@@ -309,7 +370,11 @@ describe('AssetContract', function () {
       );
 
       await expect(
-        AssetContract.connect(secondOwner).burn(owner.address, [1, 2, 3, 4], [5, 5, 100, 1])
+        AssetContract.connect(secondOwner).burn(
+          owner.address,
+          [1, 2, 3, 4],
+          [5, 5, 100, 1]
+        )
       ).to.be.revertedWith(`ERC1155: caller is not token owner or approved`);
 
       expect(await AssetContract.balanceOf(owner.address, 1)).to.be.equal(5);
@@ -338,12 +403,18 @@ describe('AssetContract', function () {
       );
       const tokenIds = args.args.ids;
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[2])).to.be.equal(
-        100
-      );
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[3])).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[2])
+      ).to.be.equal(100);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[3])
+      ).to.be.equal(1);
 
       await AssetContractAsBurner.burnBatchFrom(
         owner.address,
@@ -351,10 +422,18 @@ describe('AssetContract', function () {
         [4, 4, 20, 1]
       );
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(1);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(1);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[2])).to.be.equal(80);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[3])).to.be.equal(0);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[2])
+      ).to.be.equal(80);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[3])
+      ).to.be.equal(0);
     });
 
     it('If not BURNER_ROLE cannot batch burn assets of any owner', async function () {
@@ -366,7 +445,12 @@ describe('AssetContract', function () {
         burnerRole,
         uris,
       } = await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 3, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        3,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContractAsMinter,
         tnx,
@@ -374,7 +458,9 @@ describe('AssetContract', function () {
       );
       const tokenId = args.args.id;
       expect(tokenId).to.be.equal(10);
-      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(3);
+      expect(await AssetContract.balanceOf(owner.address, tokenId)).to.be.equal(
+        3
+      );
 
       await expect(
         AssetContract.connect(secondOwner).burnFrom(owner.address, tokenId, 3)
@@ -388,7 +474,12 @@ describe('AssetContract', function () {
     it('owner can transfer an asset', async function () {
       const {AssetContractAsMinter, owner, AssetContract, secondOwner, uris} =
         await runAssetSetup();
-      const tnx = await AssetContractAsMinter.mint(owner.address, 10, 5, uris[0]);
+      const tnx = await AssetContractAsMinter.mint(
+        owner.address,
+        10,
+        5,
+        uris[0]
+      );
       const args = await expectEventWithArgs(
         AssetContract,
         tnx,
@@ -396,13 +487,21 @@ describe('AssetContract', function () {
       );
       const tokenId1 = args.args.id;
 
-      expect(await AssetContract.balanceOf(owner.address, tokenId1)).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenId1)
+      ).to.be.equal(5);
 
-      await AssetContract.connect(owner).safeTransferFrom(owner.address, secondOwner.address, tokenId1, 5, '0x');
-
-      expect(await AssetContract.balanceOf(secondOwner.address, tokenId1)).to.be.equal(
-        5
+      await AssetContract.connect(owner).safeTransferFrom(
+        owner.address,
+        secondOwner.address,
+        tokenId1,
+        5,
+        '0x'
       );
+
+      expect(
+        await AssetContract.balanceOf(secondOwner.address, tokenId1)
+      ).to.be.equal(5);
     });
 
     it('owner can batch transfer assets', async function () {
@@ -421,12 +520,18 @@ describe('AssetContract', function () {
       );
       const tokenIds = args.args.ids;
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(5);
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[2])).to.be.equal(
-        100
-      );
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[3])).to.be.equal(1);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(5);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[2])
+      ).to.be.equal(100);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[3])
+      ).to.be.equal(1);
 
       await AssetContract.connect(owner).safeBatchTransferFrom(
         owner.address,
@@ -444,9 +549,13 @@ describe('AssetContract', function () {
         await AssetContract.balanceOf(secondOwner.address, tokenIds[1])
       ).to.be.equal(5);
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[0])).to.be.equal(0);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[0])
+      ).to.be.equal(0);
 
-      expect(await AssetContract.balanceOf(owner.address, tokenIds[1])).to.be.equal(0);
+      expect(
+        await AssetContract.balanceOf(owner.address, tokenIds[1])
+      ).to.be.equal(0);
     });
   });
 });

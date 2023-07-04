@@ -1,20 +1,17 @@
 import hre, {ethers} from 'hardhat';
-
-// TODO: why aren't we using backendAuthWallet default same as core?
+import { Contract } from 'ethers';
 
 async function burnAndRevealSignature(
   recipient: string,
   prevTokenId: number,
   amounts: number[],
   metadataHashes: string[],
-  revealHashes: string[]
+  revealHashes: string[],
+  contract: Contract,
+  // @typescript-eslint/no-explicit-any
+  signer: any
 ): Promise<string> {
-  const {getNamedAccounts} = hre;
-  const {backendAuthWallet} = await getNamedAccounts();
-
-  const AssetRevealContract = await ethers.getContract('AssetReveal');
-  const signer = ethers.provider.getSigner(backendAuthWallet);
-
+  const AssetRevealContract = contract;
   const data = {
     types: {
       InstantReveal: [
@@ -52,15 +49,12 @@ async function batchRevealSignature(
   prevTokenIds: number[],
   amounts: number[][],
   metadataHashes: string[][],
-  revealHashes: string[][]
+  revealHashes: string[][],
+  contract: Contract,
+  // @typescript-eslint/no-explicit-any
+  signer: any
 ): Promise<string> {
-  // get named accounts from hardhat
-  const {getNamedAccounts} = hre;
-  const {backendAuthWallet} = await getNamedAccounts();
-
-  const AssetRevealContract = await ethers.getContract('AssetReveal');
-
-  const signer = ethers.provider.getSigner(backendAuthWallet);
+  const AssetRevealContract = contract;
   const data = {
     types: {
       BatchReveal: [
@@ -99,17 +93,12 @@ async function revealSignature(
   prevTokenId: number,
   amounts: number[],
   metadataHashes: string[],
-  revealHashes: string[]
+  revealHashes: string[],
+  contract: Contract,
+  // @typescript-eslint/no-explicit-any
+  signer: any
 ): Promise<string> {
-  // get named accounts from hardhat
-  const {getNamedAccounts} = hre;
-  const {backendAuthWallet} = await getNamedAccounts();
-
-  const AssetRevealContract = await ethers.getContract('AssetReveal');
-
-  const signer = ethers.provider.getSigner(backendAuthWallet);
-
-  // "Reveal(address recipient,uint256 prevTokenId,uint256[] amounts,string[] metadataHashes)"
+  const AssetRevealContract = contract;
   const data = {
     types: {
       Reveal: [

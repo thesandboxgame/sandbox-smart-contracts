@@ -2,6 +2,8 @@ import {expect} from 'chai';
 import {BigNumber} from 'ethers';
 import {runCreateTestSetup} from './fixtures/assetCreateFixtures';
 
+// TODO: missing AssetCreate DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
+
 describe('AssetCreate', function () {
   describe('General', function () {
     it('should initialize with the correct values', async function () {
