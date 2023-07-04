@@ -6,7 +6,7 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner, log} = deployments;
-  const {sandAdmin} = await getNamedAccounts();
+  const {catalystAdmin} = await getNamedAccounts();
   const minterRole = await read('Catalyst', 'MINTER_ROLE');
   if (
     !(await read(
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (
     await catchUnknownSigner(
       execute(
         'Catalyst',
-        {from: sandAdmin, log: true},
+        {from: catalystAdmin, log: true},
         'grantRole',
         minterRole,
         '0x803E1522e136121c058dc9541E7B3164957c200e' // Seba's mumbai wallet
