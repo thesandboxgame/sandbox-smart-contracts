@@ -1,5 +1,5 @@
-import hre, {ethers} from 'hardhat';
-import {Contract, Signer} from 'ethers';
+import hre from 'hardhat';
+import {Contract} from 'ethers';
 
 const createAssetMintSignature = async (
   creator: string,
@@ -8,9 +8,9 @@ const createAssetMintSignature = async (
   revealed: boolean,
   metadataHash: string,
   contract: Contract,
+  // @typescript-eslint/no-explicit-any
   signer: any
 ) => {
-  
   const AssetCreateContract = contract;
   const nonce = await AssetCreateContract.signatureNonces(creator);
 

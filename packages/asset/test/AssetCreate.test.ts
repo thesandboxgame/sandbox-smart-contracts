@@ -643,8 +643,12 @@ describe('AssetCreate', function () {
         tokenIds = args[1];
       }
 
-      expect(await AssetContract.balanceOf(user.address, tokenIds[0])).to.equal(3);
-      expect(await AssetContract.balanceOf(user.address, tokenIds[1])).to.equal(5);
+      expect(await AssetContract.balanceOf(user.address, tokenIds[0])).to.equal(
+        3
+      );
+      expect(await AssetContract.balanceOf(user.address, tokenIds[1])).to.equal(
+        5
+      );
     });
     it('should mint correct tiers of assets', async function () {
       const {
