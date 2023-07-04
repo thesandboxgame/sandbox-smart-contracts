@@ -1,25 +1,20 @@
 # Audit best practices
 
-Here a list of best practices to check before sending a contract to an audit:
+Here a non-exhaustive list of best practices to check before sending a contract to an audit:
 
-- fixed pragma
-- natspec at least on external functions, variables, contract
-- linebreaks between code (imports, contract, within functions, etc) to improve lisibility
-- indentation
+## Smart Contracts
+- fixed pragma version on all smart contracts
+- natspec at least on external functions, public functions, variables, beginning of contract
+- linebreaks between code (imports, contract, within functions, etc) to improve readability
+- consistent indentation
 - contract size under 24kb
-- 100% coverage
-- fuzzy testing
-- generate gas report
-- generate documentation from natspec
-- check gas usage
+- check gas usage and optimise where it is sensible to do so 
+- generate a gas report
 - events on every non view functions
 - DRTW: use OZ when possible (Access Control)
 - use constants instead of strings or duplicate numbers
-- tests deploy the contracts
 - disable initializer in the constructor for upgradeable contracts
 - when upgrading a contract, check for storage consistency
-- run slither but be selective about the issues
-- deploy on a testnet & test it
 - check who's owning the contract, the deployer should not own the contract
 - when using ERC2771, only use msgSender()
 - avoid loops on arrays that are not limited in size
@@ -28,14 +23,12 @@ Here a list of best practices to check before sending a contract to an audit:
 - logic issues: go back to the specs and compare
 - avoid fake random 
 - use uint256 over any other uint
-- verify your contract to improve trust
-- open source your contracts
 - check your inputs (address it no 0, size is correct, limit size of arrays)
 - think about how the user/dApp will interact with your contract (am i missing a getter ?)
-- think about how to make your contract as generic as possible, that help building an open protocol
+- think about how to make your contract as generic as possible, that helps us build an open protocol
 - when using OZ upgradeable contracts, don't forget to call the init functions
 - check if your `supportsInterface` matchs what your contract uses
-- check for the usual attacks: reentrency, front running, etc
+- check for the usual attacks: reentrancy, front running, etc
 - challenge your naming
 - only use named imports
 - order your code (variables, constructor, public, etc)
@@ -45,9 +38,26 @@ Here a list of best practices to check before sending a contract to an audit:
 - check for typographical Errors
 - unused named variable
 - when dealing with ERC20, keep in mind deflationary tokens
-- one condition per require for lisibility
+- one condition per require for readability
 - check for duplicate code
-- clean debug / todo comments
-- constants in upper case
+- clean debug / TODO comments
+- put constants in upper case
 - consider to block renouncing ownership
 - consider using immutable on variables
+
+## Unit Tests
+- 100% coverage
+- fuzzy testing
+
+## Reports
+- generate documentation from natspec
+
+## Deployment
+- tests deploy the contracts inside the fixture; no deploy scripts in package
+- verify your contract to improve trust
+- open source your contracts
+- integration tests
+
+## Security
+- run slither but be selective about the issues
+- deploy on a testnet & test manually
