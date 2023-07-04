@@ -4,8 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAdmin, upgradeAdmin} =
-    await getNamedAccounts();
+  const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
