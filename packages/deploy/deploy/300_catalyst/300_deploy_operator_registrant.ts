@@ -7,6 +7,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
+  // TODO: review subscriptions for Catalyst and Asset
+  
   // Operator filter subscription
   await deploy('OperatorFilterRegistrant', {
     from: deployer,

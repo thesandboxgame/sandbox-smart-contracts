@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('AuthValidator', {
     from: deployer,
-    contract: '@sandbox-smart-contracts/asset/contracts/AuthValidator.sol:AuthValidator', // TODO: is already deployed ?
+    contract: '@sandbox-smart-contracts/asset/contracts/AuthValidator.sol:AuthValidator', // TODO: is already deployed as PolygonAuthValidator
     args: [authValidatorAdmin, backendAuthWallet],
     log: true,
     skipIfAlreadyDeployed: true,

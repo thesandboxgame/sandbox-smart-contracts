@@ -4,15 +4,17 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetCreateAdmin, upgradeAdmin, trustedForwarder} =
+  const {deployer, assetAdmin, upgradeAdmin} =
     await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
-  const AuthValidatorContract = await deployments.get('AuthValidator');
+  const AuthValidatorContract = await deployments.get('PolygonAuthValidator');
   const CatalystContract = await deployments.get('Catalyst');
 
   const name = 'Sandbox Asset Create';
   const version = '1.0';
+
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   await deploy('AssetCreate', {
     from: deployer,
@@ -28,8 +30,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           AssetContract.address,
           CatalystContract.address,
           AuthValidatorContract.address,
-          trustedForwarder,
-          assetCreateAdmin, // DEFAULT_ADMIN_ROLE
+          TRUSTED_FORWARDER.address,
+          assetAdmin, // DEFAULT_ADMIN_ROLE
         ],
       },
       upgradeIndex: 0,
@@ -40,4 +42,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset', 'AssetCreate', 'AssetCreate_deploy'];
-func.dependencies = ['Asset_deploy', 'Catalyst_deploy', 'AuthValidator_deploy'];
+func.dependencies = ['Asset', 'Catalyst', 'AuthValidator', 'TRUSTED_FORWARDER_V2'];

@@ -4,8 +4,10 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAdmin, upgradeAdmin, trustedForwarder} =
+  const {deployer, assetAdmin, upgradeAdmin} =
     await getNamedAccounts();
+
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   await deploy('Asset', {
     from: deployer,
@@ -16,10 +18,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         methodName: 'initialize',
         args: [
-          trustedForwarder,
+          TRUSTED_FORWARDER.address,
           assetAdmin,
-          [1, 2, 3, 4, 5, 6],
-          [2, 4, 6, 8, 10, 12],
+          [1, 2, 3, 4, 5, 6], // TODO: data import
+          [2, 4, 6, 8, 10, 12], // TODO: data import
           'ipfs://',
         ],
       },
@@ -31,3 +33,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset', 'Asset_deploy'];
+func.dependencies = ['TRUSTED_FORWARDER_V2'];
