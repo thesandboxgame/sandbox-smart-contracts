@@ -36,7 +36,7 @@ describe('AssetCreate', function () {
     });
     it('should revert if tier mismatches signed tier', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -46,7 +46,7 @@ describe('AssetCreate', function () {
       const signedTier = 4;
       const txSuppliedTier = 5;
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         signedTier,
         1,
         true,
@@ -59,7 +59,7 @@ describe('AssetCreate', function () {
     });
     it('should revert if amount mismatches signed amount', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -69,7 +69,7 @@ describe('AssetCreate', function () {
       const signedAmount = 1;
       const txSuppliedAmount = 2;
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         signedAmount,
         true,
@@ -82,7 +82,7 @@ describe('AssetCreate', function () {
     });
     it('should revert if metadataHash mismatches signed metadataHash', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -90,7 +90,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 2);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         1,
         true,
@@ -103,7 +103,7 @@ describe('AssetCreate', function () {
     });
     it('should revert if the signature has been used before', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -111,7 +111,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 2);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         1,
         true,
@@ -128,16 +128,13 @@ describe('AssetCreate', function () {
     });
     it("should revert if user doesn't have enough catalysts", async function () {
       const {
-        deployer,
-        mintCatalyst,
+        user,
         mintSingleAsset,
         generateSingleMintSignature,
         metadataHashes,
-        otherWallet,
       } = await runCreateTestSetup();
-      await mintCatalyst(4, 1, otherWallet);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         1,
         true,
@@ -146,11 +143,11 @@ describe('AssetCreate', function () {
 
       await expect(
         mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
-      ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
+      ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
     it('should mint a single asset successfully if all conditions are met', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -158,7 +155,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 1);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         1,
         true,
@@ -170,7 +167,7 @@ describe('AssetCreate', function () {
     });
     it('should increment the creator nonce correctly', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -179,7 +176,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 1);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         1,
         true,
@@ -189,11 +186,11 @@ describe('AssetCreate', function () {
       await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
         .not.be.reverted;
 
-      expect(await getCreatorNonce(deployer)).to.equal(BigNumber.from(1));
+      expect(await getCreatorNonce(user.address)).to.equal(BigNumber.from(1));
     });
     it('should mint the correct amount of assets', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -203,7 +200,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         5,
         true,
@@ -212,17 +209,18 @@ describe('AssetCreate', function () {
       await expect(mintSingleAsset(signature, 4, 5, true, metadataHashes[0])).to
         .not.be.reverted;
 
+      // TODO:
       // get tokenId from the event
       const tokenId = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
         .args.tokenId;
 
-      expect(await AssetContract.balanceOf(deployer, tokenId)).to.equal(
+      expect(await AssetContract.balanceOf(user.address, tokenId)).to.equal(
         BigNumber.from(5)
       );
     });
     it('should mint the correct tier of assets', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -231,7 +229,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         5,
         true,
@@ -253,7 +251,7 @@ describe('AssetCreate', function () {
     });
     it('should mint an asset with correct metadataHash', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -263,7 +261,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         5,
         true,
@@ -286,7 +284,7 @@ describe('AssetCreate', function () {
     });
     it('should emit an AssetMinted event', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         generateSingleMintSignature,
         AssetCreateContract,
@@ -294,7 +292,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 5);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         5,
         true,
@@ -308,14 +306,14 @@ describe('AssetCreate', function () {
           5,
           true,
           metadataHashes[0],
-          deployer
+          user.address
         )
       ).to.emit(AssetCreateContract, 'AssetMinted');
     });
     it;
     it('should NOT allow minting with the same metadata twice', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -323,7 +321,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 4);
       const signature1 = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         2,
         true,
@@ -332,7 +330,7 @@ describe('AssetCreate', function () {
       await expect(mintSingleAsset(signature1, 4, 2, true, metadataHashes[0]))
         .to.not.be.reverted;
       const signature2 = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         2,
         true,
@@ -344,7 +342,7 @@ describe('AssetCreate', function () {
     });
     it('should NOT mint same token ids', async function () {
       const {
-        deployer,
+        user,
         mintCatalyst,
         mintSingleAsset,
         generateSingleMintSignature,
@@ -353,7 +351,7 @@ describe('AssetCreate', function () {
       } = await runCreateTestSetup();
       await mintCatalyst(4, 4);
       const signature1 = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         2,
         true,
@@ -362,7 +360,7 @@ describe('AssetCreate', function () {
       await expect(mintSingleAsset(signature1, 4, 2, true, metadataHashes[0]))
         .to.not.be.reverted;
       const signature2 = await generateSingleMintSignature(
-        deployer,
+        user.address,
         4,
         2,
         true,
@@ -412,13 +410,13 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(5, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -441,13 +439,13 @@ describe('AssetCreate', function () {
         mintCatalyst,
         metadataHashes,
         additionalMetadataHash,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -469,13 +467,13 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -498,13 +496,13 @@ describe('AssetCreate', function () {
         mintCatalyst,
         metadataHashes,
         additionalMetadataHash,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -526,13 +524,13 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -561,13 +559,11 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
-        otherWallet,
+        user,
       } = await runCreateTestSetup();
-      await mintCatalyst(3, 1);
-      await mintCatalyst(4, 1, otherWallet);
+      await mintCatalyst(4, 1);
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -581,7 +577,7 @@ describe('AssetCreate', function () {
           [true, true],
           metadataHashes
         )
-      ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
+      ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
     it('should correctly mint multiple assets if all conditions are met', async function () {
       const {
@@ -589,13 +585,13 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 1);
       await mintCatalyst(4, 1);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [1, 1],
         [true, true],
@@ -619,13 +615,13 @@ describe('AssetCreate', function () {
         metadataHashes,
         AssetContract,
         AssetCreateContract,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -647,8 +643,8 @@ describe('AssetCreate', function () {
         tokenIds = args[1];
       }
 
-      expect(await AssetContract.balanceOf(deployer, tokenIds[0])).to.equal(3);
-      expect(await AssetContract.balanceOf(deployer, tokenIds[1])).to.equal(5);
+      expect(await AssetContract.balanceOf(user.address, tokenIds[0])).to.equal(3);
+      expect(await AssetContract.balanceOf(user.address, tokenIds[1])).to.equal(5);
     });
     it('should mint correct tiers of assets', async function () {
       const {
@@ -657,13 +653,13 @@ describe('AssetCreate', function () {
         mintCatalyst,
         metadataHashes,
         AssetCreateContract,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -696,13 +692,13 @@ describe('AssetCreate', function () {
         metadataHashes,
         AssetContract,
         AssetCreateContract,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -737,13 +733,13 @@ describe('AssetCreate', function () {
         mintCatalyst,
         metadataHashes,
         AssetCreateContract,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 3);
       await mintCatalyst(4, 5);
 
       const signature = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -756,7 +752,7 @@ describe('AssetCreate', function () {
           [3, 5],
           [true, true],
           metadataHashes,
-          deployer
+          user.address
         )
       ).to.emit(AssetCreateContract, 'AssetBatchMinted');
     });
@@ -766,13 +762,13 @@ describe('AssetCreate', function () {
         generateMultipleMintSignature,
         mintCatalyst,
         metadataHashes,
-        deployer,
+        user,
       } = await runCreateTestSetup();
       await mintCatalyst(3, 6);
       await mintCatalyst(4, 10);
 
       const signature1 = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -787,7 +783,7 @@ describe('AssetCreate', function () {
         metadataHashes
       );
       const signature2 = await generateMultipleMintSignature(
-        deployer,
+        user.address,
         [3, 4],
         [3, 5],
         [true, true],
@@ -809,14 +805,14 @@ describe('AssetCreate', function () {
       const {
         mintSpecialAsset,
         generateSingleMintSignature,
-        deployer,
+        user,
         metadataHashes,
         grantSpecialMinterRole,
       } = await runCreateTestSetup();
 
-      await grantSpecialMinterRole(deployer);
+      await grantSpecialMinterRole(user.address);
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         1,
         1,
         true,
@@ -829,12 +825,12 @@ describe('AssetCreate', function () {
       const {
         mintSpecialAsset,
         generateSingleMintSignature,
-        deployer,
+        user,
         metadataHashes,
       } = await runCreateTestSetup();
 
       const signature = await generateSingleMintSignature(
-        deployer,
+        user.address,
         1,
         1,
         true,
@@ -843,7 +839,7 @@ describe('AssetCreate', function () {
       await expect(
         mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
       ).to.be.revertedWith(
-        'AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6'
+        `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
       );
     });
   });

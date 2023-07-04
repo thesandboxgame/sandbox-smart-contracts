@@ -1,41 +1,114 @@
-import {deployments} from 'hardhat';
+import {ethers, upgrades} from 'hardhat';
+import {Contract} from 'ethers';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
 } from '../utils/createSignature';
 
-export const runCreateTestSetup = deployments.createFixture(
-  async ({deployments, getNamedAccounts, ethers}) => {
-    await deployments.fixture(['Asset', 'AssetCreate', 'AuthValidator']);
-    const {deployer, catalystMinter} = await getNamedAccounts();
-    const AssetContract = await ethers.getContract('Asset', deployer);
+const name = 'Sandbox Asset Create';
+const version = '1.0';
+
+const CATALYST_BASE_URI = 'ipfs://';
+const CATALYST_DEFAULT_ROYALTY = 100;
+const CATALYST_IPFS_CID_PER_TIER = [
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+];
+
+export async function runCreateTestSetup() {
+  const [catalystMinter, trustedForwarder, assetAdmin, user, otherWallet, catalystRoyaltyRecipient, catalystAdmin, authValidatorAdmin, backendAuthWallet] = await ethers.getSigners();
+
+    // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
+    // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT
+
+    const OperatorFilterRegistrantFactory = await ethers.getContractFactory('OperatorFilterRegistrant');
+    const OperatorFilterRegistrantContract = await OperatorFilterRegistrantFactory.deploy();
+
+    const AssetFactory = await ethers.getContractFactory('Asset');
+    const AssetContract = await upgrades.deployProxy(AssetFactory, [
+      trustedForwarder.address,
+      assetAdmin.address,
+      [1, 2, 3, 4, 5, 6],
+      [2, 4, 6, 8, 10, 12],
+      'ipfs://'
+    ], {
+      initializer: "initialize",
+    });
+
+    await AssetContract.deployed();
+
+    const CatalystFactory = await ethers.getContractFactory('Catalyst');
+    const CatalystContract = await upgrades.deployProxy(CatalystFactory, [
+      CATALYST_BASE_URI,
+      trustedForwarder.address,
+      catalystRoyaltyRecipient.address,
+      OperatorFilterRegistrantContract.address,
+      catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+      catalystMinter.address, // MINTER_ROLE
+      CATALYST_DEFAULT_ROYALTY,
+      CATALYST_IPFS_CID_PER_TIER,
+    ], {
+      initializer: "initialize",
+    });
+
+    await CatalystContract.deployed();
+
+    const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
+    const AuthValidatorContract = await AuthValidatorFactory.deploy(authValidatorAdmin.address, backendAuthWallet.address);
+
+    // END DEPLOY DEPENDENCIES
+
+    const AssetCreateFactory = await ethers.getContractFactory('AssetCreate');
+
+    const AssetCreateContract = await upgrades.deployProxy(AssetCreateFactory, [
+      name,
+      version,
+      AssetContract.address,
+      CatalystContract.address,
+      AuthValidatorContract.address,
+      trustedForwarder.address,
+      assetAdmin.address, // DEFAULT_ADMIN_ROLE
+    ], {
+      initializer: "initialize",
+    });
+
+    await AssetCreateContract.deployed();
+
+    const AssetCreateContractAsUser = AssetCreateContract.connect(user);
 
     // SETUP ROLES
-    const MinterRole = await AssetContract.MINTER_ROLE();
-    const AssetCreateContract = await ethers.getContract(
-      'AssetCreate',
-      deployer
-    );
-    const AuthValidatorContract = await ethers.getContract(
-      'AuthValidator',
-      deployer
-    );
-    await AssetContract.grantRole(MinterRole, AssetCreateContract.address);
+    // get AssetContract as DEFAULT_ADMIN_ROLE
+    const AssetAsAdmin = AssetContract.connect(assetAdmin);
+    const MinterRole = await AssetAsAdmin.MINTER_ROLE();
+    await AssetAsAdmin.grantRole(MinterRole, AssetCreateContract.address);
 
-    const CatalystContract = await ethers.getContract('Catalyst', deployer);
-    const CatalystMinterRole = await CatalystContract.MINTER_ROLE();
-    await CatalystContract.grantRole(
+    // get CatalystContract as DEFAULT_ADMIN_ROLE
+    const CatalystAsAdmin = CatalystContract.connect(catalystAdmin);
+    const CatalystMinterRole = await CatalystAsAdmin.MINTER_ROLE();
+    await CatalystAsAdmin.grantRole(
       CatalystMinterRole,
       AssetCreateContract.address
     );
+
+    const AssetCreateAsAdmin = AssetCreateContract.connect(assetAdmin);
+    const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
     // END SETUP ROLES
+
+    // HELPER FUNCTIONS
+    const grantSpecialMinterRole = async (address: string) => {
+      await AssetCreateAsAdmin.grantRole(SpecialMinterRole, address);
+    };
 
     const mintCatalyst = async (
       tier: number,
       amount: number,
-      to = deployer
+      to = user.address
     ) => {
-      const signer = ethers.provider.getSigner(catalystMinter);
+      const signer = catalystMinter;
       await CatalystContract.connect(signer).mint(to, tier, amount);
     };
 
@@ -46,13 +119,13 @@ export const runCreateTestSetup = deployments.createFixture(
       revealed: boolean,
       metadataHash: string
     ) => {
-      await AssetCreateContract.createAsset(
+      await AssetCreateContractAsUser.createAsset(
         signature,
         tier,
         amount,
         revealed,
         metadataHash,
-        deployer
+        user.address
       );
     };
 
@@ -63,20 +136,14 @@ export const runCreateTestSetup = deployments.createFixture(
       revealed: boolean[],
       metadataHashes: string[]
     ) => {
-      await AssetCreateContract.createMultipleAssets(
+      await AssetCreateContractAsUser.createMultipleAssets(
         signature,
         tiers,
         amounts,
         revealed,
         metadataHashes,
-        deployer
+        user.address
       );
-    };
-
-    const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
-
-    const grantSpecialMinterRole = async (address: string) => {
-      await AssetCreateContract.grantRole(SpecialMinterRole, address);
     };
 
     const mintSpecialAsset = async (
@@ -86,15 +153,16 @@ export const runCreateTestSetup = deployments.createFixture(
       revealed: boolean,
       metadataHash: string
     ) => {
-      await AssetCreateContract.createSpecialAsset(
+      await AssetCreateContractAsUser.createSpecialAsset(
         signature,
         tier,
         amount,
         revealed,
         metadataHash,
-        deployer
+        user.address
       );
     };
+
     const getCreatorNonce = async (creator: string) => {
       const nonce = await AssetCreateContract.creatorNonces(creator);
       return nonce;
@@ -112,7 +180,9 @@ export const runCreateTestSetup = deployments.createFixture(
         tier,
         amount,
         revealed,
-        metadataHash
+        metadataHash,
+        AssetCreateContract,
+        backendAuthWallet
       );
       return signature;
     };
@@ -129,10 +199,13 @@ export const runCreateTestSetup = deployments.createFixture(
         tiers,
         amounts,
         revealed,
-        metadataHashes
+        metadataHashes,
+        AssetCreateContract,
+        backendAuthWallet
       );
       return signature;
     };
+    // END HELPER FUNCTIONS
 
     return {
       metadataHashes: [
@@ -140,8 +213,8 @@ export const runCreateTestSetup = deployments.createFixture(
         'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1Fja',
       ],
       additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-      deployer,
-      otherWallet: '0xB37d8F5d1fEab932f99b2dC8ABda5F413043400B',
+      user,
+      otherWallet,
       AssetContract,
       AssetCreateContract,
       AuthValidatorContract,
@@ -155,5 +228,4 @@ export const runCreateTestSetup = deployments.createFixture(
       generateMultipleMintSignature,
       getCreatorNonce,
     };
-  }
-);
+  };

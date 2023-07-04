@@ -1,20 +1,17 @@
 import hre, {ethers} from 'hardhat';
-
-// TODO: why aren't we using backendAuthWallet default same as core?
+import {Contract, Signer} from 'ethers';
 
 const createAssetMintSignature = async (
   creator: string,
   tier: number,
   amount: number,
   revealed: boolean,
-  metadataHash: string
+  metadataHash: string,
+  contract: Contract,
+  signer: any
 ) => {
-  const {getNamedAccounts} = hre;
-  const {backendAuthWallet} = await getNamedAccounts();
-  const signer = ethers.provider.getSigner(backendAuthWallet);
-
-  const AssetCreateContract = await ethers.getContract('AssetCreate');
-
+  
+  const AssetCreateContract = contract;
   const nonce = await AssetCreateContract.signatureNonces(creator);
 
   const data = {
@@ -57,14 +54,11 @@ const createMultipleAssetsMintSignature = async (
   tiers: number[],
   amounts: number[],
   revealed: boolean[],
-  metadataHashes: string[]
+  metadataHashes: string[],
+  contract: Contract,
+  signer: any
 ) => {
-  const {getNamedAccounts} = hre;
-  const {backendAuthWallet} = await getNamedAccounts();
-  const signer = ethers.provider.getSigner(backendAuthWallet);
-
-  const AssetCreateContract = await ethers.getContract('AssetCreate');
-
+  const AssetCreateContract = contract;
   const nonce = await AssetCreateContract.signatureNonces(creator);
   const data = {
     types: {
@@ -100,7 +94,5 @@ const createMultipleAssetsMintSignature = async (
   );
   return signature;
 };
-
-// TODO: createSpecialAssetMintSignature
 
 export {createAssetMintSignature, createMultipleAssetsMintSignature};
