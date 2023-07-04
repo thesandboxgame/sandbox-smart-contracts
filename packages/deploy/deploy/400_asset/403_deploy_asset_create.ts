@@ -42,4 +42,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset', 'AssetCreate', 'AssetCreate_deploy'];
-func.dependencies = ['Asset', 'Catalyst', 'AuthValidator', 'TRUSTED_FORWARDER_V2'];
+func.dependencies = ['Asset_deploy', 'Catalyst', 'AuthValidator', 'TRUSTED_FORWARDER_V2'];
