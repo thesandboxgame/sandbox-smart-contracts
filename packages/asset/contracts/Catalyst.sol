@@ -40,13 +40,10 @@ contract Catalyst is
         _disableInitializers();
     }
 
-    modifier validatedId(uint256 tokenId) {
-        require(
-            tokenId > 0 && tokenId <= tokenCount,
-            "Catalyst: invalid catalyst id"
-        );
+    modifier onlyValidId(uint256 tokenId) {
+        require(tokenId > 0 && tokenId <= tokenCount, "Catalyst: invalid catalyst id");
         _;
-   }
+    }
 
     /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
@@ -67,23 +64,13 @@ contract Catalyst is
         uint96 _defaultCatalystsRoyalty,
         string[] memory _catalystIpfsCID
     ) public initializer {
-        require(
-            bytes(_baseUri).length != 0,
-            "Catalyst: base uri can't be zero"
-        );
-        require(
-            _trustedForwarder != address(0),
-            "Catalyst: trusted forwarder can't be zero"
-        );
-        require(
-            _subscription != address(0),
-            "Catalyst: subscription can't be zero"
-        );
+        require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
+        require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
+        require(_subscription != address(0), "Catalyst: subscription can't be zero");
         require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
         require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
         require(_royaltyRecipient != address(0), "Catalyst: royalty recipient can't be zero");
         require(_defaultCatalystsRoyalty != 0, "Catalyst: royalty can't be zero");
-
 
         __ERC1155_init(_baseUri);
         __AccessControl_init();
@@ -98,13 +85,12 @@ contract Catalyst is
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
-            require(
-                bytes(_catalystIpfsCID[i]).length != 0,
-                "Catalyst: CID can't be zero"
-            );
+            require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
 
             _setURI(i + 1, _catalystIpfsCID[i]);
-            unchecked {tokenCount++;}
+            unchecked {
+                tokenCount++;
+            }
         }
     }
 
@@ -112,11 +98,7 @@ contract Catalyst is
     /// @param to The address that will own the minted token
     /// @param id The token id to mint
     /// @param amount The amount to be minted
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(MINTER_ROLE) validatedId(id){
+    function mint(address to, uint256 id, uint256 amount) external onlyRole(MINTER_ROLE) onlyValidId(id) {
         _mint(to, id, amount, "");
     }
 
@@ -124,11 +106,7 @@ contract Catalyst is
     /// @param to The address that will own the minted tokens
     /// @param ids The token ids to mint
     /// @param amounts The amounts to be minted per token id
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) external onlyRole(MINTER_ROLE) {
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < ids.length; i++) {
             require(ids[i] > 0 && ids[i] <= tokenCount, "INVALID_CATALYST_ID");
         }
@@ -139,11 +117,7 @@ contract Catalyst is
     /// @param account The address to burn from
     /// @param id The token id to burn
     /// @param amount The amount to be burned
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
+    function burnFrom(address account, uint256 id, uint256 amount) external onlyRole(MINTER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -162,10 +136,7 @@ contract Catalyst is
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(
-        uint256 catalystId,
-        string memory ipfsCID
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(catalystId > tokenCount, "Catalyst: invalid catalyst id");
         require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be zero");
         tokenCount++;
@@ -176,13 +147,8 @@ contract Catalyst is
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(
-        address trustedForwarder
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(
-            trustedForwarder != address(0),
-            "Catalyst: trusted forwarder can't be zero address"
-        );
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero address");
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderChanged(trustedForwarder);
     }
@@ -193,32 +159,24 @@ contract Catalyst is
     function setMetadataHash(
         uint256 tokenId,
         string memory metadataHash
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) validatedId(tokenId){
-        require(
-            bytes(metadataHash).length != 0,
-            "Catalyst: metadataHash can't be zero"
-        );
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyValidId(tokenId) {
+        require(bytes(metadataHash).length != 0, "Catalyst: metadataHash can't be empty");
         _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
-    function setBaseURI(
-        string memory baseURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(bytes(baseURI).length != 0, "Catalyst: base uri can't be zero");
+    function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
         _setBaseURI(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(uint256 tokenId)
-        public
-        view
-        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
-    {
+    function uri(
+        uint256 tokenId
+    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory) {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
@@ -275,10 +233,10 @@ contract Catalyst is
     /// @notice Change the default royalty settings
     /// @param defaultRoyaltyRecipient The new royalty recipient address
     /// @param defaultRoyaltyBps The new royalty bps
-    function changeRoyaltyRecipient(address defaultRoyaltyRecipient, uint96 defaultRoyaltyBps)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function changeRoyaltyRecipient(
+        address defaultRoyaltyRecipient,
+        uint96 defaultRoyaltyBps
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(defaultRoyaltyRecipient, defaultRoyaltyBps);
         emit DefaultRoyaltyChanged(defaultRoyaltyRecipient, defaultRoyaltyBps);
     }
@@ -297,12 +255,9 @@ contract Catalyst is
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC1155Upgradeable, AccessControlUpgradeable, ERC2981Upgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC1155Upgradeable, AccessControlUpgradeable, ERC2981Upgradeable) returns (bool) {
         return
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             AccessControlUpgradeable.supportsInterface(interfaceId) ||
