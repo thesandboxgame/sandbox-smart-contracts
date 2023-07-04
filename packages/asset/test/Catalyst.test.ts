@@ -341,7 +341,7 @@ describe('catalyst Contract', function () {
 
       await expect(
         catalyst
-          .connect(await ethers.getSigner(user1))
+          .connect(await ethers.getSigner(user1)) // TODO: this can just be .connect(user1). Review this whole file
           .revokeRole(minterRole, catalystMinter)
       ).to.be.revertedWith(
         `AccessControl: account ${user1.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
@@ -459,10 +459,12 @@ describe('catalyst Contract', function () {
         catalystAsAdmin.addNewCatalystType(0, '0x01')
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+
+    // TODO: fix
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
-      expect(
-        await catalystAsAdmin.addNewCatalystType(9, zeroAddress)
+      await expect(
+        catalystAsAdmin.addNewCatalystType(9, zeroAddress)
       ).to.be.revertedWith("Catalyst: CID can't be zero");
     });
     it('cant set invalid trusted forwarder', async function () {
@@ -483,9 +485,11 @@ describe('catalyst Contract', function () {
         "Catalyst: metadataHash can't be empty"
       );
     });
+
+    // TODO: fix
     it('cant set invalid base uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
-      expect(await catalystAsAdmin.setBaseURI(zeroAddress)).to.be.revertedWith(
+      await expect(catalystAsAdmin.setBaseURI(zeroAddress)).to.be.revertedWith(
         "Catalyst: base uri can't be zero"
       );
     });
