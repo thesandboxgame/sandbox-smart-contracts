@@ -3,7 +3,11 @@ import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
 } from '../utils/createSignature';
-import {CATALYST_BASE_URI, CATALYST_DEFAULT_ROYALTY, CATALYST_IPFS_CID_PER_TIER}from '../../data/constants';
+import {
+  CATALYST_BASE_URI,
+  CATALYST_DEFAULT_ROYALTY,
+  CATALYST_IPFS_CID_PER_TIER,
+} from '../../data/constants';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';

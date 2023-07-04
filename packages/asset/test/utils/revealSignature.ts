@@ -1,5 +1,5 @@
-import hre, {ethers} from 'hardhat';
-import { Contract } from 'ethers';
+import hre from 'hardhat';
+import {Contract, Wallet} from 'ethers';
 
 async function burnAndRevealSignature(
   recipient: string,
@@ -8,8 +8,7 @@ async function burnAndRevealSignature(
   metadataHashes: string[],
   revealHashes: string[],
   contract: Contract,
-  // @typescript-eslint/no-explicit-any
-  signer: any
+  signer: Wallet
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {
@@ -51,8 +50,7 @@ async function batchRevealSignature(
   metadataHashes: string[][],
   revealHashes: string[][],
   contract: Contract,
-  // @typescript-eslint/no-explicit-any
-  signer: any
+  signer: Wallet
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {
@@ -95,8 +93,7 @@ async function revealSignature(
   metadataHashes: string[],
   revealHashes: string[],
   contract: Contract,
-  // @typescript-eslint/no-explicit-any
-  signer: any
+  signer: Wallet
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {

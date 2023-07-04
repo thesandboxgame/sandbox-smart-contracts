@@ -9,7 +9,7 @@ const revealHashD = formatBytes32String('revealHashD');
 const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
-// TODO: missing AssetReveal DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder 
+// TODO: missing AssetReveal DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
 // we have AccessControlUpgradeable on AssetCreate, why not here?
 
 describe('AssetReveal', function () {
@@ -60,14 +60,19 @@ describe('AssetReveal', function () {
       ).to.be.revertedWith('Amount should be greater than 0');
     });
     it('Should not be able to burn an asset that is already revealed', async function () {
-      const {AssetRevealContractAsUser, revealedtokenId} = await runRevealTestSetup();
+      const {AssetRevealContractAsUser, revealedtokenId} =
+        await runRevealTestSetup();
       await expect(
         AssetRevealContractAsUser.revealBurn(revealedtokenId, 1)
       ).to.be.revertedWith('Asset is already revealed');
     });
     it('Should not be able to burn more than owned by the caller', async function () {
-      const {user, AssetRevealContractAsUser, AssetContract, unrevealedtokenId} =
-        await runRevealTestSetup();
+      const {
+        user,
+        AssetRevealContractAsUser,
+        AssetContract,
+        unrevealedtokenId,
+      } = await runRevealTestSetup();
       const balance = await AssetContract.balanceOf(
         user.address,
         unrevealedtokenId
@@ -78,14 +83,21 @@ describe('AssetReveal', function () {
     });
     it("Should not be able to burn a token that doesn't exist", async function () {
       const {AssetRevealContractAsUser} = await runRevealTestSetup();
-      await expect(AssetRevealContractAsUser.revealBurn(123, 1)).to.be.revertedWith(
-        'ERC1155: burn amount exceeds totalSupply'
-      );
+      await expect(
+        AssetRevealContractAsUser.revealBurn(123, 1)
+      ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
     it('Should be able to burn unrevealed owned assets', async function () {
-      const {AssetRevealContractAsUser, AssetContract, unrevealedtokenId, user} =
-        await runRevealTestSetup();
-      const burnTx = await AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1);
+      const {
+        AssetRevealContractAsUser,
+        AssetContract,
+        unrevealedtokenId,
+        user,
+      } = await runRevealTestSetup();
+      const burnTx = await AssetRevealContractAsUser.revealBurn(
+        unrevealedtokenId,
+        1
+      );
       await burnTx.wait();
 
       const userBalance = await AssetContract.balanceOf(
@@ -97,7 +109,10 @@ describe('AssetReveal', function () {
     it('Should emit burn event with correct data', async function () {
       const {AssetRevealContractAsUser, unrevealedtokenId, user} =
         await runRevealTestSetup();
-      const burnTx = await AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1);
+      const burnTx = await AssetRevealContractAsUser.revealBurn(
+        unrevealedtokenId,
+        1
+      );
       const burnResult = await burnTx.wait();
       const burnEvent = burnResult.events[1];
       expect(burnEvent.event).to.equal('AssetRevealBurn');

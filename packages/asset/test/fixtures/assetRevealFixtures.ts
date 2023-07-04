@@ -4,13 +4,16 @@ import {
   burnAndRevealSignature,
   revealSignature,
 } from '../utils/revealSignature';
-import {CATALYST_BASE_URI, CATALYST_DEFAULT_ROYALTY, CATALYST_IPFS_CID_PER_TIER}from '../../data/constants';
+import {
+  CATALYST_BASE_URI,
+  CATALYST_DEFAULT_ROYALTY,
+  CATALYST_IPFS_CID_PER_TIER,
+} from '../../data/constants';
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';
 
 export async function runRevealTestSetup() {
-  
   const [
     catalystMinter,
     trustedForwarder,
@@ -100,13 +103,15 @@ export async function runRevealTestSetup() {
   const AssetRevealContractAsAdmin = AssetRevealContract.connect(assetAdmin);
 
   const MockMinterFactory = await ethers.getContractFactory('MockMinter');
-  const MockMinterContract = await MockMinterFactory.deploy(AssetContract.address);
+  const MockMinterContract = await MockMinterFactory.deploy(
+    AssetContract.address
+  );
   const AssetContractAsAdmin = AssetContract.connect(assetAdmin);
   // add mock minter as minter
   const MinterRole = await AssetContract.MINTER_ROLE();
   const BurnerRole = await AssetContract.BURNER_ROLE();
   await AssetContractAsAdmin.grantRole(MinterRole, MockMinterContract.address);
-  
+
   // add AssetReveal contracts as both MINTER and BURNER for Asset contract
   await AssetContractAsAdmin.grantRole(MinterRole, AssetRevealContract.address);
   await AssetContractAsAdmin.grantRole(BurnerRole, AssetRevealContract.address);
@@ -279,7 +284,6 @@ export async function runRevealTestSetup() {
     unrevealedtokenId,
     unrevealedtokenId2,
     revealedtokenId,
-    user
+    user,
   };
 }
-

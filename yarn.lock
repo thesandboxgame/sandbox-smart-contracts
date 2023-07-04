@@ -1556,10 +1556,10 @@ __metadata:
     eslint-plugin-prettier: ^4.2.1
     ethers: ^5.7.2
     hardhat: ^2.14.1
-    hardhat-deploy: ^0.11.25
     hardhat-gas-reporter: ^1.0.9
     prettier: ^2.8.8
     prettier-plugin-solidity: 1.0.0-beta.11
+    solhint: ^3.4.1
     solhint-plugin-prettier: ^0.0.5
     solidity-coverage: ^0.8.2
     ts-node: ^10.9.1
@@ -6262,38 +6262,6 @@ __metadata:
     "@ethersproject/hardware-wallets": ^5.0.14
     hardhat: ^2.6.8
   checksum: dd82fafd74da7f7d180c529ea7a044b8c9c9c0d65d5e05285bafeeb3f864492ffb2271174bc2ac4ed963d60f4bc3e95e4b70e4e063ee23807f34fbf6a29a8681
-  languageName: node
-  linkType: hard
-
-"hardhat-deploy@npm:^0.11.25":
-  version: 0.11.30
-  resolution: "hardhat-deploy@npm:0.11.30"
-  dependencies:
-    "@ethersproject/abi": ^5.7.0
-    "@ethersproject/abstract-signer": ^5.7.0
-    "@ethersproject/address": ^5.7.0
-    "@ethersproject/bignumber": ^5.7.0
-    "@ethersproject/bytes": ^5.7.0
-    "@ethersproject/constants": ^5.7.0
-    "@ethersproject/contracts": ^5.7.0
-    "@ethersproject/providers": ^5.7.2
-    "@ethersproject/solidity": ^5.7.0
-    "@ethersproject/transactions": ^5.7.0
-    "@ethersproject/wallet": ^5.7.0
-    "@types/qs": ^6.9.7
-    axios: ^0.21.1
-    chalk: ^4.1.2
-    chokidar: ^3.5.2
-    debug: ^4.3.2
-    enquirer: ^2.3.6
-    ethers: ^5.5.3
-    form-data: ^4.0.0
-    fs-extra: ^10.0.0
-    match-all: ^1.2.6
-    murmur-128: ^0.2.1
-    qs: ^6.9.4
-    zksync-web3: ^0.14.3
-  checksum: 7b9ac9d856097be1df88ed86cbec88e5bdeb6258c7167c097d6ad4e80a1131b9288fc7704ff6457253f293f57c9992d83383f15ce8f22190d94966b8bb05d832
   languageName: node
   linkType: hard
 

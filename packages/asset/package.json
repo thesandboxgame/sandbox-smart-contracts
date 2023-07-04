@@ -10,7 +10,6 @@
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "node": "hardhat node --no-deploy",
     "compile": "hardhat compile",
-    "deploy": "hardhat deploy",
     "test": "hardhat test"
   },
   "devDependencies": {
@@ -39,10 +38,10 @@
     "eslint-plugin-prettier": "^4.2.1",
     "ethers": "^5.7.2",
     "hardhat": "^2.14.1",
-    "hardhat-deploy": "^0.11.25",
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "1.0.0-beta.11",
+    "solhint": "^3.4.1",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2",
     "ts-node": "^10.9.1",
