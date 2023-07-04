@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./libraries/TokenIdUtils.sol";
-import "./AuthValidator.sol";
+import "./AuthValidator.sol"; // TODO: use existing PolygonAuthValidator from core
 import "./ERC2771Handler.sol";
 import "./interfaces/IAsset.sol";
 import "./interfaces/ICatalyst.sol";
