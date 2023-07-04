@@ -14,7 +14,7 @@ export async function runCatalystSetup() {
     catalystRoyaltyRecipient,
     trustedForwarder,
     user1,
-    user2
+    user2,
   ] = await ethers.getSigners();
 
   const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
@@ -42,7 +42,7 @@ export async function runCatalystSetup() {
   );
   await catalyst.deployed();
 
-  const catalystAsAdmin = await catalyst.connect(catalystAdmin)
+  const catalystAsAdmin = await catalyst.connect(catalystAdmin);
   const minterRole = await catalyst.MINTER_ROLE();
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
@@ -62,4 +62,4 @@ export async function runCatalystSetup() {
     trustedForwarder: trustedForwarder.address,
     OperatorFilterSubscription,
   };
-};
+}
