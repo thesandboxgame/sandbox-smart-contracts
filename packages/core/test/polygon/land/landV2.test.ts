@@ -3317,7 +3317,10 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2,
         users,
       } = await setupOperatorFilter();
-      users[0].polygonLandV2.setApprovalForAll(mockMarketPlace3.address, true);
+      await users[0].polygonLandV2.setApprovalForAll(
+        mockMarketPlace3.address,
+        true
+      );
       expect(
         await polygonLandV2.isApprovedForAll(
           users[0].address,
@@ -3332,7 +3335,7 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2,
         users,
       } = await setupOperatorFilter();
-      users[0].polygonLandV2.setApprovalForAllFor(
+      await users[0].polygonLandV2.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
@@ -3452,7 +3455,7 @@ describe('MockLandV2WithMint.sol', function () {
         polygonLandV2,
         users,
       } = await setupOperatorFilter();
-      users[0].polygonLandV2.setApprovalForAllFor(
+      await users[0].polygonLandV2.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
@@ -3606,7 +3609,7 @@ describe('MockLandV2WithMint.sol', function () {
         mockMarketPlace3.address
       );
 
-      users[0].polygonLandV2.setApprovalForAllFor(
+      await users[0].polygonLandV2.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
