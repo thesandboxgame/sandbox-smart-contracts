@@ -4,8 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAdmin, upgradeAdmin} =
-    await getNamedAccounts();
+  const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
   const AuthValidatorContract = await deployments.get('PolygonAuthValidator');
@@ -18,7 +17,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('AssetCreate', {
     from: deployer,
-    contract: '@sandbox-smart-contracts/asset/contracts/AssetCreate.sol:AssetCreate',
+    contract:
+      '@sandbox-smart-contracts/asset/contracts/AssetCreate.sol:AssetCreate',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -42,4 +42,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset', 'AssetCreate', 'AssetCreate_deploy'];
-func.dependencies = ['Asset_deploy', 'Catalyst', 'AuthValidator', 'TRUSTED_FORWARDER_V2'];
+func.dependencies = [
+  'Asset_deploy',
+  'Catalyst',
+  'AuthValidator',
+  'TRUSTED_FORWARDER_V2',
+];

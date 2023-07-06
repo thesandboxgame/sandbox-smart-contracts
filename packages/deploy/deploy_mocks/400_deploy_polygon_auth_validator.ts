@@ -4,19 +4,18 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-
-  const {deployer} = await getNamedAccounts();
-
-  // TODO: review subscriptions for Catalyst and Asset
-
-  // Operator filter subscription
-  await deploy('OperatorFilterRegistrant', {
+  const {deployer, sandAdmin, backendAuthWallet} = await getNamedAccounts();
+  await deploy('PolygonAuthValidator', {
+    contract: 'AuthValidatorMock',
     from: deployer,
-    contract:
-      '@sandbox-smart-contracts/asset/contracts/OperatorFilter/OperatorFilterRegistrant.sol:OperatorFilterRegistrant',
+    args: [sandAdmin, backendAuthWallet],
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
 export default func;
-func.tags = ['OperatorFilterRegistrant', 'L2'];
+func.tags = [
+  'AuthValidator',
+  'PolygonAuthValidator',
+  'PolygonAuthValidator_deploy',
+];
