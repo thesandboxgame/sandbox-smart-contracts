@@ -148,7 +148,7 @@ contract Catalyst is
     /// @param ipfsCID The royalty bps for the catalyst
     function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(catalystId > tokenCount, "Catalyst: invalid catalyst id");
-        require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be zero");
+        require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be empty");
         tokenCount++;
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId);
