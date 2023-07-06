@@ -82,13 +82,18 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
         assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit AssetMinted(creator, tokenId, tier, amount, metadataHash);
+        emit AssetMinted(creator, tokenId, tier, amount, metadataHash, revealed);
     }
 
     /// @notice Create multiple assets at once
@@ -132,8 +137,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit AssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes);
-        // TODO: put revealed in event
+        emit AssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes, revealed);
     }
 
     /// @notice Create special assets, like TSB exclusive tokens
@@ -158,8 +162,13 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, amount, metadataHash);
