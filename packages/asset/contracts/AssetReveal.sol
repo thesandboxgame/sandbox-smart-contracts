@@ -129,8 +129,6 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid revealBatchMint signature"
         );
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            // require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
-            // revealHashesUsed[revealHashes[i]] = true;
             _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
         }
     }
@@ -348,7 +346,8 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         for (uint256 i = 0; i < amounts.length; i++) {
             uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
             if (tokenId != 0) {
-                tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
+                tokenIdArray[i] = tokenId;
+                continue;
             } else {
                 uint16 revealNonce = ++revealIds[data.creator][prevTokenId];
                 tokenId = TokenIdUtils.generateTokenId(
