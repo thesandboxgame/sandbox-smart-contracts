@@ -3,7 +3,7 @@ import {runAssetSetup} from './fixtures/assetFixture';
 import {ethers} from 'hardhat';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
-  describe('Base URI', async function () {
+  describe('Base URI', function () {
     it('Should have correct base URI set in the constructor', async function () {
       const {AssetContract, mintOne, baseURI} = await runAssetSetup();
       const {tokenId, metadataHash} = await mintOne();
@@ -30,7 +30,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       );
     });
   });
-  describe('Token URI', async function () {
+  describe('Token URI', function () {
     it('Should return correct token URI', async function () {
       const {AssetContract, mintOne, baseURI, metadataHashes} =
         await runAssetSetup();
