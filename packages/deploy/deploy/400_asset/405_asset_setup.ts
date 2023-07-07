@@ -8,14 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetCreate = await deployments.get('AssetCreate');
   const minterRole = await read('Asset', 'MINTER_ROLE');
-  if (
-    !(await read(
-      'Asset',
-      'hasRole',
-      minterRole,
-      assetCreate.address 
-    ))
-  ) {
+  if (!(await read('Asset', 'hasRole', minterRole, assetCreate.address))) {
     await catchUnknownSigner(
       execute(
         'Asset',
@@ -27,8 +20,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     log(`MINTER_ROLE granted to ${assetCreate.address}`);
   }
-
-  
 };
 export default func;
 
