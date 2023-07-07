@@ -1,30 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable,
-    IAccessControlUpgradeable,
-    IERC165Upgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {
-    ERC1155BurnableUpgradeable,
-    ERC1155Upgradeable,
-    IERC1155Upgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {
-    ERC1155SupplyUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
-import {
-    ERC1155URIStorageUpgradeable,
-    IERC1155MetadataURIUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable, IAccessControlUpgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {ERC1155BurnableUpgradeable, ERC1155Upgradeable, IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import {ERC1155SupplyUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import {ERC1155URIStorageUpgradeable, IERC1155MetadataURIUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
-import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
 contract Asset is
     IAsset,
@@ -39,12 +24,7 @@ contract Asset is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE = keccak256("BRIDGE_MINTER_ROLE");
 
-    // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
-    mapping(uint256 => uint256) public recyclingAmounts;
-    // mapping of old bridged tokenId (original asset from L1) to creator nonce
-    mapping(uint256 => uint16) public bridgedTokensNonces;
     // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
 
@@ -53,23 +33,13 @@ contract Asset is
         _disableInitializers();
     }
 
-    function initialize(
-        address forwarder,
-        address assetAdmin,
-        uint256[] calldata catalystTiers,
-        uint256[] calldata catalystRecycleCopiesNeeded,
-        string memory baseUri
-    ) external initializer {
+    function initialize(address forwarder, address assetAdmin, string memory baseUri) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-
-        for (uint256 i = 0; i < catalystTiers.length; i++) {
-            recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
-        }
     }
 
     /// @notice Mint new tokens
@@ -77,12 +47,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        string memory metadataHash
-    ) external onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id, uint256 amount, string memory metadataHash) external onlyRole(MINTER_ROLE) {
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
     }
@@ -98,7 +63,8 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(ids.length == metadataHashes.length, "ids and metadataHash length mismatch");
+        require(ids.length == metadataHashes.length, "Asset: ids and metadataHash length mismatch");
+        require(ids.length == amounts.length, "Asset: ids and amounts length mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
@@ -111,11 +77,7 @@ contract Asset is
     /// @param account The account to burn tokens from
     /// @param id The token id to burn
     /// @param amount The amount of tokens to burn
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(BURNER_ROLE) {
+    function burnFrom(address account, uint256 id, uint256 amount) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -136,8 +98,9 @@ contract Asset is
 
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
-    /// @param metadata The new uri for asset's metadata
-    function setTokenUri(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    /// @param metadata The new URI for asset's metadata
+    function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setMetadataHash(tokenId, metadata);
         _setURI(tokenId, metadata);
     }
 
@@ -150,12 +113,9 @@ contract Asset is
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(uint256 tokenId)
-        public
-        view
-        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
-    {
+    function uri(
+        uint256 tokenId
+    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory) {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
@@ -163,25 +123,34 @@ contract Asset is
         return hashUsed[metadataHash];
     }
 
-    function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal onlyRole(MINTER_ROLE) {
+    function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
+        require(
+            hasRole(MINTER_ROLE, _msgSender()) || hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "Asset: must have minter or admin role to mint"
+        );
         if (hashUsed[metadataHash] != 0) {
-            require(hashUsed[metadataHash] == tokenId, "metadata hash mismatch for tokenId");
+            require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
         } else {
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
         }
     }
 
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
+        _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderChanged(trustedForwarder);
+    }
+
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id)
-        public
-        view
-        virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 id
+    ) public view virtual override(ERC1155Upgradeable, AccessControlUpgradeable) returns (bool) {
         return
             id == type(IERC165Upgradeable).interfaceId ||
             id == type(IERC1155Upgradeable).interfaceId ||

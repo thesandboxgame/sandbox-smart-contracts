@@ -15,13 +15,10 @@ interface IAsset {
         bool bridged;
     }
 
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+
     // Functions
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        string memory metadataHash
-    ) external;
+    function mint(address to, uint256 id, uint256 amount, string memory metadataHash) external;
 
     function mintBatch(
         address to,
@@ -30,17 +27,9 @@ interface IAsset {
         string[] memory metadataHashes
     ) external;
 
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external;
+    function burnFrom(address account, uint256 id, uint256 amount) external;
 
-    function burnBatchFrom(
-        address account,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) external;
+    function burnBatchFrom(address account, uint256[] memory ids, uint256[] memory amounts) external;
 
     function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256);
 }
