@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// import IAsset from "./IAsset.sol";
-import "../libraries/TokenIdUtils.sol";
+import {IAsset} from "../interfaces/IAsset.sol";
+import {TokenIdUtils} from "../libraries/TokenIdUtils.sol";
 
 contract MockMinter {
     using TokenIdUtils for uint256;
@@ -26,18 +26,10 @@ contract MockMinter {
         string calldata metadataHash
     ) public {
         // increment nonce
-        unchecked {
-            creatorNonces[msg.sender]++;
-        }
+        unchecked {creatorNonces[msg.sender]++;}
         // get current creator nonce
         uint16 creatorNonce = creatorNonces[msg.sender];
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            msg.sender,
-            tier,
-            creatorNonce,
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId = TokenIdUtils.generateTokenId(msg.sender, tier, creatorNonce, revealed ? 1 : 0, false);
 
         assetContract.mint(recipient, tokenId, amount, metadataHash);
         emit Minted(tokenId, amount);

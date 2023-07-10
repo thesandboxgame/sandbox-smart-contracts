@@ -1,4 +1,4 @@
-import { deployments, getUnnamedAccounts } from "hardhat";
+import {ethers, upgrades} from 'hardhat';
 
 export function generateOldAssetId(
   creator: string,
@@ -7,76 +7,92 @@ export function generateOldAssetId(
 ) {
   const hex = assetNumber.toString(16);
   const hexLength = hex.length;
-  let zeroAppends = "";
+  let zeroAppends = '';
   const zeroAppendsLength = 24 - hexLength;
   for (let i = 0; i < zeroAppendsLength; i++) {
     if (i == zeroAppendsLength - 1) {
       if (isNFT) {
-        zeroAppends = "8" + zeroAppends;
+        zeroAppends = '8' + zeroAppends;
       } else {
-        zeroAppends = zeroAppends + "0";
+        zeroAppends = zeroAppends + '0';
       }
     } else {
-      zeroAppends = zeroAppends + "0";
+      zeroAppends = zeroAppends + '0';
     }
   }
   return `${creator}${zeroAppends}${hex}`;
 }
 
-export const runAssetSetup = deployments.createFixture(
-  async ({ deployments, getNamedAccounts, ethers }) => {
-    // TODO: DO NOT USE DEPLOY SCRIPTS FOR TESTS
-    await deployments.fixture(["Asset"]);
-    const { deployer, assetAdmin } = await getNamedAccounts();
-    const users = await getUnnamedAccounts();
-    const owner = users[2];
-    const secondOwner = users[3];
-    const bridgeMinter = users[4];
-    const AssetContract = await ethers.getContract("Asset");
+export async function runAssetSetup() {
+  const [
+    assetAdmin,
+    owner,
+    secondOwner,
+    bridgeMinter,
+    minter,
+    burner,
+    trustedForwarder,
+  ] = await ethers.getSigners();
 
-    // Asset contract is not user-facing and we block users from minting directly
-    // Contracts that interact with Asset must have the necessary ROLE
-    // Here we set up the necessary roles for testing
-    const AssetContractAsAdmin = await ethers.getContract("Asset", assetAdmin);
-    const AssetContractAsMinter = await ethers.getContract("Asset", users[0]);
-    const AssetContractAsBurner = await ethers.getContract("Asset", users[1]);
-    const AssetContractAsOwner = await ethers.getContract("Asset", users[2]); 
-    const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
-    const minterRole = await AssetContract.MINTER_ROLE();
-    const burnerRole = await AssetContract.BURNER_ROLE();
-    const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
-    // end set up roles
+  // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
+  const AssetFactory = await ethers.getContractFactory('Asset');
+  const AssetContract = await upgrades.deployProxy(
+    AssetFactory,
+    [
+      trustedForwarder.address,
+      assetAdmin.address,
+      [1, 2, 3, 4, 5, 6],
+      [2, 4, 6, 8, 10, 12],
+      'ipfs://',
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
 
-    await AssetContract.grantRole(minterRole, users[0]); 
-    await AssetContract.grantRole(burnerRole, users[1]); 
-    await AssetContract.grantRole(bridgeMinterRole, bridgeMinter);
-    const uris = [
-      "QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY",
-      "QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR",
-      "QmUxnKe5DyjxKuwq2AMGDLYeQALnQxcffCZCgtj5a41DYw",
-      "QmYQztw9x8WyrUFDxuc5D4xYaN3pBXWNGNAaguvfDhLLgg",
-      "QmUXH1JBPMYxCmzNEMRDGTPtHmePvbo4uVEBreN3sowDwG",
-      "QmdRwSPCuPGfxSYTaot9Eqz8eU9w1DGp8mY97pTCjnSWqk",
-      "QmNrwUiZfQLYaZFHNLzxqfiLxikKYRzZcdWviyDaNhrVhm",
-    ];
-    const baseUri = "ipfs://";
+  await AssetContract.deployed();
 
-    return {
-      deployer,
-      AssetContract,
-      AssetContractAsOwner,
-      AssetContractAsMinter,
-      AssetContractAsBurner,
-      AssetContractAsAdmin,
-      owner,
-      secondOwner,
-      bridgeMinter,
-      minterRole,
-      burnerRole,
-      defaultAdminRole,
-      bridgeMinterRole,
-      uris,
-      baseUri,
-    };
-  }
-);
+  // Asset contract is not user-facing and we block users from minting directly
+  // Contracts that interact with Asset must have the necessary ROLE
+  // Here we set up the necessary roles for testing
+  const AssetContractAsAdmin = await AssetContract.connect(assetAdmin);
+  const AssetContractAsMinter = await AssetContract.connect(minter);
+  const AssetContractAsBurner = await AssetContract.connect(burner);
+  const AssetContractAsOwner = await AssetContract.connect(owner);
+  const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
+  const minterRole = await AssetContract.MINTER_ROLE();
+  const burnerRole = await AssetContract.BURNER_ROLE();
+  const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
+  await AssetContractAsAdmin.grantRole(minterRole, minter.address);
+  await AssetContractAsAdmin.grantRole(burnerRole, burner.address);
+  await AssetContractAsAdmin.grantRole(bridgeMinterRole, bridgeMinter.address);
+  // end set up roles
+
+  const uris = [
+    'QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY',
+    'QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR',
+    'QmUxnKe5DyjxKuwq2AMGDLYeQALnQxcffCZCgtj5a41DYw',
+    'QmYQztw9x8WyrUFDxuc5D4xYaN3pBXWNGNAaguvfDhLLgg',
+    'QmUXH1JBPMYxCmzNEMRDGTPtHmePvbo4uVEBreN3sowDwG',
+    'QmdRwSPCuPGfxSYTaot9Eqz8eU9w1DGp8mY97pTCjnSWqk',
+    'QmNrwUiZfQLYaZFHNLzxqfiLxikKYRzZcdWviyDaNhrVhm',
+  ];
+  const baseUri = 'ipfs://';
+
+  return {
+    AssetContract,
+    AssetContractAsOwner,
+    AssetContractAsMinter,
+    AssetContractAsBurner,
+    AssetContractAsAdmin,
+    owner,
+    secondOwner,
+    bridgeMinter,
+    minterRole,
+    burnerRole,
+    defaultAdminRole,
+    bridgeMinterRole,
+    uris,
+    baseUri,
+  };
+}
