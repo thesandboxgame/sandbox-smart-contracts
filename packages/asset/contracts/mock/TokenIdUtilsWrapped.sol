@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/TokenIdUtils.sol";
+import {TokenIdUtils} from "../libraries/TokenIdUtils.sol";
 import {IAsset} from "../interfaces/IAsset.sol";
 
 contract TokenIdUtilsWrapped {

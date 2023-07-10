@@ -2,15 +2,15 @@ import {expect} from 'chai';
 import {runTokenIdUtilsSetup} from './fixtures/tokenIdUtilsFixture';
 import {ethers} from 'hardhat';
 
-describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', async () => {
-  it('should generate a token id', async () => {
+describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', function () {
+  it('should generate a token id', async function () {
     const {generateTokenId} = await runTokenIdUtilsSetup();
     const tokenId = await generateTokenId();
     expect(tokenId).to.not.be.undefined;
     expect(tokenId.toHexString()).to.have.lengthOf(46);
   });
-  describe("Creator's address", () => {
-    it('should generate a token id with correct creator - manual extraction', async () => {
+  describe("Creator's address", function () {
+    it('should generate a token id with correct creator - manual extraction', async function () {
       const {generateTokenId, address} = await runTokenIdUtilsSetup();
       const tokenId = await generateTokenId();
       const creatorAddressBigNumber = tokenId.and(
@@ -21,7 +21,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       const creator = ethers.utils.getAddress(creatorAddressHex);
       expect(creator).equal(address);
     });
-    it('should generate a token id with correct creator - using getter function', async () => {
+    it('should generate a token id with correct creator - using getter function', async function () {
       const {tokenIdUtils, generateTokenId, address} =
         await runTokenIdUtilsSetup();
       const tokenId = await generateTokenId();
@@ -29,15 +29,15 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(tokenIdAddress).equal(address);
     });
   });
-  describe('Tier', () => {
-    it('should generate a token id with correct tier - using getter function', async () => {
+  describe('Tier', function () {
+    it('should generate a token id with correct tier - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const tier = 6;
       const tokenId = await generateTokenId(undefined, tier);
       const returnedTier = await tokenIdUtils.getTier(tokenId);
       expect(returnedTier).equal(tier);
     });
-    it('should generate a token id with correct tier - manual extraction', async () => {
+    it('should generate a token id with correct tier - manual extraction', async function () {
       const {generateTokenId, TIER_SHIFT, TIER_MASK} =
         await runTokenIdUtilsSetup();
       const tier = 6;
@@ -46,8 +46,8 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedTier).equal(tier);
     });
   });
-  describe('Creator nonce', () => {
-    it('should generate a token id with correct creator nonce - using getter function', async () => {
+  describe('Creator nonce', function () {
+    it('should generate a token id with correct creator nonce - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const creatorNonce = 120;
       const tokenId = await generateTokenId(undefined, undefined, creatorNonce);
@@ -55,7 +55,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedNonce).equal(creatorNonce);
     });
 
-    it('should generate a token id with correct creator nonce - manual extraction', async () => {
+    it('should generate a token id with correct creator nonce - manual extraction', async function () {
       const {generateTokenId, NONCE_SHIFT, NONCE_MASK} =
         await runTokenIdUtilsSetup();
       const creatorNonce = 120;
@@ -64,8 +64,8 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedNonce).equal(creatorNonce);
     });
   });
-  describe('Reveal nonce', () => {
-    it('should generate a token id with correct reveal nonce - using getter function', async () => {
+  describe('Reveal nonce', function () {
+    it('should generate a token id with correct reveal nonce - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const revealNonce = 777;
       const tokenId = await generateTokenId(
@@ -78,7 +78,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedRevealNonce).equal(revealNonce);
     });
 
-    it('should generate a token id with correct reveal nonce - manual extraction', async () => {
+    it('should generate a token id with correct reveal nonce - manual extraction', async function () {
       const {generateTokenId, REVEAL_NONCE_SHIFT, REVEAL_NONCE_MASK} =
         await runTokenIdUtilsSetup();
       const revealNonce = 777;
@@ -94,7 +94,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
         .toNumber();
       expect(returnedRevealNonce).equal(revealNonce);
     });
-    it('should return true if reveal nonce is non-zero', async () => {
+    it('should return true if reveal nonce is non-zero', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const revealNonce = 777;
       const tokenId = await generateTokenId(
@@ -106,7 +106,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       const returnedRevealNonce = await tokenIdUtils.isRevealed(tokenId);
       expect(returnedRevealNonce).equal(true);
     });
-    it('should return false if reveal nonce is zero', async () => {
+    it('should return false if reveal nonce is zero', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const revealNonce = 0;
       const tokenId = await generateTokenId(
@@ -120,8 +120,8 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
     });
   });
 
-  describe('Bridged flag', () => {
-    it('should generate a token id with correct bridged flag - using getter function', async () => {
+  describe('Bridged flag', function () {
+    it('should generate a token id with correct bridged flag - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const bridged = true;
       const tokenId = await generateTokenId(
@@ -135,7 +135,7 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedBridged).equal(bridged);
     });
 
-    it('should generate a token id with correct bridged flag - manual extraction', async () => {
+    it('should generate a token id with correct bridged flag - manual extraction', async function () {
       const {generateTokenId, BRIDGED_SHIFT, BRIDGED_MASK} =
         await runTokenIdUtilsSetup();
       const bridged = true;
@@ -151,8 +151,8 @@ describe.only('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts
       expect(returnedBridged).equal(bridged);
     });
   });
-  describe('Asset Data', () => {
-    it('should return correct asset data', async () => {
+  describe('Asset Data', function () {
+    it('should return correct asset data', async function () {
       const {tokenIdUtils, generateTokenId, address} =
         await runTokenIdUtilsSetup();
       const creator = address;
