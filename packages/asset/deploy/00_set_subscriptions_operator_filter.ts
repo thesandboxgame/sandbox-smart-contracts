@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { DEFAULT_SUBSCRIPTION } from "../constants";
+import { DEFAULT_SUBSCRIPTION } from '../data/constants';;
 import { deployments } from "hardhat";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

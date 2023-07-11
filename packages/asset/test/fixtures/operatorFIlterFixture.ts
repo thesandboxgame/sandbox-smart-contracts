@@ -10,7 +10,7 @@ import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
   CATALYST_DEFAULT_ROYALTY,
-} from "../../constants";
+} from '../../data/constants';
 
 export const setupOperatorFilter = withSnapshot([], async function () {
   const {

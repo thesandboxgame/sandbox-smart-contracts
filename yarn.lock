@@ -1420,17 +1420,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.8.2, @openzeppelin/contracts-upgradeable@npm:^4.9.0, @openzeppelin/contracts-upgradeable@npm:^4.9.2":
-  version: 4.9.2
-  resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.2"
-  checksum: 88df083e886006b9fac61848edf224a725b99e1b8a302173165a857e3bbc1d00d61cb9c71590b37d955b179fe23652fc157347a086dbaad8f66ce8470603f151
-  languageName: node
-  linkType: hard
-
 "@openzeppelin/contracts-upgradeable@npm:^4.8.2":
   version: 4.9.1
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.1"
   checksum: 4dff468b7de51701da8f46ca16e44831109e2602e80c96d68e3fba8ea1ae4ac498e60d38829e0d2d8494bb8cfc274adc7adc2dab566b929319dfe76a5c3af017
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts-upgradeable@npm:^4.9.0, @openzeppelin/contracts-upgradeable@npm:^4.9.2":
+  version: 4.9.2
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.2"
+  checksum: 88df083e886006b9fac61848edf224a725b99e1b8a302173165a857e3bbc1d00d61cb9c71590b37d955b179fe23652fc157347a086dbaad8f66ce8470603f151
   languageName: node
   linkType: hard
 
@@ -8783,17 +8783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"operator-filter-registry@npm:^1.3.1":
-  version: 1.4.2
-  resolution: "operator-filter-registry@npm:1.4.2"
-  dependencies:
-    "@openzeppelin/contracts": ^4.7.3
-    "@openzeppelin/contracts-upgradeable": ^4.8.2
-  checksum: b0e16a6bd608a3b3e35a3cf37757a669b6b3c5d34cc763a0f3a016e7e688b209b3b59e78169b9dc1b75e37aba1d37e27bc59c00f18b765170ad637b07d7ac81d
-  languageName: node
-  linkType: hard
-
-"operator-filter-registry@npm:^1.4.2":
+"operator-filter-registry@npm:^1.3.1, operator-filter-registry@npm:^1.4.2":
   version: 1.4.2
   resolution: "operator-filter-registry@npm:1.4.2"
   dependencies:
