@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
@@ -26,39 +25,20 @@ contract MockMarketplace {
     ) external payable {
         if (msg.value == 0) {
             require(erc20TokenAmount > 0, "erc20 token ammount can't be zero");
-            (address royaltyReceiver, uint256 value) = IERC2981(NFTContract)
-                .royaltyInfo(NFTId, erc20TokenAmount);
+            (address royaltyReceiver, uint256 value) = IERC2981(NFTContract).royaltyInfo(NFTId, erc20TokenAmount);
             erc20Contract.transferFrom(NFTBuyer, royaltyReceiver, value);
-            erc20Contract.transferFrom(
-                NFTBuyer,
-                NFTSeller,
-                (erc20TokenAmount - value)
-            );
+            erc20Contract.transferFrom(NFTBuyer, NFTSeller, (erc20TokenAmount - value));
         } else {
-            (address royaltyReceiver, uint256 value) = IERC2981(NFTContract)
-                .royaltyInfo(NFTId, msg.value);
+            (address royaltyReceiver, uint256 value) = IERC2981(NFTContract).royaltyInfo(NFTId, msg.value);
             (bool sent, ) = royaltyReceiver.call{value: value}("");
             require(sent, "Failed to send distributeRoyaltyEIP2981Ether");
-            (bool sentToSeller, ) = NFTSeller.call{value: msg.value - value}(
-                ""
-            );
+            (bool sentToSeller, ) = NFTSeller.call{value: msg.value - value}("");
             require(sentToSeller, "Failed to send to seller");
         }
         if (is1155) {
-            IERC1155(NFTContract).safeTransferFrom(
-                NFTSeller,
-                NFTBuyer,
-                NFTId,
-                1,
-                "0x"
-            );
+            IERC1155(NFTContract).safeTransferFrom(NFTSeller, NFTBuyer, NFTId, 1, "0x");
         } else {
-            IERC721(NFTContract).safeTransferFrom(
-                NFTSeller,
-                NFTBuyer,
-                NFTId,
-                "0x"
-            );
+            IERC721(NFTContract).safeTransferFrom(NFTSeller, NFTBuyer, NFTId, "0x");
         }
     }
 
@@ -74,58 +54,29 @@ contract MockMarketplace {
         if (msg.value == 0) {
             require(erc20TokenAmount > 0, "erc20 token ammount can't be zero");
             uint256 TotalRoyalty;
-            (
-                address payable[] memory recipients,
-                uint256[] memory amounts
-            ) = royaltyEngine.getRoyalty(
-                    address(NFTContract),
-                    NFTId,
-                    erc20TokenAmount
-                );
+            (address payable[] memory recipients, uint256[] memory amounts) =
+                royaltyEngine.getRoyalty(address(NFTContract), NFTId, erc20TokenAmount);
             for (uint256 i; i < recipients.length; i++) {
                 erc20Contract.transferFrom(NFTBuyer, recipients[i], amounts[i]);
                 TotalRoyalty += amounts[i];
             }
-            erc20Contract.transferFrom(
-                NFTBuyer,
-                NFTSeller,
-                (erc20TokenAmount - TotalRoyalty)
-            );
+            erc20Contract.transferFrom(NFTBuyer, NFTSeller, (erc20TokenAmount - TotalRoyalty));
         } else {
-            (
-                address payable[] memory recipients,
-                uint256[] memory amounts
-            ) = royaltyEngine.getRoyalty(
-                    address(NFTContract),
-                    NFTId,
-                    msg.value
-                );
+            (address payable[] memory recipients, uint256[] memory amounts) =
+                royaltyEngine.getRoyalty(address(NFTContract), NFTId, msg.value);
             uint256 TotalRoyalty;
             for (uint256 i; i < recipients.length; i++) {
                 (bool sent, ) = recipients[i].call{value: amounts[i]}("");
                 require(sent, "Failed to send Ether");
                 TotalRoyalty += amounts[i];
             }
-            (bool sentToSeller, ) = NFTSeller.call{
-                value: msg.value - TotalRoyalty
-            }("");
+            (bool sentToSeller, ) = NFTSeller.call{value: msg.value - TotalRoyalty}("");
             require(sentToSeller, "Failed to send to seller");
         }
         if (is1155) {
-            IERC1155(NFTContract).safeTransferFrom(
-                NFTSeller,
-                NFTBuyer,
-                NFTId,
-                1,
-                "0x"
-            );
+            IERC1155(NFTContract).safeTransferFrom(NFTSeller, NFTBuyer, NFTId, 1, "0x");
         } else {
-            IERC721(NFTContract).safeTransferFrom(
-                NFTSeller,
-                NFTBuyer,
-                NFTId,
-                "0x"
-            );
+            IERC721(NFTContract).safeTransferFrom(NFTSeller, NFTBuyer, NFTId, "0x");
         }
     }
 }

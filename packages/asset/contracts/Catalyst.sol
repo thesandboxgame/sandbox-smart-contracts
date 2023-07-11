@@ -16,7 +16,10 @@ import {
 import {
     ERC1155URIStorageUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+import {
+    IERC165Upgradeable,
+    ERC2981Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
@@ -81,9 +84,7 @@ contract Catalyst is
         require(_subscription != address(0), "Catalyst: subscription can't be zero");
         require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
         require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
-        require(_royaltyRecipient != address(0), "Catalyst: royalty recipient can't be zero");
-        require(_defaultCatalystsRoyalty != 0, "Catalyst: royalty can't be zero");
-
+        require(_royaltyManager != address(0), "Catalyst: royalty recipient can't be zero");
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
@@ -272,11 +273,7 @@ contract Catalyst is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(
-            ERC1155Upgradeable,
-            AccessControlUpgradeable,
-            IERC165Upgradeable
-        )
+        override(ERC1155Upgradeable, AccessControlUpgradeable, IERC165Upgradeable)
         returns (bool)
     {
         return
@@ -288,15 +285,16 @@ contract Catalyst is
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
     /// @param _tokenId of catalyst for which the royalty is distributed
     /// @param _salePrice the price of catalyst on which the royalty is calculated
-    /// @return receiver the receiver of royalty 
-    /// @return royaltyAmount the amount of royalty 
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) external view returns (address receiver, uint256 royaltyAmount) {
+    /// @return receiver the receiver of royalty
+    /// @return royaltyAmount the amount of royalty
+    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
+        external
+        view
+        returns (address receiver, uint256 royaltyAmount)
+    {
         uint16 royaltyBps;
         (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
-        royaltyAmount =  (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
+        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
         return (receiver, royaltyAmount);
     }
 }

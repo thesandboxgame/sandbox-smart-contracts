@@ -10,64 +10,53 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
-import {IRoyaltySplitter, IERC165, Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {
+    IRoyaltySplitter,
+    IERC165,
+    Recipient
+} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 
 interface IERC20Approve {
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function increaseAllowance(
-        address spender,
-        uint256 amount
-    ) external returns (bool);
+    function increaseAllowance(address spender, uint256 amount) external returns (bool);
 }
 
 /**
  * Cloneable and configurable royalty splitter contract
  */
-contract RoyaltyCustomSplitter is
-    Initializable,
-    OwnableUpgradeable,
-    IRoyaltySplitter,
-    ERC165Upgradeable
-{
+contract RoyaltyCustomSplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter, ERC165Upgradeable {
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
     using AddressUpgradeable for address;
     using SafeMath for uint256;
 
     uint256 internal constant Total_BASIS_POINTS = 10000;
-    uint256 constant IERC20_APPROVE_SELECTOR =
-        0x095ea7b300000000000000000000000000000000000000000000000000000000;
-    uint256 constant SELECTOR_MASK =
-        0xffffffff00000000000000000000000000000000000000000000000000000000;
+    uint256 constant IERC20_APPROVE_SELECTOR = 0x095ea7b300000000000000000000000000000000000000000000000000000000;
+    uint256 constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public _recipient;
     IRoyaltyManager _royaltyManager;
 
     event ETHTransferred(address indexed account, uint256 amount);
-    event ERC20Transferred(
-        address indexed erc20Contract,
-        address indexed account,
-        uint256 amount
-    );
+    event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
-        return
-            interfaceId == type(IRoyaltySplitter).interfaceId ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(IERC165, ERC165Upgradeable)
+        returns (bool)
+    {
+        return interfaceId == type(IRoyaltySplitter).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
      * @notice Called once to configure the contract after the initial deployment.
      * @dev This will be called by `createSplit` after deploying the proxy so it should never be called directly.
      */
-    function initialize(
-        address payable recipient,
-        address royaltyManager
-    ) public initializer {
+    function initialize(address payable recipient, address royaltyManager) public initializer {
         __Ownable_init();
         _royaltyManager = IRoyaltyManager(royaltyManager);
         _recipient = recipient;
@@ -76,9 +65,7 @@ contract RoyaltyCustomSplitter is
     /**
      * @dev Set the splitter recipients. Total bps must total 10000.
      */
-    function setRecipients(
-        Recipient[] calldata recipients
-    ) external override onlyOwner {
+    function setRecipients(Recipient[] calldata recipients) external override onlyOwner {
         _setRecipients(recipients);
     }
 
@@ -91,12 +78,7 @@ contract RoyaltyCustomSplitter is
     /**
      * @dev Get the splitter recipients;
      */
-    function getRecipients()
-        external
-        view
-        override
-        returns (Recipient[] memory)
-    {
+    function getRecipients() external view override returns (Recipient[] memory) {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         uint16 creatorSplit = _royaltyManager.getCreatorSplit();
         Recipient[] memory recipients = new Recipient[](2);
@@ -167,8 +149,7 @@ contract RoyaltyCustomSplitter is
             Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
             uint16 creatorSplit = _royaltyManager.getCreatorSplit();
             require(
-                commonRecipient.recipient == msg.sender ||
-                    _recipient == msg.sender,
+                commonRecipient.recipient == msg.sender || _recipient == msg.sender,
                 "Split: Can only be called by one of the recipients"
             );
             Recipient[] memory _recipients = new Recipient[](2);
@@ -185,17 +166,8 @@ contract RoyaltyCustomSplitter is
 
                     amountToSend /= Total_BASIS_POINTS;
                     totalSent += amountToSend;
-                    try
-                        erc20Contract.transfer(
-                            recipient.recipient,
-                            amountToSend
-                        )
-                    {
-                        emit ERC20Transferred(
-                            address(erc20Contract),
-                            recipient.recipient,
-                            amountToSend
-                        );
+                    try erc20Contract.transfer(recipient.recipient, amountToSend) {
+                        emit ERC20Transferred(address(erc20Contract), recipient.recipient, amountToSend);
                     } catch {
                         return false;
                     }
@@ -204,11 +176,7 @@ contract RoyaltyCustomSplitter is
                 amountToSend = balance - totalSent;
             }
             try erc20Contract.transfer(_recipients[0].recipient, amountToSend) {
-                emit ERC20Transferred(
-                    address(erc20Contract),
-                    _recipients[0].recipient,
-                    amountToSend
-                );
+                emit ERC20Transferred(address(erc20Contract), _recipients[0].recipient, amountToSend);
             } catch {
                 return false;
             }
@@ -228,10 +196,7 @@ contract RoyaltyCustomSplitter is
      * This contract is built to split ETH payments. The ability to attempt to make other calls is here
      * just in case other assets were also sent so that they don't get locked forever in the contract.
      */
-    function proxyCall(
-        address payable target,
-        bytes calldata callData
-    ) external {
+    function proxyCall(address payable target, bytes calldata callData) external {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         require(
             commonRecipient.recipient == msg.sender || _recipient == msg.sender,

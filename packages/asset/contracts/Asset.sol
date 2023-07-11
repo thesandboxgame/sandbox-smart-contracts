@@ -71,7 +71,7 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-       __MultiReceiverRoyaltyOverrideCore_init(defaultRecipient, defaultBps, _manager);
+        __MultiReceiverRoyaltyOverrideCore_init(defaultRecipient, defaultBps, _manager);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -191,11 +191,7 @@ contract Asset is
         public
         view
         virtual
-        override(
-            ERC1155Upgradeable,
-            AccessControlUpgradeable,
-            MultiReceiverRoyaltyOverrideCore
-        )
+        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiReceiverRoyaltyOverrideCore)
         returns (bool)
     {
         return
@@ -242,18 +238,14 @@ contract Asset is
     /// @notice sets default royalty bps for EIP2981
     /// @dev only owner can call.
     /// @param defaultBps royalty bps base 10000
-    function setDefaultRoyaltyBps(
-        uint16 defaultBps
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setDefaultRoyaltyBps(uint16 defaultBps) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyaltyBps(defaultBps);
     }
 
     /// @notice sets default royalty receiver for EIP2981
     /// @dev only owner can call.
     /// @param defaultReceiver address of default royalty recipient.
-    function setDefaultRoyaltyReceiver(
-        address payable defaultReceiver
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setDefaultRoyaltyReceiver(address payable defaultReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyaltyReceiver(defaultReceiver);
     }
 }

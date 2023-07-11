@@ -15,16 +15,13 @@ interface IRoyaltyManager {
 
     function setSplit(uint16 commonSplit) external;
 
-    function getCommonRecipient()
-        external
-        view
-        returns (Recipient memory recipient);
+    function getCommonRecipient() external view returns (Recipient memory recipient);
 
     function getCreatorSplit() external view returns (uint16);
 
     function getRoyaltyInfo() external view returns (address, uint16);
 
-    function deploySplitter(address creator,address payable recipient) external returns(address payable);
+    function deploySplitter(address creator, address payable recipient) external returns (address payable);
 
-    function getCreatorRoyaltySplitter(address creator) external view returns(address payable);
+    function getCreatorRoyaltySplitter(address creator) external view returns (address payable);
 }
