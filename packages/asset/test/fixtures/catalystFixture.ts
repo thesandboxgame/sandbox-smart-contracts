@@ -2,7 +2,6 @@ import {ethers, upgrades} from 'hardhat';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-  CATALYST_DEFAULT_ROYALTY,
 } from '../../data/constants';
 
 export async function runCatalystSetup() {
@@ -15,6 +14,9 @@ export async function runCatalystSetup() {
     trustedForwarder,
     user1,
     user2,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
@@ -23,18 +25,40 @@ export async function runCatalystSetup() {
   const OperatorFilterSubscription =
     await OperatorFilterSubscriptionFactory.deploy();
 
+  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
+    'RoyaltyCustomSplitter'
+  );
+  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltyCustomSplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const catalyst = await upgrades.deployProxy(
     CatalystFactory,
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterSubscription.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -46,8 +70,10 @@ export async function runCatalystSetup() {
   const minterRole = await catalyst.MINTER_ROLE();
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
+
+  TODO: fix signers vs addresses
   return {
-    deployer,
+    deployer: deployer.address,
     catalyst,
     user1,
     user2,
@@ -61,5 +87,6 @@ export async function runCatalystSetup() {
     catalystRoyaltyRecipient,
     trustedForwarder,
     OperatorFilterSubscription,
+    RoyaltyManagerContract,
   };
 }

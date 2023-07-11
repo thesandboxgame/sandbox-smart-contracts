@@ -1,107 +1,137 @@
+import {ethers, upgrades} from 'hardhat';
 import {
-  deployments,
-  ethers,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from "hardhat";
+  CATALYST_BASE_URI,
+  CATALYST_IPFS_CID_PER_TIER,
+} from '../../data/constants';
 
 export async function catalystRoyaltyDistribution() {
-  await deployments.fixture(["Catalyst"]);
-  const {
+  const [
     deployer,
-    commonRoyaltyReceiver,
-    managerAdmin,
-    contractRoyaltySetter,
     catalystMinter,
-  } = await getNamedAccounts();
-  const { deploy } = await deployments;
-  const users = await getUnnamedAccounts();
-
-  const seller = users[0];
-  const buyer = users[1];
-  const royaltyReceiver = users[2];
-  const user = users[3];
-  const commonRoyaltyReceiver2 = users[4];
-  const royaltyReceiver2 = users[5];
-  const creator = users[6];
-
-  await deploy("FallbackRegistry", {
-    from: deployer,
-    contract: "FallbackRegistry",
-    args: [deployer],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
-
-  await deploy("RoyaltyRegistry", {
-    from: deployer,
-    contract: "RoyaltyRegistry",
-    args: ["0x0000000000000000000000000000000000000000"],
-    skipIfAlreadyDeployed: true,
-    log: true,
-  });
-  const FallbackRegistry = await ethers.getContract("FallbackRegistry");
-
-  await deploy("RoyaltyEngineV1", {
-    from: deployer,
-    contract: "RoyaltyEngineV1",
-    args: [FallbackRegistry.address],
-    skipIfAlreadyDeployed: true,
-    log: true,
-  });
-
-  const RoyaltyRegistry = await ethers.getContract("RoyaltyRegistry");
-  const RoyaltyEngineV1 = await ethers.getContract("RoyaltyEngineV1");
-  await RoyaltyEngineV1.initialize(deployer, RoyaltyRegistry.address);
-
-  await deploy("MockMarketplace", {
-    from: deployer,
-    contract: "MockMarketplace",
-    skipIfAlreadyDeployed: true,
-    args: [RoyaltyEngineV1.address],
-    log: true,
-  });
-
-  await deploy("TestERC20", {
-    from: deployer,
-    contract: "TestERC20",
-    skipIfAlreadyDeployed: true,
-    args: ["TestERC20", "T"],
-    log: true,
-  });
-
-  const ERC20 = await ethers.getContract("TestERC20");
-  const manager = await ethers.getContract("RoyaltyManager");
-  const mockMarketplace = await ethers.getContract("MockMarketplace");
-
-  const catalyst = await ethers.getContract("Catalyst", catalystMinter);
-
-  const managerAdminRole = await manager.DEFAULT_ADMIN_ROLE();
-  const contractRoyaltySetterRole =
-    await manager.CONTRACT_ROYALTY_SETTER_ROLE();
-  const ERC20AsBuyer = ERC20.connect(await ethers.getSigner(buyer));
-  const managerAsAdmin = manager.connect(await ethers.getSigner(managerAdmin));
-  const managerAsRoyaltySetter = manager.connect(
-    await ethers.getSigner(contractRoyaltySetter)
-  );
-
-  return {
-    ERC20,
-    manager,
-    mockMarketplace,
-    ERC20AsBuyer,
-    deployer,
+    catalystAdmin,
+    trustedForwarder,
     seller,
     buyer,
-    user,
-    commonRoyaltyReceiver,
     royaltyReceiver,
-    RoyaltyRegistry,
-    managerAsAdmin,
+    user,
     commonRoyaltyReceiver2,
     royaltyReceiver2,
     creator,
-    catalyst,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
+  ] = await ethers.getSigners();
+
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'OperatorFilterRegistrant'
+  );
+  const OperatorFilterSubscription =
+    await OperatorFilterSubscriptionFactory.deploy();
+
+  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
+    'RoyaltyCustomSplitter'
+  );
+  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltyCustomSplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
+  const CatalystFactory = await ethers.getContractFactory('Catalyst');
+  const catalystContract = await upgrades.deployProxy(
+    CatalystFactory,
+    [
+      CATALYST_BASE_URI,
+      trustedForwarder.address,
+      OperatorFilterSubscription.address,
+      catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+      catalystMinter.address, // MINTER_ROLE
+      CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await catalystContract.deployed();
+
+  const FallbackRegistryFactory = await ethers.getContractFactory(
+    'FallbackRegistry'
+  );
+  const FallbackRegistry = await FallbackRegistryFactory.deploy(
+    deployer.address
+  );
+
+  const RoyaltyRegistryFactory = await ethers.getContractFactory(
+    'RoyaltyRegistry'
+  );
+  const RoyaltyRegistry = await RoyaltyRegistryFactory.deploy(
+    '0x0000000000000000000000000000000000000000'
+  );
+
+  const RoyaltyEngineFactory = await ethers.getContractFactory(
+    'RoyaltyEngineV1'
+  );
+  const RoyaltyEngineV1 = await RoyaltyEngineFactory.deploy(
+    FallbackRegistry.address
+  );
+
+  await RoyaltyEngineV1.initialize(deployer.address, RoyaltyRegistry.address);
+
+  const MockMarketPlaceFactory = await ethers.getContractFactory(
+    'MockMarketplace'
+  );
+  const mockMarketplace = await MockMarketPlaceFactory.deploy(
+    RoyaltyEngineV1.address
+  );
+
+  const TestERC20Factory = await ethers.getContractFactory('TestERC20');
+  const ERC20 = await TestERC20Factory.deploy('TestERC20', 'T');
+
+  // Set up roles
+  const catalystAsMinter = catalystContract.connect(catalystMinter);
+  const managerAdminRole = await RoyaltyManagerContract.DEFAULT_ADMIN_ROLE();
+  const contractRoyaltySetterRole =
+    await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
+  const ERC20AsBuyer = ERC20.connect(buyer);
+  const managerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
+  const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
+    contractRoyaltySetter
+  );
+  // End set up roles
+
+  // TODO: fix signers vs addresses
+  return {
+    ERC20,
+    manager: RoyaltyManagerContract,
+    mockMarketplace,
+    ERC20AsBuyer,
+    deployer: deployer.address,
+    seller: seller.address,
+    buyer: buyer.address,
+    user: user.address,
+    commonRoyaltyReceiver: commonRoyaltyReceiver.address,
+    royaltyReceiver: royaltyReceiver.address,
+    RoyaltyRegistry: RoyaltyRegistry.address,
+    managerAsAdmin,
+    commonRoyaltyReceiver2: commonRoyaltyReceiver2.address,
+    royaltyReceiver2: royaltyReceiver2.address,
+    creator: creator.address,
+    catalyst: catalystAsMinter,
     contractRoyaltySetter,
     managerAdminRole,
     contractRoyaltySetterRole,

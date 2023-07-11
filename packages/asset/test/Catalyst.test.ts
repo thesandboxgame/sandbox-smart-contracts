@@ -1,11 +1,7 @@
 import {expect} from 'chai';
 import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalystFixture';
-import {
-  CATALYST_BASE_URI,
-  CATALYST_IPFS_CID_PER_TIER,
-  CATALYST_DEFAULT_ROYALTY,
-} from '../data/constants';
+import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
 const catalystArray = [1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
@@ -37,8 +33,8 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystAdmin,
         catalystMinter,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscription,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -48,12 +44,11 @@ describe('catalyst Contract', function () {
           [
             '',
             trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
             OperatorFilterSubscription.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
-            CATALYST_DEFAULT_ROYALTY,
             CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -65,8 +60,8 @@ describe('catalyst Contract', function () {
       const {
         catalystAdmin,
         catalystMinter,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscription,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -76,12 +71,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             zeroAddress,
-            catalystRoyaltyRecipient.address,
             OperatorFilterSubscription.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
-            CATALYST_DEFAULT_ROYALTY,
             CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -94,7 +88,7 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystAdmin,
         catalystMinter,
-        catalystRoyaltyRecipient,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -104,12 +98,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
             zeroAddress,
-            catalystAdmin.address,
-            catalystMinter.address,
-            CATALYST_DEFAULT_ROYALTY,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
             CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -121,8 +114,8 @@ describe('catalyst Contract', function () {
       const {
         trustedForwarder,
         catalystMinter,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscription,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -132,12 +125,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
             OperatorFilterSubscription.address,
-            zeroAddress,
-            catalystMinter.address,
-            CATALYST_DEFAULT_ROYALTY,
+            zeroAddress, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
             CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -145,7 +137,7 @@ describe('catalyst Contract', function () {
         )
       ).to.revertedWith("Catalyst: admin can't be zero");
     });
-    it("royalty recipient can't be zero in initialization", async function () {
+    it("royalty manager can't be zero in initialization", async function () {
       const {
         trustedForwarder,
         catalystAdmin,
@@ -160,12 +152,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             trustedForwarder.address,
-            zeroAddress,
             OperatorFilterSubscription.address,
-            catalystAdmin.address,
-            catalystMinter.address,
-            CATALYST_DEFAULT_ROYALTY,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
             CATALYST_IPFS_CID_PER_TIER,
+            zeroAddress,
           ],
           {
             initializer: 'initialize',
@@ -173,41 +164,12 @@ describe('catalyst Contract', function () {
         )
       ).to.revertedWith("Catalyst: royalty recipient can't be zero");
     });
-    it("royalty can't be zero in initialization", async function () {
-      const {
-        trustedForwarder,
-        catalystAdmin,
-        catalystMinter,
-        catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
-      } = await runCatalystSetup();
-      const CatalystFactory = await ethers.getContractFactory('Catalyst');
-
-      await expect(
-        upgrades.deployProxy(
-          CatalystFactory,
-          [
-            CATALYST_BASE_URI,
-            trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
-            catalystAdmin.address,
-            catalystMinter.address,
-            0,
-            CATALYST_IPFS_CID_PER_TIER,
-          ],
-          {
-            initializer: 'initialize',
-          }
-        )
-      ).to.revertedWith("Catalyst: royalty can't be zero");
-    });
     it("minter can't be zero in initialization", async function () {
       const {
         trustedForwarder,
         catalystAdmin,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscription,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -217,12 +179,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
             OperatorFilterSubscription.address,
-            catalystAdmin.address,
-            zeroAddress,
-            CATALYST_DEFAULT_ROYALTY,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            zeroAddress, // MINTER_ROLE
             CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -235,8 +196,8 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystAdmin,
         catalystMinter,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscription,
+        RoyaltyManagerContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -246,12 +207,11 @@ describe('catalyst Contract', function () {
           [
             CATALYST_BASE_URI,
             trustedForwarder.address,
-            catalystRoyaltyRecipient.address,
             OperatorFilterSubscription.address,
             catalystAdmin.address,
             catalystMinter.address,
-            CATALYST_DEFAULT_ROYALTY,
             [''],
+            RoyaltyManagerContract.address,
           ],
           {
             initializer: 'initialize',
@@ -374,22 +334,6 @@ describe('catalyst Contract', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
-    it('Admin can set royalty recipient', async function () {
-      const {catalystAsAdmin, user1} = await runCatalystSetup();
-      await catalystAsAdmin.changeRoyaltyRecipient(user1.address, 0);
-      const royaltyInfo = await catalystAsAdmin.royaltyInfo(1, 300000);
-      expect(royaltyInfo[0]).to.be.equal(user1.address);
-      expect(royaltyInfo[1]).to.be.equal(0);
-    });
-    it('only Admin can set royalty recipient', async function () {
-      const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
-
-      await expect(
-        catalyst.connect(user1).changeRoyaltyRecipient(user1.address, 0)
-      ).to.be.revertedWith(
-        `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
-      );
-    });
     it('cant add invalid token id', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(
@@ -422,8 +366,6 @@ describe('catalyst Contract', function () {
         "Catalyst: metadataHash can't be empty"
       );
     });
-
-    // TODO: fix
     it('cant set invalid base uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setBaseURI('')).to.be.revertedWith(

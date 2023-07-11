@@ -5,12 +5,12 @@ import {
 } from '../utils/createSignature';
 import {
   CATALYST_BASE_URI,
-  CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
 } from '../../data/constants';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
+const DEFAULT_BPS = 300;
 
 export async function runCreateTestSetup() {
   const [
@@ -19,20 +19,45 @@ export async function runCreateTestSetup() {
     assetAdmin,
     user,
     otherWallet,
-    catalystRoyaltyRecipient,
     catalystAdmin,
     authValidatorAdmin,
     backendAuthWallet,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
-  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT
+  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT, Royalties
 
   const OperatorFilterRegistrantFactory = await ethers.getContractFactory(
     'OperatorFilterRegistrant'
   );
   const OperatorFilterRegistrantContract =
     await OperatorFilterRegistrantFactory.deploy();
+
+  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
+    'RoyaltyCustomSplitter'
+  );
+  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltyCustomSplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
@@ -43,6 +68,9 @@ export async function runCreateTestSetup() {
       [1, 2, 3, 4, 5, 6],
       [2, 4, 6, 8, 10, 12],
       'ipfs://',
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -57,12 +85,11 @@ export async function runCreateTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterRegistrantContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',

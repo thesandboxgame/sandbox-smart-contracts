@@ -6,12 +6,12 @@ import {
 } from '../utils/revealSignature';
 import {
   CATALYST_BASE_URI,
-  CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
 } from '../../data/constants';
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';
+const DEFAULT_BPS = 300;
 
 export async function runRevealTestSetup() {
   const [
@@ -19,10 +19,12 @@ export async function runRevealTestSetup() {
     trustedForwarder,
     assetAdmin,
     user,
-    catalystRoyaltyRecipient,
     catalystAdmin,
     authValidatorAdmin,
     backendAuthWallet,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
@@ -35,6 +37,29 @@ export async function runRevealTestSetup() {
   const OperatorFilterRegistrantContract =
     await OperatorFilterRegistrantFactory.deploy();
 
+  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
+    'RoyaltyCustomSplitter'
+  );
+  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltyCustomSplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
@@ -44,6 +69,9 @@ export async function runRevealTestSetup() {
       [1, 2, 3, 4, 5, 6],
       [2, 4, 6, 8, 10, 12],
       'ipfs://',
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -58,12 +86,11 @@ export async function runRevealTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterRegistrantContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -127,7 +154,7 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA' // metadata hash
   );
   const unRevResult = await unRevMintTx.wait();
-  const unrevealedtokenId = unRevResult.events[2].args.tokenId.toString();
+  const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
 
   // mint a tier 5 asset with 10 copies
   const unRevMintTx2 = await MockMinterContract.mintAsset(
@@ -138,7 +165,9 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJD'
   );
   const unRevResult2 = await unRevMintTx2.wait();
-  const unrevealedtokenId2 = unRevResult2.events[2].args.tokenId.toString();
+
+  // TODO: check events used in fixture
+  const unrevealedtokenId2 = unRevResult2.events[3].args.tokenId.toString();
 
   // mint a revealed version, tier 5 asset with 10 copies
   const revMintTx = await MockMinterContract.mintAsset(
@@ -148,9 +177,9 @@ export async function runRevealTestSetup() {
     true,
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC'
   );
-
   const revResult = await revMintTx.wait();
-  const revealedtokenId = revResult.events[2].args.tokenId.toString();
+  const revealedtokenId = revResult.events[3].args.tokenId.toString();
+
   // END SETUP USER WITH MINTED ASSETS
 
   // HELPER FUNCTIONS

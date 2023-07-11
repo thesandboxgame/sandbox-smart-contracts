@@ -1,10 +1,10 @@
-import { ethers } from "hardhat";
-import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { catalystRoyaltyDistribution } from "./fixtures/catalystRoyaltyFixture";
-describe("Catalyst royalty", () => {
-  it("manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)", async function () {
-    const { managerAsRoyaltySetter, catalyst } =
+import {ethers} from 'hardhat';
+import {expect} from 'chai';
+import {BigNumber} from 'ethers';
+import {catalystRoyaltyDistribution} from './fixtures/catalystRoyaltyFixture';
+describe('Catalyst royalty', function () {
+  it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)', async function () {
+    const {managerAsRoyaltySetter, catalyst} =
       await catalystRoyaltyDistribution();
     expect(
       await managerAsRoyaltySetter.contractRoyalty(catalyst.address)
@@ -15,8 +15,8 @@ describe("Catalyst royalty", () => {
     ).to.be.equal(500);
   });
 
-  it("only manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)", async function () {
-    const { manager, seller, catalyst, contractRoyaltySetterRole } =
+  it('only manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)', async function () {
+    const {manager, seller, catalyst, contractRoyaltySetterRole} =
       await catalystRoyaltyDistribution();
     await expect(
       manager
@@ -26,8 +26,8 @@ describe("Catalyst royalty", () => {
       `AccessControl: account ${seller.toLocaleLowerCase()} is missing role ${contractRoyaltySetterRole}`
     );
   });
-  it("catalyst should return EIP2981 royalty recipient and royalty for other contracts(catalyst)", async function () {
-    const { commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter } =
+  it('catalyst should return EIP2981 royalty recipient and royalty for other contracts(catalyst)', async function () {
+    const {commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter} =
       await catalystRoyaltyDistribution();
     await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
     const id = 1;
@@ -37,8 +37,8 @@ describe("Catalyst royalty", () => {
     expect(royaltyInfo[1]).to.be.equals((500 * priceToken) / 10000);
   });
 
-  it("catalyst should same return EIP2981 royalty recipient for different tokens contracts(catalyst)", async function () {
-    const { commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter } =
+  it('catalyst should same return EIP2981 royalty recipient for different tokens contracts(catalyst)', async function () {
+    const {commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter} =
       await catalystRoyaltyDistribution();
     await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
     const id = 1;
@@ -53,7 +53,7 @@ describe("Catalyst royalty", () => {
     expect(royaltyInfo2[1]).to.be.equals((500 * priceToken) / 10000);
   });
 
-  it("should split ERC20 using EIP2981", async function () {
+  it('should split ERC20 using EIP2981', async function () {
     const {
       catalyst,
       ERC20,
@@ -91,7 +91,7 @@ describe("Catalyst royalty", () => {
     );
   });
 
-  it("should split ETH using EIP2981", async function () {
+  it('should split ETH using EIP2981', async function () {
     const {
       catalyst,
       ERC20,
@@ -111,7 +111,7 @@ describe("Catalyst royalty", () => {
       .connect(await ethers.provider.getSigner(seller))
       .setApprovalForAll(mockMarketplace.address, true);
     expect(await catalyst.balanceOf(seller, 1)).to.be.equals(1);
-    const value = ethers.utils.parseUnits("1000", "ether");
+    const value = ethers.utils.parseUnits('1000', 'ether');
 
     await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
     const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
