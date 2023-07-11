@@ -1,6 +1,9 @@
 {
   "name": "@sandbox-smart-contracts/asset",
   "version": "0.0.1",
+  "dependencies": {
+    "@sandbox-smart-contracts/royalties": "*"
+  },
   "description": "Asset L2 smart contracts",
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",

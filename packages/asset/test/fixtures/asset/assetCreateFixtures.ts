@@ -2,11 +2,11 @@ import {ethers, upgrades} from 'hardhat';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
-} from '../utils/createSignature';
+} from '../../utils/createSignature';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';

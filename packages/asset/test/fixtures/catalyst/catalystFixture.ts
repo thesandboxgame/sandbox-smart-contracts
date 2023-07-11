@@ -2,7 +2,7 @@ import {ethers, upgrades} from 'hardhat';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 export async function runCatalystSetup() {
   const [
@@ -71,7 +71,7 @@ export async function runCatalystSetup() {
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
 
-  TODO: fix signers vs addresses
+  // TODO: fix signers vs addresses
   return {
     deployer: deployer.address,
     catalyst,

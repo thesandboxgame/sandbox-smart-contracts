@@ -22,7 +22,7 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
-import {MultiReceiverRoyaltyOverrideCore} from "./MultiReceiverRoyaltyOverrideCore.sol";
+import {MultiReceiverRoyaltyOverrideCore} from "@sandbox-smart-contracts/royalties/contracts/MultiReceiverRoyaltyOverrideCore.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";

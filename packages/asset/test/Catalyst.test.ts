@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers, upgrades} from 'hardhat';
-import {runCatalystSetup} from './fixtures/catalystFixture';
+import {runCatalystSetup} from './fixtures/catalyst/catalystFixture';
 import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
 const catalystArray = [1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';

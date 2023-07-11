@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
-import {catalystRoyaltyDistribution} from './fixtures/catalystRoyaltyFixture';
+import {catalystRoyaltyDistribution} from './fixtures/catalyst/catalystRoyaltyFixture';
 describe('Catalyst royalty', function () {
   it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)', async function () {
     const {managerAsRoyaltySetter, catalyst} =

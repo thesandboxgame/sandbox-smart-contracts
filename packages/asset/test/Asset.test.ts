@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {expectEventWithArgs} from '../util';
 import {ethers} from 'hardhat';
-import {runAssetSetup} from './fixtures/assetFixture';
+import {runAssetSetup} from './fixtures/asset/assetFixture';
 
 // TODO: test all events
 // TODO: test all reverts

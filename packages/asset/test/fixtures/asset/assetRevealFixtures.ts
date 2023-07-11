@@ -3,11 +3,11 @@ import {
   batchRevealSignature,
   burnAndRevealSignature,
   revealSignature,
-} from '../utils/revealSignature';
+} from '../../utils/revealSignature';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';

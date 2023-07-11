@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
-import {runCreateTestSetup} from './fixtures/assetCreateFixtures';
+import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 
 // TODO: missing AssetCreate DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
 

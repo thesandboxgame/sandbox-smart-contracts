@@ -5,7 +5,7 @@ import {BigNumber} from 'ethers';
 import {
   generateAssetId,
   assetRoyaltyDistribution,
-} from './fixtures/assetRoyaltyFixture';
+} from './fixtures/asset/assetRoyaltyFixture';
 
 describe('Asset Royalties', function () {
   describe('Asset royalty distribution via splitter', function () {

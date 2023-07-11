@@ -2,7 +2,8 @@ import {ethers, upgrades} from 'hardhat';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
+import royaltyManagerCompiled from "@ensdomains/ens-contracts/artifacts/contracts/registry/ENSRegistry.sol/ENSRegistry.json";
 
 export async function catalystRoyaltyDistribution() {
   const [

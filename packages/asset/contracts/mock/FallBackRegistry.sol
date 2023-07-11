@@ -1,3 +1,3 @@
 //SPDX-License-Identifier: MIT
-
-import {FallbackRegistry} from "@manifoldxyz/royalty-registry-solidity/contracts/FallbackRegistry.sol";
+pragma solidity ^0.8.0;
+import {FallbackRegistry} from "@sandbox-smart-contracts/royalties/contracts/mock/FallbackRegistry.sol";

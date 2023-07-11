@@ -22,7 +22,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
-import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
+import {IRoyaltyManager} from "@sandbox-smart-contracts/royalties/contracts/interfaces/IRoyaltyManager.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";

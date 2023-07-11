@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {formatBytes32String} from 'ethers/lib/utils';
-import {runRevealTestSetup} from './fixtures/assetRevealFixtures';
+import {runRevealTestSetup} from './fixtures/asset/assetRevealFixtures';
 
 const revealHashA = formatBytes32String('revealHashA');
 const revealHashB = formatBytes32String('revealHashB');
