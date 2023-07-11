@@ -1,19 +1,16 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-chai-matchers";
-import "hardhat-deploy";
-import "@nomiclabs/hardhat-ethers";
-import "solidity-coverage";
-import dotenv from "dotenv";
-dotenv.config();
+import {HardhatUserConfig} from 'hardhat/config';
+import '@nomicfoundation/hardhat-chai-matchers';
+import 'solidity-coverage';
+import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
   paths: {
-    sources: "./contracts",
+    sources: './contracts',
   },
   solidity: {
     compilers: [
       {
-        version: "0.8.18",
+        version: '0.8.18',
         settings: {
           optimizer: {
             enabled: true,
@@ -78,5 +75,4 @@ const config: HardhatUserConfig = {
     },
   },
 };
-
 export default config;

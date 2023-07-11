@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-
 import {IAssetERC721} from "../common/interfaces/IAssetERC721.sol";
 import {IAssetERC1155} from "../common/interfaces/IAssetERC1155.sol";
+import {ILandTokenV3} from "../common/interfaces/ILandTokenV3.sol";
 
 contract MockMarketPlace3 {
     bytes4 private constant ERC721_IS_RECEIVER = 0x150b7a02;
@@ -27,6 +27,22 @@ contract MockMarketPlace3 {
         bytes memory data
     ) external {
         IAssetERC1155(asset).safeTransferFrom(from, to, id, amount, data);
+    }
+
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param land the contract address on which the token transfer will take place
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param data aditional data accompanying the transfer.
+    function transferLand(
+        address land,
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) external {
+        ILandTokenV3(land).safeTransferFrom(from, to, id, data);
     }
 
     /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
@@ -75,6 +91,20 @@ contract MockMarketPlace3 {
         bytes memory data
     ) external {
         IAssetERC721(asset).safeBatchTransferFrom(from, to, ids, data);
+    }
+
+    /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
+    /// @param land the contract address on which the token transfer will take place
+    /// @param from The sender of the tokens.
+    /// @param to The recipient of the tokens.
+    /// @param id The id of the token to be transferred.
+    function transferLand(
+        address land,
+        address from,
+        address to,
+        uint256 id
+    ) external {
+        ILandTokenV3(land).safeTransferFrom(from, to, id);
     }
 
     function onERC1155Received(

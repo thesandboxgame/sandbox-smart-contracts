@@ -1,13 +1,27 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {AccessControlUpgradeable, ContextUpgradeable, IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {ERC1155BurnableUpgradeable, ERC1155Upgradeable, IERC1155Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {ERC1155SupplyUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
-import {ERC1155URIStorageUpgradeable, IERC1155MetadataURIUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable,
+    IAccessControlUpgradeable,
+    IERC165Upgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {
+    ERC1155BurnableUpgradeable,
+    ERC1155Upgradeable,
+    IERC1155Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import {
+    ERC1155SupplyUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import {
+    ERC1155URIStorageUpgradeable,
+    IERC1155MetadataURIUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import {OperatorFiltererUpgradeable} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
@@ -27,8 +41,7 @@ contract Asset is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE =
-        keccak256("BRIDGE_MINTER_ROLE");
+    bytes32 public constant BRIDGE_MINTER_ROLE = keccak256("BRIDGE_MINTER_ROLE");
 
     // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
     mapping(uint256 => uint256) public recyclingAmounts;
@@ -89,10 +102,7 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(
-            ids.length == metadataHashes.length,
-            "ids and metadataHash length mismatch"
-        );
+        require(ids.length == metadataHashes.length, "ids and metadataHash length mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
@@ -131,27 +141,20 @@ contract Asset is
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
     /// @param metadata The new uri for asset's metadata
-    function setTokenUri(
-        uint256 tokenId,
-        string memory metadata
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTokenUri(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setURI(tokenId, metadata);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
-    function setBaseURI(
-        string memory baseURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setBaseURI(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(
-        uint256 tokenId
-    )
+    function uri(uint256 tokenId)
         public
         view
         override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
@@ -160,21 +163,13 @@ contract Asset is
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
-    function getTokenIdByMetadataHash(
-        string memory metadataHash
-    ) public view returns (uint256) {
+    function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256) {
         return hashUsed[metadataHash];
     }
 
-    function _setMetadataHash(
-        uint256 tokenId,
-        string memory metadataHash
-    ) internal onlyRole(MINTER_ROLE) {
+    function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal onlyRole(MINTER_ROLE) {
         if (hashUsed[metadataHash] != 0) {
-            require(
-                hashUsed[metadataHash] == tokenId,
-                "metadata hash mismatch for tokenId"
-            );
+            require(hashUsed[metadataHash] == tokenId, "metadata hash mismatch for tokenId");
         } else {
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
@@ -184,9 +179,7 @@ contract Asset is
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(
-        bytes4 id
-    )
+    function supportsInterface(bytes4 id)
         public
         view
         virtual
@@ -201,23 +194,11 @@ contract Asset is
             id == 0x572b6c05; // ERC2771
     }
 
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

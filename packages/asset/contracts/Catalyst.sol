@@ -3,10 +3,19 @@
 pragma solidity 0.8.18;
 
 import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {ERC1155BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {ERC1155SupplyUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
-import {ERC1155URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {
+    ERC1155BurnableUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import {
+    ERC1155SupplyUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import {
+    ERC1155URIStorageUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OperatorFiltererUpgradeable, IOperatorFilterRegistry} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
@@ -40,6 +49,11 @@ contract Catalyst is
         _disableInitializers();
     }
 
+    modifier onlyValidId(uint256 tokenId) {
+        require(tokenId > 0 && tokenId <= tokenCount, "Catalyst: invalid catalyst id");
+        _;
+    }
+
     /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
     /// @param _trustedForwarder The trusted forwarder for meta transactions.
@@ -59,6 +73,14 @@ contract Catalyst is
         uint96 _defaultCatalystsRoyalty,
         string[] memory _catalystIpfsCID
     ) public initializer {
+        require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
+        require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
+        require(_subscription != address(0), "Catalyst: subscription can't be zero");
+        require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
+        require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
+        require(_royaltyRecipient != address(0), "Catalyst: royalty recipient can't be zero");
+        require(_defaultCatalystsRoyalty != 0, "Catalyst: royalty can't be zero");
+
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
@@ -72,10 +94,10 @@ contract Catalyst is
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
+            require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
+
             _setURI(i + 1, _catalystIpfsCID[i]);
-            unchecked {
-                tokenCount++;
-            }
+            unchecked {tokenCount++;}
         }
     }
 
@@ -87,8 +109,7 @@ contract Catalyst is
         address to,
         uint256 id,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
-        require(id > 0 && id <= tokenCount, "INVALID_CATALYST_ID");
+    ) external onlyRole(MINTER_ROLE) onlyValidId(id) {
         _mint(to, id, amount, "");
     }
 
@@ -134,10 +155,9 @@ contract Catalyst is
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(
-        uint256 catalystId,
-        string memory ipfsCID
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(catalystId > tokenCount, "Catalyst: invalid catalyst id");
+        require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be empty");
         tokenCount++;
         ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
         emit NewCatalystTypeAdded(catalystId);
@@ -146,10 +166,8 @@ contract Catalyst is
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(
-        address trustedForwarder
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "ZERO_ADDRESS");
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero address");
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderChanged(trustedForwarder);
     }
@@ -157,27 +175,26 @@ contract Catalyst is
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for
     /// @param metadataHash The new URI
-    function setMetadataHash(
-        uint256 tokenId,
-        string memory metadataHash
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setMetadataHash(uint256 tokenId, string memory metadataHash)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyValidId(tokenId)
+    {
+        require(bytes(metadataHash).length != 0, "Catalyst: metadataHash can't be empty");
         _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
-    function setBaseURI(
-        string memory baseURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
         _setBaseURI(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(
-        uint256 tokenId
-    )
+    function uri(uint256 tokenId)
         public
         view
         override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
@@ -187,24 +204,12 @@ contract Catalyst is
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (address)
-    {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771Handler)
-        returns (bytes calldata)
-    {
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 
@@ -244,20 +249,17 @@ contract Catalyst is
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public override onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /// @notice Change the default royalty settings
     /// @param defaultRoyaltyRecipient The new royalty recipient address
     /// @param defaultRoyaltyBps The new royalty bps
-    function changeRoyaltyRecipient(
-        address defaultRoyaltyRecipient,
-        uint96 defaultRoyaltyBps
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeRoyaltyRecipient(address defaultRoyaltyRecipient, uint96 defaultRoyaltyBps)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _setDefaultRoyalty(defaultRoyaltyRecipient, defaultRoyaltyBps);
         emit DefaultRoyaltyChanged(defaultRoyaltyRecipient, defaultRoyaltyBps);
     }
@@ -276,16 +278,10 @@ contract Catalyst is
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(
-        bytes4 interfaceId
-    )
+    function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(
-            ERC1155Upgradeable,
-            AccessControlUpgradeable,
-            ERC2981Upgradeable
-        )
+        override(ERC1155Upgradeable, AccessControlUpgradeable, ERC2981Upgradeable)
         returns (bool)
     {
         return
