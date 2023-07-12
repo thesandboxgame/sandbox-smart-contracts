@@ -340,10 +340,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         uint256[] memory tokenIdArray = new uint256[](metadataHashes.length);
         for (uint256 i = 0; i < metadataHashes.length; i++) {
             uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
-            if (tokenId != 0) {
-                tokenIdArray[i] = tokenId;
-                continue;
-            } else {
+            if (tokenId == 0) {
                 uint16 revealNonce = ++revealIds[data.creator][prevTokenId];
                 tokenId = TokenIdUtils.generateTokenId(
                     data.creator,
@@ -355,7 +352,6 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
             }
             tokenIdArray[i] = tokenId;
         }
-
         return tokenIdArray;
     }
 
