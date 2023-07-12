@@ -1,26 +1,26 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
-import { DEFAULT_SUBSCRIPTION } from '../data/constants';;
-import { deployments } from "hardhat";
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {DEFAULT_SUBSCRIPTION} from '../data/constants';
+import {deployments} from 'hardhat';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { getNamedAccounts } = hre;
-  const { filterOperatorSubscription } = await getNamedAccounts();
+  const {getNamedAccounts} = hre;
+  const {filterOperatorSubscription} = await getNamedAccounts();
 
   const operatorFilterRegistry = await deployments.getOrNull(
-    "OPERATOR_FILTER_REGISTRY"
+    'OPERATOR_FILTER_REGISTRY'
   );
 
   if (operatorFilterRegistry) {
     const operatorFilterRegistry = await hre.ethers.getContract(
-    "OPERATOR_FILTER_REGISTRY"
+      'OPERATOR_FILTER_REGISTRY'
     );
     const registered = await operatorFilterRegistry.isRegistered(
       filterOperatorSubscription
     );
 
     const operatorFilterSubscription = await hre.ethers.getContract(
-      "OperatorFilterSubscription"
+      'OperatorFilterSubscription'
     );
 
     const registeredOperatorFilterSubscription =
@@ -55,7 +55,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 
-func.tags = ["OperatorSubscriber"];
-func.dependencies = [
-  "OperatorFilterSubscription",
-];
+func.tags = ['OperatorSubscriber'];
+func.dependencies = ['OperatorFilterSubscription'];
