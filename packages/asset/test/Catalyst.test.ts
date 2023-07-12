@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { setupOperatorFilter } from "./fixtures/operatorFIlterFixture";
+import {expect} from 'chai';
+import {setupOperatorFilter} from './fixtures/operatorFIlterFixture';
 import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalystFixture';
 import {
@@ -681,25 +681,24 @@ describe('catalyst Contract', function () {
       expect(await catalyst.balanceOf(user2.address, 2)).to.be.equal(10);
     });
   });
-  describe("OperatorFilterer", function () {
-    describe("common subscription setup", function () {
-      it("should be registered", async function () {
-        const { operatorFilterRegistry, Catalyst } =
-          await setupOperatorFilter();
+  describe('OperatorFilterer', function () {
+    describe('common subscription setup', function () {
+      it('should be registered', async function () {
+        const {operatorFilterRegistry, Catalyst} = await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.isRegistered(Catalyst.address)
         ).to.be.equal(true);
       });
 
-      it("should be subscribed to common subscription", async function () {
-        const { operatorFilterRegistry, Catalyst, operatorFilterSubscription } =
+      it('should be subscribed to common subscription', async function () {
+        const {operatorFilterRegistry, Catalyst, operatorFilterSubscription} =
           await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.subscriptionOf(Catalyst.address)
         ).to.be.equal(operatorFilterSubscription.address);
       });
 
-      it("default subscription should blacklist Mock Market places 1, 2 and not 3, 4", async function () {
+      it('default subscription should blacklist Mock Market places 1, 2 and not 3, 4', async function () {
         const {
           operatorFilterRegistry,
           mockMarketPlace1,
@@ -772,7 +771,7 @@ describe('catalyst Contract', function () {
         ).to.be.equal(false);
       });
 
-      it("common subscription should blacklist Mock Market places 1, 2 and not 3, 4 like default subscription", async function () {
+      it('common subscription should blacklist Mock Market places 1, 2 and not 3, 4 like default subscription', async function () {
         const {
           operatorFilterRegistry,
           mockMarketPlace1,
@@ -845,7 +844,7 @@ describe('catalyst Contract', function () {
         ).to.be.equal(false);
       });
 
-      it("Catalyst should blacklist Mock Market places 1, 2 and not 3, 4 like default subscription", async function () {
+      it('Catalyst should blacklist Mock Market places 1, 2 and not 3, 4 like default subscription', async function () {
         const {
           operatorFilterRegistry,
           mockMarketPlace1,
@@ -1075,9 +1074,9 @@ describe('catalyst Contract', function () {
       });
     });
 
-    describe("Catalyst transfer and approval ", function () {
-      it("should be able to safe transfer Catalyst if from is the owner of token", async function () {
-        const { Catalyst, users } = await setupOperatorFilter();
+    describe('Catalyst transfer and approval ', function () {
+      it('should be able to safe transfer Catalyst if from is the owner of token', async function () {
+        const {Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
 
         await users[0].Catalyst.safeTransferFrom(
@@ -1085,14 +1084,14 @@ describe('catalyst Contract', function () {
           users[1].address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
-      it("should be able to safe batch transfer Catalyst if from is the owner of token", async function () {
-        const { Catalyst, users } = await setupOperatorFilter();
+      it('should be able to safe batch transfer Catalyst if from is the owner of token', async function () {
+        const {Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
         await Catalyst.mintWithoutMinterRole(users[0].address, 2, 1);
 
@@ -1101,16 +1100,15 @@ describe('catalyst Contract', function () {
           users[1].address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
       });
 
-      it("should be able to safe transfer Catalyst if from is the owner of Catalyst and to is a blacklisted marketplace", async function () {
-        const { mockMarketPlace1, Catalyst, users } =
-          await setupOperatorFilter();
+      it('should be able to safe transfer Catalyst if from is the owner of Catalyst and to is a blacklisted marketplace', async function () {
+        const {mockMarketPlace1, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
 
         await users[0].Catalyst.safeTransferFrom(
@@ -1118,7 +1116,7 @@ describe('catalyst Contract', function () {
           mockMarketPlace1.address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(
@@ -1126,9 +1124,8 @@ describe('catalyst Contract', function () {
         ).to.be.equal(1);
       });
 
-      it("should be able to safe batch transfer Catalysts if from is the owner of Catalysts and to is a blacklisted marketplace", async function () {
-        const { mockMarketPlace1, Catalyst, users } =
-          await setupOperatorFilter();
+      it('should be able to safe batch transfer Catalysts if from is the owner of Catalysts and to is a blacklisted marketplace', async function () {
+        const {mockMarketPlace1, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
         await Catalyst.mintWithoutMinterRole(users[0].address, 2, 1);
 
@@ -1137,7 +1134,7 @@ describe('catalyst Contract', function () {
           mockMarketPlace1.address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(
@@ -1148,17 +1145,19 @@ describe('catalyst Contract', function () {
         ).to.be.equal(1);
       });
 
-      it("it should not setApprovalForAll blacklisted market places", async function () {
-        const { mockMarketPlace1, users } = await setupOperatorFilter();
+      it('it should not setApprovalForAll blacklisted market places', async function () {
+        const {mockMarketPlace1, users} = await setupOperatorFilter();
         await expect(
           users[0].Catalyst.setApprovalForAll(mockMarketPlace1.address, true)
         ).to.be.reverted;
       });
 
-      it("it should setApprovalForAll non blacklisted market places", async function () {
-        const { mockMarketPlace3, Catalyst, users } =
-          await setupOperatorFilter();
-        users[0].Catalyst.setApprovalForAll(mockMarketPlace3.address, true);
+      it('it should setApprovalForAll non blacklisted market places', async function () {
+        const {mockMarketPlace3, Catalyst, users} = await setupOperatorFilter();
+        await users[0].Catalyst.setApprovalForAll(
+          mockMarketPlace3.address,
+          true
+        );
         expect(
           await Catalyst.isApprovedForAll(
             users[0].address,
@@ -1167,7 +1166,7 @@ describe('catalyst Contract', function () {
         ).to.be.equal(true);
       });
 
-      it("it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ", async function () {
+      it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ', async function () {
         const {
           mockMarketPlace3,
           operatorFilterRegistryAsDeployer,
@@ -1198,7 +1197,7 @@ describe('catalyst Contract', function () {
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ", async function () {
+      it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ', async function () {
         const {
           mockMarketPlace3,
           operatorFilterRegistryAsDeployer,
@@ -1235,7 +1234,7 @@ describe('catalyst Contract', function () {
         ).to.be.revertedWith;
       });
 
-      it("it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ", async function () {
+      it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
         const {
           mockMarketPlace1,
           operatorFilterRegistryAsDeployer,
@@ -1278,9 +1277,8 @@ describe('catalyst Contract', function () {
         ).to.be.equal(true);
       });
 
-      it("it should not be able to transfer through blacklisted market places", async function () {
-        const { mockMarketPlace1, Catalyst, users } =
-          await setupOperatorFilter();
+      it('it should not be able to transfer through blacklisted market places', async function () {
+        const {mockMarketPlace1, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
 
         await users[0].Catalyst.setApprovalForAllWithoutFilter(
@@ -1294,12 +1292,12 @@ describe('catalyst Contract', function () {
             users[1].address,
             1,
             1,
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should not be able to transfer through market places after they are blacklisted", async function () {
+      it('it should not be able to transfer through market places after they are blacklisted', async function () {
         const {
           mockMarketPlace3,
           Catalyst,
@@ -1320,7 +1318,7 @@ describe('catalyst Contract', function () {
           users[1].address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
@@ -1338,14 +1336,13 @@ describe('catalyst Contract', function () {
             users[1].address,
             1,
             1,
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should be able to transfer through non blacklisted market places", async function () {
-        const { mockMarketPlace3, Catalyst, users } =
-          await setupOperatorFilter();
+      it('it should be able to transfer through non blacklisted market places', async function () {
+        const {mockMarketPlace3, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
 
         await users[0].Catalyst.setApprovalForAllWithoutFilter(
@@ -1358,13 +1355,13 @@ describe('catalyst Contract', function () {
           users[1].address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
-      it("it should not be able to transfer through non blacklisted market places after their codeHash is blacklisted", async function () {
+      it('it should not be able to transfer through non blacklisted market places after their codeHash is blacklisted', async function () {
         const {
           mockMarketPlace3,
           Catalyst,
@@ -1384,7 +1381,7 @@ describe('catalyst Contract', function () {
           users[1].address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
@@ -1406,12 +1403,12 @@ describe('catalyst Contract', function () {
             users[1].address,
             1,
             1,
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should be able to transfer through blacklisted market places after they are removed from blacklist", async function () {
+      it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
         const {
           mockMarketPlace1,
           Catalyst,
@@ -1437,7 +1434,7 @@ describe('catalyst Contract', function () {
             users[1].address,
             1,
             1,
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
 
@@ -1458,15 +1455,14 @@ describe('catalyst Contract', function () {
           users[1].address,
           1,
           1,
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
-      it("it should not be able to batch transfer through blacklisted market places", async function () {
-        const { mockMarketPlace1, Catalyst, users } =
-          await setupOperatorFilter();
+      it('it should not be able to batch transfer through blacklisted market places', async function () {
+        const {mockMarketPlace1, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
         await Catalyst.mintWithoutMinterRole(users[0].address, 2, 1);
 
@@ -1481,12 +1477,12 @@ describe('catalyst Contract', function () {
             users[1].address,
             [1, 2],
             [1, 1],
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should not be able to batch transfer through market places after they are blacklisted", async function () {
+      it('it should not be able to batch transfer through market places after they are blacklisted', async function () {
         const {
           mockMarketPlace3,
           Catalyst,
@@ -1508,7 +1504,7 @@ describe('catalyst Contract', function () {
           users[1].address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
@@ -1528,14 +1524,13 @@ describe('catalyst Contract', function () {
             users[1].address,
             [1, 2],
             [1, 1],
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should be able to batch transfer through non blacklisted market places", async function () {
-        const { mockMarketPlace3, Catalyst, users } =
-          await setupOperatorFilter();
+      it('it should be able to batch transfer through non blacklisted market places', async function () {
+        const {mockMarketPlace3, Catalyst, users} = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
         await Catalyst.mintWithoutMinterRole(users[0].address, 2, 1);
 
@@ -1549,14 +1544,14 @@ describe('catalyst Contract', function () {
           users[1].address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
       });
 
-      it("it should not be able to batch transfer through non blacklisted market places after their codeHash is blacklisted", async function () {
+      it('it should not be able to batch transfer through non blacklisted market places after their codeHash is blacklisted', async function () {
         const {
           mockMarketPlace3,
           Catalyst,
@@ -1577,7 +1572,7 @@ describe('catalyst Contract', function () {
           users[1].address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
@@ -1600,12 +1595,12 @@ describe('catalyst Contract', function () {
             users[1].address,
             [1, 2],
             [1, 1],
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
       });
 
-      it("it should be able to batch transfer through blacklisted market places after they are removed from blacklist", async function () {
+      it('it should be able to batch transfer through blacklisted market places after they are removed from blacklist', async function () {
         const {
           mockMarketPlace1,
           Catalyst,
@@ -1632,7 +1627,7 @@ describe('catalyst Contract', function () {
             users[1].address,
             [1, 2],
             [1, 1],
-            "0x"
+            '0x'
           )
         ).to.be.revertedWithCustomError;
 
@@ -1653,12 +1648,12 @@ describe('catalyst Contract', function () {
           users[1].address,
           [1, 2],
           [1, 1],
-          "0x"
+          '0x'
         );
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
       });
-    })
-  })
+    });
+  });
 });

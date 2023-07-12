@@ -574,13 +574,12 @@ describe('AssetContract', function () {
           await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.subscriptionOf(Asset.address)
-        ).to.be.equal(filterOperatorSubscription);
+        ).to.be.equal(filterOperatorSubscription.address);
       });
 
       it('default subscription should blacklist Mock Market places 1, 2 and not 3, 4', async function () {
         const {
           operatorFilterRegistry,
-          Asset,
           mockMarketPlace1,
           mockMarketPlace2,
           mockMarketPlace3,
@@ -662,7 +661,7 @@ describe('AssetContract', function () {
         } = await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(true);
@@ -670,14 +669,14 @@ describe('AssetContract', function () {
           await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace2.address
           )
         ).to.be.equal(true);
@@ -686,14 +685,14 @@ describe('AssetContract', function () {
           await operatorFilterRegistry.codeHashOf(mockMarketPlace2.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace2CodeHash
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(false);
@@ -702,14 +701,14 @@ describe('AssetContract', function () {
           await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace4.address
           )
         ).to.be.equal(false);
@@ -718,7 +717,7 @@ describe('AssetContract', function () {
           await operatorFilterRegistry.codeHashOf(mockMarketPlace4.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace4CodeHash
           )
         ).to.be.equal(false);
@@ -822,26 +821,26 @@ describe('AssetContract', function () {
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(true);
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1.address,
           false
         );
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           MockERC1155MarketPlace1CodeHash,
           false
         );
@@ -862,14 +861,14 @@ describe('AssetContract', function () {
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(false);
@@ -900,26 +899,26 @@ describe('AssetContract', function () {
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(false);
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3.address,
           true
         );
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           MockERC1155MarketPlace3CodeHash,
           true
         );
@@ -940,14 +939,14 @@ describe('AssetContract', function () {
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription,
+            filterOperatorSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(true);
@@ -1034,7 +1033,7 @@ describe('AssetContract', function () {
 
       it('it should setApprovalForAll non blacklisted market places', async function () {
         const {mockMarketPlace3, Asset, users} = await setupOperatorFilter();
-        users[0].Asset.setApprovalForAll(mockMarketPlace3.address, true);
+        await users[0].Asset.setApprovalForAll(mockMarketPlace3.address, true);
         expect(
           await Asset.isApprovedForAll(
             users[0].address,
@@ -1061,7 +1060,7 @@ describe('AssetContract', function () {
         ).to.be.equal(true);
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3.address,
           true
         );
@@ -1095,7 +1094,7 @@ describe('AssetContract', function () {
         ).to.be.equal(true);
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
@@ -1124,13 +1123,13 @@ describe('AssetContract', function () {
         ).to.be.revertedWithCustomError;
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1.address,
           false
         );
@@ -1192,7 +1191,7 @@ describe('AssetContract', function () {
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3.address,
           true
         );
@@ -1259,7 +1258,7 @@ describe('AssetContract', function () {
             mockMarketPlace3.address
           );
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
@@ -1307,13 +1306,13 @@ describe('AssetContract', function () {
         ).to.be.revertedWithCustomError;
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1.address,
           false
         );
@@ -1380,7 +1379,7 @@ describe('AssetContract', function () {
         expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3.address,
           true
         );
@@ -1451,7 +1450,7 @@ describe('AssetContract', function () {
             mockMarketPlace3.address
           );
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
@@ -1500,13 +1499,13 @@ describe('AssetContract', function () {
         ).to.be.revertedWithCustomError;
 
         await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
         await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription,
+          filterOperatorSubscription.address,
           mockMarketPlace1.address,
           false
         );

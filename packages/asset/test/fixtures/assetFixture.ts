@@ -33,6 +33,11 @@ export async function runAssetSetup() {
     burner,
     trustedForwarder,
   ] = await ethers.getSigners();
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'OperatorFilterRegistrant'
+  );
+  const OperatorFilterSubscription =
+    await OperatorFilterSubscriptionFactory.deploy();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
   const AssetFactory = await ethers.getContractFactory('Asset');
@@ -44,6 +49,7 @@ export async function runAssetSetup() {
       [1, 2, 3, 4, 5, 6],
       [2, 4, 6, 8, 10, 12],
       'ipfs://',
+      OperatorFilterSubscription.address,
     ],
     {
       initializer: 'initialize',
