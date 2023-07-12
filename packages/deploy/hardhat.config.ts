@@ -35,6 +35,8 @@ const namedAccounts = {
     polygon: 'sandAdmin',
   },
 
+  filterOperatorSubscription: 'deployer',
+
   upgradeAdmin: 'sandAdmin',
 
   multiGiveawayAdmin: {
