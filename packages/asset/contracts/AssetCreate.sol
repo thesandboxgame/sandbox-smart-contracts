@@ -8,7 +8,7 @@ import {
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
-import {AuthValidator} from "./AuthValidator.sol"; 
+import {AuthValidator} from "./AuthValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
