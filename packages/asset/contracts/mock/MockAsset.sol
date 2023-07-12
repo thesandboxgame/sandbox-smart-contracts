@@ -8,15 +8,9 @@ contract MockAsset is Asset {
     /// @notice sets registry and subscribe to subscription
     /// @param registry address of registry
     /// @param subscription address to subscribe
-    function setRegistryAndSubscribe(
-        address registry,
-        address subscription
-    ) external {
+    function setRegistryAndSubscribe(address registry, address subscription) external {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        operatorFilterRegistry.registerAndSubscribe(
-            address(this),
-            subscription
-        );
+        operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
     }
 
     /// @notice Mint new tokens with out minter role
@@ -34,10 +28,7 @@ contract MockAsset is Asset {
     /// @notice set approval for asset transfer without filteration
     /// @param operator operator to be approved
     /// @param approved bool value for giving (true) and canceling (false) approval
-    function setApprovalForAllWithoutFilter(
-        address operator,
-        bool approved
-    ) public virtual {
+    function setApprovalForAllWithoutFilter(address operator, bool approved) public virtual {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 }

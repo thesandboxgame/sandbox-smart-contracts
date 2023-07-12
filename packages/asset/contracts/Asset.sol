@@ -68,7 +68,7 @@ contract Asset is
         __ERC1155Supply_init();
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
@@ -213,7 +213,6 @@ contract Asset is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
     /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
     /// @param from address from which tokens are transfered.
@@ -234,10 +233,12 @@ contract Asset is
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public virtual override onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override
+        onlyAllowedOperatorApproval(operator)
+    {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
