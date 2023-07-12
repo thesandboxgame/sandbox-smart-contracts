@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable code-complexity
 pragma solidity ^0.8.13;
 
 import {IOperatorFilterRegistry} from "operator-filter-registry/src/IOperatorFilterRegistry.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {OperatorFilterRegistryErrorsAndEvents} from "operator-filter-registry/src/OperatorFilterRegistryErrorsAndEvents.sol";
+import {
+    OperatorFilterRegistryErrorsAndEvents
+} from "operator-filter-registry/src/OperatorFilterRegistryErrorsAndEvents.sol";
 
 /**
  * @title  MockOperatorFilterRegistry
@@ -18,7 +21,7 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
 
     /// @dev initialized accounts have a nonzero codehash (see https://eips.ethereum.org/EIPS/eip-1052)
     /// Note that this will also be a smart contract's codehash when making calls from its constructor.
-    bytes32 constant EOA_CODEHASH = keccak256("");
+    bytes32 internal constant EOA_CODEHASH = keccak256("");
 
     mapping(address => EnumerableSet.AddressSet) private _filteredOperators;
     mapping(address => EnumerableSet.Bytes32Set) private _filteredCodeHashes;
@@ -174,10 +177,11 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
     /**
      * @notice Update an operator address for a registered address - when filtered is true, the operator is filtered.
      */
-    function updateOperator(address registrant, address operator, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperator(
+        address registrant,
+        address operator,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -210,10 +214,11 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
      *         act as an operator (an account is initialized or a smart contract exclusively in the context of its
      *         constructor),  it will have a codeHash of EOA_CODEHASH, which cannot be filtered.
      */
-    function updateCodeHash(address registrant, bytes32 codeHash, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHash(
+        address registrant,
+        bytes32 codeHash,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         if (codeHash == EOA_CODEHASH) {
             revert CannotFilterEOAs();
         }
@@ -243,10 +248,11 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
     /**
      * @notice Update multiple operators for a registered address - when filtered is true, the operators will be filtered. Reverts on duplicates.
      */
-    function updateOperators(address registrant, address[] calldata operators, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateOperators(
+        address registrant,
+        address[] calldata operators,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -257,26 +263,22 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
         EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[registrant];
         uint256 operatorsLength = operators.length;
         if (!filtered) {
-            for (uint256 i = 0; i < operatorsLength;) {
+            for (uint256 i = 0; i < operatorsLength; ) {
                 address operator = operators[i];
                 bool removed = filteredOperatorsRef.remove(operator);
                 if (!removed) {
                     revert AddressNotFiltered(operator);
                 }
-                unchecked {
-                    ++i;
-                }
+                unchecked {++i;}
             }
         } else {
-            for (uint256 i = 0; i < operatorsLength;) {
+            for (uint256 i = 0; i < operatorsLength; ) {
                 address operator = operators[i];
                 bool added = filteredOperatorsRef.add(operator);
                 if (!added) {
                     revert AddressAlreadyFiltered(operator);
                 }
-                unchecked {
-                    ++i;
-                }
+                unchecked {++i;}
             }
         }
         emit OperatorsUpdated(registrant, operators, filtered);
@@ -291,10 +293,11 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
      *         act as an operator (an account is initialized or a smart contract exclusively in the context of its
      *         constructor),  it will have a codeHash of EOA_CODEHASH, which cannot be filtered.
      */
-    function updateCodeHashes(address registrant, bytes32[] calldata codeHashes, bool filtered)
-        external
-        onlyAddressOrOwner(registrant)
-    {
+    function updateCodeHashes(
+        address registrant,
+        bytes32[] calldata codeHashes,
+        bool filtered
+    ) external onlyAddressOrOwner(registrant) {
         address registration = _registrations[registrant];
         if (registration == address(0)) {
             revert NotRegistered(registrant);
@@ -305,18 +308,16 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
         EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrant];
         uint256 codeHashesLength = codeHashes.length;
         if (!filtered) {
-            for (uint256 i = 0; i < codeHashesLength;) {
+            for (uint256 i = 0; i < codeHashesLength; ) {
                 bytes32 codeHash = codeHashes[i];
                 bool removed = filteredCodeHashesRef.remove(codeHash);
                 if (!removed) {
                     revert CodeHashNotFiltered(codeHash);
                 }
-                unchecked {
-                    ++i;
-                }
+                unchecked {++i;}
             }
         } else {
-            for (uint256 i = 0; i < codeHashesLength;) {
+            for (uint256 i = 0; i < codeHashesLength; ) {
                 bytes32 codeHash = codeHashes[i];
                 if (codeHash == EOA_CODEHASH) {
                     revert CannotFilterEOAs();
@@ -325,9 +326,7 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
                 if (!added) {
                     revert CodeHashAlreadyFiltered(codeHash);
                 }
-                unchecked {
-                    ++i;
-                }
+                unchecked {++i;}
             }
         }
         emit CodeHashesUpdated(registrant, codeHashes, filtered);
@@ -417,25 +416,21 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
         EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrantToCopy];
         uint256 filteredOperatorsLength = filteredOperatorsRef.length();
         uint256 filteredCodeHashesLength = filteredCodeHashesRef.length();
-        for (uint256 i = 0; i < filteredOperatorsLength;) {
+        for (uint256 i = 0; i < filteredOperatorsLength; ) {
             address operator = filteredOperatorsRef.at(i);
             bool added = _filteredOperators[registrant].add(operator);
             if (added) {
                 emit OperatorUpdated(registrant, operator, true);
             }
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
-        for (uint256 i = 0; i < filteredCodeHashesLength;) {
+        for (uint256 i = 0; i < filteredCodeHashesLength; ) {
             bytes32 codehash = filteredCodeHashesRef.at(i);
             bool added = _filteredCodeHashes[registrant].add(codehash);
             if (added) {
                 emit CodeHashUpdated(registrant, codehash, true);
             }
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
     }
 
@@ -568,4 +563,3 @@ contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRe
         return a.codehash;
     }
 }
-
