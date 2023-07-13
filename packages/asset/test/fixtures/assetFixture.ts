@@ -64,6 +64,10 @@ export async function runAssetSetup() {
   await AssetContractAsAdmin.grantRole(burnerRole, burner.address);
   // end set up roles
 
+  const MockAsset = await ethers.getContractFactory('MockAsset');
+  const MockAssetContract = await MockAsset.deploy();
+  await MockAssetContract.deployed();
+
   const metadataHashes = [
     'QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY',
     'QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR',
@@ -148,6 +152,7 @@ export async function runAssetSetup() {
   };
 
   return {
+    MockAssetContract,
     AssetContract,
     AssetContractAsOwner,
     AssetContractAsMinter,

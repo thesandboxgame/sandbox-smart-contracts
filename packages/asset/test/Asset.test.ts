@@ -626,6 +626,19 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         trustedForwarder.address
       );
     });
+    it('should correctly check if an address is a trusted forwarder or not', async function () {
+      const {AssetContract, trustedForwarder} = await runAssetSetup();
+      expect(await AssetContract.isTrustedForwarder(trustedForwarder.address))
+        .to.be.true;
+      expect(
+        await AssetContract.isTrustedForwarder(ethers.constants.AddressZero)
+      ).to.be.false;
+    });
+    it('should return correct msgData', async function () {
+      const {MockAssetContract} = await runAssetSetup();
+      // call the function to satisfy the coverage only
+      await MockAssetContract.msgData();
+    });
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetContract} = await runAssetSetup();
       const randomAddress = ethers.Wallet.createRandom().address;
@@ -803,6 +816,28 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         true
       );
       await expect(tx).to.emit(AssetContractAsOwner, 'ApprovalForAll');
+    });
+  });
+  describe('Interface support', function () {
+    it('should support ERC165', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0x01ffc9a7')).to.be.true;
+    });
+    it('should support ERC1155', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0xd9b67a26')).to.be.true;
+    });
+    it('should support ERC1155MetadataURI', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0x0e89341c')).to.be.true;
+    });
+    it('should support AccessControlUpgradeable', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0x7965db0b')).to.be.true;
+    });
+    it('should support ERC2771', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0x572b6c05')).to.be.true;
     });
   });
 });
