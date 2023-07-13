@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable code-complexity
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.0;
 
 import {IOperatorFilterRegistry} from "operator-filter-registry/src/IOperatorFilterRegistry.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";

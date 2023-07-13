@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.18;
+pragma solidity ^0.8.0;
 
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
