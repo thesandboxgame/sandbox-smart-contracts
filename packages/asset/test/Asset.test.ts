@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {runAssetSetup} from './fixtures/assetFixture';
 import {ethers} from 'hardhat';
 
-describe.only('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
+describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
   describe('Access Control', function () {
     it('should have MINTER_ROLE defined', async function () {
       const {AssetContract} = await runAssetSetup();
@@ -796,7 +796,7 @@ describe.only('Base Asset Contract (/packages/asset/contracts/Asset.sol)', funct
       expect(approved).to.be.true;
     });
     it('should emit ApprovalForAll event approval', async function () {
-      const {AssetContractAsOwner, owner} = await runAssetSetup();
+      const {AssetContractAsOwner} = await runAssetSetup();
       const randomAddress = ethers.Wallet.createRandom().address;
       const tx = await AssetContractAsOwner.setApprovalForAll(
         randomAddress,
