@@ -2,7 +2,103 @@ import {expect} from 'chai';
 import {runAssetSetup} from './fixtures/assetFixture';
 import {ethers} from 'hardhat';
 
-describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
+describe.only('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
+  describe('Access Control', function () {
+    it('should have MINTER_ROLE defined', async function () {
+      const {AssetContract} = await runAssetSetup();
+      const minterRole = await AssetContract.MINTER_ROLE();
+      expect(minterRole).to.be.equal(ethers.utils.id('MINTER_ROLE'));
+    });
+    it('should have BURNER_ROLE defined', async function () {
+      const {AssetContract} = await runAssetSetup();
+      const burnerRole = await AssetContract.BURNER_ROLE();
+      expect(burnerRole).to.be.equal(ethers.utils.id('BURNER_ROLE'));
+    });
+    it('should be able to grant roles', async function () {
+      const {AssetContract, AssetContractAsAdmin, owner} =
+        await runAssetSetup();
+
+      await AssetContractAsAdmin.grantRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      expect(
+        await AssetContract.hasRole(
+          ethers.utils.id('BURNER_ROLE'),
+          owner.address
+        )
+      ).to.be.true;
+    });
+    it('should be able to revoke roles', async function () {
+      const {AssetContract, AssetContractAsAdmin, owner} =
+        await runAssetSetup();
+
+      await AssetContractAsAdmin.grantRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      expect(
+        await AssetContract.hasRole(
+          ethers.utils.id('BURNER_ROLE'),
+          owner.address
+        )
+      ).to.be.true;
+
+      await AssetContractAsAdmin.revokeRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      expect(
+        await AssetContract.hasRole(
+          ethers.utils.id('BURNER_ROLE'),
+          owner.address
+        )
+      ).to.be.false;
+    });
+    it('should emit RoleGranted event when granting roles', async function () {
+      const {AssetContract, AssetContractAsAdmin, owner} =
+        await runAssetSetup();
+
+      const tx = await AssetContractAsAdmin.grantRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      await expect(tx).to.emit(AssetContract, 'RoleGranted');
+    });
+    it('should emit RoleRevoked event when revoking roles', async function () {
+      const {AssetContract, AssetContractAsAdmin, owner} =
+        await runAssetSetup();
+
+      await AssetContractAsAdmin.grantRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      const tx = await AssetContractAsAdmin.revokeRole(
+        ethers.utils.id('BURNER_ROLE'),
+        owner.address
+      );
+
+      await expect(tx).to.emit(AssetContract, 'RoleRevoked');
+    });
+    it('should not allow non-DEFAULT_ADMIN to grant roles', async function () {
+      const {AssetContractAsMinter, minter, defaultAdminRole} =
+        await runAssetSetup();
+
+      await expect(
+        AssetContractAsMinter.grantRole(
+          ethers.utils.id('BURNER_ROLE'),
+          minter.address
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${minter.address.toLowerCase()} is missing role ${defaultAdminRole}`
+      );
+    });
+  });
   describe('Base URI', function () {
     it('Should have correct base URI set in the constructor', async function () {
       const {AssetContract, mintOne, baseURI} = await runAssetSetup();
@@ -374,6 +470,154 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         `AccessControl: account ${minter.address.toLowerCase()} is missing role ${burnerRole}`
       );
     });
+    it('should allow users to burn their own tokens - single token', async function () {
+      const {AssetContractAsOwner, mintOne, owner} = await runAssetSetup();
+      const {tokenId} = await mintOne(owner.address, undefined, 10);
+      expect(
+        await AssetContractAsOwner.balanceOf(owner.address, tokenId)
+      ).to.be.equal(10);
+      await AssetContractAsOwner.burn(owner.address, tokenId, 5);
+      const balanceAfterBurn = await AssetContractAsOwner.balanceOf(
+        owner.address,
+        tokenId
+      );
+      expect(balanceAfterBurn).to.be.equal(5);
+    });
+    it('should allow users to burn their own tokens - batch of tokens', async function () {
+      const {AssetContractAsOwner, mintBatch, owner} = await runAssetSetup();
+      const amounts = [2, 4];
+      const {tokenIds} = await mintBatch(owner.address, undefined, amounts);
+      const balance = await AssetContractAsOwner.balanceOfBatch(
+        new Array(tokenIds.length).fill(owner.address),
+        tokenIds
+      );
+      expect(balance).to.be.deep.equal(amounts);
+      await AssetContractAsOwner.burnBatch(owner.address, tokenIds, [1, 1]);
+      const balanceAfterBurn = await AssetContractAsOwner.balanceOfBatch(
+        new Array(tokenIds.length).fill(owner.address),
+        tokenIds
+      );
+      expect(balanceAfterBurn).to.be.deep.equal([1, 3]);
+    });
+    describe('Burning Events', function () {
+      it('should emit TransferSingle event on burnFrom', async function () {
+        const {AssetContractAsBurner, mintOne, minter} = await runAssetSetup();
+        const {tokenId} = await mintOne();
+        const tx = await AssetContractAsBurner.burnFrom(
+          minter.address,
+          tokenId,
+          5
+        );
+        await expect(tx).to.emit(AssetContractAsBurner, 'TransferSingle');
+      });
+      it('should emit TransferSingle event with correct args on burnFrom', async function () {
+        const {AssetContractAsBurner, mintOne, minter, burner} =
+          await runAssetSetup();
+        const {tokenId} = await mintOne();
+        const tx = await AssetContractAsBurner.burnFrom(
+          minter.address,
+          tokenId,
+          5
+        );
+        await expect(tx)
+          .to.emit(AssetContractAsBurner, 'TransferSingle')
+          .withArgs(
+            burner.address,
+            minter.address,
+            ethers.constants.AddressZero,
+            tokenId,
+            5
+          );
+      });
+      it('should emit TransferBatch event on burnBatchFrom', async function () {
+        const {AssetContractAsBurner, mintBatch, minter} =
+          await runAssetSetup();
+        const amounts = [2, 4];
+        const {tokenIds} = await mintBatch(minter.address, undefined, amounts);
+        const tx = await AssetContractAsBurner.burnBatchFrom(
+          minter.address,
+          tokenIds,
+          [1, 1]
+        );
+        await expect(tx).to.emit(AssetContractAsBurner, 'TransferBatch');
+      });
+      it('should emit TransferBatch event with correct args on burnBatchFrom', async function () {
+        const {AssetContractAsBurner, mintBatch, minter, burner} =
+          await runAssetSetup();
+        const amounts = [2, 4];
+        const {tokenIds} = await mintBatch(minter.address, undefined, amounts);
+        const tx = await AssetContractAsBurner.burnBatchFrom(
+          minter.address,
+          tokenIds,
+          [1, 1]
+        );
+        await expect(tx)
+          .to.emit(AssetContractAsBurner, 'TransferBatch')
+          .withArgs(
+            burner.address,
+            minter.address,
+            ethers.constants.AddressZero,
+            [
+              ethers.utils.hexlify(tokenIds[0]),
+              ethers.utils.hexlify(tokenIds[1]),
+            ],
+            [1, 1]
+          );
+      });
+      it("should emit TransferSingle event on owner's burn", async function () {
+        const {AssetContractAsOwner, mintOne, owner} = await runAssetSetup();
+        const {tokenId} = await mintOne(owner.address, undefined, 10);
+        const tx = await AssetContractAsOwner.burn(owner.address, tokenId, 5);
+        await expect(tx).to.emit(AssetContractAsOwner, 'TransferSingle');
+      });
+      it("should emit TransferSingle event with correct args on owner's burn", async function () {
+        const {AssetContractAsOwner, mintOne, owner} = await runAssetSetup();
+        const {tokenId} = await mintOne(owner.address, undefined, 10);
+        const tx = await AssetContractAsOwner.burn(owner.address, tokenId, 5);
+        await expect(tx)
+          .to.emit(AssetContractAsOwner, 'TransferSingle')
+          .withArgs(
+            owner.address,
+            owner.address,
+            ethers.constants.AddressZero,
+            tokenId,
+            5
+          );
+      });
+      it("should emit TransferBatch event on owner's burnBatch", async function () {
+        const {AssetContractAsOwner, mintBatch, owner} = await runAssetSetup();
+        const amounts = [2, 4];
+        const {tokenIds} = await mintBatch(owner.address, undefined, amounts);
+        const tx = await AssetContractAsOwner.burnBatch(
+          owner.address,
+          tokenIds,
+          [1, 1]
+        );
+        await expect(tx).to.emit(AssetContractAsOwner, 'TransferBatch');
+      });
+      it("should emit TransferBatch event with correct args on owner's burnBatch", async function () {
+        const {AssetContractAsOwner, mintBatch, owner} = await runAssetSetup();
+        const amounts = [2, 4];
+        const {tokenIds} = await mintBatch(owner.address, undefined, amounts);
+        const tx = await AssetContractAsOwner.burnBatch(
+          owner.address,
+          tokenIds,
+          [1, 1]
+        );
+        await expect(tx)
+          .to.emit(AssetContractAsOwner, 'TransferBatch')
+          .withArgs(
+            owner.address,
+            owner.address,
+            ethers.constants.AddressZero,
+            [
+              ethers.utils.hexlify(tokenIds[0]),
+              ethers.utils.hexlify(tokenIds[1]),
+            ],
+            [1, 1]
+          );
+      });
+    });
   });
   describe('Trusted Forwarder', function () {
     it('should allow to read the trusted forwarder', async function () {
@@ -389,6 +633,176 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       expect(await AssetContract.getTrustedForwarder()).to.be.equal(
         randomAddress
       );
+    });
+  });
+  describe('Transferring', function () {
+    it('should allow owner to transfer a single token', async function () {
+      const {AssetContractAsOwner, mintOne, owner} = await runAssetSetup();
+      const {tokenId} = await mintOne(owner.address, undefined, 10);
+      await AssetContractAsOwner.safeTransferFrom(
+        owner.address,
+        ethers.Wallet.createRandom().address,
+        tokenId,
+        5,
+        '0x'
+      );
+      const balanceAfterTransfer = await AssetContractAsOwner.balanceOf(
+        owner.address,
+        tokenId
+      );
+      expect(balanceAfterTransfer).to.be.equal(5);
+    });
+    it('should allow owner to transfer a batch of tokens', async function () {
+      const {AssetContractAsOwner, mintBatch, owner} = await runAssetSetup();
+      const amounts = [2, 4];
+      const {tokenIds} = await mintBatch(owner.address, undefined, amounts);
+      const balance = await AssetContractAsOwner.balanceOfBatch(
+        new Array(tokenIds.length).fill(owner.address),
+        tokenIds
+      );
+      expect(balance).to.be.deep.equal(amounts);
+      await AssetContractAsOwner.safeBatchTransferFrom(
+        owner.address,
+        ethers.Wallet.createRandom().address,
+        tokenIds,
+        [1, 1],
+        '0x'
+      );
+      const balanceAfterTransfer = await AssetContractAsOwner.balanceOfBatch(
+        new Array(tokenIds.length).fill(owner.address),
+        tokenIds
+      );
+      expect(balanceAfterTransfer).to.be.deep.equal([1, 3]);
+    });
+    it('should allow non-owner to transfer a single token if approved', async function () {
+      const {
+        AssetContractAsMinter,
+        AssetContractAsOwner,
+        mintOne,
+        minter,
+        owner,
+      } = await runAssetSetup();
+      const {tokenId} = await mintOne(minter.address, undefined, 10);
+      await AssetContractAsMinter.setApprovalForAll(owner.address, true);
+      await AssetContractAsOwner.safeTransferFrom(
+        minter.address,
+        ethers.Wallet.createRandom().address,
+        tokenId,
+        5,
+        '0x'
+      );
+      const balanceAfterTransfer = await AssetContractAsMinter.balanceOf(
+        minter.address,
+        tokenId
+      );
+      expect(balanceAfterTransfer).to.be.equal(5);
+    });
+    it('should allow non-owner to transfer a batch of tokens if approved', async function () {
+      const {
+        AssetContractAsMinter,
+        AssetContractAsOwner,
+        mintBatch,
+        minter,
+        owner,
+      } = await runAssetSetup();
+      const amounts = [2, 4];
+      const {tokenIds} = await mintBatch(minter.address, undefined, amounts);
+      const balance = await AssetContractAsMinter.balanceOfBatch(
+        new Array(tokenIds.length).fill(minter.address),
+        tokenIds
+      );
+      expect(balance).to.be.deep.equal(amounts);
+      await AssetContractAsMinter.setApprovalForAll(owner.address, true);
+      await AssetContractAsOwner.safeBatchTransferFrom(
+        minter.address,
+        ethers.Wallet.createRandom().address,
+        tokenIds,
+        [1, 1],
+        '0x'
+      );
+      const balanceAfterTransfer = await AssetContractAsMinter.balanceOfBatch(
+        new Array(tokenIds.length).fill(minter.address),
+        tokenIds
+      );
+      expect(balanceAfterTransfer).to.be.deep.equal([1, 3]);
+    });
+    it('should not allow non-owner to transfer a single token if not approved', async function () {
+      const {AssetContractAsOwner, mintOne, minter} = await runAssetSetup();
+      const {tokenId} = await mintOne(minter.address, undefined, 10);
+      await expect(
+        AssetContractAsOwner.safeTransferFrom(
+          minter.address,
+          ethers.Wallet.createRandom().address,
+          tokenId,
+          5,
+          '0x'
+        )
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+    });
+    it('should not allow non-owner to transfer a batch of tokens if not approved', async function () {
+      const {AssetContractAsOwner, mintBatch, minter} = await runAssetSetup();
+      const amounts = [2, 4];
+      const {tokenIds} = await mintBatch(minter.address, undefined, amounts);
+      const balance = await AssetContractAsOwner.balanceOfBatch(
+        new Array(tokenIds.length).fill(minter.address),
+        tokenIds
+      );
+      expect(balance).to.be.deep.equal(amounts);
+      await expect(
+        AssetContractAsOwner.safeBatchTransferFrom(
+          minter.address,
+          ethers.Wallet.createRandom().address,
+          tokenIds,
+          [1, 1],
+          '0x'
+        )
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+    });
+    it('should emit TransferSingle event on single transfer', async function () {
+      const {AssetContractAsOwner, mintOne, owner} = await runAssetSetup();
+      const {tokenId} = await mintOne(owner.address, undefined, 10);
+      const tx = await AssetContractAsOwner.safeTransferFrom(
+        owner.address,
+        ethers.Wallet.createRandom().address,
+        tokenId,
+        5,
+        '0x'
+      );
+      await expect(tx).to.emit(AssetContractAsOwner, 'TransferSingle');
+    });
+    it('should emit TransferBatch event on batch transfer', async function () {
+      const {AssetContractAsOwner, mintBatch, owner} = await runAssetSetup();
+      const amounts = [2, 4];
+      const {tokenIds} = await mintBatch(owner.address, undefined, amounts);
+      const tx = await AssetContractAsOwner.safeBatchTransferFrom(
+        owner.address,
+        ethers.Wallet.createRandom().address,
+        tokenIds,
+        [1, 1],
+        '0x'
+      );
+      await expect(tx).to.emit(AssetContractAsOwner, 'TransferBatch');
+    });
+  });
+  describe('Approving', function () {
+    it('should allow owners to approve other accounts to use their tokens', async function () {
+      const {AssetContractAsOwner, owner} = await runAssetSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      await AssetContractAsOwner.setApprovalForAll(randomAddress, true);
+      const approved = await AssetContractAsOwner.isApprovedForAll(
+        owner.address,
+        randomAddress
+      );
+      expect(approved).to.be.true;
+    });
+    it('should emit ApprovalForAll event approval', async function () {
+      const {AssetContractAsOwner, owner} = await runAssetSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      const tx = await AssetContractAsOwner.setApprovalForAll(
+        randomAddress,
+        true
+      );
+      await expect(tx).to.emit(AssetContractAsOwner, 'ApprovalForAll');
     });
   });
 });
