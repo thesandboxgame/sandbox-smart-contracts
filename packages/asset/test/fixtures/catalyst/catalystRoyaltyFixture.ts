@@ -3,7 +3,6 @@ import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
 } from '../../../data/constants';
-import royaltyManagerCompiled from '@ensdomains/ens-contracts/artifacts/contracts/registry/ENSRegistry.sol/ENSRegistry.json';
 
 export async function catalystRoyaltyDistribution() {
   const [
@@ -29,10 +28,10 @@ export async function catalystRoyaltyDistribution() {
   const OperatorFilterSubscription =
     await OperatorFilterSubscriptionFactory.deploy();
 
-  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
-    'RoyaltyCustomSplitter'
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
   );
-  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
@@ -42,7 +41,7 @@ export async function catalystRoyaltyDistribution() {
     [
       commonRoyaltyReceiver.address,
       5000,
-      RoyaltyCustomSplitter.address,
+      RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
     ],

@@ -25,10 +25,10 @@ export async function runCatalystSetup() {
   const OperatorFilterSubscription =
     await OperatorFilterSubscriptionFactory.deploy();
 
-  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
-    'RoyaltyCustomSplitter'
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
   );
-  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
@@ -38,7 +38,7 @@ export async function runCatalystSetup() {
     [
       commonRoyaltyReceiver.address,
       5000,
-      RoyaltyCustomSplitter.address,
+      RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
     ],

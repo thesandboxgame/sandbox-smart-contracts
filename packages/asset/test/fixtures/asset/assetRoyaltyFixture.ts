@@ -32,10 +32,10 @@ export async function assetRoyaltyDistribution() {
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
 
-  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
-    'RoyaltyCustomSplitter'
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
   );
-  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
@@ -45,7 +45,7 @@ export async function assetRoyaltyDistribution() {
     [
       commonRoyaltyReceiver.address,
       5000,
-      RoyaltyCustomSplitter.address,
+      RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
     ],

@@ -37,10 +37,10 @@ export async function runRevealTestSetup() {
   const OperatorFilterRegistrantContract =
     await OperatorFilterRegistrantFactory.deploy();
 
-  const RoyaltyCustomSplitterFactory = await ethers.getContractFactory(
-    'RoyaltyCustomSplitter'
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
   );
-  const RoyaltyCustomSplitter = await RoyaltyCustomSplitterFactory.deploy();
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
@@ -50,7 +50,7 @@ export async function runRevealTestSetup() {
     [
       commonRoyaltyReceiver.address,
       5000,
-      RoyaltyCustomSplitter.address,
+      RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
     ],
