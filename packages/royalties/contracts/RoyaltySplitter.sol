@@ -2,42 +2,37 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {BytesLibrary} from "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
 import {
     IRoyaltySplitter,
     IERC165,
     Recipient
 } from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
-
-interface IERC20Approve {
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    function increaseAllowance(address spender, uint256 amount) external returns (bool);
-}
+import {IERC20Approve} from "./interfaces/IERC20Approve.sol";
 
 /**
  * Cloneable and configurable royalty splitter contract
  */
-contract RoyaltyCustomSplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter, ERC165Upgradeable {
+contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter, ERC165Upgradeable {
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
     using AddressUpgradeable for address;
     using SafeMath for uint256;
 
     uint256 internal constant Total_BASIS_POINTS = 10000;
-    uint256 constant IERC20_APPROVE_SELECTOR = 0x095ea7b300000000000000000000000000000000000000000000000000000000;
-    uint256 constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant IERC20_APPROVE_SELECTOR =
+        0x095ea7b300000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public _recipient;
-    IRoyaltyManager _royaltyManager;
+    IRoyaltyManager public _royaltyManager;
 
     event ETHTransferred(address indexed account, uint256 amount);
     event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
@@ -207,6 +202,7 @@ contract RoyaltyCustomSplitter is Initializable, OwnableUpgradeable, IRoyaltySpl
                 !callData.startsWith(IERC20Approve.increaseAllowance.selector),
             "Split: ERC20 tokens must be split"
         );
+        /* solhint-disable-next-line no-empty-blocks*/
         try this.splitERC20Tokens(IERC20(target)) {} catch {}
         target.functionCall(callData);
     }

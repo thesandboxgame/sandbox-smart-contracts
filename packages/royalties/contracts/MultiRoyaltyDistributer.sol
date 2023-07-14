@@ -2,34 +2,34 @@
 
 pragma solidity ^0.8.0;
 
-/// @author: manifold.xyz
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-
-import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IMultiReceiverRoyaltyOverride.sol";
-import "./interfaces/IMultiReceiverRoyaltyOverrideCore.sol";
+import {
+    IEIP2981MultiReceiverRoyaltyOverride
+} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IMultiReceiverRoyaltyOverride.sol";
+import {IMultiRoyaltyDistributer} from "./interfaces/IMultiRoyaltyDistributer.sol";
 import {
     IRoyaltySplitter,
     IERC165
 } from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
-import "./interfaces/IRoyaltyManager.sol";
+import {IEIP2981} from "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
+import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 
-/// @title MultiReceiverRoyaltyOverrideCore
+/// @title MultiRoyaltyDistributer
 /// @author The sandbox
 /// @dev import for Token contracts EIP3981 Royalty distribution and split for sandbox and the creator using splitters.
-abstract contract MultiReceiverRoyaltyOverrideCore is IEIP2981, IMultiReceiverRoyaltyOverrideCore, ERC165Upgradeable {
+abstract contract MultiRoyaltyDistributer is IEIP2981, IMultiRoyaltyDistributer, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     uint16 public _defaultRoyaltyBPS;
     address payable public _defaultRoyaltyReceiver;
-    address royaltyManager;
+    address public royaltyManager;
 
     mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
-    function __MultiReceiverRoyaltyOverrideCore_init(
+    function __MultiRoyaltyDistributer_init(
         address payable defaultRecipient,
         uint16 defaultBps,
         address _royaltyManager

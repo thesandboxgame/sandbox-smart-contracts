@@ -26,6 +26,7 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/royalties/contracts/inte
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
+import {RoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/RoyaltyDistributer.sol";
 
 /// @title Catalyst
 /// @author The Sandbox
@@ -43,14 +44,11 @@ contract Catalyst is
     ERC2771Handler,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable,
-    IERC2981Upgradeable
+    RoyaltyDistributer
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER");
-    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     uint256 public tokenCount;
-
-    IRoyaltyManager royaltyManager;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -95,7 +93,7 @@ contract Catalyst is
         _setBaseURI(_baseUri);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
-        royaltyManager = IRoyaltyManager(_royaltyManager);
+        __RoyaltyDistributer_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
 
@@ -273,28 +271,12 @@ contract Catalyst is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC1155Upgradeable, AccessControlUpgradeable, IERC165Upgradeable)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, RoyaltyDistributer)
         returns (bool)
     {
         return
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             AccessControlUpgradeable.supportsInterface(interfaceId) ||
-            interfaceId == type(IERC2981Upgradeable).interfaceId;
-    }
-
-    /// @notice Returns how much royalty is owed and to whom based on ERC2981
-    /// @param _tokenId of catalyst for which the royalty is distributed
-    /// @param _salePrice the price of catalyst on which the royalty is calculated
-    /// @return receiver the receiver of royalty
-    /// @return royaltyAmount the amount of royalty
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount)
-    {
-        uint16 royaltyBps;
-        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
-        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
-        return (receiver, royaltyAmount);
+            RoyaltyDistributer.supportsInterface(interfaceId);
     }
 }

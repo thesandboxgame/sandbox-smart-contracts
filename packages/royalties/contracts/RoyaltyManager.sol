@@ -2,11 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interfaces/IRoyaltyManager.sol";
-import "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import "./RoyaltyCustomSplitter.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
+import {
+    IRoyaltySplitter,
+    Recipient
+} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {RoyaltySplitter} from "./RoyaltySplitter.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /// @title Registry
 /// @author The sandbox
@@ -46,11 +50,11 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     function setRoyaltyRecipient(address payable recipient) external {
         address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[msg.sender];
         require(creatorSplitterAddress != address(0), "Manager: No splitter deployed for the creator");
-        address _recipient = RoyaltyCustomSplitter(creatorSplitterAddress)._recipient();
+        address _recipient = RoyaltySplitter(creatorSplitterAddress)._recipient();
         require(_recipient != recipient, "Recipient already set");
         Recipient[] memory newRecipient = new Recipient[](1);
         newRecipient[0] = Recipient({recipient: recipient, bps: 0});
-        RoyaltyCustomSplitter(creatorSplitterAddress).setRecipients(newRecipient);
+        RoyaltySplitter(creatorSplitterAddress).setRecipients(newRecipient);
     }
 
     /// @notice sets the common recipient and common split
@@ -107,7 +111,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[creator];
         if (creatorSplitterAddress == address(0)) {
             creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
-            RoyaltyCustomSplitter(creatorSplitterAddress).initialize(recipient, address(this));
+            RoyaltySplitter(creatorSplitterAddress).initialize(recipient, address(this));
             _creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
         }
         return creatorSplitterAddress;

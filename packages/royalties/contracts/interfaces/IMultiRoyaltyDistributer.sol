@@ -2,9 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-/// @author: manifold.xyz
-
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {
     IRoyaltySplitter,
     Recipient
@@ -13,9 +11,9 @@ import {
 /**
  * Multi-receiver EIP2981 reference override implementation
  */
-interface IMultiReceiverRoyaltyOverrideCore is IERC165 {
+interface IMultiRoyaltyDistributer is IERC165 {
     event TokenRoyaltyRemoved(uint256 tokenId);
-    event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address Recipient);
+    event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
 
     event DefaultRoyaltyReceiverSet(address recipient);

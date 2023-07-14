@@ -22,9 +22,7 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
-import {
-    MultiReceiverRoyaltyOverrideCore
-} from "@sandbox-smart-contracts/royalties/contracts/MultiReceiverRoyaltyOverrideCore.sol";
+import {MultiRoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/MultiRoyaltyDistributer.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
@@ -37,7 +35,7 @@ contract Asset is
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
-    MultiReceiverRoyaltyOverrideCore
+    MultiRoyaltyDistributer
 {
     using TokenIdUtils for uint256;
 
@@ -73,7 +71,7 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-        __MultiReceiverRoyaltyOverrideCore_init(defaultRecipient, defaultBps, _manager);
+        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
 
         for (uint256 i = 0; i < catalystTiers.length; i++) {
             recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
@@ -193,7 +191,7 @@ contract Asset is
         public
         view
         virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiReceiverRoyaltyOverrideCore)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributer)
         returns (bool)
     {
         return
