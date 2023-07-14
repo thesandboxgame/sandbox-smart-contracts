@@ -1,24 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable,
-    IAccessControlUpgradeable,
-    IERC165Upgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {
-    ERC1155BurnableUpgradeable,
-    ERC1155Upgradeable,
-    IERC1155Upgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {
-    ERC1155SupplyUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
-import {
-    ERC1155URIStorageUpgradeable,
-    IERC1155MetadataURIUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable, IAccessControlUpgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {ERC1155BurnableUpgradeable, ERC1155Upgradeable, IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import {ERC1155SupplyUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import {ERC1155URIStorageUpgradeable, IERC1155MetadataURIUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
@@ -47,11 +33,7 @@ contract Asset is
         _disableInitializers();
     }
 
-    function initialize(
-        address forwarder,
-        address assetAdmin,
-        string memory baseUri
-    ) external initializer {
+    function initialize(address forwarder, address assetAdmin, string memory baseUri) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
         __ERC1155Supply_init();
@@ -65,12 +47,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        string memory metadataHash
-    ) external onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id, uint256 amount, string memory metadataHash) external onlyRole(MINTER_ROLE) {
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
     }
@@ -100,11 +77,7 @@ contract Asset is
     /// @param account The account to burn tokens from
     /// @param id The token id to burn
     /// @param amount The amount of tokens to burn
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(BURNER_ROLE) {
+    function burnFrom(address account, uint256 id, uint256 amount) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -124,6 +97,7 @@ contract Asset is
     }
 
     /// @notice Set a new URI for specific tokenid
+    /// @dev The metadata hash should be the IPFS CIDv1 base32 encoded hash
     /// @param tokenId The token id to set URI for
     /// @param metadata The new URI for asset's metadata
     function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -140,12 +114,9 @@ contract Asset is
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(uint256 tokenId)
-        public
-        view
-        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
-    {
+    function uri(
+        uint256 tokenId
+    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory) {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
@@ -178,13 +149,9 @@ contract Asset is
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id)
-        public
-        view
-        virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 id
+    ) public view virtual override(ERC1155Upgradeable, AccessControlUpgradeable) returns (bool) {
         return
             id == type(IERC165Upgradeable).interfaceId ||
             id == type(IERC1155Upgradeable).interfaceId ||
