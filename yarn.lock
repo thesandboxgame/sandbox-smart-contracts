@@ -1685,6 +1685,7 @@ __metadata:
     "@nomiclabs/hardhat-ethers": ^2.2.3
     "@sandbox-smart-contracts/asset": "*"
     "@sandbox-smart-contracts/giveaway": "*"
+    "@sandbox-smart-contracts/royalties": "*"
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
