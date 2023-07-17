@@ -506,7 +506,8 @@ describe('catalyst Contract', function () {
       }
     });
     it('Total Supply decrease on burning', async function () {
-      const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
+      const {catalyst, user1, catalystAsBurner, catalystAsMinter} =
+        await runCatalystSetup();
       const catalystAmount = [];
       for (let i = 0; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.be.equal(0);
@@ -522,14 +523,15 @@ describe('catalyst Contract', function () {
           catalystAmount[i]
         );
 
-        await catalystAsMinter.burnFrom(user1.address, catalystArray[i], 2);
+        await catalystAsBurner.burnFrom(user1.address, catalystArray[i], 2);
         expect(await catalyst.totalSupply(catalystArray[i])).to.be.equal(
           catalystArray[i] * 2 - 2
         );
       }
     });
     it('Total Supply decrease on batch burning', async function () {
-      const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
+      const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
+        await runCatalystSetup();
       for (let i = 0; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(0);
       }
@@ -555,7 +557,7 @@ describe('catalyst Contract', function () {
         catalystAmount.push(1);
       }
 
-      await catalystAsMinter.burnBatchFrom(
+      await catalystAsBurner.burnBatchFrom(
         user1.address,
         catalystId,
         catalystAmount
@@ -569,14 +571,16 @@ describe('catalyst Contract', function () {
   });
   describe('Burn catalyst', function () {
     it("minter can burn user's catalyst", async function () {
-      const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
+      const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
+        await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 1, 5);
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(5);
-      await catalystAsMinter.burnFrom(user1.address, 1, 2);
+      await catalystAsBurner.burnFrom(user1.address, 1, 2);
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
     });
     it("minter can batch burn user's catalyst", async function () {
-      const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
+      const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
+        await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 1, 5);
       await catalystAsMinter.mint(user1.address, 2, 6);
 
@@ -584,7 +588,7 @@ describe('catalyst Contract', function () {
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(6);
       const catalystId = [1, 2];
       const catalystAmount = [2, 2];
-      await catalystAsMinter.burnBatchFrom(
+      await catalystAsBurner.burnBatchFrom(
         user1.address,
         catalystId,
         catalystAmount
