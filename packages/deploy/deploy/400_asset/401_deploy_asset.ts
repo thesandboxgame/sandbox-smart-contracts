@@ -17,7 +17,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [TRUSTED_FORWARDER.address, assetAdmin, 'ipfs://', filterOperatorSubscription],
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          'ipfs://',
+          filterOperatorSubscription,
+        ],
       },
       upgradeIndex: 0,
     },
