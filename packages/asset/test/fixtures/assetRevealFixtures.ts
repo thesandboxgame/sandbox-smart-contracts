@@ -84,6 +84,7 @@ export async function runRevealTestSetup() {
       AssetContract.address,
       AuthValidatorContract.address,
       trustedForwarder.address,
+      assetAdmin.address,
     ],
     {
       initializer: 'initialize',
@@ -279,5 +280,6 @@ export async function runRevealTestSetup() {
     unrevealedtokenId2,
     revealedtokenId,
     user,
+    assetAdmin,
   };
 }
