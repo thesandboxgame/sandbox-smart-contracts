@@ -18,7 +18,10 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OperatorFiltererUpgradeable, IOperatorFilterRegistry} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
+import {
+    OperatorFiltererUpgradeable,
+    IOperatorFilterRegistry
+} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFilter/OperatorFiltererUpgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 

@@ -4,6 +4,7 @@ import {
   createMultipleAssetsMintSignature,
 } from '../utils/createSignature';
 import {
+  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
@@ -23,16 +24,33 @@ export async function runCreateTestSetup() {
     catalystAdmin,
     authValidatorAdmin,
     backendAuthWallet,
+    mockMarketplace1,
+    mockMarketplace2,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
-  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT
+  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER
 
-  const OperatorFilterRegistrantFactory = await ethers.getContractFactory(
-    'OperatorFilterRegistrant'
+  const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'MockOperatorFilterRegistry'
   );
-  const OperatorFilterRegistrantContract =
-    await OperatorFilterRegistrantFactory.deploy();
+
+  const operatorFilterRegistry = await MockOperatorFilterRegistryFactory.deploy(
+    DEFAULT_SUBSCRIPTION,
+    [mockMarketplace1.address, mockMarketplace2.address]
+  );
+
+  // Operator Filter Registrant
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
+  );
+
+  // Provide: address _owner, address _localRegistry
+  const OperatorFilterSubscriptionContract =
+    await OperatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
 
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
@@ -40,10 +58,8 @@ export async function runCreateTestSetup() {
     [
       trustedForwarder.address,
       assetAdmin.address,
-      [1, 2, 3, 4, 5, 6],
-      [2, 4, 6, 8, 10, 12],
       'ipfs://',
-      OperatorFilterRegistrantContract.address,
+      OperatorFilterSubscriptionContract.address,
     ],
     {
       initializer: 'initialize',
@@ -59,7 +75,7 @@ export async function runCreateTestSetup() {
       CATALYST_BASE_URI,
       trustedForwarder.address,
       catalystRoyaltyRecipient.address,
-      OperatorFilterRegistrantContract.address,
+      OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
       CATALYST_DEFAULT_ROYALTY,

@@ -129,8 +129,6 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid revealBatchMint signature"
         );
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            // require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
-            // revealHashesUsed[revealHashes[i]] = true;
             _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
         }
     }
@@ -174,18 +172,14 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         uint256[] calldata amounts,
         bytes32[] calldata revealHashes
     ) internal {
-        uint256[] memory newTokenIds = getRevealedTokenIds(amounts, metadataHashes, prevTokenId);
+        uint256[] memory newTokenIds = getRevealedTokenIds(metadataHashes, prevTokenId);
+        for (uint256 i = 0; i < revealHashes.length; i++) {
+            require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
+            revealHashesUsed[revealHashes[i]] = true;
+        }
         if (newTokenIds.length == 1) {
-            // ensure that revealHash is not already used then flag it as used
-            require(revealHashesUsed[revealHashes[0]] == false, "Invalid revealHash");
-            revealHashesUsed[revealHashes[0]] = true;
             assetContract.mint(_msgSender(), newTokenIds[0], amounts[0], metadataHashes[0]);
         } else {
-            // ensure that revealHashes are not already used then flag them as used
-            for (uint256 i = 0; i < newTokenIds.length; i++) {
-                require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
-                revealHashesUsed[revealHashes[i]] = true;
-            }
             assetContract.mintBatch(_msgSender(), newTokenIds, amounts, metadataHashes);
         }
         emit AssetRevealMint(_msgSender(), prevTokenId, amounts, newTokenIds, revealHashes);
@@ -332,24 +326,19 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
 
     /// @notice Checks if each metadatahash has been used before to either get the tokenId that was already created for it or generate a new one if it hasn't
     /// @dev This function also validates that we're not trying to reveal a tokenId that has already been revealed
-    /// @param amounts The amounts of tokens to mint
     /// @param metadataHashes The hashes of the metadata
     /// @param prevTokenId The previous token id from which the assets are revealed
     /// @return tokenIdArray The array of tokenIds to mint
-    function getRevealedTokenIds(
-        uint256[] calldata amounts,
-        string[] calldata metadataHashes,
-        uint256 prevTokenId
-    ) internal returns (uint256[] memory) {
+    function getRevealedTokenIds(string[] calldata metadataHashes, uint256 prevTokenId)
+        internal
+        returns (uint256[] memory)
+    {
         IAsset.AssetData memory data = prevTokenId.getData();
         require(!data.revealed, "Asset: already revealed");
-
-        uint256[] memory tokenIdArray = new uint256[](amounts.length);
-        for (uint256 i = 0; i < amounts.length; i++) {
+        uint256[] memory tokenIdArray = new uint256[](metadataHashes.length);
+        for (uint256 i = 0; i < metadataHashes.length; i++) {
             uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
-            if (tokenId != 0) {
-                tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
-            } else {
+            if (tokenId == 0) {
                 uint16 revealNonce = ++revealIds[data.creator][prevTokenId];
                 tokenId = TokenIdUtils.generateTokenId(
                     data.creator,
@@ -361,7 +350,6 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
             }
             tokenIdArray[i] = tokenId;
         }
-
         return tokenIdArray;
     }
 

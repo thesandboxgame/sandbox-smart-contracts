@@ -15,6 +15,8 @@ interface IAsset {
         bool bridged;
     }
 
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+
     // Functions
     function mint(
         address to,

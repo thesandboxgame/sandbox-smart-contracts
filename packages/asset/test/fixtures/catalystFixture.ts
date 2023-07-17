@@ -1,5 +1,6 @@
 import {ethers, upgrades} from 'hardhat';
 import {
+  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
   CATALYST_DEFAULT_ROYALTY,
@@ -15,13 +16,30 @@ export async function runCatalystSetup() {
     trustedForwarder,
     user1,
     user2,
+    mockMarketplace1,
+    mockMarketplace2,
   ] = await ethers.getSigners();
 
-  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
-    'OperatorFilterRegistrant'
+  const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'MockOperatorFilterRegistry'
   );
-  const OperatorFilterSubscription =
-    await OperatorFilterSubscriptionFactory.deploy();
+
+  const operatorFilterRegistry = await MockOperatorFilterRegistryFactory.deploy(
+    DEFAULT_SUBSCRIPTION,
+    [mockMarketplace1.address, mockMarketplace2.address]
+  );
+
+  // Operator Filter Registrant
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
+  );
+
+  // Provide: address _owner, address _localRegistry
+  const OperatorFilterSubscriptionContract =
+    await OperatorFilterSubscriptionFactory.deploy(
+      catalystAdmin.address,
+      operatorFilterRegistry.address
+    );
 
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const catalyst = await upgrades.deployProxy(
@@ -30,7 +48,7 @@ export async function runCatalystSetup() {
       CATALYST_BASE_URI,
       trustedForwarder.address,
       catalystRoyaltyRecipient.address,
-      OperatorFilterSubscription.address,
+      OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
       CATALYST_DEFAULT_ROYALTY,
@@ -60,6 +78,6 @@ export async function runCatalystSetup() {
     catalystAdmin,
     catalystRoyaltyRecipient,
     trustedForwarder,
-    OperatorFilterSubscription,
+    OperatorFilterSubscriptionContract,
   };
 }

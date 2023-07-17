@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {setupOperatorFilter} from './fixtures/operatorFIlterFixture';
+import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalystFixture';
 import {
@@ -39,7 +39,7 @@ describe('catalyst Contract', function () {
         catalystAdmin,
         catalystMinter,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -50,7 +50,7 @@ describe('catalyst Contract', function () {
             '',
             trustedForwarder.address,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
             CATALYST_DEFAULT_ROYALTY,
@@ -67,7 +67,7 @@ describe('catalyst Contract', function () {
         catalystAdmin,
         catalystMinter,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -78,7 +78,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             zeroAddress,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
             CATALYST_DEFAULT_ROYALTY,
@@ -123,7 +123,7 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystMinter,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -134,7 +134,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             trustedForwarder.address,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             zeroAddress,
             catalystMinter.address,
             CATALYST_DEFAULT_ROYALTY,
@@ -151,7 +151,7 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystAdmin,
         catalystMinter,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -162,7 +162,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             trustedForwarder.address,
             zeroAddress,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address,
             catalystMinter.address,
             CATALYST_DEFAULT_ROYALTY,
@@ -180,7 +180,7 @@ describe('catalyst Contract', function () {
         catalystAdmin,
         catalystMinter,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -191,7 +191,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             trustedForwarder.address,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address,
             catalystMinter.address,
             0,
@@ -208,7 +208,7 @@ describe('catalyst Contract', function () {
         trustedForwarder,
         catalystAdmin,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -219,7 +219,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             trustedForwarder.address,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address,
             zeroAddress,
             CATALYST_DEFAULT_ROYALTY,
@@ -237,7 +237,7 @@ describe('catalyst Contract', function () {
         catalystAdmin,
         catalystMinter,
         catalystRoyaltyRecipient,
-        OperatorFilterSubscription,
+        OperatorFilterSubscriptionContract,
       } = await runCatalystSetup();
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
@@ -248,7 +248,7 @@ describe('catalyst Contract', function () {
             CATALYST_BASE_URI,
             trustedForwarder.address,
             catalystRoyaltyRecipient.address,
-            OperatorFilterSubscription.address,
+            OperatorFilterSubscriptionContract.address,
             catalystAdmin.address,
             catalystMinter.address,
             CATALYST_DEFAULT_ROYALTY,

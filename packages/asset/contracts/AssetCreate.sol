@@ -8,7 +8,7 @@ import {
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
-import {AuthValidator} from "./AuthValidator.sol"; // TODO: use existing PolygonAuthValidator from core
+import {AuthValidator} from "./AuthValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
@@ -91,7 +91,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
         assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit AssetMinted(creator, tokenId, tier, amount, metadataHash);
+        emit AssetMinted(creator, tokenId, tier, amount, metadataHash, revealed);
     }
 
     /// @notice Create multiple assets at once
@@ -135,8 +135,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit AssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes);
-        // TODO: put revealed in event
+        emit AssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes, revealed);
     }
 
     /// @notice Create special assets, like TSB exclusive tokens
