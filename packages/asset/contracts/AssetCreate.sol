@@ -85,13 +85,8 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -165,13 +160,8 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, amount, metadataHash);
