@@ -1,15 +1,18 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "./libraries/TokenIdUtils.sol";
-import "./AuthValidator.sol"; // TODO: use existing PolygonAuthValidator from core
-import "./ERC2771Handler.sol";
-import "./interfaces/IAsset.sol";
-import "./interfaces/ICatalyst.sol";
-import "./interfaces/IAssetCreate.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
+import {AuthValidator} from "./AuthValidator.sol";
+import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {IAsset} from "./interfaces/IAsset.sol";
+import {ICatalyst} from "./interfaces/ICatalyst.sol";
+import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
 
 /// @title AssetCreate
 /// @author The Sandbox

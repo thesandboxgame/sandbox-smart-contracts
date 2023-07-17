@@ -37,13 +37,7 @@ export async function runCreateTestSetup() {
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
-    [
-      trustedForwarder.address,
-      assetAdmin.address,
-      [1, 2, 3, 4, 5, 6],
-      [2, 4, 6, 8, 10, 12],
-      'ipfs://',
-    ],
+    [trustedForwarder.address, assetAdmin.address, 'ipfs://'],
     {
       initializer: 'initialize',
     }

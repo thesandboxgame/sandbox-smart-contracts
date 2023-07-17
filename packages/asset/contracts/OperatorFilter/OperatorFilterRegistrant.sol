@@ -2,8 +2,8 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.18;
 
-import "./interfaces/IOperatorFilterRegistry.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title OperatorFilterRegistrant
 /// @notice This contract is ment to register and copy the default subscription of the openSea for the operator filter and our Token contract are supposed to subscribe to This contract on openSea operator filter registry

@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// import IAsset from "./IAsset.sol";
-import "../libraries/TokenIdUtils.sol";
+import {IAsset} from "../interfaces/IAsset.sol";
+import {TokenIdUtils} from "../libraries/TokenIdUtils.sol";
 
 contract MockMinter {
     using TokenIdUtils for uint256;

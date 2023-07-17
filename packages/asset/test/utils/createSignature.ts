@@ -1,5 +1,6 @@
 import hre from 'hardhat';
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const createAssetMintSignature = async (
   creator: string,
@@ -8,7 +9,7 @@ const createAssetMintSignature = async (
   revealed: boolean,
   metadataHash: string,
   contract: Contract,
-  signer: Wallet
+  signer: SignerWithAddress
 ) => {
   const AssetCreateContract = contract;
   const nonce = await AssetCreateContract.signatureNonces(creator);
@@ -55,7 +56,7 @@ const createMultipleAssetsMintSignature = async (
   revealed: boolean[],
   metadataHashes: string[],
   contract: Contract,
-  signer: Wallet
+  signer: SignerWithAddress
 ) => {
   const AssetCreateContract = contract;
   const nonce = await AssetCreateContract.signatureNonces(creator);

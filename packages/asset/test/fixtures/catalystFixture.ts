@@ -47,19 +47,19 @@ export async function runCatalystSetup() {
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
   return {
-    deployer: deployer.address,
+    deployer,
     catalyst,
-    user1: user1.address,
-    user2: user2.address,
+    user1,
+    user2,
     minterRole,
     catalystAsAdmin,
     catalystAsMinter,
     catalystAdminRole,
-    upgradeAdmin: upgradeAdmin.address,
-    catalystMinter: catalystMinter.address,
-    catalystAdmin: catalystAdmin.address,
-    catalystRoyaltyRecipient: catalystRoyaltyRecipient.address,
-    trustedForwarder: trustedForwarder.address,
+    upgradeAdmin,
+    catalystMinter,
+    catalystAdmin,
+    catalystRoyaltyRecipient,
+    trustedForwarder,
     OperatorFilterSubscription,
   };
 }
