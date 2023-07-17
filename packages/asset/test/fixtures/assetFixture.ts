@@ -38,13 +38,7 @@ export async function runAssetSetup() {
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
-    [
-      trustedForwarder.address,
-      assetAdmin.address,
-      [1, 2, 3, 4, 5, 6],
-      [2, 4, 6, 8, 10, 12],
-      'ipfs://',
-    ],
+    [trustedForwarder.address, assetAdmin.address, 'ipfs://'],
     {
       initializer: 'initialize',
     }
@@ -52,23 +46,29 @@ export async function runAssetSetup() {
 
   await AssetContract.deployed();
 
+  const generateRandomTokenId = () => {
+    return ethers.utils.randomBytes(32);
+  };
+
   // Asset contract is not user-facing and we block users from minting directly
   // Contracts that interact with Asset must have the necessary ROLE
   // Here we set up the necessary roles for testing
-  const AssetContractAsAdmin = await AssetContract.connect(assetAdmin);
-  const AssetContractAsMinter = await AssetContract.connect(minter);
-  const AssetContractAsBurner = await AssetContract.connect(burner);
-  const AssetContractAsOwner = await AssetContract.connect(owner);
+  const AssetContractAsAdmin = AssetContract.connect(assetAdmin);
+  const AssetContractAsMinter = AssetContract.connect(minter);
+  const AssetContractAsBurner = AssetContract.connect(burner);
+  const AssetContractAsOwner = AssetContract.connect(owner);
   const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
   const minterRole = await AssetContract.MINTER_ROLE();
   const burnerRole = await AssetContract.BURNER_ROLE();
-  const bridgeMinterRole = await AssetContract.BRIDGE_MINTER_ROLE();
   await AssetContractAsAdmin.grantRole(minterRole, minter.address);
   await AssetContractAsAdmin.grantRole(burnerRole, burner.address);
-  await AssetContractAsAdmin.grantRole(bridgeMinterRole, bridgeMinter.address);
   // end set up roles
 
-  const uris = [
+  const MockAsset = await ethers.getContractFactory('MockAsset');
+  const MockAssetContract = await MockAsset.deploy();
+  await MockAssetContract.deployed();
+
+  const metadataHashes = [
     'QmSRVTH8VumE42fqmdzPHuA57LjCaUXQRequVzEDTGMyHY',
     'QmTeRr1J2kaKM6e1m8ixLfZ31hcb7XNktpbkWY5tMpjiFR',
     'QmUxnKe5DyjxKuwq2AMGDLYeQALnQxcffCZCgtj5a41DYw',
@@ -77,22 +77,103 @@ export async function runAssetSetup() {
     'QmdRwSPCuPGfxSYTaot9Eqz8eU9w1DGp8mY97pTCjnSWqk',
     'QmNrwUiZfQLYaZFHNLzxqfiLxikKYRzZcdWviyDaNhrVhm',
   ];
-  const baseUri = 'ipfs://';
+  const baseURI = 'ipfs://';
+
+  const mintOne = async (
+    recipient = minter.address,
+    tokenId = generateRandomTokenId(),
+    amount = 10,
+    metadataHash = metadataHashes[0]
+  ) => {
+    const tx = await AssetContractAsMinter.mint(
+      recipient,
+      tokenId,
+      amount,
+      metadataHash
+    );
+    await tx.wait();
+    return {
+      tx,
+      tokenId,
+      metadataHash,
+    };
+  };
+
+  const burnOne = async (
+    account: string,
+    tokenId: Uint8Array,
+    amount: number
+  ) => {
+    const tx = await AssetContractAsBurner.burnFrom(account, tokenId, amount);
+    await tx.wait();
+    return {
+      tx,
+      tokenId,
+    };
+  };
+
+  const mintBatch = async (
+    recipient = minter.address,
+    tokenIds = [generateRandomTokenId(), generateRandomTokenId()],
+    amounts = [10, 5],
+    metadata = [metadataHashes[0], metadataHashes[1]]
+  ) => {
+    const tx = await AssetContractAsMinter.mintBatch(
+      recipient,
+      tokenIds,
+      amounts,
+      metadata
+    );
+    await tx.wait();
+
+    return {
+      tx,
+      tokenIds,
+      metadataHashes,
+    };
+  };
+
+  const burnBatch = async (
+    account: string,
+    tokenIds: Uint8Array[],
+    amounts: number[]
+  ) => {
+    const tx = await AssetContractAsBurner.burnBatchFrom(
+      account,
+      tokenIds,
+      amounts
+    );
+    await tx.wait();
+
+    return {
+      tx,
+      tokenIds,
+    };
+  };
 
   return {
+    MockAssetContract,
     AssetContract,
     AssetContractAsOwner,
     AssetContractAsMinter,
     AssetContractAsBurner,
     AssetContractAsAdmin,
     owner,
+    assetAdmin,
+    minter,
+    burner,
+    trustedForwarder,
     secondOwner,
     bridgeMinter,
     minterRole,
     burnerRole,
     defaultAdminRole,
-    bridgeMinterRole,
-    uris,
-    baseUri,
+    metadataHashes,
+    baseURI,
+    generateRandomTokenId,
+    mintOne,
+    burnOne,
+    burnBatch,
+    mintBatch,
   };
 }

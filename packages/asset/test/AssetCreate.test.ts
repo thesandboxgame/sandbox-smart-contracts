@@ -340,7 +340,7 @@ describe('AssetCreate', function () {
       );
       await expect(
         mintSingleAsset(signature2, 4, 2, true, metadataHashes[0])
-      ).to.be.revertedWith('metadata hash mismatch for tokenId');
+      ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
     });
     it('should NOT mint same token ids', async function () {
       const {
@@ -803,7 +803,7 @@ describe('AssetCreate', function () {
           [true, true],
           metadataHashes
         )
-      ).to.be.revertedWith('metadata hash mismatch for tokenId');
+      ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
     });
   });
   describe('Special asset mint', function () {

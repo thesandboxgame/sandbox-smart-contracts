@@ -1,314 +1,174 @@
-# Asset Contract
+# Asset Contract Documentation
 
-Main contract for User Generated Content (UGC).
+This is the base Asset L2 contract that serves as an upgradeable, burnable ERC1155 token that includes roles for minting, burning, and administration. It includes extended functionality for managing base and token-specific URIs and maintaining a mapping between IPFS metadata hashes and token IDs.
 
-The minting of assets happens through a different contract called Asset Minter, only the bridge contract will be allowed to directly call mint on this contract.
+## Roles in the Contract
 
-## Roles
-
-- `DEFAULT_ADMIN_ROLE` - the role that is required to grant roles to other addresses
-- `MINTER_ROLE` - the role that is required to mint assets
-- `URI_SETTER_ROLE` - the role that is required to set the base uri for the assets
-- `BRIDGE_MINER_ROLE` - the role that is required to mint assets that were bridged from L1 to L2
+1. **Minter**: This role can create new tokens using the `mint` or `mintBatch` functions.
+2. **Burner**: This role can destroy tokens using the `burnFrom` or `burnBatchFrom` functions.
+3. **Admin**: This role has broad administrative permissions including the ability to set URIs and change the trusted forwarder.
 
 ## Public Variables
 
-- `recyclingAmounts` - mapping of amount of copies that are required to be burned to receive a catalyst of a given tier
-- `creatorNonces` - mapping of an address of the creator to a numeric value representing the amount of different assets created by a particular creator. This mapping also ensures the tokenId uniqueness for assets created by the same creator.
-- `bridgedTokensNonces` - mapping of L1 tokenId to a numeric value which is used to make sure that all copies of a given L1 tokenId that are being bridged receive same tokenId on the new network
+1. `MINTER_ROLE` - A bytes32 value representing the role that can mint new tokens.
+2. `BURNER_ROLE` - A bytes32 value representing the role that can burn tokens.
+3. `hashUsed` - A mapping from string metadata hashes to uint256 token IDs.
 
-## External functions
+## Functions
 
-```solidity
-   function initialize(
-        string memory uri,
-        address forwarder,
-        address minter,
-        address uriSetter,
-        uint256[] calldata catalystTiers,
-        uint256[] calldata catalystRecycleCopiesNeeded
-    ) external initializer
-```
-
-Initializes the contract with the given parameters at the time of deployment
-
-- `uri` - the base uri for the assets
-- `forwarder` - the forwarder contract address
-- `minter` - the address of the Asset Minter contract
-- `uriSetter` - the address of the URI setter wallet
-- `catalystTiers` - array of available catalyst tiers
-- `catalystRecycleCopiesNeeded` - array of required copies to be burned to receive a catalyst of a given tier
-
----
+### initialize
 
 ```solidity
-      function mint(
-        address creator,
-        uint256 amount,
-        uint8 tier,
-        bool isNFT,
-        bytes memory data
-    ) external
+function initialize(
+    address forwarder,
+    address assetAdmin,
+    string memory baseUri
+) external initializer
 ```
 
-Mints a new asset, only the Asset Minter contract is allowed to call this function
-This function will increment the creatorNonces mapping for the creator of the asset
+Initializes the contract with the specified parameters at the time of deployment.
 
-This function should not be used to mint TSB exclusive assets
+Parameters:
 
-- `creator` - the address of the creator of the asset
-- `amount` - the amount of copies to mint
-- `tier` - the tier of the catalyst used
-- `isNFT` - whether the asset is an NFT or not
-- `data` - data to be passed on
+- `forwarder` - The trusted forwarder for meta-transactions.
+- `assetAdmin` - The address that will be granted the DEFAULT_ADMIN_ROLE.
+- `baseUri` - The base URI for the contract.
 
----
+### mint
 
 ```solidity
-    function mintSpecial(
-        address creator,
-        address recipient,
-        uint256 amount,
-        uint8 tier,
-        bool revealed,
-        bool isNFT,
-        bytes memory data
-    ) external
+function mint(
+    address to,
+    uint256 id,
+    uint256 amount,
+    string memory metadataHash
+) external onlyRole(MINTER_ROLE)
 ```
 
-Mint special is an administrative function that allows specifying more parameters than the regular mint function.
-This function will increment the creatorNonces mapping for the creator of the asset.
+Creates a given amount of a new token with a specified ID and associates a metadata hash with it.
 
-This function is used to mint TSB exclusive assets
+Parameters:
 
----
+- `to` - The address that will receive the newly minted tokens.
+- `id` - The ID for the new tokens.
+- `amount` - The number of new tokens to create.
+- `metadataHash` - The IPFS metadata hash to associate with the new tokens.
+
+### mintBatch
 
 ```solidity
-    function bridgeMint(
-        address originalCreator,
-        uint256 originalTokenId,
-        uint256 amount,
-        uint8 tier,
-        address recipient,
-        bool revealed,
-        bool isNFT,
-        bytes memory data
-    ) external
+function mintBatch(
+    address to,
+    uint256[] memory ids,
+    uint256[] memory amounts,
+    string[] memory metadataHashes
+) external onlyRole(MINTER_ROLE)
 ```
 
-Special function for the bridge contract to mint assets that were bridged from L1 to L2.
-This function will increment the creatorNonces mapping for the creator of the asset.
+Creates a batch of new tokens with the provided IDs and amounts and associates metadata hashes with them.
 
-- `originalCreator` - the address of the creator of the asset on L1
-- `originalTokenId` - the tokenId of the asset on L1
-- `amount` - the amount of copies to mint
-- `tier` - the tier of the catalyst that the new asset will have
-- `recipient` - the address of the recipient of the asset
-- `revealed` - whether the asset is revealed or not
-- `isNFT` - whether the asset is an NFT or not
-- `data` - data to be passed on
+Parameters:
 
----
+- `to` - The address that will receive the newly minted tokens.
+- `ids` - An array of IDs for the new tokens.
+- `amounts` - An array of the number of new tokens to create for each ID.
+- `metadataHashes` - An array of IPFS metadata hashes to associate with the new tokens.
+
+### burnFrom
 
 ```solidity
-    mintBatch(
-        address creator,
-        uint256[] calldata amounts,
-        uint8[] calldata tiers,
-        bool[] calldata isNFT,
-        bytes calldata data
-    ) external
+function burnFrom(
+    address account,
+    uint256 id,
+    uint256 amount
+) external onlyRole(BURNER_ROLE)
 ```
 
-Mints a batch of assets, only the Asset Minter contract is allowed to call this function
+Destroys a given amount of a specific token from an account.
 
-- `creator` - the address of the creator of the asset
-- `amounts` - the amount of copies to mint for each asset
-- `tiers` - the tier of the catalyst used for each asset
-- `isNFT` - whether the asset is an NFT or not for each asset
-- `data` - data to be passed on
+Parameters:
 
----
+- `account` - The account from which tokens will be burned.
+- `id` - The ID of the token to be burned.
+- `amount` - The number of tokens to burn.
+
+### burnBatchFrom
 
 ```solidity
-    function reveal(
-        address creator,
-        uint8 tier,
-        uint256 tokenId,
-        uint256 amount
-    ) external
+function burnBatchFrom(
+    address account,
+    uint256[] memory ids,
+    uint256[] memory amounts
+) external onlyRole(BURNER_ROLE)
 ```
 
-TODO WORK IN PROGRESS
+Destroys a batch of tokens from an account.
 
----
+Parameters:
+
+- `account` - The account from which tokens will be burned.
+- `ids` - An array of IDs for the tokens to be burned.
+- `amounts` - An array of the number of tokens to burn for each ID.
+
+### setTokenURI
 
 ```solidity
-    function recycleAssets(
-        uint256[] calldata tokenIds,
-        uint256[] calldata amounts,
-        uint256 catalystTier
-    ) external
+function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
-This function accepts tokenIds and amounts that share the same catalyst tier and burns them to receive a catalysts of the given tier.
-The sum of call amounts must return zero from a modulo operation with the recyclingAmounts[catalystTier] value.
+Sets a new URI for a specific token.
 
-- `tokenIds` - array of tokenIds to burn
-- `amounts` - array of amounts to burn
-- `catalystTier` - the tier of the catalyst to receive
+Parameters:
 
----
+- `tokenId` - The ID of the token to set the URI for.
+- `metadata` - The new URI for the token's metadata.
+
+### setBaseURI
 
 ```solidity
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external
+function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
-Burns a given amount of copies of an asset from a given address.
+Sets a new base URI for the contract.
 
-- `account` - the address of the owner of the asset
-- `id` - the tokenId of the asset
-- `amount` - the amount of copies to burn
+Parameters:
 
----
+- `baseURI` - The new base URI.
+
+### uri
 
 ```solidity
-    function burnBatchFrom(
-        address account,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) external
+function uri(uint256 tokenId) public view override returns (string memory)
 ```
 
-Burns a batch of assets from a given address.
+Returns the full URI for a specific token, including the base URI and the token-specific metadata URI.
 
-- `account` - the address of the owner of the asset
-- `ids` - the tokenIds of the assets
-- `amounts` - the amounts of copies to burn
+Parameters:
 
----
+- `tokenId` - The ID of the token to get the URI for.
+
+### getTokenIdByMetadataHash
 
 ```solidity
-    function setRecyclingAmount(
-        uint256 catalystTokenId,
-        uint256 amount
-    ) external
+function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256)
 ```
 
-Sets the amount of copies that are required to be burned to receive a catalyst of a given tier.
+Returns the token ID associated with a specific metadata hash.
 
-- `catalystTokenId` - the tokenId of the catalyst
-- `amount` - the amount of copies to burn
+Parameters:
 
----
+- `metadataHash` - The metadata hash to query the token ID for.
+
+### setTrustedForwarder
 
 ```solidity
-    function setURI(string memory newuri) external
+function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
-Sets the base uri for the assets.
+Sets a new trusted forwarder for meta-transactions.
 
-- `newuri` - the new base uri
+Parameters:
 
----
+- `trustedForwarder` - The new trusted forwarder.
 
-```solidity
-    function setURISetter(address newUriSetter) external
-```
-
-## Public functions
-
-```solidity
-    function generateTokenId(
-        address creator,
-        uint8 tier,
-        uint16 assetNonce,
-        bool mintAsRevealed,
-        bool isNFT
-    ) public view returns (uint256)
-```
-
-Generates a tokenId for a given asset.
-Uses 256 bits to store the tokenId, the first 160 bits are used to store the address of the creator, the next 8 bits are used to store the catalyst tier, the next 16 bits are used to store the asset nonce, the next 1 bit is used to store whether the asset is revealed or not, the next 1 bit is used to store whether the asset is an NFT or not.
-
-- `creator` - the address of the creator of the asset
-- `tier` - the tier of the catalyst used
-- `assetNonce` - the nonce of the asset
-- `mintAsRevealed` - whether the asset is revealed or not
-- `isNFT` - whether the asset is an NFT or not
-
----
-
-```solidity
-    function extractCreatorFromId(
-        uint256 tokenId
-    ) public pure returns (address creator)
-```
-
-Extracts the creator address from a given tokenId.
-
-- `tokenId` - the tokenId to extract the creator address from
-
----
-
-```solidity
-    function extractTierFromId(
-        uint256 tokenId
-    ) public pure returns (uint8 tier)
-```
-
-Extracts the catalyst tier from a given tokenId.
-
-- `tokenId` - the tokenId to extract the catalyst tier from
-
----
-
-```solidity
-    function extractIsRevealedFromId(
-        uint256 tokenId
-    ) public pure returns (uint16 assetNonce)
-```
-
-Extracts whether the asset is revealed or not from a given tokenId.
-
-- `tokenId` - the tokenId to extract the revealed status from
-
----
-
-```solidity
-    function extractCreatorNonceFromId(
-        uint256 tokenId
-    ) public pure returns (uint16 assetNonce)
-```
-
-Extracts the creator nonce from a given tokenId.
-
-- `tokenId` - the tokenId to extract the asset nonce from
-
----
-
-```solidity
-    function extractIsNFTFromId(
-        uint256 tokenId
-    ) public pure returns (uint16 assetNonce)
-```
-
-Extracts whether the asset is an NFT or not from a given tokenId.
-
-- `tokenId` - the tokenId to extract the NFT status from
-
----
-
-```solidity
-    function getRecyclingAmount(
-        uint256 catalystTokenId
-    ) public view returns (uint256)
-```
-
-Returns the amount of copies that are required to be burned to receive a catalyst of a given tier.
-
-- `catalystTokenId` - the tokenId of the catalyst
+This document is essential for developers who need to understand or contribute to the code in the future. Please make sure to keep it updated and as detailed as possible.
