@@ -2,60 +2,67 @@ import {ethers} from 'hardhat';
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
 import {catalystRoyaltyDistribution} from './fixtures/catalyst/catalystRoyaltyFixture';
-describe('Catalyst royalty', function () {
+describe('catalyst royalty', function () {
   it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)', async function () {
-    const {managerAsRoyaltySetter, catalyst} =
+    const {managerAsRoyaltySetter, catalystAsMinter} =
       await catalystRoyaltyDistribution();
     expect(
-      await managerAsRoyaltySetter.contractRoyalty(catalyst.address)
+      await managerAsRoyaltySetter.contractRoyalty(catalystAsMinter.address)
     ).to.be.equal(0);
-    await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+    await managerAsRoyaltySetter.setContractRoyalty(
+      catalystAsMinter.address,
+      500
+    );
     expect(
-      await managerAsRoyaltySetter.contractRoyalty(catalyst.address)
+      await managerAsRoyaltySetter.contractRoyalty(catalystAsMinter.address)
     ).to.be.equal(500);
   });
 
   it('only manager contract royalty setter can set Eip 2981 royaltyBps for other contracts (catalyst)', async function () {
-    const {manager, seller, catalyst, contractRoyaltySetterRole} =
+    const {manager, seller, catalystAsMinter, contractRoyaltySetterRole} =
       await catalystRoyaltyDistribution();
     await expect(
-      manager
-        .connect(await ethers.provider.getSigner(seller))
-        .setContractRoyalty(catalyst.address, 500)
+      manager.connect(seller).setContractRoyalty(catalystAsMinter.address, 500)
     ).to.be.revertedWith(
-      `AccessControl: account ${seller.toLocaleLowerCase()} is missing role ${contractRoyaltySetterRole}`
+      `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${contractRoyaltySetterRole}`
     );
   });
   it('catalyst should return EIP2981 royalty recipient and royalty for other contracts(catalyst)', async function () {
-    const {commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter} =
+    const {commonRoyaltyReceiver, catalystAsMinter, managerAsRoyaltySetter} =
       await catalystRoyaltyDistribution();
-    await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+    await managerAsRoyaltySetter.setContractRoyalty(
+      catalystAsMinter.address,
+      500
+    );
     const id = 1;
     const priceToken = 300000;
-    const royaltyInfo = await catalyst.royaltyInfo(id, priceToken);
-    expect(royaltyInfo[0]).to.be.equals(commonRoyaltyReceiver);
+    const royaltyInfo = await catalystAsMinter.royaltyInfo(id, priceToken);
+    expect(royaltyInfo[0]).to.be.equals(commonRoyaltyReceiver.address);
     expect(royaltyInfo[1]).to.be.equals((500 * priceToken) / 10000);
   });
 
   it('catalyst should same return EIP2981 royalty recipient for different tokens contracts(catalyst)', async function () {
-    const {commonRoyaltyReceiver, catalyst, managerAsRoyaltySetter} =
+    const {commonRoyaltyReceiver, catalystAsMinter, managerAsRoyaltySetter} =
       await catalystRoyaltyDistribution();
-    await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+    await managerAsRoyaltySetter.setContractRoyalty(
+      catalystAsMinter.address,
+      500
+    );
     const id = 1;
     const id2 = 2;
     const priceToken = 300000;
-    const royaltyInfo = await catalyst.royaltyInfo(id, priceToken);
-    expect(royaltyInfo[0]).to.be.equals(commonRoyaltyReceiver);
+    const royaltyInfo = await catalystAsMinter.royaltyInfo(id, priceToken);
+    expect(royaltyInfo[0]).to.be.equals(commonRoyaltyReceiver.address);
     expect(royaltyInfo[1]).to.be.equals((500 * priceToken) / 10000);
 
-    const royaltyInfo2 = await catalyst.royaltyInfo(id2, priceToken);
-    expect(royaltyInfo2[0]).to.be.equals(commonRoyaltyReceiver);
+    const royaltyInfo2 = await catalystAsMinter.royaltyInfo(id2, priceToken);
+    expect(royaltyInfo2[0]).to.be.equals(commonRoyaltyReceiver.address);
     expect(royaltyInfo2[1]).to.be.equals((500 * priceToken) / 10000);
   });
 
   it('should split ERC20 using EIP2981', async function () {
     const {
-      catalyst,
+      catalystAsMinter,
       ERC20,
       mockMarketplace,
       ERC20AsBuyer,
@@ -64,36 +71,41 @@ describe('Catalyst royalty', function () {
       commonRoyaltyReceiver,
       managerAsRoyaltySetter,
     } = await catalystRoyaltyDistribution();
-    await catalyst.mint(seller, 1, 1);
+    await catalystAsMinter.mint(seller.address, 1, 1);
 
-    await ERC20.mint(buyer, 1000000);
+    await ERC20.mint(buyer.address, 1000000);
     await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
-    await catalyst
-      .connect(await ethers.provider.getSigner(seller))
+    await catalystAsMinter
+      .connect(seller)
       .setApprovalForAll(mockMarketplace.address, true);
-    expect(await catalyst.balanceOf(seller, 1)).to.be.equals(1);
-    expect(await ERC20.balanceOf(commonRoyaltyReceiver)).to.be.equals(0);
+    expect(await catalystAsMinter.balanceOf(seller.address, 1)).to.be.equals(1);
+    expect(await ERC20.balanceOf(commonRoyaltyReceiver.address)).to.be.equals(
+      0
+    );
 
-    await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+    await managerAsRoyaltySetter.setContractRoyalty(
+      catalystAsMinter.address,
+      500
+    );
 
     await mockMarketplace.distributeRoyaltyEIP2981(
       1000000,
       ERC20.address,
-      catalyst.address,
+      catalystAsMinter.address,
       1,
-      buyer,
-      seller,
+      buyer.address,
+      seller.address,
       true
     );
 
-    expect(await ERC20.balanceOf(commonRoyaltyReceiver)).to.be.equals(
+    expect(await ERC20.balanceOf(commonRoyaltyReceiver.address)).to.be.equals(
       (1000000 / 10000) * 500
     );
   });
 
   it('should split ETH using EIP2981', async function () {
     const {
-      catalyst,
+      catalystAsMinter,
       ERC20,
       mockMarketplace,
       ERC20AsBuyer,
@@ -103,30 +115,33 @@ describe('Catalyst royalty', function () {
       managerAsRoyaltySetter,
       user,
     } = await catalystRoyaltyDistribution();
-    await catalyst.mint(seller, 1, 1);
+    await catalystAsMinter.mint(seller.address, 1, 1);
 
-    await ERC20.mint(buyer, 1000000);
+    await ERC20.mint(buyer.address, 1000000);
     await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
-    await catalyst
-      .connect(await ethers.provider.getSigner(seller))
+    await catalystAsMinter
+      .connect(seller)
       .setApprovalForAll(mockMarketplace.address, true);
-    expect(await catalyst.balanceOf(seller, 1)).to.be.equals(1);
+    expect(await catalystAsMinter.balanceOf(seller.address, 1)).to.be.equals(1);
     const value = ethers.utils.parseUnits('1000', 'ether');
 
-    await managerAsRoyaltySetter.setContractRoyalty(catalyst.address, 500);
+    await managerAsRoyaltySetter.setContractRoyalty(
+      catalystAsMinter.address,
+      500
+    );
     const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
-      commonRoyaltyReceiver
+      commonRoyaltyReceiver.address
     );
 
     await mockMarketplace
-      .connect(await ethers.getSigner(user))
+      .connect(user)
       .distributeRoyaltyEIP2981(
         0,
         ERC20.address,
-        catalyst.address,
+        catalystAsMinter.address,
         1,
-        buyer,
-        seller,
+        buyer.address,
+        seller.address,
         true,
         {
           value: value,
@@ -134,7 +149,7 @@ describe('Catalyst royalty', function () {
       );
 
     const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(
-      commonRoyaltyReceiver
+      commonRoyaltyReceiver.address
     );
 
     expect(

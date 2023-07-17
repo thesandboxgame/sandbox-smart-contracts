@@ -120,36 +120,35 @@ export async function assetRoyaltyDistribution() {
     await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
   const AssetAsSeller = Asset.connect(seller);
   const ERC20AsBuyer = ERC20.connect(buyer);
-  const managerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
-  const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
+  const RoyaltyManagerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
+  const RoyaltyManagerAsRoyaltySetter = RoyaltyManagerContract.connect(
     contractRoyaltySetter
   );
 
-  // TODO: fix signers vs addresses
   return {
     Asset,
     ERC20,
-    manager: RoyaltyManagerContract,
+    RoyaltyManagerContract,
     mockMarketplace,
     AssetAsSeller,
     ERC20AsBuyer,
-    deployer: deployer.address,
+    deployer,
     seller,
     buyer,
     user,
-    commonRoyaltyReceiver: commonRoyaltyReceiver.address,
-    royaltyReceiver: royaltyReceiver.address,
+    commonRoyaltyReceiver,
+    royaltyReceiver,
     RoyaltyRegistry,
-    managerAsAdmin,
-    commonRoyaltyReceiver2: commonRoyaltyReceiver2.address,
-    royaltyReceiver2: royaltyReceiver2.address,
-    creator: creator.address,
+    RoyaltyManagerAsAdmin,
+    commonRoyaltyReceiver2,
+    royaltyReceiver2,
+    creator,
     assetAdminRole,
     contractRoyaltySetter,
     assetAdmin,
     managerAdminRole,
     contractRoyaltySetterRole,
-    managerAsRoyaltySetter,
+    RoyaltyManagerAsRoyaltySetter,
     assetAsMinter,
   };
 }

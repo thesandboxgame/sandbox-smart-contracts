@@ -20,11 +20,11 @@ describe('Asset Royalties', function () {
         commonRoyaltyReceiver,
         creator,
         AssetAsSeller,
-        manager,
+        RoyaltyManagerContract,
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       await ERC20.mint(buyer.address, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
@@ -39,7 +39,9 @@ describe('Asset Royalties', function () {
         seller.address,
         true
       );
-      const splitter = await manager._creatorRoyaltiesSplitter(creator);
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        creator.address
+      );
 
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
 
@@ -53,12 +55,12 @@ describe('Asset Royalties', function () {
       expect(balance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
 
       await splitterContract
-        .connect(await ethers.getSigner(creator))
+        .connect(await ethers.getSigner(creator.address))
         .splitERC20Tokens(ERC20.address);
 
-      const balanceCreator = await ERC20.balanceOf(creator);
+      const balanceCreator = await ERC20.balanceOf(creator.address);
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       expect(balanceCreator).to.be.equal(
@@ -83,7 +85,7 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       await ERC20.mint(buyer.address, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
@@ -99,9 +101,9 @@ describe('Asset Royalties', function () {
         true
       );
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
-      const balanceCreator = await ERC20.balanceOf(creator);
+      const balanceCreator = await ERC20.balanceOf(creator.address);
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       expect(balanceCreator).to.be.equal(
@@ -126,12 +128,12 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       expect(await Asset.balanceOf(seller.address, id)).to.be.equals(1);
-      const balanceCreator = await ethers.provider.getBalance(creator);
+      const balanceCreator = await ethers.provider.getBalance(creator.address);
       const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
       const value = ethers.utils.parseUnits('1000', 'ether');
@@ -150,9 +152,11 @@ describe('Asset Royalties', function () {
           }
         );
 
-      const balanceCreatorNew = await ethers.provider.getBalance(creator);
+      const balanceCreatorNew = await ethers.provider.getBalance(
+        creator.address
+      );
       const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       expect(balanceCreatorNew.sub(balanceCreator)).to.be.equal(
@@ -186,16 +190,16 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       await Asset.connect(seller).setApprovalForAll(
         mockMarketplace.address,
         true
       );
       expect(await Asset.balanceOf(seller.address, id)).to.be.equals(1);
-      const balanceCreator = await ethers.provider.getBalance(creator);
+      const balanceCreator = await ethers.provider.getBalance(creator.address);
       const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
       const value = ethers.utils.parseUnits('1000', 'ether');
@@ -214,9 +218,11 @@ describe('Asset Royalties', function () {
           }
         );
 
-      const balanceCreatorNew = await ethers.provider.getBalance(creator);
+      const balanceCreatorNew = await ethers.provider.getBalance(
+        creator.address
+      );
       const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       expect(balanceCreatorNew.sub(balanceCreator)).to.be.equal(
@@ -248,35 +254,39 @@ describe('Asset Royalties', function () {
         royaltyReceiver,
         creator,
         user,
-        manager,
+        RoyaltyManagerContract,
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
 
-      const splitter = await manager._creatorRoyaltiesSplitter(creator);
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        creator.address
+      );
 
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator);
+      expect(await splitterContract._recipient()).to.be.equal(creator.address);
 
-      const tnx = await manager
-        .connect(await ethers.getSigner(creator))
-        .setRoyaltyRecipient(royaltyReceiver);
+      const tnx = await RoyaltyManagerContract.connect(
+        await ethers.getSigner(creator.address)
+      ).setRoyaltyRecipient(royaltyReceiver.address);
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(royaltyReceiver);
+      expect(await splitterContract._recipient()).to.be.equal(
+        royaltyReceiver.address
+      );
 
       const balanceRoyaltyReceiver = await ethers.provider.getBalance(
-        royaltyReceiver
+        royaltyReceiver.address
       );
       const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
       const value = ethers.utils.parseUnits('1000', 'ether');
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
@@ -297,10 +307,10 @@ describe('Asset Royalties', function () {
         );
 
       const balanceRoyaltyReceiverNew = await ethers.provider.getBalance(
-        royaltyReceiver
+        royaltyReceiver.address
       );
       const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       expect(balanceRoyaltyReceiverNew.sub(balanceRoyaltyReceiver)).to.be.equal(
@@ -320,13 +330,13 @@ describe('Asset Royalties', function () {
       );
     });
 
-    it('common share of royalty should be received in ETH to new address set by the Admin on manager contract', async function () {
+    it('common share of royalty should be received in ETH to new address set by the Admin on RoyaltyManagerContract contract', async function () {
       const {
         Asset,
         ERC20,
         mockMarketplace,
         commonRoyaltyReceiver2,
-        managerAsAdmin,
+        RoyaltyManagerAsAdmin,
         seller,
         buyer,
         commonRoyaltyReceiver,
@@ -336,21 +346,21 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
-        commonRoyaltyReceiver
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
+        commonRoyaltyReceiver.address
       );
 
-      await managerAsAdmin.setRecipient(commonRoyaltyReceiver2);
+      await RoyaltyManagerAsAdmin.setRecipient(commonRoyaltyReceiver2.address);
 
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
-        commonRoyaltyReceiver2
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
+        commonRoyaltyReceiver2.address
       );
 
-      const balanceCreator = await ethers.provider.getBalance(creator);
+      const balanceCreator = await ethers.provider.getBalance(creator.address);
       const balanceCommonRoyaltyReceiver2 = await ethers.provider.getBalance(
-        commonRoyaltyReceiver2
+        commonRoyaltyReceiver2.address
       );
       const value = ethers.utils.parseUnits('1000', 'ether');
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
@@ -370,9 +380,11 @@ describe('Asset Royalties', function () {
           }
         );
 
-      const balanceCreatorNew = await ethers.provider.getBalance(creator);
+      const balanceCreatorNew = await ethers.provider.getBalance(
+        creator.address
+      );
       const balanceCommonRoyaltyReceiver2New = await ethers.provider.getBalance(
-        commonRoyaltyReceiver2
+        commonRoyaltyReceiver2.address
       );
 
       expect(balanceCreatorNew.sub(balanceCreator)).to.be.equal(
@@ -398,7 +410,7 @@ describe('Asset Royalties', function () {
         ERC20,
         mockMarketplace,
         AssetAsSeller,
-        managerAsAdmin,
+        RoyaltyManagerAsAdmin,
         seller,
         buyer,
         commonRoyaltyReceiver,
@@ -407,13 +419,13 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
 
-      await managerAsAdmin.setSplit(6000);
-      const balanceCreator = await ethers.provider.getBalance(creator);
+      await RoyaltyManagerAsAdmin.setSplit(6000);
+      const balanceCreator = await ethers.provider.getBalance(creator.address);
       const balanceCommonRoyaltyReceiver = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
       const value = ethers.utils.parseUnits('1000', 'ether');
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
@@ -433,9 +445,11 @@ describe('Asset Royalties', function () {
           }
         );
 
-      const balanceCreatorNew = await ethers.provider.getBalance(creator);
+      const balanceCreatorNew = await ethers.provider.getBalance(
+        creator.address
+      );
       const balanceCommonRoyaltyReceiverNew = await ethers.provider.getBalance(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
 
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
@@ -482,27 +496,31 @@ describe('Asset Royalties', function () {
         commonRoyaltyReceiver,
         royaltyReceiver,
         AssetAsSeller,
-        manager,
+        RoyaltyManagerContract,
         creator,
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      const splitter = await manager._creatorRoyaltiesSplitter(creator);
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        creator.address
+      );
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator);
-      const tnx = await manager
-        .connect(await ethers.getSigner(creator))
-        .setRoyaltyRecipient(royaltyReceiver);
+      expect(await splitterContract._recipient()).to.be.equal(creator.address);
+      const tnx = await RoyaltyManagerContract.connect(
+        await ethers.getSigner(creator.address)
+      ).setRoyaltyRecipient(royaltyReceiver.address);
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(royaltyReceiver);
+      expect(await splitterContract._recipient()).to.be.equal(
+        royaltyReceiver.address
+      );
 
       await ERC20.mint(buyer.address, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
@@ -519,15 +537,17 @@ describe('Asset Royalties', function () {
       );
 
       await splitterContract
-        .connect(await ethers.getSigner(royaltyReceiver))
+        .connect(await ethers.getSigner(royaltyReceiver.address))
         .splitERC20Tokens(ERC20.address);
-      const balanceCreator = await ERC20.balanceOf(creator);
+      const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(0);
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
-      const balanceRoyaltyReceiver = await ERC20.balanceOf(royaltyReceiver);
+      const balanceRoyaltyReceiver = await ERC20.balanceOf(
+        royaltyReceiver.address
+      );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
         (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
@@ -537,7 +557,7 @@ describe('Asset Royalties', function () {
       );
     });
 
-    it('common share of royalty should be received in ERC20 to new address set by the Admin on manager contract', async function () {
+    it('common share of royalty should be received in ERC20 to new address set by the Admin on RoyaltyManager contract', async function () {
       const {
         Asset,
         ERC20,
@@ -545,7 +565,7 @@ describe('Asset Royalties', function () {
         ERC20AsBuyer,
         seller,
         buyer,
-        managerAsAdmin,
+        RoyaltyManagerAsAdmin,
         commonRoyaltyReceiver2,
         commonRoyaltyReceiver,
         creator,
@@ -553,14 +573,14 @@ describe('Asset Royalties', function () {
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
-        commonRoyaltyReceiver
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
+        commonRoyaltyReceiver.address
       );
-      await managerAsAdmin.setRecipient(commonRoyaltyReceiver2);
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
-        commonRoyaltyReceiver2
+      await RoyaltyManagerAsAdmin.setRecipient(commonRoyaltyReceiver2.address);
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
+        commonRoyaltyReceiver2.address
       );
 
       await ERC20.mint(buyer.address, 1000000);
@@ -580,9 +600,9 @@ describe('Asset Royalties', function () {
 
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
       const balanceCommonRoyaltyReceiver2 = await ERC20.balanceOf(
-        commonRoyaltyReceiver2
+        commonRoyaltyReceiver2.address
       );
-      const balanceCreator = await ERC20.balanceOf(creator);
+      const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(
         (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
       );
@@ -599,16 +619,16 @@ describe('Asset Royalties', function () {
         ERC20AsBuyer,
         seller,
         buyer,
-        managerAsAdmin,
+        RoyaltyManagerAsAdmin,
         AssetAsSeller,
         commonRoyaltyReceiver,
         creator,
         assetAsMinter,
       } = await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      await managerAsAdmin.setSplit(6000);
+      await RoyaltyManagerAsAdmin.setSplit(6000);
       await ERC20.mint(buyer.address, 1000000);
       await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
       await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
@@ -625,9 +645,9 @@ describe('Asset Royalties', function () {
 
       const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
-      const balanceCreator = await ERC20.balanceOf(creator);
+      const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(
         ((1000000 * (_defaultRoyaltyBPS / 10000)) / 5) * 2
       );
@@ -647,54 +667,60 @@ describe('Asset Royalties', function () {
       assetAsMinter,
     } = await assetRoyaltyDistribution();
 
-    const id = generateAssetId(creator, 1);
+    const id = generateAssetId(creator.address, 1);
     await assetAsMinter.mint(seller.address, id, 1, '0x');
-    const id2 = generateAssetId(deployer, 1);
+    const id2 = generateAssetId(deployer.address, 1);
     await assetAsMinter.mint(seller.address, id2, 1, '0x01');
     const tokenRoyalties = await Asset.getTokenRoyalties();
     expect(tokenRoyalties[0].tokenId).to.be.equal(id);
-    expect(tokenRoyalties[0].recipients[0].recipient).to.be.equal(creator);
+    expect(tokenRoyalties[0].recipients[0].recipient).to.be.equal(
+      creator.address
+    );
     expect(tokenRoyalties[0].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver
+      commonRoyaltyReceiver.address
     );
     expect(tokenRoyalties[1].tokenId).to.be.equal(id2);
-    expect(tokenRoyalties[1].recipients[0].recipient).to.be.equal(deployer);
+    expect(tokenRoyalties[1].recipients[0].recipient).to.be.equal(
+      deployer.address
+    );
     expect(tokenRoyalties[1].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver
+      commonRoyaltyReceiver.address
     );
   });
 
   describe('Roles on Asset and Manager contract', function () {
     it('creator could change the recipient for his splitter', async function () {
-      const {seller, manager, creator, assetAsMinter} =
+      const {seller, RoyaltyManagerContract, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      const splitter = await manager._creatorRoyaltiesSplitter(creator);
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        creator.address
+      );
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator);
-      const tnx = await manager
-        .connect(await ethers.getSigner(creator))
-        .setRoyaltyRecipient(seller.address);
+      expect(await splitterContract._recipient()).to.be.equal(creator.address);
+      const tnx = await RoyaltyManagerContract.connect(
+        await ethers.getSigner(creator.address)
+      ).setRoyaltyRecipient(seller.address);
       await tnx.wait();
       expect(await splitterContract._recipient()).to.be.equal(seller.address);
     });
 
     it('only creator could change the recipient for his splitter', async function () {
-      const {seller, manager, deployer, creator, assetAsMinter} =
+      const {seller, RoyaltyManagerContract, deployer, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id = generateAssetId(creator, 1);
+      const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       await expect(
-        manager
-          .connect(await ethers.getSigner(deployer))
-          .setRoyaltyRecipient(seller.address)
+        RoyaltyManagerContract.connect(deployer).setRoyaltyRecipient(
+          seller.address
+        )
       ).to.revertedWith('Manager: No splitter deployed for the creator');
     });
 
@@ -709,10 +735,14 @@ describe('Asset Royalties', function () {
       const {Asset, commonRoyaltyReceiver, assetAdmin, deployer} =
         await assetRoyaltyDistribution();
       expect(await Asset._defaultRoyaltyReceiver()).to.be.equal(
-        commonRoyaltyReceiver
+        commonRoyaltyReceiver.address
       );
-      await Asset.connect(assetAdmin).setDefaultRoyaltyReceiver(deployer);
-      expect(await Asset._defaultRoyaltyReceiver()).to.be.equal(deployer);
+      await Asset.connect(assetAdmin).setDefaultRoyaltyReceiver(
+        deployer.address
+      );
+      expect(await Asset._defaultRoyaltyReceiver()).to.be.equal(
+        deployer.address
+      );
     });
 
     it('only asset admin can set default royalty Bps', async function () {
@@ -733,77 +763,79 @@ describe('Asset Royalties', function () {
       );
     });
 
-    it('manager admin can set common royalty recipient', async function () {
-      const {seller, commonRoyaltyReceiver, managerAsAdmin} =
+    it('RoyaltyManagerContract admin can set common royalty recipient', async function () {
+      const {seller, commonRoyaltyReceiver, RoyaltyManagerAsAdmin} =
         await assetRoyaltyDistribution();
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
-        commonRoyaltyReceiver
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
+        commonRoyaltyReceiver.address
       );
-      await managerAsAdmin.setRecipient(seller.address);
-      expect(await managerAsAdmin.commonRecipient()).to.be.equal(
+      await RoyaltyManagerAsAdmin.setRecipient(seller.address);
+      expect(await RoyaltyManagerAsAdmin.commonRecipient()).to.be.equal(
         seller.address
       );
     });
 
-    it('manager admin can set common split', async function () {
-      const {managerAsAdmin} = await assetRoyaltyDistribution();
-      expect(await managerAsAdmin.commonSplit()).to.be.equal(5000);
-      await managerAsAdmin.setSplit(3000);
-      expect(await managerAsAdmin.commonSplit()).to.be.equal(3000);
+    it('RoyaltyManagerContract admin can set common split', async function () {
+      const {RoyaltyManagerAsAdmin} = await assetRoyaltyDistribution();
+      expect(await RoyaltyManagerAsAdmin.commonSplit()).to.be.equal(5000);
+      await RoyaltyManagerAsAdmin.setSplit(3000);
+      expect(await RoyaltyManagerAsAdmin.commonSplit()).to.be.equal(3000);
     });
 
-    it('Only manager admin can set common royalty recipient', async function () {
-      const {seller, manager, managerAdminRole} =
+    it('Only RoyaltyManagerContract admin can set common royalty recipient', async function () {
+      const {seller, RoyaltyManagerContract, managerAdminRole} =
         await assetRoyaltyDistribution();
       await expect(
-        manager.connect(seller).setRecipient(seller.address)
+        RoyaltyManagerContract.connect(seller).setRecipient(seller.address)
       ).to.be.revertedWith(
         `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${managerAdminRole}`
       );
     });
 
-    it('Only manager admin can set common split', async function () {
-      const {seller, manager, managerAdminRole} =
+    it('Only RoyaltyManagerContract admin can set common split', async function () {
+      const {seller, RoyaltyManagerContract, managerAdminRole} =
         await assetRoyaltyDistribution();
-      await expect(manager.connect(seller).setSplit(3000)).to.be.revertedWith(
+      await expect(
+        RoyaltyManagerContract.connect(seller).setSplit(3000)
+      ).to.be.revertedWith(
         `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${managerAdminRole}`
       );
     });
   });
 
   describe('Minting', function () {
-    it('should have same splitter address for tokens minted by same creator', async function () {
+    it('should have same splitter address for tokens minted by same creator.address', async function () {
       const {Asset, seller, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id1 = generateAssetId(creator, 1);
+      const id1 = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id1, 1, '0x');
       const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
-      const id2 = generateAssetId(creator, 2);
+      const id2 = generateAssetId(creator.address, 2);
       await assetAsMinter.mint(seller.address, id2, 1, '0x01');
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
       expect(splitter1).to.be.equal(splitter2);
     });
 
-    it('should not have same splitter address for tokens with minted by different creator', async function () {
+    it('should not have same splitter address for tokens with minted by different creator.address', async function () {
       const {Asset, seller, deployer, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id1 = generateAssetId(creator, 1);
+      const id1 = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id1, 1, '0x');
       const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
-      const id2 = generateAssetId(deployer, 2);
+      const id2 = generateAssetId(deployer.address, 2);
       await assetAsMinter.mint(seller.address, id2, 1, '0x01');
       const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
       expect(splitter1).to.not.be.equal(splitter2);
     });
 
-    it('should have same splitter address for tokens minted by same creator in batch mint', async function () {
+    it('should have same splitter address for tokens minted by same creator.address in batch mint', async function () {
       const {Asset, seller, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id1 = generateAssetId(creator, 1);
-      const id2 = generateAssetId(creator, 2);
+      const id1 = generateAssetId(creator.address, 1);
+      const id2 = generateAssetId(creator.address, 2);
       await assetAsMinter.mintBatch(
         seller.address,
         [id1, id2],
@@ -815,12 +847,12 @@ describe('Asset Royalties', function () {
       expect(splitter1).to.be.equal(splitter2);
     });
 
-    it('should have different splitter address for tokens minted by same different creator in batch mint', async function () {
+    it('should have different splitter address for tokens minted by same different creator.address in batch mint', async function () {
       const {Asset, seller, deployer, creator, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id1 = generateAssetId(creator, 1);
-      const id2 = generateAssetId(deployer, 2);
+      const id1 = generateAssetId(creator.address, 1);
+      const id2 = generateAssetId(deployer.address, 2);
       await assetAsMinter.mintBatch(
         seller.address,
         [id1, id2],
@@ -836,7 +868,7 @@ describe('Asset Royalties', function () {
       const {Asset, seller, deployer, assetAsMinter} =
         await assetRoyaltyDistribution();
 
-      const id = generateAssetId(deployer, 2);
+      const id = generateAssetId(deployer.address, 2);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
       const splitter = await Asset._tokenRoyaltiesSplitter(id);
       const royaltyInfo = await Asset.royaltyInfo(id, 10000);
