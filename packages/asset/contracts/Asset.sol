@@ -49,10 +49,13 @@ contract Asset is
         _disableInitializers();
     }
 
-    function initialize(
+function initialize(
         address forwarder,
         address assetAdmin,
-        string memory baseUri
+        string memory baseUri,
+        address payable defaultRecipient,
+        uint16 defaultBps,
+        address _manager
     ) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
@@ -60,6 +63,7 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
+        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
     }
 
     /// @notice Mint new tokens
