@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, assetAdmin} = await getNamedAccounts();
   await deploy('AssetAuthValidator', {
     from: deployer,
-    contract: 'AuthValidator',
+    contract: 'AuthSuperValidator',
     args: [assetAdmin],
     log: true,
   });
