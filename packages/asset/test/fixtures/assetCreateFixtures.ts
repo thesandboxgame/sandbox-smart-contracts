@@ -67,9 +67,10 @@ export async function runCreateTestSetup() {
 
   const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
   const AuthValidatorContract = await AuthValidatorFactory.deploy(
-    authValidatorAdmin.address,
-    backendAuthWallet.address
+    authValidatorAdmin.address
   );
+
+  await AuthValidatorContract.deployed();
 
   // END DEPLOY DEPENDENCIES
 
@@ -94,6 +95,12 @@ export async function runCreateTestSetup() {
   await AssetCreateContract.deployed();
 
   const AssetCreateContractAsUser = AssetCreateContract.connect(user);
+
+  // SETUP VALIDATOR
+  await AuthValidatorContract.connect(authValidatorAdmin).setSigner(
+    AssetCreateContract.address,
+    backendAuthWallet.address
+  );
 
   // SETUP ROLES
   // get AssetContract as DEFAULT_ADMIN_ROLE

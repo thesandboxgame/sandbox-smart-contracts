@@ -68,9 +68,10 @@ export async function runRevealTestSetup() {
 
   const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
   const AuthValidatorContract = await AuthValidatorFactory.deploy(
-    authValidatorAdmin.address,
-    backendAuthWallet.address
+    authValidatorAdmin.address
   );
+
+  await AuthValidatorContract.deployed();
 
   // END DEPLOY DEPENDENCIES
 
@@ -91,6 +92,12 @@ export async function runRevealTestSetup() {
   );
 
   await AssetRevealContract.deployed();
+
+  // SETUP VALIDATOR
+  await AuthValidatorContract.connect(authValidatorAdmin).setSigner(
+    AssetRevealContract.address,
+    backendAuthWallet.address
+  );
 
   // SET UP ROLES
   const AssetRevealContractAsUser = AssetRevealContract.connect(user);
