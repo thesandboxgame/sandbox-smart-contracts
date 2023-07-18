@@ -40,8 +40,8 @@ contract Catalyst is
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable
 {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     uint256 public tokenCount;
 
