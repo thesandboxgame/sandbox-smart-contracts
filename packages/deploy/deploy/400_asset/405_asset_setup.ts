@@ -42,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await catchUnknownSigner(
     execute(
-      'AssetAuthValidator',
+      'AuthSuperValidator',
       {from: assetAdmin, log: true},
       'setSigner',
       assetCreate.address,
@@ -50,11 +50,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     )
   );
 
-  log(`AssetAuthValidator signer for Asset Create set to ${backendAuthWallet}`);
+  log(`AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`);
 
   await catchUnknownSigner(
     execute(
-      'AssetAuthValidator',
+      'AuthSuperValidator',
       {from: assetAdmin, log: true},
       'setSigner',
       assetReveal.address,
@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     )
   );
 
-  log(`AssetAuthValidator signer for Asset Reveal set to ${backendAuthWallet}`);
+  log(`AuthSuperValidator signer for Asset Reveal set to ${backendAuthWallet}`);
 };
 
 export default func;

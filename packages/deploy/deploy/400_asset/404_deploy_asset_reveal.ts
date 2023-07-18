@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
-  const AuthValidatorContract = await deployments.get('AssetAuthValidator');
+  const AuthValidatorContract = await deployments.get('AuthSuperValidator');
 
   const name = 'Sandbox Asset Reveal';
   const version = '1.0';

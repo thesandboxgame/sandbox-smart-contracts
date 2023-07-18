@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
-  const AuthValidatorContract = await deployments.get('AssetAuthValidator');
+  const AuthValidatorContract = await deployments.get('AuthSuperValidator');
   const CatalystContract = await deployments.get('Catalyst');
 
   const name = 'Sandbox Asset Create';

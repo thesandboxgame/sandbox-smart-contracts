@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {deployer, assetAdmin} = await getNamedAccounts();
-  await deploy('AssetAuthValidator', {
+  await deploy('AuthSuperValidator', {
     from: deployer,
     contract: 'AuthSuperValidator',
     args: [assetAdmin],
@@ -14,4 +14,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AssetAuthValidator', 'AssetAuthValidator_deploy', 'L2'];
+func.tags = ['AuthSuperValidator', 'AuthSuperValidator_deploy', 'L2'];
