@@ -5,11 +5,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, assetAdmin, backendAuthWallet} = await getNamedAccounts();
+  const {deployer, assetAdmin} = await getNamedAccounts();
   await deploy('AssetAuthValidator', {
     from: deployer,
     contract: 'AuthValidator',
-    args: [assetAdmin, backendAuthWallet],
+    args: [assetAdmin],
     log: true,
   });
 };
