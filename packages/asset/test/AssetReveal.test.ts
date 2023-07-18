@@ -13,7 +13,7 @@ const revealHashF = formatBytes32String('revealHashF');
 // TODO 2: test reveal nonce incrementation
 // we have AccessControlUpgradeable on AssetCreate, why not here?
 
-describe('AssetReveal', function () {
+describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () {
   describe('General', function () {
     it('Should deploy correctly', async function () {
       const {AssetRevealContract} = await runRevealTestSetup();
