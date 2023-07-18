@@ -162,7 +162,7 @@ describe('catalyst Contract', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: royalty recipient can't be zero");
+      ).to.revertedWith("Catalyst: royalty manager can't be zero");
     });
     it("minter can't be zero in initialization", async function () {
       const {
