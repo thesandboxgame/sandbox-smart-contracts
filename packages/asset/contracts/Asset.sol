@@ -49,7 +49,7 @@ contract Asset is
         _disableInitializers();
     }
 
-function initialize(
+    function initialize(
         address forwarder,
         address assetAdmin,
         string memory baseUri,

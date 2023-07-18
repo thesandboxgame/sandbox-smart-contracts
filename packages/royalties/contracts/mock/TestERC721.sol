@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "../MultiRoyaltyDistributer.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {MultiRoyaltyDistributer} from "../MultiRoyaltyDistributer.sol";
 
 contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributer {
     /// @notice initiliaze to be called by the proxy
