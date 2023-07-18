@@ -82,7 +82,7 @@ contract Catalyst is
         require(_subscription != address(0), "Catalyst: subscription can't be zero");
         require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
         require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
-        require(_royaltyManager != address(0), "Catalyst: royalty recipient can't be zero");
+        require(_royaltyManager != address(0), "Catalyst: royalty manager can't be zero");
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();

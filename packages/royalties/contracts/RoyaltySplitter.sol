@@ -17,9 +17,9 @@ import {
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 import {IERC20Approve} from "./interfaces/IERC20Approve.sol";
 
-/**
- * Cloneable and configurable royalty splitter contract
- */
+/// @title RoyaltySplitter
+/// @author The Sandbox
+/// @notice RoyaltySplitter contract is deployed by the RoyaltyManager contract for a creator to get his royalty's share.
 contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter, ERC165Upgradeable {
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
@@ -47,19 +47,19 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         return interfaceId == type(IRoyaltySplitter).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    /**
-     * @notice Called once to configure the contract after the initial deployment.
-     * @dev This will be called by `createSplit` after deploying the proxy so it should never be called directly.
-     */
+    /// @notice initialize the contract
+    /// @dev can only be run once.
+    /// @param recipient the wallet of the creator when the contract is deployed
+    /// @param royaltyManager the address of the royalty manager contract.
     function initialize(address payable recipient, address royaltyManager) public initializer {
         __Ownable_init();
         _royaltyManager = IRoyaltyManager(royaltyManager);
         _recipient = recipient;
     }
 
-    /**
-     * @dev Set the splitter recipients. Total bps must total 10000.
-     */
+    /// @notice sets recipient for the splitter
+    /// @dev only the owner can call this.
+    /// @param recipients the array of recipients which should only have one recipient.
     function setRecipients(Recipient[] calldata recipients) external override onlyOwner {
         _setRecipients(recipients);
     }
@@ -70,9 +70,8 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         _recipient = recipients[0].recipient;
     }
 
-    /**
-     * @dev Get the splitter recipients;
-     */
+    /// @notice to get recipients of royalty through this splitter and their splits of royalty.
+    /// @return recipients of royalty through this splitter and their splits of royalty.
     function getRecipients() external view override returns (Recipient[] memory) {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         uint16 creatorSplit = _royaltyManager.getCreatorSplit();
@@ -83,20 +82,14 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         return recipients;
     }
 
-    /**
-     * @notice Forwards any ETH received to the recipients in this split.
-     * @dev Each recipient increases the gas required to split
-     * and contract recipients may significantly increase the gas required.
-     */
+    /// @notice Splits and forwards ETH to the royalty receivers
+    /// @dev splits ETH every time it is sent to this contract as royalty.
     receive() external payable {
         _splitETH(msg.value);
     }
 
-    /**
-     * @notice Allows any ETH stored by the contract to be split among recipients.
-     * @dev Normally ETH is forwarded as it comes in, but a balance in this contract
-     * is possible if it was sent before the contract was created or if self destruct was used.
-     */
+    /// @notice Splits and forwards ETH to the royalty receivers
+    /// @dev normally ETH should be split automatically by receive function.
     function splitETH() public {
         _splitETH(address(this).balance);
     }
@@ -127,11 +120,9 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         }
     }
 
-    /**
-     * @notice recipients can call this function to split all available tokens at the provided address between the recipients.
-     * @dev This contract is built to split ETH payments. The ability to attempt to split ERC20 tokens is here
-     * just in case tokens were also sent so that they don't get locked forever in the contract.
-     */
+    /// @notice split ERC20 Tokens owned by this contract.
+    /// @dev can only be called by one of the recipients
+    /// @param erc20Contract the address of the tokens to be split.
     function splitERC20Tokens(IERC20 erc20Contract) public {
         require(_splitERC20Tokens(erc20Contract), "Split: ERC20 split failed");
     }
@@ -181,16 +172,10 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         }
     }
 
-    /**
-     * @notice Allows the split recipients to make an arbitrary contract call.
-     * @dev This is provided to allow recovering from unexpected scenarios,
-     * such as receiving an NFT at this address.
-     *
-     * It will first attempt a fair split of ERC20 tokens before proceeding.
-     *
-     * This contract is built to split ETH payments. The ability to attempt to make other calls is here
-     * just in case other assets were also sent so that they don't get locked forever in the contract.
-     */
+    /// @notice made for unexpected scenarios when assets are sent to this contact such that they could be recovered.
+    /// @dev first attempts to split ERC20 tokens.
+    /// @param target target of the call
+    /// @param callData for the call.
     function proxyCall(address payable target, bytes calldata callData) external {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         require(

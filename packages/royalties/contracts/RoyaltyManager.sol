@@ -13,9 +13,9 @@ import {RoyaltySplitter} from "./RoyaltySplitter.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /// @title Registry
-/// @author The sandbox
-/// @notice Registry contract to set the common Recipient and Split for the splitters. Also to set the royalty info
-/// for contract which don't use splitter
+/// @author The Sandbox
+/// @notice Registry contract to set the common Recipient and Split for the RoyaltySplitter. Also, to set the royalty info
+/// for contracts that don't use the RoyaltySplitter.
 contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     bytes32 public constant CONTRACT_ROYALTY_SETTER_ROLE = keccak256("CONTRACT_ROYALTY_SETTER");
 
@@ -26,10 +26,10 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     mapping(address => address payable) public _creatorRoyaltiesSplitter;
     address internal _royaltySplitterCloneable;
 
-    /// @notice initialization function for deployment of contract
+    /// @notice initialization function for the deployment of contract
     /// @dev called during the deployment via the proxy.
     /// @param _commonRecipient the != address(0)common recipient for all the splitters
-    /// @param _commonSplit split for the common recipient and creators split would be 10000 - commonSplit
+    /// @param _commonSplit split for the common recipient's and creator split would be 10000 - commonSplit
     function initialize(
         address payable _commonRecipient,
         uint16 _commonSplit,
@@ -58,14 +58,14 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice sets the common recipient and common split
-    /// @dev can only be called by the owner now later could be called my a manager
-    /// @param _commonRecipient the common recipient for all the splitters
+    /// @dev can only be called by the admin.
+    /// @param _commonRecipient is the common recipient for all the splitters
     function setRecipient(address payable _commonRecipient) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRecipient(_commonRecipient);
     }
 
     /// @notice sets the common recipient and common split
-    /// @dev can only be called by the owner now later could be called my a manager
+    /// @dev can only be called by the admin.
     /// @param _commonSplit split for the common recipient and creators split would be 10000 - commonSplit
     function setSplit(uint16 _commonSplit) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setSplit(_commonSplit);
@@ -84,7 +84,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice called to set the EIP 2981 royalty split
-    /// @dev can only be called by the owner now later could be called my a manager
+    /// @dev can only be called by contract royalty setter.
     /// @param _royaltyBps the royalty split for the EIP 2981
     function setContractRoyalty(address contractAddress, uint16 _royaltyBps)
         external
@@ -96,7 +96,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice to be called by the splitters to get the common recipient and split
-    /// @return recipient which has common recipient and split
+    /// @return recipient which has the common recipient and split
     function getCommonRecipient() external view override returns (Recipient memory recipient) {
         recipient = Recipient({recipient: commonRecipient, bps: commonSplit});
         return recipient;
@@ -105,7 +105,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @notice deploys splitter for creator
     /// @dev should only called once per creator
     /// @param creator  the address of the creator
-    /// @param recipient the wallet of the recipient where they would receive there royalty
+    /// @param recipient the wallet of the recipient where they would receive their royalty
     /// @return creatorSplitterAddress deployed for a creator
     function deploySplitter(address creator, address payable recipient) external returns (address payable) {
         address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[creator];
