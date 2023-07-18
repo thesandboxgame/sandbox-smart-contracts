@@ -7,16 +7,29 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /// @title AuthValidator
 /// @author The Sandbox
-/// @notice This contract is used to validate the signature of the backend
+/// @notice This contract is used to validate the signatures of the backend, each contract can have a separate signer assigned
 contract AuthValidator is AccessControl {
-    bytes32 public constant AUTH_SIGNER_ROLE = keccak256("AUTH_ROLE");
+    mapping(address => address) private _signers;
 
     /// @dev Constructor
     /// @param admin Address of the admin that will be able to grant roles
-    /// @param initialSigningWallet Address of the initial signing wallet that will be signing on behalf of the backend
-    constructor(address admin, address initialSigningWallet) {
+    constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(AUTH_SIGNER_ROLE, initialSigningWallet);
+    }
+
+    /// @notice Sets the signer for a contract
+    /// @dev Only the admin can call this function
+    /// @param contractAddress Address of the contract to set the signer for
+    /// @param signer Address of the signer
+    function setSigner(address contractAddress, address signer) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _signers[contractAddress] = signer;
+    }
+
+    /// @notice Gets the signer for a contract
+    /// @param contractAddress Address of the contract to get the signer for
+    /// @return address of the signer
+    function getSigner(address contractAddress) public view returns (address) {
+        return _signers[contractAddress];
     }
 
     /// @notice Takes the signature and the digest and returns if the signer has a backend signer role assigned
@@ -25,7 +38,9 @@ contract AuthValidator is AccessControl {
     /// @param digest Digest hash
     /// @return bool
     function verify(bytes memory signature, bytes32 digest) public view returns (bool) {
+        address signer = _signers[msg.sender];
+        require(signer != address(0), "AuthValidator: signer not set");
         address recoveredSigner = ECDSA.recover(digest, signature);
-        return hasRole(AUTH_SIGNER_ROLE, recoveredSigner);
+        return recoveredSigner == signer;
     }
 }
