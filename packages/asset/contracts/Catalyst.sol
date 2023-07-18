@@ -46,7 +46,8 @@ contract Catalyst is
     OperatorFiltererUpgradeable,
     RoyaltyDistributer
 {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     uint256 public tokenCount;
 
@@ -137,7 +138,7 @@ contract Catalyst is
         address account,
         uint256 id,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -149,7 +150,7 @@ contract Catalyst is
         address account,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(BURNER_ROLE) {
         _burnBatch(account, ids, amounts);
     }
 

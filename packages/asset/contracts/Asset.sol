@@ -25,7 +25,6 @@ import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {MultiRoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/MultiRoyaltyDistributer.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
-import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
 contract Asset is
     IAsset,
@@ -41,12 +40,7 @@ contract Asset is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE = keccak256("BRIDGE_MINTER_ROLE");
 
-    // a ratio for the amount of copies to burn to retrieve single catalyst for each tier
-    mapping(uint256 => uint256) public recyclingAmounts;
-    // mapping of old bridged tokenId (original asset from L1) to creator nonce
-    mapping(uint256 => uint16) public bridgedTokensNonces;
     // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
 
@@ -58,12 +52,7 @@ contract Asset is
     function initialize(
         address forwarder,
         address assetAdmin,
-        uint256[] calldata catalystTiers,
-        uint256[] calldata catalystRecycleCopiesNeeded,
-        string memory baseUri,
-        address payable defaultRecipient,
-        uint16 defaultBps,
-        address _manager
+        string memory baseUri
     ) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
@@ -71,11 +60,6 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
-
-        for (uint256 i = 0; i < catalystTiers.length; i++) {
-            recyclingAmounts[catalystTiers[i]] = catalystRecycleCopiesNeeded[i];
-        }
     }
 
     /// @notice Mint new tokens
@@ -106,7 +90,8 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(ids.length == metadataHashes.length, "ids and metadataHash length mismatch");
+        require(ids.length == metadataHashes.length, "Asset: ids and metadataHash length mismatch");
+        require(ids.length == amounts.length, "Asset: ids and amounts length mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
@@ -147,9 +132,11 @@ contract Asset is
     }
 
     /// @notice Set a new URI for specific tokenid
+    /// @dev The metadata hash should be the IPFS CIDv1 base32 encoded hash
     /// @param tokenId The token id to set URI for
-    /// @param metadata The new uri for asset's metadata
-    function setTokenUri(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    /// @param metadata The new URI for asset's metadata
+    function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setMetadataHash(tokenId, metadata);
         _setURI(tokenId, metadata);
     }
 
@@ -175,13 +162,26 @@ contract Asset is
         return hashUsed[metadataHash];
     }
 
-    function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal onlyRole(MINTER_ROLE) {
+    function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
+        require(
+            hasRole(MINTER_ROLE, _msgSender()) || hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "Asset: must have minter or admin role to mint"
+        );
         if (hashUsed[metadataHash] != 0) {
-            require(hashUsed[metadataHash] == tokenId, "metadata hash mismatch for tokenId");
+            require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
         } else {
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
         }
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
+        _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     /// @notice Query if a contract implements interface `id`.

@@ -213,8 +213,9 @@ describe('AssetCreate', function () {
 
       // TODO:
       // get tokenId from the event
-      const tokenId = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
-        .args.tokenId;
+      const tokenId = (
+        await AssetCreateContract.queryFilter('AssetMinted')
+      )?.[0].args?.tokenId;
 
       expect(await AssetContract.balanceOf(user.address, tokenId)).to.equal(
         BigNumber.from(5)
@@ -340,7 +341,7 @@ describe('AssetCreate', function () {
       );
       await expect(
         mintSingleAsset(signature2, 4, 2, true, metadataHashes[0])
-      ).to.be.revertedWith('metadata hash mismatch for tokenId');
+      ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
     });
     it('should NOT mint same token ids', async function () {
       const {
@@ -803,7 +804,7 @@ describe('AssetCreate', function () {
           [true, true],
           metadataHashes
         )
-      ).to.be.revertedWith('metadata hash mismatch for tokenId');
+      ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
     });
   });
   describe('Special asset mint', function () {

@@ -10,6 +10,7 @@ const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
 // TODO: missing AssetReveal DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
+// TODO 2: test reveal nonce incrementation
 // we have AccessControlUpgradeable on AssetCreate, why not here?
 
 describe('AssetReveal', function () {

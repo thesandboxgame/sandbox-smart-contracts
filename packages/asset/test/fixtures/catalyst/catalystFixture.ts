@@ -66,14 +66,19 @@ export async function runCatalystSetup() {
   );
   await catalyst.deployed();
 
+  // grant burner role to catalystMinter
+  const catMinterRole = await catalyst.BURNER_ROLE();
+  await catalyst
+    .connect(catalystAdmin)
+    .grantRole(catMinterRole, catalystMinter.address);
+
   const catalystAsAdmin = await catalyst.connect(catalystAdmin);
   const minterRole = await catalyst.MINTER_ROLE();
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
-
-  // TODO: fix signers vs addresses
+  const catalystAsBurner = await catalyst.connect(catalystMinter);
   return {
-    deployer: deployer.address,
+    deployer,
     catalyst,
     user1,
     user2,
@@ -83,6 +88,7 @@ export async function runCatalystSetup() {
     catalystAdminRole,
     upgradeAdmin,
     catalystMinter,
+    catalystAsBurner,
     catalystAdmin,
     catalystRoyaltyRecipient,
     trustedForwarder,
