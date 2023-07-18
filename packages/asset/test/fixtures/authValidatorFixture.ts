@@ -4,7 +4,9 @@ const runSetup = async () => {
   const [deployer, authValidatorAdmin, backendSigner] =
     await ethers.getSigners();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
+  const AuthValidatorFactory = await ethers.getContractFactory(
+    'AuthSuperValidator'
+  );
   const AuthValidatorContract = await AuthValidatorFactory.connect(
     deployer
   ).deploy(authValidatorAdmin.address);

@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
-import {AuthValidator} from "./AuthValidator.sol";
+import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {IAssetReveal} from "./interfaces/IAssetReveal.sol";
@@ -15,7 +15,7 @@ import {IAssetReveal} from "./interfaces/IAssetReveal.sol";
 contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgradeable {
     using TokenIdUtils for uint256;
     IAsset private assetContract;
-    AuthValidator private authValidator;
+    AuthSuperValidator private authValidator;
 
     // mapping of creator to asset id to asset's reveal nonce
     mapping(address => mapping(uint256 => uint16)) internal revealIds;
@@ -44,7 +44,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
 
     /// @notice Initialize the contract
     /// @param _assetContract The address of the asset contract
-    /// @param _authValidator The address of the AuthValidator contract
+    /// @param _authValidator The address of the AuthSuperValidator contract
     /// @param _forwarder The address of the forwarder contract
     function initialize(
         string memory _name,
@@ -54,7 +54,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         address _forwarder
     ) public initializer {
         assetContract = IAsset(_assetContract);
-        authValidator = AuthValidator(_authValidator);
+        authValidator = AuthSuperValidator(_authValidator);
         __ERC2771Handler_initialize(_forwarder);
         __EIP712_init(_name, _version);
     }

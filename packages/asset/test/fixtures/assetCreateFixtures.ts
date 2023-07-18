@@ -65,7 +65,9 @@ export async function runCreateTestSetup() {
 
   await CatalystContract.deployed();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
+  const AuthValidatorFactory = await ethers.getContractFactory(
+    'AuthSuperValidator'
+  );
   const AuthValidatorContract = await AuthValidatorFactory.deploy(
     authValidatorAdmin.address
   );

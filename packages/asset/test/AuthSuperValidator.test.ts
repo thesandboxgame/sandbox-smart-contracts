@@ -105,7 +105,7 @@ describe('AuthValidator, (/packages/asset/contracts/AuthValidator.sol)', functio
       );
       await expect(
         AuthValidatorContractAsAdmin.verify(signature, digest)
-      ).to.be.revertedWith('AuthValidator: signer not set');
+      ).to.be.revertedWith('AuthSuperValidator: signer not set');
     });
   });
 });
