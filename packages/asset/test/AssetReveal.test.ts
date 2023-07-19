@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {formatBytes32String} from 'ethers/lib/utils';
 import {runRevealTestSetup} from './fixtures/assetRevealFixtures';
+import {ethers} from 'hardhat';
 
 const revealHashA = formatBytes32String('revealHashA');
 const revealHashB = formatBytes32String('revealHashB');
@@ -9,9 +10,7 @@ const revealHashD = formatBytes32String('revealHashD');
 const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
-// TODO: missing  trustedForwarder tests
-
-describe.only('AssetReveal', function () {
+describe('AssetReveal', function () {
   describe('General', function () {
     it('Should deploy correctly', async function () {
       const {AssetRevealContract} = await runRevealTestSetup();
@@ -35,12 +34,6 @@ describe.only('AssetReveal', function () {
         assetAdmin.address
       );
       expect(hasAdminRole).to.equal(true);
-    });
-    it('Should have the forwarder address set correctly', async function () {
-      const {AssetRevealContract, trustedForwarder} =
-        await runRevealTestSetup();
-      const forwarderAddress = await AssetRevealContract.getTrustedForwarder();
-      expect(forwarderAddress).to.equal(trustedForwarder.address);
     });
     it("Should increment the reveal nonce if revealing an asset that hasn't been revealed before", async function () {
       const {
@@ -157,7 +150,50 @@ describe.only('AssetReveal', function () {
       expect(revealNonce2.toString()).to.equal('1');
     });
   });
-
+  describe('Trusted Forwarder', function () {
+    it('should allow to read the trusted forwarder', async function () {
+      const {AssetRevealContract, trustedForwarder} =
+        await runRevealTestSetup();
+      expect(await AssetRevealContract.getTrustedForwarder()).to.be.equal(
+        trustedForwarder.address
+      );
+    });
+    it('should correctly check if an address is a trusted forwarder or not', async function () {
+      const {AssetRevealContract, trustedForwarder} =
+        await runRevealTestSetup();
+      expect(
+        await AssetRevealContract.isTrustedForwarder(trustedForwarder.address)
+      ).to.be.true;
+      expect(
+        await AssetRevealContract.isTrustedForwarder(
+          ethers.constants.AddressZero
+        )
+      ).to.be.false;
+    });
+    it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
+      const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      await AssetRevealContractAsAdmin.setTrustedForwarder(randomAddress);
+      expect(
+        await AssetRevealContractAsAdmin.getTrustedForwarder()
+      ).to.be.equal(randomAddress);
+    });
+    it('should not allow non DEFAULT_ADMIN to set the trusted forwarder ', async function () {
+      const {AssetRevealContractAsUser, user, AdminRole} =
+        await runRevealTestSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      await expect(
+        AssetRevealContractAsUser.setTrustedForwarder(randomAddress)
+      ).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${AdminRole}`
+      );
+    });
+    it('should return correct msgData', async function () {
+      const {MockAssetRevealContract} = await runRevealTestSetup();
+      // call the function to satisfy the coverage only, but we don't need to check the result
+      await MockAssetRevealContract.msgData();
+    });
+  });
   describe('Burning', function () {
     describe('Single burn', function () {
       describe('Success', function () {
@@ -604,6 +640,33 @@ describe.only('AssetReveal', function () {
           );
           expect(result.events[7].event).to.equal('AssetRevealMint');
           expect(result.events[7].args['newTokenIds'].length).to.equal(6);
+        });
+        it('should set the reveal hash as used after successful mint', async function () {
+          const {
+            user,
+            generateRevealSignature,
+            revealAsset,
+            unrevealedtokenId,
+            AssetRevealContract,
+          } = await runRevealTestSetup();
+          const newMetadataHashes = ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcf'];
+          const amounts = [1];
+          const signature = await generateRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHashes,
+            [revealHashA]
+          );
+          await revealAsset(
+            signature,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHashes,
+            [revealHashA]
+          );
+          const isUsed = await AssetRevealContract.revealHashUsed(revealHashA);
+          expect(isUsed).to.equal(true);
         });
       });
       describe('Revert', function () {

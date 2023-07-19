@@ -79,6 +79,10 @@ export async function runRevealTestSetup() {
     backendAuthWallet.address
   );
 
+  const MockAssetReveal = await ethers.getContractFactory('MockAssetReveal');
+  const MockAssetRevealContract = await MockAssetReveal.deploy();
+  await MockAssetRevealContract.deployed();
+
   // END DEPLOY DEPENDENCIES
 
   const AssetRevealFactory = await ethers.getContractFactory('AssetReveal');
@@ -112,6 +116,7 @@ export async function runRevealTestSetup() {
   // add mock minter as minter
   const MinterRole = await AssetContract.MINTER_ROLE();
   const BurnerRole = await AssetContract.BURNER_ROLE();
+  const AdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
   await AssetContractAsAdmin.grantRole(MinterRole, MockMinterContract.address);
 
   // add AssetReveal contracts as both MINTER and BURNER for Asset contract
@@ -280,6 +285,7 @@ export async function runRevealTestSetup() {
     AssetRevealContract,
     AssetRevealContractAsUser,
     AssetRevealContractAsAdmin,
+    MockAssetRevealContract,
     TokenIdUtilsContract,
     AssetContract,
     AuthValidatorContract,
@@ -287,6 +293,7 @@ export async function runRevealTestSetup() {
     unrevealedtokenId,
     unrevealedtokenId2,
     revealedtokenId,
+    AdminRole,
     user,
     assetAdmin,
   };
