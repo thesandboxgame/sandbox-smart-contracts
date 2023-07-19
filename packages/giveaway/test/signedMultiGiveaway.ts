@@ -15,10 +15,27 @@ import {
 } from './signature';
 import {expect} from 'chai';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
-import {setupSignedMultiGiveaway} from './fixtures';
+import {deploySignedMultiGiveaway, setupSignedMultiGiveaway} from './fixtures';
 
 describe('SignedMultiGiveaway.sol', function () {
   describe('initialization', function () {
+    it('should fail to call implementation initialization', async function () {
+      const {implementation} = await loadFixture(deploySignedMultiGiveaway);
+      const [, , trustedForwarder, admin] = await ethers.getSigners();
+      await expect(
+        implementation.initialize(trustedForwarder.address, admin.address)
+      ).to.revertedWith('Initializable: contract is already initialized');
+    });
+    it('initialization event', async function () {
+      const {contract, trustedForwarder, admin} = await loadFixture(
+        deploySignedMultiGiveaway
+      );
+
+      // Initialize
+      await expect(contract.initialize(trustedForwarder.address, admin.address))
+        .to.emit(contract, 'Initialization')
+        .withArgs(trustedForwarder.address, admin.address);
+    });
     it('interfaces', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       const interfaces = {
@@ -946,6 +963,7 @@ describe('SignedMultiGiveaway.sol', function () {
         maxPerClaim
       );
       const claimId = BigNumber.from(0x123);
+      // maxPerClaim+1 fails
       await expect(
         fixtures.signAndClaim(
           [claimId],
@@ -958,6 +976,17 @@ describe('SignedMultiGiveaway.sol', function () {
           ]
         )
       ).to.be.revertedWith('checkLimits, amount too high');
+      // maxPerClaim is ok
+      await fixtures.signAndClaim(
+        [claimId],
+        [
+          {
+            tokenType: TokenType.ERC20,
+            token: fixtures.sandToken,
+            amount: maxPerClaim,
+          },
+        ]
+      );
     });
     it('should success to claim if maxPerClaim is !=0 but amount is bellow maxPerClaim per token', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
@@ -1055,7 +1084,11 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contractAsAdmin.setTrustedForwarder(fixtures.other.address)
       )
         .to.emit(fixtures.contract, 'TrustedForwarderSet')
-        .withArgs(fixtures.other.address, fixtures.admin.address);
+        .withArgs(
+          fixtures.trustedForwarder.address,
+          fixtures.other.address,
+          fixtures.admin.address
+        );
       expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
         fixtures.other.address
       );

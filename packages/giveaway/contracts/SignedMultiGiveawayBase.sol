@@ -6,10 +6,10 @@ import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/crypt
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-/// @title This contract give rewards in any ERC20, ERC721 or ERC1155 when the backend authorize it via message signing.
+/// @title This contract gives rewards in any ERC20, ERC721 or ERC1155 when the backend authorizes it via message signing.
 /// @dev The whole contract is split in this base one and implementation to facilitate the reading and split
 /// @dev the signature checking code
-/// @dev This contract support meta transactions.
+/// @dev This contract supports meta transactions.
 abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnumerableUpgradeable {
     struct Signature {
         uint8 v;
@@ -47,10 +47,11 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
     /// @dev claimId => true if already claimed
     mapping(uint256 => bool) private _claimed;
 
-    /// @notice verifies a ERC712 signature and mint a new NFT for the buyer.
+    /// @notice verifies the data inside the claim including the ERC712 signature.
     /// @param numberOfSignatures number of signatures required
     /// @param sigs signature part
     /// @param claimIds unique claim ids
+    /// @param expiration expiration timestamp
     /// @param from source user
     /// @param to destination user
     /// @param claims list of tokens to do transfer
@@ -82,7 +83,7 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
         }
     }
 
-    function _checkSig(uint256 numberOfSignatures, bytes32 digest, Signature[] calldata sigs) internal virtual {
+    function _checkSig(uint256 numberOfSignatures, bytes32 digest, Signature[] calldata sigs) internal view virtual {
         require(numberOfSignatures == sigs.length, "wrong number of signatures");
         address lastSig = address(0);
         for (uint256 i; i < numberOfSignatures; i++) {

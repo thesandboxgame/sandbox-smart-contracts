@@ -14,22 +14,22 @@ abstract contract ERC2771Handler {
         _trustedForwarder = forwarder;
     }
 
-    /// @notice return true if the forwarder is the assigned trusted forwarder
+    /// @notice return true if the forwarder is the trusted forwarder
     /// @param forwarder trusted forwarder address to check
     /// @return true if the address is the same as the trusted forwarder
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
-    /// @notice return true if the forwarder is the assigned trusted forwarder
-    /// @return return the address of the assigned trusted forwarder
+    /// @notice return the address of the trusted forwarder
+    /// @return return the address of the trusted forwarder
     function getTrustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
 
-    /// @notice return true if the forwarder is the assigned trusted forwarder
-    /// @dev used this methods is the same as getTrustedForwarder but used by Biconomy
-    /// @return return the address of the assigned trusted forwarder
+    /// @notice return the address of the trusted forwarder
+    /// @dev this methods is the same as getTrustedForwarder but used by Biconomy
+    /// @return return the address of the trusted forwarder
     function trustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
@@ -47,4 +47,6 @@ abstract contract ERC2771Handler {
             sender = msg.sender;
         }
     }
+
+    uint256[49] private __gap;
 }
