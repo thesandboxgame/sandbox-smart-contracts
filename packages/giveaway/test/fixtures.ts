@@ -12,7 +12,10 @@ import {
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
 
-async function deploy(name: string, users: Signer[] = []): Promise<Contract[]> {
+export async function deploy(
+  name: string,
+  users: Signer[] = []
+): Promise<Contract[]> {
   const Contract = await ethers.getContractFactory(name);
   const contract = await Contract.deploy();
   await contract.deployed();

@@ -15,10 +15,28 @@ import {
 } from './signature';
 import {expect} from 'chai';
 import {loadFixture, time} from '@nomicfoundation/hardhat-network-helpers';
-import {setupSignedMultiGiveaway} from './fixtures';
+import {deploy, setupSignedMultiGiveaway} from './fixtures';
 
 describe('SignedMultiGiveaway.sol', function () {
   describe('initialization', function () {
+    it('event', async function () {
+      async function setup() {
+        const [, deployer, trustedForwarder, admin] = await ethers.getSigners();
+        const [contract] = await deploy('SignedMultiGiveaway', [deployer]);
+        return {
+          contract,
+          trustedForwarder,
+          admin,
+        };
+      }
+
+      const {contract, trustedForwarder, admin} = await loadFixture(setup);
+
+      // Initialize
+      await expect(contract.initialize(trustedForwarder.address, admin.address))
+        .to.emit(contract, 'Initialization')
+        .withArgs(trustedForwarder.address, admin.address);
+    });
     it('interfaces', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       const interfaces = {
@@ -1055,7 +1073,11 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contractAsAdmin.setTrustedForwarder(fixtures.other.address)
       )
         .to.emit(fixtures.contract, 'TrustedForwarderSet')
-        .withArgs(fixtures.other.address, fixtures.admin.address);
+        .withArgs(
+          fixtures.trustedForwarder.address,
+          fixtures.other.address,
+          fixtures.admin.address
+        );
       expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
         fixtures.other.address
       );

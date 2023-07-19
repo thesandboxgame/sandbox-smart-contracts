@@ -45,6 +45,7 @@ contract SignedMultiGiveaway is
         address to;
         ClaimEntry[] claims;
     }
+
     string public constant NAME = "Sandbox SignedMultiGiveaway";
     string public constant VERSION = "1.0";
 
@@ -75,7 +76,8 @@ contract SignedMultiGiveaway is
     );
     event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address indexed operator);
     event MaxClaimEntriesSet(uint256 maxClaimEntries, address indexed operator);
-    event TrustedForwarderSet(address indexed newForwarder, address indexed operator);
+    event TrustedForwarderSet(address indexed oldForwarder, address indexed newForwarder, address indexed operator);
+    event Initialization(address indexed trustedForwarder, address indexed admin);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -91,6 +93,7 @@ contract SignedMultiGiveaway is
     /// @param trustedForwarder_ address of the ERC2771 trusted forwarder
     /// @param admin_ address that have admin access and can assign roles.
     function initialize(address trustedForwarder_, address admin_) external initializer {
+        emit Initialization(trustedForwarder_, admin_);
         __Context_init_unchained();
         __ERC165_init_unchained();
         __ERC1155Receiver_init_unchained();
@@ -153,7 +156,7 @@ contract SignedMultiGiveaway is
         emit AssetsRecovered(to, claims, _msgSender());
     }
 
-    /// @notice let the admin revoke some claims so they cannot be used anymore
+    /// @notice let the backoffice role to revoke claims so they cannot be used anymore
     /// @param claimIds and array of claim Ids to revoke
     function revokeClaims(uint256[] calldata claimIds) external onlyBackoffice {
         _revokeClaims(claimIds);
@@ -204,10 +207,10 @@ contract SignedMultiGiveaway is
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder_ The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder_) external onlyAdmin {
-        _trustedForwarder = trustedForwarder_;
-        emit TrustedForwarderSet(_trustedForwarder, _msgSender());
+    /// @param newForwarder The new trustedForwarder
+    function setTrustedForwarder(address newForwarder) external onlyAdmin {
+        emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
+        _trustedForwarder = newForwarder;
     }
 
     /// @notice return true if already claimed

@@ -47,7 +47,7 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
     /// @dev claimId => true if already claimed
     mapping(uint256 => bool) private _claimed;
 
-    /// @notice verifies a ERC712 signature and mint a new NFT for the buyer.
+    /// @notice verifies the data inside the claim including the ERC712 signature.
     /// @param numberOfSignatures number of signatures required
     /// @param sigs signature part
     /// @param claimIds unique claim ids
