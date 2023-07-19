@@ -163,6 +163,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
             "AssetReveal: Invalid burnAndReveal signature"
         );
         _burnAsset(prevTokenId, burnAmount);
+        emit AssetRevealBurn(_msgSender(), prevTokenId, burnAmount);
         _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
     }
 
