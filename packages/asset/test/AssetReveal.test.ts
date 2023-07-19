@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {formatBytes32String} from 'ethers/lib/utils';
 import {runRevealTestSetup} from './fixtures/assetRevealFixtures';
 import {ethers} from 'hardhat';
+import {Event} from 'ethers';
 
 const revealHashA = formatBytes32String('revealHashA');
 const revealHashB = formatBytes32String('revealHashB');
@@ -1136,7 +1137,7 @@ describe('AssetReveal', function () {
           );
 
           const revealEvents = result.events.filter(
-            (event: any) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealMint'
           );
           expect(revealEvents.length).to.equal(2);
         });
@@ -1169,7 +1170,7 @@ describe('AssetReveal', function () {
             [[revealHashA], [revealHashB]]
           );
           const revealEvents = result.events.filter(
-            (event: any) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealMint'
           );
           const args1 = revealEvents[0].args;
           const args2 = revealEvents[1].args;
@@ -1219,7 +1220,7 @@ describe('AssetReveal', function () {
             [revealHashA]
           );
           const revealMintEvent = result.events.filter(
-            (event: any) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealMint'
           )[0];
           expect(revealMintEvent).to.not.be.undefined;
         });
@@ -1318,7 +1319,7 @@ describe('AssetReveal', function () {
             [revealHashA]
           );
           const burnEvent = result.events.filter(
-            (event: any) => event.event === 'AssetRevealBurn'
+            (event: Event) => event.event === 'AssetRevealBurn'
           )[0];
           expect(burnEvent.args['revealer']).to.equal(user.address);
           expect(burnEvent.args['unrevealedTokenId']).to.equal(
@@ -1355,7 +1356,7 @@ describe('AssetReveal', function () {
             [revealHashA]
           );
           const revealMintEvent = result.events.filter(
-            (event: any) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealMint'
           )[0];
           expect(revealMintEvent.args['recipient']).to.equal(user.address);
           expect(revealMintEvent.args['unrevealedTokenId']).to.equal(

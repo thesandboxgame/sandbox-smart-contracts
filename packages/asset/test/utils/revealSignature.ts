@@ -1,5 +1,5 @@
 import hre from 'hardhat';
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 async function burnAndRevealSignature(
