@@ -10,7 +10,6 @@ const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
 // TODO: missing  trustedForwarder tests
-// TODO 2: test reveal nonce incrementation
 
 describe.only('AssetReveal', function () {
   describe('General', function () {
@@ -44,9 +43,119 @@ describe.only('AssetReveal', function () {
       expect(forwarderAddress).to.equal(trustedForwarder.address);
     });
     it("Should increment the reveal nonce if revealing an asset that hasn't been revealed before", async function () {
-      // TODO
+      const {
+        generateRevealSignature,
+        user,
+        unrevealedtokenId,
+        revealAsset,
+        TokenIdUtilsContract,
+      } = await runRevealTestSetup();
+
+      const newMetadataHashes1 = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const newMetadataHashes2 = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
+      ];
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes1,
+        [revealHashA]
+      );
+      const result = await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes1,
+        [revealHashA]
+      );
+      expect(result.events[2].event).to.equal('AssetRevealMint');
+      const newTokenId = result.events[2].args.newTokenIds[0];
+      const revealNonce = await TokenIdUtilsContract.getRevealNonce(newTokenId);
+      expect(revealNonce.toString()).to.equal('1');
+
+      const signature2 = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes2,
+        [revealHashB]
+      );
+      const result2 = await revealAsset(
+        signature2,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHashes2,
+        [revealHashB]
+      );
+
+      expect(result2.events[2].event).to.equal('AssetRevealMint');
+      const newTokenId2 = result2.events[2].args.newTokenIds[0];
+      const revealNonce2 = await TokenIdUtilsContract.getRevealNonce(
+        newTokenId2
+      );
+
+      expect(revealNonce2.toString()).to.equal('2');
     });
-    it('Should not increment the reveal nonce if revealing an asset that has already been revealed', async function () {});
+    it('Should not increment the reveal nonce if revealing an asset that has already been revealed', async function () {
+      const {
+        generateRevealSignature,
+        user,
+        unrevealedtokenId,
+        revealAsset,
+        TokenIdUtilsContract,
+      } = await runRevealTestSetup();
+
+      const sameMetadataHash = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        sameMetadataHash,
+        [revealHashA]
+      );
+      const result = await revealAsset(
+        signature,
+        unrevealedtokenId,
+        amounts,
+        sameMetadataHash,
+        [revealHashA]
+      );
+      expect(result.events[2].event).to.equal('AssetRevealMint');
+      const newTokenId = result.events[2].args.newTokenIds[0];
+      const revealNonce = await TokenIdUtilsContract.getRevealNonce(newTokenId);
+      expect(revealNonce.toString()).to.equal('1');
+
+      const signature2 = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        sameMetadataHash,
+        [revealHashB]
+      );
+      const result2 = await revealAsset(
+        signature2,
+        unrevealedtokenId,
+        amounts,
+        sameMetadataHash,
+        [revealHashB]
+      );
+
+      expect(result2.events[1].event).to.equal('AssetRevealMint');
+      const newTokenId2 = result2.events[1].args.newTokenIds[0];
+      const revealNonce2 = await TokenIdUtilsContract.getRevealNonce(
+        newTokenId2
+      );
+
+      expect(revealNonce2.toString()).to.equal('1');
+    });
   });
 
   describe('Burning', function () {
@@ -605,7 +714,78 @@ describe.only('AssetReveal', function () {
         });
       });
       describe('Events', function () {
-        // TODO
+        it('should emit AssetRevealMint event when successully revealed a token', async function () {
+          const {
+            user,
+            generateRevealSignature,
+            revealAsset,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHashes = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcf',
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcg',
+          ];
+          const amounts = [1, 2];
+          const signature = await generateRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHashes,
+            [revealHashA, revealHashB]
+          );
+
+          const result = await revealAsset(
+            signature,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHashes,
+            [revealHashA, revealHashB]
+          );
+          expect(result.events[3].event).to.equal('AssetRevealMint');
+        });
+        it('should emit AssetRevealMint event with correct arguments', async function () {
+          const {
+            user,
+            generateRevealSignature,
+            revealAsset,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHashes = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcf',
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcg',
+          ];
+          const mintAmounts = [1, 2];
+          const signature = await generateRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            mintAmounts,
+            newMetadataHashes,
+            [revealHashA, revealHashB]
+          );
+
+          const result = await revealAsset(
+            signature,
+            unrevealedtokenId,
+            mintAmounts,
+            newMetadataHashes,
+            [revealHashA, revealHashB]
+          );
+
+          expect(result.events[3].event).to.equal('AssetRevealMint');
+          const args = result.events[3].args;
+          const {
+            recipient,
+            unrevealedTokenId,
+            amounts,
+            newTokenIds,
+            revealHashes,
+          } = args;
+          expect(recipient).to.equal(user.address);
+          expect(unrevealedTokenId).to.equal(unrevealedtokenId);
+          expect(amounts).to.deep.equal(mintAmounts);
+          expect(newTokenIds.length).to.equal(2);
+          expect(revealHashes).to.deep.equal([revealHashA, revealHashB]);
+        });
       });
     });
     describe('Batch reveal mint', function () {
@@ -863,7 +1043,86 @@ describe.only('AssetReveal', function () {
         });
       });
       describe('Events', function () {
-        // TODO
+        it('should emit multiple AssetRevealMint events when successully revealed multiple tokens', async function () {
+          const {
+            user,
+            generateBatchRevealSignature,
+            revealAssetBatch,
+            unrevealedtokenId,
+            unrevealedtokenId2,
+          } = await runRevealTestSetup();
+          const newMetadataHashes1 = ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcf'];
+          const newMetadataHashes2 = ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcg'];
+          const amounts1 = [1];
+          const amounts2 = [1];
+
+          const signature = await generateBatchRevealSignature(
+            user.address,
+            [unrevealedtokenId, unrevealedtokenId2],
+            [amounts1, amounts2],
+            [newMetadataHashes1, newMetadataHashes2],
+            [[revealHashA], [revealHashB]]
+          );
+
+          const result = await revealAssetBatch(
+            signature,
+            [unrevealedtokenId, unrevealedtokenId2],
+            [amounts1, amounts2],
+            [newMetadataHashes1, newMetadataHashes2],
+            [[revealHashA], [revealHashB]]
+          );
+
+          const revealEvents = result.events.filter(
+            (event: any) => event.event === 'AssetRevealMint'
+          );
+          expect(revealEvents.length).to.equal(2);
+        });
+        it('should emit AssetRevealMint events with correct arguments when successully revealed multiple tokens', async function () {
+          const {
+            user,
+            generateBatchRevealSignature,
+            revealAssetBatch,
+            unrevealedtokenId,
+            unrevealedtokenId2,
+          } = await runRevealTestSetup();
+          const newMetadataHashes1 = ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcf'];
+          const newMetadataHashes2 = ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcg'];
+          const amounts1 = [1];
+          const amounts2 = [1];
+
+          const signature = await generateBatchRevealSignature(
+            user.address,
+            [unrevealedtokenId, unrevealedtokenId2],
+            [amounts1, amounts2],
+            [newMetadataHashes1, newMetadataHashes2],
+            [[revealHashA], [revealHashB]]
+          );
+
+          const result = await revealAssetBatch(
+            signature,
+            [unrevealedtokenId, unrevealedtokenId2],
+            [amounts1, amounts2],
+            [newMetadataHashes1, newMetadataHashes2],
+            [[revealHashA], [revealHashB]]
+          );
+          const revealEvents = result.events.filter(
+            (event: any) => event.event === 'AssetRevealMint'
+          );
+          const args1 = revealEvents[0].args;
+          const args2 = revealEvents[1].args;
+
+          expect(args1['recipient']).to.equal(user.address);
+          expect(args1['unrevealedTokenId']).to.equal(unrevealedtokenId);
+          expect(args1['amounts']).to.deep.equal(amounts1);
+          expect(args1['newTokenIds'].length).to.equal(1);
+          expect(args1['revealHashes']).to.deep.equal([revealHashA]);
+
+          expect(args2['recipient']).to.equal(user.address);
+          expect(args2['unrevealedTokenId']).to.equal(unrevealedtokenId2);
+          expect(args2['amounts']).to.deep.equal(amounts2);
+          expect(args2['newTokenIds'].length).to.equal(1);
+          expect(args2['revealHashes']).to.deep.equal([revealHashB]);
+        });
       });
     });
     describe('Burn and reveal mint', function () {
@@ -896,17 +1155,155 @@ describe.only('AssetReveal', function () {
             newMetadataHash,
             [revealHashA]
           );
-          expect(result.events[3].event).to.equal('AssetRevealMint');
+          const revealMintEvent = result.events.filter(
+            (event: any) => event.event === 'AssetRevealMint'
+          )[0];
+          expect(revealMintEvent).to.not.be.undefined;
         });
       });
       describe('Revert', function () {
-        // TODO all below
-        it("should revert if amounts array isn't the same length as metadataHashes array", async function () {});
-        it("should revert if amounts array isn't the same length as revealHashes array", async function () {});
+        it("should revert if amounts array isn't the same length as metadataHashes array", async function () {
+          const {
+            user,
+            generateBurnAndRevealSignature,
+            instantReveal,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHash = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
+          ];
+          const amounts = [1, 2];
+
+          const signature = await generateBurnAndRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+
+          await expect(
+            instantReveal(
+              signature,
+              unrevealedtokenId,
+              amounts[0],
+              amounts,
+              newMetadataHash,
+              [revealHashA]
+            )
+          ).to.be.revertedWith('AssetReveal: Invalid amounts length');
+        });
+        it("should revert if amounts array isn't the same length as revealHashes array", async function () {
+          const {
+            user,
+            generateBurnAndRevealSignature,
+            instantReveal,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHash = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
+          ];
+          const amounts = [1];
+
+          const signature = await generateBurnAndRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHash,
+            [revealHashA, revealHashB]
+          );
+
+          await expect(
+            instantReveal(
+              signature,
+              unrevealedtokenId,
+              amounts[0],
+              amounts,
+              newMetadataHash,
+              [revealHashA, revealHashB]
+            )
+          ).to.be.revertedWith('AssetReveal: Invalid revealHashes length');
+        });
       });
       describe('Events', function () {
-        it("Should emit AssetRevealBurn event with correct data when burning and revealing a single token's copy", async function () {});
-        it('Should emit AssetRevealMint event with correct data when burning and revealing a single token', async function () {});
+        it('Should emit AssetRevealBurn event with correct data when burning and revealing a single token', async function () {
+          const {
+            user,
+            generateBurnAndRevealSignature,
+            instantReveal,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHash = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
+          ];
+          const amounts = [1];
+
+          const signature = await generateBurnAndRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+
+          const result = await instantReveal(
+            signature,
+            unrevealedtokenId,
+            amounts[0],
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+          const burnEvent = result.events.filter(
+            (event: any) => event.event === 'AssetRevealBurn'
+          )[0];
+          expect(burnEvent.args['revealer']).to.equal(user.address);
+          expect(burnEvent.args['unrevealedTokenId']).to.equal(
+            unrevealedtokenId
+          );
+          expect(burnEvent.args['amount']).to.equal(amounts[0]);
+        });
+        it('Should emit AssetRevealMint event with correct data when burning and revealing a single token', async function () {
+          const {
+            user,
+            generateBurnAndRevealSignature,
+            instantReveal,
+            unrevealedtokenId,
+          } = await runRevealTestSetup();
+          const newMetadataHash = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
+          ];
+          const amounts = [1];
+
+          const signature = await generateBurnAndRevealSignature(
+            user.address,
+            unrevealedtokenId,
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+
+          const result = await instantReveal(
+            signature,
+            unrevealedtokenId,
+            amounts[0],
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+          const revealMintEvent = result.events.filter(
+            (event: any) => event.event === 'AssetRevealMint'
+          )[0];
+          expect(revealMintEvent.args['recipient']).to.equal(user.address);
+          expect(revealMintEvent.args['unrevealedTokenId']).to.equal(
+            unrevealedtokenId
+          );
+          expect(revealMintEvent.args['amounts']).to.deep.equal(amounts);
+          expect(revealMintEvent.args['newTokenIds'].length).to.equal(1);
+          expect(revealMintEvent.args['revealHashes']).to.deep.equal([
+            revealHashA,
+          ]);
+        });
       });
     });
   });

@@ -46,6 +46,13 @@ export async function runRevealTestSetup() {
 
   await AssetContract.deployed();
 
+  // deploy wrapped TokenIdUtils contract
+  const TokenIdUtilsFactory = await ethers.getContractFactory(
+    'TokenIdUtilsWrapped'
+  );
+  const TokenIdUtilsContract = await TokenIdUtilsFactory.deploy();
+  await TokenIdUtilsContract.deployed();
+
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const CatalystContract = await upgrades.deployProxy(
     CatalystFactory,
@@ -273,6 +280,7 @@ export async function runRevealTestSetup() {
     AssetRevealContract,
     AssetRevealContractAsUser,
     AssetRevealContractAsAdmin,
+    TokenIdUtilsContract,
     AssetContract,
     AuthValidatorContract,
     trustedForwarder,
