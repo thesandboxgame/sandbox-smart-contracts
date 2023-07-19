@@ -131,8 +131,6 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
             "AssetReveal: Invalid revealBatchMint signature"
         );
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            // require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
-            // revealHashesUsed[revealHashes[i]] = true;
             _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
         }
     }
