@@ -16,7 +16,8 @@
     "private": true,
     "dependencies": {
         "@sandbox-smart-contracts/asset": "*",
-        "@sandbox-smart-contracts/giveaway": "*"
+        "@sandbox-smart-contracts/giveaway": "*",
+        "@sandbox-smart-contracts/operator-filter": "*"
     },
     "files": [
         "deployments"
