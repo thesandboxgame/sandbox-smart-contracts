@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer, upgradeAdmin, assetAdmin} = await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
   const AuthValidatorContract = await deployments.get('AuthSuperValidator');
@@ -13,8 +13,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const version = '1.0';
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
-
-  // TODO: who is DEFAULT_ADMIN ?
 
   await deploy('AssetReveal', {
     from: deployer,
@@ -31,6 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           AssetContract.address,
           AuthValidatorContract.address,
           TRUSTED_FORWARDER.address,
+          assetAdmin,
         ],
       },
       upgradeIndex: 0,

@@ -24,7 +24,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Asset MINTER_ROLE granted to ${assetCreate.address}`);
   }
 
-  const catMinterRole = await read('Catalyst', 'MINTER_ROLE');
+  const catMinterRole = await read('Catalyst', 'BURNER_ROLE');
   if (
     !(await read('Catalyst', 'hasRole', catMinterRole, assetCreate.address))
   ) {
@@ -37,7 +37,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         assetCreate.address
       )
     );
-    log(`Catalyst MINTER_ROLE granted to ${assetCreate.address}`);
+    log(`Catalyst BURNER_ROLE granted to ${assetCreate.address}`);
   }
 
   await catchUnknownSigner(
