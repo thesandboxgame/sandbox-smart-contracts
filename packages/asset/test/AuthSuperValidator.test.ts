@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {expect} from 'chai';
 import runSetup from './fixtures/authValidatorFixture';
 
-describe('AuthValidator, (/packages/asset/contracts/AuthValidator.sol)', function () {
+describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)', function () {
   describe('General', function () {
     it('should assign DEFAULT_ADMIN_ROLE to the admin address from the constructor', async function () {
       const {authValidatorAdmin, AuthValidatorContract} = await runSetup();
@@ -28,6 +28,20 @@ describe('AuthValidator, (/packages/asset/contracts/AuthValidator.sol)', functio
       );
       expect(assignedSigner).to.equal(backendSigner.address);
     });
+    it('should not allow non-admin to set signer for a given contract address', async function () {
+      const {MockContract, AuthValidatorContract, backendSigner, deployer} =
+        await runSetup();
+      const DEFAULT_ADMIN_ROLE =
+        await AuthValidatorContract.DEFAULT_ADMIN_ROLE();
+      await expect(
+        AuthValidatorContract.setSigner(
+          MockContract.address,
+          backendSigner.address
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
+      );
+    });
     it('should allow admin to remove signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContractAsAdmin, backendSigner} =
         await runSetup();
@@ -43,6 +57,29 @@ describe('AuthValidator, (/packages/asset/contracts/AuthValidator.sol)', functio
         MockContract.address
       );
       expect(assignedSigner).to.equal(ethers.constants.AddressZero);
+    });
+    it('should not allow non-admin to remove signer for a given contract address', async function () {
+      const {
+        MockContract,
+        AuthValidatorContract,
+        AuthValidatorContractAsAdmin,
+        backendSigner,
+        deployer,
+      } = await runSetup();
+      const DEFAULT_ADMIN_ROLE =
+        await AuthValidatorContract.DEFAULT_ADMIN_ROLE();
+      await AuthValidatorContractAsAdmin.setSigner(
+        MockContract.address,
+        backendSigner.address
+      );
+      await expect(
+        AuthValidatorContract.setSigner(
+          MockContract.address,
+          ethers.constants.AddressZero
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
+      );
     });
   });
   describe('Signature verification', function () {

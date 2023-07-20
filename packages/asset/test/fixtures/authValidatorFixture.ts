@@ -26,6 +26,7 @@ const runSetup = async () => {
     AuthValidatorContractAsAdmin,
     MockContract,
     backendSigner,
+    deployer,
     createMockDigest,
     createMockSignature,
   };
