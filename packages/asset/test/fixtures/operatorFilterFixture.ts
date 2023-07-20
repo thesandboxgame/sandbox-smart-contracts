@@ -23,12 +23,6 @@ export async function setupOperatorFilter() {
     user4,
   ] = await ethers.getSigners();
 
-  // const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
-  //   'OperatorFilterRegistrant'
-  // );
-  // const OperatorFilterSubscription =
-  //   await OperatorFilterSubscriptionFactory.deploy();
-
   const MockERC1155MarketPlace1Factory = await ethers.getContractFactory(
     'MockERC1155MarketPlace1'
   );
