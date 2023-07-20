@@ -1794,6 +1794,7 @@ __metadata:
     ethers: ^5.7.2
     hardhat: ^2.14.1
     hardhat-gas-reporter: ^1.0.9
+    operator-filter-registry: ^1.4.2
     prettier: ^2.8.8
     prettier-plugin-solidity: 1.0.0-beta.11
     solhint: ^3.4.1
