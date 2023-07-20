@@ -647,6 +647,16 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         randomAddress
       );
     });
+    it("should not allow non-DEFAULT_ADMIN to set the trusted forwarder's address", async function () {
+      const {AssetContractAsMinter, minter, defaultAdminRole} =
+        await runAssetSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      await expect(
+        AssetContractAsMinter.setTrustedForwarder(randomAddress)
+      ).to.be.revertedWith(
+        `AccessControl: account ${minter.address.toLowerCase()} is missing role ${defaultAdminRole}`
+      );
+    });
   });
   describe('Transferring', function () {
     it('should allow owner to transfer a single token', async function () {

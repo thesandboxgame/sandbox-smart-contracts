@@ -3,6 +3,10 @@ pragma solidity 0.8.18;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthValidator} from "./AuthValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
@@ -12,7 +16,7 @@ import {IAssetReveal} from "./interfaces/IAssetReveal.sol";
 /// @title AssetReveal
 /// @author The Sandbox
 /// @notice Contract for burning and revealing assets
-contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgradeable {
+contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, ERC2771Handler, EIP712Upgradeable {
     using TokenIdUtils for uint256;
     IAsset private assetContract;
     AuthValidator private authValidator;
@@ -51,12 +55,14 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         string memory _version,
         address _assetContract,
         address _authValidator,
-        address _forwarder
+        address _forwarder,
+        address _defaultAdmin
     ) public initializer {
         assetContract = IAsset(_assetContract);
         authValidator = AuthValidator(_authValidator);
         __ERC2771Handler_initialize(_forwarder);
         __EIP712_init(_name, _version);
+        _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     }
 
     /// @notice Reveal an asset to view its abilities and enhancements
@@ -65,6 +71,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
     /// @param amount the amount of tokens to reveal
     function revealBurn(uint256 tokenId, uint256 amount) public {
         _burnAsset(tokenId, amount);
+        emit AssetRevealBurn(_msgSender(), tokenId, amount);
     }
 
     /// @notice Burn multiple assets to be able to reveal them later
@@ -72,10 +79,8 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
     /// @param tokenIds the tokenIds of the assets to burn
     /// @param amounts the amounts of the assets to burn
     function revealBatchBurn(uint256[] calldata tokenIds, uint256[] calldata amounts) external {
-        require(tokenIds.length == amounts.length, "Invalid input");
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            _burnAsset(tokenIds[i], amounts[i]);
-        }
+        _burnAssetBatch(tokenIds, amounts);
+        emit AssetRevealBatchBurn(_msgSender(), tokenIds, amounts);
     }
 
     /// @notice Reveal assets to view their abilities and enhancements
@@ -92,14 +97,14 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) public {
-        require(amounts.length == metadataHashes.length, "Invalid amounts");
-        require(amounts.length == revealHashes.length, "Invalid revealHashes");
+        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
+        require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         require(
             authValidator.verify(
                 signature,
                 _hashReveal(_msgSender(), prevTokenId, amounts, metadataHashes, revealHashes)
             ),
-            "Invalid revealMint signature"
+            "AssetReveal: Invalid revealMint signature"
         );
         _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
     }
@@ -118,15 +123,15 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         string[][] calldata metadataHashes,
         bytes32[][] calldata revealHashes
     ) public {
-        require(prevTokenIds.length == amounts.length, "Invalid amounts");
-        require(amounts.length == metadataHashes.length, "Invalid metadataHashes");
-        require(prevTokenIds.length == revealHashes.length, "Invalid revealHashes");
+        require(prevTokenIds.length == amounts.length, "AssetReveal: Invalid amounts length");
+        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid metadataHashes length");
+        require(prevTokenIds.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         require(
             authValidator.verify(
                 signature,
                 _hashBatchReveal(_msgSender(), prevTokenIds, amounts, metadataHashes, revealHashes)
             ),
-            "Invalid revealBatchMint signature"
+            "AssetReveal: Invalid revealBatchMint signature"
         );
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
             _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
@@ -149,16 +154,17 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) external {
-        require(amounts.length == metadataHashes.length, "Invalid amounts");
-        require(amounts.length == revealHashes.length, "Invalid revealHashes");
+        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
+        require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         require(
             authValidator.verify(
                 signature,
                 _hashInstantReveal(_msgSender(), prevTokenId, amounts, metadataHashes, revealHashes)
             ),
-            "Invalid burnAndReveal signature"
+            "AssetReveal: Invalid burnAndReveal signature"
         );
         _burnAsset(prevTokenId, burnAmount);
+        emit AssetRevealBurn(_msgSender(), prevTokenId, burnAmount);
         _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
     }
 
@@ -174,7 +180,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
     ) internal {
         uint256[] memory newTokenIds = getRevealedTokenIds(metadataHashes, prevTokenId);
         for (uint256 i = 0; i < revealHashes.length; i++) {
-            require(revealHashesUsed[revealHashes[i]] == false, "Invalid revealHash");
+            require(revealHashesUsed[revealHashes[i]] == false, "AssetReveal: RevealHash already used");
             revealHashesUsed[revealHashes[i]] = true;
         }
         if (newTokenIds.length == 1) {
@@ -189,11 +195,22 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
     /// @param tokenId the tokenId of the asset to burn
     /// @param amount the amount of the asset to burn
     function _burnAsset(uint256 tokenId, uint256 amount) internal {
-        require(amount > 0, "Amount should be greater than 0");
-        IAsset.AssetData memory data = tokenId.getData();
-        require(!data.revealed, "Asset is already revealed");
+        _verifyBurnData(tokenId, amount);
         assetContract.burnFrom(_msgSender(), tokenId, amount);
-        emit AssetRevealBurn(_msgSender(), tokenId, data.tier, amount);
+    }
+
+    function _burnAssetBatch(uint256[] calldata tokenIds, uint256[] calldata amounts) internal {
+        require(tokenIds.length == amounts.length, "AssetReveal: Invalid input");
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            _verifyBurnData(tokenIds[i], amounts[i]);
+        }
+        assetContract.burnBatchFrom(_msgSender(), tokenIds, amounts);
+    }
+
+    function _verifyBurnData(uint256 tokenId, uint256 amount) internal pure {
+        IAsset.AssetData memory data = tokenId.getData();
+        require(!data.revealed, "AssetReveal: Asset is already revealed");
+        require(amount > 0, "AssetReveal: Burn amount should be greater than 0");
     }
 
     /// @notice Creates a hash of the reveal data
@@ -334,7 +351,7 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
         returns (uint256[] memory)
     {
         IAsset.AssetData memory data = prevTokenId.getData();
-        require(!data.revealed, "Asset: already revealed");
+        require(!data.revealed, "AssetReveal: already revealed");
         uint256[] memory tokenIdArray = new uint256[](metadataHashes.length);
         for (uint256 i = 0; i < metadataHashes.length; i++) {
             uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
@@ -369,5 +386,22 @@ contract AssetReveal is IAssetReveal, Initializable, ERC2771Handler, EIP712Upgra
     /// @return The auth validator address
     function getAuthValidator() external view returns (address) {
         return address(authValidator);
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "AssetReveal: trusted forwarder can't be zero address");
+        _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderChanged(trustedForwarder);
+    }
+
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
