@@ -6,7 +6,7 @@ pragma solidity 0.8.18;
 import {Asset} from "../Asset.sol";
 import {
     IOperatorFilterRegistry
-} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFilter/interfaces/IOperatorFilterRegistry.sol";
+} from "@sandbox-smart-contracts/operator-filter/contracts/interfaces/IOperatorFilterRegistry.sol";
 
 contract MockAsset is Asset {
     /// @notice sets registry and subscribe to subscription

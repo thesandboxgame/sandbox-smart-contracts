@@ -21,7 +21,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {
     OperatorFiltererUpgradeable,
     IOperatorFilterRegistry
-} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFilter/OperatorFiltererUpgradeable.sol";
+} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 

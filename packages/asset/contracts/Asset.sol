@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import {
     OperatorFiltererUpgradeable
-} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFilter/OperatorFiltererUpgradeable.sol";
+} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {
     AccessControlUpgradeable,
     ContextUpgradeable,
