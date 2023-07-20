@@ -30,7 +30,7 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const OperatorFilterSubscription = await deployments.get(
-    'OperatorFilterRegistrant'
+    'OperatorFilterSubscription'
   );
 
   await deploy('Catalyst', {
@@ -60,4 +60,4 @@ const func: DeployFunction = async function (
 };
 export default func;
 func.tags = ['Catalyst', 'Catalyst_deploy', 'L2'];
-func.dependencies = ['OperatorFilterRegistrant', 'TRUSTED_FORWARDER_V2'];
+func.dependencies = ['OperatorFilterSubscription', 'TRUSTED_FORWARDER_V2'];

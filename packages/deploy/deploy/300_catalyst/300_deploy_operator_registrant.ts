@@ -10,13 +10,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // TODO: review subscriptions for Catalyst and Asset
 
   // Operator filter subscription
-  await deploy('OperatorFilterRegistrant', {
+  await deploy('OperatorFilterSubscription', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/asset/contracts/OperatorFilter/OperatorFilterRegistrant.sol:OperatorFilterRegistrant',
+      '@sandbox-smart-contracts/operator-filter/contracts/OperatorFilterSubscription.sol:OperatorFilterSubscription',
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
 export default func;
-func.tags = ['OperatorFilterRegistrant', 'L2'];
+func.tags = ['OperatorFilterSubscription', 'L2'];
