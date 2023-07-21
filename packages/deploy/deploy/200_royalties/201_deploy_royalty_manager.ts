@@ -44,4 +44,4 @@ const func: DeployFunction = async function (
 };
 export default func;
 func.tags = ['RoyaltyManager', 'RoyaltyManager_deploy', 'L2'];
-func.dependencies = ['RoyaltySplitter'];
+func.dependencies = ['RoyaltySplitter_deploy'];
