@@ -8,7 +8,7 @@ import {
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
-import {AuthValidator} from "./AuthValidator.sol";
+import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
@@ -22,7 +22,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
 
     IAsset private assetContract;
     ICatalyst private catalystContract;
-    AuthValidator private authValidator;
+    AuthSuperValidator private authValidator;
 
     // mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
@@ -44,7 +44,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
 
     /// @notice Initialize the contract
     /// @param _assetContract The address of the asset contract
-    /// @param _authValidator The address of the AuthValidator contract
+    /// @param _authValidator The address of the AuthSuperValidator contract
     /// @param _forwarder The address of the forwarder contract
     function initialize(
         string memory _name,
@@ -57,7 +57,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
     ) public initializer {
         assetContract = IAsset(_assetContract);
         catalystContract = ICatalyst(_catalystContract);
-        authValidator = AuthValidator(_authValidator);
+        authValidator = AuthSuperValidator(_authValidator);
         __ERC2771Handler_initialize(_forwarder);
         __EIP712_init(_name, _version);
         __AccessControl_init();

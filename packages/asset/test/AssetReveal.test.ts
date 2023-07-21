@@ -11,7 +11,7 @@ const revealHashD = formatBytes32String('revealHashD');
 const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
-describe('AssetReveal', function () {
+describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () {
   describe('General', function () {
     it('Should deploy correctly', async function () {
       const {AssetRevealContract} = await runRevealTestSetup();
