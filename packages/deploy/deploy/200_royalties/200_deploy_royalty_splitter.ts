@@ -13,7 +13,7 @@ const func: DeployFunction = async function (
     from: deployer,
     log: true,
     contract:
-      '@sandbox-smart-contracts/royalties/contracts/RoyaltySplitter.sol:RoyaltySplitter',
+      '@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltySplitter.sol:RoyaltySplitter',
     skipIfAlreadyDeployed: true,
   });
 };

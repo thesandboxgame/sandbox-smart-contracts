@@ -1,9 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {deployments} from 'hardhat';
 const DEFAULT_SUBSCRIPTION = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {getNamedAccounts} = hre;
+  const {deployments, getNamedAccounts} = hre;
   const {filterOperatorSubscription} = await getNamedAccounts();
   const {execute, read} = deployments;
 
