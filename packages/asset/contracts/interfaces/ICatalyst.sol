@@ -61,9 +61,4 @@ interface ICatalyst {
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
     function setBaseURI(string memory baseURI) external;
-
-    /// @notice Change the default royalty settings
-    /// @param defaultRoyaltyRecipient The new royalty recipient address
-    /// @param defaultRoyaltyBps The new royalty bps
-    function changeRoyaltyRecipient(address defaultRoyaltyRecipient, uint96 defaultRoyaltyBps) external;
 }

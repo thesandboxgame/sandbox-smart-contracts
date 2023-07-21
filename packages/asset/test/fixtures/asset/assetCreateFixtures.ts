@@ -2,15 +2,15 @@ import {ethers, upgrades} from 'hardhat';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
-} from '../utils/createSignature';
+} from '../../utils/createSignature';
 import {
   CATALYST_BASE_URI,
-  CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
+const DEFAULT_BPS = 300;
 
 export async function runCreateTestSetup() {
   const [
@@ -19,14 +19,16 @@ export async function runCreateTestSetup() {
     assetAdmin,
     user,
     otherWallet,
-    catalystRoyaltyRecipient,
     catalystAdmin,
     authValidatorAdmin,
     backendAuthWallet,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
-  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT
+  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT, Royalties
 
   const OperatorFilterRegistrantFactory = await ethers.getContractFactory(
     'OperatorFilterRegistrant'
@@ -34,10 +36,40 @@ export async function runCreateTestSetup() {
   const OperatorFilterRegistrantContract =
     await OperatorFilterRegistrantFactory.deploy();
 
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
-    [trustedForwarder.address, assetAdmin.address, 'ipfs://'],
+    [
+      trustedForwarder.address,
+      assetAdmin.address,
+      'ipfs://',
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
+    ],
     {
       initializer: 'initialize',
     }
@@ -51,12 +83,11 @@ export async function runCreateTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterRegistrantContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',

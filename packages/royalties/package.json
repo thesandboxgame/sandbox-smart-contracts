@@ -1,19 +1,26 @@
 {
-  "name": "@sandbox-smart-contracts/asset",
+  "name": "@sandbox-smart-contracts/royalties",
   "version": "0.0.1",
-  "dependencies": {
-    "@sandbox-smart-contracts/royalties": "*"
-  },
-  "description": "Asset L2 smart contracts",
+  "description": "The Sandbox Royalties",
+  "files": [
+    "contracts"
+  ],
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
     "format": "prettier --check \"**/*.{ts,js,sol}\"",
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
+    "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
-    "node": "hardhat node --no-deploy",
-    "compile": "hardhat compile",
-    "test": "hardhat test"
+    "hardhat": "hardhat",
+    "compile": "hardhat compile"
+  },
+  "mocha": {
+    "require": "hardhat/register",
+    "timeout": 40000,
+    "_": [
+      "test/**/*.ts"
+    ]
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
