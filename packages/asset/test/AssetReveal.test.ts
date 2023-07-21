@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {formatBytes32String} from 'ethers/lib/utils';
-import {runRevealTestSetup} from './fixtures/Asset/assetRevealFixtures';
+import {runRevealTestSetup} from './fixtures/asset/assetRevealFixtures';
 import {ethers} from 'hardhat';
 import {Event} from 'ethers';
 
