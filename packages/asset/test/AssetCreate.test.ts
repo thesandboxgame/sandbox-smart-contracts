@@ -4,7 +4,7 @@ import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 
 // TODO: missing AssetCreate DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
 
-describe('AssetCreate', function () {
+describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should initialize with the correct values', async function () {
       const {

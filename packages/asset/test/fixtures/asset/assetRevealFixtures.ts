@@ -104,11 +104,14 @@ export async function runRevealTestSetup() {
 
   await CatalystContract.deployed();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
-  const AuthValidatorContract = await AuthValidatorFactory.deploy(
-    authValidatorAdmin.address,
-    backendAuthWallet.address
+  const AuthValidatorFactory = await ethers.getContractFactory(
+    'AuthSuperValidator'
   );
+  const AuthValidatorContract = await AuthValidatorFactory.deploy(
+    authValidatorAdmin.address
+  );
+
+  await AuthValidatorContract.deployed();
 
   const MockAssetReveal = await ethers.getContractFactory('MockAssetReveal');
   const MockAssetRevealContract = await MockAssetReveal.deploy();
@@ -134,6 +137,12 @@ export async function runRevealTestSetup() {
   );
 
   await AssetRevealContract.deployed();
+
+  // SETUP VALIDATOR
+  await AuthValidatorContract.connect(authValidatorAdmin).setSigner(
+    AssetRevealContract.address,
+    backendAuthWallet.address
+  );
 
   // SET UP ROLES
   const AssetRevealContractAsUser = AssetRevealContract.connect(user);
