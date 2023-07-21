@@ -1,5 +1,5 @@
 import {ethers, upgrades} from 'hardhat';
-import {DEFAULT_SUBSCRIPTION} from '../../data/constants';
+import {DEFAULT_SUBSCRIPTION} from '../../../data/constants';
 
 const DEFAULT_BPS = 300;
 

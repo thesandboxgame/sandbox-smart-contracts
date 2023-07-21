@@ -21,7 +21,6 @@ export async function runRevealTestSetup() {
     assetAdmin,
     user,
     catalystAdmin,
-    catalystRoyaltyRecipient,
     authValidatorAdmin,
     backendAuthWallet,
     mockMarketplace1,
@@ -111,7 +110,6 @@ export async function runRevealTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE

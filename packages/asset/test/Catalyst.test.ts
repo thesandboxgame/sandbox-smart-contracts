@@ -115,7 +115,6 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const {
         trustedForwarder,
         catalystMinter,
-        catalystRoyaltyRecipient,
         OperatorFilterSubscriptionContract,
         RoyaltyManagerContract,
       } = await runCatalystSetup();
@@ -158,13 +157,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             catalystAdmin.address,
             catalystMinter.address,
             CATALYST_IPFS_CID_PER_TIER,
-            zeroAddress
+            zeroAddress,
           ],
           {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: royalty recipient can't be zero");
+      ).to.revertedWith("Catalyst: royalty manager can't be zero");
     });
     it("minter can't be zero in initialization", async function () {
       const {
@@ -256,9 +255,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await runCatalystSetup();
 
       await expect(
-        catalyst
-          .connect(user1)
-          .revokeRole(minterRole, catalystMinter.address)
+        catalyst.connect(user1).revokeRole(minterRole, catalystMinter.address)
       ).to.be.revertedWith(
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );

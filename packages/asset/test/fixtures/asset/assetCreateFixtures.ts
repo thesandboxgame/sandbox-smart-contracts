@@ -21,7 +21,6 @@ export async function runCreateTestSetup() {
     user,
     otherWallet,
     catalystAdmin,
-    catalystRoyaltyRecipient,
     authValidatorAdmin,
     backendAuthWallet,
     commonRoyaltyReceiver,
@@ -103,7 +102,6 @@ export async function runCreateTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE

@@ -4,8 +4,9 @@ import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-  CATALYST_DEFAULT_ROYALTY,
 } from '../../data/constants';
+
+const DEFAULT_BPS = 300;
 
 export async function setupOperatorFilter() {
   const [
@@ -15,19 +16,15 @@ export async function setupOperatorFilter() {
     trustedForwarder,
     catalystAdmin,
     catalystMinter,
-    catalystRoyaltyRecipient,
     assetAdmin,
     user1,
     user2,
     user3,
     user4,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
-
-  // const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
-  //   'OperatorFilterRegistrant'
-  // );
-  // const OperatorFilterSubscription =
-  //   await OperatorFilterSubscriptionFactory.deploy();
 
   const MockERC1155MarketPlace1Factory = await ethers.getContractFactory(
     'MockERC1155MarketPlace1'
@@ -72,6 +69,30 @@ export async function setupOperatorFilter() {
     DEFAULT_SUBSCRIPTION
   );
   await tnx.wait();
+
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('MockAsset');
   const Asset = await upgrades.deployProxy(
     AssetFactory,
@@ -80,6 +101,9 @@ export async function setupOperatorFilter() {
       assetAdmin.address,
       'ipfs://',
       filterOperatorSubscription.address,
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -109,12 +133,11 @@ export async function setupOperatorFilter() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      catalystRoyaltyRecipient.address,
       operatorFilterSubscription.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',

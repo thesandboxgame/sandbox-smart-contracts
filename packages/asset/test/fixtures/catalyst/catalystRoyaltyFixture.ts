@@ -2,6 +2,7 @@ import {ethers, upgrades} from 'hardhat';
 import {
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../../data/constants';
 
 export async function catalystRoyaltyDistribution() {
@@ -20,13 +21,28 @@ export async function catalystRoyaltyDistribution() {
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
+    assetAdmin,
+    mockMarketplace1,
+    mockMarketplace2,
   ] = await ethers.getSigners();
 
+  const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'MockOperatorFilterRegistry'
+  );
+
+  const operatorFilterRegistry = await MockOperatorFilterRegistryFactory.deploy(
+    DEFAULT_SUBSCRIPTION,
+    [mockMarketplace1.address, mockMarketplace2.address]
+  );
+
   const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
-    'OperatorFilterRegistrant'
+    'MockOperatorFilterSubscription'
   );
   const OperatorFilterSubscription =
-    await OperatorFilterSubscriptionFactory.deploy();
+    await OperatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
 
   const RoyaltySplitterFactory = await ethers.getContractFactory(
     'RoyaltySplitter'

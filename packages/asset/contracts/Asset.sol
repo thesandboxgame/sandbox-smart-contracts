@@ -37,7 +37,7 @@ contract Asset is
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
-    OperatorFiltererUpgradeable
+    OperatorFiltererUpgradeable,
     MultiRoyaltyDistributer
 {
     using TokenIdUtils for uint256;
@@ -57,7 +57,7 @@ contract Asset is
         address forwarder,
         address assetAdmin,
         string memory baseUri,
-        address commonSubscription
+        address commonSubscription,
         address payable defaultRecipient,
         uint16 defaultBps,
         address _manager
@@ -278,6 +278,8 @@ contract Asset is
             "ERC1155: caller is not token owner or approved"
         );
         _safeTransferFrom(from, to, id, amount, data);
+    }
+
     /// @notice could be used to deploy splitter and set tokens royalties
     /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
     /// @param royaltyBPS should be defult EIP2981 roayaltie.
