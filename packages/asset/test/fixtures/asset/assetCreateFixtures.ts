@@ -2,16 +2,16 @@ import {ethers, upgrades} from 'hardhat';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
-} from '../utils/createSignature';
+} from '../../utils/createSignature';
 import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
-  CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
+const DEFAULT_BPS = 300;
 
 export async function runCreateTestSetup() {
   const [
@@ -20,16 +20,19 @@ export async function runCreateTestSetup() {
     assetAdmin,
     user,
     otherWallet,
-    catalystRoyaltyRecipient,
     catalystAdmin,
+    catalystRoyaltyRecipient,
     authValidatorAdmin,
     backendAuthWallet,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
     mockMarketplace1,
     mockMarketplace2,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
-  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER
+  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT, ROYALTIES
 
   const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
     'MockOperatorFilterRegistry'
@@ -52,6 +55,29 @@ export async function runCreateTestSetup() {
       operatorFilterRegistry.address
     );
 
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
@@ -60,6 +86,9 @@ export async function runCreateTestSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -78,8 +107,8 @@ export async function runCreateTestSetup() {
       OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -88,11 +117,14 @@ export async function runCreateTestSetup() {
 
   await CatalystContract.deployed();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
-  const AuthValidatorContract = await AuthValidatorFactory.deploy(
-    authValidatorAdmin.address,
-    backendAuthWallet.address
+  const AuthValidatorFactory = await ethers.getContractFactory(
+    'AuthSuperValidator'
   );
+  const AuthValidatorContract = await AuthValidatorFactory.deploy(
+    authValidatorAdmin.address
+  );
+
+  await AuthValidatorContract.deployed();
 
   // END DEPLOY DEPENDENCIES
 
@@ -118,6 +150,12 @@ export async function runCreateTestSetup() {
 
   const AssetCreateContractAsUser = AssetCreateContract.connect(user);
 
+  // SETUP VALIDATOR
+  await AuthValidatorContract.connect(authValidatorAdmin).setSigner(
+    AssetCreateContract.address,
+    backendAuthWallet.address
+  );
+
   // SETUP ROLES
   // get AssetContract as DEFAULT_ADMIN_ROLE
   const AssetAsAdmin = AssetContract.connect(assetAdmin);
@@ -126,9 +164,9 @@ export async function runCreateTestSetup() {
 
   // get CatalystContract as DEFAULT_ADMIN_ROLE
   const CatalystAsAdmin = CatalystContract.connect(catalystAdmin);
-  const CatalystMinterRole = await CatalystAsAdmin.MINTER_ROLE();
+  const CatalystBurnerRole = await CatalystAsAdmin.BURNER_ROLE();
   await CatalystAsAdmin.grantRole(
-    CatalystMinterRole,
+    CatalystBurnerRole,
     AssetCreateContract.address
   );
 

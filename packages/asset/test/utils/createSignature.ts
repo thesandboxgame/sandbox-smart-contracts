@@ -1,3 +1,4 @@
+import {ethers} from 'ethers';
 import hre from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -95,4 +96,65 @@ const createMultipleAssetsMintSignature = async (
   return signature;
 };
 
-export {createAssetMintSignature, createMultipleAssetsMintSignature};
+const createMockSignature = async (
+  creator: string,
+  signer: SignerWithAddress
+) => {
+  const data = {
+    types: {
+      Basic: [{name: 'creator', type: 'address'}],
+    },
+    domain: {
+      name: 'The Sandbox',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+    },
+    message: {
+      creator,
+    },
+  };
+
+  const signature = await signer._signTypedData(
+    data.domain,
+    data.types,
+    data.message
+  );
+
+  const digest = ethers.utils._TypedDataEncoder.hash(
+    data.domain,
+    data.types,
+    data.message
+  );
+
+  return {signature, digest};
+};
+
+const createMockDigest = async (creator: string) => {
+  const data = {
+    types: {
+      Basic: [{name: 'creator', type: 'address'}],
+    },
+    domain: {
+      name: 'The Sandbox',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+    },
+    message: {
+      creator,
+    },
+  };
+  const digest = ethers.utils._TypedDataEncoder.hash(
+    data.domain,
+    data.types,
+    data.message
+  );
+
+  return digest;
+};
+
+export {
+  createAssetMintSignature,
+  createMultipleAssetsMintSignature,
+  createMockSignature,
+  createMockDigest,
+};

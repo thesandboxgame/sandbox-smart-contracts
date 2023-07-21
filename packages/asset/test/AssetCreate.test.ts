@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
-import {runCreateTestSetup} from './fixtures/assetCreateFixtures';
+import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 
 // TODO: missing AssetCreate DEFAULT_ADMIN, trustedForwarder tests, setTrustedForwarder
 
-describe('AssetCreate', function () {
+describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should initialize with the correct values', async function () {
       const {
@@ -213,8 +213,9 @@ describe('AssetCreate', function () {
 
       // TODO:
       // get tokenId from the event
-      const tokenId = (await AssetCreateContract.queryFilter('AssetMinted'))[0]
-        .args.tokenId;
+      const tokenId = (
+        await AssetCreateContract.queryFilter('AssetMinted')
+      )?.[0].args?.tokenId;
 
       expect(await AssetContract.balanceOf(user.address, tokenId)).to.equal(
         BigNumber.from(5)

@@ -3,16 +3,16 @@ import {
   batchRevealSignature,
   burnAndRevealSignature,
   revealSignature,
-} from '../utils/revealSignature';
+} from '../../utils/revealSignature';
 import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
-  CATALYST_DEFAULT_ROYALTY,
   CATALYST_IPFS_CID_PER_TIER,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';
+const DEFAULT_BPS = 300;
 
 export async function runRevealTestSetup() {
   const [
@@ -20,12 +20,15 @@ export async function runRevealTestSetup() {
     trustedForwarder,
     assetAdmin,
     user,
-    catalystRoyaltyRecipient,
     catalystAdmin,
+    catalystRoyaltyRecipient,
     authValidatorAdmin,
     backendAuthWallet,
     mockMarketplace1,
     mockMarketplace2,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
@@ -53,6 +56,29 @@ export async function runRevealTestSetup() {
       operatorFilterRegistry.address
     );
 
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
@@ -61,6 +87,9 @@ export async function runRevealTestSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -68,6 +97,13 @@ export async function runRevealTestSetup() {
   );
 
   await AssetContract.deployed();
+
+  // deploy wrapped TokenIdUtils contract
+  const TokenIdUtilsFactory = await ethers.getContractFactory(
+    'TokenIdUtilsWrapped'
+  );
+  const TokenIdUtilsContract = await TokenIdUtilsFactory.deploy();
+  await TokenIdUtilsContract.deployed();
 
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const CatalystContract = await upgrades.deployProxy(
@@ -79,8 +115,8 @@ export async function runRevealTestSetup() {
       OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -89,11 +125,18 @@ export async function runRevealTestSetup() {
 
   await CatalystContract.deployed();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
-  const AuthValidatorContract = await AuthValidatorFactory.deploy(
-    authValidatorAdmin.address,
-    backendAuthWallet.address
+  const AuthValidatorFactory = await ethers.getContractFactory(
+    'AuthSuperValidator'
   );
+  const AuthValidatorContract = await AuthValidatorFactory.deploy(
+    authValidatorAdmin.address
+  );
+
+  await AuthValidatorContract.deployed();
+
+  const MockAssetReveal = await ethers.getContractFactory('MockAssetReveal');
+  const MockAssetRevealContract = await MockAssetReveal.deploy();
+  await MockAssetRevealContract.deployed();
 
   // END DEPLOY DEPENDENCIES
 
@@ -107,6 +150,7 @@ export async function runRevealTestSetup() {
       AssetContract.address,
       AuthValidatorContract.address,
       trustedForwarder.address,
+      assetAdmin.address,
     ],
     {
       initializer: 'initialize',
@@ -114,6 +158,12 @@ export async function runRevealTestSetup() {
   );
 
   await AssetRevealContract.deployed();
+
+  // SETUP VALIDATOR
+  await AuthValidatorContract.connect(authValidatorAdmin).setSigner(
+    AssetRevealContract.address,
+    backendAuthWallet.address
+  );
 
   // SET UP ROLES
   const AssetRevealContractAsUser = AssetRevealContract.connect(user);
@@ -127,6 +177,7 @@ export async function runRevealTestSetup() {
   // add mock minter as minter
   const MinterRole = await AssetContract.MINTER_ROLE();
   const BurnerRole = await AssetContract.BURNER_ROLE();
+  const AdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
   await AssetContractAsAdmin.grantRole(MinterRole, MockMinterContract.address);
 
   // add AssetReveal contracts as both MINTER and BURNER for Asset contract
@@ -144,7 +195,7 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA' // metadata hash
   );
   const unRevResult = await unRevMintTx.wait();
-  const unrevealedtokenId = unRevResult.events[2].args.tokenId.toString();
+  const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
 
   // mint a tier 5 asset with 10 copies
   const unRevMintTx2 = await MockMinterContract.mintAsset(
@@ -155,7 +206,9 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJD'
   );
   const unRevResult2 = await unRevMintTx2.wait();
-  const unrevealedtokenId2 = unRevResult2.events[2].args.tokenId.toString();
+
+  // TODO: check events used in fixture
+  const unrevealedtokenId2 = unRevResult2.events[3].args.tokenId.toString();
 
   // mint a revealed version, tier 5 asset with 10 copies
   const revMintTx = await MockMinterContract.mintAsset(
@@ -165,9 +218,9 @@ export async function runRevealTestSetup() {
     true,
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC'
   );
-
   const revResult = await revMintTx.wait();
-  const revealedtokenId = revResult.events[2].args.tokenId.toString();
+  const revealedtokenId = revResult.events[3].args.tokenId.toString();
+
   // END SETUP USER WITH MINTED ASSETS
 
   // HELPER FUNCTIONS
@@ -295,12 +348,16 @@ export async function runRevealTestSetup() {
     AssetRevealContract,
     AssetRevealContractAsUser,
     AssetRevealContractAsAdmin,
+    MockAssetRevealContract,
+    TokenIdUtilsContract,
     AssetContract,
     AuthValidatorContract,
     trustedForwarder,
     unrevealedtokenId,
     unrevealedtokenId2,
     revealedtokenId,
+    AdminRole,
     user,
+    assetAdmin,
   };
 }

@@ -3,8 +3,7 @@ import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
-  CATALYST_DEFAULT_ROYALTY,
-} from '../../data/constants';
+} from '../../../data/constants';
 
 export async function runCatalystSetup() {
   const [
@@ -18,6 +17,9 @@ export async function runCatalystSetup() {
     user2,
     mockMarketplace1,
     mockMarketplace2,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
@@ -41,6 +43,29 @@ export async function runCatalystSetup() {
       operatorFilterRegistry.address
     );
 
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const catalyst = await upgrades.deployProxy(
     CatalystFactory,
@@ -51,8 +76,8 @@ export async function runCatalystSetup() {
       OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
-      CATALYST_DEFAULT_ROYALTY,
       CATALYST_IPFS_CID_PER_TIER,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',
@@ -60,10 +85,17 @@ export async function runCatalystSetup() {
   );
   await catalyst.deployed();
 
+  // grant burner role to catalystMinter
+  const catMinterRole = await catalyst.BURNER_ROLE();
+  await catalyst
+    .connect(catalystAdmin)
+    .grantRole(catMinterRole, catalystMinter.address);
+
   const catalystAsAdmin = await catalyst.connect(catalystAdmin);
   const minterRole = await catalyst.MINTER_ROLE();
   const catalystAdminRole = await catalyst.DEFAULT_ADMIN_ROLE();
   const catalystAsMinter = await catalyst.connect(catalystMinter);
+  const catalystAsBurner = await catalyst.connect(catalystMinter);
   return {
     deployer,
     catalyst,
@@ -75,9 +107,11 @@ export async function runCatalystSetup() {
     catalystAdminRole,
     upgradeAdmin,
     catalystMinter,
+    catalystAsBurner,
     catalystAdmin,
     catalystRoyaltyRecipient,
     trustedForwarder,
     OperatorFilterSubscriptionContract,
+    RoyaltyManagerContract,
   };
 }

@@ -1,6 +1,8 @@
 import {ethers, upgrades} from 'hardhat';
 import {DEFAULT_SUBSCRIPTION} from '../../data/constants';
 
+const DEFAULT_BPS = 300;
+
 export function generateOldAssetId(
   creator: string,
   assetNumber: number,
@@ -35,9 +37,36 @@ export async function runAssetSetup() {
     trustedForwarder,
     mockMarketplace1,
     mockMarketplace2,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
+
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitter'
+  );
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory = await ethers.getContractFactory(
+    'RoyaltyManager'
+  );
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      RoyaltySplitter.address,
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+    ],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await RoyaltyManagerContract.deployed();
+
   const AssetFactory = await ethers.getContractFactory('Asset');
 
   const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
@@ -68,6 +97,9 @@ export async function runAssetSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
+      commonRoyaltyReceiver.address,
+      DEFAULT_BPS,
+      RoyaltyManagerContract.address,
     ],
     {
       initializer: 'initialize',

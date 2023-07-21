@@ -25,6 +25,7 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {MultiRoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/MultiRoyaltyDistributer.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 
@@ -37,6 +38,7 @@ contract Asset is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     OperatorFiltererUpgradeable
+    MultiRoyaltyDistributer
 {
     using TokenIdUtils for uint256;
 
@@ -56,6 +58,9 @@ contract Asset is
         address assetAdmin,
         string memory baseUri,
         address commonSubscription
+        address payable defaultRecipient,
+        uint16 defaultBps,
+        address _manager
     ) external initializer {
         _setBaseURI(baseUri);
         __AccessControl_init();
@@ -64,6 +69,7 @@ contract Asset is
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
+        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
     }
 
     /// @notice Mint new tokens
@@ -79,6 +85,8 @@ contract Asset is
     ) external onlyRole(MINTER_ROLE) {
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
+        address creator = id.getCreatorAddress();
+        _setTokenRoyalties(id, _defaultRoyaltyBPS, payable(creator), creator);
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
@@ -98,6 +106,10 @@ contract Asset is
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
         _mintBatch(to, ids, amounts, "");
+        for (uint256 i; i < ids.length; i++) {
+            address creator = ids[i].getCreatorAddress();
+            _setTokenRoyalties(ids[i], _defaultRoyaltyBPS, payable(creator), creator);
+        }
     }
 
     /// @notice Burn a token from a given account
@@ -189,7 +201,7 @@ contract Asset is
         public
         view
         virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributer)
         returns (bool)
     {
         return
@@ -266,5 +278,31 @@ contract Asset is
             "ERC1155: caller is not token owner or approved"
         );
         _safeTransferFrom(from, to, id, amount, data);
+    /// @notice could be used to deploy splitter and set tokens royalties
+    /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
+    /// @param royaltyBPS should be defult EIP2981 roayaltie.
+    /// @param recipient the royalty recipient for the splitter of the creator.
+    /// @param creator the creactor of the tokens.
+    function setTokenRoyalties(
+        uint256 tokenId,
+        uint16 royaltyBPS,
+        address payable recipient,
+        address creator
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setTokenRoyalties(tokenId, royaltyBPS, recipient, creator);
+    }
+
+    /// @notice sets default royalty bps for EIP2981
+    /// @dev only owner can call.
+    /// @param defaultBps royalty bps base 10000
+    function setDefaultRoyaltyBps(uint16 defaultBps) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setDefaultRoyaltyBps(defaultBps);
+    }
+
+    /// @notice sets default royalty receiver for EIP2981
+    /// @dev only owner can call.
+    /// @param defaultReceiver address of default royalty recipient.
+    function setDefaultRoyaltyReceiver(address payable defaultReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setDefaultRoyaltyReceiver(defaultReceiver);
     }
 }

@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {runAssetSetup} from './fixtures/assetFixture';
+import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
@@ -646,6 +646,16 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       await AssetContract.setTrustedForwarder(randomAddress);
       expect(await AssetContract.getTrustedForwarder()).to.be.equal(
         randomAddress
+      );
+    });
+    it("should not allow non-DEFAULT_ADMIN to set the trusted forwarder's address", async function () {
+      const {AssetContractAsMinter, minter, defaultAdminRole} =
+        await runAssetSetup();
+      const randomAddress = ethers.Wallet.createRandom().address;
+      await expect(
+        AssetContractAsMinter.setTrustedForwarder(randomAddress)
+      ).to.be.revertedWith(
+        `AccessControl: account ${minter.address.toLowerCase()} is missing role ${defaultAdminRole}`
       );
     });
   });

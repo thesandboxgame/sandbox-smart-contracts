@@ -1,6 +1,9 @@
 {
   "name": "@sandbox-smart-contracts/asset",
   "version": "0.0.1",
+  "dependencies": {
+    "@sandbox-smart-contracts/royalties": "*"
+  },
   "description": "Asset L2 smart contracts",
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
@@ -15,12 +18,14 @@
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
+    "@manifoldxyz/libraries-solidity": "^1.0.4",
+    "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts": "^4.8.2",
+    "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/contracts-upgradeable": "^4.9.0",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@sandbox-smart-contracts/operator-filter": "*",

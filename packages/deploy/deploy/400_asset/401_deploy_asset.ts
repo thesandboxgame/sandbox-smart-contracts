@@ -1,13 +1,21 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+export const DEFAULT_BPS = 300;
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, assetAdmin, upgradeAdmin, filterOperatorSubscription} =
-    await getNamedAccounts();
+  const {
+    deployer,
+    assetAdmin,
+    upgradeAdmin,
+    commonRoyaltyReceiver,
+    filterOperatorSubscription,
+  } = await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const RoyaltyManager = await deployments.get('RoyaltyManager');
 
   await deploy('Asset', {
     from: deployer,
@@ -21,6 +29,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           TRUSTED_FORWARDER.address,
           assetAdmin,
           'ipfs://',
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManager.address,
           filterOperatorSubscription,
         ],
       },

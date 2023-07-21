@@ -2,8 +2,9 @@
 pragma solidity 0.8.18;
 
 interface IAssetReveal {
-    event AssetRevealBurn(address revealer, uint256 unrevealedTokenId, uint8 tier, uint256 amount);
-
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event AssetRevealBurn(address revealer, uint256 unrevealedTokenId, uint256 amount);
+    event AssetRevealBatchBurn(address revealer, uint256[] unrevealedTokenIds, uint256[] amounts);
     event AssetRevealMint(
         address recipient,
         uint256 unrevealedTokenId,
