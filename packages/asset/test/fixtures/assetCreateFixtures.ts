@@ -126,9 +126,9 @@ export async function runCreateTestSetup() {
 
   // get CatalystContract as DEFAULT_ADMIN_ROLE
   const CatalystAsAdmin = CatalystContract.connect(catalystAdmin);
-  const CatalystMinterRole = await CatalystAsAdmin.MINTER_ROLE();
+  const CatalystBurnerRole = await CatalystAsAdmin.BURNER_ROLE();
   await CatalystAsAdmin.grantRole(
-    CatalystMinterRole,
+    CatalystBurnerRole,
     AssetCreateContract.address
   );
 
