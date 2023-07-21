@@ -12,4 +12,11 @@ interface IAssetReveal {
         uint256[] newTokenIds,
         bytes32[] revealHashes
     );
+    event AssetRevealBatchMint(
+        address recipient,
+        uint256[] unrevealedTokenIds,
+        uint256[][] amounts,
+        uint256[][] newTokenIds,
+        bytes32[][] revealHashes
+    );
 }
