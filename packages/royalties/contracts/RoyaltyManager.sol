@@ -30,6 +30,9 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @dev called during the deployment via the proxy.
     /// @param _commonRecipient the != address(0)common recipient for all the splitters
     /// @param _commonSplit split for the common recipient's and creator split would be 10000 - commonSplit
+    /// @param royaltySplitterCloneable address of cloneable splitter contract for royalties distribution
+    /// @param managerAdmin address of RoyaltyManager contract.
+    /// @param contractRoyaltySetter the address of royalty setter of contract.
     function initialize(
         address payable _commonRecipient,
         uint16 _commonSplit,

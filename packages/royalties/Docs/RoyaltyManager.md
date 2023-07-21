@@ -13,7 +13,10 @@ This contract also deploys the RoyaltySplitters for creators, which are deployed
 ```Solidity
     function initialize(
         address payable _commonRecipient,
-        uint16 _commonSplit
+        uint16 _commonSplit,
+        address royaltySplitterCloneable,
+        address managerAdmin,
+        address contractRoyaltySetter
     ) external initializer
 ```
 
@@ -21,6 +24,9 @@ This contract also deploys the RoyaltySplitters for creators, which are deployed
 - This function is called during deployment and sets the common recipient and split for all the RoyaltySplitters.
 - ` _commonRecipient`: The common recipient wallet address for all the RoyaltySplitters
 - `_commonSplit` The split percentage for the common recipient and creators split would be 10000 - commonSplit
+-  `royaltySplitterCloneable` address of cloneable splitter contract for royalties distribution
+- `managerAdmin` address of RoyaltyManager contract.
+- `contractRoyaltySetter` the address of royalty setter of contract.
 
 ---
 
