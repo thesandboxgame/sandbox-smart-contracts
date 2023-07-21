@@ -1,5 +1,6 @@
 import hre from 'hardhat';
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 async function burnAndRevealSignature(
   recipient: string,
@@ -8,7 +9,7 @@ async function burnAndRevealSignature(
   metadataHashes: string[],
   revealHashes: string[],
   contract: Contract,
-  signer: Wallet
+  signer: SignerWithAddress
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {
@@ -50,7 +51,7 @@ async function batchRevealSignature(
   metadataHashes: string[][],
   revealHashes: string[][],
   contract: Contract,
-  signer: Wallet
+  signer: SignerWithAddress
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {
@@ -93,7 +94,7 @@ async function revealSignature(
   metadataHashes: string[],
   revealHashes: string[],
   contract: Contract,
-  signer: Wallet
+  signer: SignerWithAddress
 ): Promise<string> {
   const AssetRevealContract = contract;
   const data = {

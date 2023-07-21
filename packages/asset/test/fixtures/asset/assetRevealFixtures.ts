@@ -78,6 +78,13 @@ export async function runRevealTestSetup() {
 
   await AssetContract.deployed();
 
+  // deploy wrapped TokenIdUtils contract
+  const TokenIdUtilsFactory = await ethers.getContractFactory(
+    'TokenIdUtilsWrapped'
+  );
+  const TokenIdUtilsContract = await TokenIdUtilsFactory.deploy();
+  await TokenIdUtilsContract.deployed();
+
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const CatalystContract = await upgrades.deployProxy(
     CatalystFactory,
@@ -103,6 +110,10 @@ export async function runRevealTestSetup() {
     backendAuthWallet.address
   );
 
+  const MockAssetReveal = await ethers.getContractFactory('MockAssetReveal');
+  const MockAssetRevealContract = await MockAssetReveal.deploy();
+  await MockAssetRevealContract.deployed();
+
   // END DEPLOY DEPENDENCIES
 
   const AssetRevealFactory = await ethers.getContractFactory('AssetReveal');
@@ -115,6 +126,7 @@ export async function runRevealTestSetup() {
       AssetContract.address,
       AuthValidatorContract.address,
       trustedForwarder.address,
+      assetAdmin.address,
     ],
     {
       initializer: 'initialize',
@@ -135,6 +147,7 @@ export async function runRevealTestSetup() {
   // add mock minter as minter
   const MinterRole = await AssetContract.MINTER_ROLE();
   const BurnerRole = await AssetContract.BURNER_ROLE();
+  const AdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
   await AssetContractAsAdmin.grantRole(MinterRole, MockMinterContract.address);
 
   // add AssetReveal contracts as both MINTER and BURNER for Asset contract
@@ -305,12 +318,16 @@ export async function runRevealTestSetup() {
     AssetRevealContract,
     AssetRevealContractAsUser,
     AssetRevealContractAsAdmin,
+    MockAssetRevealContract,
+    TokenIdUtilsContract,
     AssetContract,
     AuthValidatorContract,
     trustedForwarder,
     unrevealedtokenId,
     unrevealedtokenId2,
     revealedtokenId,
+    AdminRole,
     user,
+    assetAdmin,
   };
 }
