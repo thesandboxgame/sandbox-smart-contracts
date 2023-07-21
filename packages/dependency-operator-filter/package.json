@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "description": "Implementation for OpenSea's operator filter",
   "files": [
-    "contracts",
-    "contracts/OperatorFilter"
+    "contracts"
   ],
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
