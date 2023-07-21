@@ -29,10 +29,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           TRUSTED_FORWARDER.address,
           assetAdmin,
           'ipfs://',
+          filterOperatorSubscription,
           commonRoyaltyReceiver,
           DEFAULT_BPS,
           RoyaltyManager.address,
-          filterOperatorSubscription,
         ],
       },
       upgradeIndex: 0,
@@ -43,4 +43,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset', 'Asset_deploy', 'L2'];
-func.dependencies = ['TRUSTED_FORWARDER_V2', 'OperatorSubscriber'];
+func.dependencies = ['TRUSTED_FORWARDER_V2', 'OperatorFilter_setup'];
