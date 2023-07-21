@@ -189,7 +189,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver)
         .add(balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
   });
 
@@ -259,7 +261,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver)
         .add(balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
   });
 
@@ -347,7 +351,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver2)
         .add(balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
   });
 
@@ -427,7 +433,9 @@ describe('Token', function () {
           balanceCommonRoyaltyReceiver2New.sub(balanceCommonRoyaltyReceiver2)
         )
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
   });
 
@@ -490,13 +498,13 @@ describe('Token', function () {
       .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
       .div(ethers.BigNumber.from(10000));
 
-    const sellerRoyaltyShare = TotalRoyalty.mul(ethers.BigNumber.from(4000)).div(
-      ethers.BigNumber.from(10000)
-    );
+    const sellerRoyaltyShare = TotalRoyalty.mul(
+      ethers.BigNumber.from(4000)
+    ).div(ethers.BigNumber.from(10000));
 
-    const commonRecipientShare = TotalRoyalty.mul(ethers.BigNumber.from(6000)).div(
-      ethers.BigNumber.from(10000)
-    );
+    const commonRecipientShare = TotalRoyalty.mul(
+      ethers.BigNumber.from(6000)
+    ).div(ethers.BigNumber.from(10000));
 
     expect(balanceRoyaltyReceiverNew.sub(balanceRoyaltyReceiver)).to.be.equal(
       sellerRoyaltyShare
@@ -511,7 +519,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver)
         .add(balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
   });
 
@@ -1219,7 +1229,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver)
         .add(balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
 
     await ERC721.connect(deployer).mint(
@@ -1335,7 +1347,9 @@ describe('Token', function () {
         .sub(balanceRoyaltyReceiver)
         .add(balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver))
     ).to.be.equal(
-      value.mul(ethers.BigNumber.from(_defaultRoyaltyBPS)).div(ethers.BigNumber.from(10000))
+      value
+        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .div(ethers.BigNumber.from(10000))
     );
 
     await ERC721.connect(deployer).mint(
