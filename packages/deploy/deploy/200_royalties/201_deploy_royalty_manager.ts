@@ -23,7 +23,7 @@ const func: DeployFunction = async function (
     from: deployer,
     log: true,
     contract:
-      '@sandbox-smart-contracts/royalties/contracts/RoyaltyManager.sol:RoyaltyManager',
+      '@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyManager.sol:RoyaltyManager',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',

@@ -10,6 +10,8 @@ import './tasks/importedPackages';
 const importedPackages = {
   '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
+  '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
+  '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
 };
 
 const namedAccounts = {
@@ -34,6 +36,8 @@ const namedAccounts = {
     mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
     polygon: 'sandAdmin',
   },
+
+  filterOperatorSubscription: 'deployer',
 
   upgradeAdmin: 'sandAdmin',
 

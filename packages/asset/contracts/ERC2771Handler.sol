@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.18;
 
 /// @dev minimal ERC2771 handler to keep bytecode-size down

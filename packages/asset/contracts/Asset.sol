@@ -22,7 +22,12 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
-import {MultiRoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/MultiRoyaltyDistributer.sol";
+import {
+    MultiRoyaltyDistributer
+} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributer.sol";
+import {
+    OperatorFiltererUpgradeable
+} from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 
@@ -34,6 +39,7 @@ contract Asset is
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
+    OperatorFiltererUpgradeable,
     MultiRoyaltyDistributer
 {
     using TokenIdUtils for uint256;
@@ -53,6 +59,7 @@ contract Asset is
         address forwarder,
         address assetAdmin,
         string memory baseUri,
+        address commonSubscription,
         address payable defaultRecipient,
         uint16 defaultBps,
         address _manager
@@ -63,6 +70,7 @@ contract Asset is
         __ERC2771Handler_initialize(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
+        __OperatorFilterer_init(commonSubscription, true);
         __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
     }
 
@@ -223,6 +231,55 @@ contract Asset is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
+    /// @dev call data should be optimized to order ids so packedBalance can be used efficiently.
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param ids ids of each token type transfered.
+    /// @param amounts amount of each token type transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public virtual override onlyAllowedOperator(from) {
+        super.safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override
+        onlyAllowedOperatorApproval(operator)
+    {
+        _setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
+    /// @param from address from which tokens are transfered.
+    /// @param to address to which the token will be transfered.
+    /// @param id the token type transfered.
+    /// @param amount amount of token transfered.
+    /// @param data aditional data accompanying the transfer.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public virtual override onlyAllowedOperator(from) {
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: caller is not token owner or approved"
+        );
+        _safeTransferFrom(from, to, id, amount, data);
     }
 
     /// @notice could be used to deploy splitter and set tokens royalties

@@ -1,4 +1,5 @@
 import {ethers, upgrades} from 'hardhat';
+import {DEFAULT_SUBSCRIPTION} from '../../../data/constants';
 
 const DEFAULT_BPS = 300;
 
@@ -34,6 +35,8 @@ export async function runAssetSetup() {
     minter,
     burner,
     trustedForwarder,
+    mockMarketplace1,
+    mockMarketplace2,
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
@@ -65,12 +68,35 @@ export async function runAssetSetup() {
   await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('Asset');
+
+  const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'MockOperatorFilterRegistry'
+  );
+
+  const operatorFilterRegistry = await MockOperatorFilterRegistryFactory.deploy(
+    DEFAULT_SUBSCRIPTION,
+    [mockMarketplace1.address, mockMarketplace2.address]
+  );
+
+  // Operator Filter Registrant
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
+  );
+
+  // Provide: address _owner, address _localRegistry
+  const OperatorFilterSubscriptionContract =
+    await OperatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
+
   const AssetContract = await upgrades.deployProxy(
     AssetFactory,
     [
       trustedForwarder.address,
       assetAdmin.address,
       'ipfs://',
+      OperatorFilterSubscriptionContract.address,
       commonRoyaltyReceiver.address,
       DEFAULT_BPS,
       RoyaltyManagerContract.address,

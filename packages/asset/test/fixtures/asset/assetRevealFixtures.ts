@@ -5,6 +5,7 @@ import {
   revealSignature,
 } from '../../utils/revealSignature';
 import {
+  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
 } from '../../../data/constants';
@@ -22,20 +23,37 @@ export async function runRevealTestSetup() {
     catalystAdmin,
     authValidatorAdmin,
     backendAuthWallet,
+    mockMarketplace1,
+    mockMarketplace2,
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
-  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER REGISTRANT
+  // DEPLOY DEPENDENCIES: ASSET, CATALYST, AUTH VALIDATOR, OPERATOR FILTER
   // note: reveal tests use a MockMinter instead of AssetCreate
 
-  const OperatorFilterRegistrantFactory = await ethers.getContractFactory(
-    'OperatorFilterRegistrant'
+  const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'MockOperatorFilterRegistry'
   );
-  const OperatorFilterRegistrantContract =
-    await OperatorFilterRegistrantFactory.deploy();
+
+  const operatorFilterRegistry = await MockOperatorFilterRegistryFactory.deploy(
+    DEFAULT_SUBSCRIPTION,
+    [mockMarketplace1.address, mockMarketplace2.address]
+  );
+
+  // Operator Filter Registrant
+  const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
+  );
+
+  // Provide: address _owner, address _localRegistry
+  const OperatorFilterSubscriptionContract =
+    await OperatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
 
   const RoyaltySplitterFactory = await ethers.getContractFactory(
     'RoyaltySplitter'
@@ -67,6 +85,7 @@ export async function runRevealTestSetup() {
       trustedForwarder.address,
       assetAdmin.address,
       'ipfs://',
+      OperatorFilterSubscriptionContract.address,
       commonRoyaltyReceiver.address,
       DEFAULT_BPS,
       RoyaltyManagerContract.address,
@@ -91,7 +110,7 @@ export async function runRevealTestSetup() {
     [
       CATALYST_BASE_URI,
       trustedForwarder.address,
-      OperatorFilterRegistrantContract.address,
+      OperatorFilterSubscriptionContract.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
       CATALYST_IPFS_CID_PER_TIER,

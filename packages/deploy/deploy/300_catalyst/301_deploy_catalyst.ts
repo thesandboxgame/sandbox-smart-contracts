@@ -2,7 +2,6 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export const CATALYST_BASE_URI = 'ipfs://';
-export const CATALYST_DEFAULT_ROYALTY = 100;
 
 // TODO: update for polygon-mainnet deployment
 export const CATALYST_IPFS_CID_PER_TIER = [
@@ -25,7 +24,7 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const OperatorFilterSubscription = await deployments.get(
-    'OperatorFilterRegistrant'
+    'OperatorFilterSubscription'
   );
   const RoyaltyManager = await deployments.get('RoyaltyManager');
 
@@ -56,7 +55,7 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['Catalyst', 'Catalyst_deploy', 'L2'];
 func.dependencies = [
-  'OperatorFilterRegistrant',
+  'OperatorFilterSubscription_deploy',
+  'RoyaltyManager_deploy',
   'TRUSTED_FORWARDER_V2',
-  'RoyaltyManager',
 ];
