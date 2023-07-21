@@ -69,7 +69,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
     /// @dev the reveal mechanism works through burning the asset and minting a new one with updated tokenId
     /// @param tokenId the tokenId of id idasset to reveal
     /// @param amount the amount of tokens to reveal
-    function revealBurn(uint256 tokenId, uint256 amount) public {
+    function revealBurn(uint256 tokenId, uint256 amount) external {
         _burnAsset(tokenId, amount);
         emit AssetRevealBurn(_msgSender(), tokenId, amount);
     }
@@ -96,7 +96,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
         uint256[] calldata amounts,
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
-    ) public {
+    ) external {
         require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
         require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         require(
@@ -106,7 +106,8 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
             ),
             "AssetReveal: Invalid revealMint signature"
         );
-        _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
+        uint256[] memory newTokenIds = _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
+        emit AssetRevealMint(_msgSender(), prevTokenId, amounts, newTokenIds, revealHashes);
     }
 
     /// @notice Mint multiple assets with revealed abilities and enhancements
@@ -122,7 +123,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
         uint256[][] calldata amounts,
         string[][] calldata metadataHashes,
         bytes32[][] calldata revealHashes
-    ) public {
+    ) external {
         require(prevTokenIds.length == amounts.length, "AssetReveal: Invalid amounts length");
         require(amounts.length == metadataHashes.length, "AssetReveal: Invalid metadataHashes length");
         require(prevTokenIds.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
@@ -133,9 +134,11 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
             ),
             "AssetReveal: Invalid revealBatchMint signature"
         );
+        uint256[][] memory newTokenIds = new uint256[][](prevTokenIds.length);
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
+            newTokenIds[i] = _revealAsset(prevTokenIds[i], metadataHashes[i], amounts[i], revealHashes[i]);
         }
+        emit AssetRevealBatchMint(_msgSender(), prevTokenIds, amounts, newTokenIds, revealHashes);
     }
 
     /// @notice Reveal assets to view their abilities and enhancements and mint them in a single transaction
@@ -164,8 +167,8 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
             "AssetReveal: Invalid burnAndReveal signature"
         );
         _burnAsset(prevTokenId, burnAmount);
-        emit AssetRevealBurn(_msgSender(), prevTokenId, burnAmount);
-        _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
+        uint256[] memory newTokenIds = _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
+        emit AssetRevealMint(_msgSender(), prevTokenId, amounts, newTokenIds, revealHashes);
     }
 
     /// @notice Generate new tokenIds for revealed assets and mint them
@@ -177,7 +180,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
         string[] calldata metadataHashes,
         uint256[] calldata amounts,
         bytes32[] calldata revealHashes
-    ) internal {
+    ) internal returns (uint256[] memory) {
         uint256[] memory newTokenIds = getRevealedTokenIds(metadataHashes, prevTokenId);
         for (uint256 i = 0; i < revealHashes.length; i++) {
             require(revealHashesUsed[revealHashes[i]] == false, "AssetReveal: RevealHash already used");
@@ -188,7 +191,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
         } else {
             assetContract.mintBatch(_msgSender(), newTokenIds, amounts, metadataHashes);
         }
-        emit AssetRevealMint(_msgSender(), prevTokenId, amounts, newTokenIds, revealHashes);
+        return newTokenIds;
     }
 
     /// @notice Burns an asset to be able to reveal it later

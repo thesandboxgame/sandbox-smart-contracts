@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {formatBytes32String} from 'ethers/lib/utils';
 import {runRevealTestSetup} from './fixtures/asset/assetRevealFixtures';
 import {ethers} from 'hardhat';
-import {Event} from 'ethers';
+import {BigNumber, Event} from 'ethers';
 
 const revealHashA = formatBytes32String('revealHashA');
 const revealHashB = formatBytes32String('revealHashB');
@@ -887,9 +887,11 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             [[revealHashA], [revealHashB]]
           );
 
-          // expect two events with name AssetsRevealed
-          expect(result.events[3].event).to.equal('AssetRevealMint');
-          expect(result.events[7].event).to.equal('AssetRevealMint');
+          // expect one batch reveal event
+          const event = result.events.find(
+            (e: Event) => e.event === 'AssetRevealBatchMint'
+          );
+          expect(event).to.not.be.undefined;
         });
         it("should allow batch reveal of the same token's copies", async function () {
           const {
@@ -930,22 +932,20 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [revealHashC, revealHashD],
             ]
           );
-          // three tokens should be minted with amounts 1, 3,2
-          expect(result.events[5].event).to.equal('AssetRevealMint');
-          expect(result.events[5].args['newTokenIds'].length).to.equal(2);
 
-          expect(result.events[10].event).to.equal('AssetRevealMint');
-          expect(result.events[10].args['newTokenIds'].length).to.equal(2);
+          const batchRevealMintEvent: Event = result.events.find(
+            (e: Event) => e.event === 'AssetRevealBatchMint'
+          );
 
-          const allNewTokenIds = [
-            ...result.events[5].args['newTokenIds'],
-            ...result.events[10].args['newTokenIds'],
-          ];
+          const newTokenIds = batchRevealMintEvent.args?.newTokenIds;
+          const allNewTokenIds = newTokenIds.flat();
+
+          const idsAsStrings = allNewTokenIds.map((id: BigNumber) =>
+            id.toString()
+          );
 
           // deduplicate, deep equality
-          const deduplicated = allNewTokenIds.filter(
-            (v, i, a) => a.findIndex((t) => t.eq(v)) === i
-          );
+          const deduplicated = [...new Set(idsAsStrings)];
 
           expect(deduplicated.length).to.equal(3);
           // check balances
@@ -1136,9 +1136,9 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
 
           const revealEvents = result.events.filter(
-            (event: Event) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealBatchMint'
           );
-          expect(revealEvents.length).to.equal(2);
+          expect(revealEvents.length).to.equal(1);
         });
         it('should emit AssetRevealMint events with correct arguments when successully revealed multiple tokens', async function () {
           const {
@@ -1169,22 +1169,21 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             [[revealHashA], [revealHashB]]
           );
           const revealEvents = result.events.filter(
-            (event: Event) => event.event === 'AssetRevealMint'
+            (event: Event) => event.event === 'AssetRevealBatchMint'
           );
           const args1 = revealEvents[0].args;
-          const args2 = revealEvents[1].args;
 
           expect(args1['recipient']).to.equal(user.address);
-          expect(args1['unrevealedTokenId']).to.equal(unrevealedtokenId);
-          expect(args1['amounts']).to.deep.equal(amounts1);
-          expect(args1['newTokenIds'].length).to.equal(1);
-          expect(args1['revealHashes']).to.deep.equal([revealHashA]);
-
-          expect(args2['recipient']).to.equal(user.address);
-          expect(args2['unrevealedTokenId']).to.equal(unrevealedtokenId2);
-          expect(args2['amounts']).to.deep.equal(amounts2);
-          expect(args2['newTokenIds'].length).to.equal(1);
-          expect(args2['revealHashes']).to.deep.equal([revealHashB]);
+          expect(args1['unrevealedTokenIds']).to.deep.equal([
+            unrevealedtokenId,
+            unrevealedtokenId2,
+          ]);
+          expect(args1['amounts']).to.deep.equal([amounts1, amounts2]);
+          expect(args1['newTokenIds'].length).to.equal(2);
+          expect(args1['revealHashes']).to.deep.equal([
+            [revealHashA],
+            [revealHashB],
+          ]);
         });
       });
     });
@@ -1289,43 +1288,6 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
       describe('Events', function () {
-        it('Should emit AssetRevealBurn event with correct data when burning and revealing a single token', async function () {
-          const {
-            user,
-            generateBurnAndRevealSignature,
-            instantReveal,
-            unrevealedtokenId,
-          } = await runRevealTestSetup();
-          const newMetadataHash = [
-            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE',
-          ];
-          const amounts = [1];
-
-          const signature = await generateBurnAndRevealSignature(
-            user.address,
-            unrevealedtokenId,
-            amounts,
-            newMetadataHash,
-            [revealHashA]
-          );
-
-          const result = await instantReveal(
-            signature,
-            unrevealedtokenId,
-            amounts[0],
-            amounts,
-            newMetadataHash,
-            [revealHashA]
-          );
-          const burnEvent = result.events.filter(
-            (event: Event) => event.event === 'AssetRevealBurn'
-          )[0];
-          expect(burnEvent.args['revealer']).to.equal(user.address);
-          expect(burnEvent.args['unrevealedTokenId']).to.equal(
-            unrevealedtokenId
-          );
-          expect(burnEvent.args['amount']).to.equal(amounts[0]);
-        });
         it('Should emit AssetRevealMint event with correct data when burning and revealing a single token', async function () {
           const {
             user,
