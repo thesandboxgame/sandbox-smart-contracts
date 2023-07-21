@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
   const AssetContract = await deployments.get('Asset');
-  const AuthValidatorContract = await deployments.get('AssetAuthValidator');
+  const AuthValidatorContract = await deployments.get('AuthSuperValidator');
   const CatalystContract = await deployments.get('Catalyst');
 
   const name = 'Sandbox Asset Create';
@@ -45,6 +45,6 @@ func.tags = ['Asset', 'AssetCreate', 'AssetCreate_deploy', 'L2'];
 func.dependencies = [
   'Asset_deploy',
   'Catalyst',
-  'AssetAuthValidator_deploy',
+  'AuthSuperValidator_deploy',
   'TRUSTED_FORWARDER_V2',
 ];
