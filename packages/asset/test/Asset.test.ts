@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {runAssetSetup} from './fixtures/assetFixture';
+import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {ethers} from 'hardhat';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {

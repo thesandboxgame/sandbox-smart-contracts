@@ -16,11 +16,17 @@ import {
 import {
     ERC1155URIStorageUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+import {
+    IERC165Upgradeable,
+    ERC2981Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFilter/OperatorFiltererUpgradeable.sol";
+import {IRoyaltyManager} from "@sandbox-smart-contracts/royalties/contracts/interfaces/IRoyaltyManager.sol";
+import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
+import {RoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/RoyaltyDistributer.sol";
 
 /// @title Catalyst
 /// @author The Sandbox
@@ -36,9 +42,9 @@ contract Catalyst is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     ERC2771Handler,
-    ERC2981Upgradeable,
     AccessControlUpgradeable,
-    OperatorFiltererUpgradeable
+    OperatorFiltererUpgradeable,
+    RoyaltyDistributer
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -58,30 +64,26 @@ contract Catalyst is
     /// @notice Initialize the contract, setting up initial values for various features.
     /// @param _baseUri The base URI for the token metadata, most likely set to ipfs://.
     /// @param _trustedForwarder The trusted forwarder for meta transactions.
-    /// @param _royaltyRecipient The recipient of the royalties.
     /// @param _subscription The subscription address.
     /// @param _defaultAdmin The default admin address.
     /// @param _defaultMinter The default minter address.
-    /// @param _defaultCatalystsRoyalty The royalties for each catalyst.
     /// @param _catalystIpfsCID The IPFS content identifiers for each catalyst.
+    /// @param _royaltyManager, the address of the Manager contract for common royalty recipient
     function initialize(
         string memory _baseUri,
         address _trustedForwarder,
-        address _royaltyRecipient,
         address _subscription,
         address _defaultAdmin,
         address _defaultMinter,
-        uint96 _defaultCatalystsRoyalty,
-        string[] memory _catalystIpfsCID
+        string[] memory _catalystIpfsCID,
+        address _royaltyManager
     ) public initializer {
         require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
         require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
         require(_subscription != address(0), "Catalyst: subscription can't be zero");
         require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
         require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
-        require(_royaltyRecipient != address(0), "Catalyst: royalty recipient can't be zero");
-        require(_defaultCatalystsRoyalty != 0, "Catalyst: royalty can't be zero");
-
+        require(_royaltyManager != address(0), "Catalyst: royalty manager can't be zero");
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
@@ -89,11 +91,10 @@ contract Catalyst is
         __ERC1155URIStorage_init();
         __ERC2771Handler_initialize(_trustedForwarder);
         __OperatorFilterer_init(_subscription, true);
-        __ERC2981_init();
         _setBaseURI(_baseUri);
-        _setDefaultRoyalty(_royaltyRecipient, _defaultCatalystsRoyalty);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
+        __RoyaltyDistributer_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
 
@@ -254,17 +255,6 @@ contract Catalyst is
         super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Change the default royalty settings
-    /// @param defaultRoyaltyRecipient The new royalty recipient address
-    /// @param defaultRoyaltyBps The new royalty bps
-    function changeRoyaltyRecipient(address defaultRoyaltyRecipient, uint96 defaultRoyaltyBps)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        _setDefaultRoyalty(defaultRoyaltyRecipient, defaultRoyaltyBps);
-        emit DefaultRoyaltyChanged(defaultRoyaltyRecipient, defaultRoyaltyBps);
-    }
-
     function _beforeTokenTransfer(
         address operator,
         address from,
@@ -282,12 +272,12 @@ contract Catalyst is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC1155Upgradeable, AccessControlUpgradeable, ERC2981Upgradeable)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, RoyaltyDistributer)
         returns (bool)
     {
         return
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             AccessControlUpgradeable.supportsInterface(interfaceId) ||
-            ERC2981Upgradeable.supportsInterface(interfaceId);
+            RoyaltyDistributer.supportsInterface(interfaceId);
     }
 }

@@ -65,7 +65,10 @@ const namedAccounts = {
   defaultMinterAdmin: 'sandAdmin', // can change the fees
   genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
   assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
-  assetAuctionAdmin: 'sandAdmin', // can change fee collector
+  assetAuctionAdmin: 'sandAdmin', // can change fee collector,
+  commonRoyaltyReceiver: 'sandAdmin',
+  royaltyManagerAdmin: 'sandAdmin',
+  contractRoyaltySetter: 6,
 
   sandSaleBeneficiary: {
     default: 3,

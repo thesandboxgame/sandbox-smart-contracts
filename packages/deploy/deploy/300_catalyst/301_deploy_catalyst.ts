@@ -20,18 +20,14 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {
-    deployer,
-    upgradeAdmin,
-    catalystMinter,
-    catalystAdmin,
-    catalystAssetFeeRecipient, // royalty recipient
-  } = await getNamedAccounts();
+  const {deployer, upgradeAdmin, catalystMinter, catalystAdmin} =
+    await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const OperatorFilterSubscription = await deployments.get(
     'OperatorFilterRegistrant'
   );
+  const RoyaltyManager = await deployments.get('RoyaltyManager');
 
   await deploy('Catalyst', {
     from: deployer,
@@ -45,12 +41,11 @@ const func: DeployFunction = async function (
         args: [
           CATALYST_BASE_URI,
           TRUSTED_FORWARDER.address,
-          catalystAssetFeeRecipient, // royalty recipient
           OperatorFilterSubscription.address,
           catalystAdmin, // DEFAULT_ADMIN_ROLE
           catalystMinter, // MINTER_ROLE
-          CATALYST_DEFAULT_ROYALTY,
           CATALYST_IPFS_CID_PER_TIER,
+          RoyaltyManager.address,
         ],
       },
       upgradeIndex: 0,
@@ -60,4 +55,8 @@ const func: DeployFunction = async function (
 };
 export default func;
 func.tags = ['Catalyst', 'Catalyst_deploy', 'L2'];
-func.dependencies = ['OperatorFilterRegistrant', 'TRUSTED_FORWARDER_V2'];
+func.dependencies = [
+  'OperatorFilterRegistrant',
+  'TRUSTED_FORWARDER_V2',
+  'RoyaltyManager',
+];
