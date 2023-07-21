@@ -1,5 +1,7 @@
 import '@nomicfoundation/hardhat-toolbox';
 import {HardhatUserConfig} from 'hardhat/config';
+import 'solidity-coverage';
+import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required

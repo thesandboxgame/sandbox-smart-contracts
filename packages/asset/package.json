@@ -1,9 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/asset",
   "version": "0.0.1",
-  "dependencies": {
-    "@sandbox-smart-contracts/royalties": "*"
-  },
   "description": "Asset L2 smart contracts",
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
@@ -28,7 +25,8 @@
     "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/contracts-upgradeable": "^4.9.0",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
-    "@sandbox-smart-contracts/operator-filter": "*",
+    "@sandbox-smart-contracts/dependency-operator-filter": "*",
+    "@sandbox-smart-contracts/dependency-royalty-management": "*",
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.3.5",

@@ -10,6 +10,7 @@ import './tasks/importedPackages';
 const importedPackages = {
   '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
+  '@sandbox-smart-contracts/operator-filter': 'contracts/',
 };
 
 const namedAccounts = {

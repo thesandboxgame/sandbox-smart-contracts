@@ -23,12 +23,16 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {
     OperatorFiltererUpgradeable,
     IOperatorFilterRegistry
-} from "@sandbox-smart-contracts/operator-filter/contracts/OperatorFilter/OperatorFiltererUpgradeable.sol";
-import {IRoyaltyManager} from "@sandbox-smart-contracts/royalties/contracts/interfaces/IRoyaltyManager.sol";
+} from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
+import {
+    RoyaltyDistributer
+} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributer.sol";
+import {
+    IRoyaltyManager
+} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
-import {RoyaltyDistributer} from "@sandbox-smart-contracts/royalties/contracts/RoyaltyDistributer.sol";
 
 /// @title Catalyst
 /// @author The Sandbox
