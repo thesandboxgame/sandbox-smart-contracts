@@ -26,7 +26,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
     using AddressUpgradeable for address;
     using SafeMath for uint256;
 
-    uint256 internal constant Total_BASIS_POINTS = 10000;
+    uint256 internal constant TOTAL_BASIS_POINTS = 10000;
     uint256 internal constant IERC20_APPROVE_SELECTOR =
         0x095ea7b300000000000000000000000000000000000000000000000000000000;
     uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
@@ -107,7 +107,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
             unchecked {
                 for (uint256 i = _recipients.length - 1; i > 0; i--) {
                     Recipient memory recipient = _recipients[i];
-                    amountToSend = (value * recipient.bps) / Total_BASIS_POINTS;
+                    amountToSend = (value * recipient.bps) / TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
                     recipient.recipient.sendValue(amountToSend);
                     emit ETHTransferred(recipient.recipient, amountToSend);
@@ -150,7 +150,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
                     bool success;
                     (success, amountToSend) = balance.tryMul(recipient.bps);
 
-                    amountToSend /= Total_BASIS_POINTS;
+                    amountToSend /= TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
                     try erc20Contract.transfer(recipient.recipient, amountToSend) {
                         emit ERC20Transferred(address(erc20Contract), recipient.recipient, amountToSend);

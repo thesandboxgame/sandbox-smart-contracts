@@ -12,7 +12,7 @@ import {
 import {RoyaltySplitter} from "./RoyaltySplitter.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-/// @title Registry
+/// @title RoyaltyManager
 /// @author The Sandbox
 /// @notice Registry contract to set the common Recipient and Split for the RoyaltySplitter. Also, to set the royalty info
 /// for contracts that don't use the RoyaltySplitter.
