@@ -68,7 +68,7 @@ const namedAccounts = {
   assetAuctionAdmin: 'sandAdmin', // can change fee collector,
   commonRoyaltyReceiver: 'sandAdmin',
   royaltyManagerAdmin: 'sandAdmin',
-  contractRoyaltySetter: 'deployer',
+  contractRoyaltySetter: 6,
 
   sandSaleBeneficiary: {
     default: 3,
