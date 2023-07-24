@@ -7,7 +7,7 @@ The intended audience for .md documentation is auditors, internal developers and
 This contract give rewards in any ERC20, ERC721 or ERC1155 when the backend authorize it via message signing. The
 message is composed of:
 
-- A list of signatures. If the contract holt too much value more than one signature is needed. Ideally the systems that
+- A list of signatures. If the contract holds too much value more than one signature is needed. Ideally the systems that
   sign must be independent.
 - A list of claim ids used by the backend to avoid double spending.
 - Expiration the expiration time of the message in unix timestamp. After the expiration the message cannot be used
@@ -55,34 +55,31 @@ We have the following limits:
 
 ```solidity
 struct PerTokenLimitData {
-	uint256 maxWeiPerClaim;
+    uint256 maxWeiPerClaim;
 }
 ```
-
 
 ### LimitData
 
 ```solidity
 struct LimitData {
-	uint128 numberOfSignaturesNeeded;
-	uint128 maxClaimEntries;
+    uint128 numberOfSignaturesNeeded;
+    uint128 maxClaimEntries;
 }
 ```
-
 
 ### BatchClaimData
 
 ```solidity
 struct BatchClaimData {
-	SignedMultiGiveawayBase.Signature[] sigs;
-	uint256[] claimIds;
-	uint256 expiration;
-	address from;
-	address to;
-	SignedMultiGiveawayBase.ClaimEntry[] claims;
+    SignedMultiGiveawayBase.Signature[] sigs;
+    uint256[] claimIds;
+    uint256 expiration;
+    address from;
+    address to;
+    SignedMultiGiveawayBase.ClaimEntry[] claims;
 }
 ```
-
 
 ## Events info
 
@@ -92,13 +89,11 @@ struct BatchClaimData {
 event Claimed(uint256[] claimIds, address indexed from, address indexed to, SignedMultiGiveawayBase.ClaimEntry[] claims, address operator)
 ```
 
-
 ### RevokedClaims
 
 ```solidity
 event RevokedClaims(uint256[] claimIds, address operator)
 ```
-
 
 ### AssetsRecovered
 
@@ -106,13 +101,11 @@ event RevokedClaims(uint256[] claimIds, address operator)
 event AssetsRecovered(address to, SignedMultiGiveawayBase.ClaimEntry[] claims, address operator)
 ```
 
-
 ### MaxWeiPerClaimSet
 
 ```solidity
 event MaxWeiPerClaimSet(address token, uint256 tokenId, uint256 maxWeiPerClaim, address operator)
 ```
-
 
 ### NumberOfSignaturesNeededSet
 
@@ -120,13 +113,11 @@ event MaxWeiPerClaimSet(address token, uint256 tokenId, uint256 maxWeiPerClaim, 
 event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address operator)
 ```
 
-
 ### MaxClaimEntriesSet
 
 ```solidity
 event MaxClaimEntriesSet(uint256 maxClaimEntries, address operator)
 ```
-
 
 ## Constants info
 
@@ -137,6 +128,7 @@ bytes32 constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE")
 ```
 
 this role is for addresses that help the admin. Can pause the contract, butF, only the admin can unpause it.
+
 ## Modifiers info
 
 ### onlyAdmin
@@ -145,13 +137,11 @@ this role is for addresses that help the admin. Can pause the contract, butF, on
 modifier onlyAdmin()
 ```
 
-
 ### onlyBackoffice
 
 ```solidity
 modifier onlyBackoffice()
 ```
-
 
 ## Functions info
 
@@ -159,10 +149,9 @@ modifier onlyBackoffice()
 
 ```solidity
 function initialize(address trustedForwarder_, address admin_)
-    external
-    initializer
+external
+initializer
 ```
-
 
 ### claim (0xbec74704)
 
@@ -179,7 +168,6 @@ function claim(
 
 verifies the ERC712 signatures and transfer tokens from the source user to the destination user.
 
-
 Parameters:
 
 | Name     | Type                                        | Description                                                      |
@@ -194,12 +182,11 @@ Parameters:
 
 ```solidity
 function batchClaim(SignedMultiGiveaway.BatchClaimData[] calldata batch)
-    external
-    whenNotPaused
+external
+whenNotPaused
 ```
 
 does a lot of claims in batch
-
 
 Parameters:
 
@@ -218,7 +205,6 @@ function recoverAssets(
 
 let the admin recover tokens from the contract
 
-
 Parameters:
 
 | Name   | Type                                        | Description                                |
@@ -234,7 +220,6 @@ function revokeClaims(uint256[] calldata claimIds) external onlyBackoffice
 
 let the admin revoke some claims so they cannot be used anymore
 
-
 Parameters:
 
 | Name     | Type      | Description                      |
@@ -248,6 +233,7 @@ function pause() external onlyBackoffice
 ```
 
 Triggers stopped state. No mre claims are accepted.
+
 ### unpause (0x3f4ba83a)
 
 ```solidity
@@ -255,16 +241,16 @@ function unpause() external onlyAdmin
 ```
 
 Returns to the normal state. Accept claims.
+
 ### setNumberOfSignaturesNeeded (0x2ed5c3a7)
 
 ```solidity
 function setNumberOfSignaturesNeeded(uint128 numberOfSignaturesNeeded)
-    external
-    onlyAdmin
+external
+onlyAdmin
 ```
 
 set the global limits of the contract
-
 
 Parameters:
 
@@ -279,7 +265,6 @@ function setMaxClaimEntries(uint128 maxClaimEntries) external onlyAdmin
 ```
 
 set the global limits of the contract
-
 
 Parameters:
 
@@ -317,7 +302,6 @@ function isClaimed(uint256 claimId) external view virtual returns (bool)
 
 return true if already claimed
 
-
 Return values:
 
 | Name | Type | Description     |
@@ -339,7 +323,6 @@ function verifySignature(
 
 verifies a ERC712 signature for the Claim data type.
 
-
 Parameters:
 
 | Name       | Type                                        | Description                              |
@@ -350,7 +333,6 @@ Parameters:
 | from       | address                                     | source user                              |
 | to         | address                                     | destination user                         |
 | claims     | struct SignedMultiGiveawayBase.ClaimEntry[] | list of tokens to do transfer            |
-
 
 Return values:
 
@@ -366,7 +348,6 @@ function domainSeparator() public view virtual returns (bytes32)
 
 EIP712 domain separator
 
-
 Return values:
 
 | Name | Type    | Description                      |
@@ -380,6 +361,7 @@ function getNumberOfSignaturesNeeded() external view returns (uint256)
 ```
 
 get the needed number of signatures to approve a claim
+
 ### getMaxClaimEntries (0x4423c4bc)
 
 ```solidity
@@ -387,13 +369,14 @@ function getMaxClaimEntries() external view returns (uint256)
 ```
 
 get the maximum claim entries per claim
+
 ### getMaxWeiPerClaim (0xaa5a047d)
 
 ```solidity
 function getMaxWeiPerClaim(address token, uint256 tokenId)
-    external
-    view
-    returns (uint256)
+external
+view
+returns (uint256)
 ```
 
 get maximum Weis that can be claimed at once
@@ -411,11 +394,11 @@ Parameters:
 
 ```solidity
 function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override
-    returns (bool)
+public
+view
+virtual
+override
+returns (bool)
 ```
 
 See {IERC165-supportsInterface}.

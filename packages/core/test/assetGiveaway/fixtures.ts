@@ -109,7 +109,7 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function assignReservedAddressToClaim(dataSet: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return dataSet.map(async (claim: any) => {
+    return dataSet.map((claim: any) => {
       claim.reservedAddress = others[0];
       return claim;
     });

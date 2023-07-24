@@ -1,4 +1,3 @@
-// const {ethers, getNamedAccounts, ethereum} = require('@nomiclabs/buidler');
 const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
 const {BigNumber, utils} = require('ethers');
 const Prando = require('prando');
@@ -68,7 +67,7 @@ const erc721Tests = require('../erc721')(
     const assetContract1155 = await ethers.getContract('Asset');
     const assetContract721 = await ethers.getContract('AssetERC721');
 
-    await [...others].map(async (user) => {
+    for (const user of others) {
       const assetContract1155AsUser = await assetContract1155.connect(
         ethers.provider.getSigner(user)
       );
@@ -77,7 +76,7 @@ const erc721Tests = require('../erc721')(
         ethers.provider.getSigner(user)
       );
       await assetContract721AsUser.setApprovalForAll(contract.address, true);
-    });
+    }
 
     const assetAsAdmin = await assetContract1155.connect(
       ethers.provider.getSigner(assetAdmin)
@@ -91,6 +90,7 @@ const erc721Tests = require('../erc721')(
 
     async function mint(to) {
       const assets = [];
+
       async function supplyAssets(to) {
         for (i; i < 6; i++) {
           const tx = await assetAsAdmin[
@@ -107,6 +107,7 @@ const erc721Tests = require('../erc721')(
           packId++;
         }
       }
+
       await supplyAssets(to);
       const randomId = await getRandom();
 

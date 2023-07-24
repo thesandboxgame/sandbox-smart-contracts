@@ -1817,7 +1817,7 @@ describe('LandV3', function () {
 
     it('it should setApprovalForAll non blacklisted market places', async function () {
       const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
-      users[0].landV3.setApprovalForAll(mockMarketPlace3.address, true);
+      await users[0].landV3.setApprovalForAll(mockMarketPlace3.address, true);
       expect(
         await landV3.isApprovedForAll(
           users[0].address,
@@ -1828,7 +1828,7 @@ describe('LandV3', function () {
 
     it('it should setApprovalForAllFor non blacklisted market places', async function () {
       const {mockMarketPlace3, landV3, users} = await setupOperatorFilter();
-      users[0].landV3.setApprovalForAllFor(
+      await users[0].landV3.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
@@ -1945,7 +1945,7 @@ describe('LandV3', function () {
         landV3,
         users,
       } = await setupOperatorFilter();
-      users[0].landV3.setApprovalForAllFor(
+      await users[0].landV3.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
@@ -2096,7 +2096,7 @@ describe('LandV3', function () {
         mockMarketPlace3.address
       );
 
-      users[0].landV3.setApprovalForAllFor(
+      await users[0].landV3.setApprovalForAllFor(
         users[0].address,
         mockMarketPlace3.address,
         true
