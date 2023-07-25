@@ -126,6 +126,10 @@ export async function runCreateTestSetup() {
 
   // END DEPLOY DEPENDENCIES
 
+  const MockAssetCreate = await ethers.getContractFactory('MockAssetCreate');
+  const MockAssetCreateContract = await MockAssetCreate.deploy();
+  await MockAssetCreateContract.deployed();
+
   const AssetCreateFactory = await ethers.getContractFactory('AssetCreate');
 
   const AssetCreateContract = await upgrades.deployProxy(
@@ -168,13 +172,15 @@ export async function runCreateTestSetup() {
     AssetCreateContract.address
   );
 
-  const AssetCreateAsAdmin = AssetCreateContract.connect(assetAdmin);
+  const AdminRole = await AssetCreateContract.DEFAULT_ADMIN_ROLE();
+
+  const AssetCreateContractAsAdmin = AssetCreateContract.connect(assetAdmin);
   const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
   // END SETUP ROLES
 
   // HELPER FUNCTIONS
   const grantSpecialMinterRole = async (address: string) => {
-    await AssetCreateAsAdmin.grantRole(SpecialMinterRole, address);
+    await AssetCreateContractAsAdmin.grantRole(SpecialMinterRole, address);
   };
 
   const mintCatalyst = async (
@@ -193,7 +199,7 @@ export async function runCreateTestSetup() {
     revealed: boolean,
     metadataHash: string
   ) => {
-    await AssetCreateContractAsUser.createAsset(
+    const tx = await AssetCreateContractAsUser.createAsset(
       signature,
       tier,
       amount,
@@ -201,6 +207,8 @@ export async function runCreateTestSetup() {
       metadataHash,
       user.address
     );
+    const result = await tx.wait();
+    return result;
   };
 
   const mintMultipleAssets = async (
@@ -210,7 +218,7 @@ export async function runCreateTestSetup() {
     revealed: boolean[],
     metadataHashes: string[]
   ) => {
-    await AssetCreateContractAsUser.createMultipleAssets(
+    const tx = await AssetCreateContractAsUser.createMultipleAssets(
       signature,
       tiers,
       amounts,
@@ -218,6 +226,9 @@ export async function runCreateTestSetup() {
       metadataHashes,
       user.address
     );
+
+    const result = await tx.wait();
+    return result;
   };
 
   const mintSpecialAsset = async (
@@ -227,7 +238,7 @@ export async function runCreateTestSetup() {
     revealed: boolean,
     metadataHash: string
   ) => {
-    await AssetCreateContractAsUser.createSpecialAsset(
+    const tx = await AssetCreateContractAsUser.createSpecialAsset(
       signature,
       tier,
       amount,
@@ -235,6 +246,8 @@ export async function runCreateTestSetup() {
       metadataHash,
       user.address
     );
+    const result = await tx.wait();
+    return result;
   };
 
   const getCreatorNonce = async (creator: string) => {
@@ -288,11 +301,16 @@ export async function runCreateTestSetup() {
     ],
     additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
     user,
+    AdminRole,
+    trustedForwarder,
     otherWallet,
     AssetContract,
     AssetCreateContract,
+    AssetCreateContractAsUser,
+    AssetCreateContractAsAdmin,
     AuthValidatorContract,
     CatalystContract,
+    MockAssetCreateContract,
     mintCatalyst,
     mintSingleAsset,
     mintMultipleAssets,
