@@ -148,11 +148,7 @@ contract Asset is
     /// @dev The metadata hash should be the IPFS CIDv1 base32 encoded hash
     /// @param tokenId The token id to set URI for
     /// @param metadata The new URI for asset's metadata
-    function setTokenURI(uint256 tokenId, string memory metadata) external {
-        require(
-            hasRole(MODERATOR_ROLE, _msgSender()) || hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "Asset: must have moderator or admin role to set token URI"
-        );
+    function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(MODERATOR_ROLE) {
         _setURI(tokenId, metadata);
     }
 
@@ -179,7 +175,6 @@ contract Asset is
     }
 
     function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
-        require(hasRole(MINTER_ROLE, _msgSender()), "Asset: must have minter or admin role to mint");
         if (hashUsed[metadataHash] != 0) {
             require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
         } else {

@@ -135,21 +135,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const tokenURI = await AssetContract.uri(tokenId);
       expect(tokenURI).to.be.equal(baseURI + metadataHashes[0]);
     });
-    it('Should allow DEFAULT_ADMIN to change token URI', async function () {
-      const {
-        AssetContract,
-        AssetContractAsAdmin,
-        mintOne,
-        metadataHashes,
-        baseURI,
-      } = await runAssetSetup();
-      const {tokenId} = await mintOne();
-      const tokenURI = await AssetContract.uri(tokenId);
-      expect(tokenURI).to.be.equal(baseURI + metadataHashes[0]);
-      await AssetContractAsAdmin.setTokenURI(tokenId, metadataHashes[1]);
-      const newTokenURI = await AssetContract.uri(tokenId);
-      expect(newTokenURI).to.be.equal(baseURI + metadataHashes[1]);
-    });
     it('Should allow MODERATOR_ROLE to change token URI', async function () {
       const {
         AssetContract,
@@ -173,13 +158,15 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       expect(newTokenURI).to.be.equal(baseURI + metadataHashes[1]);
     });
     it('Should not allow unauthorized accounts to change token URI', async function () {
-      const {AssetContractAsMinter, mintOne, metadataHashes} =
+      const {AssetContractAsMinter, mintOne, metadataHashes, minter} =
         await runAssetSetup();
       const {tokenId} = await mintOne();
       await expect(
         AssetContractAsMinter.setTokenURI(tokenId, metadataHashes[1])
       ).to.be.revertedWith(
-        'Asset: must have moderator or admin role to set token URI'
+        `AccessControl: account ${minter.address.toLowerCase()} is missing role ${ethers.utils.id(
+          'MODERATOR_ROLE'
+        )}`
       );
     });
   });

@@ -118,7 +118,7 @@ Parameters:
 function setTokenURI(uint256 tokenId, string memory metadata) external
 ```
 
-Sets a new URI for a specific token, only available to DEFAULT_ADMIN_ROLE or MODERATOR_ROLE.
+Sets a new URI for a specific token, only available to MODERATOR_ROLE.
 
 Parameters:
 
