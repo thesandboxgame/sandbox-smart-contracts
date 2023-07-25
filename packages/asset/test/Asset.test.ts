@@ -173,18 +173,13 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       expect(newTokenURI).to.be.equal(baseURI + metadataHashes[1]);
     });
     it('Should not allow unauthorized accounts to change token URI', async function () {
-      const {
-        AssetContractAsMinter,
-        minter,
-        mintOne,
-        metadataHashes,
-        defaultAdminRole,
-      } = await runAssetSetup();
+      const {AssetContractAsMinter, mintOne, metadataHashes} =
+        await runAssetSetup();
       const {tokenId} = await mintOne();
       await expect(
         AssetContractAsMinter.setTokenURI(tokenId, metadataHashes[1])
       ).to.be.revertedWith(
-        `AccessControl: account ${minter.address.toLowerCase()} is missing role ${defaultAdminRole}`
+        'Asset: must have moderator or admin role to set token URI'
       );
     });
   });
