@@ -3,10 +3,7 @@ pragma solidity 0.8.18;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
@@ -29,7 +26,6 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
     mapping(address => uint16) public signatureNonces;
 
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
-    bytes32 public constant BRIDGE_MINTER_ROLE = keccak256("BRIDGE_MINTER_ROLE");
     bytes32 public constant MINT_TYPEHASH =
         keccak256("Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)");
     bytes32 public constant MINT_BATCH_TYPEHASH =
@@ -85,8 +81,13 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -160,19 +161,16 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit SpecialAssetMinted(creator, tokenId, amount, metadataHash);
-    }
-
-    /// @notice Get the next available creator nonce
-    /// @dev Called from the bridge contract
-    /// @param creator The address of the creator
-    /// @return nonce The next available creator nonce
-    function bridgeIncrementCreatorNonce(address creator) external onlyRole(BRIDGE_MINTER_ROLE) returns (uint16) {
-        return ++creatorNonces[creator];
+        emit SpecialAssetMinted(creator, tokenId, tier, amount, metadataHash, revealed);
     }
 
     /// @notice Get the asset contract address
@@ -261,6 +259,15 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         }
 
         return keccak256(abi.encodePacked(encodedHashes));
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder != address(0), "AssetReveal: trusted forwarder can't be zero address");
+        _trustedForwarder = trustedForwarder;
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
