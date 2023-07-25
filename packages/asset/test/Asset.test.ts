@@ -150,23 +150,29 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const newTokenURI = await AssetContract.uri(tokenId);
       expect(newTokenURI).to.be.equal(baseURI + metadataHashes[1]);
     });
-    it('Should not allow DEFAULT_ADMIN to change token URI to already used hash', async function () {
+    it('Should allow MODERATOR_ROLE to change token URI', async function () {
       const {
         AssetContract,
+        AssetContractAsOwner,
+        owner,
         AssetContractAsAdmin,
         mintOne,
         metadataHashes,
         baseURI,
       } = await runAssetSetup();
       const {tokenId} = await mintOne();
-      await mintOne(undefined, undefined, undefined, metadataHashes[1]);
       const tokenURI = await AssetContract.uri(tokenId);
       expect(tokenURI).to.be.equal(baseURI + metadataHashes[0]);
-      await expect(
-        AssetContractAsAdmin.setTokenURI(tokenId, metadataHashes[1])
-      ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+      // grant moderator role to owner
+      await AssetContractAsAdmin.grantRole(
+        ethers.utils.id('MODERATOR_ROLE'),
+        owner.address
+      );
+      await AssetContractAsOwner.setTokenURI(tokenId, metadataHashes[1]);
+      const newTokenURI = await AssetContract.uri(tokenId);
+      expect(newTokenURI).to.be.equal(baseURI + metadataHashes[1]);
     });
-    it('Should not allow non-DEFAULT_ADMIN to change token URI', async function () {
+    it('Should not allow unauthorized accounts to change token URI', async function () {
       const {
         AssetContractAsMinter,
         minter,

@@ -113,10 +113,10 @@ Parameters:
 ### setTokenURI
 
 ```solidity
-function setTokenURI(uint256 tokenId, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE)
+function setTokenURI(uint256 tokenId, string memory metadata) external
 ```
 
-Sets a new URI for a specific token.
+Sets a new URI for a specific token, only available to DEFAULT_ADMIN_ROLE or MODERATOR_ROLE.
 
 Parameters:
 
