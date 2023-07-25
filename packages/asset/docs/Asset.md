@@ -7,12 +7,14 @@ This is the base Asset L2 contract that serves as an upgradeable, burnable ERC11
 1. **Minter**: This role can create new tokens using the `mint` or `mintBatch` functions.
 2. **Burner**: This role can destroy tokens using the `burnFrom` or `burnBatchFrom` functions.
 3. **Admin**: This role has broad administrative permissions including the ability to set URIs and change the trusted forwarder.
+4. **Moderator**: This role has the ability to set URIs.
 
 ## Public Variables
 
 1. `MINTER_ROLE` - A bytes32 value representing the role that can mint new tokens.
 2. `BURNER_ROLE` - A bytes32 value representing the role that can burn tokens.
-3. `hashUsed` - A mapping from string metadata hashes to uint256 token IDs.
+3. `MODERATOR_ROLE` - A bytes32 value representing the role that can set URIs.
+4. `hashUsed` - A mapping from string metadata hashes to uint256 token IDs.
 
 ## Functions
 
