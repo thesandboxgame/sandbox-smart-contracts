@@ -3,7 +3,10 @@ pragma solidity 0.8.18;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
@@ -81,13 +84,8 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -161,13 +159,8 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
             "Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? 1 : 0,
-            false
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, tier, amount, metadataHash, revealed);
