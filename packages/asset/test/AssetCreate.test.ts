@@ -1142,4 +1142,200 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
+  describe('Token info', function () {
+    it('should return correct creator from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.getCreatorAddress(tokenId)).to.equal(
+        user.address
+      );
+    });
+    it('should return correct reveal from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.getRevealNonce(tokenId)).to.equal(1);
+    });
+    it('should return correct Bridged information from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.isBridged(tokenId)).to.equal(false);
+    });
+    it('should return correct tier from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.getTier(tokenId)).to.equal(4);
+    });
+    it('should return correct revealed information from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.isRevealed(tokenId)).to.equal(true);
+    });
+    it('should return correct creator nonce from asset', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        AssetContract,
+        metadataHashes,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 5);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const result = await mintSingleAsset(
+        signature,
+        4,
+        5,
+        true,
+        metadataHashes[0]
+      );
+
+      const tokenId = result.events.filter(
+        (e: Event) => e.event == 'AssetMinted'
+      )[0].args.tokenId;
+
+      expect(await AssetContract.getCreatorNonce(tokenId)).to.equal(1);
+    });
+  });
 });
