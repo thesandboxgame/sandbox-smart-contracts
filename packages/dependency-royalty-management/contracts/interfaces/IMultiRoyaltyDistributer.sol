@@ -57,4 +57,6 @@ interface IMultiRoyaltyDistributer is IERC165 {
      * @dev Helper function to get all splits contracts
      */
     function getAllSplits() external view returns (address payable[] memory);
+
+    function getRecipients(uint256 tokenId) external view returns (Recipient[] memory);
 }
