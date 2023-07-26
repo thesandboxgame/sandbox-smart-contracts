@@ -45,13 +45,7 @@ contract MockERC1155MarketPlace3 is ERC1155Receiver, ERC721Holder {
         IERC1155Upgradeable(asset).safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 
@@ -65,7 +59,8 @@ contract MockERC1155MarketPlace3 is ERC1155Receiver, ERC721Holder {
         return ERC1155_BATCH_RECEIVED;
     }
 
-    function supportsInterface(bytes4 _interfaceId) public view override returns (bool) {
-        super.supportsInterface(_interfaceId);
+    function supportsInterface(bytes4 _interfaceId) public view override returns (bool interfaceId) {
+        interfaceId = super.supportsInterface(_interfaceId);
+        return interfaceId;
     }
 }

@@ -14,12 +14,10 @@ contract RoyaltyDistributer is IERC2981Upgradeable {
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
     /// @dev tokenId is one of the EIP2981 args for this function can't be removed
-    /// @param _tokenId of catalyst for which the royalty is distributed
     /// @param _salePrice the price of catalyst on which the royalty is calculated
     /// @return receiver the receiver of royalty
     /// @return royaltyAmount the amount of royalty
-    /* solhint-disable-next-line no-unused-vars*/
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
+    function royaltyInfo(uint256 /*_tokenId */, uint256 _salePrice)
         external
         view
         returns (address receiver, uint256 royaltyAmount)
