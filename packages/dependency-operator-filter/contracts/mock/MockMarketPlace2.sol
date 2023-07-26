@@ -45,7 +45,13 @@ contract MockERC1155MarketPlace2 is ERC1155Receiver, ERC721Holder {
         IERC1155Upgradeable(asset).safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure returns (bytes4) {
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 

@@ -17,11 +17,10 @@ contract RoyaltyDistributer is IERC2981Upgradeable {
     /// @param _salePrice the price of catalyst on which the royalty is calculated
     /// @return receiver the receiver of royalty
     /// @return royaltyAmount the amount of royalty
-    function royaltyInfo(uint256 /*_tokenId */, uint256 _salePrice)
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount)
-    {
+    function royaltyInfo(
+        uint256, /*_tokenId */
+        uint256 _salePrice
+    ) external view returns (address receiver, uint256 royaltyAmount) {
         uint16 royaltyBps;
         (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
         royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
