@@ -20,7 +20,7 @@ import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 /// @author The Sandbox
 /// @dev  The MultiRoyaltyDistributer contract implements the ERC-2981 and ERC-165 interfaces for a royalty payment system. This payment system can be used to pay royalties to multiple recipients through splitters.
 /// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to slip its royalty between the creator and Sandbox and use it for every token minted by that creator.
-abstract contract MultiRoyaltyDistributer is IEIP2981, IMultiRoyaltyDistributer, ERC165Upgradeable {
+abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributer, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     uint16 public _defaultRoyaltyBPS;
     address payable public _defaultRoyaltyReceiver;
@@ -29,7 +29,7 @@ abstract contract MultiRoyaltyDistributer is IEIP2981, IMultiRoyaltyDistributer,
     mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
-    function __MultiRoyaltyDistributer_init(
+    function __MultiRoyaltyDistributor_init(
         address payable defaultRecipient,
         uint16 defaultBps,
         address _royaltyManager
