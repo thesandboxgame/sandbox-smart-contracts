@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import "./IRoyaltyUGC.sol";
+import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 
 interface ITokenUtils is IRoyaltyUGC {
     function getTier(uint256 tokenId) external pure returns (uint8 tier);
