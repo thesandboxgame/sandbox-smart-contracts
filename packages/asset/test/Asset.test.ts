@@ -838,8 +838,126 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0x572b6c05')).to.be.true;
     });
+    it('should support RoyaltyUGC', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0xa30b4db9')).to.be.true;
+    });
   });
+  describe('Token util', function () {
+    it('should return correct creator from asset for a token', async function () {
+      const {AssetContractAsMinter, generateAssetId, owner} =
+        await runAssetSetup();
 
+      const tier = 4;
+      const revealNonce = 1;
+      const creatorNonce = 1;
+      const bridgeMinted = false;
+
+      const tokenId = generateAssetId(
+        owner.address,
+        tier,
+        creatorNonce,
+        revealNonce,
+        bridgeMinted
+      );
+
+      await AssetContractAsMinter.mint(owner.address, tokenId, 1, '0x');
+
+      expect(await AssetContractAsMinter.getCreatorAddress(tokenId)).to.equal(
+        owner.address
+      );
+    });
+
+    it('should return correct bridged information from asset for a token', async function () {
+      const {AssetContractAsMinter, generateAssetId, owner} =
+        await runAssetSetup();
+
+      const tier = 4;
+      const revealNonce = 1;
+      const creatorNonce = 1;
+      const bridgeMinted = false;
+
+      const tokenId = generateAssetId(
+        owner.address,
+        tier,
+        creatorNonce,
+        revealNonce,
+        bridgeMinted
+      );
+      await AssetContractAsMinter.mint(owner.address, tokenId, 1, '0x');
+
+      expect(await AssetContractAsMinter.isBridged(tokenId)).to.equal(
+        bridgeMinted
+      );
+    });
+    it('should return correct tier from asset for a token', async function () {
+      const {AssetContractAsMinter, generateAssetId, owner} =
+        await runAssetSetup();
+
+      const tier = 4;
+      const revealNonce = 1;
+      const creatorNonce = 1;
+      const bridgeMinted = false;
+
+      const tokenId = generateAssetId(
+        owner.address,
+        tier,
+        creatorNonce,
+        revealNonce,
+        bridgeMinted
+      );
+
+      await AssetContractAsMinter.mint(owner.address, tokenId, 1, '0x');
+
+      expect(await AssetContractAsMinter.getTier(tokenId)).to.equal(tier);
+    });
+    it('should return correct revealed information from asset for a token', async function () {
+      const {AssetContractAsMinter, generateAssetId, owner} =
+        await runAssetSetup();
+
+      const tier = 4;
+      const revealNonce = 1;
+      const creatorNonce = 1;
+      const bridgeMinted = false;
+
+      const tokenId = generateAssetId(
+        owner.address,
+        tier,
+        creatorNonce,
+        revealNonce,
+        bridgeMinted
+      );
+
+      await AssetContractAsMinter.mint(owner.address, tokenId, 1, '0x');
+
+      expect(await AssetContractAsMinter.isRevealed(tokenId)).to.equal(true);
+      expect(await AssetContractAsMinter.getRevealNonce(tokenId)).to.equal(
+        revealNonce
+      );
+    });
+    it('should return correct creator nonce from asset for a token', async function () {
+      const {AssetContractAsMinter, generateAssetId, owner} =
+        await runAssetSetup();
+
+      const tier = 4;
+      const revealNonce = 1;
+      const creatorNonce = 1;
+      const bridgeMinted = false;
+
+      const tokenId = generateAssetId(
+        owner.address,
+        tier,
+        creatorNonce,
+        revealNonce,
+        bridgeMinted
+      );
+
+      await AssetContractAsMinter.mint(owner.address, tokenId, 1, '0x');
+      expect(await AssetContractAsMinter.getCreatorNonce(tokenId)).to.equal(
+        creatorNonce
+      );
+    });
+  });
   describe('OperatorFilterer', function () {
     describe('common subscription setup', function () {
       it('should be registered', async function () {
