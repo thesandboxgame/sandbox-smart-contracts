@@ -117,6 +117,7 @@ contract SignedMultiGiveaway is
     /// @notice verifies the ERC712 signatures and transfer tokens from the source user to the destination user.
     /// @param sigs signature part (v,r,s) the array of signatures M in N of M sigs
     /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param expiration expiration timestamp
     /// @param from source user
     /// @param to destination user
     /// @param claims list of tokens to do transfer
