@@ -26,6 +26,54 @@ export function generateOldAssetId(
   return `${creator}${zeroAppends}${hex}`;
 }
 
+export function generateAssetId(
+  creator: string,
+  tier: number,
+  nonce: number,
+  revealNonce: number,
+  Bridged: boolean
+) {
+  const tierHex = tier.toString(16);
+  const tierHexLength = tierHex.length;
+  let tierAppend;
+  if (tierHexLength >= 2) {
+    tierAppend = tierHex.substring(tierHexLength - 2);
+  } else {
+    tierAppend = '0' + tierHex;
+  }
+
+  let nonceHex = nonce.toString(16);
+  const nonceLength = nonceHex.length;
+  1;
+  let nonceAppend;
+  if (nonceLength >= 4) {
+    nonceAppend = nonceHex.substring(nonceLength - 4);
+  } else {
+    for (let i = nonceLength; i < 4; i++) {
+      nonceHex = '0' + nonceHex;
+    }
+    nonceAppend = nonceHex;
+  }
+
+  let revealNonceHex = revealNonce.toString(16);
+  const revealNonceHexLength = revealNonceHex.length;
+  let revealNonceAppend;
+  if (revealNonceHexLength >= 4) {
+    revealNonceAppend = revealNonceHex.substring(revealNonceHexLength - 4);
+  } else {
+    for (let i = revealNonceHexLength; i < 4; i++) {
+      revealNonceHex = '0' + revealNonceHex;
+    }
+    revealNonceAppend = revealNonceHex;
+  }
+
+  const zeroAppends = '0x00000000000000';
+
+  return `${zeroAppends}${
+    Bridged ? '1' : '0'
+  }${revealNonceAppend}${nonceAppend}${tierAppend}${creator.substring(2)}`;
+}
+
 export async function runAssetSetup() {
   const [
     assetAdmin,
@@ -237,5 +285,6 @@ export async function runAssetSetup() {
     burnOne,
     burnBatch,
     mintBatch,
+    generateAssetId,
   };
 }

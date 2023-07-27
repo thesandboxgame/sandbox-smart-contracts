@@ -30,6 +30,7 @@ import {
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
+import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 
 contract Asset is
     IAsset,
@@ -40,7 +41,8 @@ contract Asset is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     OperatorFiltererUpgradeable,
-    MultiRoyaltyDistributor
+    MultiRoyaltyDistributor,
+    ITokenUtils
 {
     using TokenIdUtils for uint256;
 
@@ -207,6 +209,7 @@ contract Asset is
             id == type(IERC1155Upgradeable).interfaceId ||
             id == type(IERC1155MetadataURIUpgradeable).interfaceId ||
             id == type(IAccessControlUpgradeable).interfaceId ||
+            id == type(IRoyaltyUGC).interfaceId ||
             id == 0x572b6c05; // ERC2771
     }
 
@@ -304,5 +307,47 @@ contract Asset is
     /// @param defaultReceiver address of default royalty recipient.
     function setDefaultRoyaltyReceiver(address payable defaultReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyaltyReceiver(defaultReceiver);
+    }
+
+    /// @notice Extracts the creator address from a given token id
+    /// @param tokenId The token id to extract the creator address from
+    /// @return creator The asset creator address
+    function getCreatorAddress(uint256 tokenId) external pure returns (address creator) {
+        return TokenIdUtils.getCreatorAddress(tokenId);
+    }
+
+    /// @notice Extracts the tier from a given token id
+    /// @param tokenId The token id to extract the tier from
+    /// @return tier The asset tier, determined by the catalyst used to create it
+    function getTier(uint256 tokenId) external pure returns (uint8 tier) {
+        return TokenIdUtils.getTier(tokenId);
+    }
+
+    /// @notice Extracts the revealed flag from a given token id
+    /// @param tokenId The token id to extract the revealed flag from
+    /// @return isRevealed Whether the asset is revealed or not
+    function isRevealed(uint256 tokenId) external pure returns (bool) {
+        return TokenIdUtils.isRevealed(tokenId);
+    }
+
+    /// @notice Extracts the asset nonce from a given token id
+    /// @param tokenId The token id to extract the asset nonce from
+    /// @return creatorNonce The asset creator nonce
+    function getCreatorNonce(uint256 tokenId) external pure returns (uint16) {
+        return TokenIdUtils.getCreatorNonce(tokenId);
+    }
+
+    /// @notice Extracts the abilities and enhancements hash from a given token id
+    /// @param tokenId The token id to extract reveal nonce from
+    /// @return revealNonce The reveal nonce of the asset
+    function getRevealNonce(uint256 tokenId) external pure returns (uint16) {
+        return TokenIdUtils.getRevealNonce(tokenId);
+    }
+
+    /// @notice Extracts the bridged flag from a given token id
+    /// @param tokenId The token id to extract the bridged flag from
+    /// @return bridged Whether the asset is bridged or not
+    function isBridged(uint256 tokenId) external pure returns (bool) {
+        return TokenIdUtils.isBridged(tokenId);
     }
 }
