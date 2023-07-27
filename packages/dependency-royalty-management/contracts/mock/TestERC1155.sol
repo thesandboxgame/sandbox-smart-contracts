@@ -3,12 +3,12 @@ pragma solidity ^0.8.0;
 
 import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {MultiRoyaltyDistributer} from "../MultiRoyaltyDistributer.sol";
+import {MultiRoyaltyDistributor} from "../MultiRoyaltyDistributor.sol";
 
 /// @title Test ERC1155 contract
 /// @dev Made to test splitter deployment for each creator
 /// Creator could change his royalty receiving Wallet for his splitter through setRoyaltyRecipient function
-contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributer {
+contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor {
     /// @notice initiliaze to be called by the proxy
     /// @dev would run once.
     /// @param defaultBps default erc2981 royalty bps.(base 10000)
@@ -19,7 +19,7 @@ contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDist
         address payable defaultRecipient,
         address _manager
     ) external initializer {
-        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
+        __MultiRoyaltyDistributor_init(defaultRecipient, defaultBps, _manager);
         __Ownable_init();
     }
 
@@ -66,7 +66,7 @@ contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDist
         public
         view
         virtual
-        override(MultiRoyaltyDistributer, ERC1155Upgradeable)
+        override(MultiRoyaltyDistributor, ERC1155Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

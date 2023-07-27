@@ -15,10 +15,9 @@ contract AuthValidatorMock {
 
     /// @notice Takes the signature and the digest and returns if the signer has a backend signer role assigned
     /// @dev Multipurpose function that can be used to verify signatures with different digests
-    /// @param signature Signature hash
     /// @param digest Digest hash
     /// @return bool
-    function verify(bytes memory signature, bytes32 digest) public view returns (bool) {
+    function verify(bytes memory /*signature*/, bytes32 digest) public view returns (bool) {
         return valid[digest];
     }
 

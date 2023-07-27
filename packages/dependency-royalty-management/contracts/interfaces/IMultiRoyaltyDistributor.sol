@@ -11,7 +11,7 @@ import {
 /**
  * Multi-receiver EIP2981 reference override implementation
  */
-interface IMultiRoyaltyDistributer is IERC165 {
+interface IMultiRoyaltyDistributor is IERC165 {
     event TokenRoyaltyRemoved(uint256 tokenId);
     event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
