@@ -41,7 +41,7 @@ contract Asset is
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     OperatorFiltererUpgradeable,
-    MultiRoyaltyDistributer,
+    MultiRoyaltyDistributor,
     ITokenUtils
 {
     using TokenIdUtils for uint256;
