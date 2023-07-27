@@ -248,7 +248,7 @@ contract SignedMultiGiveaway is
 
     /// @notice EIP712 domain separator
     /// @return the hash of the domain separator
-    function domainSeparator() public view returns (bytes32) {
+    function domainSeparator() external view returns (bytes32) {
         return _domainSeparatorV4();
     }
 
