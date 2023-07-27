@@ -30,7 +30,7 @@ import {
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
-import {ITokenInfo} from "./interfaces/ITokenInfo.sol";
+import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 
 contract Asset is
     IAsset,
@@ -42,7 +42,7 @@ contract Asset is
     ERC1155URIStorageUpgradeable,
     OperatorFiltererUpgradeable,
     MultiRoyaltyDistributer,
-    ITokenInfo
+    ITokenUtils
 {
     using TokenIdUtils for uint256;
 
@@ -209,7 +209,7 @@ contract Asset is
             id == type(IERC1155Upgradeable).interfaceId ||
             id == type(IERC1155MetadataURIUpgradeable).interfaceId ||
             id == type(IAccessControlUpgradeable).interfaceId ||
-            id == type(ITokenInfo).interfaceId ||
+            id == type(IRoyaltyUGC).interfaceId ||
             id == 0x572b6c05; // ERC2771
     }
 
