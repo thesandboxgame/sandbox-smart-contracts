@@ -23,8 +23,8 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {
-    MultiRoyaltyDistributer
-} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributer.sol";
+    MultiRoyaltyDistributor
+} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
 import {
     OperatorFiltererUpgradeable
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
@@ -74,7 +74,7 @@ contract Asset is
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
-        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
+        __MultiRoyaltyDistributor_init(defaultRecipient, defaultBps, _manager);
     }
 
     /// @notice Mint new tokens
@@ -201,7 +201,7 @@ contract Asset is
         public
         view
         virtual
-        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributer)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributor)
         returns (bool)
     {
         return

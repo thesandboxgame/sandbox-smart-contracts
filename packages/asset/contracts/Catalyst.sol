@@ -25,8 +25,8 @@ import {
     IOperatorFilterRegistry
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {
-    RoyaltyDistributer
-} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributer.sol";
+    RoyaltyDistributor
+} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributor.sol";
 import {
     IRoyaltyManager
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
@@ -50,7 +50,7 @@ contract Catalyst is
     ERC2771Handler,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable,
-    RoyaltyDistributer
+    RoyaltyDistributor
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -100,7 +100,7 @@ contract Catalyst is
         _setBaseURI(_baseUri);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
         _grantRole(MINTER_ROLE, _defaultMinter);
-        __RoyaltyDistributer_init(_royaltyManager);
+        __RoyaltyDistributor_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
 
@@ -278,12 +278,12 @@ contract Catalyst is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC1155Upgradeable, AccessControlUpgradeable, RoyaltyDistributer)
+        override(ERC1155Upgradeable, AccessControlUpgradeable, RoyaltyDistributor)
         returns (bool)
     {
         return
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             AccessControlUpgradeable.supportsInterface(interfaceId) ||
-            RoyaltyDistributer.supportsInterface(interfaceId);
+            RoyaltyDistributor.supportsInterface(interfaceId);
     }
 }

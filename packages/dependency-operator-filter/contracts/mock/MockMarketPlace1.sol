@@ -65,7 +65,8 @@ contract MockERC1155MarketPlace1 is ERC1155Receiver, ERC721Holder {
         return ERC1155_BATCH_RECEIVED;
     }
 
-    function supportsInterface(bytes4 _interfaceId) public view override returns (bool) {
-        super.supportsInterface(_interfaceId);
+    function supportsInterface(bytes4 _interfaceId) public view override returns (bool interfaceId) {
+        interfaceId = super.supportsInterface(_interfaceId);
+        return interfaceId;
     }
 }

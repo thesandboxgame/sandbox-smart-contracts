@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {MultiRoyaltyDistributer} from "../MultiRoyaltyDistributer.sol";
+import {MultiRoyaltyDistributor} from "../MultiRoyaltyDistributor.sol";
 
-contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributer {
+contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor {
     /// @notice initiliaze to be called by the proxy
     /// @dev would run once.
     /// @param defaultBps default erc2981 royalty bps.(base 10000)
@@ -16,7 +16,7 @@ contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistri
         address payable defaultRecipient,
         address _manager
     ) external initializer {
-        __MultiRoyaltyDistributer_init(defaultRecipient, defaultBps, _manager);
+        __MultiRoyaltyDistributor_init(defaultRecipient, defaultBps, _manager);
         __Ownable_init();
     }
 
@@ -55,7 +55,7 @@ contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistri
         public
         view
         virtual
-        override(MultiRoyaltyDistributer, ERC721Upgradeable)
+        override(MultiRoyaltyDistributor, ERC721Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
