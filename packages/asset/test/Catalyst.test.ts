@@ -26,7 +26,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(
         await catalyst.hasRole(minterRole, catalystMinter.address)
       ).to.be.equals(true);
-      expect(await catalyst.tokenCount()).to.be.equals(6);
+      expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
     it("base uri can't be empty in initialization", async function () {
@@ -262,15 +262,33 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     });
     it('Admin can add new catalyst', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
-      await catalystAsAdmin.addNewCatalystType(7, '0x01');
+      await catalystAsAdmin.addNewCatalystType('0x01');
       expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
     });
-
+    it('correctly increases highest tier index on adding new catalyst', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await catalystAsAdmin.addNewCatalystType('0x01');
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(7);
+    });
+    it('emits NewCatalystTypeAdded event on adding new catalyst with id one higher than the previous highest tier', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await expect(catalystAsAdmin.addNewCatalystType('0x01'))
+        .to.emit(catalystAsAdmin, 'NewCatalystTypeAdded')
+        .withArgs(7);
+    });
+    it('sets the URI for newly created catalyst tier correctly', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await catalystAsAdmin.addNewCatalystType('0x01');
+      expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
+    });
     it('only Admin can add new catalyst', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
       await expect(
-        catalyst.connect(user1).addNewCatalystType(7, '0x01')
+        catalyst.connect(user1).addNewCatalystType('0x01')
       ).to.be.revertedWith(
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
@@ -333,17 +351,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
-    it('cant add invalid token id', async function () {
-      const {catalystAsAdmin} = await runCatalystSetup();
-      await expect(
-        catalystAsAdmin.addNewCatalystType(0, '0x01')
-      ).to.be.revertedWith('Catalyst: invalid catalyst id');
-    });
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
-      await expect(
-        catalystAsAdmin.addNewCatalystType(9, '')
-      ).to.be.revertedWith("Catalyst: CID can't be empty");
+      await expect(catalystAsAdmin.addNewCatalystType('')).to.be.revertedWith(
+        "Catalyst: CID can't be empty"
+      );
     });
     it('cant set invalid trusted forwarder', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
@@ -395,7 +407,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
       const catalystAmount = [];
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         catalystId.push(catalystArray[i]);
         catalystAmount.push(catalystArray[i] * 2);
       }
@@ -404,7 +416,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystId,
         catalystAmount
       );
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(
           await catalyst.balanceOf(user1.address, catalystArray[i])
         ).to.be.equal(catalystArray[i] * 2);
@@ -419,7 +431,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
   describe('Total Supply', function () {
     it('Total Supply increase on minting', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(0);
         await catalystAsMinter.mint(user1.address, catalystArray[i], 2);
         expect(await catalyst.totalSupply(catalystArray[i])).to.be.equal(2);
@@ -429,7 +441,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
       const catalystAmount = [];
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         catalystId.push(catalystArray[i]);
         catalystAmount.push(catalystArray[i] * 2);
       }
@@ -438,7 +450,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystId,
         catalystAmount
       );
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(
           catalystArray[i] * 2
         );
@@ -448,18 +460,21 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const {catalyst, user1, catalystAsBurner, catalystAsMinter} =
         await runCatalystSetup();
       const catalystAmount = [];
-      for (let i = 0; i < catalystArray.length; i++) {
+      const catalystId = [];
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.be.equal(0);
         catalystAmount.push(catalystArray[i] * 2);
+        catalystId.push(catalystArray[i]);
       }
+
       await catalystAsMinter.mintBatch(
         user1.address,
-        catalystArray,
+        catalystId,
         catalystAmount
       );
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(
-          catalystAmount[i]
+          catalystArray[i] * 2
         );
 
         await catalystAsBurner.burnFrom(user1.address, catalystArray[i], 2);
@@ -471,12 +486,12 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     it('Total Supply decrease on batch burning', async function () {
       const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
         await runCatalystSetup();
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(0);
       }
       const catalystId = [];
       let catalystAmount = [];
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         catalystId.push(catalystArray[i]);
         catalystAmount.push(catalystArray[i] * 2);
       }
@@ -485,14 +500,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystId,
         catalystAmount
       );
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(
           catalystArray[i] * 2
         );
       }
       catalystAmount = [];
 
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         catalystAmount.push(1);
       }
 
@@ -501,7 +516,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystId,
         catalystAmount
       );
-      for (let i = 0; i < catalystArray.length; i++) {
+      for (let i = 1; i < catalystArray.length; i++) {
         expect(await catalyst.totalSupply(catalystArray[i])).to.equal(
           catalystArray[i] * 2 - 1
         );
