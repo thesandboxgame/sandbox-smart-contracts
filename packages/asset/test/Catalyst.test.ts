@@ -6,7 +6,7 @@ import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
 const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-describe.only('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
+describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
   describe('Contract setup', function () {
     it('Should deploy correctly', async function () {
       const {
