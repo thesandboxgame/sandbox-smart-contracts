@@ -265,7 +265,25 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       await catalystAsAdmin.addNewCatalystType('0x01');
       expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
     });
-
+    it('correctly increases highest tier index on adding new catalyst', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await catalystAsAdmin.addNewCatalystType('0x01');
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(7);
+    });
+    it('emits NewCatalystTypeAdded event on adding new catalyst with id one higher than the previous highest tier', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await expect(catalystAsAdmin.addNewCatalystType('0x01'))
+        .to.emit(catalystAsAdmin, 'NewCatalystTypeAdded')
+        .withArgs(7);
+    });
+    it('sets the URI for newly created catalyst tier correctly', async function () {
+      const {catalystAsAdmin} = await runCatalystSetup();
+      expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
+      await catalystAsAdmin.addNewCatalystType('0x01');
+      expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
+    });
     it('only Admin can add new catalyst', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
