@@ -22,6 +22,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Asset MINTER_ROLE granted to ${assetReveal.address}`);
   }
 
+  const burnerRole = await read('Asset', 'BURNER_ROLE');
+  if (!(await read('Asset', 'hasRole', burnerRole, assetReveal.address))) {
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: assetAdmin, log: true},
+        'grantRole',
+        burnerRole,
+        assetReveal.address
+      )
+    );
+    log(`Asset BURNER_ROLE granted to ${assetReveal.address}`);
+  }
+
   await catchUnknownSigner(
     execute(
       'AuthSuperValidator',
