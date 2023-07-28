@@ -50,20 +50,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   log(`AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`);
-
-  const moderatorRole = await read('Asset', 'MODERATOR_ROLE');
-  if (!(await read('Asset', 'hasRole', moderatorRole, assetAdmin))) {
-    await catchUnknownSigner(
-      execute(
-        'Asset',
-        {from: assetAdmin, log: true},
-        'grantRole',
-        moderatorRole,
-        assetAdmin
-      )
-    );
-    log(`Asset MODERATOR_ROLE granted to ${assetAdmin}`);
-  }
 };
 
 export default func;
