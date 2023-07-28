@@ -3,7 +3,7 @@ import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalyst/catalystFixture';
 import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
-const catalystArray = [1, 2, 3, 4, 5, 6];
+const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
