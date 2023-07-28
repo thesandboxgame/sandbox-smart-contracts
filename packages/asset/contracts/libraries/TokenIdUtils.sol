@@ -8,7 +8,7 @@ library TokenIdUtils {
     uint256 public constant TIER_MASK = 0xFF;
     uint256 public constant NONCE_MASK = 0xFFFF;
     uint256 public constant REVEAL_NONCE_MASK = 0xFFFF;
-    uint256 public constant BRIDGED_MASK = 0xFF;
+    uint256 public constant BRIDGED_MASK = 0x1;
 
     // Bit shifts
     uint256 public constant CREATOR_SHIFT = 0;
