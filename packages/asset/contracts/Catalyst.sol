@@ -103,8 +103,7 @@ contract Catalyst is
         __RoyaltyDistributor_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
-
-            _setURI(i + 1, _catalystIpfsCID[i]);
+            _setURI(i, _catalystIpfsCID[i]);
             unchecked {tokenCount++;}
         }
     }

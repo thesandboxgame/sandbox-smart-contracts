@@ -8,7 +8,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await getNamedAccounts();
 
   const assetCreate = await deployments.get('AssetCreate');
-  const assetReveal = await deployments.get('AssetReveal');
 
   const minterRole = await read('Asset', 'MINTER_ROLE');
   if (!(await read('Asset', 'hasRole', minterRole, assetCreate.address))) {
@@ -52,18 +51,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   log(`AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`);
 
-  await catchUnknownSigner(
-    execute(
-      'AuthSuperValidator',
-      {from: assetAdmin, log: true},
-      'setSigner',
-      assetReveal.address,
-      backendAuthWallet
-    )
-  );
-
-  log(`AuthSuperValidator signer for Asset Reveal set to ${backendAuthWallet}`);
-
   const moderatorRole = await read('Asset', 'MODERATOR_ROLE');
   if (!(await read('Asset', 'hasRole', moderatorRole, assetAdmin))) {
     await catchUnknownSigner(
@@ -81,5 +68,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 
-func.tags = ['Asset', 'Asset_role_setup'];
+func.tags = ['Asset', 'AssetCreate_setup'];
 func.dependencies = ['Asset_deploy', 'Catalyst_deploy', 'AssetCreate_deploy'];
