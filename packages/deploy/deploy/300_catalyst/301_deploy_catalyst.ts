@@ -5,12 +5,12 @@ export const CATALYST_BASE_URI = 'ipfs://';
 
 // TODO: update for polygon-mainnet deployment
 export const CATALYST_IPFS_CID_PER_TIER = [
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-  'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+  'bafkreib5tky3dgsc7zy637dfunb4zwwnpzo3w3i5tepbfee42eq3srwnwq',
+  'bafkreiegevvim5q3ati4htsncxwsejfc3lbkzb7wn2a2fzthc6tsof7v7m',
+  'bafkreifhtkou5a32xrtktdvfqrvgh4mp2ohvlyqdsih5xk4kgcfywtxefi',
+  'bafkreigqpb7qo3iqka4243oah3nka6agx3nmvwzauxze2jznotx3zwozqe',
+  'bafkreih3itsiwkn2urzfvg26mby3ssgfshvdr6zfabr6rxxrlzhedqil4e',
+  'bafkreibmngauozzidz2eevyyb3umf2ew7zexing3ghup6l7io2ao522mvy',
 ];
 
 const func: DeployFunction = async function (
