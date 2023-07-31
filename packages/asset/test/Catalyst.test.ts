@@ -714,6 +714,51 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         ).to.be.revertedWith("Catalyst: subscription can't be zero address");
       });
 
+      it('should revert when registry is set and subscription is set by non-admin', async function () {
+        const {
+          trustedForwarder,
+          operatorFilterSubscription,
+          catalystAdmin,
+          catalystMinter,
+          RoyaltyManagerContract,
+          user1,
+          defaultAdminRole,
+          operatorFilterRegistry,
+        } = await setupOperatorFilter();
+        const CatalystFactory = await ethers.getContractFactory('Catalyst');
+        const catalyst = await upgrades.deployProxy(
+          CatalystFactory,
+          [
+            CATALYST_BASE_URI,
+            trustedForwarder.address,
+            operatorFilterSubscription.address,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
+            CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+        await catalyst.deployed();
+        await expect(
+          catalyst
+            .connect(user1)
+            .setOperatorRegistry(operatorFilterRegistry.address)
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+
+        await expect(
+          catalyst
+            .connect(user1)
+            .registerAndSubscribe(operatorFilterSubscription.address, true)
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+      });
+
       it('should be subscribed to common subscription', async function () {
         const {operatorFilterRegistry, Catalyst, operatorFilterSubscription} =
           await setupOperatorFilter();

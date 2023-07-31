@@ -1050,6 +1050,53 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         ).to.be.revertedWith("Asset: subscription can't be zero address");
       });
 
+      it('should revert when registry is set and subscription is set by non-admin', async function () {
+        const {
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+          operatorFilterRegistry,
+          defaultAdminRole,
+          user1,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await expect(
+          Asset.connect(user1).setOperatorRegistry(
+            operatorFilterRegistry.address
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+
+        await expect(
+          Asset.connect(user1).registerAndSubscribe(
+            filterOperatorSubscription.address,
+            true
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+      });
+
       it('should be subscribed to common subscription', async function () {
         const {operatorFilterRegistry, Asset, filterOperatorSubscription} =
           await setupOperatorFilter();
