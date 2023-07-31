@@ -26,7 +26,8 @@ import {
     MultiRoyaltyDistributor
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
 import {
-    OperatorFiltererUpgradeable
+    OperatorFiltererUpgradeable,
+    IOperatorFilterRegistry
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
@@ -349,5 +350,20 @@ contract Asset is
     /// @return bridged Whether the asset is bridged or not
     function isBridged(uint256 tokenId) external pure returns (bool) {
         return TokenIdUtils.isBridged(tokenId);
+    }
+
+    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
+    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+    /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
+    function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(subscriptionOrRegistrantToCopy != address(0), "Asset: subscription can't be zero address");
+        _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 }
