@@ -90,6 +90,19 @@ export const splitterAbi = [
   },
   {
     inputs: [],
+    name: '_royaltyManager',
+    outputs: [
+      {
+        internalType: 'contract IRoyaltyManager',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'getRecipients',
     outputs: [
       {
@@ -122,7 +135,7 @@ export const splitterAbi = [
       },
       {
         internalType: 'address',
-        name: 'sandBoxRegistry',
+        name: 'royaltyManager',
         type: 'address',
       },
     ],
@@ -211,7 +224,7 @@ export const splitterAbi = [
     inputs: [],
     name: 'splitETH',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {

@@ -111,6 +111,9 @@ export async function royaltyDistribution() {
     contractRoyaltySetter
   );
 
+  const NFTFactory = await ethers.getContractFactory('NFTWithoutTransferCheck');
+  const NFT = await NFTFactory.deploy();
+
   const ERC1155AsSeller = ERC1155.connect(seller);
   const ERC20AsBuyer = ERC20.connect(buyer);
   const ERC721AsSeller = ERC721.connect(seller);
@@ -140,5 +143,6 @@ export async function royaltyDistribution() {
     contractRoyaltySetterRole,
     RoyaltyManagerAsRoyaltySetter,
     SingleReceiver,
+    NFT,
   };
 }
