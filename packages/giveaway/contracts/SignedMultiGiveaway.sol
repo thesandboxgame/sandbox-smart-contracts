@@ -59,6 +59,12 @@ contract SignedMultiGiveaway is
     /// @dev Token -> id -> Limit
     mapping(address => mapping(uint256 => PerTokenLimitData)) private _perTokenLimitData;
 
+    /// @notice This event is emitted when a claim occurs.
+    /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param from source user
+    /// @param to destination user
+    /// @param claims list of tokens to do transfer
+    /// @param operator the sender of the transaction
     event Claimed(
         uint256[] claimIds,
         address indexed from,
@@ -66,15 +72,38 @@ contract SignedMultiGiveaway is
         ClaimEntry[] claims,
         address indexed operator
     );
+
+    /// @notice This event is emitted when a claim is revoked.
+    /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param operator the sender of the transaction
     event RevokedClaims(uint256[] claimIds, address indexed operator);
+
+    /// @notice This event is emitted when assets are recovered from the contract.
+    /// @param to destination user
+    /// @param claims unique claim ids, used by the backend to avoid double spending
+    /// @param operator the sender of the transaction
     event AssetsRecovered(address indexed to, ClaimEntry[] claims, address indexed operator);
+
+    /// @notice This event is emitted when the max wei per claim is set
+    /// @param token address of the token to configure
+    /// @param tokenId of the token
+    /// @param maxWeiPerClaim maximum amount of wei per each individual claim, 0 => check disabled
+    /// @param operator the sender of the transaction
     event MaxWeiPerClaimSet(
         address indexed token,
         uint256 indexed tokenId,
         uint256 maxWeiPerClaim,
         address indexed operator
     );
+
+    /// @notice This event is emitted when the number of signatures needed to claim is set
+    /// @param numberOfSignaturesNeeded amount of valid signatures needed to claim
+    /// @param operator the sender of the transaction
     event NumberOfSignaturesNeededSet(uint128 numberOfSignaturesNeeded, address indexed operator);
+
+    /// @notice This event is emitted when the max entries per claim is set
+    /// @param maxClaimEntries maximum amount of claim entries per message
+    /// @param operator the sender of the transaction
     event MaxClaimEntriesSet(uint128 maxClaimEntries, address indexed operator);
 
     modifier onlyAdmin() {

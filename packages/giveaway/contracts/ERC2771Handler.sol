@@ -8,7 +8,10 @@ pragma solidity 0.8.18;
 abstract contract ERC2771Handler {
     address internal _trustedForwarder;
 
-    /// @dev Emitted when a `newTrustedForwarder` is set, replacing the `oldTrustedForwarder`
+    /// @notice Emitted when a `newTrustedForwarder` is set, replacing the `oldTrustedForwarder`
+    /// @param oldTrustedForwarder old trusted forwarder
+    /// @param newTrustedForwarder new trusted forwarder
+    /// @param operator the sender of the transaction
     event TrustedForwarderSet(
         address indexed oldTrustedForwarder,
         address indexed newTrustedForwarder,
