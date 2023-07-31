@@ -29,6 +29,16 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
+    describe('Interface support', function () {
+      it('should support ERC2771', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface('0x572b6c05')).to.be.true;
+      });
+      it('should support ERC2981Upgradeable', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface('0x2a55205a')).to.be.true;
+      });
+    });
     it("base uri can't be empty in initialization", async function () {
       const {
         trustedForwarder,

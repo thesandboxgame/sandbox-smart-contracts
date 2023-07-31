@@ -271,7 +271,7 @@ contract Catalyst is
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return `true` if the contract implements `interfaceId`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -279,8 +279,7 @@ contract Catalyst is
         returns (bool)
     {
         return
-            ERC1155Upgradeable.supportsInterface(interfaceId) ||
-            AccessControlUpgradeable.supportsInterface(interfaceId) ||
-            RoyaltyDistributor.supportsInterface(interfaceId);
+            interfaceId == 0x572b6c05 || // ERC2771
+            super.supportsInterface(interfaceId);
     }
 }
