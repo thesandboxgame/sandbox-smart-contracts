@@ -27,14 +27,23 @@ describe('SignedMultiGiveaway.sol', function () {
       ).to.revertedWith('Initializable: contract is already initialized');
     });
     it('initialization event', async function () {
-      const {contract, trustedForwarder, admin} = await loadFixture(
+      const {contract, deployer, trustedForwarder, admin} = await loadFixture(
         deploySignedMultiGiveaway
       );
+      const defaultAdminRole = await contract.DEFAULT_ADMIN_ROLE();
 
       // Initialize
-      await expect(contract.initialize(trustedForwarder.address, admin.address))
-        .to.emit(contract, 'Initialization')
-        .withArgs(trustedForwarder.address, admin.address);
+      const tx = contract.initialize(trustedForwarder.address, admin.address);
+      await expect(tx)
+        .to.emit(contract, 'TrustedForwarderSet')
+        .withArgs(
+          constants.AddressZero,
+          trustedForwarder.address,
+          deployer.address
+        );
+      await expect(tx)
+        .to.emit(contract, 'RoleGranted')
+        .withArgs(defaultAdminRole, admin.address, deployer.address);
     });
     it('interfaces', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
@@ -1074,6 +1083,13 @@ describe('SignedMultiGiveaway.sol', function () {
     });
     it('admin should be able to set the trusted forwarder', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
+      expect(
+        await fixtures.contract.isTrustedForwarder(
+          fixtures.trustedForwarder.address
+        )
+      ).to.be.true;
+      expect(await fixtures.contract.isTrustedForwarder(fixtures.other.address))
+        .to.be.false;
       expect(await fixtures.contract.getTrustedForwarder()).to.be.equal(
         fixtures.trustedForwarder.address
       );

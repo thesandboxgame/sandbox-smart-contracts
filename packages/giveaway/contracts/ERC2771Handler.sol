@@ -8,17 +8,24 @@ pragma solidity 0.8.18;
 abstract contract ERC2771Handler {
     address internal _trustedForwarder;
 
+    /// @dev Emitted when a `newTrustedForwarder` is set, replacing the `oldTrustedForwarder`
+    event TrustedForwarderSet(
+        address indexed oldTrustedForwarder,
+        address indexed newTrustedForwarder,
+        address indexed operator
+    );
+
     /// @notice set the trusted forwarder address
     /// @param forwarder trusted forwarder address or zero to disable it
     function __ERC2771Handler_initialize(address forwarder) internal {
-        _trustedForwarder = forwarder;
+        _setTrustedForwarder(forwarder);
     }
 
     /// @notice return true if the forwarder is the trusted forwarder
     /// @param forwarder trusted forwarder address to check
     /// @return true if the address is the same as the trusted forwarder
-    function isTrustedForwarder(address forwarder) public view returns (bool) {
-        return forwarder == _trustedForwarder;
+    function isTrustedForwarder(address forwarder) external view returns (bool) {
+        return _isTrustedForwarder(forwarder);
     }
 
     /// @notice return the address of the trusted forwarder
@@ -34,10 +41,17 @@ abstract contract ERC2771Handler {
         return _trustedForwarder;
     }
 
+    /// @notice set the address of the trusted forwarder
+    /// @param newForwarder the address of the new forwarder.
+    function _setTrustedForwarder(address newForwarder) internal virtual {
+        emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
+        _trustedForwarder = newForwarder;
+    }
+
     /// @notice if the call is from the trusted forwarder the sender is extracted from calldata, msg.sender otherwise
     /// @return sender the calculated address of the sender
     function _msgSender() internal view virtual returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
+        if (_isTrustedForwarder(msg.sender) && msg.data.length >= 20) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -46,6 +60,13 @@ abstract contract ERC2771Handler {
         } else {
             sender = msg.sender;
         }
+    }
+
+    /// @notice return true if the forwarder is the trusted forwarder
+    /// @param forwarder trusted forwarder address to check
+    /// @return true if the address is the same as the trusted forwarder
+    function _isTrustedForwarder(address forwarder) internal view virtual returns (bool) {
+        return forwarder == _trustedForwarder;
     }
 
     uint256[49] private __gap;

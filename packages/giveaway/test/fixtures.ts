@@ -291,6 +291,7 @@ export async function deploySignedMultiGiveaway() {
     contract,
     proxy,
     implementation,
+    deployer,
     trustedForwarder,
     admin,
   };

@@ -76,8 +76,6 @@ contract SignedMultiGiveaway is
     );
     event NumberOfSignaturesNeededSet(uint128 numberOfSignaturesNeeded, address indexed operator);
     event MaxClaimEntriesSet(uint128 maxClaimEntries, address indexed operator);
-    event TrustedForwarderSet(address indexed oldForwarder, address indexed newForwarder, address indexed operator);
-    event Initialization(address indexed trustedForwarder, address indexed admin);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -99,7 +97,6 @@ contract SignedMultiGiveaway is
     /// @param trustedForwarder_ address of the ERC2771 trusted forwarder
     /// @param admin_ address that have admin access and can assign roles.
     function initialize(address trustedForwarder_, address admin_) external initializer {
-        emit Initialization(trustedForwarder_, admin_);
         __Context_init_unchained();
         __ERC165_init_unchained();
         __ERC1155Receiver_init_unchained();
@@ -217,8 +214,7 @@ contract SignedMultiGiveaway is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param newForwarder The new trustedForwarder
     function setTrustedForwarder(address newForwarder) external onlyAdmin {
-        emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
-        _trustedForwarder = newForwarder;
+        _setTrustedForwarder(newForwarder);
     }
 
     /// @notice return true if already claimed
