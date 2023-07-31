@@ -291,7 +291,10 @@ contract Catalyst is
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
-    function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         require(subscriptionOrRegistrantToCopy != address(0), "Asset: subscription can't be zero address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
