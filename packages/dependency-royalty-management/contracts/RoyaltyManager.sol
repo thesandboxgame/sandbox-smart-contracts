@@ -53,7 +53,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[msg.sender];
         require(creatorSplitterAddress != address(0), "Manager: No splitter deployed for the creator");
         address _recipient = RoyaltySplitter(creatorSplitterAddress)._recipient();
-        require(_recipient != recipient, "Recipient already set");
+        require(_recipient != recipient, "Manager: Recipient already set");
         Recipient[] memory newRecipient = new Recipient[](1);
         newRecipient[0] = Recipient({recipient: recipient, bps: 0});
         RoyaltySplitter(creatorSplitterAddress).setRecipients(newRecipient);
@@ -80,7 +80,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     function _setSplit(uint16 _commonSplit) internal {
-        require(_commonSplit < TOTAL_BASIS_POINTS, "Manager: Can't set common recipient to zero address");
+        require(_commonSplit < TOTAL_BASIS_POINTS, "Manager: Can't set split greater than the total basis point");
         commonSplit = _commonSplit;
         emit SplitSet(_commonSplit);
     }

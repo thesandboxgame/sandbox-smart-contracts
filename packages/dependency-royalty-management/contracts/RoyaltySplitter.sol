@@ -89,7 +89,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
 
     /// @notice Splits and forwards ETH to the royalty receivers
     /// @dev normally ETH should be split automatically by receive function.
-    function splitETH() public {
+    function splitETH() public payable {
         _splitETH(address(this).balance);
     }
 
@@ -183,7 +183,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         );
         require(
             !callData.startsWith(IERC20Approve.approve.selector) &&
-                !callData.startsWith(IERC20Approve.increaseAllowance.selector),
+                !callData.startsWith(IERC20Approve.transfer.selector),
             "Split: ERC20 tokens must be split"
         );
         /* solhint-disable-next-line no-empty-blocks*/
