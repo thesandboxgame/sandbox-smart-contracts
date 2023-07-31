@@ -205,12 +205,9 @@ contract Asset is
         returns (bool)
     {
         return
-            id == type(IERC165Upgradeable).interfaceId ||
-            id == type(IERC1155Upgradeable).interfaceId ||
-            id == type(IERC1155MetadataURIUpgradeable).interfaceId ||
-            id == type(IAccessControlUpgradeable).interfaceId ||
             id == type(IRoyaltyUGC).interfaceId ||
-            id == 0x572b6c05; // ERC2771
+            id == 0x572b6c05 ||  // ERC2771
+            super.supportsInterface(interfaceId);
     }
 
     function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
