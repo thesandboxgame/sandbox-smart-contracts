@@ -101,13 +101,27 @@ export async function setupOperatorFilter() {
     operatorFilterSubscription.address
   );
   await tnx3.wait();
+
+  const UnRegisteredTokenFactory = await ethers.getContractFactory(
+    'UnRegisteredToken'
+  );
+  const UnRegisteredToken = await upgrades.deployProxy(
+    UnRegisteredTokenFactory,
+    ['UnRegisteredToken', operatorFilterSubscription.address, true],
+    {
+      initializer: 'initialize',
+    }
+  );
+
   const users = await setupUsers(
     [user1.address, user2.address, user3.address, user4.address],
     {
       ERC1155,
       ERC721,
+      UnRegisteredToken,
     }
   );
+
   return {
     mockMarketPlace1,
     mockMarketPlace2,
@@ -124,5 +138,6 @@ export async function setupOperatorFilter() {
     operatorFilterRegistryAsDeployer,
     operatorFilterSubscription,
     ERC721,
+    UnRegisteredToken,
   };
 }
