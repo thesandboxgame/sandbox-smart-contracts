@@ -299,6 +299,7 @@ contract Catalyst is
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(registry != address(0), "Asset: registry can't be zero address");
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 }

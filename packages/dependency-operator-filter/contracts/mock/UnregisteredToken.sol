@@ -5,7 +5,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
-contract UnRegisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable {
+contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable {
     function initialize(
         string memory uri_,
         address subscription,
