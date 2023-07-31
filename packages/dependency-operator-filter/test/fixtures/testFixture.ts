@@ -77,7 +77,7 @@ export async function setupOperatorFilter() {
       operatorFilterRegistry.address
     );
 
-  const operatorFilterRegistryAsDeployer = await operatorFilterRegistry.connect(
+  const operatorFilterRegistryAsOwner = await operatorFilterRegistry.connect(
     deployer
   );
 
@@ -135,7 +135,7 @@ export async function setupOperatorFilter() {
     upgradeAdmin,
     ERC1155,
     DEFAULT_SUBSCRIPTION,
-    operatorFilterRegistryAsDeployer,
+    operatorFilterRegistryAsOwner,
     operatorFilterSubscription,
     ERC721,
     UnRegisteredToken,

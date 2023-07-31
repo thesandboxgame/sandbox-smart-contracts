@@ -12,7 +12,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(true);
     });
 
-    it("token can't be registered on operator filter registry if not set on the token", async function () {
+    it('should not be registered on operator filter registry if not set on the token', async function () {
       const {operatorFilterRegistry, UnRegisteredToken} =
         await setupOperatorFilter();
       await UnRegisteredToken.registerAndSubscribe(zeroAddress, false);
@@ -22,7 +22,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(false);
     });
 
-    it('operatorFilterSubscription could not register if the registry is not deployed', async function () {
+    it('should not be registered if registry is not deployed', async function () {
       const {operatorFilterRegistry} = await setupOperatorFilter();
 
       const OperatorFilterSubscriptionFactory = await ethers.getContractFactory(
@@ -38,7 +38,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(false);
     });
 
-    it('would not subscribe to operatorFilterSubscription if token is already registered', async function () {
+    it('should not subscribe to operatorFilterSubscription if token is already registered', async function () {
       const {
         operatorFilterRegistry,
         operatorFilterSubscription,
@@ -56,7 +56,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(zeroAddress);
     });
 
-    it('would not subscribe to operatorFilterSubscription if  is already registered', async function () {
+    it('should not subscribe to operatorFilterSubscription if  is already registered', async function () {
       const {
         operatorFilterRegistry,
         operatorFilterSubscription,
@@ -85,7 +85,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(true);
     });
 
-    it('should could be registered and copy subscription', async function () {
+    it('should be registered and copy subscription', async function () {
       const {
         operatorFilterRegistry,
         UnRegisteredToken,
@@ -737,7 +737,7 @@ describe('OperatorFilterer', function () {
       const {
         operatorFilterRegistry,
         mockMarketPlace1,
-        operatorFilterRegistryAsDeployer,
+        operatorFilterRegistryAsOwner,
         operatorFilterSubscription,
         ERC721,
       } = await setupOperatorFilter();
@@ -770,13 +770,13 @@ describe('OperatorFilterer', function () {
         )
       ).to.be.equal(true);
 
-      await operatorFilterRegistryAsDeployer.updateOperator(
+      await operatorFilterRegistryAsOwner.updateOperator(
         operatorFilterSubscription.address,
         mockMarketPlace1.address,
         false
       );
 
-      await operatorFilterRegistryAsDeployer.updateCodeHash(
+      await operatorFilterRegistryAsOwner.updateCodeHash(
         operatorFilterSubscription.address,
         MockERC1155MarketPlace1CodeHash,
         false
@@ -815,7 +815,7 @@ describe('OperatorFilterer', function () {
       const {
         operatorFilterRegistry,
         mockMarketPlace3,
-        operatorFilterRegistryAsDeployer,
+        operatorFilterRegistryAsOwner,
         operatorFilterSubscription,
         ERC721,
       } = await setupOperatorFilter();
@@ -848,13 +848,13 @@ describe('OperatorFilterer', function () {
         )
       ).to.be.equal(false);
 
-      await operatorFilterRegistryAsDeployer.updateOperator(
+      await operatorFilterRegistryAsOwner.updateOperator(
         operatorFilterSubscription.address,
         mockMarketPlace3.address,
         true
       );
 
-      await operatorFilterRegistryAsDeployer.updateCodeHash(
+      await operatorFilterRegistryAsOwner.updateCodeHash(
         operatorFilterSubscription.address,
         MockERC1155MarketPlace3CodeHash,
         true
