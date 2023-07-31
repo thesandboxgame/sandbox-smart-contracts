@@ -31,6 +31,12 @@ abstract contract SignedMultiGiveawayBase is EIP712Upgradeable, AccessControlEnu
     struct ClaimEntry {
         TokenType tokenType;
         address tokenAddress;
+        // This field depends on tokenType
+        //      ERC20: uint256 encoded amount
+        //      ERC721/ERC721_SAFE: uint256 encoded token id
+        //      ERC721_BATCH/ERC721_SAFE_BATCH: uint256[] encoded array of token ids
+        //      ERC1155: (uint256, uint256, bytes) encoded token id, amount, and data argument passed to the safeTransferFrom function
+        //      ERC1155_BATCH: (uint256[], uint256[], bytes) encoded token ids array, amounts array, and data argument passed to the safeTransferFrom function
         bytes data;
     }
 
