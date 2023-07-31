@@ -13,12 +13,12 @@ describe('OperatorFilterer', function () {
     });
 
     it('should not be registered on operator filter registry if not set on the token', async function () {
-      const {operatorFilterRegistry, UnRegisteredToken} =
+      const {operatorFilterRegistry, UnregisteredToken} =
         await setupOperatorFilter();
-      await UnRegisteredToken.registerAndSubscribe(zeroAddress, false);
+      await UnregisteredToken.registerAndSubscribe(zeroAddress, false);
 
       expect(
-        await operatorFilterRegistry.isRegistered(UnRegisteredToken.address)
+        await operatorFilterRegistry.isRegistered(UnregisteredToken.address)
       ).to.be.equal(false);
     });
 
@@ -42,17 +42,17 @@ describe('OperatorFilterer', function () {
       const {
         operatorFilterRegistry,
         operatorFilterSubscription,
-        UnRegisteredToken,
+        UnregisteredToken,
       } = await setupOperatorFilter();
-      await UnRegisteredToken.setRegistry(operatorFilterRegistry.address);
-      await UnRegisteredToken.registerAndSubscribe(zeroAddress, false);
-      await UnRegisteredToken.registerAndSubscribe(
+      await UnregisteredToken.setRegistry(operatorFilterRegistry.address);
+      await UnregisteredToken.registerAndSubscribe(zeroAddress, false);
+      await UnregisteredToken.registerAndSubscribe(
         operatorFilterSubscription.address,
         true
       );
 
       expect(
-        await operatorFilterRegistry.subscriptionOf(UnRegisteredToken.address)
+        await operatorFilterRegistry.subscriptionOf(UnregisteredToken.address)
       ).to.be.equal(zeroAddress);
     });
 
@@ -60,56 +60,56 @@ describe('OperatorFilterer', function () {
       const {
         operatorFilterRegistry,
         operatorFilterSubscription,
-        UnRegisteredToken,
+        UnregisteredToken,
       } = await setupOperatorFilter();
-      await UnRegisteredToken.setRegistry(operatorFilterRegistry.address);
-      await UnRegisteredToken.registerAndSubscribe(
+      await UnregisteredToken.setRegistry(operatorFilterRegistry.address);
+      await UnregisteredToken.registerAndSubscribe(
         operatorFilterSubscription.address,
         true
       );
 
       expect(
-        await operatorFilterRegistry.subscriptionOf(UnRegisteredToken.address)
+        await operatorFilterRegistry.subscriptionOf(UnregisteredToken.address)
       ).to.be.equal(operatorFilterSubscription.address);
     });
 
     it('should be registered through when zero address subscription is passed', async function () {
-      const {operatorFilterRegistry, UnRegisteredToken} =
+      const {operatorFilterRegistry, UnregisteredToken} =
         await setupOperatorFilter();
 
-      await UnRegisteredToken.setRegistry(operatorFilterRegistry.address);
-      await UnRegisteredToken.registerAndSubscribe(zeroAddress, false);
+      await UnregisteredToken.setRegistry(operatorFilterRegistry.address);
+      await UnregisteredToken.registerAndSubscribe(zeroAddress, false);
 
       expect(
-        await operatorFilterRegistry.isRegistered(UnRegisteredToken.address)
+        await operatorFilterRegistry.isRegistered(UnregisteredToken.address)
       ).to.be.equal(true);
     });
 
     it('should be registered and copy subscription', async function () {
       const {
         operatorFilterRegistry,
-        UnRegisteredToken,
+        UnregisteredToken,
         operatorFilterSubscription,
         mockMarketPlace1,
       } = await setupOperatorFilter();
 
-      await UnRegisteredToken.setRegistry(operatorFilterRegistry.address);
-      await UnRegisteredToken.registerAndSubscribe(
+      await UnregisteredToken.setRegistry(operatorFilterRegistry.address);
+      await UnregisteredToken.registerAndSubscribe(
         operatorFilterSubscription.address,
         false
       );
 
       expect(
-        await operatorFilterRegistry.isRegistered(UnRegisteredToken.address)
+        await operatorFilterRegistry.isRegistered(UnregisteredToken.address)
       ).to.be.equal(true);
 
       expect(
-        await operatorFilterRegistry.subscriptionOf(UnRegisteredToken.address)
+        await operatorFilterRegistry.subscriptionOf(UnregisteredToken.address)
       ).to.be.equal(zeroAddress);
 
       expect(
         await operatorFilterRegistry.isOperatorFiltered(
-          UnRegisteredToken.address,
+          UnregisteredToken.address,
           mockMarketPlace1.address
         )
       ).to.be.equal(true);
@@ -890,61 +890,61 @@ describe('OperatorFilterer', function () {
     });
   });
   describe('transfer and approval ', function () {
-    it('black listed market places can be approved if operator filterer registry is not set on token', async function () {
+    it('should be able to approve black listed market places if operator filterer registry is not set on token', async function () {
       const {
-        UnRegisteredToken,
+        UnregisteredToken,
         users,
         operatorFilterSubscription,
         mockMarketPlace1,
       } = await setupOperatorFilter();
 
-      await UnRegisteredToken.registerAndSubscribe(
+      await UnregisteredToken.registerAndSubscribe(
         operatorFilterSubscription.address,
         true
       );
 
-      await users[0].UnRegisteredToken.setApprovalForAll(
+      await users[0].UnregisteredToken.setApprovalForAll(
         mockMarketPlace1.address,
         true
       );
 
       expect(
-        await UnRegisteredToken.isApprovedForAll(
+        await UnregisteredToken.isApprovedForAll(
           users[0].address,
           mockMarketPlace1.address
         )
       ).to.be.equal(true);
     });
 
-    it('black listed market places can transfer token if operator filterer registry is not set on token', async function () {
+    it('should be able to transfer through black listed market places if operator filterer registry is not set on token', async function () {
       const {
-        UnRegisteredToken,
+        UnregisteredToken,
         users,
         operatorFilterSubscription,
         mockMarketPlace1,
       } = await setupOperatorFilter();
 
-      await UnRegisteredToken.mintWithoutMinterRole(users[0].address, 1, 1);
+      await UnregisteredToken.mintWithoutMinterRole(users[0].address, 1, 1);
 
-      await UnRegisteredToken.registerAndSubscribe(
+      await UnregisteredToken.registerAndSubscribe(
         operatorFilterSubscription.address,
         true
       );
 
-      await users[0].UnRegisteredToken.setApprovalForAll(
+      await users[0].UnregisteredToken.setApprovalForAll(
         mockMarketPlace1.address,
         true
       );
 
       expect(
-        await UnRegisteredToken.isApprovedForAll(
+        await UnregisteredToken.isApprovedForAll(
           users[0].address,
           mockMarketPlace1.address
         )
       ).to.be.equal(true);
 
       await mockMarketPlace1.transferTokenForERC1155(
-        UnRegisteredToken.address,
+        UnregisteredToken.address,
         users[0].address,
         users[1].address,
         1,
@@ -953,7 +953,7 @@ describe('OperatorFilterer', function () {
       );
 
       expect(
-        await UnRegisteredToken.balanceOf(users[1].address, 1)
+        await UnregisteredToken.balanceOf(users[1].address, 1)
       ).to.be.equal(1);
     });
     it('should be able to safe transfer if from is the owner of token', async function () {
