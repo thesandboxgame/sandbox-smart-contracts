@@ -206,7 +206,7 @@ contract Asset is
     {
         return
             id == type(IRoyaltyUGC).interfaceId ||
-            id == 0x572b6c05 ||  // ERC2771
+            id == 0x572b6c05 || // ERC2771
             super.supportsInterface(interfaceId);
     }
 
