@@ -632,6 +632,88 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         ).to.be.equal(true);
       });
 
+      it('should set registry and subscribe to common subscription', async function () {
+        const {
+          operatorFilterRegistry,
+          trustedForwarder,
+          operatorFilterSubscription,
+          catalystAdmin,
+          catalystMinter,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const CatalystFactory = await ethers.getContractFactory('Catalyst');
+        const catalyst = await upgrades.deployProxy(
+          CatalystFactory,
+          [
+            CATALYST_BASE_URI,
+            trustedForwarder.address,
+            operatorFilterSubscription.address,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
+            CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+        await catalyst.deployed();
+        await catalyst
+          .connect(catalystAdmin)
+          .setOperatorRegistry(operatorFilterRegistry.address);
+        expect(await catalyst.operatorFilterRegistry()).to.be.equals(
+          operatorFilterRegistry.address
+        );
+
+        await catalyst
+          .connect(catalystAdmin)
+          .registerAndSubscribe(operatorFilterSubscription.address, true);
+
+        expect(
+          await operatorFilterRegistry.isRegistered(catalyst.address)
+        ).to.be.equals(true);
+
+        expect(
+          await operatorFilterRegistry.subscriptionOf(catalyst.address)
+        ).to.be.equals(operatorFilterSubscription.address);
+      });
+
+      it('should revert when registry is set zero and subscription is set zero', async function () {
+        const {
+          trustedForwarder,
+          operatorFilterSubscription,
+          catalystAdmin,
+          catalystMinter,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const CatalystFactory = await ethers.getContractFactory('Catalyst');
+        const catalyst = await upgrades.deployProxy(
+          CatalystFactory,
+          [
+            CATALYST_BASE_URI,
+            trustedForwarder.address,
+            operatorFilterSubscription.address,
+            catalystAdmin.address, // DEFAULT_ADMIN_ROLE
+            catalystMinter.address, // MINTER_ROLE
+            CATALYST_IPFS_CID_PER_TIER,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+        await catalyst.deployed();
+        await expect(
+          catalyst.connect(catalystAdmin).setOperatorRegistry(zeroAddress)
+        ).to.be.revertedWith("Catalyst: registry can't be zero address");
+
+        await expect(
+          catalyst
+            .connect(catalystAdmin)
+            .registerAndSubscribe(zeroAddress, true)
+        ).to.be.revertedWith("Catalyst: subscription can't be zero address");
+      });
+
       it('should be subscribed to common subscription', async function () {
         const {operatorFilterRegistry, Catalyst, operatorFilterSubscription} =
           await setupOperatorFilter();

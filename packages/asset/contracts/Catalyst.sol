@@ -295,14 +295,14 @@ contract Catalyst is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy != address(0), "Asset: subscription can't be zero address");
+        require(subscriptionOrRegistrantToCopy != address(0), "Catalyst: subscription can't be zero address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Asset: registry can't be zero address");
+        require(registry != address(0), "Catalyst: registry can't be zero address");
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 }

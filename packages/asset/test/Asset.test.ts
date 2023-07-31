@@ -1,7 +1,8 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import {ethers, upgrades} from 'hardhat';
 import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
+const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
   describe('Access Control', function () {
@@ -965,6 +966,88 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         expect(
           await operatorFilterRegistry.isRegistered(Asset.address)
         ).to.be.equal(true);
+      });
+      it('should set registry and subscribe to common subscription', async function () {
+        const {
+          operatorFilterRegistry,
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await Asset.connect(assetAdmin).setOperatorRegistry(
+          operatorFilterRegistry.address
+        );
+        expect(await Asset.operatorFilterRegistry()).to.be.equals(
+          operatorFilterRegistry.address
+        );
+
+        await Asset.connect(assetAdmin).registerAndSubscribe(
+          filterOperatorSubscription.address,
+          true
+        );
+
+        expect(
+          await operatorFilterRegistry.isRegistered(Asset.address)
+        ).to.be.equals(true);
+
+        expect(
+          await operatorFilterRegistry.subscriptionOf(Asset.address)
+        ).to.be.equals(filterOperatorSubscription.address);
+      });
+
+      it('should revert when registry is set zero and subscription is set zero', async function () {
+        const {
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await expect(
+          Asset.connect(assetAdmin).setOperatorRegistry(zeroAddress)
+        ).to.be.revertedWith("Asset: registry can't be zero address");
+
+        await expect(
+          Asset.connect(assetAdmin).registerAndSubscribe(zeroAddress, true)
+        ).to.be.revertedWith("Asset: subscription can't be zero address");
       });
 
       it('should be subscribed to common subscription', async function () {

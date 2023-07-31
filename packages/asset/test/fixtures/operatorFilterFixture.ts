@@ -180,5 +180,12 @@ export async function setupOperatorFilter() {
     operatorFilterRegistryAsDeployer,
     operatorFilterSubscription,
     Catalyst,
+    trustedForwarder,
+    assetAdmin,
+    commonRoyaltyReceiver,
+    DEFAULT_BPS,
+    RoyaltyManagerContract,
+    catalystAdmin,
+    catalystMinter,
   };
 }
