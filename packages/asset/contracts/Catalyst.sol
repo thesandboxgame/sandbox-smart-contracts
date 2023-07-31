@@ -55,7 +55,7 @@ contract Catalyst is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
-    uint256 public tokenCount;
+    uint256 public highestTierIndex;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -63,7 +63,7 @@ contract Catalyst is
     }
 
     modifier onlyValidId(uint256 tokenId) {
-        require(tokenId > 0 && tokenId <= tokenCount, "Catalyst: invalid catalyst id");
+        require(tokenId > 0 && tokenId <= highestTierIndex, "Catalyst: invalid catalyst id");
         _;
     }
 
@@ -103,9 +103,8 @@ contract Catalyst is
         __RoyaltyDistributor_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
             require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
-
-            _setURI(i + 1, _catalystIpfsCID[i]);
-            unchecked {tokenCount++;}
+            _setURI(i, _catalystIpfsCID[i]);
+            highestTierIndex = i;
         }
     }
 
@@ -131,7 +130,7 @@ contract Catalyst is
         uint256[] memory amounts
     ) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < ids.length; i++) {
-            require(ids[i] > 0 && ids[i] <= tokenCount, "INVALID_CATALYST_ID");
+            require(ids[i] > 0 && ids[i] <= highestTierIndex, "Catalyst: invalid catalyst id");
         }
         _mintBatch(to, ids, amounts, "");
     }
@@ -161,14 +160,12 @@ contract Catalyst is
     }
 
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
-    /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(catalystId > tokenCount, "Catalyst: invalid catalyst id");
+    function addNewCatalystType(string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be empty");
-        tokenCount++;
-        ERC1155URIStorageUpgradeable._setURI(catalystId, ipfsCID);
-        emit NewCatalystTypeAdded(catalystId);
+        uint256 newCatId = ++highestTierIndex;
+        ERC1155URIStorageUpgradeable._setURI(newCatId, ipfsCID);
+        emit NewCatalystTypeAdded(newCatId);
     }
 
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only

@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, log, read, catchUnknownSigner} = deployments;
-  const {assetAdmin} = await getNamedAccounts();
+  const {assetAdmin, backendAuthWallet} = await getNamedAccounts();
 
   const assetReveal = await deployments.get('AssetReveal');
 
@@ -21,9 +21,35 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     log(`Asset MINTER_ROLE granted to ${assetReveal.address}`);
   }
+
+  const burnerRole = await read('Asset', 'BURNER_ROLE');
+  if (!(await read('Asset', 'hasRole', burnerRole, assetReveal.address))) {
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: assetAdmin, log: true},
+        'grantRole',
+        burnerRole,
+        assetReveal.address
+      )
+    );
+    log(`Asset BURNER_ROLE granted to ${assetReveal.address}`);
+  }
+
+  await catchUnknownSigner(
+    execute(
+      'AuthSuperValidator',
+      {from: assetAdmin, log: true},
+      'setSigner',
+      assetReveal.address,
+      backendAuthWallet
+    )
+  );
+
+  log(`AuthSuperValidator signer for Asset Reveal set to ${backendAuthWallet}`);
 };
 
 export default func;
 
-func.tags = ['Asset', 'Asset_Reveal_role_setup'];
-func.dependencies = ['Asset_deploy', 'Catalyst_deploy', 'AssetCreate_deploy'];
+func.tags = ['Asset', 'AssetReveal_setup'];
+func.dependencies = ['Asset_deploy', 'AssetCreate_deploy'];

@@ -49,9 +49,8 @@ interface ICatalyst {
     ) external;
 
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
-    /// @param catalystId The catalyst id to add
     /// @param ipfsCID The royalty bps for the catalyst
-    function addNewCatalystType(uint256 catalystId, string memory ipfsCID) external;
+    function addNewCatalystType(string memory ipfsCID) external;
 
     /// @notice Set a new URI for specific tokenid
     /// @param tokenId The token id to set URI for

@@ -23,7 +23,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'OPERATOR_FILTER_REGISTRY',
         {from: filterOperatorSubscription},
         'registerAndCopyEntries',
-        [filterOperatorSubscription, DEFAULT_SUBSCRIPTION]
+        filterOperatorSubscription,
+        DEFAULT_SUBSCRIPTION
       );
       console.log(
         "common subscription registered on operator filter registry and opensea's blacklist copied"
