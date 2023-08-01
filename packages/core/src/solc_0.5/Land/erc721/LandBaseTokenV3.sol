@@ -22,7 +22,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
 
     mapping(address => bool) internal _minters;
-    event Minter(address superOperator, bool enabled);
+    event Minter(address indexed superOperator, bool enabled);
 
     struct Land {
         uint256 x;

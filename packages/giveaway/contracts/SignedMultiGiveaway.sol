@@ -45,6 +45,8 @@ contract SignedMultiGiveaway is
         address to;
         ClaimEntry[] claims;
     }
+    string public constant NAME = "Sandbox SignedMultiGiveaway";
+    string public constant VERSION = "1.0";
 
     /// @dev this role is for addresses that help the admin. Can pause the contract, butF, only the admin can unpause it.
     bytes32 public constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE");
@@ -56,13 +58,24 @@ contract SignedMultiGiveaway is
     /// @dev Token -> id -> Limit
     mapping(address => mapping(uint256 => PerTokenLimitData)) private _perTokenLimitData;
 
-    event Claimed(uint256[] claimIds, address indexed from, address indexed to, ClaimEntry[] claims, address operator);
-    event RevokedClaims(uint256[] claimIds, address operator);
-    event AssetsRecovered(address to, ClaimEntry[] claims, address operator);
-    event MaxWeiPerClaimSet(address token, uint256 tokenId, uint256 maxWeiPerClaim, address operator);
-    event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address operator);
-    event MaxClaimEntriesSet(uint256 maxClaimEntries, address operator);
-    event TrustedForwarderSet(address indexed newForwarder);
+    event Claimed(
+        uint256[] claimIds,
+        address indexed from,
+        address indexed to,
+        ClaimEntry[] claims,
+        address indexed operator
+    );
+    event RevokedClaims(uint256[] claimIds, address indexed operator);
+    event AssetsRecovered(address indexed to, ClaimEntry[] claims, address indexed operator);
+    event MaxWeiPerClaimSet(
+        address indexed token,
+        uint256 indexed tokenId,
+        uint256 maxWeiPerClaim,
+        address indexed operator
+    );
+    event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address indexed operator);
+    event MaxClaimEntriesSet(uint256 maxClaimEntries, address indexed operator);
+    event TrustedForwarderSet(address indexed newForwarder, address indexed operator);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -74,6 +87,9 @@ contract SignedMultiGiveaway is
         _;
     }
 
+    /// @notice initializer method, called during deployment
+    /// @param trustedForwarder_ address of the ERC2771 trusted forwarder
+    /// @param admin_ address that have admin access and can assign roles.
     function initialize(address trustedForwarder_, address admin_) external initializer {
         __Context_init_unchained();
         __ERC165_init_unchained();
@@ -81,7 +97,7 @@ contract SignedMultiGiveaway is
         __ERC1155Holder_init_unchained();
         __ERC721Holder_init_unchained();
         __AccessControl_init_unchained();
-        __EIP712_init_unchained(name, version);
+        __EIP712_init_unchained(NAME, VERSION);
         __Pausable_init_unchained();
         __ERC2771Handler_initialize(trustedForwarder_);
         _setupRole(DEFAULT_ADMIN_ROLE, admin_);
@@ -102,7 +118,7 @@ contract SignedMultiGiveaway is
         address to,
         ClaimEntry[] calldata claims
     ) external whenNotPaused {
-        _claim(_limits.numberOfSignaturesNeeded + 1, sigs, claimIds, expiration, from, to, claims);
+        _verifyClaim(_limits.numberOfSignaturesNeeded + 1, sigs, claimIds, expiration, from, to, claims);
         _transfer(from, to, claims);
         emit Claimed(claimIds, from, to, claims, _msgSender());
     }
@@ -115,7 +131,15 @@ contract SignedMultiGiveaway is
         address sender = _msgSender();
         for (uint256 i; i < len; i++) {
             BatchClaimData calldata c = batch[i];
-            _claim(_limits.numberOfSignaturesNeeded + 1, c.sigs, c.claimIds, c.expiration, c.from, c.to, c.claims);
+            _verifyClaim(
+                _limits.numberOfSignaturesNeeded + 1,
+                c.sigs,
+                c.claimIds,
+                c.expiration,
+                c.from,
+                c.to,
+                c.claims
+            );
             _transfer(c.from, c.to, c.claims);
             emit Claimed(c.claimIds, c.from, c.to, c.claims, sender);
         }
@@ -183,7 +207,7 @@ contract SignedMultiGiveaway is
     /// @param trustedForwarder_ The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder_) external onlyAdmin {
         _trustedForwarder = trustedForwarder_;
-        emit TrustedForwarderSet(_trustedForwarder);
+        emit TrustedForwarderSet(_trustedForwarder, _msgSender());
     }
 
     /// @notice return true if already claimed
@@ -350,7 +374,9 @@ contract SignedMultiGiveaway is
         }
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
+
+    uint256[48] private __gap;
 }
