@@ -839,13 +839,17 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0x572b6c05')).to.be.true;
     });
-    it('should support RoyaltyUGC', async function () {
+    it('should support IRoyaltyUGC', async function () {
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0xa30b4db9')).to.be.true;
     });
-    it('should support RoyaltyMultiDistributor', async function () {
+    it('should support IRoyaltyMultiDistributor', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0xb2975413')).to.be.true;
+      expect(await AssetContract.supportsInterface('0x4f07bc84')).to.be.true;
+    });
+    it('should support IRoyaltyMultiRecipients', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0xfd90e897')).to.be.true;
     });
   });
   describe('Token util', function () {
