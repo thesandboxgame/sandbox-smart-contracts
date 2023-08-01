@@ -54,6 +54,7 @@ abstract contract MultiRoyaltyDistributor is
         return
             interfaceId == type(IEIP2981).interfaceId ||
             interfaceId == type(IMultiRoyaltyDistributor).interfaceId ||
+            interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
