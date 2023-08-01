@@ -282,4 +282,23 @@ contract Catalyst is
             interfaceId == 0x572b6c05 || // ERC2771
             super.supportsInterface(interfaceId);
     }
+
+    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
+    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+    /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
+    function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(subscriptionOrRegistrantToCopy != address(0), "Catalyst: subscription can't be zero address");
+        _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(registry != address(0), "Catalyst: registry can't be zero address");
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    }
 }
