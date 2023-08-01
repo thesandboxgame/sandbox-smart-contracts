@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {IMultiRoyaltyDistributor} from "./interfaces/IMultiRoyaltyDistributor.sol";
+import {IMultiRoyaltyDistributor, IMultiRoyaltyRecipients} from "./interfaces/IMultiRoyaltyDistributor.sol";
 import {
     IRoyaltySplitter,
     IERC165
