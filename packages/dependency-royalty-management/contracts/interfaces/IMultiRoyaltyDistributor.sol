@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IMultiRoyaltyRecipients} from "./IMultiRoyaltyRecipients.sol";
 import {
     IRoyaltySplitter,
     Recipient
@@ -10,7 +11,7 @@ import {
 /**
  * Multi-receiver EIP2981 reference override implementation
  */
-interface IMultiRoyaltyDistributor is IERC165 {
+interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
     event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);

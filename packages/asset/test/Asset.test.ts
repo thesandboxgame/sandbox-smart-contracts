@@ -847,6 +847,10 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0x4f07bc84')).to.be.true;
     });
+    it('should support IRoyaltyMultiRecipients', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0xfd90e897')).to.be.true;
+    });
   });
   describe('Token util', function () {
     it('should return correct creator from asset for a token', async function () {
