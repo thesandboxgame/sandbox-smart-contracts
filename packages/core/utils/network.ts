@@ -93,5 +93,10 @@ export function isTest(hre: HardhatRuntimeEnvironment): boolean {
 }
 
 function isFork(): boolean {
-  return !!process.env.HARDHAT_FORK && !['--skip-test-deployments', '-ntd'].some(arg => process.argv.includes(arg));
+  return (
+    !!process.env.HARDHAT_FORK &&
+    !['--skip-test-deployments', '-ntd'].some((arg) =>
+      process.argv.includes(arg)
+    )
+  );
 }
