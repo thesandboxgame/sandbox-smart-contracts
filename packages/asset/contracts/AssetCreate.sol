@@ -151,6 +151,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         string calldata metadataHash,
         address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) {
+        require(tier == 0, "AssetCreate: Special assets must be tier 0");
         require(
             authValidator.verify(
                 signature,

@@ -281,6 +281,27 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('Invalid signature');
       });
+      it('should revert if sender is not the creator for which the signature was generated', async function () {
+        const {
+          mintCatalyst,
+          mintSingleAsset,
+          generateSingleMintSignature,
+          metadataHashes,
+          otherWallet,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateSingleMintSignature(
+          otherWallet.address,
+          4,
+          1,
+          true,
+          metadataHashes[0]
+        );
+
+        await expect(
+          mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
+        ).to.be.revertedWith('Invalid signature');
+      });
       it('should revert if metadataHash mismatches signed metadataHash', async function () {
         const {
           user,
@@ -727,6 +748,34 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('Invalid signature');
       });
+      it('should revert if sender is not the creator for which the signature was generated', async function () {
+        const {
+          mintMultipleAssets,
+          generateMultipleMintSignature,
+          mintCatalyst,
+          metadataHashes,
+          otherWallet,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+
+        const signature = await generateMultipleMintSignature(
+          otherWallet.address,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          mintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            [true, true],
+            metadataHashes
+          )
+        ).to.be.revertedWith('Invalid signature');
+      });
       it('should revert if tiers, amounts and metadatahashes are not of the same length', async function () {
         const {
           mintMultipleAssets,
@@ -1027,7 +1076,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
   });
   describe('Special asset mint', function () {
     describe('Success', function () {
-      it('should allow special minter role to mint special assets', async function () {
+      it('should allow special minter role to mint special assets with tier 0 (TSB Exclusive)', async function () {
         const {
           mintSpecialAsset,
           generateSingleMintSignature,
@@ -1039,12 +1088,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await grantSpecialMinterRole(user.address);
         const signature = await generateSingleMintSignature(
           user.address,
-          1,
+          0,
           1,
           true,
           metadataHashes[0]
         );
-        await expect(mintSpecialAsset(signature, 1, 1, true, metadataHashes[0]))
+        await expect(mintSpecialAsset(signature, 0, 1, true, metadataHashes[0]))
           .to.not.be.reverted;
       });
     });
@@ -1070,6 +1119,27 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
         );
       });
+      it('should not allow minting assets with tier other than 0 (TSB Exclusive)', async function () {
+        const {
+          mintSpecialAsset,
+          generateSingleMintSignature,
+          user,
+          metadataHashes,
+          grantSpecialMinterRole,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateSingleMintSignature(
+          user.address,
+          1,
+          1,
+          true,
+          metadataHashes[0]
+        );
+        await expect(
+          mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
+        ).to.be.revertedWith('AssetCreate: Special assets must be tier 0');
+      });
     });
     describe('Event', function () {
       it('should emit a SpecialAssetMinted event', async function () {
@@ -1085,7 +1155,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await grantSpecialMinterRole(user.address);
         const signature = await generateSingleMintSignature(
           user.address,
-          1,
+          0,
           1,
           true,
           metadataHashes[0]
@@ -1093,7 +1163,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await expect(
           AssetCreateContractAsUser.createSpecialAsset(
             signature,
-            1,
+            0,
             1,
             true,
             metadataHashes[0],
@@ -1113,14 +1183,14 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await grantSpecialMinterRole(user.address);
         const signature = await generateSingleMintSignature(
           user.address,
-          1,
+          0,
           1,
           true,
           metadataHashes[0]
         );
         const result = await mintSpecialAsset(
           signature,
-          1,
+          0,
           1,
           true,
           metadataHashes[0]
@@ -1132,7 +1202,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         // creator should be user
         expect(eventData.creator).to.equal(user.address);
         // tier should be 1
-        expect(eventData.tier).to.equal(1);
+        expect(eventData.tier).to.equal(0);
         // amount should be 1
         expect(eventData.amount).to.equal(1);
         // metadataHash should be metadataHashes[0]
