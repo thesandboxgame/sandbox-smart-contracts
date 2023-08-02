@@ -43,7 +43,9 @@ describe('Asset Royalties', function () {
         creator.address
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
@@ -52,7 +54,7 @@ describe('Asset Royalties', function () {
 
       const balance = await ERC20.balanceOf(splitter);
 
-      expect(balance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
+      expect(balance).to.be.equal(1000000 * (assetRoyaltyBPS / 10000));
 
       await splitterContract
         .connect(await ethers.getSigner(creator.address))
@@ -64,10 +66,10 @@ describe('Asset Royalties', function () {
       );
 
       expect(balanceCreator).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
     });
 
@@ -83,6 +85,7 @@ describe('Asset Royalties', function () {
         creator,
         AssetAsSeller,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -100,17 +103,19 @@ describe('Asset Royalties', function () {
         seller.address,
         true
       );
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
       const balanceCreator = await ERC20.balanceOf(creator.address);
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
         commonRoyaltyReceiver.address
       );
 
       expect(balanceCreator).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
     });
 
@@ -126,6 +131,7 @@ describe('Asset Royalties', function () {
         user,
         AssetAsSeller,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -163,7 +169,9 @@ describe('Asset Royalties', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       expect(
         balanceCreatorNew
@@ -172,7 +180,7 @@ describe('Asset Royalties', function () {
             balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
           )
       ).to.be.equal(
-        value.mul(BigNumber.from(_defaultRoyaltyBPS)).div(BigNumber.from(10000))
+        value.mul(BigNumber.from(assetRoyaltyBPS)).div(BigNumber.from(10000))
       );
     });
 
@@ -188,6 +196,7 @@ describe('Asset Royalties', function () {
         user,
         AssetAsSeller,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -229,7 +238,9 @@ describe('Asset Royalties', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       expect(
         balanceCreatorNew
@@ -238,7 +249,7 @@ describe('Asset Royalties', function () {
             balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
           )
       ).to.be.equal(
-        value.mul(BigNumber.from(_defaultRoyaltyBPS)).div(BigNumber.from(10000))
+        value.mul(BigNumber.from(assetRoyaltyBPS)).div(BigNumber.from(10000))
       );
     });
 
@@ -317,7 +328,9 @@ describe('Asset Royalties', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       expect(
         balanceRoyaltyReceiverNew
@@ -326,7 +339,7 @@ describe('Asset Royalties', function () {
             balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
           )
       ).to.be.equal(
-        value.mul(BigNumber.from(_defaultRoyaltyBPS)).div(BigNumber.from(10000))
+        value.mul(BigNumber.from(assetRoyaltyBPS)).div(BigNumber.from(10000))
       );
     });
 
@@ -344,6 +357,7 @@ describe('Asset Royalties', function () {
         user,
         AssetAsSeller,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -391,7 +405,9 @@ describe('Asset Royalties', function () {
         balanceCommonRoyaltyReceiver2New.sub(balanceCommonRoyaltyReceiver2)
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       expect(
         balanceCreatorNew
@@ -400,7 +416,7 @@ describe('Asset Royalties', function () {
             balanceCommonRoyaltyReceiver2New.sub(balanceCommonRoyaltyReceiver2)
           )
       ).to.be.equal(
-        value.mul(BigNumber.from(_defaultRoyaltyBPS)).div(BigNumber.from(10000))
+        value.mul(BigNumber.from(assetRoyaltyBPS)).div(BigNumber.from(10000))
       );
     });
 
@@ -417,6 +433,7 @@ describe('Asset Royalties', function () {
         creator,
         user,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -452,10 +469,12 @@ describe('Asset Royalties', function () {
         commonRoyaltyReceiver.address
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
 
       const TotalRoyalty = value
-        .mul(BigNumber.from(_defaultRoyaltyBPS))
+        .mul(BigNumber.from(assetRoyaltyBPS))
         .div(BigNumber.from(10000));
 
       const sellerRoyaltyShare = TotalRoyalty.mul(BigNumber.from(4000)).div(
@@ -481,7 +500,7 @@ describe('Asset Royalties', function () {
             balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
           )
       ).to.be.equal(
-        value.mul(BigNumber.from(_defaultRoyaltyBPS)).div(BigNumber.from(10000))
+        value.mul(BigNumber.from(assetRoyaltyBPS)).div(BigNumber.from(10000))
       );
     });
 
@@ -541,7 +560,9 @@ describe('Asset Royalties', function () {
         .splitERC20Tokens(ERC20.address);
       const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(0);
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
         commonRoyaltyReceiver.address
       );
@@ -550,10 +571,10 @@ describe('Asset Royalties', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
     });
 
@@ -571,6 +592,7 @@ describe('Asset Royalties', function () {
         creator,
         AssetAsSeller,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -598,16 +620,18 @@ describe('Asset Royalties', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
       const balanceCommonRoyaltyReceiver2 = await ERC20.balanceOf(
         commonRoyaltyReceiver2.address
       );
       const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver2).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
     });
 
@@ -624,6 +648,7 @@ describe('Asset Royalties', function () {
         commonRoyaltyReceiver,
         creator,
         assetAsMinter,
+        RoyaltyManagerContract,
       } = await assetRoyaltyDistribution();
 
       const id = generateAssetId(creator.address, 1);
@@ -643,16 +668,18 @@ describe('Asset Royalties', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await Asset._defaultRoyaltyBPS();
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
         commonRoyaltyReceiver.address
       );
       const balanceCreator = await ERC20.balanceOf(creator.address);
       expect(balanceCreator).to.be.equal(
-        ((1000000 * (_defaultRoyaltyBPS / 10000)) / 5) * 2
+        ((1000000 * (assetRoyaltyBPS / 10000)) / 5) * 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        ((1000000 * (_defaultRoyaltyBPS / 10000)) / 5) * 3
+        ((1000000 * (assetRoyaltyBPS / 10000)) / 5) * 3
       );
     });
   });
@@ -722,45 +749,6 @@ describe('Asset Royalties', function () {
           seller.address
         )
       ).to.revertedWith('Manager: No splitter deployed for the creator');
-    });
-
-    it('Asset admin can set default royalty Bps', async function () {
-      const {Asset, assetAdmin} = await assetRoyaltyDistribution();
-      expect(await Asset._defaultRoyaltyBPS()).to.be.equal(300);
-      await Asset.connect(assetAdmin).setDefaultRoyaltyBps(400);
-      expect(await Asset._defaultRoyaltyBPS()).to.be.equal(400);
-    });
-
-    it('Asset admin can set default royalty address', async function () {
-      const {Asset, commonRoyaltyReceiver, assetAdmin, deployer} =
-        await assetRoyaltyDistribution();
-      expect(await Asset._defaultRoyaltyReceiver()).to.be.equal(
-        commonRoyaltyReceiver.address
-      );
-      await Asset.connect(assetAdmin).setDefaultRoyaltyReceiver(
-        deployer.address
-      );
-      expect(await Asset._defaultRoyaltyReceiver()).to.be.equal(
-        deployer.address
-      );
-    });
-
-    it('only asset admin can set default royalty Bps', async function () {
-      const {Asset, seller, assetAdminRole} = await assetRoyaltyDistribution();
-      await expect(
-        Asset.connect(seller).setDefaultRoyaltyBps(400)
-      ).to.be.revertedWith(
-        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${assetAdminRole}`
-      );
-    });
-
-    it('only asset admin can set default royalty address', async function () {
-      const {Asset, seller, assetAdminRole} = await assetRoyaltyDistribution();
-      await expect(
-        Asset.connect(seller).setDefaultRoyaltyReceiver(seller.address)
-      ).to.be.revertedWith(
-        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${assetAdminRole}`
-      );
     });
 
     it('RoyaltyManagerContract admin can set common royalty recipient', async function () {

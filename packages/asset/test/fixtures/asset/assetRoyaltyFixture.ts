@@ -88,8 +88,6 @@ export async function assetRoyaltyDistribution() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
-      commonRoyaltyReceiver.address,
-      DEFAULT_BPS,
       RoyaltyManagerContract.address,
     ],
     {
@@ -148,7 +146,10 @@ export async function assetRoyaltyDistribution() {
   const RoyaltyManagerAsRoyaltySetter = RoyaltyManagerContract.connect(
     contractRoyaltySetter
   );
-
+  await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(
+    Asset.address,
+    DEFAULT_BPS
+  );
   return {
     Asset,
     ERC20,

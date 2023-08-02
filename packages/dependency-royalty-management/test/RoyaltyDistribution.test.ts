@@ -44,7 +44,9 @@ describe('Royalty', function () {
         deployer.address
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
@@ -53,7 +55,7 @@ describe('Royalty', function () {
 
       const balance = await ERC20.balanceOf(splitter);
 
-      expect(balance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
+      expect(balance).to.be.equal(1000000 * (erc1155Royalty / 10000));
 
       await splitterContract
         .connect(await ethers.getSigner(royaltyReceiver.address))
@@ -67,10 +69,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
     it('should split ERC20 using RoyaltyEngine', async function () {
@@ -86,6 +88,7 @@ describe('Royalty', function () {
         royaltyReceiver,
         RoyaltyRegistry,
         ERC1155AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
 
       await RoyaltyRegistry.connect(deployer).setRoyaltyLookupAddress(
@@ -113,7 +116,9 @@ describe('Royalty', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const balanceRoyaltyReceiver = await ERC20.balanceOf(
         royaltyReceiver.address
@@ -124,10 +129,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
 
@@ -143,6 +148,7 @@ describe('Royalty', function () {
         royaltyReceiver,
         user,
         ERC1155AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(deployer).mint(
         seller.address,
@@ -186,7 +192,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiverNew
@@ -196,7 +204,7 @@ describe('Royalty', function () {
           )
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
     });
@@ -213,6 +221,7 @@ describe('Royalty', function () {
         royaltyReceiver,
         user,
         ERC1155AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(deployer).mint(
         seller.address,
@@ -260,7 +269,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiverNew
@@ -270,7 +281,7 @@ describe('Royalty', function () {
           )
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
     });
@@ -357,7 +368,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiverNew.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiver2New
@@ -367,7 +380,7 @@ describe('Royalty', function () {
           )
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
     });
@@ -385,6 +398,7 @@ describe('Royalty', function () {
         royaltyReceiver,
         user,
         ERC1155AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(seller).mint(
         seller.address,
@@ -439,7 +453,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiver2New.sub(balanceCommonRoyaltyReceiver2)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiverNew
@@ -449,7 +465,7 @@ describe('Royalty', function () {
           )
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
     });
@@ -466,6 +482,7 @@ describe('Royalty', function () {
         commonRoyaltyReceiver,
         royaltyReceiver,
         user,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(seller).mint(
         seller.address,
@@ -507,10 +524,12 @@ describe('Royalty', function () {
         commonRoyaltyReceiver.address
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const TotalRoyalty = value
-        .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+        .mul(ethers.BigNumber.from(erc1155Royalty))
         .div(ethers.BigNumber.from(10000));
 
       const sellerRoyaltyShare = TotalRoyalty.mul(
@@ -537,7 +556,7 @@ describe('Royalty', function () {
           )
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
     });
@@ -609,7 +628,9 @@ describe('Royalty', function () {
       );
       expect(balanceRoyaltyReceiver).to.be.equal(0);
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
         commonRoyaltyReceiver.address
@@ -620,10 +641,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver2).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
 
@@ -640,6 +661,7 @@ describe('Royalty', function () {
         commonRoyaltyReceiver,
         royaltyReceiver,
         ERC1155AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(seller).mint(
         seller.address,
@@ -674,7 +696,9 @@ describe('Royalty', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const balanceCommonRoyaltyReceiver2 = await ERC20.balanceOf(
         commonRoyaltyReceiver2.address
@@ -685,10 +709,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver2).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
 
@@ -704,6 +728,7 @@ describe('Royalty', function () {
         ERC1155AsSeller,
         commonRoyaltyReceiver,
         royaltyReceiver,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(seller).mint(
         seller.address,
@@ -729,7 +754,9 @@ describe('Royalty', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
         commonRoyaltyReceiver.address
@@ -740,10 +767,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        ((1000000 * (_defaultRoyaltyBPS / 10000)) / 5) * 2
+        ((1000000 * (erc1155Royalty / 10000)) / 5) * 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        ((1000000 * (_defaultRoyaltyBPS / 10000)) / 5) * 3
+        ((1000000 * (erc1155Royalty / 10000)) / 5) * 3
       );
     });
 
@@ -834,7 +861,9 @@ describe('Royalty', function () {
         deployer.address
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
@@ -843,7 +872,7 @@ describe('Royalty', function () {
 
       const balance = await ERC20.balanceOf(splitter);
 
-      expect(balance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
+      expect(balance).to.be.equal(1000000 * (erc1155Royalty / 10000));
 
       await expect(
         splitterContract.splitERC20Tokens(ERC20.address)
@@ -900,40 +929,6 @@ describe('Royalty', function () {
           seller.address
         )
       ).to.revertedWith('Manager: No splitter deployed for the creator');
-    });
-
-    it('token admin can set default royalty Bps', async function () {
-      const {ERC1155, deployer} = await royaltyDistribution();
-      expect(await ERC1155._defaultRoyaltyBPS()).to.be.equal(300);
-      await ERC1155.connect(deployer).setDefaultRoyaltyBps(400);
-      expect(await ERC1155._defaultRoyaltyBPS()).to.be.equal(400);
-    });
-
-    it('token admin can set default royalty address', async function () {
-      const {ERC1155, royaltyReceiver, deployer} = await royaltyDistribution();
-      expect(await ERC1155._defaultRoyaltyReceiver()).to.be.equal(
-        royaltyReceiver.address
-      );
-      await ERC1155.connect(deployer).setDefaultRoyaltyReceiver(
-        deployer.address
-      );
-      expect(await ERC1155._defaultRoyaltyReceiver()).to.be.equal(
-        deployer.address
-      );
-    });
-
-    it('only Token admin can set default royalty Bps', async function () {
-      const {ERC1155, seller} = await royaltyDistribution();
-      await expect(
-        ERC1155.connect(seller).setDefaultRoyaltyBps(400)
-      ).to.be.revertedWith('Ownable: caller is not the owner');
-    });
-
-    it('only Token admin can set default royalty address', async function () {
-      const {ERC1155, seller} = await royaltyDistribution();
-      await expect(
-        ERC1155.connect(seller).setDefaultRoyaltyReceiver(seller.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
     it('manager admin can set common royalty recipient', async function () {
@@ -1127,7 +1122,9 @@ describe('Royalty', function () {
         deployer.address
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const splitterContract = await ethers.getContractAt(
         splitterAbi,
@@ -1136,7 +1133,7 @@ describe('Royalty', function () {
 
       const balance = await ERC20.balanceOf(splitter);
 
-      expect(balance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
+      expect(balance).to.be.equal(1000000 * (erc1155Royalty / 10000));
 
       await splitterContract
         .connect(royaltyReceiver)
@@ -1150,10 +1147,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       await ERC721.connect(deployer).mint(
         seller.address,
@@ -1176,7 +1173,11 @@ describe('Royalty', function () {
       );
       const newBalance = await ERC20.balanceOf(splitter);
 
-      expect(newBalance).to.be.equal(1000000 * (_defaultRoyaltyBPS / 10000));
+      const erc721Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC721.address
+      );
+
+      expect(newBalance).to.be.equal(1000000 * (erc1155Royalty / 10000));
 
       await splitterContract
         .connect(royaltyReceiver)
@@ -1190,10 +1191,10 @@ describe('Royalty', function () {
       );
 
       expect(newBalanceRoyaltyReceiver).to.be.equal(
-        1000000 * (_defaultRoyaltyBPS / 10000)
+        1000000 * (erc721Royalty / 10000)
       );
       expect(newBalanceCommonRoyaltyReceiver).to.be.equal(
-        1000000 * (_defaultRoyaltyBPS / 10000)
+        1000000 * (erc721Royalty / 10000)
       );
     });
 
@@ -1212,6 +1213,7 @@ describe('Royalty', function () {
         ERC1155AsSeller,
         ERC721,
         ERC721AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
 
       await RoyaltyRegistry.connect(deployer).setRoyaltyLookupAddress(
@@ -1239,7 +1241,9 @@ describe('Royalty', function () {
         true
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       const balanceRoyaltyReceiver = await ERC20.balanceOf(
         royaltyReceiver.address
@@ -1250,10 +1254,10 @@ describe('Royalty', function () {
       );
 
       expect(balanceRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
       expect(balanceCommonRoyaltyReceiver).to.be.equal(
-        (1000000 * (_defaultRoyaltyBPS / 10000)) / 2
+        (1000000 * (erc1155Royalty / 10000)) / 2
       );
 
       await ERC721.connect(deployer).mint(
@@ -1275,6 +1279,9 @@ describe('Royalty', function () {
         seller.address,
         false
       );
+      const erc721Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC721.address
+      );
 
       const newBalanceRoyaltyReceiver = await ERC20.balanceOf(
         royaltyReceiver.address
@@ -1284,10 +1291,10 @@ describe('Royalty', function () {
       );
 
       expect(newBalanceRoyaltyReceiver).to.be.equal(
-        1000000 * (_defaultRoyaltyBPS / 10000)
+        1000000 * (erc721Royalty / 10000)
       );
       expect(newBalanceCommonRoyaltyReceiver).to.be.equal(
-        1000000 * (_defaultRoyaltyBPS / 10000)
+        1000000 * (erc721Royalty / 10000)
       );
     });
 
@@ -1305,6 +1312,7 @@ describe('Royalty', function () {
         ERC1155AsSeller,
         ERC721,
         ERC721AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(deployer).mint(
         seller.address,
@@ -1348,7 +1356,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiver1
@@ -1356,7 +1366,7 @@ describe('Royalty', function () {
           .add(balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver))
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
 
@@ -1381,6 +1391,9 @@ describe('Royalty', function () {
             value: value,
           }
         );
+      const erc721Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC721.address
+      );
 
       const balanceRoyaltyReceiver2 = await ethers.provider.getBalance(
         royaltyReceiver.address
@@ -1399,7 +1412,7 @@ describe('Royalty', function () {
           .add(balanceCommonRoyaltyReceiver2.sub(balanceCommonRoyaltyReceiver))
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc721Royalty))
           .div(ethers.BigNumber.from(10000))
           .mul(ethers.BigNumber.from(2))
       );
@@ -1419,6 +1432,7 @@ describe('Royalty', function () {
         ERC1155AsSeller,
         ERC721,
         ERC721AsSeller,
+        RoyaltyManagerContract,
       } = await royaltyDistribution();
       await ERC1155.connect(deployer).mint(
         seller.address,
@@ -1466,7 +1480,9 @@ describe('Royalty', function () {
         balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver)
       );
 
-      const _defaultRoyaltyBPS = await ERC1155._defaultRoyaltyBPS();
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
 
       expect(
         balanceRoyaltyReceiver1
@@ -1474,7 +1490,7 @@ describe('Royalty', function () {
           .add(balanceCommonRoyaltyReceiver1.sub(balanceCommonRoyaltyReceiver))
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc1155Royalty))
           .div(ethers.BigNumber.from(10000))
       );
 
@@ -1500,6 +1516,10 @@ describe('Royalty', function () {
           }
         );
 
+      const erc721Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC721.address
+      );
+
       const balanceRoyaltyReceiver2 = await ethers.provider.getBalance(
         royaltyReceiver.address
       );
@@ -1517,7 +1537,7 @@ describe('Royalty', function () {
           .add(balanceCommonRoyaltyReceiver2.sub(balanceCommonRoyaltyReceiver))
       ).to.be.equal(
         value
-          .mul(ethers.BigNumber.from(_defaultRoyaltyBPS))
+          .mul(ethers.BigNumber.from(erc721Royalty))
           .div(ethers.BigNumber.from(10000))
           .mul(ethers.BigNumber.from(2))
       );
@@ -1617,40 +1637,6 @@ describe('Royalty', function () {
       )
         .to.emit(RoyaltyManagerContract, 'RoyaltySet')
         .withArgs(500, SingleReceiver.address);
-    });
-    it('should revert when invalid royalties BPS is set for a token', async function () {
-      const {ERC1155, seller, deployer, royaltyReceiver} =
-        await royaltyDistribution();
-      await ERC1155.connect(deployer).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-      await expect(
-        ERC1155.connect(deployer).setTokenRoyalties(
-          1,
-          10000,
-          royaltyReceiver.address,
-          seller.address
-        )
-      ).to.be.revertedWith('Invalid bps');
-    });
-    it('should revert when zero address is set for default royalty recipient', async function () {
-      const {ERC1155, deployer} = await royaltyDistribution();
-
-      await expect(
-        ERC1155.connect(deployer).setDefaultRoyaltyReceiver(
-          '0x0000000000000000000000000000000000000000'
-        )
-      ).to.be.revertedWith("Default receiver can't be zero");
-    });
-    it('should revert when invalid default royalties is set', async function () {
-      const {ERC1155, deployer} = await royaltyDistribution();
-      await expect(
-        ERC1155.connect(deployer).setDefaultRoyaltyBps(10000)
-      ).to.be.revertedWith('Invalid bps');
     });
     it('should revert when setRecipients in splitter called by not owner', async function () {
       const {
@@ -1760,8 +1746,12 @@ describe('Royalty', function () {
         deployer,
         ERC20,
         royaltyReceiver,
+        RoyaltyManagerAsRoyaltySetter,
       } = await royaltyDistribution();
-      await ERC1155.connect(deployer).setDefaultRoyaltyBps(0);
+      await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(
+        ERC1155.address,
+        0
+      );
       await ERC1155.connect(deployer).mint(
         seller.address,
         1,
@@ -2009,21 +1999,25 @@ describe('Royalty', function () {
       ]);
     });
     it('should return common royalty recipient address in when no splitter is set for a token', async function () {
-      const {ERC1155, royaltyReceiver} = await royaltyDistribution();
+      const {ERC1155, commonRoyaltyReceiver} = await royaltyDistribution();
 
       expect(await ERC1155.royaltyInfo(1, 0)).to.deep.equal([
-        royaltyReceiver.address,
+        commonRoyaltyReceiver.address,
         0,
       ]);
     });
     it('should return zero address and zero bps when set for token which have no splitter deployed', async function () {
-      const {ERC1155, deployer} = await royaltyDistribution();
+      const {ERC1155, RoyaltyManagerAsRoyaltySetter} =
+        await royaltyDistribution();
 
-      await ERC1155.connect(deployer).setDefaultRoyaltyBps(0);
+      await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(
+        ERC1155.address,
+        0
+      );
       expect(await ERC1155.royaltyInfo(2, 1000)).to.deep.equal(['0', 0x00]);
     });
     it('should return all the royalty recipient form the contract', async function () {
-      const {ERC1155, royaltyReceiver, seller, user, deployer} =
+      const {ERC1155, commonRoyaltyReceiver, seller, user, deployer} =
         await royaltyDistribution();
       await ERC1155.connect(deployer).mint(
         seller.address,
@@ -2033,7 +2027,7 @@ describe('Royalty', function () {
         '0x'
       );
       expect(await ERC1155.getAllSplits()).to.deep.equal([
-        royaltyReceiver.address,
+        commonRoyaltyReceiver.address,
         await ERC1155._tokenRoyaltiesSplitter(1),
       ]);
     });
@@ -2047,7 +2041,7 @@ describe('Royalty', function () {
       } = await royaltyDistribution();
 
       expect((await ERC1155.getRecipients(1))[0].recipient).to.be.equal(
-        royaltyReceiver.address
+        commonRoyaltyReceiver.address
       );
       await ERC1155.connect(deployer).mint(
         seller.address,

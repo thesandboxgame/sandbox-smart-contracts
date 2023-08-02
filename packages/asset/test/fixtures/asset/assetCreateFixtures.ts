@@ -11,7 +11,6 @@ import {
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
-const DEFAULT_BPS = 300;
 
 export async function runCreateTestSetup() {
   const [
@@ -85,8 +84,6 @@ export async function runCreateTestSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
-      commonRoyaltyReceiver.address,
-      DEFAULT_BPS,
       RoyaltyManagerContract.address,
     ],
     {
