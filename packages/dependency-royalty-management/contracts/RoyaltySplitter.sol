@@ -183,7 +183,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         );
         require(
             !callData.startsWith(IERC20Approve.approve.selector) &&
-                !callData.startsWith(IERC20Approve.transfer.selector),
+                !callData.startsWith(IERC20Approve.increaseAllowance.selector),
             "Split: ERC20 tokens must be split"
         );
         /* solhint-disable-next-line no-empty-blocks*/
