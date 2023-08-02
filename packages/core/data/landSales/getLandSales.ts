@@ -40,7 +40,7 @@ export type SectorEstate = {
   coordinateY: number;
   ownerAddress: string;
   type: number;
-  lands: {coordinateX: number; coordinateY: number}[];
+  lands: SectorLand[];
   bundleId?: string;
 };
 
@@ -259,7 +259,6 @@ export async function getLandSales(
   const landSales = [];
   for (const sectorData of sectors) {
     const fixedSectorData = await excludeMinted(sectorData)
-    console.log({lands: sectorData.lands.length, unmintedLands: fixedSectorData.lands.length})
     const {lands} = await generateLandsForMerkleTree(
       fixedSectorData,
       bundles,
