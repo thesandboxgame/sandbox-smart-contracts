@@ -13,7 +13,7 @@ import {
  */
 interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
-    event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address recipient);
+    event TokenRoyaltySet(uint256 tokenId, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
 
     event DefaultRoyaltyReceiverSet(address recipient);
@@ -31,7 +31,6 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
      */
     function setTokenRoyalties(
         uint256 tokenId,
-        uint16 royaltyBPS,
         address payable recipient,
         address creator
     ) external;
@@ -40,21 +39,6 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
      * @dev Get all token royalty configurations
      */
     function getTokenRoyalties() external view returns (TokenRoyaltyConfig[] memory);
-
-    /**
-     * @dev Get the default royalty
-     */
-    function getDefaultRoyalty() external view returns (uint16 bps, Recipient[] memory);
-
-    /**
-     * @dev Set a default royalty.  Will be used if no token specific configuration is set
-     */
-    function setDefaultRoyaltyBps(uint16 bps) external;
-
-    /**
-     * @dev Set a default royalty receiver.  Will be used if no token specific configuration is set
-     */
-    function setDefaultRoyaltyReceiver(address payable defaultReceiver) external;
 
     /**
      * @dev Helper function to get all splits contracts
