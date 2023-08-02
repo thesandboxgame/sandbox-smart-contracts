@@ -23,12 +23,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Asset MODERATOR_ROLE granted to ${assetAdmin}`);
   }
 
-  await execute(
-    'RoyaltyManager',
-    {from: contractRoyaltySetter, log: true},
-    'setContractRoyalty',
-    Asset.address,
-    DEFAULT_BPS
+  await catchUnknownSigner(
+    execute(
+      'RoyaltyManager',
+      {from: contractRoyaltySetter, log: true},
+      'setContractRoyalty',
+      Asset.address,
+      DEFAULT_BPS
+    )
   );
 };
 
