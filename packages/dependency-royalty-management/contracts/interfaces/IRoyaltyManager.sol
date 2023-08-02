@@ -18,9 +18,11 @@ interface IRoyaltyManager {
 
     function getCreatorSplit() external view returns (uint16);
 
-    function getRoyaltyInfo() external view returns (address, uint16);
+    function getRoyaltyInfo() external view returns (address payable, uint16);
 
     function deploySplitter(address creator, address payable recipient) external returns (address payable);
 
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable);
+
+    function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps);
 }

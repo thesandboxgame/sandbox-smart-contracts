@@ -18,20 +18,12 @@ import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 /// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to slip its royalty between the creator and Sandbox and use it for every token minted by that creator.
 abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-    uint16 public _defaultRoyaltyBPS;
-    address payable public _defaultRoyaltyReceiver;
     address public royaltyManager;
 
     mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
-    function __MultiRoyaltyDistributor_init(
-        address payable defaultRecipient,
-        uint16 defaultBps,
-        address _royaltyManager
-    ) internal {
-        _defaultRoyaltyReceiver = defaultRecipient;
-        _defaultRoyaltyBPS = defaultBps;
+    function __MultiRoyaltyDistributor_init(address _royaltyManager) internal {
         royaltyManager = _royaltyManager;
     }
 
@@ -55,35 +47,16 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice sets token royalty
     /// @dev deploys a splitter if a creator doesn't have one
     /// @param tokenId id of token
-    /// @param royaltyBPS the bps of for EIP2981 royalty
     /// @param creator of the token
     function _setTokenRoyalties(
         uint256 tokenId,
-        uint16 royaltyBPS,
         address payable recipient,
         address creator
     ) internal {
-        require(royaltyBPS < TOTAL_BASIS_POINTS, "Invalid bps");
         address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager).deploySplitter(creator, recipient);
         _tokenRoyaltiesSplitter[tokenId] = creatorSplitterAddress;
         _tokensWithRoyalties.push(tokenId);
-        emit TokenRoyaltySet(tokenId, royaltyBPS, recipient);
-    }
-
-    /// @dev Internal function to set the default EIP2981 royalty
-    /// @param bps the new default royalty in BPS to be set
-    function _setDefaultRoyaltyBps(uint16 bps) internal {
-        require(bps < TOTAL_BASIS_POINTS, "Invalid bps");
-        _defaultRoyaltyBPS = bps;
-        emit DefaultRoyaltyBpsSet(bps);
-    }
-
-    /// @dev Internal function to set the default EIP2981 royalty receiver
-    /// @param defaultReceiver is the new default royalty receiver in BPS to be set
-    function _setDefaultRoyaltyReceiver(address payable defaultReceiver) internal {
-        require(defaultReceiver != address(0), "Default receiver can't be zero");
-        _defaultRoyaltyReceiver = defaultReceiver;
-        emit DefaultRoyaltyReceiverSet(defaultReceiver);
+        emit TokenRoyaltySet(tokenId, recipient);
     }
 
     /// @notice Returns royalty receivers and their split of royalty for each token
@@ -102,21 +75,14 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         }
     }
 
-    /// @notice Returns default royalty bps and the default recipient following EIP2981
-    /// @dev In this contract there is only one default recipient so its split is 100 percent or 10000 points.
-    /// @return bps the royalty percentage in BPS
-    /// @return recipients The default recipients with their share of the royalty
-    function getDefaultRoyalty() external view override returns (uint16 bps, Recipient[] memory recipients) {
-        recipients[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
-        return (_defaultRoyaltyBPS, recipients);
-    }
-
     /// @notice EIP 2981 royalty info function to return the royalty receiver and royalty amount
     /// @param tokenId of the token for which the royalty is needed to be distributed
     /// @param value the amount on which the royalty is calculated
     /// @return address the royalty receiver
     /// @return value the EIP2981 royalty
     function royaltyInfo(uint256 tokenId, uint256 value) public view override returns (address, uint256) {
+        (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
+            IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
             return (_tokenRoyaltiesSplitter[tokenId], (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
         }
@@ -131,6 +97,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     function getAllSplits() external view override returns (address payable[] memory splits) {
         uint256 startingIndex;
         uint256 endingIndex = _tokensWithRoyalties.length;
+        (address payable _defaultRoyaltyReceiver, ) = IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_defaultRoyaltyReceiver != address(0)) {
             splits = new address payable[](1 + _tokensWithRoyalties.length);
             splits[0] = _defaultRoyaltyReceiver;
@@ -151,6 +118,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @return addresses of royalty recipient of the token.
     function getRecipients(uint256 tokenId) public view returns (Recipient[] memory) {
         address payable splitterAddress = _tokenRoyaltiesSplitter[tokenId];
+        (address payable _defaultRoyaltyReceiver, ) = IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (splitterAddress != address(0)) {
             return IRoyaltySplitter(splitterAddress).getRecipients();
         }

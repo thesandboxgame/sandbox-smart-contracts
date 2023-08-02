@@ -101,8 +101,6 @@ export async function setupOperatorFilter() {
       assetAdmin.address,
       'ipfs://',
       filterOperatorSubscription.address,
-      commonRoyaltyReceiver.address,
-      DEFAULT_BPS,
       RoyaltyManagerContract.address,
     ],
     {

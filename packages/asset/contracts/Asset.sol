@@ -64,8 +64,6 @@ contract Asset is
         address assetAdmin,
         string memory baseUri,
         address commonSubscription,
-        address payable defaultRecipient,
-        uint16 defaultBps,
         address _manager
     ) external initializer {
         _setBaseURI(baseUri);
@@ -75,7 +73,7 @@ contract Asset is
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
-        __MultiRoyaltyDistributor_init(defaultRecipient, defaultBps, _manager);
+        __MultiRoyaltyDistributor_init(_manager);
     }
 
     /// @notice Mint new tokens
@@ -92,7 +90,7 @@ contract Asset is
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
         address creator = id.getCreatorAddress();
-        _setTokenRoyalties(id, _defaultRoyaltyBPS, payable(creator), creator);
+        _setTokenRoyalties(id, payable(creator), creator);
     }
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
@@ -114,7 +112,7 @@ contract Asset is
         _mintBatch(to, ids, amounts, "");
         for (uint256 i; i < ids.length; i++) {
             address creator = ids[i].getCreatorAddress();
-            _setTokenRoyalties(ids[i], _defaultRoyaltyBPS, payable(creator), creator);
+            _setTokenRoyalties(ids[i], payable(creator), creator);
         }
     }
 
@@ -281,30 +279,14 @@ contract Asset is
 
     /// @notice could be used to deploy splitter and set tokens royalties
     /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
-    /// @param royaltyBPS should be defult EIP2981 roayaltie.
     /// @param recipient the royalty recipient for the splitter of the creator.
     /// @param creator the creactor of the tokens.
     function setTokenRoyalties(
         uint256 tokenId,
-        uint16 royaltyBPS,
         address payable recipient,
         address creator
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setTokenRoyalties(tokenId, royaltyBPS, recipient, creator);
-    }
-
-    /// @notice sets default royalty bps for EIP2981
-    /// @dev only owner can call.
-    /// @param defaultBps royalty bps base 10000
-    function setDefaultRoyaltyBps(uint16 defaultBps) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setDefaultRoyaltyBps(defaultBps);
-    }
-
-    /// @notice sets default royalty receiver for EIP2981
-    /// @dev only owner can call.
-    /// @param defaultReceiver address of default royalty recipient.
-    function setDefaultRoyaltyReceiver(address payable defaultReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setDefaultRoyaltyReceiver(defaultReceiver);
+        _setTokenRoyalties(tokenId, recipient, creator);
     }
 
     /// @notice Extracts the creator address from a given token id

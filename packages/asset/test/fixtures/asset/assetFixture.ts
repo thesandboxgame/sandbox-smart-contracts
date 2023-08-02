@@ -1,8 +1,6 @@
 import {ethers, upgrades} from 'hardhat';
 import {DEFAULT_SUBSCRIPTION} from '../../../data/constants';
 
-const DEFAULT_BPS = 300;
-
 export function generateOldAssetId(
   creator: string,
   assetNumber: number,
@@ -145,8 +143,6 @@ export async function runAssetSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
-      commonRoyaltyReceiver.address,
-      DEFAULT_BPS,
       RoyaltyManagerContract.address,
     ],
     {

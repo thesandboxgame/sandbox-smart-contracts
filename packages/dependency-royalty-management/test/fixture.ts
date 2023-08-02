@@ -43,7 +43,7 @@ export async function royaltyDistribution() {
   const TestERC1155Factory = await ethers.getContractFactory('TestERC1155');
   const ERC1155 = await upgrades.deployProxy(
     TestERC1155Factory,
-    [300, royaltyReceiver.address, RoyaltyManagerContract.address],
+    [RoyaltyManagerContract.address],
     {
       initializer: 'initialize',
     }
@@ -54,7 +54,7 @@ export async function royaltyDistribution() {
   const TestERC721Factory = await ethers.getContractFactory('TestERC721');
   const ERC721 = await upgrades.deployProxy(
     TestERC721Factory,
-    [300, royaltyReceiver.address, RoyaltyManagerContract.address],
+    [RoyaltyManagerContract.address],
     {
       initializer: 'initialize',
     }
@@ -111,9 +111,15 @@ export async function royaltyDistribution() {
     contractRoyaltySetter
   );
 
+  const NFTFactory = await ethers.getContractFactory('NFTWithoutTransferCheck');
+  const NFT = await NFTFactory.deploy();
+
   const ERC1155AsSeller = ERC1155.connect(seller);
   const ERC20AsBuyer = ERC20.connect(buyer);
   const ERC721AsSeller = ERC721.connect(seller);
+
+  await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(ERC1155.address, 300);
+  await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(ERC721.address, 300);
 
   return {
     ERC1155,
@@ -140,5 +146,6 @@ export async function royaltyDistribution() {
     contractRoyaltySetterRole,
     RoyaltyManagerAsRoyaltySetter,
     SingleReceiver,
+    NFT,
   };
 }

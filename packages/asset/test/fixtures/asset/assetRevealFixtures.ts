@@ -12,7 +12,6 @@ import {
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';
-const DEFAULT_BPS = 300;
 
 export async function runRevealTestSetup() {
   const [
@@ -86,8 +85,6 @@ export async function runRevealTestSetup() {
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
-      commonRoyaltyReceiver.address,
-      DEFAULT_BPS,
       RoyaltyManagerContract.address,
     ],
     {

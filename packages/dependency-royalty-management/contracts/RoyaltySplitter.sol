@@ -89,7 +89,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
 
     /// @notice Splits and forwards ETH to the royalty receivers
     /// @dev normally ETH should be split automatically by receive function.
-    function splitETH() public {
+    function splitETH() public payable {
         _splitETH(address(this).balance);
     }
 

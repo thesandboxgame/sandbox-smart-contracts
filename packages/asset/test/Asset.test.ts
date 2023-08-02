@@ -845,7 +845,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
     });
     it('should support IRoyaltyMultiDistributor', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x4f07bc84')).to.be.true;
+      expect(await AssetContract.supportsInterface('0x667873ce')).to.be.true;
     });
     it('should support IRoyaltyMultiRecipients', async function () {
       const {AssetContract} = await runAssetSetup();
@@ -981,8 +981,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           assetAdmin,
           trustedForwarder,
           filterOperatorSubscription,
-          commonRoyaltyReceiver,
-          DEFAULT_BPS,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
@@ -993,8 +991,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
-            commonRoyaltyReceiver.address,
-            DEFAULT_BPS,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1028,8 +1024,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           assetAdmin,
           trustedForwarder,
           filterOperatorSubscription,
-          commonRoyaltyReceiver,
-          DEFAULT_BPS,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
@@ -1040,8 +1034,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
-            commonRoyaltyReceiver.address,
-            DEFAULT_BPS,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1063,8 +1055,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           assetAdmin,
           trustedForwarder,
           filterOperatorSubscription,
-          commonRoyaltyReceiver,
-          DEFAULT_BPS,
           RoyaltyManagerContract,
           operatorFilterRegistry,
           defaultAdminRole,
@@ -1078,8 +1068,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
-            commonRoyaltyReceiver.address,
-            DEFAULT_BPS,
             RoyaltyManagerContract.address,
           ],
           {
