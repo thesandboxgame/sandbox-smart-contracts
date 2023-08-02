@@ -1,10 +1,13 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+export const DEFAULT_BPS = 300;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, log, read, catchUnknownSigner} = deployments;
-  const {assetAdmin} = await getNamedAccounts();
+  const {assetAdmin, contractRoyaltySetter} = await getNamedAccounts();
+
+  const Asset = await deployments.get('Asset');
 
   const moderatorRole = await read('Asset', 'MODERATOR_ROLE');
   if (!(await read('Asset', 'hasRole', moderatorRole, assetAdmin))) {
@@ -19,6 +22,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     log(`Asset MODERATOR_ROLE granted to ${assetAdmin}`);
   }
+
+  await execute(
+    'RoyaltyManager',
+    {from: contractRoyaltySetter, log: true},
+    'setContractRoyalty',
+    Asset.address,
+    DEFAULT_BPS
+  );
 };
 
 export default func;
