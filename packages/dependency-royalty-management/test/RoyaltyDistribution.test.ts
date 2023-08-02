@@ -1972,11 +1972,8 @@ describe('Royalty', function () {
 
   describe('Single receiver for contracts which have single royalty recipient (common recipient)', function () {
     it('Should return contract royalty from manager for single receiver', async function () {
-      const {
-        RoyaltyManagerAsRoyaltySetter,
-        SingleReceiver,
-        commonRoyaltyReceiver,
-      } = await royaltyDistribution();
+      const {RoyaltyManagerAsRoyaltySetter, SingleReceiver} =
+        await royaltyDistribution();
       expect(
         await RoyaltyManagerAsRoyaltySetter.contractRoyalty(
           SingleReceiver.address
