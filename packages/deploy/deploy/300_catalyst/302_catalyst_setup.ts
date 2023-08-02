@@ -49,4 +49,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['Catalyst', 'Catalyst_setup', 'L2'];
-func.dependencies = ['Catalyst_deploy'];
+func.dependencies = ['Catalyst_deploy', 'RoyaltyManager_deploy'];

@@ -44,7 +44,8 @@ export default func;
 func.tags = ['Asset', 'AssetCreate', 'AssetCreate_deploy', 'L2'];
 func.dependencies = [
   'Asset_deploy',
-  'Catalyst',
+  'Catalyst_deploy',
+  'Catalyst_setup',
   'AuthSuperValidator_deploy',
   'TRUSTED_FORWARDER_V2',
 ];
