@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IMultiRoyaltyRecipients} from "./IMultiRoyaltyRecipients.sol";
 import {
     IRoyaltySplitter,
     Recipient
@@ -10,7 +11,7 @@ import {
 /**
  * Multi-receiver EIP2981 reference override implementation
  */
-interface IMultiRoyaltyDistributor is IERC165 {
+interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
     event TokenRoyaltySet(uint256 tokenId, uint16 royaltyBPS, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
@@ -46,16 +47,17 @@ interface IMultiRoyaltyDistributor is IERC165 {
     function getDefaultRoyalty() external view returns (uint16 bps, Recipient[] memory);
 
     /**
-     * @dev Set a default royalty e.  Will be used if no token specific configuration is set
+     * @dev Set a default royalty.  Will be used if no token specific configuration is set
      */
     function setDefaultRoyaltyBps(uint16 bps) external;
 
+    /**
+     * @dev Set a default royalty receiver.  Will be used if no token specific configuration is set
+     */
     function setDefaultRoyaltyReceiver(address payable defaultReceiver) external;
 
     /**
      * @dev Helper function to get all splits contracts
      */
     function getAllSplits() external view returns (address payable[] memory);
-
-    function getRecipients(uint256 tokenId) external view returns (Recipient[] memory);
 }

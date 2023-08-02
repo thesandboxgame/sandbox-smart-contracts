@@ -4,11 +4,7 @@ pragma solidity ^0.8.0;
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-
-import {
-    IEIP2981MultiReceiverRoyaltyOverride
-} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IMultiReceiverRoyaltyOverride.sol";
-import {IMultiRoyaltyDistributor} from "./interfaces/IMultiRoyaltyDistributor.sol";
+import {IMultiRoyaltyDistributor, IMultiRoyaltyRecipients} from "./interfaces/IMultiRoyaltyDistributor.sol";
 import {
     IRoyaltySplitter,
     IERC165
@@ -51,8 +47,8 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     {
         return
             interfaceId == type(IEIP2981).interfaceId ||
-            interfaceId == type(IEIP2981MultiReceiverRoyaltyOverride).interfaceId ||
             interfaceId == type(IMultiRoyaltyDistributor).interfaceId ||
+            interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 

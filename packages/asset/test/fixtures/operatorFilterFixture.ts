@@ -110,6 +110,8 @@ export async function setupOperatorFilter() {
     }
   );
 
+  const defaultAdminRole = await Asset.DEFAULT_ADMIN_ROLE();
+
   let MockOperatorFilterSubscriptionFactory = await ethers.getContractFactory(
     'MockOperatorFilterSubscription'
   );
@@ -180,5 +182,14 @@ export async function setupOperatorFilter() {
     operatorFilterRegistryAsDeployer,
     operatorFilterSubscription,
     Catalyst,
+    trustedForwarder,
+    assetAdmin,
+    commonRoyaltyReceiver,
+    DEFAULT_BPS,
+    RoyaltyManagerContract,
+    catalystAdmin,
+    catalystMinter,
+    defaultAdminRole,
+    user1,
   };
 }

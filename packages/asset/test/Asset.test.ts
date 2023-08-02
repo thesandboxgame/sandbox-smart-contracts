@@ -1,7 +1,8 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import {ethers, upgrades} from 'hardhat';
 import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
+const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
   describe('Access Control', function () {
@@ -838,13 +839,17 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0x572b6c05')).to.be.true;
     });
-    it('should support RoyaltyUGC', async function () {
+    it('should support IRoyaltyUGC', async function () {
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0xa30b4db9')).to.be.true;
     });
-    it('should support RoyaltyMultiDistributor', async function () {
+    it('should support IRoyaltyMultiDistributor', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0xb2975413')).to.be.true;
+      expect(await AssetContract.supportsInterface('0x4f07bc84')).to.be.true;
+    });
+    it('should support IRoyaltyMultiRecipients', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface('0xfd90e897')).to.be.true;
     });
   });
   describe('Token util', function () {
@@ -969,6 +974,135 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         expect(
           await operatorFilterRegistry.isRegistered(Asset.address)
         ).to.be.equal(true);
+      });
+      it('should set registry and subscribe to common subscription', async function () {
+        const {
+          operatorFilterRegistry,
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await Asset.connect(assetAdmin).setOperatorRegistry(
+          operatorFilterRegistry.address
+        );
+        expect(await Asset.operatorFilterRegistry()).to.be.equals(
+          operatorFilterRegistry.address
+        );
+
+        await Asset.connect(assetAdmin).registerAndSubscribe(
+          filterOperatorSubscription.address,
+          true
+        );
+
+        expect(
+          await operatorFilterRegistry.isRegistered(Asset.address)
+        ).to.be.equals(true);
+
+        expect(
+          await operatorFilterRegistry.subscriptionOf(Asset.address)
+        ).to.be.equals(filterOperatorSubscription.address);
+      });
+
+      it('should revert when registry is set zero and subscription is set zero', async function () {
+        const {
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await expect(
+          Asset.connect(assetAdmin).setOperatorRegistry(zeroAddress)
+        ).to.be.revertedWith("Asset: registry can't be zero address");
+
+        await expect(
+          Asset.connect(assetAdmin).registerAndSubscribe(zeroAddress, true)
+        ).to.be.revertedWith("Asset: subscription can't be zero address");
+      });
+
+      it('should revert when registry is set and subscription is set by non-admin', async function () {
+        const {
+          assetAdmin,
+          trustedForwarder,
+          filterOperatorSubscription,
+          commonRoyaltyReceiver,
+          DEFAULT_BPS,
+          RoyaltyManagerContract,
+          operatorFilterRegistry,
+          defaultAdminRole,
+          user1,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            trustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            commonRoyaltyReceiver.address,
+            DEFAULT_BPS,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await expect(
+          Asset.connect(user1).setOperatorRegistry(
+            operatorFilterRegistry.address
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+
+        await expect(
+          Asset.connect(user1).registerAndSubscribe(
+            filterOperatorSubscription.address,
+            true
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
       });
 
       it('should be subscribed to common subscription', async function () {
