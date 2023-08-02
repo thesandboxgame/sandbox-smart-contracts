@@ -984,7 +984,7 @@ describe('Royalty', function () {
       );
     });
 
-    it('should revert when contract royalties are not set by royalty setter', async function () {
+    it('only contract royalty setter set Eip 2981 royaltyBps for other contracts', async function () {
       const {RoyaltyManagerContract, seller, SingleReceiver} =
         await royaltyDistribution();
 
