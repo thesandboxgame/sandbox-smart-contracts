@@ -192,7 +192,6 @@ contract Asset is
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
-        require(trustedForwarder != _trustedForwarder, "Asset: forwarder already set");
         _setTrustedForwarder(trustedForwarder);
     }
 

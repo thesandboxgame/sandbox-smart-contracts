@@ -7,7 +7,7 @@ import {ERC2771HandlerAbstract} from "./ERC2771HandlerAbstract.sol";
 /// @dev minimal ERC2771 handler to keep bytecode-size down
 /// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
 contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
-    address internal _trustedForwarder;
+    address private _trustedForwarder;
 
     /// @notice Emitted when a `newTrustedForwarder` is set, replacing the `oldTrustedForwarder`
     /// @param oldTrustedForwarder old trusted forwarder
@@ -40,6 +40,7 @@ contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
     /// @notice set the address of the trusted forwarder
     /// @param newForwarder the address of the new forwarder.
     function _setTrustedForwarder(address newForwarder) internal virtual {
+        require(newForwarder != _trustedForwarder, "ERC2771HandlerUpgradeable: forwarder already set");
         emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
         _trustedForwarder = newForwarder;
     }
