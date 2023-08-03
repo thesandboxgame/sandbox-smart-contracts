@@ -25,4 +25,8 @@ interface IRoyaltyManager {
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable);
 
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps);
+
+    function setTrustedForwarder(address _newForwarder) external;
+
+    function getTrustedForwarder() external view returns (address);
 }
