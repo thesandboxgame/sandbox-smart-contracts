@@ -33,6 +33,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param royaltySplitterCloneable address of cloneable splitter contract for royalties distribution
     /// @param managerAdmin address of RoyaltyManager contract.
     /// @param contractRoyaltySetter the address of royalty setter of contract.
+    /// @param trustedForwarder the trustedForwarder address for royalty splitters to use.
     function initialize(
         address payable _commonRecipient,
         uint16 _commonSplit,
@@ -72,7 +73,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @notice sets the trustedForwarder address to be used by the splitters
     /// @dev can only be called by the admin
     /// @param _newForwarder is the new trusted forwarder address
-    /// @dev the splitters will have to apply this new setting
+    /// @dev new splitters will be deployed with this setting; existing splitters will have to apply it
     function setTrustedForwarder(address _newForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = _newForwarder;
     }
