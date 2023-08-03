@@ -17,6 +17,7 @@ const func: DeployFunction = async function (
     contractRoyaltySetter,
   } = await getNamedAccounts();
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const RoyaltySplitter = await deployments.get('RoyaltySplitter');
 
   await deploy('RoyaltyManager', {
@@ -35,6 +36,7 @@ const func: DeployFunction = async function (
           RoyaltySplitter.address,
           royaltyManagerAdmin,
           contractRoyaltySetter,
+          TRUSTED_FORWARDER.address,
         ],
       },
       upgradeIndex: 0,
@@ -44,4 +46,4 @@ const func: DeployFunction = async function (
 };
 export default func;
 func.tags = ['RoyaltyManager', 'RoyaltyManager_deploy', 'L2'];
-func.dependencies = ['RoyaltySplitter_deploy'];
+func.dependencies = ['RoyaltySplitter_deploy', 'TRUSTED_FORWARDER_V2'];
