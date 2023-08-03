@@ -24,6 +24,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     mapping(address => uint16) public contractRoyalty;
     mapping(address => address payable) public _creatorRoyaltiesSplitter;
     address internal _royaltySplitterCloneable;
+    address internal _trustedForwarder;
 
     /// @notice initialization function for the deployment of contract
     /// @dev called during the deployment via the proxy.
@@ -32,18 +33,21 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param royaltySplitterCloneable address of cloneable splitter contract for royalties distribution
     /// @param managerAdmin address of RoyaltyManager contract.
     /// @param contractRoyaltySetter the address of royalty setter of contract.
+    /// @param trustedForwarder the trustedForwarder address for royalty splitters to use.
     function initialize(
         address payable _commonRecipient,
         uint16 _commonSplit,
         address royaltySplitterCloneable,
         address managerAdmin,
-        address contractRoyaltySetter
+        address contractRoyaltySetter,
+        address trustedForwarder
     ) external initializer {
         _setRecipient(_commonRecipient);
         _setSplit(_commonSplit);
         _grantRole(DEFAULT_ADMIN_ROLE, managerAdmin);
         _grantRole(CONTRACT_ROYALTY_SETTER_ROLE, contractRoyaltySetter);
         _royaltySplitterCloneable = royaltySplitterCloneable;
+        _trustedForwarder = trustedForwarder;
     }
 
     /// @notice sets royalty recipient wallet
@@ -60,10 +64,18 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice sets the common recipient and common split
-    /// @dev can only be called by the admin.
+    /// @dev can only be called by the admin
     /// @param _commonRecipient is the common recipient for all the splitters
     function setRecipient(address payable _commonRecipient) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRecipient(_commonRecipient);
+    }
+
+    /// @notice sets the trustedForwarder address to be used by the splitters
+    /// @dev can only be called by the admin
+    /// @param _newForwarder is the new trusted forwarder address
+    /// @dev new splitters will be deployed with this setting; existing splitters will have to apply it
+    function setTrustedForwarder(address _newForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _trustedForwarder = _newForwarder;
     }
 
     /// @notice sets the common recipient and common split
@@ -71,6 +83,11 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param _commonSplit split for the common recipient and creators split would be 10000 - commonSplit
     function setSplit(uint16 _commonSplit) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setSplit(_commonSplit);
+    }
+
+    /// @notice get the current trustedForwarder address
+    function getTrustedForwarder() public view returns (address) {
+        return _trustedForwarder;
     }
 
     function _setRecipient(address payable _commonRecipient) internal {

@@ -40,6 +40,7 @@ contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
     /// @notice set the address of the trusted forwarder
     /// @param newForwarder the address of the new forwarder.
     function _setTrustedForwarder(address newForwarder) internal virtual {
+        require(newForwarder != _trustedForwarder, "ERC2771HandlerUpgradeable: forwarder already set");
         emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
         _trustedForwarder = newForwarder;
     }

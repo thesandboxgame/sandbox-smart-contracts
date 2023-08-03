@@ -2,7 +2,10 @@
 pragma solidity ^0.8.0;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {
+    OwnableUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -13,13 +16,22 @@ import {
     IERC165,
     Recipient
 } from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 import {IERC20Approve} from "./interfaces/IERC20Approve.sol";
 
 /// @title RoyaltySplitter
 /// @author The Sandbox
 /// @notice RoyaltySplitter contract is deployed by the RoyaltyManager contract for a creator to get his royalty's share.
-contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter, ERC165Upgradeable {
+contract RoyaltySplitter is
+    Initializable,
+    OwnableUpgradeable,
+    IRoyaltySplitter,
+    ERC165Upgradeable,
+    ERC2771HandlerAbstract
+{
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
     using AddressUpgradeable for address;
@@ -49,11 +61,11 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
     /// @notice initialize the contract
     /// @dev can only be run once.
     /// @param recipient the wallet of the creator when the contract is deployed
-    /// @param royaltyManager the address of the royalty manager contract.
+    /// @param royaltyManager the address of the royalty manager contract
     function initialize(address payable recipient, address royaltyManager) public initializer {
-        __Ownable_init();
-        _royaltyManager = IRoyaltyManager(royaltyManager);
+        _royaltyManager = IRoyaltyManager(royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _recipient = recipient;
+        __Ownable_init();
     }
 
     /// @notice sets recipient for the splitter
@@ -134,7 +146,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
             Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
             uint16 creatorSplit = _royaltyManager.getCreatorSplit();
             require(
-                commonRecipient.recipient == msg.sender || _recipient == msg.sender,
+                commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
                 "Split: Can only be called by one of the recipients"
             );
             Recipient[] memory _recipients = new Recipient[](2);
@@ -178,7 +190,7 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
     function proxyCall(address payable target, bytes calldata callData) external {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         require(
-            commonRecipient.recipient == msg.sender || _recipient == msg.sender,
+            commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
             "Split: Can only be called by one of the recipients"
         );
         require(
@@ -189,5 +201,32 @@ contract RoyaltySplitter is Initializable, OwnableUpgradeable, IRoyaltySplitter,
         /* solhint-disable-next-line no-empty-blocks*/
         try this.splitERC20Tokens(IERC20(target)) {} catch {}
         target.functionCall(callData);
+    }
+
+    /// @notice verify whether a forwarder address is the trustedForwarder address, using the manager setting
+    /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
+    /// @return bool whether the forwarder is the trusted address
+    function _isTrustedForwarder(address forwarder) internal view override(ERC2771HandlerAbstract) returns (bool) {
+        return forwarder == _royaltyManager.getTrustedForwarder();
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (address sender)
+    {
+        return ERC2771HandlerAbstract._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 }

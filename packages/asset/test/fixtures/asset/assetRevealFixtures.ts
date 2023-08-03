@@ -70,6 +70,7 @@ export async function runRevealTestSetup() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',
@@ -190,6 +191,7 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA' // metadata hash
   );
   const unRevResult = await unRevMintTx.wait();
+  // TODO: this is brittle and should be modified to search for the relevant event name
   const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
 
   // mint a tier 5 asset with 10 copies
@@ -202,7 +204,7 @@ export async function runRevealTestSetup() {
   );
   const unRevResult2 = await unRevMintTx2.wait();
 
-  // TODO: check events used in fixture
+  // TODO: this is brittle and should be modified to search for the relevant event name
   const unrevealedtokenId2 = unRevResult2.events[3].args.tokenId.toString();
 
   // mint a revealed version, tier 5 asset with 10 copies
@@ -214,6 +216,7 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC'
   );
   const revResult = await revMintTx.wait();
+  // TODO: this is brittle and should be modified to search for the relevant event name
   const revealedtokenId = revResult.events[3].args.tokenId.toString();
 
   // END SETUP USER WITH MINTED ASSETS

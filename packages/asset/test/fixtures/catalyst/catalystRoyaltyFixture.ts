@@ -60,6 +60,7 @@ export async function catalystRoyaltyDistribution() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',

@@ -835,10 +835,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0x7965db0b')).to.be.true;
     });
-    it('should support ERC2771', async function () {
-      const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x572b6c05')).to.be.true;
-    });
     it('should support IRoyaltyUGC', async function () {
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.supportsInterface('0xa30b4db9')).to.be.true;

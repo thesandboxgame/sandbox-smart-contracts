@@ -9,14 +9,23 @@ import {
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {
+    ERC2771HandlerUpgradeable,
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {IAssetReveal} from "./interfaces/IAssetReveal.sol";
 
 /// @title AssetReveal
 /// @author The Sandbox
 /// @notice Contract for burning and revealing assets
-contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, ERC2771Handler, EIP712Upgradeable {
+contract AssetReveal is
+    IAssetReveal,
+    Initializable,
+    AccessControlUpgradeable,
+    ERC2771HandlerUpgradeable,
+    EIP712Upgradeable
+{
     using TokenIdUtils for uint256;
     IAsset private assetContract;
     AuthSuperValidator private authValidator;
@@ -60,7 +69,7 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
     ) public initializer {
         assetContract = IAsset(_assetContract);
         authValidator = AuthSuperValidator(_authValidator);
-        __ERC2771Handler_initialize(_forwarder);
+        __ERC2771Handler_init(_forwarder);
         __EIP712_init(_name, _version);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     }
@@ -396,15 +405,26 @@ contract AssetReveal is IAssetReveal, Initializable, AccessControlUpgradeable, E
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "AssetReveal: trusted forwarder can't be zero address");
-        _trustedForwarder = trustedForwarder;
-        emit TrustedForwarderChanged(trustedForwarder);
+        _setTrustedForwarder(trustedForwarder);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (address sender)
+    {
+        return ERC2771HandlerAbstract._msgSender();
     }
 
-    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 }

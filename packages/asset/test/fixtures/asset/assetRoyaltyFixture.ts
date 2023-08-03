@@ -73,6 +73,7 @@ export async function assetRoyaltyDistribution() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',
