@@ -63,9 +63,9 @@ contract RoyaltySplitter is
     /// @param recipient the wallet of the creator when the contract is deployed
     /// @param royaltyManager the address of the royalty manager contract
     function initialize(address payable recipient, address royaltyManager) public initializer {
-        __Ownable_init();
-        _royaltyManager = IRoyaltyManager(royaltyManager);
+        _royaltyManager = IRoyaltyManager(royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _recipient = recipient;
+        __Ownable_init();
     }
 
     /// @notice sets recipient for the splitter
@@ -207,8 +207,7 @@ contract RoyaltySplitter is
     /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
     /// @return bool whether the forwarder is the trusted address
     function _isTrustedForwarder(address forwarder) internal view override(ERC2771HandlerAbstract) returns (bool) {
-        address trustedForwarder = _royaltyManager.getTrustedForwarder();
-        return forwarder == trustedForwarder;
+        return forwarder == _royaltyManager.getTrustedForwarder();
     }
 
     function _msgSender()
