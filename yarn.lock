@@ -1579,6 +1579,7 @@ __metadata:
     "@openzeppelin/contracts": ^4.9.0
     "@openzeppelin/contracts-upgradeable": ^4.9.0
     "@openzeppelin/hardhat-upgrades": ^1.28.0
+    "@sandbox-smart-contracts/dependency-metatx": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@typechain/ethers-v5": ^10.2.1
@@ -1677,7 +1678,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx":
+"@sandbox-smart-contracts/dependency-metatx@*, @sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx"
   dependencies:
@@ -1775,6 +1776,7 @@ __metadata:
     "@openzeppelin/contracts": ^4.9.0
     "@openzeppelin/contracts-upgradeable": ^4.9.0
     "@openzeppelin/hardhat-upgrades": ^1.28.0
+    "@sandbox-smart-contracts/dependency-metatx": "*"
     "@typechain/ethers-v5": ^10.2.1
     "@typechain/hardhat": ^6.1.6
     "@types/chai": ^4.3.5

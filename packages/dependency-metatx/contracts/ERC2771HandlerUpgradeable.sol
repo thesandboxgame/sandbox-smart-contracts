@@ -7,7 +7,7 @@ import {ERC2771HandlerAbstract} from "./ERC2771HandlerAbstract.sol";
 /// @dev minimal ERC2771 handler to keep bytecode-size down
 /// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
 contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
-    address private _trustedForwarder;
+    address internal _trustedForwarder;
 
     /// @notice Emitted when a `newTrustedForwarder` is set, replacing the `oldTrustedForwarder`
     /// @param oldTrustedForwarder old trusted forwarder

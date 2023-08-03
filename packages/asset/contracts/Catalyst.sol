@@ -31,7 +31,10 @@ import {
     IRoyaltyManager
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {
+    ERC2771HandlerUpgradeable,
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
 /// @title Catalyst
@@ -47,7 +50,7 @@ contract Catalyst is
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
-    ERC2771Handler,
+    ERC2771HandlerUpgradeable,
     AccessControlUpgradeable,
     OperatorFiltererUpgradeable,
     RoyaltyDistributor
@@ -95,7 +98,7 @@ contract Catalyst is
         __ERC1155Burnable_init();
         __ERC1155Supply_init();
         __ERC1155URIStorage_init();
-        __ERC2771Handler_initialize(_trustedForwarder);
+        __ERC2771Handler_init(_trustedForwarder);
         __OperatorFilterer_init(_subscription, true);
         _setBaseURI(_baseUri);
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
@@ -173,8 +176,8 @@ contract Catalyst is
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero address");
-        _trustedForwarder = trustedForwarder;
-        emit TrustedForwarderChanged(trustedForwarder);
+        require(trustedForwarder != _trustedForwarder, "Catalyst: forwarder already set");
+        _setTrustedForwarder(trustedForwarder);
     }
 
     /// @notice Set a new URI for specific tokenid
@@ -209,13 +212,19 @@ contract Catalyst is
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address) {
-        return ERC2771Handler._msgSender();
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771HandlerAbstract) returns (address) {
+        return ERC2771HandlerAbstract._msgSender();
     }
 
     /// @dev Needed for meta transactions (see EIP-2771)
-    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).

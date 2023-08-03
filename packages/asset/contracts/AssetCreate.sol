@@ -9,7 +9,10 @@ import {
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {
+    ERC2771HandlerUpgradeable,
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
@@ -17,7 +20,13 @@ import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
 /// @title AssetCreate
 /// @author The Sandbox
 /// @notice User-facing contract for creating new assets
-contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgradeable, AccessControlUpgradeable {
+contract AssetCreate is
+    IAssetCreate,
+    Initializable,
+    ERC2771HandlerUpgradeable,
+    EIP712Upgradeable,
+    AccessControlUpgradeable
+{
     using TokenIdUtils for uint256;
 
     IAsset private assetContract;
@@ -57,7 +66,7 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
         assetContract = IAsset(_assetContract);
         catalystContract = ICatalyst(_catalystContract);
         authValidator = AuthSuperValidator(_authValidator);
-        __ERC2771Handler_initialize(_forwarder);
+        __ERC2771Handler_init(_forwarder);
         __EIP712_init(_name, _version);
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
@@ -255,16 +264,28 @@ contract AssetCreate is IAssetCreate, Initializable, ERC2771Handler, EIP712Upgra
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "AssetReveal: trusted forwarder can't be zero address");
-        _trustedForwarder = trustedForwarder;
-        emit TrustedForwarderChanged(trustedForwarder);
+        require(trustedForwarder != address(0), "AssetCreate: trusted forwarder can't be zero address");
+        require(trustedForwarder != _trustedForwarder, "AssetCreate: forwarder already set");
+        _setTrustedForwarder(trustedForwarder);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (address sender)
+    {
+        return ERC2771HandlerAbstract._msgSender();
     }
 
-    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 }

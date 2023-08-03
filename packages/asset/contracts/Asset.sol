@@ -21,7 +21,10 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {
+    ERC2771HandlerUpgradeable,
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {
     MultiRoyaltyDistributor
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
@@ -36,7 +39,7 @@ import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 contract Asset is
     IAsset,
     Initializable,
-    ERC2771Handler,
+    ERC2771HandlerUpgradeable,
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
@@ -69,7 +72,7 @@ contract Asset is
         _setBaseURI(baseUri);
         __AccessControl_init();
         __ERC1155Supply_init();
-        __ERC2771Handler_initialize(forwarder);
+        __ERC2771Handler_init(forwarder);
         __ERC1155Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
@@ -189,8 +192,8 @@ contract Asset is
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
-        _trustedForwarder = trustedForwarder;
-        emit TrustedForwarderChanged(trustedForwarder);
+        require(trustedForwarder != _trustedForwarder, "Asset: forwarder already set");
+        _setTrustedForwarder(trustedForwarder);
     }
 
     /// @notice Query if a contract implements interface `id`.
@@ -209,12 +212,24 @@ contract Asset is
             super.supportsInterface(id);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
-        return ERC2771Handler._msgSender();
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (address sender)
+    {
+        return ERC2771HandlerAbstract._msgSender();
     }
 
-    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 
     function _beforeTokenTransfer(
