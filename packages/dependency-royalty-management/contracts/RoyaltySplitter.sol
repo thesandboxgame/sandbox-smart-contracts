@@ -146,7 +146,7 @@ contract RoyaltySplitter is
             Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
             uint16 creatorSplit = _royaltyManager.getCreatorSplit();
             require(
-                commonRecipient.recipient == msg.sender || _recipient == msg.sender,
+                commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
                 "Split: Can only be called by one of the recipients"
             );
             Recipient[] memory _recipients = new Recipient[](2);
@@ -190,7 +190,7 @@ contract RoyaltySplitter is
     function proxyCall(address payable target, bytes calldata callData) external {
         Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
         require(
-            commonRecipient.recipient == msg.sender || _recipient == msg.sender,
+            commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
             "Split: Can only be called by one of the recipients"
         );
         require(
