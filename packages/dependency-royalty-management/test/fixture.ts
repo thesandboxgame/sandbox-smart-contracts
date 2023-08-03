@@ -12,7 +12,7 @@ export async function royaltyDistribution() {
     royaltyReceiver2,
     managerAdmin,
     contractRoyaltySetter,
-    trustedForwarder
+    trustedForwarder,
   ] = await ethers.getSigners();
 
   const TestERC20Factory = await ethers.getContractFactory('TestERC20');
@@ -34,7 +34,7 @@ export async function royaltyDistribution() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
-      trustedForwarder.address
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',
