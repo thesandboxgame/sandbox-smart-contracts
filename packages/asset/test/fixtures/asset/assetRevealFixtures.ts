@@ -192,7 +192,7 @@ export async function runRevealTestSetup() {
   );
   const unRevResult = await unRevMintTx.wait();
   // TODO: this is brittle and should be modified to search for the relevant event name
-  const unrevealedtokenId = unRevResult.events[6].args.tokenId.toString();
+  const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
 
   // mint a tier 5 asset with 10 copies
   const unRevMintTx2 = await MockMinterContract.mintAsset(
