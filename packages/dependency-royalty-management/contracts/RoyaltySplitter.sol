@@ -17,7 +17,6 @@ import {
     Recipient
 } from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {
-    ERC2771HandlerUpgradeable,
     ERC2771HandlerAbstract
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
@@ -31,7 +30,7 @@ contract RoyaltySplitter is
     OwnableUpgradeable,
     IRoyaltySplitter,
     ERC165Upgradeable,
-    ERC2771HandlerUpgradeable
+    ERC2771HandlerAbstract
 {
     using BytesLibrary for bytes;
     using AddressUpgradeable for address payable;
@@ -67,8 +66,6 @@ contract RoyaltySplitter is
         __Ownable_init();
         _royaltyManager = IRoyaltyManager(royaltyManager);
         _recipient = recipient;
-        address _forwarder = _royaltyManager.getTrustedForwarder();
-        __ERC2771Handler_init(_forwarder);
     }
 
     /// @notice sets recipient for the splitter
@@ -76,14 +73,6 @@ contract RoyaltySplitter is
     /// @param recipients the array of recipients which should only have one recipient.
     function setRecipients(Recipient[] calldata recipients) external override onlyOwner {
         _setRecipients(recipients);
-    }
-
-    /// @notice update the trustedForwarder address using the manager setting
-    /// @dev only the owner can call this.
-    function setTrustedForwarder() external onlyOwner {
-        address forwarder = _royaltyManager.getTrustedForwarder();
-        require(_trustedForwarder != forwarder, "Trusted forwarder already set");
-        _setTrustedForwarder(forwarder);
     }
 
     function _setRecipients(Recipient[] calldata recipients) private {
@@ -212,6 +201,14 @@ contract RoyaltySplitter is
         /* solhint-disable-next-line no-empty-blocks*/
         try this.splitERC20Tokens(IERC20(target)) {} catch {}
         target.functionCall(callData);
+    }
+
+    /// @notice verify whether a forwarder address is the trustedForwarder address, using the manager setting
+    /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
+    /// @return bool whether the forwarder is the trusted address
+    function _isTrustedForwarder(address forwarder) internal view override(ERC2771HandlerAbstract) returns (bool) {
+        address trustedForwarder = _royaltyManager.getTrustedForwarder();
+        return forwarder == trustedForwarder;
     }
 
     function _msgSender()

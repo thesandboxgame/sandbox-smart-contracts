@@ -206,10 +206,7 @@ contract Asset is
         override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributor)
         returns (bool)
     {
-        return
-            id == type(IRoyaltyUGC).interfaceId ||
-            id == 0x572b6c05 || // ERC2771
-            super.supportsInterface(id);
+        return id == type(IRoyaltyUGC).interfaceId || super.supportsInterface(id);
     }
 
     function _msgSender()
