@@ -69,6 +69,7 @@ export async function runCreateTestSetup() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',

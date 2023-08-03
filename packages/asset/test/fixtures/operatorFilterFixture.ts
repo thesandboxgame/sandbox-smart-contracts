@@ -86,6 +86,7 @@ export async function setupOperatorFilter() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
+      trustedForwarder.address,
     ],
     {
       initializer: 'initialize',
