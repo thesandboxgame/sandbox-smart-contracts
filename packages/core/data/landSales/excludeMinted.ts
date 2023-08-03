@@ -4,18 +4,16 @@ import {TheGraph} from "../../scripts/utils/thegraph";
 import {SectorData, SectorLand} from "./getLandSales";
 
 let l1, l2;
-if (hre.network.tags.testnet) {
-  // l1 = "GOERLI"
-  // l2 = "MUMBAI"
-  l1 = "MAINNET"
-  l2 = "POLYGON"
+if (hre.network.tags.testnet && !process.env.HARDHAT_FORK) {
+  l1 = "GOERLI"
+  l2 = "MUMBAI"
 } else {
   l1 = "MAINNET"
   l2 = "POLYGON"
 }
 const graphUrlL1 = process.env[`SANDBOX_GRAPH_URL_${l1}`]
 const graphUrlL2 = process.env[`SANDBOX_GRAPH_URL_${l2}`]
-const skipExcludeMinted = process.env.CI || !graphUrlL1 || !graphUrlL2 || process.env.NODE_ENV === "test";
+const skipExcludeMinted = process.env.CI !== undefined || !graphUrlL1 || !graphUrlL2 || process.env.NODE_ENV === "test";
 
 export async function excludeMinted({sector, lands, estates}: SectorData): Promise<SectorData> {
   if (skipExcludeMinted) return {sector, lands, estates}
@@ -25,20 +23,34 @@ export async function excludeMinted({sector, lands, estates}: SectorData): Promi
     estates: []
   }
   let minX = 204, minY = 204, maxX = -204, maxY = -204
-  lands.forEach(({coordinateX, coordinateY}) => {
+  const checkCoords = ({coordinateX, coordinateY}: SectorLand) => {
     if (coordinateX < minX) minX = coordinateX
     if (coordinateX > maxX) maxX = coordinateX
     if (coordinateY < minY) minY = coordinateY
     if (coordinateY > maxY) maxY = coordinateY
-  })
+  }
+  lands.forEach((land) => checkCoords(land))
+  estates.forEach(estate => estate.lands.forEach(land => checkCoords(land)))
   const mintedLands = await getMintedLands({minX, minY, maxX, maxY})
+  const isMinted = (land: SectorLand) => mintedLands.find(m => m.coordinateX === land.coordinateX && m.coordinateY === land.coordinateY)
   lands.forEach(land => {
-    if (mintedLands.find(m => m.coordinateX === land.coordinateX && m.coordinateY === land.coordinateY)) {
+    if (isMinted(land)) {
       console.log("minted", JSON.stringify(land))
       return
     }
     result.lands.push(land)
   })
+  const mintedEstatesLands: SectorLand[] = []
+  estates.forEach(estate => {
+    estate.lands.forEach(land => {
+      if (isMinted(land)) {
+        console.log("minted", JSON.stringify(land))
+        mintedEstatesLands.push(land)
+      }
+    })
+  })
+  console.log({lands: lands.length, mintedLands: lands.length - result.lands.length})
+  console.log({estatesLands: estates.reduce((acc, e) => acc + e.lands.length, 0), mintedEstatesLands: mintedEstatesLands.length})
   return result
 }
 
