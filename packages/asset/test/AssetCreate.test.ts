@@ -1093,8 +1093,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           true,
           metadataHashes[0]
         );
-        await expect(mintSpecialAsset(signature, 0, 1, true, metadataHashes[0]))
-          .to.not.be.reverted;
+        await expect(mintSpecialAsset(signature, 1, metadataHashes[0])).to.not
+          .be.reverted;
       });
     });
     describe('Revert', function () {
@@ -1108,37 +1108,16 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         const signature = await generateSingleMintSignature(
           user.address,
-          1,
+          0,
           1,
           true,
           metadataHashes[0]
         );
         await expect(
-          mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
+          mintSpecialAsset(signature, 1, metadataHashes[0])
         ).to.be.revertedWith(
           `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
         );
-      });
-      it('should not allow minting assets with tier other than 0 (TSB Exclusive)', async function () {
-        const {
-          mintSpecialAsset,
-          generateSingleMintSignature,
-          user,
-          metadataHashes,
-          grantSpecialMinterRole,
-        } = await runCreateTestSetup();
-
-        await grantSpecialMinterRole(user.address);
-        const signature = await generateSingleMintSignature(
-          user.address,
-          1,
-          1,
-          true,
-          metadataHashes[0]
-        );
-        await expect(
-          mintSpecialAsset(signature, 1, 1, true, metadataHashes[0])
-        ).to.be.revertedWith('AssetCreate: Special assets must be tier 0');
       });
     });
     describe('Event', function () {
@@ -1163,9 +1142,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await expect(
           AssetCreateContractAsUser.createSpecialAsset(
             signature,
-            0,
             1,
-            true,
             metadataHashes[0],
             user.address
           )
@@ -1188,13 +1165,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           true,
           metadataHashes[0]
         );
-        const result = await mintSpecialAsset(
-          signature,
-          0,
-          1,
-          true,
-          metadataHashes[0]
-        );
+        const result = await mintSpecialAsset(signature, 1, metadataHashes[0]);
         const eventData = result.events.filter(
           (e: Event) => e.event == 'SpecialAssetMinted'
         )[0].args;

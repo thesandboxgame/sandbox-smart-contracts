@@ -230,16 +230,12 @@ export async function runCreateTestSetup() {
 
   const mintSpecialAsset = async (
     signature: string,
-    tier: number,
     amount: number,
-    revealed: boolean,
     metadataHash: string
   ) => {
     const tx = await AssetCreateContractAsUser.createSpecialAsset(
       signature,
-      tier,
       amount,
-      revealed,
       metadataHash,
       user.address
     );
