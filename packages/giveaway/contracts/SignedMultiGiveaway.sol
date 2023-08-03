@@ -2,22 +2,22 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.18;
 
-import {SignedMultiGiveawayBase} from "./SignedMultiGiveawayBase.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {ERC1155HolderUpgradeable, ERC1155ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
 import {ERC721HolderUpgradeable, IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {ERC2771Handler} from "./ERC2771Handler.sol";
+import {SignedMultiGiveawayBase} from "./SignedMultiGiveawayBase.sol";
 
-/// @title This contract give rewards in any ERC20, ERC721 or ERC1155 when the backend authorize it via message signing.
+/// @title This contract gives rewards in any ERC20, ERC721 or ERC1155 when the backend authorizes it via message signing.
 /// @dev The whole contract is split in the base one this implementation to facilitate the reading and split
 /// @dev the signature checking code.
-/// @dev This contract support meta transactions.
-/// @dev This contract is final, don't inherit form it.
+/// @dev This contract supports meta transactions.
+/// @dev This contract is final, don't inherit from it.
 contract SignedMultiGiveaway is
     SignedMultiGiveawayBase,
     PausableUpgradeable,
@@ -33,7 +33,7 @@ contract SignedMultiGiveaway is
     /// @dev global limits that affect the whole contract behaviour
     struct LimitData {
         uint128 numberOfSignaturesNeeded; // Amount of signatures needed minus one to approve a message, 0 => 1 signature
-        uint128 maxClaimEntries; // Maximum amount of claims per message minus one, 0 => 1 claim entry pero claim
+        uint128 maxClaimEntries; // Maximum amount of claims per message minus one, 0 => 1 claim entry per claim
     }
 
     /// @dev args of claim, used to pass an array to batchClaim
@@ -41,14 +41,15 @@ contract SignedMultiGiveaway is
         Signature[] sigs;
         uint256[] claimIds;
         uint256 expiration;
-        address from; // address(this)
+        address from;
         address to;
         ClaimEntry[] claims;
     }
+
     string public constant NAME = "Sandbox SignedMultiGiveaway";
     string public constant VERSION = "1.0";
 
-    /// @dev this role is for addresses that help the admin. Can pause the contract, butF, only the admin can unpause it.
+    /// @dev this role is for addresses that help the admin. Can pause the contract, but, only the admin can unpause it.
     bytes32 public constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE");
 
     /// @dev configurable global limits for the contract.
@@ -58,6 +59,12 @@ contract SignedMultiGiveaway is
     /// @dev Token -> id -> Limit
     mapping(address => mapping(uint256 => PerTokenLimitData)) private _perTokenLimitData;
 
+    /// @notice This event is emitted when a claim occurs.
+    /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param from source user
+    /// @param to destination user
+    /// @param claims list of tokens to do transfer
+    /// @param operator the sender of the transaction
     event Claimed(
         uint256[] claimIds,
         address indexed from,
@@ -65,17 +72,39 @@ contract SignedMultiGiveaway is
         ClaimEntry[] claims,
         address indexed operator
     );
+
+    /// @notice This event is emitted when a claim is revoked.
+    /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param operator the sender of the transaction
     event RevokedClaims(uint256[] claimIds, address indexed operator);
+
+    /// @notice This event is emitted when assets are recovered from the contract.
+    /// @param to destination user
+    /// @param claims unique claim ids, used by the backend to avoid double spending
+    /// @param operator the sender of the transaction
     event AssetsRecovered(address indexed to, ClaimEntry[] claims, address indexed operator);
+
+    /// @notice This event is emitted when the max wei per claim is set
+    /// @param token address of the token to configure
+    /// @param tokenId of the token
+    /// @param maxWeiPerClaim maximum amount of wei per each individual claim, 0 => check disabled
+    /// @param operator the sender of the transaction
     event MaxWeiPerClaimSet(
         address indexed token,
         uint256 indexed tokenId,
         uint256 maxWeiPerClaim,
         address indexed operator
     );
-    event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address indexed operator);
-    event MaxClaimEntriesSet(uint256 maxClaimEntries, address indexed operator);
-    event TrustedForwarderSet(address indexed newForwarder, address indexed operator);
+
+    /// @notice This event is emitted when the number of signatures needed to claim is set
+    /// @param numberOfSignaturesNeeded amount of valid signatures needed to claim
+    /// @param operator the sender of the transaction
+    event NumberOfSignaturesNeededSet(uint128 numberOfSignaturesNeeded, address indexed operator);
+
+    /// @notice This event is emitted when the max entries per claim is set
+    /// @param maxClaimEntries maximum amount of claim entries per message
+    /// @param operator the sender of the transaction
+    event MaxClaimEntriesSet(uint128 maxClaimEntries, address indexed operator);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -85,6 +114,12 @@ contract SignedMultiGiveaway is
     modifier onlyBackoffice() {
         require(hasRole(BACKOFFICE_ROLE, _msgSender()), "only backoffice");
         _;
+    }
+
+    /// @dev this protects the implementation contract from behing initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
     /// @notice initializer method, called during deployment
@@ -97,16 +132,18 @@ contract SignedMultiGiveaway is
         __ERC1155Holder_init_unchained();
         __ERC721Holder_init_unchained();
         __AccessControl_init_unchained();
+        __AccessControlEnumerable_init_unchained();
         __EIP712_init_unchained(NAME, VERSION);
         __Pausable_init_unchained();
         __ERC2771Handler_initialize(trustedForwarder_);
-        _setupRole(DEFAULT_ADMIN_ROLE, admin_);
-        _setupRole(BACKOFFICE_ROLE, admin_);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+        _grantRole(BACKOFFICE_ROLE, admin_);
     }
 
     /// @notice verifies the ERC712 signatures and transfer tokens from the source user to the destination user.
     /// @param sigs signature part (v,r,s) the array of signatures M in N of M sigs
     /// @param claimIds unique claim ids, used by the backend to avoid double spending
+    /// @param expiration expiration timestamp
     /// @param from source user
     /// @param to destination user
     /// @param claims list of tokens to do transfer
@@ -153,14 +190,14 @@ contract SignedMultiGiveaway is
         emit AssetsRecovered(to, claims, _msgSender());
     }
 
-    /// @notice let the admin revoke some claims so they cannot be used anymore
+    /// @notice let the backoffice role to revoke claims so they cannot be used anymore
     /// @param claimIds and array of claim Ids to revoke
     function revokeClaims(uint256[] calldata claimIds) external onlyBackoffice {
         _revokeClaims(claimIds);
         emit RevokedClaims(claimIds, _msgSender());
     }
 
-    /// @notice Triggers stopped state. No mre claims are accepted.
+    /// @notice Triggers stopped state. No more claims are accepted.
     function pause() external onlyBackoffice {
         _pause();
     }
@@ -204,15 +241,15 @@ contract SignedMultiGiveaway is
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder_ The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder_) external onlyAdmin {
-        _trustedForwarder = trustedForwarder_;
-        emit TrustedForwarderSet(_trustedForwarder, _msgSender());
+    /// @param newForwarder The new trustedForwarder
+    function setTrustedForwarder(address newForwarder) external onlyAdmin {
+        _setTrustedForwarder(newForwarder);
     }
 
     /// @notice return true if already claimed
+    /// @param claimId unique id used to avoid double spending
     /// @return true if claimed
-    function isClaimed(uint256 claimId) external view virtual returns (bool) {
+    function isClaimed(uint256 claimId) external view returns (bool) {
         return _isClaimed(claimId);
     }
 
@@ -231,30 +268,33 @@ contract SignedMultiGiveaway is
         address from,
         address to,
         ClaimEntry[] calldata claims
-    ) external view virtual returns (address) {
+    ) external view returns (address) {
         return _verifySignature(sig, claimIds, expiration, from, to, claims);
     }
 
     /// @notice EIP712 domain separator
     /// @return the hash of the domain separator
-    function domainSeparator() public view virtual returns (bytes32) {
+    function domainSeparator() external view returns (bytes32) {
         return _domainSeparatorV4();
     }
 
     /// @notice get the needed number of signatures to approve a claim
-    function getNumberOfSignaturesNeeded() external view returns (uint256) {
+    /// @return number of signatures needed
+    function getNumberOfSignaturesNeeded() external view returns (uint128) {
         return _limits.numberOfSignaturesNeeded + 1;
     }
 
     /// @notice get the maximum claim entries per claim
-    function getMaxClaimEntries() external view returns (uint256) {
+    /// @return Maximum amount of claims per message
+    function getMaxClaimEntries() external view returns (uint128) {
         return _limits.maxClaimEntries + 1;
     }
 
     /// @notice get maximum Weis that can be claimed at once
     /// @param token the token contract address
-    /// @param tokenId inf ERC1155 the token id else must be zero
+    /// @param tokenId if ERC1155 the token id else must be zero
     /// @dev even tokenId is kind of inconsistent for tokenType!=ERC1155 it doesn't harm
+    /// @return maximum amount of wei per each individual claim, 0 => check disabled
     function getMaxWeiPerClaim(address token, uint256 tokenId) external view returns (uint256) {
         return _perTokenLimitData[token][tokenId].maxWeiPerClaim;
     }
@@ -262,7 +302,7 @@ contract SignedMultiGiveaway is
     /// @dev See {IERC165-supportsInterface}.
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControlEnumerableUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
+    ) public view override(AccessControlEnumerableUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
         return (interfaceId == type(IERC721ReceiverUpgradeable).interfaceId) || super.supportsInterface(interfaceId);
     }
 
@@ -370,7 +410,7 @@ contract SignedMultiGiveaway is
     function _checkLimits(PerTokenLimitData storage limits, uint256 amount) internal view {
         require(amount > 0, "invalid amount");
         if (limits.maxWeiPerClaim > 0) {
-            require(amount < limits.maxWeiPerClaim, "checkLimits, amount too high");
+            require(amount <= limits.maxWeiPerClaim, "checkLimits, amount too high");
         }
     }
 

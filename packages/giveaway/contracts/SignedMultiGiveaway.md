@@ -86,40 +86,112 @@ struct BatchClaimData {
 ### Claimed
 
 ```solidity
-event Claimed(uint256[] claimIds, address indexed from, address indexed to, SignedMultiGiveawayBase.ClaimEntry[] claims, address operator)
+event Claimed(uint256[] claimIds, address indexed from, address indexed to, SignedMultiGiveawayBase.ClaimEntry[] claims, address indexed operator)
 ```
+
+This event is emitted when a claim occurs.
+
+Parameters:
+
+| Name     | Type                                        | Description                                                     |
+| :------- | :------------------------------------------ | :-------------------------------------------------------------- |
+| claimIds | uint256[]                                   | unique claim ids, used by the backend to avoid double spending  |
+| from     | address                                     | source user                                                     |
+| to       | address                                     | destination user                                                |
+| claims   | struct SignedMultiGiveawayBase.ClaimEntry[] | list of tokens to do transfer                                   |
+| operator | address                                     | the sender of the transaction                                   |
 
 ### RevokedClaims
 
 ```solidity
-event RevokedClaims(uint256[] claimIds, address operator)
+event RevokedClaims(uint256[] claimIds, address indexed operator)
 ```
+
+This event is emitted when a claim is revoked.
+
+Parameters:
+
+| Name     | Type      | Description                                                     |
+| :------- | :-------- | :-------------------------------------------------------------- |
+| claimIds | uint256[] | unique claim ids, used by the backend to avoid double spending  |
+| operator | address   | the sender of the transaction                                   |
 
 ### AssetsRecovered
 
 ```solidity
-event AssetsRecovered(address to, SignedMultiGiveawayBase.ClaimEntry[] claims, address operator)
+event AssetsRecovered(address indexed to, SignedMultiGiveawayBase.ClaimEntry[] claims, address indexed operator)
 ```
+
+This event is emitted when assets are recovered from the contract.
+
+Parameters:
+
+| Name     | Type                                        | Description                                                     |
+| :------- | :------------------------------------------ | :-------------------------------------------------------------- |
+| to       | address                                     | destination user                                                |
+| claims   | struct SignedMultiGiveawayBase.ClaimEntry[] | unique claim ids, used by the backend to avoid double spending  |
+| operator | address                                     | the sender of the transaction                                   |
 
 ### MaxWeiPerClaimSet
 
 ```solidity
-event MaxWeiPerClaimSet(address token, uint256 tokenId, uint256 maxWeiPerClaim, address operator)
+event MaxWeiPerClaimSet(address indexed token, uint256 indexed tokenId, uint256 maxWeiPerClaim, address indexed operator)
 ```
+
+This event is emitted when the max wei per claim is set
+
+Parameters:
+
+| Name           | Type    | Description                                                           |
+| :------------- | :------ | :-------------------------------------------------------------------- |
+| token          | address | address of the token to configure                                     |
+| tokenId        | uint256 | of the token                                                          |
+| maxWeiPerClaim | uint256 | maximum amount of wei per each individual claim, 0 => check disabled  |
+| operator       | address | the sender of the transaction                                         |
 
 ### NumberOfSignaturesNeededSet
 
 ```solidity
-event NumberOfSignaturesNeededSet(uint256 numberOfSignaturesNeeded, address operator)
+event NumberOfSignaturesNeededSet(uint128 numberOfSignaturesNeeded, address indexed operator)
 ```
+
+This event is emitted when the number of signatures needed to claim is set
+
+Parameters:
+
+| Name                     | Type    | Description                                 |
+| :----------------------- | :------ | :------------------------------------------ |
+| numberOfSignaturesNeeded | uint128 | amount of valid signatures needed to claim  |
+| operator                 | address | the sender of the transaction               |
 
 ### MaxClaimEntriesSet
 
 ```solidity
-event MaxClaimEntriesSet(uint256 maxClaimEntries, address operator)
+event MaxClaimEntriesSet(uint128 maxClaimEntries, address indexed operator)
 ```
 
+This event is emitted when the max entries per claim is set
+
+Parameters:
+
+| Name            | Type    | Description                                  |
+| :-------------- | :------ | :------------------------------------------- |
+| maxClaimEntries | uint128 | maximum amount of claim entries per message  |
+| operator        | address | the sender of the transaction                |
+
 ## Constants info
+
+### NAME (0xa3f4df7e)
+
+```solidity
+string constant NAME = "Sandbox SignedMultiGiveaway"
+```
+
+### VERSION (0xffa1ad74)
+
+```solidity
+string constant VERSION = "1.0"
+```
 
 ### BACKOFFICE_ROLE (0x6406156d)
 
@@ -127,7 +199,7 @@ event MaxClaimEntriesSet(uint256 maxClaimEntries, address operator)
 bytes32 constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE")
 ```
 
-this role is for addresses that help the admin. Can pause the contract, butF, only the admin can unpause it.
+this role is for addresses that help the admin. Can pause the contract, but, only the admin can unpause it.
 
 ## Modifiers info
 
@@ -145,13 +217,33 @@ modifier onlyBackoffice()
 
 ## Functions info
 
+### constructor
+
+```solidity
+constructor()
+```
+
+this protects the implementation contract from behing initialized.
+
+oz-upgrades-unsafe-allow: constructor
+
 ### initialize (0x485cc955)
 
 ```solidity
-function initialize(address trustedForwarder_, address admin_)
-external
-initializer
+function initialize(
+    address trustedForwarder_,
+    address admin_
+) external initializer
 ```
+
+initializer method, called during deployment
+
+Parameters:
+
+| Name              | Type    | Description                                          |
+| :---------------- | :------ | :--------------------------------------------------- |
+| trustedForwarder_ | address | address of the ERC2771 trusted forwarder             |
+| admin_            | address | address that have admin access and can assign roles. |
 
 ### claim (0xbec74704)
 
@@ -170,20 +262,21 @@ verifies the ERC712 signatures and transfer tokens from the source user to the d
 
 Parameters:
 
-| Name     | Type                                        | Description                                                      |
-| :------- | :------------------------------------------ | :--------------------------------------------------------------- |
-| sigs     | struct SignedMultiGiveawayBase.Signature[]  | signature part (v,r,s) the array of signatures M in N of M sigs  |
-| claimIds | uint256[]                                   | unique claim ids, used by the backend to avoid double spending   |
-| from     | address                                     | source user                                                      |
-| to       | address                                     | destination user                                                 |
-| claims   | struct SignedMultiGiveawayBase.ClaimEntry[] | list of tokens to do transfer                                    |
+| Name       | Type                                        | Description                                                      |
+| :--------- | :------------------------------------------ | :--------------------------------------------------------------- |
+| sigs       | struct SignedMultiGiveawayBase.Signature[]  | signature part (v,r,s) the array of signatures M in N of M sigs  |
+| claimIds   | uint256[]                                   | unique claim ids, used by the backend to avoid double spending   |
+| expiration | uint256                                     | expiration timestamp                                             |
+| from       | address                                     | source user                                                      |
+| to         | address                                     | destination user                                                 |
+| claims     | struct SignedMultiGiveawayBase.ClaimEntry[] | list of tokens to do transfer                                    |
 
 ### batchClaim (0x4ac48bc1)
 
 ```solidity
-function batchClaim(SignedMultiGiveaway.BatchClaimData[] calldata batch)
-external
-whenNotPaused
+function batchClaim(
+    SignedMultiGiveaway.BatchClaimData[] calldata batch
+) external whenNotPaused
 ```
 
 does a lot of claims in batch
@@ -218,7 +311,7 @@ Parameters:
 function revokeClaims(uint256[] calldata claimIds) external onlyBackoffice
 ```
 
-let the admin revoke some claims so they cannot be used anymore
+let the backoffice role to revoke claims so they cannot be used anymore
 
 Parameters:
 
@@ -232,7 +325,7 @@ Parameters:
 function pause() external onlyBackoffice
 ```
 
-Triggers stopped state. No mre claims are accepted.
+Triggers stopped state. No more claims are accepted.
 
 ### unpause (0x3f4ba83a)
 
@@ -245,9 +338,9 @@ Returns to the normal state. Accept claims.
 ### setNumberOfSignaturesNeeded (0x2ed5c3a7)
 
 ```solidity
-function setNumberOfSignaturesNeeded(uint128 numberOfSignaturesNeeded)
-external
-onlyAdmin
+function setNumberOfSignaturesNeeded(
+    uint128 numberOfSignaturesNeeded
+) external onlyAdmin
 ```
 
 set the global limits of the contract
@@ -294,13 +387,33 @@ Parameters:
 | tokenId        | uint256 | for ERC1155 is the id of the token, else it must be zero      |
 | maxWeiPerClaim | uint256 | the max amount per each claim, for example 0.01eth per claim  |
 
+### setTrustedForwarder (0xda742228)
+
+```solidity
+function setTrustedForwarder(address newForwarder) external onlyAdmin
+```
+
+Change the address of the trusted forwarder for meta-TX
+
+Parameters:
+
+| Name         | Type    | Description              |
+| :----------- | :------ | :----------------------- |
+| newForwarder | address | The new trustedForwarder |
+
 ### isClaimed (0x9e34070f)
 
 ```solidity
-function isClaimed(uint256 claimId) external view virtual returns (bool)
+function isClaimed(uint256 claimId) external view returns (bool)
 ```
 
 return true if already claimed
+
+Parameters:
+
+| Name    | Type    | Description                              |
+| :------ | :------ | :--------------------------------------- |
+| claimId | uint256 | unique id used to avoid double spending  |
 
 Return values:
 
@@ -318,7 +431,7 @@ function verifySignature(
     address from,
     address to,
     SignedMultiGiveawayBase.ClaimEntry[] calldata claims
-) external view virtual returns (address)
+) external view returns (address)
 ```
 
 verifies a ERC712 signature for the Claim data type.
@@ -343,7 +456,7 @@ Return values:
 ### domainSeparator (0xf698da25)
 
 ```solidity
-function domainSeparator() public view virtual returns (bytes32)
+function domainSeparator() external view returns (bytes32)
 ```
 
 EIP712 domain separator
@@ -357,26 +470,38 @@ Return values:
 ### getNumberOfSignaturesNeeded (0xdbbac9cc)
 
 ```solidity
-function getNumberOfSignaturesNeeded() external view returns (uint256)
+function getNumberOfSignaturesNeeded() external view returns (uint128)
 ```
 
 get the needed number of signatures to approve a claim
 
+Return values:
+
+| Name | Type    | Description                 |
+| :--- | :------ | :-------------------------- |
+| [0]  | uint128 | number of signatures needed |
+
 ### getMaxClaimEntries (0x4423c4bc)
 
 ```solidity
-function getMaxClaimEntries() external view returns (uint256)
+function getMaxClaimEntries() external view returns (uint128)
 ```
 
 get the maximum claim entries per claim
 
+Return values:
+
+| Name | Type    | Description                          |
+| :--- | :------ | :----------------------------------- |
+| [0]  | uint128 | Maximum amount of claims per message |
+
 ### getMaxWeiPerClaim (0xaa5a047d)
 
 ```solidity
-function getMaxWeiPerClaim(address token, uint256 tokenId)
-external
-view
-returns (uint256)
+function getMaxWeiPerClaim(
+    address token,
+    uint256 tokenId
+) external view returns (uint256)
 ```
 
 get maximum Weis that can be claimed at once
@@ -385,20 +510,23 @@ even tokenId is kind of inconsistent for tokenType!=ERC1155 it doesn't harm
 
 Parameters:
 
-| Name    | Type    | Description                                 |
-| :------ | :------ | :------------------------------------------ |
-| token   | address | the token contract address                  |
-| tokenId | uint256 | inf ERC1155 the token id else must be zero  |
+| Name    | Type    | Description                                |
+| :------ | :------ | :----------------------------------------- |
+| token   | address | the token contract address                 |
+| tokenId | uint256 | if ERC1155 the token id else must be zero  |
+
+Return values:
+
+| Name | Type    | Description                                                          |
+| :--- | :------ | :------------------------------------------------------------------- |
+| [0]  | uint256 | maximum amount of wei per each individual claim, 0 => check disabled |
 
 ### supportsInterface (0x01ffc9a7)
 
 ```solidity
-function supportsInterface(bytes4 interfaceId)
-public
-view
-virtual
-override
-returns (bool)
+function supportsInterface(
+    bytes4 interfaceId
+) public view override returns (bool)
 ```
 
 See {IERC165-supportsInterface}.
