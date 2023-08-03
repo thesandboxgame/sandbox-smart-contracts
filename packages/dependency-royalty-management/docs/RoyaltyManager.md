@@ -128,6 +128,15 @@ function getRoyaltyInfo() external view returns (address, uint16)
 ---
 
 ```Solidity
+    function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) 
+```
+
+- This function returns EIP2981 RoyaltyBPS for a contract
+- `_contractAddress` address of the contract for the royalty has to be retrieved.
+
+---
+
+```Solidity
     function _setRecipient(
         address payable _commonRecipient
     ) internal

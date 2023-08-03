@@ -25,6 +25,8 @@ function initialize(
     address forwarder,
     address assetAdmin,
     string memory baseUri
+    address commonSubscription,
+    address _manager
 ) external initializer
 ```
 
@@ -35,6 +37,8 @@ Parameters:
 - `forwarder` - The trusted forwarder for meta-transactions.
 - `assetAdmin` - The address that will be granted the DEFAULT_ADMIN_ROLE.
 - `baseUri` - The base URI for the contract.
+- `commonSubscription` - the address of the subscription for operator filter
+- `_manager` - the address of royalty manager contract
 
 ### mint
 
@@ -172,5 +176,122 @@ Sets a new trusted forwarder for meta-transactions.
 Parameters:
 
 - `trustedForwarder` - The new trusted forwarder.
+### setTokenRoyalties
+
+```solidity
+function setTokenRoyalties(
+        uint256 tokenId,
+        address payable recipient,
+        address creator
+) external override onlyRole(DEFAULT_ADMIN_ROLE) 
+```
+
+Sets token royalty i.e. the creator splitter address as EIP2981 royalty recipient. deploys a splitter if there is none deployed for a creator. Only admin can call it.
+
+Parameters:
+
+- `tokenId` - the id of the token for which the royalty is set.
+- `recipient` - the royalty recipient wallet.
+- `creator` - the creator of the token.
+
+### getCreatorAddress
+
+```solidity
+function getCreatorAddress(uint256 tokenId) external pure returns (address creator)
+```
+
+Returns the creator for a token.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+### getTier
+
+```solidity
+function getTier(uint256 tokenId) external pure returns (uint8 tier)
+```
+
+Returns the tier for a token.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+### isRevealed
+
+```solidity
+function isRevealed(uint256 tokenId) external pure returns (bool)
+```
+
+Returns bool representing if the token has been revealed or not.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+### getCreatorNonce
+
+```solidity
+function getCreatorNonce(uint256 tokenId) external pure returns (uint16)
+```
+
+Returns the creator's nonce using which the token was minted.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+### getRevealNonce
+
+```solidity
+function getRevealNonce(uint256 tokenId) external pure returns (uint16)
+```
+
+Returns the reveal nonce of the token.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+
+### isBridged
+
+```solidity
+function isBridged(uint256 tokenId) external pure returns (bool)
+```
+
+Returns bool representing if the token has been bridged.
+
+Parameters:
+
+- `tokenId` - the id of the token.
+
+### registerAndSubscribe
+
+```solidity
+function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe)
+    external
+    onlyRole(DEFAULT_ADMIN_ROLE)
+```
+
+Used to register and subscribe on the operator filter registry of Opensea
+
+Parameters:
+
+- `subscriptionOrRegistrantToCopy` - the address of the subscription.
+- `subscribe` - the bool value representing to subscribe or not.
+
+### setOperatorRegistry
+
+```solidity
+function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE)
+```fu
+
+Used to the address of the operator filter registry
+
+Parameters:
+
+- `registry` - the address of the operator filter registry.
 
 This document is essential for developers who need to understand or contribute to the code in the future. Please make sure to keep it updated and as detailed as possible.
