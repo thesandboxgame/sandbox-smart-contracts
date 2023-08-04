@@ -5,4 +5,4 @@ export const AccessControlInterfaceId = '0x7965db0b';
 export const ERC2981InterfaceId = '0x2a55205a';
 export const RoyaltyUGCInterfaceId = '0xa30b4db9';
 export const RoyaltyMultiDistributorInterfaceId = '0x667873ce';
-export const RoyaltyMultiRecipientsInterfaceId = '0x2e1a7d4d';
+export const RoyaltyMultiRecipientsInterfaceId = '0xfd90e897';
