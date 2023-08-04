@@ -70,9 +70,10 @@ const namedAccounts = {
   genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
   assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
   assetAuctionAdmin: 'sandAdmin', // can change fee collector,
-  commonRoyaltyReceiver: 'sandAdmin',
-  royaltyManagerAdmin: 'sandAdmin',
-  contractRoyaltySetter: 6,
+
+  commonRoyaltyReceiver: 'treasury', // The Sandbox royalty receiver
+  royaltyManagerAdmin: 'sandAdmin', // default admin for RoyaltyManager contract
+  contractRoyaltySetter: 'sandAdmin', // can set the EIP 2981 royalty split for contracts via RoyaltyManager
 
   sandSaleBeneficiary: {
     default: 3,
