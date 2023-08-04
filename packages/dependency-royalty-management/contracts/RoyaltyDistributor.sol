@@ -3,8 +3,12 @@ pragma solidity ^0.8.0;
 
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
+import {
+    ERC165Upgradeable,
+    IERC165Upgradeable
+} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
-contract RoyaltyDistributor is IERC2981Upgradeable {
+contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     IRoyaltyManager public royaltyManager;
 
@@ -30,7 +34,13 @@ contract RoyaltyDistributor is IERC2981Upgradeable {
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC2981Upgradeable).interfaceId;
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
+        return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 }

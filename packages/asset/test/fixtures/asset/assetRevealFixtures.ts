@@ -1,4 +1,5 @@
 import {ethers, upgrades} from 'hardhat';
+import {Event} from 'ethers';
 import {
   batchRevealSignature,
   burnAndRevealSignature,
@@ -191,8 +192,9 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA' // metadata hash
   );
   const unRevResult = await unRevMintTx.wait();
-  // TODO: this is brittle and should be modified to search for the relevant event name
-  const unrevealedtokenId = unRevResult.events[5].args.tokenId.toString();
+  const unrevealedtokenId = unRevResult.events
+    .find((e: Event) => e.event === 'Minted')
+    .args.tokenId.toString();
 
   // mint a tier 5 asset with 10 copies
   const unRevMintTx2 = await MockMinterContract.mintAsset(
@@ -204,8 +206,9 @@ export async function runRevealTestSetup() {
   );
   const unRevResult2 = await unRevMintTx2.wait();
 
-  // TODO: this is brittle and should be modified to search for the relevant event name
-  const unrevealedtokenId2 = unRevResult2.events[3].args.tokenId.toString();
+  const unrevealedtokenId2 = unRevResult2.events
+    .find((e: Event) => e.event === 'Minted')
+    .args.tokenId.toString();
 
   // mint a revealed version, tier 5 asset with 10 copies
   const revMintTx = await MockMinterContract.mintAsset(
@@ -216,8 +219,10 @@ export async function runRevealTestSetup() {
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJC'
   );
   const revResult = await revMintTx.wait();
-  // TODO: this is brittle and should be modified to search for the relevant event name
-  const revealedtokenId = revResult.events[3].args.tokenId.toString();
+
+  const revealedtokenId = revResult.events
+    .find((e: Event) => e.event === 'Minted')
+    .args.tokenId.toString();
 
   // END SETUP USER WITH MINTED ASSETS
 

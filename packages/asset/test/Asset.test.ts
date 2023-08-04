@@ -2,6 +2,16 @@ import {expect} from 'chai';
 import {ethers, upgrades} from 'hardhat';
 import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
+import {
+  AccessControlInterfaceId,
+  ERC1155InterfaceId,
+  ERC1155MetadataURIInterfaceId,
+  ERC165InterfaceId,
+  ERC2981InterfaceId,
+  RoyaltyMultiDistributorInterfaceId,
+  RoyaltyMultiRecipientsInterfaceId,
+  RoyaltyUGCInterfaceId,
+} from './utils/interfaceIds';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
@@ -821,31 +831,48 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
   describe('Interface support', function () {
     it('should support ERC165', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x01ffc9a7')).to.be.true;
+      expect(await AssetContract.supportsInterface(ERC165InterfaceId)).to.be
+        .true;
     });
     it('should support ERC1155', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0xd9b67a26')).to.be.true;
+      expect(await AssetContract.supportsInterface(ERC1155InterfaceId)).to.be
+        .true;
     });
     it('should support ERC1155MetadataURI', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x0e89341c')).to.be.true;
+      expect(
+        await AssetContract.supportsInterface(ERC1155MetadataURIInterfaceId)
+      ).to.be.true;
     });
     it('should support AccessControlUpgradeable', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x7965db0b')).to.be.true;
+      expect(await AssetContract.supportsInterface(AccessControlInterfaceId)).to
+        .be.true;
     });
     it('should support IRoyaltyUGC', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0xa30b4db9')).to.be.true;
+      expect(await AssetContract.supportsInterface(RoyaltyUGCInterfaceId)).to.be
+        .true;
     });
     it('should support IRoyaltyMultiDistributor', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0x667873ce')).to.be.true;
+      expect(
+        await AssetContract.supportsInterface(
+          RoyaltyMultiDistributorInterfaceId
+        )
+      ).to.be.true;
     });
     it('should support IRoyaltyMultiRecipients', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.supportsInterface('0xfd90e897')).to.be.true;
+      expect(
+        await AssetContract.supportsInterface(RoyaltyMultiRecipientsInterfaceId)
+      ).to.be.true;
+    });
+    it('should support IERC2981', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.supportsInterface(ERC2981InterfaceId)).to.be
+        .true;
     });
   });
   describe('Token util', function () {
