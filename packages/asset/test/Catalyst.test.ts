@@ -3,6 +3,13 @@ import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 import {ethers, upgrades} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalyst/catalystFixture';
 import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
+import {
+  AccessControlInterfaceId,
+  ERC1155InterfaceId,
+  ERC1155MetadataURIInterfaceId,
+  ERC165InterfaceId,
+  ERC2981InterfaceId,
+} from './utils/interfaceIds';
 const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
@@ -29,10 +36,28 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
-    describe('Interface support', function () {
-      it('should support ERC2981Upgradeable', async function () {
+    describe.only('Interface support', function () {
+      it('should support ERC165', async function () {
         const {catalyst} = await runCatalystSetup();
-        expect(await catalyst.supportsInterface('0x2a55205a')).to.be.true;
+        expect(await catalyst.supportsInterface(ERC165InterfaceId)).to.be.true;
+      });
+      it('should support ERC1155', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface(ERC1155InterfaceId)).to.be.true;
+      });
+      it('should support ERC1155MetadataURI', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface(ERC1155MetadataURIInterfaceId))
+          .to.be.true;
+      });
+      it('should support AccessControl', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface(AccessControlInterfaceId)).to.be
+          .true;
+      });
+      it('should support IERC2981', async function () {
+        const {catalyst} = await runCatalystSetup();
+        expect(await catalyst.supportsInterface(ERC2981InterfaceId)).to.be.true;
       });
     });
     it("base uri can't be empty in initialization", async function () {
