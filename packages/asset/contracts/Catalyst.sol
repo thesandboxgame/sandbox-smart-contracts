@@ -286,7 +286,10 @@ contract Catalyst is
         override(ERC1155Upgradeable, AccessControlUpgradeable, RoyaltyDistributor)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return
+            ERC1155Upgradeable.supportsInterface(interfaceId) ||
+            AccessControlUpgradeable.supportsInterface(interfaceId) ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea.can only be called by admin.
