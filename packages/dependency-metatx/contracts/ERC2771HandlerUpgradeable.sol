@@ -52,5 +52,17 @@ contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
         return forwarder == _trustedForwarder;
     }
 
+    /// @notice if the call is from the trusted forwarder the sender is extracted from calldata, msg.sender otherwise
+    /// @return sender the calculated address of the sender
+    function _msgSender() internal view virtual override returns (address sender) {
+        return super._msgSender();
+    }
+
+    /// @notice if the call is from the trusted forwarder the sender is removed from calldata
+    /// @return the calldata without the sender
+    function _msgData() internal view virtual override returns (bytes calldata) {
+        return super._msgData();
+    }
+
     uint256[49] private __gap;
 }
