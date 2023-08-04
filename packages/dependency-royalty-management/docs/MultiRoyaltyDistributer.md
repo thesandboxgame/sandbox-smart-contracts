@@ -41,20 +41,6 @@ For more information on how the royalty could be distributed please read Royalty
 ---
 
 ```Solidity
-    function getDefaultRoyalty()
-       external
-       view
-       override
-    returns (uint16 bps, Recipient[] memory recipients)
-```
-
-- Retrieves the default royalty for the contract.
-- return `bps` The default royalty Bps in basis points (1/10,000).
-- return `recipients` An array of `Recipient` structs, containing the default royalty recipient and Bps.
-
----
-
-```Solidity
     function royaltyInfo(
         uint256 tokenId,
         uint256 value
@@ -96,7 +82,6 @@ For more information on how the royalty could be distributed please read Royalty
 ```Solidity
     function _setTokenRoyalties(
         uint256 tokenId,
-        uint16 royaltyBPS,
         address payable recipient,
         address creator
     ) internal
@@ -104,34 +89,8 @@ For more information on how the royalty could be distributed please read Royalty
 
 - Sets the royalty for a given token
 - `tokenId`: The ID of the token
-- `royaltyBPS`: The royalty rate in basis points
 - `recipient`: The address that will receive the royalties
 - `creator`: The address of the creator of the token
-
----
-
-```Solidity
-    function _setDefaultRoyaltyBps(
-        uint16 bps
-    ) internal
-```
-
-- Sets the default royalty basis points (bps) for the contract
-- The new default royalty bps should be a valid value less than 10000
-- `bps`: The new default royalty bps to be set
-- Emits `DefaultRoyaltyBpsSet` event with the new bps value
-
----
-
-```Solidity
-    function _setDefaultRoyaltyReceiver(
-        address payable defaultReceiver
-    ) internal
-```
-
-- Sets the default royalty receiver wallet for the contract
-- `defaultReceiver`: The new default royalty receiver wallet address to be set
-- Emits `DefaultRoyaltyReceiverSet` event with the new wallet address
 
 ---
 
