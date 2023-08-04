@@ -287,8 +287,6 @@ contract Catalyst is
         returns (bool)
     {
         return
-            ERC1155Upgradeable.supportsInterface(interfaceId) ||
-            AccessControlUpgradeable.supportsInterface(interfaceId) ||
             super.supportsInterface(interfaceId);
     }
 
