@@ -2,6 +2,7 @@ import {ethers} from 'hardhat';
 import {expect} from 'chai';
 import {splitterAbi} from './Splitter.abi';
 import {royaltyDistribution} from './fixture';
+import {BigNumber} from 'ethers';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Royalty', function () {
@@ -60,6 +61,77 @@ describe('Royalty', function () {
       await splitterContract
         .connect(await ethers.getSigner(royaltyReceiver.address))
         .splitERC20Tokens(ERC20.address);
+
+      const balanceRoyaltyReceiver = await ERC20.balanceOf(
+        royaltyReceiver.address
+      );
+      const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
+        commonRoyaltyReceiver.address
+      );
+
+      expect(balanceRoyaltyReceiver).to.be.equal(
+        (1000000 * (erc1155Royalty / 10000)) / 2
+      );
+      expect(balanceCommonRoyaltyReceiver).to.be.equal(
+        (1000000 * (erc1155Royalty / 10000)) / 2
+      );
+    });
+    it('should split ERC20 using EIP2981 using trusted forwarder', async function () {
+      const {
+        ERC1155,
+        ERC20,
+        mockMarketplace,
+        ERC20AsBuyer,
+        deployer,
+        seller,
+        buyer,
+        commonRoyaltyReceiver,
+        royaltyReceiver,
+        ERC1155AsSeller,
+        RoyaltyManagerContract,
+        TrustedForwarder,
+      } = await royaltyDistribution();
+      await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      await ERC20.mint(buyer.address, 1000000);
+      await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
+      await ERC1155AsSeller.setApprovalForAll(mockMarketplace.address, true);
+      expect(await ERC1155.balanceOf(seller.address, 1)).to.be.equals(1);
+      await mockMarketplace.distributeRoyaltyEIP2981(
+        1000000,
+        ERC20.address,
+        ERC1155.address,
+        1,
+        buyer.address,
+        seller.address,
+        true
+      );
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        deployer.address
+      );
+
+      const erc1155Royalty = await RoyaltyManagerContract.getContractRoyalty(
+        ERC1155.address
+      );
+
+      const splitterContract = await ethers.getContractAt(
+        splitterAbi,
+        splitter
+      );
+
+      const balance = await ERC20.balanceOf(splitter);
+
+      expect(balance).to.be.equal(1000000 * (erc1155Royalty / 10000));
+      const data = await splitterContract
+        .connect(royaltyReceiver.address)
+        .populateTransaction['splitERC20Tokens(address)'](ERC20.address);
+
+      await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
 
       const balanceRoyaltyReceiver = await ERC20.balanceOf(
         royaltyReceiver.address
@@ -948,6 +1020,30 @@ describe('Royalty', function () {
       expect(await RoyaltyManagerAsAdmin.commonSplit()).to.be.equal(5000);
       await RoyaltyManagerAsAdmin.setSplit(3000);
       expect(await RoyaltyManagerAsAdmin.commonSplit()).to.be.equal(3000);
+    });
+
+    it('manager admin can set trusted forwarder', async function () {
+      const {RoyaltyManagerAsAdmin, TrustedForwarder, seller} =
+        await royaltyDistribution();
+      expect(await RoyaltyManagerAsAdmin.getTrustedForwarder()).to.be.equal(
+        TrustedForwarder.address
+      );
+      await RoyaltyManagerAsAdmin.setTrustedForwarder(seller.address);
+      expect(await RoyaltyManagerAsAdmin.getTrustedForwarder()).to.be.equal(
+        seller.address
+      );
+    });
+
+    it('only manager admin can set trusted forwarder', async function () {
+      const {RoyaltyManagerContract, seller, managerAdminRole} =
+        await royaltyDistribution();
+      await expect(
+        RoyaltyManagerContract.connect(seller).setTrustedForwarder(
+          seller.address
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${managerAdminRole}`
+      );
     });
 
     it('only manager admin can set common royalty recipient', async function () {

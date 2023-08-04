@@ -21,7 +21,6 @@ export async function assetRoyaltyDistribution() {
     assetMinter,
     buyer,
     seller,
-    trustedForwarder,
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
@@ -35,6 +34,11 @@ export async function assetRoyaltyDistribution() {
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
+
+  const TrustedForwarderFactory = await ethers.getContractFactory(
+    'MockTrustedForwarder'
+  );
+  const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
   const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
     'MockOperatorFilterRegistry'
@@ -73,7 +77,7 @@ export async function assetRoyaltyDistribution() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
-      trustedForwarder.address,
+      TrustedForwarder.address,
     ],
     {
       initializer: 'initialize',
@@ -85,7 +89,7 @@ export async function assetRoyaltyDistribution() {
   const Asset = await upgrades.deployProxy(
     AssetFactory,
     [
-      trustedForwarder.address,
+      TrustedForwarder.address,
       assetAdmin.address,
       'ipfs://',
       OperatorFilterSubscriptionContract.address,
@@ -176,5 +180,6 @@ export async function assetRoyaltyDistribution() {
     contractRoyaltySetterRole,
     RoyaltyManagerAsRoyaltySetter,
     assetAsMinter,
+    TrustedForwarder,
   };
 }

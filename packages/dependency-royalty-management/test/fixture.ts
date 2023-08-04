@@ -12,8 +12,11 @@ export async function royaltyDistribution() {
     royaltyReceiver2,
     managerAdmin,
     contractRoyaltySetter,
-    trustedForwarder,
   ] = await ethers.getSigners();
+  const TrustedForwarderFactory = await ethers.getContractFactory(
+    'MockTrustedForwarder'
+  );
+  const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
   const TestERC20Factory = await ethers.getContractFactory('TestERC20');
   const ERC20 = await TestERC20Factory.deploy('TestERC20', 'T');
@@ -34,7 +37,7 @@ export async function royaltyDistribution() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
-      trustedForwarder.address,
+      TrustedForwarder.address,
     ],
     {
       initializer: 'initialize',
@@ -149,5 +152,6 @@ export async function royaltyDistribution() {
     RoyaltyManagerAsRoyaltySetter,
     SingleReceiver,
     NFT,
+    TrustedForwarder,
   };
 }
