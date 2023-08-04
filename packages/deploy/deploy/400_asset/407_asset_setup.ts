@@ -32,6 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       DEFAULT_BPS
     )
   );
+  log(`Asset set on RoyaltyManager with ${DEFAULT_BPS} BPS royalty`);
 };
 
 export default func;
