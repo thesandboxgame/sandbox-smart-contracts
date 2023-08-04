@@ -14,7 +14,7 @@ export async function royaltyDistribution() {
     contractRoyaltySetter,
   ] = await ethers.getSigners();
   const TrustedForwarderFactory = await ethers.getContractFactory(
-    'TrustedForwarderMock'
+    'MockTrustedForwarder'
   );
   const TrustedForwarder = await TrustedForwarderFactory.deploy();
 

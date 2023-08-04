@@ -36,7 +36,7 @@ export async function assetRoyaltyDistribution() {
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
 
   const TrustedForwarderFactory = await ethers.getContractFactory(
-    'TrustedForwarderMock'
+    'MockTrustedForwarder'
   );
   const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
