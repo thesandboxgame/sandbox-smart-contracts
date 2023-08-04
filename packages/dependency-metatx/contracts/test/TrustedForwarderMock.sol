@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.2;
 
-contract TrustedForwarderMock {
+contract MockTrustedForwarder {
     struct ForwardRequest {
         address from;
         address to;
