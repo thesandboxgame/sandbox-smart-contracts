@@ -36,7 +36,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
-    describe.only('Interface support', function () {
+    describe('Interface support', function () {
       it('should support ERC165', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(ERC165InterfaceId)).to.be.true;
