@@ -16,9 +16,7 @@ import {
     IERC165,
     Recipient
 } from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {
-    ERC2771HandlerAbstract
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerAbstract} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerAbstract.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
 import {IERC20Approve} from "./interfaces/IERC20Approve.sol";
 
