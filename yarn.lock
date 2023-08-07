@@ -6239,7 +6239,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.12.5, hardhat@npm:^2.14.1, hardhat@npm:^2.16.0":
+"hardhat@npm:^2.14.1, hardhat@npm:^2.16.0":
   version: 2.17.1
   resolution: "hardhat@npm:2.17.1"
   dependencies:
