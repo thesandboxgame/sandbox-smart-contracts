@@ -1824,7 +1824,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
       it('it should be able to transfer through trusted forwarder after it is blacklisted', async function () {
         const {
-          mockMarketPlace3,
           Asset,
           users,
           operatorFilterRegistryAsSubscription,
@@ -2165,7 +2164,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       });
       it('should be able to batch transfer through trusted forwarder if it is black listed', async function () {
         const {
-          mockMarketPlace1,
           Asset,
           users,
           operatorFilterRegistryAsSubscription,
