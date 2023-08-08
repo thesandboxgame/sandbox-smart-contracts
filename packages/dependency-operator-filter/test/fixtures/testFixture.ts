@@ -12,6 +12,10 @@ export async function setupOperatorFilter() {
     user3,
     user4,
   ] = await ethers.getSigners();
+  const TrustedForwarderFactory = await ethers.getContractFactory(
+    'MockTrustedForwarder'
+  );
+  const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
   const MockERC1155MarketPlace1Factory = await ethers.getContractFactory(
     'MockERC1155MarketPlace1'
@@ -60,9 +64,13 @@ export async function setupOperatorFilter() {
 
   await tnx.wait();
   const ERC1155Factory = await ethers.getContractFactory('TestERC1155');
-  const ERC1155 = await upgrades.deployProxy(ERC1155Factory, ['testERC1155'], {
-    initializer: 'initialize',
-  });
+  const ERC1155 = await upgrades.deployProxy(
+    ERC1155Factory,
+    ['testERC1155', TrustedForwarder.address],
+    {
+      initializer: 'initialize',
+    }
+  );
 
   let MockOperatorFilterSubscriptionFactory = await ethers.getContractFactory(
     'MockOperatorFilterSubscription'
@@ -84,7 +92,7 @@ export async function setupOperatorFilter() {
   const ERC721Factory = await ethers.getContractFactory('TestERC721');
   const ERC721 = await upgrades.deployProxy(
     ERC721Factory,
-    ['test', 'testERC721'],
+    ['test', 'testERC721', TrustedForwarder.address],
     {
       initializer: 'initialize',
     }

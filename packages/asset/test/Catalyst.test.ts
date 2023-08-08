@@ -10,6 +10,8 @@ import {
   ERC165InterfaceId,
   ERC2981InterfaceId,
 } from './utils/interfaceIds';
+import {BigNumber} from 'ethers';
+
 const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
@@ -681,7 +683,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       it('should set registry and subscribe to common subscription', async function () {
         const {
           operatorFilterRegistry,
-          trustedForwarder,
+          TrustedForwarder,
           operatorFilterSubscription,
           catalystAdmin,
           catalystMinter,
@@ -692,7 +694,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           CatalystFactory,
           [
             CATALYST_BASE_URI,
-            trustedForwarder.address,
+            TrustedForwarder.address,
             operatorFilterSubscription.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
@@ -726,7 +728,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
 
       it('should revert when registry is set zero and subscription is set zero', async function () {
         const {
-          trustedForwarder,
+          TrustedForwarder,
           operatorFilterSubscription,
           catalystAdmin,
           catalystMinter,
@@ -737,7 +739,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           CatalystFactory,
           [
             CATALYST_BASE_URI,
-            trustedForwarder.address,
+            TrustedForwarder.address,
             operatorFilterSubscription.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
@@ -762,7 +764,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
 
       it('should revert when registry is set and subscription is set by non-admin', async function () {
         const {
-          trustedForwarder,
+          TrustedForwarder,
           operatorFilterSubscription,
           catalystAdmin,
           catalystMinter,
@@ -776,7 +778,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           CatalystFactory,
           [
             CATALYST_BASE_URI,
-            trustedForwarder.address,
+            TrustedForwarder.address,
             operatorFilterSubscription.address,
             catalystAdmin.address, // DEFAULT_ADMIN_ROLE
             catalystMinter.address, // MINTER_ROLE
@@ -1036,7 +1038,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         const {
           operatorFilterRegistry,
           mockMarketPlace1,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
           Catalyst,
         } = await setupOperatorFilter();
@@ -1069,13 +1071,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
         );
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           MockERC1155MarketPlace1CodeHash,
           false
@@ -1114,7 +1116,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         const {
           operatorFilterRegistry,
           mockMarketPlace3,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
           Catalyst,
         } = await setupOperatorFilter();
@@ -1147,13 +1149,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.equal(false);
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
         );
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           MockERC1155MarketPlace3CodeHash,
           true
@@ -1281,10 +1283,34 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         ).to.be.equal(true);
       });
 
+      it('it should not be able to setApprovalForAll trusted forwarder if black listed', async function () {
+        const {
+          operatorFilterRegistryAsOwner,
+          operatorFilterSubscription,
+          users,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+
+        const TrustedForwarderCodeHash =
+          await operatorFilterRegistryAsOwner.codeHashOf(
+            TrustedForwarder.address
+          );
+
+        await operatorFilterRegistryAsOwner.updateCodeHash(
+          operatorFilterSubscription.address,
+          TrustedForwarderCodeHash,
+          true
+        );
+
+        await expect(
+          users[1].Catalyst.setApprovalForAll(TrustedForwarder.address, true)
+        ).to.be.revertedWithCustomError;
+      });
+
       it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ', async function () {
         const {
           mockMarketPlace3,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
           Catalyst,
           users,
@@ -1301,7 +1327,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
@@ -1315,14 +1341,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ', async function () {
         const {
           mockMarketPlace3,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
           Catalyst,
           users,
         } = await setupOperatorFilter();
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace3.address
           );
 
@@ -1338,7 +1364,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
@@ -1352,14 +1378,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
         const {
           mockMarketPlace1,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
           Catalyst,
           users,
         } = await setupOperatorFilter();
 
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace1.address
           );
 
@@ -1367,13 +1393,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           users[0].Catalyst.setApprovalForAll(mockMarketPlace1.address, true)
         ).to.be.revertedWithCustomError;
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
@@ -1417,7 +1443,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace3,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 2);
@@ -1438,7 +1464,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
 
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
@@ -1454,6 +1480,33 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             '0x'
           )
         ).to.be.revertedWithCustomError;
+      });
+
+      it('it should be able to transfer through trusted forwarder after it is blacklisted', async function () {
+        const {
+          Catalyst,
+          users,
+          operatorFilterRegistryAsOwner,
+          operatorFilterSubscription,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+        await Catalyst.mintWithoutMinterRole(users[0].address, 1, 2);
+
+        await operatorFilterRegistryAsOwner.updateOperator(
+          operatorFilterSubscription.address,
+          TrustedForwarder.address,
+          true
+        );
+
+        const data = await Catalyst.connect(
+          users[0].Catalyst.signer
+        ).populateTransaction[
+          'safeTransferFrom(address,address,uint256,uint256,bytes)'
+        ](users[0].address, users[1].address, 1, 1, '0x');
+
+        await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
+
+        expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
       it('it should be able to transfer through non blacklisted market places', async function () {
@@ -1481,7 +1534,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace3,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 2);
@@ -1502,10 +1555,10 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace3.address
           );
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
@@ -1528,11 +1581,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace1,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace1.address
           );
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
@@ -1553,13 +1606,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.revertedWithCustomError;
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
@@ -1602,7 +1655,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace3,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 2);
@@ -1626,7 +1679,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
 
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
@@ -1671,7 +1724,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace3,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 2);
@@ -1694,10 +1747,10 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace3.address
           );
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
@@ -1720,11 +1773,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           mockMarketPlace1,
           Catalyst,
           users,
-          operatorFilterRegistryAsDeployer,
+          operatorFilterRegistryAsOwner,
           operatorFilterSubscription,
         } = await setupOperatorFilter();
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsDeployer.codeHashOf(
+          await operatorFilterRegistryAsOwner.codeHashOf(
             mockMarketPlace1.address
           );
         await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
@@ -1746,13 +1799,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           )
         ).to.be.revertedWithCustomError;
 
-        await operatorFilterRegistryAsDeployer.updateCodeHash(
+        await operatorFilterRegistryAsOwner.updateCodeHash(
           operatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsDeployer.updateOperator(
+        await operatorFilterRegistryAsOwner.updateOperator(
           operatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
@@ -1766,6 +1819,44 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           '0x'
         );
 
+        expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
+        expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
+      });
+
+      it('should be able to batch transfer through trusted forwarder if it is black listed', async function () {
+        const {
+          Catalyst,
+          users,
+          operatorFilterRegistryAsOwner,
+          operatorFilterSubscription,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+        const TrustedForwarderCodeHash =
+          await operatorFilterRegistryAsOwner.codeHashOf(
+            TrustedForwarder.address
+          );
+        await Catalyst.mintWithoutMinterRole(users[0].address, 1, 1);
+        await Catalyst.mintWithoutMinterRole(users[0].address, 2, 1);
+
+        await operatorFilterRegistryAsOwner.updateCodeHash(
+          operatorFilterSubscription.address,
+          TrustedForwarderCodeHash,
+          true
+        );
+
+        await operatorFilterRegistryAsOwner.updateOperator(
+          operatorFilterSubscription.address,
+          TrustedForwarder.address,
+          true
+        );
+
+        const data = await Catalyst.connect(
+          users[0].Catalyst.signer
+        ).populateTransaction[
+          'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
+        ](users[0].address, users[1].address, [1, 2], [1, 1], '0x');
+
+        await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
       });

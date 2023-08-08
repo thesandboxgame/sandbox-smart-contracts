@@ -12,6 +12,7 @@ import {
   RoyaltyMultiRecipientsInterfaceId,
   RoyaltyUGCInterfaceId,
 } from './utils/interfaceIds';
+import {BigNumber} from 'ethers';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
@@ -1002,7 +1003,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           operatorFilterRegistry,
           assetAdmin,
-          trustedForwarder,
+          TrustedForwarder,
           filterOperatorSubscription,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
@@ -1010,7 +1011,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const Asset = await upgrades.deployProxy(
           AssetFactory,
           [
-            trustedForwarder.address,
+            TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
@@ -1045,7 +1046,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       it('should revert when registry is set zero and subscription is set zero', async function () {
         const {
           assetAdmin,
-          trustedForwarder,
+          TrustedForwarder,
           filterOperatorSubscription,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
@@ -1053,7 +1054,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const Asset = await upgrades.deployProxy(
           AssetFactory,
           [
-            trustedForwarder.address,
+            TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
@@ -1076,7 +1077,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       it('should revert when registry is set and subscription is set by non-admin', async function () {
         const {
           assetAdmin,
-          trustedForwarder,
+          TrustedForwarder,
           filterOperatorSubscription,
           RoyaltyManagerContract,
           operatorFilterRegistry,
@@ -1087,7 +1088,49 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const Asset = await upgrades.deployProxy(
           AssetFactory,
           [
-            trustedForwarder.address,
+            TrustedForwarder.address,
+            assetAdmin.address,
+            'ipfs://',
+            filterOperatorSubscription.address,
+            RoyaltyManagerContract.address,
+          ],
+          {
+            initializer: 'initialize',
+          }
+        );
+
+        await expect(
+          Asset.connect(user1).setOperatorRegistry(
+            operatorFilterRegistry.address
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+
+        await expect(
+          Asset.connect(user1).registerAndSubscribe(
+            filterOperatorSubscription.address,
+            true
+          )
+        ).to.be.revertedWith(
+          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        );
+      });
+      it('should not revert when registry is set and subscription is set by admin through trusted forwarder', async function () {
+        const {
+          assetAdmin,
+          TrustedForwarder,
+          filterOperatorSubscription,
+          RoyaltyManagerContract,
+          operatorFilterRegistry,
+          defaultAdminRole,
+          user1,
+        } = await setupOperatorFilter();
+        const AssetFactory = await ethers.getContractFactory('Asset');
+        const Asset = await upgrades.deployProxy(
+          AssetFactory,
+          [
+            TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
             filterOperatorSubscription.address,
@@ -1651,6 +1694,30 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         ).to.be.revertedWith;
       });
 
+      it('it should not be able to setApprovalForAll trusted forwarder if black listed', async function () {
+        const {
+          operatorFilterRegistryAsSubscription,
+          filterOperatorSubscription,
+          users,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+
+        const TrustedForwarderCodeHash =
+          await operatorFilterRegistryAsSubscription.codeHashOf(
+            TrustedForwarder.address
+          );
+
+        await operatorFilterRegistryAsSubscription.updateCodeHash(
+          filterOperatorSubscription.address,
+          TrustedForwarderCodeHash,
+          true
+        );
+
+        await expect(
+          users[1].Asset.setApprovalForAll(TrustedForwarder.address, true)
+        ).to.be.revertedWithCustomError;
+      });
+
       it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
         const {
           mockMarketPlace1,
@@ -1753,6 +1820,34 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             '0x'
           )
         ).to.be.revertedWithCustomError;
+      });
+
+      it('it should be able to transfer through trusted forwarder after it is blacklisted', async function () {
+        const {
+          mockMarketPlace3,
+          Asset,
+          users,
+          operatorFilterRegistryAsSubscription,
+          filterOperatorSubscription,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+        await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
+
+        await operatorFilterRegistryAsSubscription.updateOperator(
+          filterOperatorSubscription.address,
+          TrustedForwarder.address,
+          true
+        );
+
+        const data = await Asset.connect(
+          users[0].Asset.signer
+        ).populateTransaction[
+          'safeTransferFrom(address,address,uint256,uint256,bytes)'
+        ](users[0].address, users[1].address, 1, 1, '0x');
+
+        await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
+
+        expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
       it('it should be able to transfer through non blacklisted market places', async function () {
@@ -2065,6 +2160,43 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           '0x'
         );
 
+        expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
+        expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
+      });
+      it('should be able to batch transfer through trusted forwarder if it is black listed', async function () {
+        const {
+          mockMarketPlace1,
+          Asset,
+          users,
+          operatorFilterRegistryAsSubscription,
+          filterOperatorSubscription,
+          TrustedForwarder,
+        } = await setupOperatorFilter();
+        const TrustedForwarderCodeHash =
+          await operatorFilterRegistryAsSubscription.codeHashOf(
+            TrustedForwarder.address
+          );
+        await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
+        await Asset.mintWithoutMinterRole(users[0].address, 2, 1);
+
+        await operatorFilterRegistryAsSubscription.updateCodeHash(
+          filterOperatorSubscription.address,
+          TrustedForwarderCodeHash,
+          true
+        );
+
+        await operatorFilterRegistryAsSubscription.updateOperator(
+          filterOperatorSubscription.address,
+          TrustedForwarder.address,
+          true
+        );
+        const data = await Asset.connect(
+          users[0].Asset.signer
+        ).populateTransaction[
+          'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
+        ](users[0].address, users[1].address, [1, 2], [1, 1], '0x');
+
+        await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
       });
