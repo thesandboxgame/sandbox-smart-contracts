@@ -1,16 +1,16 @@
 import {getContract, withSnapshot} from '../../utils/testUtils';
 import {expect} from 'chai';
 
-const setupTest = withSnapshot(['MultiGiveawayV1'], async (hre) => {
+const setupTest = withSnapshot(['SignedMultiGiveaway'], async (hre) => {
   const namedAccount = await hre.getNamedAccounts();
-  const contract = await getContract(hre, 'MultiGiveawayV1');
+  const contract = await getContract(hre, 'SignedMultiGiveaway');
   return {
     contract,
     namedAccount,
   };
 });
 
-describe('MultiGiveawayV1', function () {
+describe('SignedMultiGiveaway', function () {
   describe('check roles', function () {
     it('admin', async function () {
       const fixtures = await setupTest();
