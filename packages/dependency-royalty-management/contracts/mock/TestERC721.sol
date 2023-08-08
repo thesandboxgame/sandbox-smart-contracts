@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {
+    ERC721Upgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {MultiRoyaltyDistributor} from "../MultiRoyaltyDistributor.sol";
+import {
+    ERC2771HandlerUpgradeable,
+    ERC2771HandlerAbstract
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 
-contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor {
+contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor, ERC2771HandlerUpgradeable {
     /// @notice initiliaze to be called by the proxy
     /// @dev would run once.
     /// @param _manager, the address of the Manager contract for common royalty recipient
-    function initialize(address _manager) external initializer {
+    function initialize(address _manager, address trustedForwarder) external initializer {
         __MultiRoyaltyDistributor_init(_manager);
         __Ownable_init();
+        __ERC2771Handler_init(trustedForwarder);
     }
 
     /// @notice function to mint a single ERC721 token
@@ -66,5 +74,25 @@ contract TestERC721 is ERC721Upgradeable, OwnableUpgradeable, MultiRoyaltyDistri
         address creator
     ) external override onlyOwner {
         _setTokenRoyalties(tokenId, recipient, creator);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (address sender)
+    {
+        return ERC2771HandlerAbstract._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerAbstract._msgData();
     }
 }
