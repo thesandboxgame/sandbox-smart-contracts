@@ -7,8 +7,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {RoyaltyDistributor} from "../RoyaltyDistributor.sol";
 import {
-    ERC2771HandlerUpgradeable,
-    ERC2771HandlerAbstract
+    ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 
 contract SingleReceiver is ERC1155Upgradeable, RoyaltyDistributor, ERC2771HandlerUpgradeable {
@@ -34,19 +33,19 @@ contract SingleReceiver is ERC1155Upgradeable, RoyaltyDistributor, ERC2771Handle
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address sender)
     {
-        return ERC2771HandlerAbstract._msgSender();
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
     function _msgData()
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (bytes calldata)
     {
-        return ERC2771HandlerAbstract._msgData();
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }

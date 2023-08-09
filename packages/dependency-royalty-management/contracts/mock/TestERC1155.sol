@@ -8,8 +8,7 @@ import {
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {MultiRoyaltyDistributor} from "../MultiRoyaltyDistributor.sol";
 import {
-    ERC2771HandlerUpgradeable,
-    ERC2771HandlerAbstract
+    ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 
 /// @title Test ERC1155 contract
@@ -91,19 +90,19 @@ contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDist
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address sender)
     {
-        return ERC2771HandlerAbstract._msgSender();
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
     function _msgData()
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (bytes calldata)
     {
-        return ERC2771HandlerAbstract._msgData();
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }
