@@ -1,4 +1,4 @@
-<p align="center"><a href="https://sandbox.game"><img width="300" title="TSB" src='brand-assets/tsb_3d.jpeg' /></a></p>
+<p align="center"><a href="https://sandbox.game"><img width="300" title="TSB" src='brand-assets/tsb_pride.jpeg' /></a></p>
 
 <h1 align="center">The Sandbox smart contracts</h1>
 
@@ -37,6 +37,7 @@ To add a package simply add it inside the packages directory. Every package can 
 See [`packages/example-hardhat`](./packages/example-hardhat) for an example template package for smart contract development with Hardhat.
 
 Refer to each package's readme for more information about that package. Note that deployment for all new packages is carried out via `packages/deploy`.
+Each package should follow the [audit best practices](./audit-best-practices.md) where applicable.
 
 ### Developer quickstart
 
