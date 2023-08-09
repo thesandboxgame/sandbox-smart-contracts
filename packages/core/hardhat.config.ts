@@ -120,7 +120,7 @@ const config: HardhatUserConfig = {
 
     sandAdmin: {
       default: 2,
-      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
       polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
@@ -169,7 +169,7 @@ const config: HardhatUserConfig = {
     sandSaleBeneficiary: {
       default: 3,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
-      polygon: '0xbc4fE9A8a46442eDaF13Bd5c615D7CFe0953885B', // TODO: get sand admin multi sig contract
+      polygon: '0x1b47567CBE36e63293A7A2018F79687f942aB24C', // same as treasury
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       goerli_test: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
@@ -201,8 +201,8 @@ const config: HardhatUserConfig = {
 
     landAdmin: {
       default: 2,
-      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
-      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
+      mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
@@ -213,8 +213,8 @@ const config: HardhatUserConfig = {
     assetAttributesRegistryAdmin: 'sandAdmin',
     proxyAdminOwner: {
       default: 2,
-      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
-      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
+      mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
+      polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       goerli_test: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',

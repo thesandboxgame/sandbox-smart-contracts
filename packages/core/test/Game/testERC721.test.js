@@ -96,7 +96,7 @@ const erc721Tests = require('../erc721')(
           const tx = await assetAsAdmin[
             'mint(address,uint40,bytes32,uint256,address,bytes)'
           ](to, packId, dummyHash, 100, to, '0x');
-          const receipt = tx.wait();
+          const receipt = await tx.wait();
           const event = await expectEventWithArgsFromReceipt(
             assetContract1155,
             receipt,
