@@ -5,7 +5,7 @@
 ![Node Version](https://img.shields.io/badge/node-18.x-green)
 [![Discord](https://img.shields.io/discord/497312527093334036.svg?label=Discord&logo=discord)](<https://discord.gg/vAe4zvY>)
 
-[The Sandbox](https://sandbox.game) The Sandbox is a user-generated content (UGC) gaming platform, that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
+[The Sandbox](https://sandbox.game) is a user-generated content (UGC) gaming platform, that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
 
 This mono-repo contains The Sandbox smart contracts, underpinning The Sandbox metaverse. Our key token contracts were conceived inside the core package. You can find out more about some of our early blockchain features in [this article](https://medium.com/sandbox-game/blockchain-features-in-the-sandbox-7db91fcc615c). Since core was created, we have added new contracts and updates via new packages - see the below Architecture Overview for more information.
 
@@ -33,7 +33,7 @@ To add a package simply add it inside the packages directory. Every package can 
 - `lint`: lint your code.
 - `format`: format the code with prettier.
 
-See `packages/example-hardhat` for an example template package for smart contract development with Hardhat.
+See [`packages/example-hardhat`](./packages/example-hardhat) for an example template package for smart contract development with Hardhat.
 
 Refer to each package's readme for more information about that package. Note that deployment for all new packages is carried out via `packages/deploy`.
 
