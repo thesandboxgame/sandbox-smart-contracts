@@ -1732,6 +1732,7 @@ __metadata:
     "@openzeppelin/contracts": ^4.9.0
     "@openzeppelin/contracts-upgradeable": ^4.9.0
     "@openzeppelin/hardhat-upgrades": ^1.28.0
+    "@sandbox-smart-contracts/dependency-metatx": "*"
     "@typechain/ethers-v5": ^10.2.1
     "@typechain/hardhat": ^6.1.6
     "@types/chai": ^4.3.5

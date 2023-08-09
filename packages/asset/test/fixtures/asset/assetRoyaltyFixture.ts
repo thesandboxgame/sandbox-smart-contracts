@@ -40,6 +40,8 @@ export async function assetRoyaltyDistribution() {
   );
   const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
+  const NonTrustedForwarder = await TrustedForwarderFactory.deploy();
+
   const MockOperatorFilterRegistryFactory = await ethers.getContractFactory(
     'MockOperatorFilterRegistry'
   );
@@ -181,5 +183,6 @@ export async function assetRoyaltyDistribution() {
     RoyaltyManagerAsRoyaltySetter,
     assetAsMinter,
     TrustedForwarder,
+    NonTrustedForwarder,
   };
 }

@@ -1,20 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {
+    ERC1155Upgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {MultiRoyaltyDistributor} from "../MultiRoyaltyDistributor.sol";
+import {
+    ERC2771HandlerUpgradeable
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 
 /// @title Test ERC1155 contract
 /// @dev Made to test splitter deployment for each creator
 /// Creator could change his royalty receiving Wallet for his splitter through setRoyaltyRecipient function
-contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor {
+contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDistributor, ERC2771HandlerUpgradeable {
     /// @notice initiliaze to be called by the proxy
     /// @dev would run once.
     /// @param _manager, the address of the Manager contract for common royalty recipient
-    function initialize(address _manager) external initializer {
+    function initialize(address _manager, address trustedForwarder) external initializer {
         __MultiRoyaltyDistributor_init(_manager);
         __Ownable_init();
+        __ERC2771Handler_init(trustedForwarder);
     }
 
     /// @notice function to mint a single ERC1155 token
@@ -77,5 +84,25 @@ contract TestERC1155 is ERC1155Upgradeable, OwnableUpgradeable, MultiRoyaltyDist
         address creator
     ) external override onlyOwner {
         _setTokenRoyalties(tokenId, recipient, creator);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }

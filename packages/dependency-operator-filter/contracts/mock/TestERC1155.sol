@@ -1,13 +1,21 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {
+    ERC1155Upgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {
+    ERC2771HandlerUpgradeable
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
+
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
-contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable {
-    function initialize(string memory uri_) external initializer() {
+contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771HandlerUpgradeable {
+    function initialize(string memory uri_, address trustedForwarder) external initializer() {
         __ERC1155_init(uri_);
+        __ERC2771Handler_init(trustedForwarder);
     }
 
     /// @notice sets registry and subscribe to subscription
@@ -30,7 +38,7 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable {
         _mint(to, id, amount, "");
     }
 
-    /// @notice set approval for asset transfer without filtering
+    /// @notice set approval for token transfer without filtering
     /// @param operator operator to be approved
     /// @param approved bool value for giving (true) and canceling (false) approval
     function setApprovalForAllWithoutFilter(address operator, bool approved) public virtual {
@@ -84,5 +92,25 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable {
         bytes memory data
     ) public virtual override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, id, amount, data);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }
