@@ -2,6 +2,7 @@
 
 <h1 align="center">The Sandbox smart contracts</h1>
 
+<a href="https://github.com/thesandboxgame/sandbox-smart-contracts/actions"><img alt="Build Status" src="https://github.com/thesandboxgame/sandbox-smart-contracts/actions/workflows/main.yml/badge.svg"/></a>
 ![Node Version](https://img.shields.io/badge/node-18.x-green)
 [![Discord](https://img.shields.io/discord/497312527093334036.svg?label=Discord&logo=discord)](<https://discord.gg/vAe4zvY>)
 
