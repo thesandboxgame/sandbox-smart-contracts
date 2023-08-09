@@ -1,6 +1,6 @@
 <p align="center"><a href="https://sandbox.game"><img width="300" title="TSB" src='brand-assets/tsb_pride.png' /></a></p>
 
-<h1 align="center">The Sandbox smart contracts</h1>
+<h1 align="center">The Sandbox Smart Contracts</h1>
 
 <a href="https://github.com/thesandboxgame/sandbox-smart-contracts/actions"><img alt="Build Status" src="https://github.com/thesandboxgame/sandbox-smart-contracts/actions/workflows/main.yml/badge.svg"/></a>
 ![Node Version](https://img.shields.io/badge/node-18.x-green)
@@ -66,7 +66,3 @@ yarn install
 ### Bug bounties
 
 Submit a bug at [Immunefi](https://immunefi.com/bounty/thesandbox/) to help secure our smart contracts!
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev) to learn more about Nx.
