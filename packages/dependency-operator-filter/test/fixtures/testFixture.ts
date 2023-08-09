@@ -115,7 +115,12 @@ export async function setupOperatorFilter() {
   );
   const UnregisteredToken = await upgrades.deployProxy(
     UnregisteredTokenFactory,
-    ['UnregisteredToken', operatorFilterSubscription.address, true],
+    [
+      'UnregisteredToken',
+      operatorFilterSubscription.address,
+      true,
+      TrustedForwarder.address,
+    ],
     {
       initializer: 'initialize',
     }
