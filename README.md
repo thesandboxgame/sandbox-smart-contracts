@@ -1,4 +1,4 @@
-<p align="center"><a href="https://sandbox.game"><img width="300" title="TSB" src='brand-assets/tsb_pride.jpeg' /></a></p>
+<p align="center"><a href="https://sandbox.game"><img width="300" title="TSB" src='brand-assets/tsb_pride.png' /></a></p>
 
 <h1 align="center">The Sandbox smart contracts</h1>
 
