@@ -32,8 +32,7 @@ import {
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {
-    ERC2771HandlerUpgradeable,
-    ERC2771HandlerAbstract
+    ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
@@ -215,7 +214,7 @@ contract Catalyst is
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address)
     {
         return ERC2771HandlerUpgradeable._msgSender();
@@ -226,7 +225,7 @@ contract Catalyst is
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();

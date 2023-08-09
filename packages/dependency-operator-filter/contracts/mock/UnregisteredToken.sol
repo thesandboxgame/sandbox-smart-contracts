@@ -7,8 +7,7 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
 import {
-    ERC2771HandlerUpgradeable,
-    ERC2771HandlerAbstract
+    ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
@@ -117,7 +116,7 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address sender)
     {
         return ERC2771HandlerUpgradeable._msgSender();
@@ -127,7 +126,7 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();

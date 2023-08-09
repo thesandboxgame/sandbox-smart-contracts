@@ -3,12 +3,12 @@ pragma solidity ^0.8.0;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
-import {ERC2771HandlerAbstract} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerAbstract.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The SandBox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's addess could be set using a setter which could be implemented in inherting contract
-abstract contract OperatorFiltererUpgradeable is Initializable, ERC2771HandlerAbstract {
+abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {

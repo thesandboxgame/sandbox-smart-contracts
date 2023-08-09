@@ -6,8 +6,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {
-    ERC2771HandlerUpgradeable,
-    ERC2771HandlerAbstract
+    ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
 
@@ -99,7 +98,7 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address sender)
     {
         return ERC2771HandlerUpgradeable._msgSender();
@@ -109,7 +108,7 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771
         internal
         view
         virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable, ERC2771HandlerAbstract)
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
