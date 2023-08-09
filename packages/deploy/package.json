@@ -6,7 +6,12 @@
         "type": "git",
         "url": "https://github.com/thesandboxgame/sandbox-smart-contracts.git"
     },
-    "keywords": [],
+  "keywords": [
+    "ethereum",
+    "smart-contracts",
+    "The Sandbox",
+    "matic"
+  ],
     "author": "",
     "license": "MIT",
     "bugs": {

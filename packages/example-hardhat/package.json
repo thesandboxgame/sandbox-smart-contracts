@@ -5,6 +5,12 @@
   "files": [
     "contracts"
   ],
+  "keywords": [
+    "ethereum",
+    "smart-contracts",
+    "The Sandbox",
+    "matic"
+  ],
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
