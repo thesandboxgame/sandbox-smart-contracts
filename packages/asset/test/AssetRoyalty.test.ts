@@ -191,7 +191,9 @@ describe('Asset Royalties', function () {
         .connect(creator.address)
         .populateTransaction['splitERC20Tokens(address)'](ERC20.address);
 
-      await NonTrustedForwarder.execute({...data, value: BigNumber.from(0)});
+      await expect(
+        NonTrustedForwarder.execute({...data, value: BigNumber.from(0)})
+      ).to.be.revertedWith('Call execution failed');
 
       const balanceCreator = await ERC20.balanceOf(creator.address);
       const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(

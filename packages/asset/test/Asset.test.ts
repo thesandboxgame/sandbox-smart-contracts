@@ -1849,6 +1849,27 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
       });
 
+      it('it should not be able to transfer through trusted forwarder after if sender is blacklisted', async function () {
+        const {Asset, users, TrustedForwarder, mockMarketPlace1} =
+          await setupOperatorFilter();
+        await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
+
+        await users[0].Asset.setApprovalForAllWithoutFilter(
+          mockMarketPlace1.address,
+          true
+        );
+
+        const data = await Asset.connect(
+          ethers.provider.getSigner(mockMarketPlace1.address)
+        ).populateTransaction[
+          'safeTransferFrom(address,address,uint256,uint256,bytes)'
+        ](users[0].address, users[1].address, 1, 1, '0x');
+
+        await expect(
+          TrustedForwarder.execute({...data, value: BigNumber.from(0)})
+        ).to.be.revertedWith('Call execution failed');
+      });
+
       it('it should be able to transfer through non blacklisted market places', async function () {
         const {mockMarketPlace3, Asset, users} = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
@@ -2197,6 +2218,28 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         await TrustedForwarder.execute({...data, value: BigNumber.from(0)});
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
+      });
+      it('should not be able to batch transfer through trusted forwarder if the sender is black listed', async function () {
+        const {Asset, users, TrustedForwarder, mockMarketPlace1} =
+          await setupOperatorFilter();
+
+        await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
+        await Asset.mintWithoutMinterRole(users[0].address, 2, 1);
+
+        await users[0].Asset.setApprovalForAllWithoutFilter(
+          mockMarketPlace1.address,
+          true
+        );
+
+        const data = await Asset.connect(
+          ethers.provider.getSigner(mockMarketPlace1.address)
+        ).populateTransaction[
+          'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
+        ](users[0].address, users[1].address, [1, 2], [1, 1], '0x');
+
+        await expect(
+          TrustedForwarder.execute({...data, value: BigNumber.from(0)})
+        ).to.be.revertedWith('Call execution failed');
       });
     });
   });
