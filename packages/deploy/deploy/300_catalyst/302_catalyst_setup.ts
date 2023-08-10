@@ -35,16 +35,25 @@ const func: DeployFunction = async function (
   const catalyst = await deployments.get('Catalyst');
   // TODO this should not be hardcoded here
   const royaltyAmount = 500;
-  await catchUnknownSigner(
-    execute(
+  if (
+    (await read(
       'RoyaltyManager',
-      {from: contractRoyaltySetter, log: true},
-      'setContractRoyalty',
-      catalyst.address,
-      royaltyAmount
-    )
-  );
-  log(`Catalyst set on RoyaltyManager with ${royaltyAmount} BPS royalty`);
+      {from: contractRoyaltySetter},
+      'contractRoyalty',
+      catalyst.address
+    )) === 0
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'RoyaltyManager',
+        {from: contractRoyaltySetter, log: true},
+        'setContractRoyalty',
+        catalyst.address,
+        royaltyAmount
+      )
+    );
+    log(`Catalyst set on RoyaltyManager with ${royaltyAmount} BPS royalty`);
+  }
 };
 
 export default func;
