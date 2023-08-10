@@ -1,5 +1,8 @@
 name: CI
-on: push
+on: pull_request
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -28,6 +31,7 @@ jobs:
       - name: Running tests
         run: yarn test:ci
 
+
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -37,30 +41,20 @@ jobs:
       - name: Running coverage
         run: yarn coverage:ci
 
-      - name: Coverage created?
-        id: check_coverage
-        run: |
-          if [ -s $GITHUB_WORKSPACE/coverage/lcov.info ] ; then
-            echo "check_result=true" >> $GITHUB_OUTPUT
-            echo "lcov.info FILE exists and has a size greater than zero"
-          else
-            echo "check_result=false" >> $GITHUB_OUTPUT
-            echo "lcov.info does not exists or has size zero"
-          fi
-
       - name: Report coverage
-        if: steps.check_coverage.outputs.check_result == 'true'
-        uses: romeovs/lcov-reporter-action@v0.3.1
+        uses: adjisb/code-coverage-assistant@master
         with:
-          lcov-file: ./coverage/lcov.info
+          monorepo-base-path: "./packages"
+          exclude: "core"
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          min_coverage: 90
+          badge_path: "./badges"
 
-      - name: Enforce coverage
-        if: steps.check_coverage.outputs.check_result == 'true'
-        uses: VeryGoodOpenSource/very_good_coverage@v2
+      - name: Deploy badges
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: ./coverage/lcov.info
-          min_coverage: 80
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./badges
 
   deploy:
     runs-on: ubuntu-latest

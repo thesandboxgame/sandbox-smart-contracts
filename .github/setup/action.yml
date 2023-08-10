@@ -13,7 +13,7 @@ runs:
         cache: 'yarn'
 
     - name: Installing dependencies
-      run: yarn install --frozen-lockfile
+      run: yarn install --immutable
       shell: bash
 
     - name: Derive appropriate SHAs for base and head for `nx affected` commands
