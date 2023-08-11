@@ -16,6 +16,7 @@ contract MockTrustedForwarder {
             abi.encodePacked(req.data, req.from)
         );
         assert(gasleft() > req.gasLimit / 63);
+        require(success, "Call execution failed");
         return (success, returndata);
     }
 }

@@ -13,6 +13,7 @@ export async function royaltyDistribution() {
     managerAdmin,
     contractRoyaltySetter,
   ] = await ethers.getSigners();
+
   const TrustedForwarderFactory = await ethers.getContractFactory(
     'MockTrustedForwarder'
   );
@@ -48,7 +49,7 @@ export async function royaltyDistribution() {
   const TestERC1155Factory = await ethers.getContractFactory('TestERC1155');
   const ERC1155 = await upgrades.deployProxy(
     TestERC1155Factory,
-    [RoyaltyManagerContract.address],
+    [RoyaltyManagerContract.address, TrustedForwarder.address],
     {
       initializer: 'initialize',
     }
@@ -59,7 +60,7 @@ export async function royaltyDistribution() {
   const TestERC721Factory = await ethers.getContractFactory('TestERC721');
   const ERC721 = await upgrades.deployProxy(
     TestERC721Factory,
-    [RoyaltyManagerContract.address],
+    [RoyaltyManagerContract.address, TrustedForwarder.address],
     {
       initializer: 'initialize',
     }
@@ -70,7 +71,7 @@ export async function royaltyDistribution() {
   );
   const SingleReceiver = await upgrades.deployProxy(
     SingleReceiverFactory,
-    [RoyaltyManagerContract.address],
+    [RoyaltyManagerContract.address, TrustedForwarder.address],
     {
       initializer: 'initialize',
     }

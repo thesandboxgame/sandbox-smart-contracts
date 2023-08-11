@@ -139,6 +139,84 @@ describe('Asset Royalties', function () {
       );
     });
 
+    it('should revert split ERC20 using EIP2981 using non trusted forwarder', async function () {
+      const {
+        Asset,
+        ERC20,
+        mockMarketplace,
+        ERC20AsBuyer,
+        seller,
+        buyer,
+        commonRoyaltyReceiver,
+        creator,
+        AssetAsSeller,
+        RoyaltyManagerContract,
+        assetAsMinter,
+        NonTrustedForwarder,
+      } = await assetRoyaltyDistribution();
+
+      const id = generateAssetId(creator.address, 1);
+      await assetAsMinter.mint(seller.address, id, 1, '0x');
+      await ERC20.mint(buyer.address, 1000000);
+      await ERC20AsBuyer.approve(mockMarketplace.address, 1000000);
+      await AssetAsSeller.setApprovalForAll(mockMarketplace.address, true);
+      expect(await Asset.balanceOf(seller.address, id)).to.be.equals(1);
+      await mockMarketplace.distributeRoyaltyEIP2981(
+        1000000,
+        ERC20.address,
+        Asset.address,
+        id,
+        buyer.address,
+        seller.address,
+        true
+      );
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        creator.address
+      );
+
+      const assetRoyaltyBPS = await RoyaltyManagerContract.getContractRoyalty(
+        Asset.address
+      );
+
+      const splitterContract = await ethers.getContractAt(
+        splitterAbi,
+        splitter
+      );
+
+      const balance = await ERC20.balanceOf(splitter);
+
+      expect(balance).to.be.equal(1000000 * (assetRoyaltyBPS / 10000));
+
+      const data = await splitterContract
+        .connect(creator.address)
+        .populateTransaction['splitERC20Tokens(address)'](ERC20.address);
+
+      await expect(
+        NonTrustedForwarder.execute({...data, value: BigNumber.from(0)})
+      ).to.be.revertedWith('Call execution failed');
+
+      const balanceCreator = await ERC20.balanceOf(creator.address);
+      const balanceCommonRoyaltyReceiver = await ERC20.balanceOf(
+        commonRoyaltyReceiver.address
+      );
+
+      const newbalance = await ERC20.balanceOf(splitter);
+
+      expect(newbalance).to.be.equal(1000000 * (assetRoyaltyBPS / 10000));
+
+      expect(balanceCreator).to.be.equal(0);
+      expect(balanceCommonRoyaltyReceiver).to.be.equal(0);
+    });
+
+    it('should get trusted forwarder from Royalty Manager', async function () {
+      const {RoyaltyManagerContract, TrustedForwarder} =
+        await assetRoyaltyDistribution();
+
+      expect(await RoyaltyManagerContract.getTrustedForwarder()).to.be.equal(
+        TrustedForwarder.address
+      );
+    });
+
     it('should split ERC20 using RoyaltyEngine', async function () {
       const {
         Asset,

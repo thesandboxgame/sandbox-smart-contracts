@@ -1,12 +1,23 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {
+    ERC721Upgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
+import {
+    ERC2771HandlerUpgradeable
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
-contract TestERC721 is ERC721Upgradeable, OperatorFiltererUpgradeable {
-    function initialize(string memory name_, string memory symbol_) external initializer() {
+contract TestERC721 is ERC721Upgradeable, OperatorFiltererUpgradeable, ERC2771HandlerUpgradeable {
+    function initialize(
+        string memory name_,
+        string memory symbol_,
+        address trustedForwarder
+    ) external initializer() {
         __ERC721_init(name_, symbol_);
+        __ERC2771Handler_init(trustedForwarder);
     }
 
     /// @notice sets registry and subscribe to subscription
@@ -57,5 +68,25 @@ contract TestERC721 is ERC721Upgradeable, OperatorFiltererUpgradeable {
         uint256 id
     ) public virtual override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, id);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 }

@@ -3,11 +3,12 @@ pragma solidity ^0.8.0;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The SandBox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's addess could be set using a setter which could be implemented in inherting contract
-abstract contract OperatorFiltererUpgradeable is Initializable {
+abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
@@ -40,11 +41,11 @@ abstract contract OperatorFiltererUpgradeable is Initializable {
             // Allow spending tokens from addresses with balance
             // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
             // from an EOA.
-            if (from == msg.sender) {
+            if (from == _msgSender()) {
                 _;
                 return;
             }
-            if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
+            if (!operatorFilterRegistry.isOperatorAllowed(address(this), _msgSender())) {
                 revert("Operator Not Allowed");
             }
         }

@@ -13,7 +13,6 @@ export async function setupOperatorFilter() {
     deployer,
     upgradeAdmin,
     filterOperatorSubscription,
-    trustedForwarder,
     catalystAdmin,
     catalystMinter,
     assetAdmin,
@@ -25,6 +24,11 @@ export async function setupOperatorFilter() {
     managerAdmin,
     contractRoyaltySetter,
   ] = await ethers.getSigners();
+
+  const TrustedForwarderFactory = await ethers.getContractFactory(
+    'MockTrustedForwarder'
+  );
+  const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
   const MockERC1155MarketPlace1Factory = await ethers.getContractFactory(
     'MockERC1155MarketPlace1'
@@ -86,7 +90,7 @@ export async function setupOperatorFilter() {
       RoyaltySplitter.address,
       managerAdmin.address,
       contractRoyaltySetter.address,
-      trustedForwarder.address,
+      TrustedForwarder.address,
     ],
     {
       initializer: 'initialize',
@@ -98,7 +102,7 @@ export async function setupOperatorFilter() {
   const Asset = await upgrades.deployProxy(
     AssetFactory,
     [
-      trustedForwarder.address,
+      TrustedForwarder.address,
       assetAdmin.address,
       'ipfs://',
       filterOperatorSubscription.address,
@@ -124,7 +128,7 @@ export async function setupOperatorFilter() {
       operatorFilterRegistry.address
     );
 
-  const operatorFilterRegistryAsDeployer = await operatorFilterRegistry.connect(
+  const operatorFilterRegistryAsOwner = await operatorFilterRegistry.connect(
     deployer
   );
 
@@ -133,7 +137,7 @@ export async function setupOperatorFilter() {
     CatalystFactory,
     [
       CATALYST_BASE_URI,
-      trustedForwarder.address,
+      TrustedForwarder.address,
       operatorFilterSubscription.address,
       catalystAdmin.address, // DEFAULT_ADMIN_ROLE
       catalystMinter.address, // MINTER_ROLE
@@ -178,10 +182,10 @@ export async function setupOperatorFilter() {
     upgradeAdmin,
     Asset,
     DEFAULT_SUBSCRIPTION,
-    operatorFilterRegistryAsDeployer,
+    operatorFilterRegistryAsOwner,
     operatorFilterSubscription,
     Catalyst,
-    trustedForwarder,
+    TrustedForwarder,
     assetAdmin,
     commonRoyaltyReceiver,
     DEFAULT_BPS,
