@@ -11,6 +11,7 @@ contract FakeProxy is ERC1967UpgradeUpgradeable {
     }
 
     function _delegate(address implementation) internal virtual {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             calldatacopy(0, 0, calldatasize())
             let result := delegatecall(gas(), implementation, 0, calldatasize(), 0, 0)
