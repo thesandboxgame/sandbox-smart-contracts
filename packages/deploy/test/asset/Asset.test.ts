@@ -7,7 +7,8 @@ import {OperatorFilterRegistry_ABI} from '../../utils/abi';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const namedAccount = await getNamedAccounts();
+    const {deployer, assetAdmin, filterOperatorSubscription, sandAdmin} =
+      await getNamedAccounts();
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryBytecode,
@@ -16,10 +17,10 @@ const setupTest = deployments.createFixture(
       OperatorFilterRegistry_ABI,
       OPERATOR_FILTER_REGISTRY
     );
-    const deployerSigner = await ethers.getSigner(namedAccount.deployer);
+    const deployerSigner = await ethers.getSigner(deployer);
     const tx1 = await OperatorFilterRegistryContract.connect(
       deployerSigner
-    ).register(namedAccount.filterOperatorSubscription);
+    ).register(filterOperatorSubscription);
     await tx1.wait();
     await network.provider.send('hardhat_setBalance', [
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
@@ -64,11 +65,11 @@ const setupTest = deployments.createFixture(
     );
 
     // grant moderator role to the assetAdmin
-    const adminSigner = await ethers.getSigner(namedAccount.assetAdmin);
+    const adminSigner = await ethers.getSigner(assetAdmin);
     const moderatorRole = await AssetContract.MODERATOR_ROLE();
     await AssetContract.connect(adminSigner).grantRole(
       moderatorRole,
-      namedAccount.assetAdmin
+      assetAdmin
     );
     // set tokenURI for tokenId 1 for baseURI test
     const mockMetadataHash = 'QmQ6BFzGGAU7JdkNJmvkEVjvqKC4VCGb3qoDnjAQWHexxD';
@@ -78,7 +79,9 @@ const setupTest = deployments.createFixture(
       AssetContract,
       AssetCreateContract,
       RoyaltyManagerContract,
-      namedAccount,
+      deployer,
+      sandAdmin,
+      filterOperatorSubscription,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
@@ -90,89 +93,76 @@ const setupTest = deployments.createFixture(
 describe('Asset', function () {
   describe('Roles', function () {
     it('Admin', async function () {
-      const fixtures = await setupTest();
-      const defaultAdminRole =
-        await fixtures.AssetContract.DEFAULT_ADMIN_ROLE();
-      expect(
-        await fixtures.AssetContract.hasRole(
-          defaultAdminRole,
-          fixtures.namedAccount.sandAdmin
-        )
-      ).to.be.true;
+      const {AssetContract, sandAdmin} = await setupTest();
+      const defaultAdminRole = await AssetContract.DEFAULT_ADMIN_ROLE();
+      expect(await AssetContract.hasRole(defaultAdminRole, sandAdmin)).to.be
+        .true;
     });
     it('Minter', async function () {
-      const fixtures = await setupTest();
-      const minterRole = await fixtures.AssetContract.MINTER_ROLE();
+      const {AssetContract, AssetCreateContract} = await setupTest();
+      const minterRole = await AssetContract.MINTER_ROLE();
       expect(
-        await fixtures.AssetContract.hasRole(
-          minterRole,
-          fixtures.AssetCreateContract.address
-        )
+        await AssetContract.hasRole(minterRole, AssetCreateContract.address)
       ).to.be.true;
     });
     it('Burner', async function () {
       // TODO Update when AssetRecycle is deployed
     });
     it('Moderator', async function () {
-      const fixtures = await setupTest();
-      const moderatorRole = await fixtures.AssetContract.MODERATOR_ROLE();
-      expect(
-        await fixtures.AssetContract.hasRole(
-          moderatorRole,
-          fixtures.namedAccount.sandAdmin
-        )
-      ).to.be.true;
+      const {AssetContract, sandAdmin} = await setupTest();
+      const moderatorRole = await AssetContract.MODERATOR_ROLE();
+      expect(await AssetContract.hasRole(moderatorRole, sandAdmin)).to.be.true;
     });
   });
   describe("Asset's Metadata", function () {
     it('Asset base URI is set correctly', async function () {
-      const fixtures = await setupTest();
-      expect(await fixtures.AssetContract.uri(1)).to.be.equal(
-        'ipfs://' + fixtures.mockMetadataHash
+      const {AssetContract, mockMetadataHash} = await setupTest();
+      expect(await AssetContract.uri(1)).to.be.equal(
+        'ipfs://' + mockMetadataHash
       );
     });
   });
   describe('Royalties', function () {
     it('Contract is registered on RoyaltyManager', async function () {
-      const fixtures = await setupTest();
+      const {RoyaltyManagerContract, AssetContract} = await setupTest();
       expect(
-        await fixtures.RoyaltyManagerContract.getContractRoyalty(
-          fixtures.AssetContract.address
-        )
+        await RoyaltyManagerContract.getContractRoyalty(AssetContract.address)
       ).to.be.equal(DEFAULT_BPS);
     });
   });
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const fixtures = await setupTest();
-      expect(await fixtures.AssetContract.getTrustedForwarder()).to.be.equal(
-        fixtures.TRUSTED_FORWARDER.address
+      const {AssetContract, TRUSTED_FORWARDER} = await setupTest();
+      expect(await AssetContract.getTrustedForwarder()).to.be.equal(
+        TRUSTED_FORWARDER.address
       );
     });
   });
   describe('Operator Filter Registry', function () {
     it('Asset contract is registered correctly', async function () {
-      const fixtures = await setupTest();
+      const {OperatorFilterRegistryContract, AssetContract} = await setupTest();
       expect(
-        await fixtures.OperatorFilterRegistryContract.isRegistered(
-          fixtures.AssetContract.address
-        )
+        await OperatorFilterRegistryContract.isRegistered(AssetContract.address)
       ).to.be.true;
     });
     it('Asset contract is subscribed to correct address', async function () {
-      const fixtures = await setupTest();
+      const {
+        OperatorFilterRegistryContract,
+        AssetContract,
+        filterOperatorSubscription,
+      } = await setupTest();
       expect(
-        await fixtures.OperatorFilterRegistryContract.subscriptionOf(
-          fixtures.AssetContract.address
+        await OperatorFilterRegistryContract.subscriptionOf(
+          AssetContract.address
         )
-      ).to.be.equal(fixtures.namedAccount.filterOperatorSubscription);
+      ).to.be.equal(filterOperatorSubscription);
     });
   });
   describe('MultiRoyaltyDistributor', function () {
     it('RoyaltyManager contract is set correctly', async function () {
-      const fixtures = await setupTest();
-      expect(await fixtures.AssetContract.royaltyManager()).to.be.equal(
-        fixtures.RoyaltyManagerContract.address
+      const {AssetContract, RoyaltyManagerContract} = await setupTest();
+      expect(await AssetContract.royaltyManager()).to.be.equal(
+        RoyaltyManagerContract.address
       );
     });
   });
