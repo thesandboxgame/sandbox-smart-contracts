@@ -21,12 +21,14 @@ contract ERC2771HandlerUpgradeable is Initializable, ERC2771HandlerAbstract {
 
     /// @notice initialize the trusted forwarder address
     /// @param forwarder trusted forwarder address or zero to disable it
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_init(address forwarder) internal onlyInitializing {
         __ERC2771Handler_init_unchained(forwarder);
     }
 
     /// @notice initialize the trusted forwarder address
     /// @param forwarder trusted forwarder address or zero to disable it
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_init_unchained(address forwarder) internal onlyInitializing {
         _setTrustedForwarder(forwarder);
     }

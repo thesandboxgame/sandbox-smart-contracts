@@ -37,7 +37,7 @@ describe('LockUpgradable', function () {
       const latestTime = await time.latest();
       const Lock = await ethers.getContractFactory('Lock');
       await expect(Lock.deploy(latestTime, {value: 1})).to.be.revertedWith(
-        'Unlock time should be in the future'
+        'Should be in the future'
       );
     });
   });
