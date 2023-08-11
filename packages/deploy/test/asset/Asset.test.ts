@@ -63,6 +63,17 @@ const setupTest = deployments.createFixture(
       TRUSTED_FORWARDER_Data.address
     );
 
+    // grant moderator role to the assetAdmin
+    const adminSigner = await ethers.getSigner(namedAccount.assetAdmin);
+    const moderatorRole = await AssetContract.MODERATOR_ROLE();
+    await AssetContract.connect(adminSigner).grantRole(
+      moderatorRole,
+      namedAccount.assetAdmin
+    );
+    // set tokenURI for tokenId 1 for baseURI test
+    const mockMetadataHash = 'QmQ6BFzGGAU7JdkNJmvkEVjvqKC4VCGb3qoDnjAQWHexxD';
+    await AssetContract.connect(adminSigner).setTokenURI(1, mockMetadataHash);
+
     return {
       AssetContract,
       AssetCreateContract,
@@ -71,12 +82,13 @@ const setupTest = deployments.createFixture(
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
+      mockMetadataHash,
     };
   }
 );
 
 describe('Asset', function () {
-  describe('Check Roles', function () {
+  describe('Roles', function () {
     it('Admin', async function () {
       const fixtures = await setupTest();
       const defaultAdminRole =
@@ -112,7 +124,15 @@ describe('Asset', function () {
       ).to.be.true;
     });
   });
-  describe('Check Royalty', function () {
+  describe("Asset's Metadata", function () {
+    it('Asset base URI is set correctly', async function () {
+      const fixtures = await setupTest();
+      expect(await fixtures.AssetContract.uri(1)).to.be.equal(
+        'ipfs://' + fixtures.mockMetadataHash
+      );
+    });
+  });
+  describe('Royalties', function () {
     it('Contract is registered on RoyaltyManager', async function () {
       const fixtures = await setupTest();
       expect(
