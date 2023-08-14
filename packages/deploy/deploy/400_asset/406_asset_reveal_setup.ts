@@ -47,6 +47,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   log(`AuthSuperValidator signer for Asset Reveal set to ${backendAuthWallet}`);
+
+  await catchUnknownSigner(
+    execute(
+      'AssetReveal',
+      {from: assetAdmin, log: true},
+      'setTierInstantRevealAllowed',
+      5,
+      true
+    )
+  );
+
+  log(`Allowed instant reveal for tier 5 assets (Mythical))`);
 };
 
 export default func;
