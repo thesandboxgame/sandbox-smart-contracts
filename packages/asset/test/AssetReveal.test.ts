@@ -1187,7 +1187,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
     });
-    describe.only('Burn and reveal mint', function () {
+    describe('Burn and reveal mint', function () {
       describe('Success', function () {
         it('Should allow instant reveal when authorized by the backend for allowed tier', async function () {
           const {
