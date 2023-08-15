@@ -12,6 +12,7 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     IRoyaltyManager public royaltyManager;
 
+    // solhint-disable-next-line func-name-mixedcase
     function __RoyaltyDistributor_init(address _royaltyManager) internal {
         royaltyManager = IRoyaltyManager(_royaltyManager);
     }

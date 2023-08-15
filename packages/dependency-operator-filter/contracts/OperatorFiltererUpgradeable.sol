@@ -11,6 +11,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
+    // solhint-disable-next-line func-name-mixedcase
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         operatorFilterRegistry = IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E); // Address of the operator filterer registry
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
