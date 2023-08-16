@@ -37,11 +37,15 @@ const setupTest = deployments.createFixture(
     const MockERC1155MarketPlace4 = await deployments.get(
       'MockERC1155MarketPlace4'
     );
+
     const deployerSigner = await ethers.getSigner(deployer);
+
     const tx1 = await OperatorFilterRegistryContract.connect(
       deployerSigner
     ).register(filterOperatorSubscription);
+
     await tx1.wait();
+
     await network.provider.send('hardhat_setBalance', [
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
       '0xDE0B6B3A7640000',
@@ -65,18 +69,22 @@ const setupTest = deployments.createFixture(
       await OperatorFilterRegistryContract.connect(signer).codeHashOf(
         MockERC1155MarketPlace2.address
       );
+
+    const subscriptionSigner = await ethers.getSigner(
+      filterOperatorSubscription
+    );
     const tx2 = await OperatorFilterRegistryContract.connect(
-      signer
+      subscriptionSigner
     ).updateOperators(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      filterOperatorSubscription,
       [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
       true
     );
     await tx2.wait();
     const tx3 = await OperatorFilterRegistryContract.connect(
-      signer
+      subscriptionSigner
     ).updateCodeHashes(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      filterOperatorSubscription,
       [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
       true
     );
@@ -205,7 +213,7 @@ describe('Asset', function () {
         )
       ).to.be.equal(filterOperatorSubscription);
     });
-    it('catalyst contract has correct market places black listed', async function () {
+    it('asset contract has correct market places black listed', async function () {
       const {
         OperatorFilterRegistryContract,
         AssetContract,
@@ -218,25 +226,29 @@ describe('Asset', function () {
         await OperatorFilterRegistryContract.isOperatorFiltered(
           AssetContract.address,
           MockERC1155MarketPlace1.address
-        )
+        ),
+        'MarketPlace1 should be filtered'
       ).to.be.equal(true);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
           AssetContract.address,
           MockERC1155MarketPlace2.address
-        )
+        ),
+        'MarketPlace2 should be filtered'
       ).to.be.equal(true);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
           AssetContract.address,
           MockERC1155MarketPlace3.address
-        )
+        ),
+        'MarketPlace3 should not be filtered'
       ).to.be.equal(false);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
           AssetContract.address,
           MockERC1155MarketPlace4.address
-        )
+        ),
+        'MarketPlace4 should not be filtered'
       ).to.be.equal(false);
     });
   });
