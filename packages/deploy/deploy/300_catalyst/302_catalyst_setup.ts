@@ -1,6 +1,9 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
+// TODO this should not be hardcoded here
+export const royaltyAmount = 500;
+
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
@@ -33,8 +36,7 @@ const func: DeployFunction = async function (
 
   // set catalyst on Royalty Manager
   const catalyst = await deployments.get('Catalyst');
-  // TODO this should not be hardcoded here
-  const royaltyAmount = 500;
+
   if (
     (await read(
       'RoyaltyManager',
