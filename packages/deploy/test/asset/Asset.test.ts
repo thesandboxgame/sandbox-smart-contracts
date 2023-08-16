@@ -17,6 +17,26 @@ const setupTest = deployments.createFixture(
       OperatorFilterRegistry_ABI,
       OPERATOR_FILTER_REGISTRY
     );
+
+    await deployments.fixture([
+      'MockERC1155MarketPlace1',
+      'MockERC1155MarketPlace2',
+      'MockERC1155MarketPlace3',
+      'MockERC1155MarketPlace4',
+    ]);
+
+    const MockERC1155MarketPlace1 = await deployments.get(
+      'MockERC1155MarketPlace1'
+    );
+    const MockERC1155MarketPlace2 = await deployments.get(
+      'MockERC1155MarketPlace2'
+    );
+    const MockERC1155MarketPlace3 = await deployments.get(
+      'MockERC1155MarketPlace3'
+    );
+    const MockERC1155MarketPlace4 = await deployments.get(
+      'MockERC1155MarketPlace4'
+    );
     const deployerSigner = await ethers.getSigner(deployer);
     const tx1 = await OperatorFilterRegistryContract.connect(
       deployerSigner
@@ -37,6 +57,30 @@ const setupTest = deployments.createFixture(
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
     );
     await tx.wait();
+    const MockMarketPlace1CodeHash =
+      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+        MockERC1155MarketPlace1.address
+      );
+    const MockMarketPlace2CodeHash =
+      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+        MockERC1155MarketPlace2.address
+      );
+    const tx2 = await OperatorFilterRegistryContract.connect(
+      signer
+    ).updateOperators(
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
+      true
+    );
+    await tx2.wait();
+    const tx3 = await OperatorFilterRegistryContract.connect(
+      signer
+    ).updateCodeHashes(
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
+      true
+    );
+    await tx3.wait();
     await network.provider.request({
       method: 'hardhat_stopImpersonatingAccount',
       params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
@@ -86,6 +130,10 @@ const setupTest = deployments.createFixture(
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
       mockMetadataHash,
+      MockERC1155MarketPlace1,
+      MockERC1155MarketPlace2,
+      MockERC1155MarketPlace3,
+      MockERC1155MarketPlace4,
     };
   }
 );
@@ -156,6 +204,40 @@ describe('Asset', function () {
           AssetContract.address
         )
       ).to.be.equal(filterOperatorSubscription);
+    });
+    it('catalyst contract has correct market places black listed', async function () {
+      const {
+        OperatorFilterRegistryContract,
+        AssetContract,
+        MockERC1155MarketPlace1,
+        MockERC1155MarketPlace2,
+        MockERC1155MarketPlace3,
+        MockERC1155MarketPlace4,
+      } = await setupTest();
+      expect(
+        await OperatorFilterRegistryContract.isOperatorFiltered(
+          AssetContract.address,
+          MockERC1155MarketPlace1.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistryContract.isOperatorFiltered(
+          AssetContract.address,
+          MockERC1155MarketPlace2.address
+        )
+      ).to.be.equal(true);
+      expect(
+        await OperatorFilterRegistryContract.isOperatorFiltered(
+          AssetContract.address,
+          MockERC1155MarketPlace3.address
+        )
+      ).to.be.equal(false);
+      expect(
+        await OperatorFilterRegistryContract.isOperatorFiltered(
+          AssetContract.address,
+          MockERC1155MarketPlace4.address
+        )
+      ).to.be.equal(false);
     });
   });
   describe('MultiRoyaltyDistributor', function () {
