@@ -3,15 +3,10 @@ pragma solidity 0.8.18;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {IAssetReveal} from "./interfaces/IAssetReveal.sol";
 
@@ -362,10 +357,10 @@ contract AssetReveal is
     /// @param metadataHashes The hashes of the metadata
     /// @param prevTokenId The previous token id from which the assets are revealed
     /// @return tokenIdArray The array of tokenIds to mint
-    function getRevealedTokenIds(string[] calldata metadataHashes, uint256 prevTokenId)
-        internal
-        returns (uint256[] memory)
-    {
+    function getRevealedTokenIds(
+        string[] calldata metadataHashes,
+        uint256 prevTokenId
+    ) internal returns (uint256[] memory) {
         IAsset.AssetData memory data = prevTokenId.getData();
         require(!data.revealed, "AssetReveal: already revealed");
         uint256[] memory tokenIdArray = new uint256[](metadataHashes.length);
@@ -405,11 +400,15 @@ contract AssetReveal is
     }
 
     /// @notice Set permission for instant reveal for a given tier
+    /// @param tier the tier to set the permission for
+    /// @param allowed allow or disallow instant reveal for the given tier
     function setTierInstantRevealAllowed(uint8 tier, bool allowed) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tierInstantRevealAllowed[tier] = allowed;
     }
 
     /// @notice Get permission for instant reveal for a given tier
+    /// @param tier The tier to check
+    /// @return Whether instant reveal is allowed for the given tier
     function getTierInstantRevealAllowed(uint8 tier) external view returns (bool) {
         return tierInstantRevealAllowed[tier];
     }
