@@ -1189,7 +1189,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
     });
     describe('Burn and reveal mint', function () {
       describe('Success', function () {
-        it('Should allow instant reveal when authorized by the backend', async function () {
+        it('Should allow instant reveal when authorized by the backend for allowed tier', async function () {
           const {
             user,
             generateBurnAndRevealSignature,
@@ -1224,6 +1224,39 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
       describe('Revert', function () {
+        it('should revert if the tier is not allowed to instant reveal', async function () {
+          const {
+            user,
+            generateBurnAndRevealSignature,
+            instantReveal,
+            unrevealedtokenId2,
+          } = await runRevealTestSetup();
+          const newMetadataHash = [
+            'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+          ];
+          const amounts = [1];
+
+          const signature = await generateBurnAndRevealSignature(
+            user.address,
+            unrevealedtokenId2,
+            amounts,
+            newMetadataHash,
+            [revealHashA]
+          );
+
+          await expect(
+            instantReveal(
+              signature,
+              unrevealedtokenId2,
+              amounts[0],
+              amounts,
+              newMetadataHash,
+              [revealHashA]
+            )
+          ).to.be.revertedWith(
+            'AssetReveal: Tier not allowed for instant reveal'
+          );
+        });
         it("should revert if amounts array isn't the same length as metadataHashes array", async function () {
           const {
             user,

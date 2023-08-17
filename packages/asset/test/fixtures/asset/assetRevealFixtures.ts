@@ -182,6 +182,9 @@ export async function runRevealTestSetup() {
   await AssetContractAsAdmin.grantRole(BurnerRole, AssetRevealContract.address);
   // END SET UP ROLES
 
+  // SET TIER 5 AS ALLOWED FOR INSTANT REVEAl
+  await AssetRevealContractAsAdmin.setTierInstantRevealAllowed(5, true);
+
   // SETUP USER WITH MINTED ASSETS
   // mint a tier 5 asset with 10 copies
   const unRevMintTx = await MockMinterContract.mintAsset(
@@ -200,7 +203,7 @@ export async function runRevealTestSetup() {
   const unRevMintTx2 = await MockMinterContract.mintAsset(
     user.address,
     10,
-    5,
+    4,
     false,
     'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJD'
   );
