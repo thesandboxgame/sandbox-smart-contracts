@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, log, read, catchUnknownSigner} = deployments;
-  const {assetAdmin, backendAuthWallet} = await getNamedAccounts();
+  const {assetAdmin, backendAuthWallet, assetPauser} = await getNamedAccounts();
 
   const assetReveal = await deployments.get('AssetReveal');
 
@@ -20,6 +20,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       )
     );
     log(`Asset MINTER_ROLE granted to ${assetReveal.address}`);
+  }
+
+  const pauserRole = await read('AssetReveal', 'PAUSER_ROLE');
+  if (!(await read('AssetReveal', 'hasRole', pauserRole, assetPauser))) {
+    await catchUnknownSigner(
+      execute(
+        'AssetReveal',
+        {from: assetAdmin, log: true},
+        'grantRole',
+        pauserRole,
+        assetPauser
+      )
+    );
+    log(`AssetReveal PAUSER_ROLE granted to ${assetPauser}`);
   }
 
   const burnerRole = await read('Asset', 'BURNER_ROLE');
