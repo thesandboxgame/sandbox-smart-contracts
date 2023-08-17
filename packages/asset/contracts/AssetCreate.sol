@@ -7,6 +7,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {
@@ -24,7 +25,8 @@ contract AssetCreate is
     Initializable,
     ERC2771HandlerUpgradeable,
     EIP712Upgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    PausableUpgradeable
 {
     using TokenIdUtils for uint256;
 
@@ -37,6 +39,8 @@ contract AssetCreate is
     mapping(address => uint16) public signatureNonces;
 
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
     bytes32 public constant MINT_TYPEHASH =
         keccak256("Mint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash)");
     bytes32 public constant MINT_BATCH_TYPEHASH =
@@ -83,7 +87,7 @@ contract AssetCreate is
         bool revealed,
         string calldata metadataHash,
         address creator
-    ) external {
+    ) external whenNotPaused {
         require(
             authValidator.verify(
                 signature,
@@ -113,7 +117,7 @@ contract AssetCreate is
         bool[] calldata revealed,
         string[] calldata metadataHashes,
         address creator
-    ) external {
+    ) external whenNotPaused {
         require(
             authValidator.verify(
                 signature,
@@ -156,7 +160,7 @@ contract AssetCreate is
         uint256 amount,
         string calldata metadataHash,
         address creator
-    ) external onlyRole(SPECIAL_MINTER_ROLE) {
+    ) external onlyRole(SPECIAL_MINTER_ROLE) whenNotPaused {
         require(
             authValidator.verify(
                 signature,
@@ -169,6 +173,16 @@ contract AssetCreate is
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(creator, tokenId, 0, amount, metadataHash, true);
+    }
+
+    /// @notice Pause the contracts mint and burn functions
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause the contracts mint and burn functions
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 
     /// @notice Get the asset contract address

@@ -180,6 +180,10 @@ export async function runRevealTestSetup() {
   // add AssetReveal contracts as both MINTER and BURNER for Asset contract
   await AssetContractAsAdmin.grantRole(MinterRole, AssetRevealContract.address);
   await AssetContractAsAdmin.grantRole(BurnerRole, AssetRevealContract.address);
+
+  // set admin as pauser
+  const PauserRole = await AssetContract.PAUSER_ROLE();
+  await AssetContractAsAdmin.grantRole(PauserRole, assetAdmin.address);
   // END SET UP ROLES
 
   // SET TIER 5 AS ALLOWED FOR INSTANT REVEAl
@@ -342,6 +346,15 @@ export async function runRevealTestSetup() {
     );
     return signature;
   };
+
+  const pause = async () => {
+    await AssetRevealContractAsAdmin.pause();
+  };
+
+  const unpause = async () => {
+    await AssetRevealContractAsAdmin.unpause();
+  };
+
   // END HELPER FUNCTIONS
 
   return {
@@ -351,6 +364,8 @@ export async function runRevealTestSetup() {
     revealAsset,
     revealAssetBatch,
     instantReveal,
+    pause,
+    unpause,
     AssetRevealContract,
     AssetRevealContractAsUser,
     AssetRevealContractAsAdmin,
@@ -363,6 +378,7 @@ export async function runRevealTestSetup() {
     unrevealedtokenId2,
     revealedtokenId,
     AdminRole,
+    PauserRole,
     user,
     assetAdmin,
   };

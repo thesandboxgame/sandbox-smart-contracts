@@ -6,6 +6,7 @@ This document serves as comprehensive documentation for the AssetCreate contract
 
 1. **DEFAULT_ADMIN_ROLE**: The role with broad administrative permissions, including setting URIs and changing the trusted forwarder.
 2. **SPECIAL_MINTER_ROLE**: The special minter role with permission to create special assets like TSB exclusive tokens.
+3. **PAUSER_ROLE**: The role with permission to pause the contract.
 
 ## Public Variables
 

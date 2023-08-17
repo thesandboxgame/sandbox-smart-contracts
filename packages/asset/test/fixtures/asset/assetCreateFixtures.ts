@@ -174,6 +174,9 @@ export async function runCreateTestSetup() {
 
   const AssetCreateContractAsAdmin = AssetCreateContract.connect(assetAdmin);
   const SpecialMinterRole = await AssetCreateContract.SPECIAL_MINTER_ROLE();
+
+  const PauserRole = await AssetCreateContract.PAUSER_ROLE();
+  await AssetCreateContractAsAdmin.grantRole(PauserRole, assetAdmin.address);
   // END SETUP ROLES
 
   // HELPER FUNCTIONS
@@ -286,6 +289,15 @@ export async function runCreateTestSetup() {
     );
     return signature;
   };
+
+  const pause = async () => {
+    await AssetCreateContractAsAdmin.pause();
+  };
+
+  const unpause = async () => {
+    await AssetCreateContractAsAdmin.unpause();
+  };
+
   // END HELPER FUNCTIONS
 
   return {
@@ -296,6 +308,7 @@ export async function runCreateTestSetup() {
     additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
     user,
     AdminRole,
+    PauserRole,
     trustedForwarder,
     otherWallet,
     AssetContract,
@@ -313,5 +326,7 @@ export async function runCreateTestSetup() {
     generateSingleMintSignature,
     generateMultipleMintSignature,
     getCreatorNonce,
+    pause,
+    unpause,
   };
 }
