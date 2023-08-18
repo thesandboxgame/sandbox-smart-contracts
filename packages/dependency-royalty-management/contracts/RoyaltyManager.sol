@@ -2,12 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IRoyaltyManager} from "./interfaces/IRoyaltyManager.sol";
-import {
-    IRoyaltySplitter,
-    Recipient
-} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {RoyaltySplitter} from "./RoyaltySplitter.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 

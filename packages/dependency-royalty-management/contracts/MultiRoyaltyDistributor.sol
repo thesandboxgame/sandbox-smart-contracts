@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IMultiRoyaltyDistributor, IMultiRoyaltyRecipients} from "./interfaces/IMultiRoyaltyDistributor.sol";
 import {
     IRoyaltySplitter,
@@ -23,6 +21,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
+    // solhint-disable-next-line func-name-mixedcase
     function __MultiRoyaltyDistributor_init(address _royaltyManager) internal {
         royaltyManager = _royaltyManager;
     }

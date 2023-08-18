@@ -3,10 +3,7 @@ pragma solidity ^0.8.0;
 
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IMultiRoyaltyRecipients} from "./IMultiRoyaltyRecipients.sol";
-import {
-    IRoyaltySplitter,
-    Recipient
-} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 
 /**
  * Multi-receiver EIP2981 reference override implementation

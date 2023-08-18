@@ -3,24 +3,19 @@ pragma solidity 0.8.18;
 
 import {
     AccessControlUpgradeable,
-    ContextUpgradeable,
-    IAccessControlUpgradeable,
-    IERC165Upgradeable
+    ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {
     ERC1155BurnableUpgradeable,
-    ERC1155Upgradeable,
-    IERC1155Upgradeable
+    ERC1155Upgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import {
     ERC1155SupplyUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import {
-    ERC1155URIStorageUpgradeable,
-    IERC1155MetadataURIUpgradeable
+    ERC1155URIStorageUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {
     ERC2771HandlerUpgradeable
 } from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
