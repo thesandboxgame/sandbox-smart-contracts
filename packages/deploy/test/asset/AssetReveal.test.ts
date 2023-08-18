@@ -3,7 +3,8 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, getNamedAccounts, ethers}) => {
-    const {assetAdmin, backendAuthWallet} = await getNamedAccounts();
+    const {assetAdmin, backendAuthWallet, assetPauser} =
+      await getNamedAccounts();
     await deployments.fixture('Asset');
     const Asset = await deployments.get('Asset');
     const AssetContract = await ethers.getContractAt('Asset', Asset.address);
@@ -32,6 +33,7 @@ const setupTest = deployments.createFixture(
       AuthSuperValidatorContract,
       assetAdmin,
       backendAuthWallet,
+      assetPauser,
     };
   }
 );
@@ -78,6 +80,12 @@ describe('Asset Reveal', function () {
       expect(
         await AuthSuperValidatorContract.getSigner(AssetRevealContract.address)
       ).to.be.equal(backendAuthWallet);
+    });
+    it('Pauser role is granted to assetPauser', async function () {
+      const {AssetRevealContract, assetPauser} = await setupTest();
+      const pauserRole = await AssetRevealContract.PAUSER_ROLE();
+      expect(await AssetRevealContract.hasRole(pauserRole, assetPauser)).to.be
+        .true;
     });
   });
   describe('EIP712', function () {

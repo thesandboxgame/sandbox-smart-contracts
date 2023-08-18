@@ -74,6 +74,184 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       await MockAssetCreateContract.msgData();
     });
   });
+  describe('Pausable', function () {
+    it('should allow pauser to pause the contract', async function () {
+      const {AssetCreateContract, pause} = await runCreateTestSetup();
+      await pause();
+      expect(await AssetCreateContract.paused()).to.be.true;
+    });
+    it('should not allow non pauser to pause the contract', async function () {
+      const {AssetCreateContractAsUser, user, PauserRole} =
+        await runCreateTestSetup();
+      await expect(AssetCreateContractAsUser.pause()).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
+      );
+    });
+    it('should allow pauser to unpause the contract', async function () {
+      const {AssetCreateContract, pause, unpause} = await runCreateTestSetup();
+      await pause();
+      expect(await AssetCreateContract.paused()).to.be.true;
+      await unpause();
+      expect(await AssetCreateContract.paused()).to.be.false;
+    });
+    it('should not allow non pauser to unpause the contract', async function () {
+      const {AssetCreateContractAsUser, user, PauserRole} =
+        await runCreateTestSetup();
+      await expect(AssetCreateContractAsUser.unpause()).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
+      );
+    });
+    it('should not allow createAsset to be called when paused', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        metadataHashes,
+        pause,
+      } = await runCreateTestSetup();
+      await mintCatalyst(4, 1);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await pause();
+      await expect(
+        mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow createMultipleAssets to be called when paused', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintMultipleAssets,
+        generateMultipleMintSignature,
+        metadataHashes,
+        pause,
+      } = await runCreateTestSetup();
+      await mintCatalyst(3, 1);
+      await mintCatalyst(4, 1);
+      const signature = await generateMultipleMintSignature(
+        user.address,
+        [3, 4],
+        [1, 1],
+        [true, true],
+        metadataHashes
+      );
+      await pause();
+      await expect(
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow createSpecialAsset to be called when paused', async function () {
+      const {
+        user,
+        grantSpecialMinterRole,
+        mintSpecialAsset,
+        generateSingleMintSignature,
+        metadataHashes,
+        pause,
+      } = await runCreateTestSetup();
+      await grantSpecialMinterRole(user.address);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        0,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await pause();
+      await expect(
+        mintSpecialAsset(signature, 1, metadataHashes[0])
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should allow createAsset to be called when unpaused', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintSingleAsset,
+        generateSingleMintSignature,
+        metadataHashes,
+        unpause,
+        pause,
+      } = await runCreateTestSetup();
+      await pause();
+      await mintCatalyst(4, 1);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        4,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await unpause();
+      await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
+        .not.be.reverted;
+    });
+    it('should allow createMultipleAssets to be called when unpaused', async function () {
+      const {
+        user,
+        mintCatalyst,
+        mintMultipleAssets,
+        generateMultipleMintSignature,
+        metadataHashes,
+        unpause,
+        pause,
+      } = await runCreateTestSetup();
+      await pause();
+      await mintCatalyst(3, 1);
+      await mintCatalyst(4, 1);
+      const signature = await generateMultipleMintSignature(
+        user.address,
+        [3, 4],
+        [1, 1],
+        [true, true],
+        metadataHashes
+      );
+      await unpause();
+      await expect(
+        mintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        )
+      ).to.not.be.reverted;
+    });
+    it('should allow createSpecialAsset to be called when unpaused', async function () {
+      const {
+        user,
+        grantSpecialMinterRole,
+        mintSpecialAsset,
+        generateSingleMintSignature,
+        metadataHashes,
+        unpause,
+        pause,
+      } = await runCreateTestSetup();
+      await pause();
+      await grantSpecialMinterRole(user.address);
+      const signature = await generateSingleMintSignature(
+        user.address,
+        0,
+        1,
+        true,
+        metadataHashes[0]
+      );
+      await unpause();
+      await expect(mintSpecialAsset(signature, 1, metadataHashes[0])).to.not.be
+        .reverted;
+    });
+  });
   describe('Single asset mint', function () {
     describe('Success', function () {
       it('should mint a single asset successfully if all conditions are met', async function () {

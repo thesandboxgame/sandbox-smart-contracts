@@ -7,6 +7,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {
@@ -23,7 +24,8 @@ contract AssetReveal is
     Initializable,
     AccessControlUpgradeable,
     ERC2771HandlerUpgradeable,
-    EIP712Upgradeable
+    EIP712Upgradeable,
+    PausableUpgradeable
 {
     using TokenIdUtils for uint256;
     IAsset private assetContract;
@@ -38,6 +40,8 @@ contract AssetReveal is
 
     // allowance list for tier to be revealed in a single transaction
     mapping(uint8 => bool) internal tierInstantRevealAllowed;
+
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     bytes32 public constant REVEAL_TYPEHASH =
         keccak256(
@@ -73,6 +77,8 @@ contract AssetReveal is
         authValidator = AuthSuperValidator(_authValidator);
         __ERC2771Handler_init(_forwarder);
         __EIP712_init(_name, _version);
+        __AccessControl_init();
+        __Pausable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     }
 
@@ -80,7 +86,7 @@ contract AssetReveal is
     /// @dev the reveal mechanism works through burning the asset and minting a new one with updated tokenId
     /// @param tokenId the tokenId of id idasset to reveal
     /// @param amount the amount of tokens to reveal
-    function revealBurn(uint256 tokenId, uint256 amount) external {
+    function revealBurn(uint256 tokenId, uint256 amount) external whenNotPaused {
         _burnAsset(tokenId, amount);
         emit AssetRevealBurn(_msgSender(), tokenId, amount);
     }
@@ -89,7 +95,7 @@ contract AssetReveal is
     /// @dev Can be used to burn multiple copies of the same token id, each copy will be revealed separately
     /// @param tokenIds the tokenIds of the assets to burn
     /// @param amounts the amounts of the assets to burn
-    function revealBatchBurn(uint256[] calldata tokenIds, uint256[] calldata amounts) external {
+    function revealBatchBurn(uint256[] calldata tokenIds, uint256[] calldata amounts) external whenNotPaused {
         _burnAssetBatch(tokenIds, amounts);
         emit AssetRevealBatchBurn(_msgSender(), tokenIds, amounts);
     }
@@ -107,7 +113,7 @@ contract AssetReveal is
         uint256[] calldata amounts,
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
-    ) external {
+    ) external whenNotPaused {
         require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
         require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         require(
@@ -134,7 +140,7 @@ contract AssetReveal is
         uint256[][] calldata amounts,
         string[][] calldata metadataHashes,
         bytes32[][] calldata revealHashes
-    ) external {
+    ) external whenNotPaused {
         require(prevTokenIds.length == amounts.length, "AssetReveal: Invalid amounts length");
         require(amounts.length == metadataHashes.length, "AssetReveal: Invalid metadataHashes length");
         require(prevTokenIds.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
@@ -167,7 +173,7 @@ contract AssetReveal is
         uint256[] calldata amounts,
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
-    ) external {
+    ) external whenNotPaused {
         require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
         require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
         uint8 tier = prevTokenId.getTier();
@@ -416,6 +422,16 @@ contract AssetReveal is
     /// @return Whether instant reveal is allowed for the given tier
     function getTierInstantRevealAllowed(uint8 tier) external view returns (bool) {
         return tierInstantRevealAllowed[tier];
+    }
+
+    /// @notice Pause the contracts mint and burn functions
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause the contracts mint and burn functions
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 
     /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only

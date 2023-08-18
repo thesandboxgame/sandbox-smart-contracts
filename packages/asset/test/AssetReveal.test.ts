@@ -195,6 +195,155 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       await MockAssetRevealContract.msgData();
     });
   });
+  describe('Pause/Unpause', function () {
+    it('should allow pauser to pause the contract', async function () {
+      const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
+      await AssetRevealContractAsAdmin.pause();
+      expect(await AssetRevealContractAsAdmin.paused()).to.be.true;
+    });
+    it('should not allow non pauser to pause the contract', async function () {
+      const {AssetRevealContractAsUser, user, PauserRole} =
+        await runRevealTestSetup();
+      await expect(AssetRevealContractAsUser.pause()).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
+      );
+    });
+    it('should allow pauser to unpause the contract', async function () {
+      const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
+      await AssetRevealContractAsAdmin.pause();
+      await AssetRevealContractAsAdmin.unpause();
+      expect(await AssetRevealContractAsAdmin.paused()).to.be.false;
+    });
+    it('should not allow non pauser to unpause the contract', async function () {
+      const {AssetRevealContractAsUser, user, PauserRole} =
+        await runRevealTestSetup();
+      await expect(AssetRevealContractAsUser.unpause()).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
+      );
+    });
+    it('should not allow revealBurn to be called when paused', async function () {
+      const {
+        AssetRevealContractAsAdmin,
+        AssetRevealContractAsUser,
+        unrevealedtokenId,
+      } = await runRevealTestSetup();
+      await AssetRevealContractAsAdmin.pause();
+      await expect(
+        AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1)
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow revealMint to be called when paused', async function () {
+      const {
+        unrevealedtokenId,
+        user,
+        generateRevealSignature,
+        pause,
+        revealAsset,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await pause();
+      await expect(
+        revealAsset(signature, unrevealedtokenId, amounts, newMetadataHashes, [
+          revealHashA,
+        ])
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow revealBatchMint to be called when paused', async function () {
+      const {
+        unrevealedtokenId,
+        user,
+        generateRevealSignature,
+        pause,
+        revealAsset,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await pause();
+      await expect(
+        revealAsset(signature, unrevealedtokenId, amounts, newMetadataHashes, [
+          revealHashA,
+        ])
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow revealBatchBurn to be called when paused', async function () {
+      const {
+        unrevealedtokenId,
+        user,
+        generateRevealSignature,
+        pause,
+        revealAsset,
+      } = await runRevealTestSetup();
+      const newMetadataHashes = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const amounts = [1];
+      const signature = await generateRevealSignature(
+        user.address, // revealer
+        unrevealedtokenId, // prevTokenId
+        amounts,
+        newMetadataHashes,
+        [revealHashA]
+      );
+      await pause();
+      await expect(
+        revealAsset(signature, unrevealedtokenId, amounts, newMetadataHashes, [
+          revealHashA,
+        ])
+      ).to.be.revertedWith('Pausable: paused');
+    });
+    it('should not allow burnAndReveal to be called when paused', async function () {
+      const {
+        AssetRevealContractAsAdmin,
+        unrevealedtokenId,
+        instantReveal,
+        generateBurnAndRevealSignature,
+        user,
+      } = await runRevealTestSetup();
+      await AssetRevealContractAsAdmin.pause();
+      const newMetadataHash = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const amounts = [1];
+
+      const signature = await generateBurnAndRevealSignature(
+        user.address,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHash,
+        [revealHashA]
+      );
+
+      await expect(
+        instantReveal(
+          signature,
+          unrevealedtokenId,
+          amounts[0],
+          amounts,
+          newMetadataHash,
+          [revealHashA]
+        )
+      ).to.be.revertedWith('Pausable: paused');
+    });
+  });
   describe('Burning', function () {
     describe('Single burn', function () {
       describe('Success', function () {

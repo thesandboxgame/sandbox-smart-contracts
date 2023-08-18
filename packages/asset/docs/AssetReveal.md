@@ -4,7 +4,8 @@ This is a solidity contract designed for managing the revealing of assets linked
 
 ## Roles in the Contract
 
-1. **Admin**: This role has broad administrative permissions, including the ability to set the trusted forwarder.
+1. **DEFAULT_ADMIN_ROLE**: This role has broad administrative permissions, including the ability to set the trusted forwarder.
+2. **PAUSER_ROLE**: The role with permission to pause the contract.
 
 ## Public Variables
 

@@ -62,6 +62,7 @@ const namedAccounts = {
   mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
   sandBeneficiary: 'sandAdmin', // will be the owner of all initial SAND
   assetAdmin: 'sandAdmin', // can add super operator and change admin to Asset
+  assetPauser: 'sandAdmin', // can pause AssetCreate and AssetReveal
   assetMinterAdmin: 'sandAdmin', // can set metaTxProcessors & types
   assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
   sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
