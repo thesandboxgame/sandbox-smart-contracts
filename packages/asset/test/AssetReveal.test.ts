@@ -195,7 +195,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       await MockAssetRevealContract.msgData();
     });
   });
-  describe.only('Pause/Unpause', function () {
+  describe('Pause/Unpause', function () {
     it('should allow pauser to pause the contract', async function () {
       const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
       await AssetRevealContractAsAdmin.pause();
