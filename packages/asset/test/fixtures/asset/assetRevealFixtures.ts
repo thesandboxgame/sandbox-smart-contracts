@@ -182,8 +182,8 @@ export async function runRevealTestSetup() {
   await AssetContractAsAdmin.grantRole(BurnerRole, AssetRevealContract.address);
 
   // set admin as pauser
-  const PauserRole = await AssetContract.PAUSER_ROLE();
-  await AssetContractAsAdmin.grantRole(PauserRole, assetAdmin.address);
+  const PauserRole = await AssetRevealContract.PAUSER_ROLE();
+  await AssetRevealContractAsAdmin.grantRole(PauserRole, assetAdmin.address);
   // END SET UP ROLES
 
   // SET TIER 5 AS ALLOWED FOR INSTANT REVEAl
