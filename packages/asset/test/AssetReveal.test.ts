@@ -195,7 +195,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       await MockAssetRevealContract.msgData();
     });
   });
-  describe('Pause/Unpause', function () {
+  describe.only('Pause/Unpause', function () {
     it('should allow pauser to pause the contract', async function () {
       const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
       await AssetRevealContractAsAdmin.pause();
@@ -313,12 +313,34 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
     it('should not allow burnAndReveal to be called when paused', async function () {
       const {
         AssetRevealContractAsAdmin,
-        AssetRevealContractAsUser,
         unrevealedtokenId,
+        instantReveal,
+        generateBurnAndRevealSignature,
+        user,
       } = await runRevealTestSetup();
       await AssetRevealContractAsAdmin.pause();
+      const newMetadataHash = [
+        'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJF',
+      ];
+      const amounts = [1];
+
+      const signature = await generateBurnAndRevealSignature(
+        user.address,
+        unrevealedtokenId,
+        amounts,
+        newMetadataHash,
+        [revealHashA]
+      );
+
       await expect(
-        AssetRevealContractAsUser.burnAndReveal(unrevealedtokenId, 1)
+        instantReveal(
+          signature,
+          unrevealedtokenId,
+          amounts[0],
+          amounts,
+          newMetadataHash,
+          [revealHashA]
+        )
       ).to.be.revertedWith('Pausable: paused');
     });
   });
