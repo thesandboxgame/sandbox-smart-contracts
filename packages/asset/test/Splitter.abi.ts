@@ -145,24 +145,6 @@ export const splitterAbi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'address payable',
-        name: 'target',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes',
-        name: 'callData',
-        type: 'bytes',
-      },
-    ],
-    name: 'proxyCall',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
