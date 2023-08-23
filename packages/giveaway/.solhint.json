@@ -12,6 +12,7 @@
     "compiler-version": ["error", "^0.8.0"],
     "func-name-mixedcase": "off",
     "func-visibility": ["error", {"ignoreConstructors": true}],
-    "not-rely-on-time": "off"
+    "not-rely-on-time": "off",
+    "custom-errors": "off"
   }
 }
