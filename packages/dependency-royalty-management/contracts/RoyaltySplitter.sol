@@ -181,26 +181,6 @@ contract RoyaltySplitter is
         }
     }
 
-    /// @notice made for unexpected scenarios when assets are sent to this contact such that they could be recovered.
-    /// @dev first attempts to split ERC20 tokens.
-    /// @param target target of the call
-    /// @param callData for the call.
-    function proxyCall(address payable target, bytes calldata callData) external {
-        Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
-        require(
-            commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
-            "Split: Can only be called by one of the recipients"
-        );
-        require(
-            !callData.startsWith(IERC20Approve.approve.selector) &&
-                !callData.startsWith(IERC20Approve.increaseAllowance.selector),
-            "Split: ERC20 tokens must be split"
-        );
-        /* solhint-disable-next-line no-empty-blocks*/
-        try this.splitERC20Tokens(IERC20(target)) {} catch {}
-        target.functionCall(callData);
-    }
-
     /// @notice verify whether a forwarder address is the trustedForwarder address, using the manager setting
     /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
     /// @return bool whether the forwarder is the trusted address
