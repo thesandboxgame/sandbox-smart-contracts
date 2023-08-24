@@ -1,6 +1,6 @@
 {
     "name": "@sandbox-smart-contracts/giveaway",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Contracts used for token claims",
     "license": "MIT",
     "main": "index.js",
@@ -42,10 +42,12 @@
         "plugins": {
             "@release-it/keep-a-changelog": {}
         },
-        "before:init": [
-            "yarn lint",
-            "yarn test"
-        ]
+        "hooks": {
+            "before:init": [
+                "yarn lint",
+                "yarn test"
+            ]
+        }
     },
     "devDependencies": {
         "@dlsl/hardhat-markup": "^1.0.0-rc.11",
