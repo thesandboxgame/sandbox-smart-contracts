@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- move @openzeppelin contract to dependencies (instead of dev deps)
+
 ### Fixed
 
 - fix release-it hooks
