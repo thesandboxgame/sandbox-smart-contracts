@@ -1093,6 +1093,47 @@ describe('Royalty', function () {
         `AccessControl: account ${seller.address.toLowerCase()} is missing role ${await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE()}`
       );
     });
+    it('should be reverted when caller do not have splitter deployer role', async function () {
+      const {
+        RoyaltyManagerContract,
+        seller,
+        royaltyReceiver,
+        splitterDeployerRole,
+      } = await royaltyDistribution();
+      await expect(
+        RoyaltyManagerContract.connect(seller).deploySplitter(
+          seller.address,
+          royaltyReceiver.address
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${splitterDeployerRole}`
+      );
+    });
+    it('should not be reverted when caller have splitter deployer role', async function () {
+      const {
+        RoyaltyManagerContract,
+        seller,
+        royaltyReceiver,
+        splitterDeployerRole,
+        RoyaltyManagerAsAdmin,
+      } = await royaltyDistribution();
+      await RoyaltyManagerAsAdmin.grantRole(
+        splitterDeployerRole,
+        seller.address
+      );
+      expect(
+        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+      ).to.be.equals('0x0000000000000000000000000000000000000000');
+
+      await RoyaltyManagerContract.connect(seller).deploySplitter(
+        seller.address,
+        royaltyReceiver.address
+      );
+
+      expect(
+        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+      ).to.not.equals('0x0000000000000000000000000000000000000000');
+    });
   });
 
   describe('Multi contract splitter setup', function () {
