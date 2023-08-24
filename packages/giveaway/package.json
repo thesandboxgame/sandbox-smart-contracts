@@ -1,12 +1,17 @@
 {
     "name": "@sandbox-smart-contracts/giveaway",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Contracts used for token claims",
     "license": "MIT",
     "main": "index.js",
     "files": [
-        "contracts"
+        "contracts",
+        "README.md",
+        "CHANGELOG.md"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
         "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
