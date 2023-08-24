@@ -13,6 +13,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 /// for contracts that don't use the RoyaltySplitter.
 contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     bytes32 public constant CONTRACT_ROYALTY_SETTER_ROLE = keccak256("CONTRACT_ROYALTY_SETTER");
+    bytes32 public constant SPLITTER_DEPLOYER_ROLE = keccak256("SPLITTER_DEPLOYER");
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     uint16 public commonSplit;
@@ -122,7 +123,11 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param creator  the address of the creator
     /// @param recipient the wallet of the recipient where they would receive their royalty
     /// @return creatorSplitterAddress deployed for a creator
-    function deploySplitter(address creator, address payable recipient) external returns (address payable) {
+    function deploySplitter(address creator, address payable recipient)
+        external
+        onlyRole(SPLITTER_DEPLOYER_ROLE)
+        returns (address payable)
+    {
         address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[creator];
         if (creatorSplitterAddress == address(0)) {
             creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
