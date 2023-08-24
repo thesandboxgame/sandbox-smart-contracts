@@ -157,6 +157,9 @@ export async function assetRoyaltyDistribution() {
     Asset.address,
     DEFAULT_BPS
   );
+  const splitterDeployerRole =
+    await RoyaltyManagerContract.SPLITTER_DEPLOYER_ROLE();
+  await RoyaltyManagerAsAdmin.grantRole(splitterDeployerRole, Asset.address);
   return {
     Asset,
     ERC20,
