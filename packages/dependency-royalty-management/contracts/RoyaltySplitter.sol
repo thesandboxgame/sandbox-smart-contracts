@@ -158,7 +158,7 @@ contract RoyaltySplitter is
                     Recipient memory recipient = _recipients[i];
                     bool success;
                     (success, amountToSend) = balance.tryMul(recipient.bps);
-                    require(success,"RoyaltySplitter: Multiplication Overflow");
+                    require(success, "RoyaltySplitter: Multiplication Overflow");
 
                     amountToSend /= TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
