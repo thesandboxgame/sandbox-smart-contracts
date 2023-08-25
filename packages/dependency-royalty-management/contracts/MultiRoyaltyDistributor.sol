@@ -53,8 +53,15 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         address creator
     ) internal {
         address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager).deploySplitter(creator, recipient);
-        _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
-        _tokensWithRoyalties.push(tokenId);
+
+        if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
+            if (_tokenRoyaltiesSplitter[tokenId] != creatorSplitterAddress) {
+                _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
+            }
+        } else {
+            _tokensWithRoyalties.push(tokenId);
+            _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
+        }
         emit TokenRoyaltySet(tokenId, recipient);
     }
 
