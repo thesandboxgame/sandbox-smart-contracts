@@ -1735,7 +1735,6 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      console.log(mintResult);
       const splitterSetEvent = mintResult.events[3];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
