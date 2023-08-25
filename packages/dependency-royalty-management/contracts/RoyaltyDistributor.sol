@@ -10,7 +10,7 @@ import {
 
 contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-    IRoyaltyManager public royaltyManager;
+    IRoyaltyManager private royaltyManager;
 
     // solhint-disable-next-line func-name-mixedcase
     function __RoyaltyDistributor_init(address _royaltyManager) internal {
@@ -43,5 +43,11 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
         returns (bool)
     {
         return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    /// @notice returns the royalty manager
+    /// @return address of royalty manager contract.
+    function getRoyaltyManager() external view returns (IRoyaltyManager) {
+        return royaltyManager;
     }
 }

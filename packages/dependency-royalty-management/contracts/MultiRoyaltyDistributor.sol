@@ -16,9 +16,9 @@ import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 /// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to slip its royalty between the creator and Sandbox and use it for every token minted by that creator.
 abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-    address public royaltyManager;
+    address private royaltyManager;
 
-    mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
+    mapping(uint256 => address payable) private _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
     // solhint-disable-next-line func-name-mixedcase
@@ -53,7 +53,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         address creator
     ) internal {
         address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager).deploySplitter(creator, recipient);
-        _tokenRoyaltiesSplitter[tokenId] = creatorSplitterAddress;
+        _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
         _tokensWithRoyalties.push(tokenId);
         emit TokenRoyaltySet(tokenId, recipient);
     }
@@ -124,5 +124,23 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         Recipient[] memory defaultRecipient = new Recipient[](1);
         defaultRecipient[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
         return defaultRecipient;
+    }
+
+    function _setTokenRoyaltiesSplitter(uint256 tokenId, address payable splitterAddress) internal {
+        _tokenRoyaltiesSplitter[tokenId] = splitterAddress;
+        emit TokenRoyaltySplitterSet(tokenId, splitterAddress);
+    }
+
+    /// @notice returns the address of token royalty splitter.
+    /// @param tokenId is the token id for which royalty splitter should be returned.
+    /// @return address of royalty splitter for the token.
+    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable) {
+        return _tokenRoyaltiesSplitter[tokenId];
+    }
+
+    /// @notice returns the address of royalty manager.
+    /// @return address of royalty manager.
+    function getRoyaltyManager() external view returns (address) {
+        return royaltyManager;
     }
 }
