@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     )
   );
   log(`Asset set on RoyaltyManager with ${DEFAULT_BPS} BPS royalty`);
-  
+
   const splitterDeployerRole = await read(
     'RoyaltyManager',
     'SPLITTER_DEPLOYER_ROLE'
