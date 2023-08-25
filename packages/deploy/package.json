@@ -15,7 +15,7 @@
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "private": true,
     "dependencies": {
-        "@sandbox-smart-contracts/giveaway": "*"
+        "@sandbox-smart-contracts/giveaway": "0.0.3"
     },
     "files": [
         "deployments"
