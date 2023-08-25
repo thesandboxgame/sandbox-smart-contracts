@@ -1766,6 +1766,45 @@ describe('Royalty', function () {
         );
       }
     });
+    it('should emit Token Royalty Set event when a token splitter address is added', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const tokenRoyaltySetEvent = mintResult.events[4];
+      expect(tokenRoyaltySetEvent.event).to.equal('TokenRoyaltySet');
+    });
+    it('should not emit Token Royalty Set event when token is minted for second time', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const tokenRoyaltySetEvent = mintResult.events[4];
+      expect(tokenRoyaltySetEvent.event).to.equal('TokenRoyaltySet');
+      const mintTx2 = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult2 = await mintTx2.wait();
+      for (let i = 0; i < mintResult2.events.length; i++) {
+        expect(mintResult.events[i].event).to.not.equal('TokenRoyaltySet');
+      }
+    });
   });
 
   describe('Input validation', function () {
