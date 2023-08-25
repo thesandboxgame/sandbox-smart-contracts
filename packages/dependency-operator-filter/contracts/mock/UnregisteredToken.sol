@@ -27,7 +27,6 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
     /// @param registry address of registry
     function setRegistry(address registry) external {
         _setOperatorFilterRegistry(registry);
-        
     }
 
     /// @notice register contract
@@ -41,7 +40,7 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
-           _setOperatorFilterRegistry(registry);
+        _setOperatorFilterRegistry(registry);
         IOperatorFilterRegistry(registry).registerAndSubscribe(address(this), subscription);
     }
 
