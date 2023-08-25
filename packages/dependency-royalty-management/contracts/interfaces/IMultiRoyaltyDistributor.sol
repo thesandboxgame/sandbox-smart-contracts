@@ -17,6 +17,8 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
 
     event RoyaltyRecipientSet(address splitter, address recipient);
 
+    event TokenRoyaltySplitterSet(uint256 tokenId, address splitterAddress);
+
     struct TokenRoyaltyConfig {
         uint256 tokenId;
         uint16 royaltyBPS;

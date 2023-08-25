@@ -1,19 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import {
-    ERC1155Upgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {ERC1155Upgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
 
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771HandlerUpgradeable {
-    function initialize(string memory uri_, address trustedForwarder) external initializer() {
+    function initialize(string memory uri_, address trustedForwarder) external initializer {
         __ERC1155_init(uri_);
         __ERC2771Handler_init(trustedForwarder);
     }
@@ -22,19 +17,15 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
+        _setOperatorFilterRegistry(registry);
+        IOperatorFilterRegistry(registry).registerAndSubscribe(address(this), subscription);
     }
 
     /// @notice Mint new tokens with out minter role
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
-    function mintWithoutMinterRole(
-        address to,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function mintWithoutMinterRole(address to, uint256 id, uint256 amount) external {
         _mint(to, id, amount, "");
     }
 
@@ -69,12 +60,10 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 

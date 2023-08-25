@@ -24,8 +24,8 @@ contract TestERC721 is ERC721Upgradeable, OperatorFiltererUpgradeable, ERC2771Ha
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
+         _setOperatorFilterRegistry(registry);
+        IOperatorFilterRegistry(registry).registerAndSubscribe(address(this), subscription);
     }
 
     /// @notice Mint new tokens with out minter role
