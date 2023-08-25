@@ -145,7 +145,7 @@ describe('Catalyst', function () {
   describe('Check Royalty', function () {
     it('RoyaltyManager contract is set correctly', async function () {
       const {CatalystContract, RoyaltyManagerContract} = await setupTest();
-      expect(await CatalystContract.royaltyManager()).to.be.equal(
+      expect(await CatalystContract.getRoyaltyManager()).to.be.equal(
         RoyaltyManagerContract.address
       );
     });

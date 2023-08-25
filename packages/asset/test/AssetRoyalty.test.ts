@@ -942,10 +942,10 @@ describe('Asset Royalties', function () {
 
       const id1 = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id1, 1, '0x');
-      const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
+      const splitter1 = await Asset.getTokenRoyaltiesSplitter(id1);
       const id2 = generateAssetId(creator.address, 2);
       await assetAsMinter.mint(seller.address, id2, 1, '0x01');
-      const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
+      const splitter2 = await Asset.getTokenRoyaltiesSplitter(id2);
       expect(splitter1).to.be.equal(splitter2);
     });
 
@@ -955,10 +955,10 @@ describe('Asset Royalties', function () {
 
       const id1 = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id1, 1, '0x');
-      const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
+      const splitter1 = await Asset.getTokenRoyaltiesSplitter(id1);
       const id2 = generateAssetId(deployer.address, 2);
       await assetAsMinter.mint(seller.address, id2, 1, '0x01');
-      const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
+      const splitter2 = await Asset.getTokenRoyaltiesSplitter(id2);
       expect(splitter1).to.not.be.equal(splitter2);
     });
 
@@ -974,8 +974,8 @@ describe('Asset Royalties', function () {
         [1, 1],
         ['0x', '0x01']
       );
-      const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
-      const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
+      const splitter2 = await Asset.getTokenRoyaltiesSplitter(id2);
+      const splitter1 = await Asset.getTokenRoyaltiesSplitter(id1);
       expect(splitter1).to.be.equal(splitter2);
     });
 
@@ -991,8 +991,8 @@ describe('Asset Royalties', function () {
         [1, 1],
         ['0x', '0x01']
       );
-      const splitter2 = await Asset._tokenRoyaltiesSplitter(id2);
-      const splitter1 = await Asset._tokenRoyaltiesSplitter(id1);
+      const splitter2 = await Asset.getTokenRoyaltiesSplitter(id2);
+      const splitter1 = await Asset.getTokenRoyaltiesSplitter(id1);
       expect(splitter1).to.not.be.equal(splitter2);
     });
 
@@ -1002,7 +1002,7 @@ describe('Asset Royalties', function () {
 
       const id = generateAssetId(deployer.address, 2);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      const splitter = await Asset._tokenRoyaltiesSplitter(id);
+      const splitter = await Asset.getTokenRoyaltiesSplitter(id);
       const royaltyInfo = await Asset.royaltyInfo(id, 10000);
       expect(splitter).to.be.equal(royaltyInfo[0]);
     });

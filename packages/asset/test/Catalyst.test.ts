@@ -709,7 +709,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalyst
           .connect(catalystAdmin)
           .setOperatorRegistry(operatorFilterRegistry.address);
-        expect(await catalyst.operatorFilterRegistry()).to.be.equals(
+        expect(await catalyst.getOperatorFilterRegistry()).to.be.equals(
           operatorFilterRegistry.address
         );
 
