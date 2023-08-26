@@ -68,6 +68,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @return royaltyConfigs receivers and their split array as long as the number of tokens.
     function getTokenRoyalties() external view override returns (TokenRoyaltyConfig[] memory royaltyConfigs) {
         royaltyConfigs = new TokenRoyaltyConfig[](_tokensWithRoyalties.length);
+        uint16 contractRoyaltyBPS = IRoyaltyManager(royaltyManager).getContractRoyalty(address(this));
         for (uint256 i; i < _tokensWithRoyalties.length; ++i) {
             TokenRoyaltyConfig memory royaltyConfig;
             uint256 tokenId = _tokensWithRoyalties[i];
@@ -77,6 +78,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
             }
             royaltyConfig.tokenId = tokenId;
             royaltyConfigs[i] = royaltyConfig;
+            royaltyConfigs[i].royaltyBPS = contractRoyaltyBPS;
         }
     }
 
