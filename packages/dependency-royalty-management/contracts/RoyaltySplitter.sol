@@ -10,6 +10,7 @@ import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Addr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {BytesLibrary} from "@manifoldxyz/royalty-registry-solidity/contracts/libraries/BytesLibrary.sol";
 import {
     IRoyaltySplitter,
@@ -34,6 +35,7 @@ contract RoyaltySplitter is
     using AddressUpgradeable for address payable;
     using AddressUpgradeable for address;
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     uint256 internal constant TOTAL_BASIS_POINTS = 10000;
     uint256 internal constant IERC20_APPROVE_SELECTOR =
@@ -164,20 +166,15 @@ contract RoyaltySplitter is
 
                     amountToSend /= TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
-                    try erc20Contract.transfer(recipient.recipient, amountToSend) {
-                        emit ERC20Transferred(address(erc20Contract), recipient.recipient, amountToSend);
-                    } catch {
-                        return false;
-                    }
+
+                    erc20Contract.safeTransfer(recipient.recipient, amountToSend);
+                    emit ERC20Transferred(address(erc20Contract), recipient.recipient, amountToSend);
                 }
                 // Favor the 1st recipient if there are any rounding issues
                 amountToSend = balance - totalSent;
             }
-            try erc20Contract.transfer(_recipients[0].recipient, amountToSend) {
-                emit ERC20Transferred(address(erc20Contract), _recipients[0].recipient, amountToSend);
-            } catch {
-                return false;
-            }
+            erc20Contract.safeTransfer(_recipients[0].recipient, amountToSend);
+            emit ERC20Transferred(address(erc20Contract), _recipients[0].recipient, amountToSend);
             return true;
         } catch {
             return false;
