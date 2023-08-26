@@ -13,7 +13,7 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     IRoyaltyManager private royaltyManager;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __RoyaltyDistributor_init(address _royaltyManager) internal {
+    function __RoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
         royaltyManager = IRoyaltyManager(_royaltyManager);
     }
 

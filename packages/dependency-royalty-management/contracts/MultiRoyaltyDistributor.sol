@@ -22,7 +22,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     uint256[] private _tokensWithRoyalties;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __MultiRoyaltyDistributor_init(address _royaltyManager) internal {
+    function __MultiRoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
         royaltyManager = _royaltyManager;
     }
 
