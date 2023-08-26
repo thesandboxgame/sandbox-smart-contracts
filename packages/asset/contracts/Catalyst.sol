@@ -154,7 +154,7 @@ contract Catalyst is
     }
 
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
-    /// @param ipfsCID The royalty bps for the catalyst
+    /// @param ipfsCID The IPFS content identifiers for the catalyst
     function addNewCatalystType(string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be empty");
         uint256 newCatId = ++highestTierIndex;
@@ -298,7 +298,7 @@ contract Catalyst is
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
-    /// @notice sets filter registry address deployed in test
+    /// @notice sets filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(registry != address(0), "Catalyst: registry can't be zero address");

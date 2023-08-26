@@ -60,7 +60,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         RoyaltySplitter(creatorSplitterAddress).setRecipients(newRecipient);
     }
 
-    /// @notice sets the common recipient and common split
+    /// @notice sets the common recipient
     /// @dev can only be called by the admin
     /// @param _commonRecipient is the common recipient for all the splitters
     function setRecipient(address payable _commonRecipient) external override onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -69,13 +69,13 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice sets the trustedForwarder address to be used by the splitters
     /// @dev can only be called by the admin
+    /// new splitters will be deployed with this setting; existing splitters will have to apply it
     /// @param _newForwarder is the new trusted forwarder address
-    /// @dev new splitters will be deployed with this setting; existing splitters will have to apply it
     function setTrustedForwarder(address _newForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = _newForwarder;
     }
 
-    /// @notice sets the common recipient and common split
+    /// @notice sets the common split
     /// @dev can only be called by the admin.
     /// @param _commonSplit split for the common recipient and creators split would be 10000 - commonSplit
     function setSplit(uint16 _commonSplit) external override onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -120,7 +120,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice deploys splitter for creator
     /// @dev should only called once per creator
-    /// @param creator  the address of the creator
+    /// @param creator the address of the creator
     /// @param recipient the wallet of the recipient where they would receive their royalty
     /// @return creatorSplitterAddress deployed for a creator
     function deploySplitter(address creator, address payable recipient)
@@ -138,28 +138,28 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice returns the address of splitter of a creator.
-    /// @param creator  the address of the creator
+    /// @param creator the address of the creator
     /// @return creatorSplitterAddress deployed for a creator
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable) {
         return _creatorRoyaltiesSplitter[creator];
     }
 
-    /// @notice to be called by the splitters to get the common recipient and split
+    /// @notice returns the amount of basis points allocated to the creator
     /// @return creatorSplit which is 10000 - commonSplit
     function getCreatorSplit() external view returns (uint16) {
         return TOTAL_BASIS_POINTS - commonSplit;
     }
 
     /// @notice returns the commonRecipient and EIP2981 royalty split
-    /// @return commonRecipient
+    /// @return commonRecipient address of common royalty recipient
     /// @return royaltySplit
     function getRoyaltyInfo() external view returns (address payable, uint16) {
         return (commonRecipient, contractRoyalty[msg.sender]);
     }
 
-    /// @notice returns the commonRecipient and EIP2981 royalty split
-    /// @param _contractAddress the address of the contract for which the royalty is required.
-    /// @return royaltyBps royalty bps of the contarct
+    /// @notice returns the EIP2981 royalty split
+    /// @param _contractAddress the address of the contract for which the royalty is required
+    /// @return royaltyBps royalty bps of the contract
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) {
         return contractRoyalty[_contractAddress];
     }
