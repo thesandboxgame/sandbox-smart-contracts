@@ -151,5 +151,12 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         emit RoyaltyManagerSet(_royaltyManager);
     }
 
+    /// @notice set royalty manager address
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = _royaltyManager;
+        emit RoyaltyManagerSet(_royaltyManager);
+    }
+
     uint256[49] private __gap;
 }
