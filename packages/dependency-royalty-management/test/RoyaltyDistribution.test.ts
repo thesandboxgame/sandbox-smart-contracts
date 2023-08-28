@@ -1724,7 +1724,7 @@ describe('Royalty', function () {
         await RoyaltyManagerContract.getCreatorRoyaltySplitter(deployer.address)
       ).to.be.equal(await ERC1155.getTokenRoyaltiesSplitter(1));
     });
-    it('should emit Token Royalty Splitter event when a token is minted for first time', async function () {
+    it('should emit Token Royalty Splitter set event when a token is minted for first time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
       const mintTx = await ERC1155.connect(deployer).mint(
@@ -1738,7 +1738,7 @@ describe('Royalty', function () {
       const splitterSetEvent = mintResult.events[3];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
-    it('should not emit Token Royalty Splitter event when a token is minted for second time', async function () {
+    it('should not emit Token Royalty Splitter set event when a token is minted for second time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
       const mintTx = await ERC1155.connect(deployer).mint(
