@@ -122,7 +122,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         sameMetadataHash,
         [revealHashA]
       );
-     
+
       expect(result.events[4].event).to.equal('AssetRevealMint');
       const newTokenId = result.events[4].args.newTokenIds[0];
       const revealNonce = await TokenIdUtilsContract.getRevealNonce(newTokenId);
@@ -142,7 +142,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         sameMetadataHash,
         [revealHashB]
       );
-     expect(result2.events[2].event).to.equal('AssetRevealMint');
+      expect(result2.events[2].event).to.equal('AssetRevealMint');
       const newTokenId2 = result2.events[2].args.newTokenIds[0];
       const revealNonce2 = await TokenIdUtilsContract.getRevealNonce(
         newTokenId2
