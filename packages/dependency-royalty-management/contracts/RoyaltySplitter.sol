@@ -49,6 +49,9 @@ contract RoyaltySplitter is
     event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
     event RecipientSet(address indexed recipientAddress);
 
+    /// @notice Query if a contract implements interface `id`.
+    /// @param interfaceId the interface identifier, as specified in ERC-165.
+    /// @return `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view

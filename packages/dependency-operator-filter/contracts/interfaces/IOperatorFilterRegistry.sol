@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/**
+ * @title IOperatorFilterRegistry
+ * @notice Interface for managing operators and filtering.
+ */
 interface IOperatorFilterRegistry {
     /**
      * @notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns
