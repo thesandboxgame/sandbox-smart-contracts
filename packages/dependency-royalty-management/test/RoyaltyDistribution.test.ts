@@ -1766,7 +1766,7 @@ describe('Royalty', function () {
         );
       }
     });
-    it('should emit Token Royalty Set event when a token splitter address is added', async function () {
+    it('should emit Token Royalty Set event when a token minted for the first time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
       const mintTx = await ERC1155.connect(deployer).mint(
