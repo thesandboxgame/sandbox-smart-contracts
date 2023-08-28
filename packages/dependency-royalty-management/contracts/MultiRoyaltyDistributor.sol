@@ -126,6 +126,9 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         return defaultRecipient;
     }
 
+    /// @notice internal function to set the token royalty splitter
+    /// @param tokenId id of token
+    /// @param splitterAddress address of the splitter contract
     function _setTokenRoyaltiesSplitter(uint256 tokenId, address payable splitterAddress) internal {
         _tokenRoyaltiesSplitter[tokenId] = splitterAddress;
         emit TokenRoyaltySplitterSet(tokenId, splitterAddress);

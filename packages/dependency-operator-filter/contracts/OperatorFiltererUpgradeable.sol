@@ -71,11 +71,14 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
         return _getOperatorFilterRegistry();
     }
 
+    /// @notice internal method to set the operator filter registry
+    /// @param registry address the registry.
     function _setOperatorFilterRegistry(address registry) internal {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
         emit OperatorFilterRegistrySet(registry);
     }
 
+    /// @notice internal method to get the operator filter registry.
     function _getOperatorFilterRegistry() internal view returns (IOperatorFilterRegistry) {
         return operatorFilterRegistry;
     }
