@@ -1843,7 +1843,6 @@ describe('Royalty', function () {
       expect(log.topics[0]).to.be.equal(
         ethers.utils.id('RecipientSet(address)')
       );
-
       const mintTx2 = await ERC1155.connect(deployer).mint(
         seller.address,
         1,
