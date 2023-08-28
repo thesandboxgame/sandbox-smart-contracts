@@ -187,6 +187,7 @@ contract Catalyst is
     function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
         _setBaseURI(baseURI);
+        emit BaseURISet(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
