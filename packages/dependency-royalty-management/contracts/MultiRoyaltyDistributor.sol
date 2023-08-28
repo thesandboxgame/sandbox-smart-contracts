@@ -23,7 +23,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
 
     // solhint-disable-next-line func-name-mixedcase
     function __MultiRoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
-        royaltyManager = _royaltyManager;
+        _setRoyaltyManager(_royaltyManager);
     }
 
     /// @notice EIP 165 interface function
@@ -135,5 +135,12 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @return address of royalty manager.
     function getRoyaltyManager() external view returns (address) {
         return royaltyManager;
+    }
+
+    /// @notice set royalty manager address
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = _royaltyManager;
+        emit RoyaltyManagerSet(_royaltyManager);
     }
 }
