@@ -9,12 +9,13 @@ import {
 } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
+    event RoyaltyManagerSet(address indexed _royaltyManager);
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     IRoyaltyManager private royaltyManager;
 
     // solhint-disable-next-line func-name-mixedcase
     function __RoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
-        royaltyManager = IRoyaltyManager(_royaltyManager);
+        _setRoyaltyManager(_royaltyManager);
     }
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
@@ -49,5 +50,12 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
         return royaltyManager;
+    }
+
+    /// @notice set royalty manager
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(_royaltyManager);
     }
 }

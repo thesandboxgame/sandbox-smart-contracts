@@ -44,7 +44,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         _grantRole(DEFAULT_ADMIN_ROLE, managerAdmin);
         _grantRole(CONTRACT_ROYALTY_SETTER_ROLE, contractRoyaltySetter);
         _royaltySplitterCloneable = royaltySplitterCloneable;
-        _trustedForwarder = trustedForwarder;
+        _setTrustedForwarder(trustedForwarder);
     }
 
     /// @notice sets royalty recipient wallet
@@ -72,7 +72,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// new splitters will read this value
     /// @param _newForwarder is the new trusted forwarder address
     function setTrustedForwarder(address _newForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _trustedForwarder = _newForwarder;
+        _setTrustedForwarder(_newForwarder);
     }
 
     /// @notice sets the common split
@@ -97,6 +97,14 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         require(_commonSplit < TOTAL_BASIS_POINTS, "Manager: Can't set split greater than the total basis point");
         commonSplit = _commonSplit;
         emit SplitSet(_commonSplit);
+    }
+
+    /// @notice sets trusted forwarder address
+    /// @param _newForwarder new trusted forwarder address to set
+    function _setTrustedForwarder(address _newForwarder) internal {
+        address oldTrustedForwarder = _trustedForwarder;
+        _trustedForwarder = _newForwarder;
+        emit TrustedForwarderSet(oldTrustedForwarder, _newForwarder);
     }
 
     /// @notice called to set the EIP 2981 royalty split
@@ -133,6 +141,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
             creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
             RoyaltySplitter(creatorSplitterAddress).initialize(recipient, address(this));
             _creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
+            emit SplitterDeployed(creator, recipient, creatorSplitterAddress);
         }
         return creatorSplitterAddress;
     }
