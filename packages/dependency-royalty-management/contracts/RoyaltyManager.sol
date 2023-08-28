@@ -12,8 +12,8 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 /// @notice Registry contract to set the common Recipient and Split for the RoyaltySplitter. Also, to set the royalty info
 /// for contracts that don't use the RoyaltySplitter.
 contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
-    bytes32 public constant CONTRACT_ROYALTY_SETTER_ROLE = keccak256("CONTRACT_ROYALTY_SETTER");
-    bytes32 public constant SPLITTER_DEPLOYER_ROLE = keccak256("SPLITTER_DEPLOYER");
+    bytes32 public constant CONTRACT_ROYALTY_SETTER_ROLE = keccak256("CONTRACT_ROYALTY_SETTER_ROLE");
+    bytes32 public constant SPLITTER_DEPLOYER_ROLE = keccak256("SPLITTER_DEPLOYER_ROLE");
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     uint16 public commonSplit;
