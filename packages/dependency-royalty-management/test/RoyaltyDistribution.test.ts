@@ -7,6 +7,51 @@ const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Royalty', function () {
   describe('Royalty distribution through splitter', function () {
+    it('should emit TrustedForwarderSet event with correct data when setting new trusted forwarder', async function () {
+      const {
+        deployer,
+        RoyaltyManagerContract,
+        RoyaltyManagerAsAdmin,
+        TrustedForwarder,
+      } = await royaltyDistribution();
+      expect(
+        await await RoyaltyManagerContract.getTrustedForwarder()
+      ).to.be.equal(TrustedForwarder.address);
+      await expect(RoyaltyManagerAsAdmin.setTrustedForwarder(deployer.address))
+        .to.emit(RoyaltyManagerContract, 'TrustedForwarderSet')
+        .withArgs(TrustedForwarder.address, deployer.address);
+    });
+
+    it('should emit SplitterDeployed event with correct data when deploying splitter', async function () {
+      const {
+        seller,
+        royaltyReceiver,
+        RoyaltyManagerContract,
+        RoyaltyManagerAsAdmin,
+        splitterDeployerRole,
+      } = await royaltyDistribution();
+
+      expect(
+        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+      ).to.be.equals('0x0000000000000000000000000000000000000000');
+      await RoyaltyManagerAsAdmin.grantRole(
+        splitterDeployerRole,
+        seller.address
+      );
+
+      const splitterDeployedTx = await RoyaltyManagerContract.connect(
+        seller
+      ).deploySplitter(seller.address, royaltyReceiver.address);
+
+      await expect(splitterDeployedTx)
+        .to.emit(RoyaltyManagerContract, 'SplitterDeployed')
+        .withArgs(
+          seller.address,
+          royaltyReceiver.address,
+          await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+        );
+    });
+
     it('should split ERC20 using EIP2981', async function () {
       const {
         ERC1155,
@@ -76,6 +121,7 @@ describe('Royalty', function () {
         (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
+
     it('should split ERC20 using EIP2981 using trusted forwarder', async function () {
       const {
         ERC1155,
@@ -1736,7 +1782,10 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
+<<<<<<< HEAD
 
+=======
+>>>>>>> a4a8444b (feat : added test cases)
       const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
@@ -1751,7 +1800,10 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
+<<<<<<< HEAD
 
+=======
+>>>>>>> a4a8444b (feat : added test cases)
       const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
       const mintTx2 = await ERC1155.connect(deployer).mint(
