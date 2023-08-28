@@ -58,4 +58,6 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
         royaltyManager = IRoyaltyManager(_royaltyManager);
         emit RoyaltyManagerSet(_royaltyManager);
     }
+
+    uint256[49] private __gap;
 }

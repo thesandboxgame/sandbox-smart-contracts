@@ -82,4 +82,6 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
     function _getOperatorFilterRegistry() internal view returns (IOperatorFilterRegistry) {
         return operatorFilterRegistry;
     }
+
+    uint256[49] private __gap;
 }
