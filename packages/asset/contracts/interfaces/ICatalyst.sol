@@ -7,6 +7,8 @@ interface ICatalyst {
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
     event NewCatalystTypeAdded(uint256 catalystId);
     event DefaultRoyaltyChanged(address indexed newDefaultRoyaltyRecipient, uint256 newDefaultRoyaltyAmount);
+    event BaseURISet(string BaseURI);
+    event OperatorRegistrySet(address indexed registry);
 
     /// @notice Mints a new token, limited to MINTER_ROLE only
     /// @param to The address that will own the minted token

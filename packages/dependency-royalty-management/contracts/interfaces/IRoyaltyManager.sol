@@ -10,6 +10,10 @@ interface IRoyaltyManager {
 
     event RoyaltySet(uint16 royaltyBps, address contractAddress);
 
+    event TrustedForwarderSet(address indexed previousForwarder, address indexed newForwarder);
+
+    event SplitterDeployed(address indexed creator, address indexed recipient, address splitterAddress);
+
     function setRecipient(address payable _commonRecipient) external;
 
     function setSplit(uint16 commonSplit) external;
