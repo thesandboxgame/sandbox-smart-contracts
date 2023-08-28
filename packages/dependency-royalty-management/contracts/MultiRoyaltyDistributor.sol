@@ -143,4 +143,6 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         royaltyManager = _royaltyManager;
         emit RoyaltyManagerSet(_royaltyManager);
     }
+
+    uint256[49] private __gap;
 }

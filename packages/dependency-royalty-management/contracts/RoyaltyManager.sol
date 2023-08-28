@@ -172,4 +172,6 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) {
         return contractRoyalty[_contractAddress];
     }
+
+    uint256[49] private __gap;
 }

@@ -86,4 +86,6 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
     {
         return operatorFilterRegistry;
     }
+
+    uint256[49] private __gap;
 }

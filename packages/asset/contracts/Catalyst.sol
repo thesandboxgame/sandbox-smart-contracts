@@ -312,4 +312,6 @@ contract Catalyst is
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
     }
+
+    uint256[49] private __gap;
 }
