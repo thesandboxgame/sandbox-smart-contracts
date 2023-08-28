@@ -1934,6 +1934,43 @@ describe('Royalty', function () {
         )
       ).to.be.revertedWith('Manager: No splitter deployed for the creator');
     });
+
+    it('should revert on for overflow for try mul in splitter contract', async function () {
+      const {
+        ERC1155,
+        deployer,
+        seller,
+        royaltyReceiver,
+        RoyaltyManagerContract,
+      } = await royaltyDistribution();
+      await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const TestERC20Factory = await ethers.getContractFactory(
+        'OverflowTestERC20'
+      );
+      const OverflowERC20 = await TestERC20Factory.deploy();
+
+      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+        deployer.address
+      );
+
+      const splitterContract = await ethers.getContractAt(
+        splitterAbi,
+        splitter
+      );
+
+      await OverflowERC20.mintMax(splitter);
+      await expect(
+        splitterContract
+          .connect(royaltyReceiver)
+          .splitERC20Tokens(OverflowERC20.address)
+      ).to.be.revertedWith('RoyaltySplitter: Multiplication Overflow');
+    });
   });
 
   describe('Interfaces', function () {
