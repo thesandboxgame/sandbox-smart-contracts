@@ -90,19 +90,6 @@ export const splitterAbi = [
   },
   {
     inputs: [],
-    name: '_recipient',
-    outputs: [
-      {
-        internalType: 'address payable',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: '_royaltyManager',
     outputs: [
       {
@@ -143,12 +130,12 @@ export const splitterAbi = [
     inputs: [
       {
         internalType: 'address payable',
-        name: 'recipient',
+        name: '_recipient',
         type: 'address',
       },
       {
         internalType: 'address',
-        name: 'royaltyManager',
+        name: '_royaltyManager',
         type: 'address',
       },
     ],
@@ -191,9 +178,35 @@ export const splitterAbi = [
   },
   {
     inputs: [],
+    name: 'recipient',
+    outputs: [
+      {
+        internalType: 'address payable',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'royaltyManager',
+    outputs: [
+      {
+        internalType: 'contract IRoyaltyManager',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
