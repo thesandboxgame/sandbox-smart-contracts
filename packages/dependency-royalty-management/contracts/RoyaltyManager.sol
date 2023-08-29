@@ -150,7 +150,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
             creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
             emit SplitterDeployed(creator, recipient, creatorSplitterAddress);
         }
-        return creatorSplitterAddress;
+        return _creatorSplitterAddress;
     }
 
     /// @notice returns the address of splitter of a creator.
