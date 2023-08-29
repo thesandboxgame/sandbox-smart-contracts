@@ -53,6 +53,12 @@ contract RoyaltySplitter is
     event RecipientSet(address indexed newRecipient);
 >>>>>>> 0a587f5d (feat : added events after sensitive changes)
 
+    /// @dev this protects the implementation contract from behing initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
