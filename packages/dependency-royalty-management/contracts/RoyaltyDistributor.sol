@@ -11,7 +11,7 @@ import {
 /// @title RoyaltyDistributor
 /// @author The Sandbox
 /// @notice Contract for distributing royalties based on the ERC2981 standard.
-contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
+abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     event RoyaltyManagerSet(address indexed _royaltyManager);
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     IRoyaltyManager private royaltyManager;
