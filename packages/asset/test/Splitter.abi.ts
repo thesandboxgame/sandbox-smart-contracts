@@ -90,19 +90,6 @@ export const splitterAbi = [
   },
   {
     inputs: [],
-    name: '_royaltyManager',
-    outputs: [
-      {
-        internalType: 'contract IRoyaltyManager',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'getRecipients',
     outputs: [
       {
