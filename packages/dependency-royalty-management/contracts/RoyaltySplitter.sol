@@ -42,8 +42,8 @@ contract RoyaltySplitter is
         0x095ea7b300000000000000000000000000000000000000000000000000000000;
     uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
-    address payable public _recipient;
-    IRoyaltyManager public _royaltyManager;
+    address payable public recipient;
+    IRoyaltyManager public royaltyManager;
 
     event ETHTransferred(address indexed account, uint256 amount);
     event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
@@ -64,11 +64,11 @@ contract RoyaltySplitter is
 
     /// @notice initialize the contract
     /// @dev can only be run once.
-    /// @param recipient the wallet of the creator when the contract is deployed
-    /// @param royaltyManager the address of the royalty manager contract
-    function initialize(address payable recipient, address royaltyManager) public initializer {
-        _royaltyManager = IRoyaltyManager(royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
-        _setRecipient(recipient);
+    /// @param recipientAddress the wallet of the creator when the contract is deployed
+    /// @param _royaltyManager the address of the royalty manager contract
+    function initialize(address payable recipientAddress, address _royaltyManager) public initializer {
+        royaltyManager = IRoyaltyManager(_royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
+        _setRecipient(recipientAddress);
         __Ownable_init();
     }
 
@@ -81,18 +81,18 @@ contract RoyaltySplitter is
     }
 
     function _setRecipient(address payable recipientAddress) private {
-        delete _recipient;
-        _recipient = recipientAddress;
+        delete recipient;
+        recipient = recipientAddress;
         emit RecipientSet(recipientAddress);
     }
 
     /// @notice to get recipients of royalty through this splitter and their splits of royalty.
     /// @return recipients of royalty through this splitter and their splits of royalty.
     function getRecipients() external view override returns (Recipient[] memory) {
-        Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
-        uint16 creatorSplit = _royaltyManager.getCreatorSplit();
+        Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
+        uint16 creatorSplit = royaltyManager.getCreatorSplit();
         Recipient[] memory recipients = new Recipient[](2);
-        recipients[0].recipient = _recipient;
+        recipients[0].recipient = recipient;
         recipients[0].bps = creatorSplit;
         recipients[1] = commonRecipient;
         return recipients;
@@ -112,21 +112,21 @@ contract RoyaltySplitter is
 
     function _splitETH(uint256 value) internal {
         if (value > 0) {
-            Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
-            uint16 creatorSplit = _royaltyManager.getCreatorSplit();
+            Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
+            uint16 creatorSplit = royaltyManager.getCreatorSplit();
             Recipient[] memory _recipients = new Recipient[](2);
-            _recipients[0].recipient = _recipient;
+            _recipients[0].recipient = recipient;
             _recipients[0].bps = creatorSplit;
             _recipients[1] = commonRecipient;
             uint256 totalSent;
             uint256 amountToSend;
             unchecked {
                 for (uint256 i = _recipients.length - 1; i > 0; i--) {
-                    Recipient memory recipient = _recipients[i];
-                    amountToSend = (value * recipient.bps) / TOTAL_BASIS_POINTS;
+                    Recipient memory _recipient = _recipients[i];
+                    amountToSend = (value * _recipient.bps) / TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
-                    recipient.recipient.sendValue(amountToSend);
-                    emit ETHTransferred(recipient.recipient, amountToSend);
+                    _recipient.recipient.sendValue(amountToSend);
+                    emit ETHTransferred(_recipient.recipient, amountToSend);
                 }
                 // Favor the 1st recipient if there are any rounding issues
                 amountToSend = value - totalSent;
@@ -148,30 +148,30 @@ contract RoyaltySplitter is
             if (balance == 0) {
                 return false;
             }
-            Recipient memory commonRecipient = _royaltyManager.getCommonRecipient();
-            uint16 creatorSplit = _royaltyManager.getCreatorSplit();
+            Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
+            uint16 creatorSplit = royaltyManager.getCreatorSplit();
             require(
-                commonRecipient.recipient == _msgSender() || _recipient == _msgSender(),
+                commonRecipient.recipient == _msgSender() || recipient == _msgSender(),
                 "Split: Can only be called by one of the recipients"
             );
             Recipient[] memory _recipients = new Recipient[](2);
-            _recipients[0].recipient = _recipient;
+            _recipients[0].recipient = recipient;
             _recipients[0].bps = creatorSplit;
             _recipients[1] = commonRecipient;
             uint256 amountToSend;
             uint256 totalSent;
             unchecked {
                 for (uint256 i = _recipients.length - 1; i > 0; i--) {
-                    Recipient memory recipient = _recipients[i];
+                    Recipient memory _recipient = _recipients[i];
                     bool success;
-                    (success, amountToSend) = balance.tryMul(recipient.bps);
+                    (success, amountToSend) = balance.tryMul(_recipient.bps);
                     require(success, "RoyaltySplitter: Multiplication Overflow");
 
                     amountToSend /= TOTAL_BASIS_POINTS;
                     totalSent += amountToSend;
 
-                    erc20Contract.safeTransfer(recipient.recipient, amountToSend);
-                    emit ERC20Transferred(address(erc20Contract), recipient.recipient, amountToSend);
+                    erc20Contract.safeTransfer(_recipient.recipient, amountToSend);
+                    emit ERC20Transferred(address(erc20Contract), _recipient.recipient, amountToSend);
                 }
                 // Favor the 1st recipient if there are any rounding issues
                 amountToSend = balance - totalSent;
@@ -188,7 +188,7 @@ contract RoyaltySplitter is
     /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
     /// @return bool whether the forwarder is the trusted address
     function _isTrustedForwarder(address forwarder) internal view override(ERC2771HandlerAbstract) returns (bool) {
-        return forwarder == _royaltyManager.getTrustedForwarder();
+        return forwarder == royaltyManager.getTrustedForwarder();
     }
 
     function _msgSender()
