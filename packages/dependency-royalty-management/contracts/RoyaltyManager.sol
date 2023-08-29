@@ -23,6 +23,12 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     address internal _royaltySplitterCloneable;
     address internal _trustedForwarder;
 
+    /// @dev this protects the implementation contract from behing initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice initialization function for the deployment of contract
     /// @dev called during the deployment via the proxy.
     /// @param _commonRecipient the != address(0)common recipient for all the splitters
