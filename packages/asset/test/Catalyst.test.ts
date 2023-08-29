@@ -384,6 +384,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+    it('emits BaseURISet event on setting base uri', async function () {
+      const {catalystAsAdmin, catalyst} = await runCatalystSetup();
+
+      const setBaseURITx = await catalystAsAdmin.setBaseURI('ipfs////');
+      await expect(setBaseURITx)
+        .to.emit(catalyst, 'BaseURISet')
+        .withArgs(`ipfs////`);
+    });
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.addNewCatalystType('')).to.be.revertedWith(

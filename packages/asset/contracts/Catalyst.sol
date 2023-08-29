@@ -187,7 +187,6 @@ contract Catalyst is
     function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
         _setBaseURI(baseURI);
-        emit BaseURISet(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
@@ -222,6 +221,12 @@ contract Catalyst is
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    /// @dev Sets `baseURI` as the `_baseURI` for all tokens
+    function _setBaseURI(string memory baseURI) internal virtual override {
+        _baseURI = baseURI;
+        emit BaseURISet(baseURI);
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
