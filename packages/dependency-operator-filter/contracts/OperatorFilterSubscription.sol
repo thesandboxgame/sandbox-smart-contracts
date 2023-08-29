@@ -11,13 +11,13 @@ contract OperatorFilterSubscription is Ownable {
     address public constant DEFAULT_SUBSCRIPTION = address(0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6);
 
     // solhint-disable-next-line const-name-snakecase
-    IOperatorFilterRegistry public constant operatorFilterRegistry =
+    IOperatorFilterRegistry public constant OPERATOR_FILTER_REGISTRY =
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     constructor() Ownable() {
         // Subscribe and copy the entries of the Default subscription list of open sea.
-        if (address(operatorFilterRegistry).code.length > 0) {
-            operatorFilterRegistry.registerAndCopyEntries(address(this), DEFAULT_SUBSCRIPTION);
+        if (address(OPERATOR_FILTER_REGISTRY).code.length > 0) {
+            OPERATOR_FILTER_REGISTRY.registerAndCopyEntries(address(this), DEFAULT_SUBSCRIPTION);
         }
     }
 }
