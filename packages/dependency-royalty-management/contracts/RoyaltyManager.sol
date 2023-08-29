@@ -89,6 +89,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice get the current trustedForwarder address
+    /// @return address of current TrustedForwarder
     function getTrustedForwarder() public view returns (address) {
         return _trustedForwarder;
     }
@@ -115,6 +116,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice called to set the EIP 2981 royalty split
     /// @dev can only be called by contract royalty setter.
+    /// @param contractAddress address of contract for which royalty is set
     /// @param _royaltyBps the royalty split for the EIP 2981
     function setContractRoyalty(address contractAddress, uint16 _royaltyBps)
         external
