@@ -32,7 +32,7 @@ describe('Royalty', function () {
       } = await royaltyDistribution();
 
       expect(
-        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
       ).to.be.equals('0x0000000000000000000000000000000000000000');
       await RoyaltyManagerAsAdmin.grantRole(
         splitterDeployerRole,
@@ -48,7 +48,7 @@ describe('Royalty', function () {
         .withArgs(
           seller.address,
           royaltyReceiver.address,
-          await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+          await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
         );
     });
 
@@ -86,7 +86,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -157,7 +157,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -426,7 +426,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -435,7 +435,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -445,7 +445,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver2.address
       );
 
@@ -701,7 +701,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -710,7 +710,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -720,7 +720,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver2.address
       );
 
@@ -909,7 +909,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -975,7 +975,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1010,7 +1010,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -1019,7 +1019,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -1029,7 +1029,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(seller.address);
+      expect(await splitterContract.recipient()).to.be.equal(seller.address);
     });
 
     it('only creator could change the recipient for his splitter', async function () {
@@ -1168,7 +1168,7 @@ describe('Royalty', function () {
         seller.address
       );
       expect(
-        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
       ).to.be.equals('0x0000000000000000000000000000000000000000');
 
       await RoyaltyManagerContract.connect(seller).deploySplitter(
@@ -1177,7 +1177,7 @@ describe('Royalty', function () {
       );
 
       expect(
-        await RoyaltyManagerContract._creatorRoyaltiesSplitter(seller.address)
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
       ).to.not.equals('0x0000000000000000000000000000000000000000');
     });
   });
@@ -1301,7 +1301,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1942,7 +1942,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -1989,7 +1989,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -2042,7 +2042,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -2122,7 +2122,7 @@ describe('Royalty', function () {
         royaltyReceiver.address,
         '0x'
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
