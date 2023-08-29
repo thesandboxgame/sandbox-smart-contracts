@@ -26,9 +26,9 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         _setRoyaltyManager(_royaltyManager);
     }
 
-    /// @notice EIP 165 interface function
-    /// @dev used to check the interface implemented
-    /// @param interfaceId to be checked for implementation
+    /// @notice Query if a contract implements interface `id`.
+    /// @param interfaceId the interface identifier, as specified in ERC-165.
+    /// @return `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -46,6 +46,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice sets token royalty
     /// @dev deploys a splitter if a creator doesn't have one
     /// @param tokenId id of token
+    /// @param recipient royalty recipient
     /// @param creator of the token
     function _setTokenRoyalties(
         uint256 tokenId,
