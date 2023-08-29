@@ -19,7 +19,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     uint16 public commonSplit;
     address payable public commonRecipient;
     mapping(address => uint16) public contractRoyalty;
-    mapping(address => address payable) public _creatorRoyaltiesSplitter;
+    mapping(address => address payable) public creatorRoyaltiesSplitter;
     address internal _royaltySplitterCloneable;
     address internal _trustedForwarder;
 
@@ -51,13 +51,13 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @dev should be called by the creator. The bps is not set on the splitter as it is set here on manager contract.
     /// @param recipient new recipient wallet.
     function setRoyaltyRecipient(address payable recipient) external {
-        address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[msg.sender];
-        require(creatorSplitterAddress != address(0), "Manager: No splitter deployed for the creator");
-        address _recipient = RoyaltySplitter(creatorSplitterAddress)._recipient();
+        address payable _creatorSplitterAddress = creatorRoyaltiesSplitter[msg.sender];
+        require(_creatorSplitterAddress != address(0), "Manager: No splitter deployed for the creator");
+        address _recipient = RoyaltySplitter(_creatorSplitterAddress).recipient();
         require(_recipient != recipient, "Manager: Recipient already set");
         Recipient[] memory newRecipient = new Recipient[](1);
         newRecipient[0] = Recipient({recipient: recipient, bps: 0});
-        RoyaltySplitter(creatorSplitterAddress).setRecipients(newRecipient);
+        RoyaltySplitter(_creatorSplitterAddress).setRecipients(newRecipient);
     }
 
     /// @notice sets the common recipient
@@ -136,21 +136,21 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         onlyRole(SPLITTER_DEPLOYER_ROLE)
         returns (address payable)
     {
-        address payable creatorSplitterAddress = _creatorRoyaltiesSplitter[creator];
-        if (creatorSplitterAddress == address(0)) {
-            creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
-            RoyaltySplitter(creatorSplitterAddress).initialize(recipient, address(this));
-            _creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
-            emit SplitterDeployed(creator, recipient, creatorSplitterAddress);
+        address payable _creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
+        if (_creatorSplitterAddress == address(0)) {
+            _creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
+            RoyaltySplitter(_creatorSplitterAddress).initialize(recipient, address(this));
+            creatorRoyaltiesSplitter[creator] = _creatorSplitterAddress;
+            emit SplitterDeployed(creator, recipient, _creatorSplitterAddress);
         }
-        return creatorSplitterAddress;
+        return _creatorSplitterAddress;
     }
 
     /// @notice returns the address of splitter of a creator.
     /// @param creator the address of the creator
     /// @return creatorSplitterAddress deployed for a creator
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable) {
-        return _creatorRoyaltiesSplitter[creator];
+        return creatorRoyaltiesSplitter[creator];
     }
 
     /// @notice returns the amount of basis points allocated to the creator
