@@ -36,11 +36,10 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         override(ERC165Upgradeable, IERC165)
         returns (bool isSupported)
     {
-        return
-            interfaceId == type(IEIP2981).interfaceId ||
+        isSupported = (interfaceId == type(IEIP2981).interfaceId ||
             interfaceId == type(IMultiRoyaltyDistributor).interfaceId ||
             interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
-            super.supportsInterface(interfaceId);
+            super.supportsInterface(interfaceId));
     }
 
     /// @notice sets token royalty
@@ -79,12 +78,17 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
             IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
-            return (_tokenRoyaltiesSplitter[tokenId], (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
+            (receiver, royaltyAmount) = (
+                _tokenRoyaltiesSplitter[tokenId],
+                (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS
+            );
+            return (receiver, royaltyAmount);
         }
         if (_defaultRoyaltyReceiver != address(0) && _defaultRoyaltyBPS != 0) {
-            return (_defaultRoyaltyReceiver, (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
+            (receiver, royaltyAmount) = (_defaultRoyaltyReceiver, (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
+            return (receiver, royaltyAmount);
         }
-        return (address(0), 0);
+        return (receiver, royaltyAmount);
     }
 
     /// @notice returns the EIP-2981 royalty receiver for each token (i.e. splitters) including the default royalty receiver.
@@ -134,13 +138,13 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @param tokenId is the token id for which royalty splitter should be returned.
     /// @return splitterAddress address of royalty splitter for the token
     function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable splitterAddress) {
-        return _tokenRoyaltiesSplitter[tokenId];
+        splitterAddress = _tokenRoyaltiesSplitter[tokenId];
     }
 
     /// @notice returns the address of royalty manager.
     /// @return managerAddress address of royalty manager.
     function getRoyaltyManager() external view returns (address managerAddress) {
-        return royaltyManager;
+        managerAddress = royaltyManager;
     }
 
     /// @notice set royalty manager address
