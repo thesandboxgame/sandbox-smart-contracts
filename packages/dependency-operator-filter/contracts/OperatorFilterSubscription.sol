@@ -15,7 +15,7 @@ contract OperatorFilterSubscription is Ownable {
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     constructor() Ownable() {
-        // Subscribe and copy the entries of the Default subscription list of open sea.
+        // Subscribe and copy the entries of the Default subscription list of OpenSea.
         if (address(OPERATOR_FILTER_REGISTRY).code.length > 0) {
             OPERATOR_FILTER_REGISTRY.registerAndCopyEntries(address(this), DEFAULT_SUBSCRIPTION);
         }

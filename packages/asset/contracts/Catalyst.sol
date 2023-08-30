@@ -30,7 +30,7 @@ import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
 /// @title Catalyst
 /// @author The Sandbox
-/// @notice THis contract manages catalysts which are used to mint new assets.
+/// @notice This contract manages catalysts which are used to mint new assets.
 /// @dev An ERC1155 contract that manages catalysts, extends multiple OpenZeppelin contracts to
 /// provide a variety of features including, AccessControl, URIStorage, Burnable and more.
 /// The contract includes support for meta transactions.
@@ -235,7 +235,7 @@ contract Catalyst is
     /// @param to address to which the token will be transfered.
     /// @param id the token type transfered.
     /// @param value amount of token transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeTransferFrom(
         address from,
         address to,
@@ -252,7 +252,7 @@ contract Catalyst is
     /// @param to address to which the token will be transfered.
     /// @param ids ids of each token type transfered.
     /// @param values amount of each token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -293,7 +293,7 @@ contract Catalyst is
         return super.supportsInterface(interfaceId);
     }
 
-    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".

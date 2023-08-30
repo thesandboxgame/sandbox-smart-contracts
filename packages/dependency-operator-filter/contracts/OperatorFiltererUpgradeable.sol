@@ -7,7 +7,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 
 ///@title OperatorFiltererUpgradeable
 ///@author The SandBox
-///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's addess could be set using a setter which could be implemented in inherting contract
+///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's address could be set using a setter which could be implemented in inheriting contract
 abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
     event OperatorFilterRegistrySet(address indexed registry);
 
