@@ -77,7 +77,7 @@ contract Catalyst is
         address _defaultMinter,
         string[] memory _catalystIpfsCID,
         address _royaltyManager
-    ) public initializer {
+    ) external initializer {
         require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
         require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
         require(_subscription != address(0), "Catalyst: subscription can't be zero");

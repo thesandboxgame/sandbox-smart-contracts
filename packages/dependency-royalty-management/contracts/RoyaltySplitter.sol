@@ -113,7 +113,7 @@ contract RoyaltySplitter is
 
     /// @notice Splits and forwards ETH to the royalty receivers
     /// @dev normally ETH should be split automatically by receive function.
-    function splitETH() public payable {
+    function splitETH() external payable {
         _splitETH(address(this).balance);
     }
 
@@ -146,7 +146,7 @@ contract RoyaltySplitter is
     /// @notice split ERC20 Tokens owned by this contract.
     /// @dev can only be called by one of the recipients
     /// @param erc20Contract the address of the tokens to be split.
-    function splitERC20Tokens(IERC20 erc20Contract) public {
+    function splitERC20Tokens(IERC20 erc20Contract) external {
         require(_splitERC20Tokens(erc20Contract), "Split: ERC20 split failed");
     }
 
