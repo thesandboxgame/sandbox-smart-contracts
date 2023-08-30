@@ -6,11 +6,11 @@ import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overri
 /// @title IRoyaltyManager
 /// @notice interface for RoyaltyManager Contract
 interface IRoyaltyManager {
-    event RecipientSet(address commonRecipient);
+    event RecipientSet(address indexed commonRecipient);
 
     event SplitSet(uint16 commonSplit);
 
-    event RoyaltySet(uint16 royaltyBps, address contractAddress);
+    event RoyaltySet(uint16 royaltyBps, address indexed contractAddress);
 
     event TrustedForwarderSet(address indexed previousForwarder, address indexed newForwarder);
 
