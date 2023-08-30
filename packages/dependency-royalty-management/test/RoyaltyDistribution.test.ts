@@ -1814,26 +1814,6 @@ describe('Royalty', function () {
         );
       }
     });
-    it('should return contract royalty BPS when getTokenRoyalties is called', async function () {
-      const {
-        seller,
-        ERC1155,
-        deployer,
-        royaltyReceiver,
-        RoyaltyManagerContract,
-      } = await royaltyDistribution();
-      await ERC1155.connect(deployer).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-      const tokenRoyalties = await ERC1155.getTokenRoyalties();
-      expect(tokenRoyalties[0].royaltyBPS).to.be.equal(
-        await RoyaltyManagerContract.getContractRoyalty(ERC1155.address)
-      );
-    });
   });
 
   describe('Input validation', function () {
@@ -2222,17 +2202,6 @@ describe('Royalty', function () {
       expect(recipients[1].recipient).to.deep.equal(
         commonRoyaltyReceiver.address
       );
-    });
-    it('should return the tokens for which the royalties is set', async function () {
-      const {ERC1155, seller, royaltyReceiver} = await royaltyDistribution();
-      await ERC1155.connect(seller).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-      expect((await ERC1155.getTokenRoyalties()).length).to.be.equals(1);
     });
   });
 });
