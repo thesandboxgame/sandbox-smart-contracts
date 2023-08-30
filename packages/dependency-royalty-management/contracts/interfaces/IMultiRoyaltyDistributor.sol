@@ -10,9 +10,9 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
 
-    event DefaultRoyaltyReceiverSet(address recipient);
+    event DefaultRoyaltyReceiverSet(address indexed recipient);
 
-    event RoyaltyRecipientSet(address splitter, address recipient);
+    event RoyaltyRecipientSet(address indexed splitter, address indexed recipient);
 
     event TokenRoyaltySplitterSet(uint256 tokenId, address splitterAddress);
 
