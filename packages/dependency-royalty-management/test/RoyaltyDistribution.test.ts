@@ -1782,10 +1782,6 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-<<<<<<< HEAD
-
-=======
->>>>>>> a4a8444b (feat : added test cases)
       const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
@@ -1800,10 +1796,6 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-<<<<<<< HEAD
-
-=======
->>>>>>> a4a8444b (feat : added test cases)
       const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
       const mintTx2 = await ERC1155.connect(deployer).mint(
