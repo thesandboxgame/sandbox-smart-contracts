@@ -47,11 +47,7 @@ contract RoyaltySplitter is
 
     event ETHTransferred(address indexed account, uint256 amount);
     event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
-<<<<<<< HEAD
     event RecipientSet(address indexed recipientAddress);
-=======
-    event RecipientSet(address indexed newRecipient);
->>>>>>> 0a587f5d (feat : added events after sensitive changes)
 
     function supportsInterface(bytes4 interfaceId)
         public
