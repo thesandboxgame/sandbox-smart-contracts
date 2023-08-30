@@ -157,20 +157,20 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param creator the address of the creator
     /// @return creatorSplitterAddress splitter's address deployed for a creator
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable creatorSplitterAddress) {
-        return creatorRoyaltiesSplitter[creator];
+        creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
     }
 
     /// @notice returns the amount of basis points allocated to the creator
     /// @return creatorSplit which is 10000 - commonSplit
     function getCreatorSplit() external view returns (uint16 creatorSplit) {
-        return TOTAL_BASIS_POINTS - commonSplit;
+        creatorSplit = TOTAL_BASIS_POINTS - commonSplit;
     }
 
     /// @notice returns the commonRecipient and EIP2981 royalty bps
     /// @return recipient address of common royalty recipient
     /// @return royaltySplit contract EIP2981 royalty bps
     function getRoyaltyInfo() external view returns (address payable recipient, uint16 royaltySplit) {
-        return (commonRecipient, contractRoyalty[msg.sender]);
+        (recipient, royaltySplit) = (commonRecipient, contractRoyalty[msg.sender]);
     }
 
     /// @notice returns the EIP2981 royalty bps
