@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 /// @author The Sandbox
 /// @notice This contract is meant to register and copy the default subscription of the OpenSea for the operator filter and our Token contract are supposed to subscribe to this contract on openSea operator filter registry
 contract OperatorFilterSubscription is Ownable {
-    address public constant DEFAULT_SUBSCRIPTION = address(0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6);
+    address public constant DEFAULT_SUBSCRIPTION = 0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6;
 
     // solhint-disable-next-line const-name-snakecase
     IOperatorFilterRegistry public constant OPERATOR_FILTER_REGISTRY =
