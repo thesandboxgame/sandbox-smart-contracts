@@ -64,24 +64,6 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         }
     }
 
-    /// @notice Returns royalty receivers and their split of royalty for each token
-    /// @return royaltyConfigs receivers and their split array as long as the number of tokens.
-    function getTokenRoyalties() external view override returns (TokenRoyaltyConfig[] memory royaltyConfigs) {
-        royaltyConfigs = new TokenRoyaltyConfig[](_tokensWithRoyalties.length);
-        uint16 contractRoyaltyBPS = IRoyaltyManager(royaltyManager).getContractRoyalty(address(this));
-        for (uint256 i; i < _tokensWithRoyalties.length; ++i) {
-            TokenRoyaltyConfig memory royaltyConfig;
-            uint256 tokenId = _tokensWithRoyalties[i];
-            address splitterAddress = _tokenRoyaltiesSplitter[tokenId];
-            if (splitterAddress != address(0)) {
-                royaltyConfig.recipients = IRoyaltySplitter(splitterAddress).getRecipients();
-            }
-            royaltyConfig.tokenId = tokenId;
-            royaltyConfigs[i] = royaltyConfig;
-            royaltyConfigs[i].royaltyBPS = contractRoyaltyBPS;
-        }
-    }
-
     /// @notice EIP 2981 royalty info function to return the royalty receiver and royalty amount
     /// @param tokenId of the token for which the royalty is needed to be distributed
     /// @param value the amount on which the royalty is calculated

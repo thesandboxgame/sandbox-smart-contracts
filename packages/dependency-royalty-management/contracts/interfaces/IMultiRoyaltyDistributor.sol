@@ -34,11 +34,6 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     ) external;
 
     /**
-     * @dev Get all token royalty configurations
-     */
-    function getTokenRoyalties() external view returns (TokenRoyaltyConfig[] memory);
-
-    /**
      * @dev Helper function to get all splits contracts
      */
     function getAllSplits() external view returns (address payable[] memory);
