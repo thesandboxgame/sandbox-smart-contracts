@@ -76,6 +76,19 @@ export const splitterAbi = [
     type: 'event',
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'recipientAddress',
+        type: 'address',
+      },
+    ],
+    name: 'RecipientSet',
+    type: 'event',
+  },
+  {
     inputs: [],
     name: '_recipient',
     outputs: [
@@ -142,6 +155,25 @@ export const splitterAbi = [
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'forwarder',
+        type: 'address',
+      },
+    ],
+    name: 'isTrustedForwarder',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {

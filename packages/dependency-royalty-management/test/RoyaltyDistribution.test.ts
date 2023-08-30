@@ -1727,6 +1727,7 @@ describe('Royalty', function () {
     it('should emit Token Royalty Splitter set event when a token is minted for first time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
+
       const mintTx = await ERC1155.connect(deployer).mint(
         seller.address,
         1,
@@ -1735,7 +1736,8 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      const splitterSetEvent = mintResult.events[3];
+
+      const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
     it('should not emit Token Royalty Splitter set event when a token is minted for second time', async function () {
@@ -1750,7 +1752,7 @@ describe('Royalty', function () {
       );
       const mintResult = await mintTx.wait();
 
-      const splitterSetEvent = mintResult.events[3];
+      const splitterSetEvent = mintResult.events[4];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
       const mintTx2 = await ERC1155.connect(deployer).mint(
         seller.address,
@@ -1766,7 +1768,7 @@ describe('Royalty', function () {
         );
       }
     });
-    it('should emit Token Royalty Set event when a token minted for the first time', async function () {
+    it('should emit recipient set event when a token minted for the first time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
       const mintTx = await ERC1155.connect(deployer).mint(
@@ -1777,10 +1779,12 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      const tokenRoyaltySetEvent = mintResult.events[4];
-      expect(tokenRoyaltySetEvent.event).to.equal('TokenRoyaltySet');
+      const log = mintResult.logs[1];
+      expect(log.topics[0]).to.be.equal(
+        ethers.utils.id('RecipientSet(address)')
+      );
     });
-    it('should not emit Token Royalty Set event when token is minted for second time', async function () {
+    it('should not emit recipient set event when token is minted for second time', async function () {
       const {seller, ERC1155, deployer, royaltyReceiver} =
         await royaltyDistribution();
       const mintTx = await ERC1155.connect(deployer).mint(
@@ -1791,8 +1795,11 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      const tokenRoyaltySetEvent = mintResult.events[4];
-      expect(tokenRoyaltySetEvent.event).to.equal('TokenRoyaltySet');
+      const log = mintResult.logs[1];
+      expect(log.topics[0]).to.be.equal(
+        ethers.utils.id('RecipientSet(address)')
+      );
+
       const mintTx2 = await ERC1155.connect(deployer).mint(
         seller.address,
         1,
@@ -1802,7 +1809,9 @@ describe('Royalty', function () {
       );
       const mintResult2 = await mintTx2.wait();
       for (let i = 0; i < mintResult2.events.length; i++) {
-        expect(mintResult.events[i].event).to.not.equal('TokenRoyaltySet');
+        expect(mintResult.logs[i].topics[0]).to.not.equal(
+          ethers.utils.id('RecipientSet(address)')
+        );
       }
     });
   });
