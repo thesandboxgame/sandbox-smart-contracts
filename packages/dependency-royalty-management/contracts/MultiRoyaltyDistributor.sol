@@ -57,12 +57,10 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
             if (_tokenRoyaltiesSplitter[tokenId] != creatorSplitterAddress) {
                 _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
-                emit TokenRoyaltySet(tokenId, recipient);
             }
         } else {
             _tokensWithRoyalties.push(tokenId);
             _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
-            emit TokenRoyaltySet(tokenId, recipient);
         }
     }
 

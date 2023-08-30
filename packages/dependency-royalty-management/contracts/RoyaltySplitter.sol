@@ -45,6 +45,7 @@ contract RoyaltySplitter is
 
     event ETHTransferred(address indexed account, uint256 amount);
     event ERC20Transferred(address indexed erc20Contract, address indexed account, uint256 amount);
+    event RecipientSet(address indexed recipientAddress);
 
     function supportsInterface(bytes4 interfaceId)
         public
@@ -62,7 +63,7 @@ contract RoyaltySplitter is
     /// @param royaltyManager the address of the royalty manager contract
     function initialize(address payable recipient, address royaltyManager) public initializer {
         _royaltyManager = IRoyaltyManager(royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
-        _recipient = recipient;
+        _setRecipient(recipient);
         __Ownable_init();
     }
 
@@ -70,13 +71,14 @@ contract RoyaltySplitter is
     /// @dev only the owner can call this.
     /// @param recipients the array of recipients which should only have one recipient.
     function setRecipients(Recipient[] calldata recipients) external override onlyOwner {
-        _setRecipients(recipients);
+        require(recipients.length == 1, "Invalid recipents length");
+        _setRecipient(recipients[0].recipient);
     }
 
-    function _setRecipients(Recipient[] calldata recipients) private {
+    function _setRecipient(address payable recipientAddress) private {
         delete _recipient;
-        require(recipients.length == 1, "Invalid recipents length");
-        _recipient = recipients[0].recipient;
+        _recipient = recipientAddress;
+        emit RecipientSet(recipientAddress);
     }
 
     /// @notice to get recipients of royalty through this splitter and their splits of royalty.

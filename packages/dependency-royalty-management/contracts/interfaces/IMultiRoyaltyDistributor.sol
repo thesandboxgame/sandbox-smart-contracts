@@ -10,7 +10,6 @@ import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overri
  */
 interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
-    event TokenRoyaltySet(uint256 tokenId, address recipient);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
 
     event DefaultRoyaltyReceiverSet(address recipient);
