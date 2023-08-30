@@ -157,7 +157,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         return (commonRecipient, contractRoyalty[msg.sender]);
     }
 
-    /// @notice returns the EIP2981 royalty split
+    /// @notice returns the EIP2981 royalty bps
     /// @param _contractAddress the address of the contract for which the royalty is required
     /// @return royaltyBps royalty bps of the contract
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) {
