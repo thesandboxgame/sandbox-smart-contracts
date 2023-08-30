@@ -57,13 +57,13 @@ contract RoyaltySplitter is
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(IERC165, ERC165Upgradeable)
-        returns (bool)
+        returns (bool isSupported)
     {
         return interfaceId == type(IRoyaltySplitter).interfaceId || super.supportsInterface(interfaceId);
     }
@@ -93,11 +93,11 @@ contract RoyaltySplitter is
     }
 
     /// @notice to get recipients of royalty through this splitter and their splits of royalty.
-    /// @return recipients of royalty through this splitter and their splits of royalty.
-    function getRecipients() external view override returns (Recipient[] memory) {
+    /// @return recipients array of royalty recipients through the splitter and their splits of royalty.
+    function getRecipients() external view override returns (Recipient[] memory recipients) {
         Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
         uint16 creatorSplit = royaltyManager.getCreatorSplit();
-        Recipient[] memory recipients = new Recipient[](2);
+        recipients = new Recipient[](2);
         recipients[0].recipient = recipient;
         recipients[0].bps = creatorSplit;
         recipients[1] = commonRecipient;
@@ -149,7 +149,7 @@ contract RoyaltySplitter is
         require(_splitERC20Tokens(erc20Contract), "Split: ERC20 split failed");
     }
 
-    function _splitERC20Tokens(IERC20 erc20Contract) internal returns (bool) {
+    function _splitERC20Tokens(IERC20 erc20Contract) internal returns (bool success) {
         try erc20Contract.balanceOf(address(this)) returns (uint256 balance) {
             if (balance == 0) {
                 return false;
@@ -169,7 +169,6 @@ contract RoyaltySplitter is
             unchecked {
                 for (uint256 i = _recipients.length - 1; i > 0; i--) {
                     Recipient memory _recipient = _recipients[i];
-                    bool success;
                     (success, amountToSend) = balance.tryMul(_recipient.bps);
                     require(success, "RoyaltySplitter: Multiplication Overflow");
 

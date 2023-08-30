@@ -38,13 +38,13 @@ abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(ERC165Upgradeable, IERC165Upgradeable)
-        returns (bool)
+        returns (bool isSupported)
     {
         return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
