@@ -76,11 +76,37 @@ export const splitterAbi = [
     type: 'event',
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'recipientAddress',
+        type: 'address',
+      },
+    ],
+    name: 'RecipientSet',
+    type: 'event',
+  },
+  {
     inputs: [],
     name: '_recipient',
     outputs: [
       {
         internalType: 'address payable',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: '_royaltyManager',
+    outputs: [
+      {
+        internalType: 'contract IRoyaltyManager',
         name: '',
         type: 'address',
       },
@@ -122,13 +148,32 @@ export const splitterAbi = [
       },
       {
         internalType: 'address',
-        name: 'sandBoxRegistry',
+        name: 'royaltyManager',
         type: 'address',
       },
     ],
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'forwarder',
+        type: 'address',
+      },
+    ],
+    name: 'isTrustedForwarder',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -193,7 +238,7 @@ export const splitterAbi = [
     inputs: [],
     name: 'splitETH',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {
