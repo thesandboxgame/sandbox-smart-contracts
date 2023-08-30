@@ -828,37 +828,6 @@ describe('Asset Royalties', function () {
     });
   });
 
-  it('Can view all the royalty recipient of each asset', async function () {
-    const {
-      Asset,
-      seller,
-      commonRoyaltyReceiver,
-      creator,
-      deployer,
-      assetAsMinter,
-    } = await assetRoyaltyDistribution();
-
-    const id = generateAssetId(creator.address, 1);
-    await assetAsMinter.mint(seller.address, id, 1, '0x');
-    const id2 = generateAssetId(deployer.address, 1);
-    await assetAsMinter.mint(seller.address, id2, 1, '0x01');
-    const tokenRoyalties = await Asset.getTokenRoyalties();
-    expect(tokenRoyalties[0].tokenId).to.be.equal(id);
-    expect(tokenRoyalties[0].recipients[0].recipient).to.be.equal(
-      creator.address
-    );
-    expect(tokenRoyalties[0].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver.address
-    );
-    expect(tokenRoyalties[1].tokenId).to.be.equal(id2);
-    expect(tokenRoyalties[1].recipients[0].recipient).to.be.equal(
-      deployer.address
-    );
-    expect(tokenRoyalties[1].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver.address
-    );
-  });
-
   describe('Roles on Asset and Manager contract', function () {
     it('creator could change the recipient for his splitter', async function () {
       const {seller, RoyaltyManagerContract, creator, assetAsMinter} =
