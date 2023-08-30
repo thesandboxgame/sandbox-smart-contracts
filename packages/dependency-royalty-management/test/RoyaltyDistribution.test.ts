@@ -1782,7 +1782,7 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      const splitterSetEvent = mintResult.events[4];
+      const splitterSetEvent = mintResult.events[5];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
     });
     it('should not emit Token Royalty Splitter set event when a token is minted for second time', async function () {
@@ -1796,7 +1796,7 @@ describe('Royalty', function () {
         '0x'
       );
       const mintResult = await mintTx.wait();
-      const splitterSetEvent = mintResult.events[4];
+      const splitterSetEvent = mintResult.events[5];
       expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
       const mintTx2 = await ERC1155.connect(deployer).mint(
         seller.address,
