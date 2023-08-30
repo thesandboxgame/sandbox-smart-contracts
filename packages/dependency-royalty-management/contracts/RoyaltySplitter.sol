@@ -76,6 +76,7 @@ contract RoyaltySplitter is
         royaltyManager = IRoyaltyManager(_royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _setRecipient(recipientAddress);
         __Ownable_init();
+        __ERC165_init();
     }
 
     /// @notice sets recipient for the splitter

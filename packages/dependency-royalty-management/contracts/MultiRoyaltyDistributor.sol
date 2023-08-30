@@ -24,6 +24,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     // solhint-disable-next-line func-name-mixedcase
     function __MultiRoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
         _setRoyaltyManager(_royaltyManager);
+        __ERC165_init_unchained();
     }
 
     /// @notice Query if a contract implements interface `id`.
