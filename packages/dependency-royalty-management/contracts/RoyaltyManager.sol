@@ -177,7 +177,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @param _contractAddress the address of the contract for which the royalty is required
     /// @return royaltyBps royalty bps of the contract
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) {
-        return contractRoyalty[_contractAddress];
+        royaltyBps = contractRoyalty[_contractAddress];
     }
 
     uint256[46] private __gap;
