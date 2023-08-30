@@ -225,7 +225,7 @@ contract Catalyst is
 
     /// @dev Sets `baseURI` as the `_baseURI` for all tokens
     function _setBaseURI(string memory baseURI) internal virtual override {
-        _baseURI = baseURI;
+        super._setBaseURI(baseURI);
         emit BaseURISet(baseURI);
     }
 
