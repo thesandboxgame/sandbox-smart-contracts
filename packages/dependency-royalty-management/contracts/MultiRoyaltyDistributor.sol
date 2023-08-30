@@ -28,13 +28,13 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(ERC165Upgradeable, IERC165)
-        returns (bool)
+        returns (bool isSupported)
     {
         return
             interfaceId == type(IEIP2981).interfaceId ||
@@ -68,9 +68,14 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice EIP 2981 royalty info function to return the royalty receiver and royalty amount
     /// @param tokenId of the token for which the royalty is needed to be distributed
     /// @param value the amount on which the royalty is calculated
-    /// @return address the royalty receiver
-    /// @return value the EIP2981 royalty
-    function royaltyInfo(uint256 tokenId, uint256 value) public view override returns (address, uint256) {
+    /// @return receiver address the royalty receiver
+    /// @return royaltyAmount value the EIP2981 royalty
+    function royaltyInfo(uint256 tokenId, uint256 value)
+        public
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
         (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
             IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
@@ -105,14 +110,14 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice returns the royalty recipients for each tokenId.
     /// @dev returns the default address for tokens with no recipients.
     /// @param tokenId is the token id for which the recipient should be returned.
-    /// @return addresses of royalty recipient of the token.
-    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory) {
+    /// @return defaultRecipient addresses of royalty recipient of the token.
+    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory defaultRecipient) {
         address payable splitterAddress = _tokenRoyaltiesSplitter[tokenId];
         (address payable _defaultRoyaltyReceiver, ) = IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (splitterAddress != address(0)) {
             return IRoyaltySplitter(splitterAddress).getRecipients();
         }
-        Recipient[] memory defaultRecipient = new Recipient[](1);
+        defaultRecipient = new Recipient[](1);
         defaultRecipient[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
         return defaultRecipient;
     }
@@ -127,14 +132,14 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
 
     /// @notice returns the address of token royalty splitter.
     /// @param tokenId is the token id for which royalty splitter should be returned.
-    /// @return address of royalty splitter for the token.
-    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable) {
+    /// @return splitterAddress address of royalty splitter for the token.
+    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable splitterAddress) {
         return _tokenRoyaltiesSplitter[tokenId];
     }
 
     /// @notice returns the address of royalty manager.
-    /// @return address of royalty manager.
-    function getRoyaltyManager() external view returns (address) {
+    /// @return  managerAddress address of royalty manager.
+    function getRoyaltyManager() external view returns (address managerAddress) {
         return royaltyManager;
     }
 

@@ -89,8 +89,8 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice get the current trustedForwarder address
-    /// @return address of current TrustedForwarder
-    function getTrustedForwarder() public view returns (address) {
+    /// @return trustedForwarder address of current TrustedForwarder
+    function getTrustedForwarder() public view returns (address trustedForwarder) {
         return _trustedForwarder;
     }
 
@@ -138,39 +138,39 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @dev should only called once per creator
     /// @param creator the address of the creator
     /// @param recipient the wallet of the recipient where they would receive their royalty
-    /// @return creatorSplitterAddress deployed for a creator
+    /// @return creatorSplitterAddress creatorSplitterAddress deployed for a creator
     function deploySplitter(address creator, address payable recipient)
         external
         onlyRole(SPLITTER_DEPLOYER_ROLE)
-        returns (address payable)
+        returns (address payable creatorSplitterAddress)
     {
-        address payable _creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
-        if (_creatorSplitterAddress == address(0)) {
-            _creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
-            RoyaltySplitter(_creatorSplitterAddress).initialize(recipient, address(this));
-            creatorRoyaltiesSplitter[creator] = _creatorSplitterAddress;
-            emit SplitterDeployed(creator, recipient, _creatorSplitterAddress);
+        creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
+        if (creatorSplitterAddress == address(0)) {
+            creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
+            RoyaltySplitter(creatorSplitterAddress).initialize(recipient, address(this));
+            creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
+            emit SplitterDeployed(creator, recipient, creatorSplitterAddress);
         }
-        return _creatorSplitterAddress;
+        return creatorSplitterAddress;
     }
 
     /// @notice returns the address of splitter of a creator.
     /// @param creator the address of the creator
     /// @return creatorSplitterAddress deployed for a creator
-    function getCreatorRoyaltySplitter(address creator) external view returns (address payable) {
+    function getCreatorRoyaltySplitter(address creator) external view returns (address payable creatorSplitterAddress) {
         return creatorRoyaltiesSplitter[creator];
     }
 
     /// @notice returns the amount of basis points allocated to the creator
     /// @return creatorSplit which is 10000 - commonSplit
-    function getCreatorSplit() external view returns (uint16) {
+    function getCreatorSplit() external view returns (uint16 creatorSplit) {
         return TOTAL_BASIS_POINTS - commonSplit;
     }
 
     /// @notice returns the commonRecipient and EIP2981 royalty bps
-    /// @return commonRecipient address of common royalty recipient
-    /// @return contract EIP2981 royalty bps
-    function getRoyaltyInfo() external view returns (address payable, uint16) {
+    /// @return recipient address of common royalty recipient
+    /// @return royaltySplit contract EIP2981 royalty bps
+    function getRoyaltyInfo() external view returns (address payable recipient, uint16 royaltySplit) {
         return (commonRecipient, contractRoyalty[msg.sender]);
     }
 
