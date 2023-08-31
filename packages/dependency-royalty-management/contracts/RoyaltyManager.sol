@@ -69,7 +69,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice sets the trustedForwarder address to be used by the splitters
     /// @dev can only be called by the admin
-    /// new splitters will be deployed with this setting; existing splitters will have to apply it
+    /// new splitters will read this value
     /// @param _newForwarder is the new trusted forwarder address
     function setTrustedForwarder(address _newForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = _newForwarder;
@@ -150,9 +150,9 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         return TOTAL_BASIS_POINTS - commonSplit;
     }
 
-    /// @notice returns the commonRecipient and EIP2981 royalty split
+    /// @notice returns the commonRecipient and EIP2981 royalty bps
     /// @return commonRecipient address of common royalty recipient
-    /// @return royaltySplit
+    /// @return contract EIP2981 royalty bps
     function getRoyaltyInfo() external view returns (address payable, uint16) {
         return (commonRecipient, contractRoyalty[msg.sender]);
     }
