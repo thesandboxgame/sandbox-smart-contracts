@@ -2088,7 +2088,7 @@ describe('Royalty', function () {
       );
       const OverflowERC20 = await TestERC20Factory.deploy();
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
