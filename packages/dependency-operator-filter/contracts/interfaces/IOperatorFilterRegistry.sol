@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 interface IOperatorFilterRegistry {
     ///@notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns
     ///        true if supplied registrant address is not registered.
-    function isOperatorAllowed(address registrant, address operator) external view returns (bool);
+    function isOperatorAllowed(address registrant, address operator) external view returns (bool isAllowed);
 
     ///@notice Registers an address with the registry. May be called by address itself or by EIP-173 owner.
     function register(address registrant) external;
@@ -66,46 +66,44 @@ interface IOperatorFilterRegistry {
 
     ///@notice Get the set of addresses subscribed to a given registrant.
     ///        Note that order is not guaranteed as updates are made.
-
-    function subscribers(address registrant) external returns (address[] memory);
+    function subscribers(address registrant) external returns (address[] memory subscribersList);
 
     ///@notice Get the subscriber at a given index in the set of addresses subscribed to a given registrant.
     ///        Note that order is not guaranteed as updates are made.
-    function subscriberAt(address registrant, uint256 index) external returns (address);
+    function subscriberAt(address registrant, uint256 index) external returns (address subscriberAddress);
 
     ///@notice Copy filtered operators and codeHashes from a different registrantToCopy to addr.
-
     function copyEntriesOf(address registrant, address registrantToCopy) external;
 
     ///@notice Returns true if operator is filtered by a given address or its subscription.
-    function isOperatorFiltered(address registrant, address operator) external returns (bool);
+    function isOperatorFiltered(address registrant, address operator) external returns (bool isFiltered);
 
     ///@notice Returns true if the hash of an address's code is filtered by a given address or its subscription.
-    function isCodeHashOfFiltered(address registrant, address operatorWithCode) external returns (bool);
+    function isCodeHashOfFiltered(address registrant, address operatorWithCode) external returns (bool isFiltered);
 
     ///@notice Returns true if a codeHash is filtered by a given address or its subscription.
-    function isCodeHashFiltered(address registrant, bytes32 codeHash) external returns (bool);
+    function isCodeHashFiltered(address registrant, bytes32 codeHash) external returns (bool isFiltered);
 
     ///@notice Returns a list of filtered operators for a given address or its subscription.
-    function filteredOperators(address addr) external returns (address[] memory);
+    function filteredOperators(address addr) external returns (address[] memory operatorList);
 
     ///@notice Returns the set of filtered codeHashes for a given address or its subscription.
     ///        Note that order is not guaranteed as updates are made.
-    function filteredCodeHashes(address addr) external returns (bytes32[] memory);
+    function filteredCodeHashes(address addr) external returns (bytes32[] memory codeHashList);
 
     ///@notice Returns the filtered operator at the given index of the set of filtered operators for a given address or
     ///        its subscription.
     ///        Note that order is not guaranteed as updates are made.
-    function filteredOperatorAt(address registrant, uint256 index) external returns (address);
+    function filteredOperatorAt(address registrant, uint256 index) external returns (address operator);
 
     ///@notice Returns the filtered codeHash at the given index of the list of filtered codeHashes for a given address or
     ///        its subscription.
     ///        Note that order is not guaranteed as updates are made.
-    function filteredCodeHashAt(address registrant, uint256 index) external returns (bytes32);
+    function filteredCodeHashAt(address registrant, uint256 index) external returns (bytes32 codeHash);
 
     ///@notice Returns true if an address has registered
-    function isRegistered(address addr) external returns (bool);
+    function isRegistered(address addr) external returns (bool registered);
 
     ///@dev Convenience method to compute the code hash of an arbitrary contract
-    function codeHashOf(address addr) external returns (bytes32);
+    function codeHashOf(address addr) external returns (bytes32 codeHash);
 }

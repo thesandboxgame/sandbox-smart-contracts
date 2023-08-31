@@ -29,24 +29,24 @@ interface IRoyaltyManager {
     function getCommonRecipient() external view returns (Recipient memory recipient);
 
     ///@notice returns the amount of basis points allocated to the creator
-    ///@return creator split
-    function getCreatorSplit() external view returns (uint16);
+    ///@return creatorSplit the share of creator in bps
+    function getCreatorSplit() external view returns (uint16 creatorSplit);
 
     ///@notice returns the commonRecipient and EIP2981 royalty split
-    ///@return address of common royalty recipient
-    ///@return royalty split
-    function getRoyaltyInfo() external view returns (address payable, uint16);
+    ///@return recipient address of common royalty recipient
+    ///@return royaltySplit contract EIP2981 royalty bps
+    function getRoyaltyInfo() external view returns (address payable recipient, uint16 royaltySplit);
 
     ///@notice deploys splitter for creator
     ///@param creator the address of the creator
     ///@param recipient the wallet of the recipient where they would receive their royalty
-    ///@return splitter address deployed for creator
-    function deploySplitter(address creator, address payable recipient) external returns (address payable);
+    ///@return creatorSplitterAddress splitter's address deployed for creator
+    function deploySplitter(address creator, address payable recipient) external returns (address payable creatorSplitterAddress);
 
     ///@notice returns the address of splitter of a creator.
     ///@param creator the address of the creator
-    ///@return address of creator splitter
-    function getCreatorRoyaltySplitter(address creator) external view returns (address payable);
+    ///@return creatorSplitterAddress splitter's address deployed for a creator
+    function getCreatorRoyaltySplitter(address creator) external view returns (address payable creatorSplitterAddress);
 
     ///@notice returns the EIP2981 royalty split
     ///@param _contractAddress the address of the contract for which the royalty is required
@@ -58,6 +58,6 @@ interface IRoyaltyManager {
     function setTrustedForwarder(address _newForwarder) external;
 
     ///@notice get the current trustedForwarder address
-    ///@return address of current trusted Forwarder
-    function getTrustedForwarder() external view returns (address);
+    ///@return trustedForwarder address of current trusted Forwarder
+    function getTrustedForwarder() external view returns (address trustedForwarder);
 }
