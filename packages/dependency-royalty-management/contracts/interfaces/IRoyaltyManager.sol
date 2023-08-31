@@ -41,7 +41,9 @@ interface IRoyaltyManager {
     ///@param creator the address of the creator
     ///@param recipient the wallet of the recipient where they would receive their royalty
     ///@return creatorSplitterAddress splitter's address deployed for creator
-    function deploySplitter(address creator, address payable recipient) external returns (address payable creatorSplitterAddress);
+    function deploySplitter(address creator, address payable recipient)
+        external
+        returns (address payable creatorSplitterAddress);
 
     ///@notice returns the address of splitter of a creator.
     ///@param creator the address of the creator
