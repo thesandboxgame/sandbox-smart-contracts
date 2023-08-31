@@ -3,10 +3,8 @@ pragma solidity ^0.8.0;
 
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 
-/**
- * @title IRoyaltyManager
- * @notice interface for RoyaltyManager Contract
- */
+/// @title IRoyaltyManager
+/// @notice interface for RoyaltyManager Contract
 interface IRoyaltyManager {
     event RecipientSet(address commonRecipient);
 
@@ -18,68 +16,48 @@ interface IRoyaltyManager {
 
     event SplitterDeployed(address indexed creator, address indexed recipient, address splitterAddress);
 
-    /**
-     * @notice sets the common recipient
-     * @param _commonRecipient is the common recipient for all the splitters
-     */
+    ///@notice sets the common recipient
+    ///@param _commonRecipient is the common recipient for all the splitters
     function setRecipient(address payable _commonRecipient) external;
 
-    /**
-     * @notice sets the common split
-     * @param commonSplit split for the common recipient
-     */
+    ///@notice sets the common split
+    ///@param commonSplit split for the common recipient
     function setSplit(uint16 commonSplit) external;
 
-    /**
-     * @notice to be called by the splitters to get the common recipient and split
-     * @return recipient which has the common recipient and split
-     */
+    ///@notice to be called by the splitters to get the common recipient and split
+    ///@return recipient which has the common recipient and split
     function getCommonRecipient() external view returns (Recipient memory recipient);
 
-    /**
-     * @notice returns the amount of basis points allocated to the creator
-     * @return creator split
-     */
+    ///@notice returns the amount of basis points allocated to the creator
+    ///@return creator split
     function getCreatorSplit() external view returns (uint16);
 
-    /**
-     * @notice returns the commonRecipient and EIP2981 royalty split
-     * @return address of common royalty recipient
-     * @return royalty split
-     */
+    ///@notice returns the commonRecipient and EIP2981 royalty split
+    ///@return address of common royalty recipient
+    ///@return royalty split
     function getRoyaltyInfo() external view returns (address payable, uint16);
 
-    /**
-     * @notice deploys splitter for creator
-     * @param creator the address of the creator
-     * @param recipient the wallet of the recipient where they would receive their royalty
-     * @return splitter address deployed for creator
-     */
+    ///@notice deploys splitter for creator
+    ///@param creator the address of the creator
+    ///@param recipient the wallet of the recipient where they would receive their royalty
+    ///@return splitter address deployed for creator
     function deploySplitter(address creator, address payable recipient) external returns (address payable);
 
-    /**
-     * @notice returns the address of splitter of a creator.
-     * @param creator the address of the creator
-     * @return address of creator splitter
-     */
+    ///@notice returns the address of splitter of a creator.
+    ///@param creator the address of the creator
+    ///@return address of creator splitter
     function getCreatorRoyaltySplitter(address creator) external view returns (address payable);
 
-    /**
-     * @notice returns the EIP2981 royalty split
-     * @param _contractAddress the address of the contract for which the royalty is required
-     * @return royaltyBps royalty bps of the contract
-     */
+    ///@notice returns the EIP2981 royalty split
+    ///@param _contractAddress the address of the contract for which the royalty is required
+    ///@return royaltyBps royalty bps of the contract
     function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps);
 
-    /**
-     * @notice sets the trustedForwarder address to be used by the splitters
-     * @param _newForwarder is the new trusted forwarder address
-     */
+    ///@notice sets the trustedForwarder address to be used by the splitters
+    ///@param _newForwarder is the new trusted forwarder address
     function setTrustedForwarder(address _newForwarder) external;
 
-    /**
-     * @notice get the current trustedForwarder address
-     * @return address of current trusted Forwarder
-     */
+    ///@notice get the current trustedForwarder address
+    ///@return address of current trusted Forwarder
     function getTrustedForwarder() external view returns (address);
 }
