@@ -72,7 +72,7 @@ contract RoyaltySplitter is
     /// @dev can only be run once.
     /// @param recipientAddress the wallet of the creator when the contract is deployed
     /// @param _royaltyManager the address of the royalty manager contract
-    function initialize(address payable recipientAddress, address _royaltyManager) public initializer {
+    function initialize(address payable recipientAddress, address _royaltyManager) external initializer {
         royaltyManager = IRoyaltyManager(_royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _setRecipient(recipientAddress);
         __Ownable_init();
