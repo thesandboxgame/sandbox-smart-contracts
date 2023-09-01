@@ -36,10 +36,11 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         override(ERC165Upgradeable, IERC165)
         returns (bool isSupported)
     {
-        isSupported = (interfaceId == type(IEIP2981).interfaceId ||
+        return
+            interfaceId == type(IEIP2981).interfaceId ||
             interfaceId == type(IMultiRoyaltyDistributor).interfaceId ||
             interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
-            super.supportsInterface(interfaceId));
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice sets token royalty
@@ -78,17 +79,12 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
             IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
-            (receiver, royaltyAmount) = (
-                _tokenRoyaltiesSplitter[tokenId],
-                (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS
-            );
-            return (receiver, royaltyAmount);
+            return (_tokenRoyaltiesSplitter[tokenId], (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
         }
         if (_defaultRoyaltyReceiver != address(0) && _defaultRoyaltyBPS != 0) {
-            (receiver, royaltyAmount) = (_defaultRoyaltyReceiver, (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
-            return (receiver, royaltyAmount);
+            return (_defaultRoyaltyReceiver, (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
         }
-        return (receiver, royaltyAmount);
+        return (address(0), 0);
     }
 
     /// @notice returns the EIP-2981 royalty receiver for each token (i.e. splitters) including the default royalty receiver.
@@ -114,16 +110,16 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice returns the royalty recipients for each tokenId.
     /// @dev returns the default address for tokens with no recipients.
     /// @param tokenId is the token id for which the recipient should be returned.
-    /// @return defaultRecipient addresses of royalty recipient of the token.
-    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory defaultRecipient) {
+    /// @return recipients array of royalty recipients for the token
+    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory recipients) {
         address payable splitterAddress = _tokenRoyaltiesSplitter[tokenId];
         (address payable _defaultRoyaltyReceiver, ) = IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (splitterAddress != address(0)) {
             return IRoyaltySplitter(splitterAddress).getRecipients();
         }
-        defaultRecipient = new Recipient[](1);
-        defaultRecipient[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
-        return defaultRecipient;
+        recipients = new Recipient[](1);
+        recipients[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
+        return recipients;
     }
 
     /// @notice internal function to set the token royalty splitter
@@ -138,13 +134,13 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @param tokenId is the token id for which royalty splitter should be returned.
     /// @return splitterAddress address of royalty splitter for the token.
     function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable splitterAddress) {
-        splitterAddress = _tokenRoyaltiesSplitter[tokenId];
+        return _tokenRoyaltiesSplitter[tokenId];
     }
 
     /// @notice returns the address of royalty manager.
     /// @return  managerAddress address of royalty manager.
     function getRoyaltyManager() external view returns (address managerAddress) {
-        managerAddress = royaltyManager;
+        return royaltyManager;
     }
 
     /// @notice set royalty manager address
