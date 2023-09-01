@@ -46,13 +46,13 @@ abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
         override(ERC165Upgradeable, IERC165Upgradeable)
         returns (bool isSupported)
     {
-        isSupported = (interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId));
+        return (interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId));
     }
 
     /// @notice returns the royalty manager
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        royaltyManagerAddress = royaltyManager;
+        return royaltyManager;
     }
 
     /// @notice set royalty manager
