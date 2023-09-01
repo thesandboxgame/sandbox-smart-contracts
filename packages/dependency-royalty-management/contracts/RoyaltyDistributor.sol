@@ -53,7 +53,7 @@ abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     /// @notice returns the royalty manager
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        royaltyManagerAddress = royaltyManager;
+        return royaltyManager;
     }
 
     /// @notice set royalty manager
