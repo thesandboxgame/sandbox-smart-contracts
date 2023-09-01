@@ -3,10 +3,7 @@ pragma solidity ^0.8.0;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IMultiRoyaltyDistributor, IMultiRoyaltyRecipients} from "./interfaces/IMultiRoyaltyDistributor.sol";
-import {
-    IRoyaltySplitter,
-    IERC165
-} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {IRoyaltySplitter, IERC165} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IEIP2981} from "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
 import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 
@@ -30,13 +27,9 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
     /// @return isSupported `true` if the contract implements `id`.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC165Upgradeable, IERC165)
-        returns (bool isSupported)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, IERC165) returns (bool isSupported) {
         return
             interfaceId == type(IEIP2981).interfaceId ||
             interfaceId == type(IMultiRoyaltyDistributor).interfaceId ||
@@ -49,11 +42,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @param tokenId id of token
     /// @param recipient royalty recipient
     /// @param creator of the token
-    function _setTokenRoyalties(
-        uint256 tokenId,
-        address payable recipient,
-        address creator
-    ) internal {
+    function _setTokenRoyalties(uint256 tokenId, address payable recipient, address creator) internal {
         address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager).deploySplitter(creator, recipient);
 
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
@@ -71,14 +60,12 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @param value the amount on which the royalty is calculated
     /// @return receiver address the royalty receiver
     /// @return royaltyAmount value the EIP2981 royalty
-    function royaltyInfo(uint256 tokenId, uint256 value)
-        public
-        view
-        override
-        returns (address receiver, uint256 royaltyAmount)
-    {
-        (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
-            IRoyaltyManager(royaltyManager).getRoyaltyInfo();
+    function royaltyInfo(
+        uint256 tokenId,
+        uint256 value
+    ) public view override returns (address receiver, uint256 royaltyAmount) {
+        (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) = IRoyaltyManager(royaltyManager)
+            .getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
             return (_tokenRoyaltiesSplitter[tokenId], (value * _defaultRoyaltyBPS) / TOTAL_BASIS_POINTS);
         }
