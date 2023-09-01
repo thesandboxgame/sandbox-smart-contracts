@@ -293,7 +293,7 @@ contract Catalyst is
         return super.supportsInterface(interfaceId);
     }
 
-    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea. Can only be called by admin.
+    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of OpenSea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
