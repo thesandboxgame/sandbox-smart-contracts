@@ -7,7 +7,7 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer, upgradeAdmin, sandAdmin} = await getNamedAccounts();
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
-  await deployments.deploy('MultiGiveawayV1', {
+  await deployments.deploy('SignedMultiGiveaway', {
     from: deployer,
     contract:
       '@sandbox-smart-contracts/giveaway/contracts/SignedMultiGiveaway.sol:SignedMultiGiveaway',
@@ -26,5 +26,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['MultiGiveawayV1', 'MultiGiveawayV1_deploy', 'L2'];
+func.tags = ['SignedMultiGiveaway', 'SignedMultiGiveaway_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER_V2'];
