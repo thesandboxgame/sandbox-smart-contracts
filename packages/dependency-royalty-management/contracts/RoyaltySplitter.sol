@@ -88,7 +88,6 @@ contract RoyaltySplitter is
     }
 
     function _setRecipient(address payable recipientAddress) private {
-        delete recipient;
         recipient = recipientAddress;
         emit RecipientSet(recipientAddress);
     }
