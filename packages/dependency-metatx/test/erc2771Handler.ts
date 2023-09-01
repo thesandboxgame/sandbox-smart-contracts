@@ -38,6 +38,12 @@ function testContract(fixture: () => Promise<SetupType>) {
     expect(await contractAsDeployer.isTrustedForwarder(other.address)).to.be
       .true;
   });
+  it('should fail to set the same forwarder', async function () {
+    const {contractAsDeployer, trustedForwarder} = await loadFixture(fixture);
+    await expect(
+      contractAsDeployer.setTrustedForwarder(trustedForwarder.address)
+    ).to.revertedWith('forwarder already set');
+  });
   describe('from trusted forwarder', function () {
     it('get sender', async function () {
       const {trustedForwarder, contractAsTrustedForwarder} = await loadFixture(

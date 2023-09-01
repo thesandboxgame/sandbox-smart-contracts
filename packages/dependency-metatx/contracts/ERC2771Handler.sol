@@ -34,6 +34,7 @@ contract ERC2771Handler is ERC2771HandlerAbstract {
     /// @notice set the address of the trusted forwarder
     /// @param newForwarder the address of the new forwarder.
     function _setTrustedForwarder(address newForwarder) internal virtual {
+        require(newForwarder != _trustedForwarder, "forwarder already set");
         emit TrustedForwarderSet(_trustedForwarder, newForwarder, _msgSender());
         _trustedForwarder = newForwarder;
     }
@@ -43,5 +44,17 @@ contract ERC2771Handler is ERC2771HandlerAbstract {
     /// @return true if the address is the same as the trusted forwarder
     function _isTrustedForwarder(address forwarder) internal view virtual override returns (bool) {
         return forwarder == _trustedForwarder;
+    }
+
+    /// @notice if the call is from the trusted forwarder the sender is extracted from calldata, msg.sender otherwise
+    /// @return sender the calculated address of the sender
+    function _msgSender() internal view virtual override returns (address sender) {
+        return super._msgSender();
+    }
+
+    /// @notice if the call is from the trusted forwarder the sender is removed from calldata
+    /// @return the calldata without the sender
+    function _msgData() internal view virtual override returns (bytes calldata) {
+        return super._msgData();
     }
 }
