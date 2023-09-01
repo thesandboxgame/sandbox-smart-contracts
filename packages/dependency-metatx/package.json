@@ -5,8 +5,13 @@
   "license": "MIT",
   "main": "index.js",
   "files": [
-    "contracts"
+    "contracts",
+    "README.md",
+    "CHANGELOG.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
@@ -15,7 +20,8 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "release": "release-it"
   },
   "repository": {
     "type": "git",
@@ -32,6 +38,22 @@
       "test/**/*.ts"
     ]
   },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagName": "@sandbox-smart-contracts/dependency-metatx@v${version}"
+    },
+    "plugins": {
+      "@release-it/keep-a-changelog": {}
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -41,6 +63,7 @@
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@release-it/keep-a-changelog": "^4.0.0",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.3.5",
@@ -60,6 +83,7 @@
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "^1.1.3",
+    "release-it": "^16.1.5",
     "solhint": "^3.4.1",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2",
