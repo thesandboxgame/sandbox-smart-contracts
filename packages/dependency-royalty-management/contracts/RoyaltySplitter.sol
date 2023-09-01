@@ -153,8 +153,7 @@ contract RoyaltySplitter is
     function _splitERC20Tokens(IERC20 erc20Contract) internal returns (bool success) {
         try erc20Contract.balanceOf(address(this)) returns (uint256 balance) {
             if (balance == 0) {
-                success = false;
-                return success;
+                return false;
             }
             Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
             uint16 creatorSplit = royaltyManager.getCreatorSplit();
@@ -185,9 +184,9 @@ contract RoyaltySplitter is
             }
             erc20Contract.safeTransfer(_recipients[0].recipient, amountToSend);
             emit ERC20Transferred(address(erc20Contract), _recipients[0].recipient, amountToSend);
-            success = true;
+            return true;
         } catch {
-            success = false;
+            return false;
         }
     }
 
@@ -210,7 +209,7 @@ contract RoyaltySplitter is
         override(ContextUpgradeable, ERC2771HandlerAbstract)
         returns (address sender)
     {
-        sender = ERC2771HandlerAbstract._msgSender();
+        return ERC2771HandlerAbstract._msgSender();
     }
 
     function _msgData()
@@ -220,6 +219,6 @@ contract RoyaltySplitter is
         override(ContextUpgradeable, ERC2771HandlerAbstract)
         returns (bytes calldata messageData)
     {
-        messageData = ERC2771HandlerAbstract._msgData();
+        return ERC2771HandlerAbstract._msgData();
     }
 }
