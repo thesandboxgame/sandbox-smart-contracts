@@ -1,14 +1,10 @@
 {
     "name": "contracts",
     "version": "0.0.1",
-    "workspaces": {
-        "packages": [
-            "packages/*"
-        ],
-        "marketplace": [
-            "marketplace/*"
-        ]
-    },
+    "workspaces": [
+        "packages",
+        "marketplace"
+    ],
     "private": true,
     "description": "The Sandbox smart contracts",
     "scripts": {

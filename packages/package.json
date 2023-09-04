@@ -1,0 +1,7 @@
+{
+    "name": "packages",
+    "version": "1.0.0",
+    "dependencies": {
+        "cross-env": "7.0.3"
+    }
+}
