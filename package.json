@@ -4,6 +4,9 @@
     "workspaces": {
         "packages": [
             "packages/*"
+        ],
+        "marketplace": [
+            "marketplace/*"
         ]
     },
     "private": true,
