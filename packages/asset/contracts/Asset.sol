@@ -30,6 +30,9 @@ import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 
+/// @title Asset
+/// @author TheSandbox
+/// @notice Base asset contract for ERC1155 tokens
 contract Asset is
     IAsset,
     Initializable,
@@ -56,6 +59,12 @@ contract Asset is
         _disableInitializers();
     }
 
+    /// @notice Initialize the contract
+    /// @param forwarder The address of the trusted forwarder
+    /// @param assetAdmin The address of the asset admin
+    /// @param baseUri The base URI for the token metadata
+    /// @param commonSubscription The address of the operator filter subscription
+    /// @param _manager The address of the royalty manager
     function initialize(
         address forwarder,
         address assetAdmin,
@@ -78,6 +87,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
+    /// @param metadataHash The metadata hash of the token to mint
     function mint(
         address to,
         uint256 id,
@@ -95,6 +105,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param ids The ids of the tokens to mint
     /// @param amounts The amounts of the tokens to mint
+    /// @param metadataHashes The metadata hashes of the tokens to mint
     function mintBatch(
         address to,
         uint256[] memory ids,
@@ -168,10 +179,16 @@ contract Asset is
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
+    /// @notice returns the tokenId associated with provided metadata hash
+    /// @param metadataHash The metadata hash to get tokenId for
+    /// @return tokenId the tokenId associated with the metadata hash
     function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256) {
         return hashUsed[metadataHash];
     }
 
+    /// @notice sets the metadata hash for a given tokenId
+    /// @param tokenId The tokenId to set metadata hash for
+    /// @param metadataHash The metadata hash to set
     function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
         if (hashUsed[metadataHash] != 0) {
             require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
@@ -310,29 +327,29 @@ contract Asset is
 
     /// @notice Extracts the revealed flag from a given token id
     /// @param tokenId The token id to extract the revealed flag from
-    /// @return isRevealed Whether the asset is revealed or not
-    function isRevealed(uint256 tokenId) external pure returns (bool) {
+    /// @return revealed Whether the asset is revealed or not
+    function isRevealed(uint256 tokenId) external pure returns (bool revealed) {
         return TokenIdUtils.isRevealed(tokenId);
     }
 
     /// @notice Extracts the asset nonce from a given token id
     /// @param tokenId The token id to extract the asset nonce from
     /// @return creatorNonce The asset creator nonce
-    function getCreatorNonce(uint256 tokenId) external pure returns (uint16) {
+    function getCreatorNonce(uint256 tokenId) external pure returns (uint16 creatorNonce) {
         return TokenIdUtils.getCreatorNonce(tokenId);
     }
 
     /// @notice Extracts the abilities and enhancements hash from a given token id
     /// @param tokenId The token id to extract reveal nonce from
     /// @return revealNonce The reveal nonce of the asset
-    function getRevealNonce(uint256 tokenId) external pure returns (uint16) {
+    function getRevealNonce(uint256 tokenId) external pure returns (uint16 revealNonce) {
         return TokenIdUtils.getRevealNonce(tokenId);
     }
 
     /// @notice Extracts the bridged flag from a given token id
     /// @param tokenId The token id to extract the bridged flag from
     /// @return bridged Whether the asset is bridged or not
-    function isBridged(uint256 tokenId) external pure returns (bool) {
+    function isBridged(uint256 tokenId) external pure returns (bool bridged) {
         return TokenIdUtils.isBridged(tokenId);
     }
 

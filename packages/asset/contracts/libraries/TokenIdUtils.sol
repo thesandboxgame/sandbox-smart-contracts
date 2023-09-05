@@ -3,6 +3,9 @@ pragma solidity ^0.8.0;
 
 import {IAsset} from "../interfaces/IAsset.sol";
 
+/// @title TokenIdUtils library
+/// @author The Sandbox
+/// @notice Contains utility functions for token ids
 library TokenIdUtils {
     // Layer masks
     uint256 public constant TIER_MASK = 0xFF;

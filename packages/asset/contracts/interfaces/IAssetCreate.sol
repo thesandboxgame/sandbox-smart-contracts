@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+/// @title AssetCreate interface
+/// @author The Sandbox
 interface IAssetCreate {
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
     event AssetMinted(
