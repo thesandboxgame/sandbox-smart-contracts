@@ -86,17 +86,9 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
 
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
   return (
-    hre.network.name === HARDHAT_NETWORK_NAME ||
-    hre.network.name === 'localhost' ||
-    isFork()
-  );
-}
-
-function isFork(): boolean {
-  return (
-    !!process.env.HARDHAT_FORK &&
-    !['--skip-test-deployments', '-ntd'].some((arg) =>
-      process.argv.includes(arg)
-    )
+    !process.env.SKIP_TEST_DEPLOYMENTS &&
+    (hre.network.name === HARDHAT_NETWORK_NAME ||
+      hre.network.name === 'localhost' ||
+      !!process.env.HARDHAT_FORK)
   );
 }
