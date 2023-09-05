@@ -94,7 +94,7 @@ contract AssetCreate is
                 signature,
                 _hashMint(creator, signatureNonces[_msgSender()]++, tier, amount, revealed, metadataHash)
             ),
-            "Invalid signature"
+            "AssetCreate: Invalid signature"
         );
 
         uint256 tokenId =
@@ -124,12 +124,12 @@ contract AssetCreate is
                 signature,
                 _hashBatchMint(creator, signatureNonces[_msgSender()]++, tiers, amounts, revealed, metadataHashes)
             ),
-            "Invalid signature"
+            "AssetCreate: Invalid signature"
         );
 
-        require(tiers.length == amounts.length, "Arrays must be same length");
-        require(amounts.length == metadataHashes.length, "Arrays must be same length");
-        require(metadataHashes.length == revealed.length, "Arrays must be same length");
+        require(tiers.length == amounts.length, "AssetCreate: Arrays must be same length");
+        require(amounts.length == metadataHashes.length, "AssetCreate: Arrays must be same length");
+        require(metadataHashes.length == revealed.length, "AssetCreate: Arrays must be same length");
 
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
@@ -167,7 +167,7 @@ contract AssetCreate is
                 signature,
                 _hashMint(creator, signatureNonces[_msgSender()]++, 0, amount, true, metadataHash)
             ),
-            "Invalid signature"
+            "AssetCreate: Invalid signature"
         );
 
         uint256 tokenId = TokenIdUtils.generateTokenId(creator, 0, ++creatorNonces[creator], 1, false);
