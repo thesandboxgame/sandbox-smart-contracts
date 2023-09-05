@@ -85,11 +85,11 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
 }
 
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
-  if (shouldSkipTestDeployements()) return false;
+  if (shouldSkipTestDeployments()) return false;
   return isTestNetwork(hre) || isFork();
 }
 
-function shouldSkipTestDeployements(): boolean {
+function shouldSkipTestDeployments(): boolean {
   return !!process.env.SKIP_TEST_DEPLOYMENTS;
 }
 
