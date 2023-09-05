@@ -78,6 +78,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
+    /// @param metadataHash The metadata hash of the token to mint
     function mint(
         address to,
         uint256 id,
@@ -95,6 +96,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param ids The ids of the tokens to mint
     /// @param amounts The amounts of the tokens to mint
+    /// @param metadataHashes The metadata hashes of the tokens to mint
     function mintBatch(
         address to,
         uint256[] memory ids,
