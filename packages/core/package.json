@@ -5,8 +5,13 @@
   "license": "MIT",
   "files": [
     "deployments/mainnet",
-    "deployments/rinkeby"
+    "deployments/rinkeby",
+    "README.md",
+    "CHANGELOG.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "ethereum",
     "smart-contracts",
@@ -32,6 +37,7 @@
     "@openzeppelin/contracts-0.8.13": "npm:@openzeppelin/contracts@4.8.0",
     "@openzeppelin/contracts-upgradeable": "4.4.2",
     "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0",
+    "@release-it/keep-a-changelog": "^4.0.0",
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^9.0.6",
     "@types/inquirer": "^7.3.1",
@@ -72,6 +78,7 @@
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-beta.11",
     "readline": "^1.3.0",
+    "release-it": "^16.1.5",
     "solhint": "3.4.1",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "0.8.2",
@@ -109,7 +116,8 @@
     "claimV2:send:polygon": "yarn execute polygon ./setup/send_assets_to_multi_giveaway.ts PolygonMulti_Giveaway_V2_1",
     "landsale:send": "yarn execute mainnet ./setup/landsales/send_assets_to_sales.ts",
     "landsale:withdraw": "yarn execute mainnet ./setup/landsales/withdraw_from_sales.ts",
-    "hardhat": "hardhat"
+    "hardhat": "hardhat",
+    "release": "release-it"
   },
   "main": ".eslintrc.js",
   "directories": {

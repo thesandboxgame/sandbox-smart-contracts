@@ -1,0 +1,16 @@
+{
+  "git": {
+    "commitMessage": "chore: @sandbox-smart-contracts/core release v${version}",
+    "tagAnnotation": "@sandbox-smart-contracts/core release v${version}",
+    "tagName": "@sandbox-smart-contracts/core@v${version}"
+  },
+  "plugins": {
+    "@release-it/keep-a-changelog": {}
+  },
+  "hooks": {
+    "before:init": [
+      "yarn lint",
+      "yarn test"
+    ]
+  }
+}
