@@ -163,12 +163,12 @@ contract Asset is
         public
         view
         override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
+        returns (string memory tokenURI)
     {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
-    function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256) {
+    function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256 tokenId) {
         return hashUsed[metadataHash];
     }
 
@@ -310,29 +310,29 @@ contract Asset is
 
     /// @notice Extracts the revealed flag from a given token id
     /// @param tokenId The token id to extract the revealed flag from
-    /// @return isRevealed Whether the asset is revealed or not
-    function isRevealed(uint256 tokenId) external pure returns (bool) {
+    /// @return revealed Whether the asset is revealed or not
+    function isRevealed(uint256 tokenId) external pure returns (bool revealed) {
         return TokenIdUtils.isRevealed(tokenId);
     }
 
     /// @notice Extracts the asset nonce from a given token id
     /// @param tokenId The token id to extract the asset nonce from
     /// @return creatorNonce The asset creator nonce
-    function getCreatorNonce(uint256 tokenId) external pure returns (uint16) {
+    function getCreatorNonce(uint256 tokenId) external pure returns (uint16 creatorNonce) {
         return TokenIdUtils.getCreatorNonce(tokenId);
     }
 
     /// @notice Extracts the abilities and enhancements hash from a given token id
     /// @param tokenId The token id to extract reveal nonce from
     /// @return revealNonce The reveal nonce of the asset
-    function getRevealNonce(uint256 tokenId) external pure returns (uint16) {
+    function getRevealNonce(uint256 tokenId) external pure returns (uint16 revealNonce) {
         return TokenIdUtils.getRevealNonce(tokenId);
     }
 
     /// @notice Extracts the bridged flag from a given token id
     /// @param tokenId The token id to extract the bridged flag from
     /// @return bridged Whether the asset is bridged or not
-    function isBridged(uint256 tokenId) external pure returns (bool) {
+    function isBridged(uint256 tokenId) external pure returns (bool bridged) {
         return TokenIdUtils.isBridged(tokenId);
     }
 
