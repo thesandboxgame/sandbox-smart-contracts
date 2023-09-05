@@ -301,4 +301,6 @@ contract AssetCreate is
     {
         return ERC2771HandlerUpgradeable._msgData();
     }
+
+    uint256[47] private __gap;
 }

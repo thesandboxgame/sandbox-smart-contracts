@@ -354,4 +354,6 @@ contract Asset is
         require(registry != address(0), "Asset: registry can't be zero address");
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
+
+    uint256[50] private __gap;
 }
