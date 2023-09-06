@@ -44,5 +44,5 @@ interface IAsset {
         uint256[] memory amounts
     ) external;
 
-    function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256);
+    function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256 tokenId);
 }

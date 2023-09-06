@@ -191,13 +191,13 @@ contract Asset is
 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return supported `true` if the contract implements `id`.
     function supportsInterface(bytes4 id)
         public
         view
         virtual
         override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributor)
-        returns (bool)
+        returns (bool supported)
     {
         return id == type(IRoyaltyUGC).interfaceId || super.supportsInterface(id);
     }
@@ -217,7 +217,7 @@ contract Asset is
         view
         virtual
         override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (bytes calldata)
+        returns (bytes calldata msgData)
     {
         return ERC2771HandlerUpgradeable._msgData();
     }
