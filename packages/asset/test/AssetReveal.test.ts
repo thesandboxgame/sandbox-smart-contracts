@@ -12,7 +12,7 @@ const revealHashD = formatBytes32String('revealHashD');
 const revealHashE = formatBytes32String('revealHashE');
 const revealHashF = formatBytes32String('revealHashF');
 
-describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () {
+describe.only('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () {
   describe('General', function () {
     it('Should deploy correctly', async function () {
       const {AssetRevealContract} = await runRevealTestSetup();
@@ -998,7 +998,10 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
 
           const event = findEventByName(result.events, 'AssetRevealMint');
           expect(event).to.not.be.undefined;
-          const args = event?.args!;
+          const args = event?.args;
+          if (!args) {
+            expect.fail('Event args are undefined');
+          }
           const {
             recipient,
             unrevealedTokenId,
@@ -1335,16 +1338,16 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             'AssetRevealBatchMint'
           );
           expect(revealEvents.length).to.equal(1);
-          const args1 = revealEvents[0].args!;
+          const args = revealEvents[0].args;
 
-          expect(args1['recipient']).to.equal(user.address);
-          expect(args1['unrevealedTokenIds']).to.deep.equal([
+          expect(args?.recipient).to.equal(user.address);
+          expect(args?.unrevealedTokenIds).to.deep.equal([
             unrevealedtokenId,
             unrevealedtokenId2,
           ]);
-          expect(args1['amounts']).to.deep.equal([amounts1, amounts2]);
-          expect(args1['newTokenIds'].length).to.equal(2);
-          expect(args1['revealHashes']).to.deep.equal([
+          expect(args?.amounts).to.deep.equal([amounts1, amounts2]);
+          expect(args?.newTokenIds.length).to.equal(2);
+          expect(args?.revealHashes).to.deep.equal([
             [revealHashA],
             [revealHashB],
           ]);
