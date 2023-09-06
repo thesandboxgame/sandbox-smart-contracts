@@ -31,7 +31,7 @@ import {IAsset} from "./interfaces/IAsset.sol";
 import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 
 /// @title Asset
-/// @author TheSandbox
+/// @author The Sandbox
 /// @notice ERC1155 asset token contract
 /// @notice Minting and burning tokens is only allowed through separate authorized contracts
 /// @dev This contract is final and should not be inherited
