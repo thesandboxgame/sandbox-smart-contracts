@@ -142,7 +142,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       await expect(
         AuthValidatorContractAsAdmin.verify(signature, digest)
-      ).to.be.revertedWith('AuthSuperValidator: no signer');
+      ).to.be.revertedWith('AuthSuperValidator: No signer');
     });
   });
 });

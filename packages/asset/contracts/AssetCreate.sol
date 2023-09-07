@@ -278,7 +278,7 @@ contract AssetCreate is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "AssetCreate: zero address");
+        require(trustedForwarder != address(0), "AssetCreate: Zero address");
         _setTrustedForwarder(trustedForwarder);
     }
 
