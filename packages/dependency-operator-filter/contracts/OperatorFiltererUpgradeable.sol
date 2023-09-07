@@ -66,8 +66,8 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
     }
 
     /// @notice returns the operator filter registry.
-    /// @return address of operator filter registry contract.
-    function getOperatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
+    /// @return operatorFilterRegistryAddress address of operator filter registry contract.
+    function getOperatorFilterRegistry() external view returns (IOperatorFilterRegistry operatorFilterRegistryAddress) {
         return _getOperatorFilterRegistry();
     }
 
@@ -79,7 +79,11 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
     }
 
     /// @notice internal method to get the operator filter registry.
-    function _getOperatorFilterRegistry() internal view returns (IOperatorFilterRegistry) {
+    function _getOperatorFilterRegistry()
+        internal
+        view
+        returns (IOperatorFilterRegistry operatorFilterRegistryAddress)
+    {
         return operatorFilterRegistry;
     }
 }

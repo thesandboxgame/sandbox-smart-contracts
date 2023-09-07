@@ -136,14 +136,14 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
 
     /// @notice returns the address of token royalty splitter.
     /// @param tokenId is the token id for which royalty splitter should be returned.
-    /// @return address of royalty splitter for the token.
-    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable) {
+    /// @return splitterAddress address of royalty splitter for the token
+    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable splitterAddress) {
         return _tokenRoyaltiesSplitter[tokenId];
     }
 
     /// @notice returns the address of royalty manager.
-    /// @return address of royalty manager.
-    function getRoyaltyManager() external view returns (address) {
+    /// @return managerAddress address of royalty manager.
+    function getRoyaltyManager() external view returns (address managerAddress) {
         return royaltyManager;
     }
 }
