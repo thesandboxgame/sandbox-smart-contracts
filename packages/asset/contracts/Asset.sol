@@ -1,31 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {
-    ERC1155BurnableUpgradeable,
-    ERC1155Upgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {
-    ERC1155SupplyUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
-import {
-    ERC1155URIStorageUpgradeable
-} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {ERC1155BurnableUpgradeable, ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import {ERC1155SupplyUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import {ERC1155URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
-import {
-    MultiRoyaltyDistributor
-} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
-import {
-    OperatorFiltererUpgradeable,
-    IOperatorFilterRegistry
-} from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {MultiRoyaltyDistributor} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
+import {OperatorFiltererUpgradeable, IOperatorFilterRegistry} from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
@@ -78,12 +61,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount,
-        string memory metadataHash
-    ) external onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id, uint256 amount, string memory metadataHash) external onlyRole(MINTER_ROLE) {
         _setMetadataHash(id, metadataHash);
         _mint(to, id, amount, "");
         address creator = id.getCreatorAddress();
@@ -101,8 +79,8 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(ids.length == metadataHashes.length, "Asset: ids and metadataHash length mismatch");
-        require(ids.length == amounts.length, "Asset: ids and amounts length mismatch");
+        require(ids.length == metadataHashes.length, "Asset: Array mismatch");
+        require(ids.length == amounts.length, "Asset: Array mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
@@ -119,11 +97,7 @@ contract Asset is
     /// @param account The account to burn tokens from
     /// @param id The token id to burn
     /// @param amount The amount of tokens to burn
-    function burnFrom(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(BURNER_ROLE) {
+    function burnFrom(address account, uint256 id, uint256 amount) external onlyRole(BURNER_ROLE) {
         _burn(account, id, amount);
     }
 
@@ -159,12 +133,9 @@ contract Asset is
     /// @notice returns full token URI, including baseURI and token metadata URI
     /// @param tokenId The token id to get URI for
     /// @return tokenURI the URI of the token
-    function uri(uint256 tokenId)
-        public
-        view
-        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
-    {
+    function uri(
+        uint256 tokenId
+    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory) {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
@@ -174,7 +145,7 @@ contract Asset is
 
     function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
         if (hashUsed[metadataHash] != 0) {
-            require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
+            require(hashUsed[metadataHash] == tokenId, "Asset: Hash already used");
         } else {
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
@@ -185,14 +156,16 @@ contract Asset is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
+        require(trustedForwarder != address(0), "Asset: Zero address");
         _setTrustedForwarder(trustedForwarder);
     }
 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id)
+    function supportsInterface(
+        bytes4 id
+    )
         public
         view
         virtual
@@ -253,12 +226,10 @@ contract Asset is
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override onlyAllowedOperatorApproval(operator) {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
@@ -275,10 +246,7 @@ contract Asset is
         uint256 amount,
         bytes memory data
     ) public virtual override onlyAllowedOperator(from) {
-        require(
-            from == _msgSender() || isApprovedForAll(from, _msgSender()),
-            "ERC1155: caller is not token owner or approved"
-        );
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "Asset: Transfer error");
         _safeTransferFrom(from, to, id, amount, data);
     }
 
@@ -340,18 +308,18 @@ contract Asset is
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
-    function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subscribe)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        require(subscriptionOrRegistrantToCopy != address(0), "Asset: subscription can't be zero address");
+    function registerAndSubscribe(
+        address subscriptionOrRegistrantToCopy,
+        bool subscribe
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(subscriptionOrRegistrantToCopy != address(0), "Asset: Zero address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Asset: registry can't be zero address");
+        require(registry != address(0), "Asset: Zero address");
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 }
