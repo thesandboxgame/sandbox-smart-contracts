@@ -173,5 +173,5 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
         return contractRoyalty[_contractAddress];
     }
 
-    uint256[46] private __gap;
+    uint256[44] private __gap;
 }
