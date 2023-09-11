@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         DEFAULT_SUBSCRIPTION
       );
       console.log(
-        "common subscription registered on operator filter registry and opensea's blacklist copied"
+        "common subscription registered on operator filter registry and OpenSea's blacklist copied"
       );
     }
   }

@@ -38,9 +38,6 @@ contract RoyaltySplitter is
     using SafeERC20 for IERC20;
 
     uint256 internal constant TOTAL_BASIS_POINTS = 10000;
-    uint256 internal constant IERC20_APPROVE_SELECTOR =
-        0x095ea7b300000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public recipient;
     IRoyaltyManager public royaltyManager;
@@ -88,7 +85,6 @@ contract RoyaltySplitter is
     }
 
     function _setRecipient(address payable recipientAddress) private {
-        delete recipient;
         recipient = recipientAddress;
         emit RecipientSet(recipientAddress);
     }
