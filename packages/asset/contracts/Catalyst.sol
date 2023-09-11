@@ -30,7 +30,7 @@ import {ICatalyst} from "./interfaces/ICatalyst.sol";
 
 /// @title Catalyst
 /// @author The Sandbox
-/// @notice THis contract manages catalysts which are used to mint new assets.
+/// @notice This contract manages catalysts which are used to mint new assets.
 /// @dev An ERC1155 contract that manages catalysts, extends multiple OpenZeppelin contracts to
 /// provide a variety of features including, AccessControl, URIStorage, Burnable and more.
 /// The contract includes support for meta transactions.
@@ -77,7 +77,7 @@ contract Catalyst is
         address _defaultMinter,
         string[] memory _catalystIpfsCID,
         address _royaltyManager
-    ) public initializer {
+    ) external initializer {
         require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
         require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
         require(_subscription != address(0), "Catalyst: subscription can't be zero");
@@ -187,6 +187,7 @@ contract Catalyst is
     function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
         _setBaseURI(baseURI);
+        emit BaseURISet(baseURI);
     }
 
     /// @notice returns full token URI, including baseURI and token metadata URI
@@ -223,12 +224,18 @@ contract Catalyst is
         return ERC2771HandlerUpgradeable._msgData();
     }
 
+    /// @dev Sets `baseURI` as the `_baseURI` for all tokens
+    function _setBaseURI(string memory baseURI) internal virtual override {
+        super._setBaseURI(baseURI);
+        emit BaseURISet(baseURI);
+    }
+
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
     /// @param from address from which tokens are transfered.
     /// @param to address to which the token will be transfered.
     /// @param id the token type transfered.
     /// @param value amount of token transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeTransferFrom(
         address from,
         address to,
@@ -245,7 +252,7 @@ contract Catalyst is
     /// @param to address to which the token will be transfered.
     /// @param ids ids of each token type transfered.
     /// @param values amount of each token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -286,7 +293,7 @@ contract Catalyst is
         return super.supportsInterface(interfaceId);
     }
 
-    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @notice This function is used to register Catalyst contract on the Operator Filterer Registry of OpenSea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
@@ -303,5 +310,8 @@ contract Catalyst is
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(registry != address(0), "Catalyst: registry can't be zero address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
+
+    uint256[49] private __gap;
 }

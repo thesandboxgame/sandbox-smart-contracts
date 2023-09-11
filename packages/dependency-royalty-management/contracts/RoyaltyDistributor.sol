@@ -8,13 +8,18 @@ import {
     IERC165Upgradeable
 } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
-contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
+/// @title RoyaltyDistributor
+/// @author The Sandbox
+/// @notice Contract for distributing royalties based on the ERC2981 standard.
+abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
+    event RoyaltyManagerSet(address indexed _royaltyManager);
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     IRoyaltyManager private royaltyManager;
 
     // solhint-disable-next-line func-name-mixedcase
     function __RoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
-        royaltyManager = IRoyaltyManager(_royaltyManager);
+        _setRoyaltyManager(_royaltyManager);
+        __ERC165_init_unchained();
     }
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
@@ -34,15 +39,15 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(ERC165Upgradeable, IERC165Upgradeable)
-        returns (bool)
+        returns (bool isSupported)
     {
-        return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
+        return (interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId));
     }
 
     /// @notice returns the royalty manager
@@ -50,4 +55,13 @@ contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
         return royaltyManager;
     }
+
+    /// @notice set royalty manager
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(_royaltyManager);
+    }
+
+    uint256[49] private __gap;
 }
