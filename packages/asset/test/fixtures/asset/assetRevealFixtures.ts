@@ -95,6 +95,13 @@ export async function runRevealTestSetup() {
   );
 
   await AssetContract.deployed();
+  const RoyaltyManagerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
+  const splitterDeployerRole =
+    await RoyaltyManagerContract.SPLITTER_DEPLOYER_ROLE();
+  await RoyaltyManagerAsAdmin.grantRole(
+    splitterDeployerRole,
+    AssetContract.address
+  );
 
   // deploy wrapped TokenIdUtils contract
   const TokenIdUtilsFactory = await ethers.getContractFactory(

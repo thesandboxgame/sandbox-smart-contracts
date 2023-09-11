@@ -112,6 +112,8 @@ export async function royaltyDistribution() {
   const managerAdminRole = await RoyaltyManagerContract.DEFAULT_ADMIN_ROLE();
   const contractRoyaltySetterRole =
     await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
+  const splitterDeployerRole =
+    await RoyaltyManagerContract.SPLITTER_DEPLOYER_ROLE();
   const RoyaltyManagerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
   const RoyaltyManagerAsRoyaltySetter = RoyaltyManagerContract.connect(
     contractRoyaltySetter
@@ -126,6 +128,8 @@ export async function royaltyDistribution() {
 
   await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(ERC1155.address, 300);
   await RoyaltyManagerAsRoyaltySetter.setContractRoyalty(ERC721.address, 300);
+  await RoyaltyManagerAsAdmin.grantRole(splitterDeployerRole, ERC1155.address);
+  await RoyaltyManagerAsAdmin.grantRole(splitterDeployerRole, ERC721.address);
 
   return {
     ERC1155,
@@ -154,5 +158,6 @@ export async function royaltyDistribution() {
     SingleReceiver,
     NFT,
     TrustedForwarder,
+    splitterDeployerRole,
   };
 }
