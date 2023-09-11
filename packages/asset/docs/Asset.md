@@ -176,6 +176,7 @@ Sets a new trusted forwarder for meta-transactions.
 Parameters:
 
 - `trustedForwarder` - The new trusted forwarder.
+
 ### setTokenRoyalties
 
 ```solidity
@@ -183,7 +184,7 @@ function setTokenRoyalties(
         uint256 tokenId,
         address payable recipient,
         address creator
-) external override onlyRole(DEFAULT_ADMIN_ROLE) 
+) external override onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
 Sets token royalty i.e. the creator splitter address as EIP2981 royalty recipient. deploys a splitter if there is none deployed for a creator. Only admin can call it.
@@ -254,7 +255,6 @@ Parameters:
 
 - `tokenId` - the id of the token.
 
-
 ### isBridged
 
 ```solidity
@@ -275,7 +275,7 @@ function registerAndSubscribe(address subscriptionOrRegistrantToCopy, bool subsc
     onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
-Used to register and subscribe on the operator filter registry of Opensea
+Used to register and subscribe on the operator filter registry of OpenSea
 
 Parameters:
 
@@ -286,7 +286,7 @@ Parameters:
 
 ```solidity
 function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE)
-```fu
+```
 
 Used to the address of the operator filter registry
 
