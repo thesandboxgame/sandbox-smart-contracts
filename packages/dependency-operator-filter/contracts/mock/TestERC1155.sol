@@ -13,7 +13,7 @@ import {OperatorFiltererUpgradeable} from "../OperatorFiltererUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771HandlerUpgradeable {
-    function initialize(string memory uri_, address trustedForwarder) external initializer() {
+    function initialize(string memory uri_, address trustedForwarder) external initializer {
         __ERC1155_init(uri_);
         __ERC2771Handler_init(trustedForwarder);
     }
@@ -22,8 +22,8 @@ contract TestERC1155 is ERC1155Upgradeable, OperatorFiltererUpgradeable, ERC2771
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
+        _setOperatorFilterRegistry(registry);
+        IOperatorFilterRegistry(registry).registerAndSubscribe(address(this), subscription);
     }
 
     /// @notice Mint new tokens with out minter role

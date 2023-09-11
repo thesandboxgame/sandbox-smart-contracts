@@ -6,10 +6,12 @@ import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol"
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 ///@title OperatorFiltererUpgradeable
-///@author The SandBox
-///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's addess could be set using a setter which could be implemented in inherting contract
+///@author The Sandbox
+///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list. The operator filter registry's address could be set using a setter which could be implemented in inheriting contract
 abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
-    IOperatorFilterRegistry public operatorFilterRegistry;
+    event OperatorFilterRegistrySet(address indexed registry);
+
+    IOperatorFilterRegistry private operatorFilterRegistry;
 
     // solhint-disable-next-line func-name-mixedcase
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
@@ -62,4 +64,28 @@ abstract contract OperatorFiltererUpgradeable is Initializable, ContextUpgradeab
         }
         _;
     }
+
+    /// @notice returns the operator filter registry.
+    /// @return operatorFilterRegistryAddress address of operator filter registry contract.
+    function getOperatorFilterRegistry() external view returns (IOperatorFilterRegistry operatorFilterRegistryAddress) {
+        return _getOperatorFilterRegistry();
+    }
+
+    /// @notice internal method to set the operator filter registry
+    /// @param registry address the registry.
+    function _setOperatorFilterRegistry(address registry) internal {
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorFilterRegistrySet(registry);
+    }
+
+    /// @notice internal method to get the operator filter registry.
+    function _getOperatorFilterRegistry()
+        internal
+        view
+        returns (IOperatorFilterRegistry operatorFilterRegistryAddress)
+    {
+        return operatorFilterRegistry;
+    }
+
+    uint256[49] private __gap;
 }
