@@ -19,6 +19,7 @@ abstract contract RoyaltyDistributor is IERC2981Upgradeable, ERC165Upgradeable {
     // solhint-disable-next-line func-name-mixedcase
     function __RoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
         _setRoyaltyManager(_royaltyManager);
+        __ERC165_init_unchained();
     }
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981

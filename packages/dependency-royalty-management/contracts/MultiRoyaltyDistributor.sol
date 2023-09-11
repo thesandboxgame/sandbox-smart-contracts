@@ -10,10 +10,10 @@ import {
 import {IEIP2981} from "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
 import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 
-/// @title MultiRoyaltyDistributer
+/// @title MultiRoyaltyDistributor
 /// @author The Sandbox
-/// @dev  The MultiRoyaltyDistributer contract implements the ERC-2981 and ERC-165 interfaces for a royalty payment system. This payment system can be used to pay royalties to multiple recipients through splitters.
-/// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to slip its royalty between the creator and Sandbox and use it for every token minted by that creator.
+/// @dev  The MultiRoyaltyDistributor contract implements the ERC-2981 and ERC-165 interfaces for a royalty payment system. This payment system can be used to pay royalties to multiple recipients through splitters.
+/// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to split its royalty between the creator and Sandbox and use it for every token minted by that creator.
 abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
     address private royaltyManager;
@@ -24,6 +24,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     // solhint-disable-next-line func-name-mixedcase
     function __MultiRoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
         _setRoyaltyManager(_royaltyManager);
+        __ERC165_init_unchained();
     }
 
     /// @notice Query if a contract implements interface `id`.
