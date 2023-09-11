@@ -336,7 +336,7 @@ contract Asset is
         return TokenIdUtils.isBridged(tokenId);
     }
 
-    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of OpenSea.can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
@@ -352,6 +352,6 @@ contract Asset is
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(registry != address(0), "Asset: registry can't be zero address");
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
     }
 }
