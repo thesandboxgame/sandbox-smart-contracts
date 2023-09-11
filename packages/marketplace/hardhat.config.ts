@@ -1,0 +1,23 @@
+import {HardhatUserConfig} from 'hardhat/config';
+
+const config: HardhatUserConfig = {
+  // solidity compiler version may be updated for new packages as required
+  // to ensure packages use up-to-date dependencies
+  solidity: {
+    compilers: [
+      {
+        version: '0.8.19',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
+    ],
+  },
+  paths: {
+    sources: 'src',
+  },
+};
+export default config;
