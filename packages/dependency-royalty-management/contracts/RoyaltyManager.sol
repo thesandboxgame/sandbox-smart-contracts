@@ -90,7 +90,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice get the current trustedForwarder address
     /// @return trustedForwarder address of current TrustedForwarder
-    function getTrustedForwarder() public view returns (address trustedForwarder) {
+    function getTrustedForwarder() external view returns (address trustedForwarder) {
         return _trustedForwarder;
     }
 
