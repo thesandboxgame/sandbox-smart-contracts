@@ -115,7 +115,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith('Catalyst: Zero address');
+      ).to.revertedWith('Catalyst: 1-Zero address');
     });
     it("subscription can't be zero in initialization", async function () {
       const {
@@ -142,7 +142,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith('Catalyst: Zero address');
+      ).to.revertedWith('Catalyst: 2-Zero address');
     });
     it("admin can't be zero in initialization", async function () {
       const {
@@ -169,7 +169,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith('Catalyst: Zero address');
+      ).to.revertedWith('Catalyst: 3-Zero address');
     });
     it("royalty manager can't be zero in initialization", async function () {
       const {
@@ -196,7 +196,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith('Catalyst: Zero address');
+      ).to.revertedWith('Catalyst: 5-Zero address');
     });
     it("minter can't be zero in initialization", async function () {
       const {
@@ -223,7 +223,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith('Catalyst: Zero address');
+      ).to.revertedWith('Catalyst: 4-Zero address');
     });
     it("token CID can't be zero in initialization", async function () {
       const {

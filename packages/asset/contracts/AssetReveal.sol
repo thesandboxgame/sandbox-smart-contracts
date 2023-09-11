@@ -114,8 +114,8 @@ contract AssetReveal is
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) external whenNotPaused {
-        require(amounts.length == metadataHashes.length, "AssetReveal: Array mismatch");
-        require(amounts.length == revealHashes.length, "AssetReveal: Array mismatch");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == revealHashes.length, "AssetReveal: 2-Array mismatch");
         require(
             authValidator.verify(
                 signature,
@@ -141,9 +141,9 @@ contract AssetReveal is
         string[][] calldata metadataHashes,
         bytes32[][] calldata revealHashes
     ) external whenNotPaused {
-        require(prevTokenIds.length == amounts.length, "AssetReveal: Array mismatch");
-        require(amounts.length == metadataHashes.length, "AssetReveal: Array mismatch");
-        require(prevTokenIds.length == revealHashes.length, "AssetReveal: Array mismatch");
+        require(prevTokenIds.length == amounts.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 2-Array mismatch");
+        require(prevTokenIds.length == revealHashes.length, "AssetReveal: 3-Array mismatch");
         require(
             authValidator.verify(
                 signature,
@@ -174,8 +174,8 @@ contract AssetReveal is
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) external whenNotPaused {
-        require(amounts.length == metadataHashes.length, "AssetReveal: Array mismatch");
-        require(amounts.length == revealHashes.length, "AssetReveal: Array mismatch");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == revealHashes.length, "AssetReveal: 2-Array mismatch");
         uint8 tier = prevTokenId.getTier();
         require(tierInstantRevealAllowed[tier], "AssetReveal: Not allowed");
         require(

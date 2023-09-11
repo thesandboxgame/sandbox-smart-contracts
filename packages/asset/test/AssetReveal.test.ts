@@ -849,7 +849,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHashes,
               [revealHashA, revealHashB]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it('Should revert if amounts array is not the same length as revealHashes array', async function () {
           const {
@@ -882,7 +882,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHashes,
               [revealHashA, revealHashB, revealHashC]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
         it('Should not allow using the same signature twice', async function () {
           const {
@@ -1147,7 +1147,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1, newMetadataHashes2],
               [[revealHashA], [revealHashB]]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it('Should revert if ids array and metadataHashes array are not the same length', async function () {
           const {
@@ -1177,7 +1177,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1],
               [[revealHashA], [revealHashB]]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
         it('Should revert if ids array and revealHashes array are not the same length', async function () {
           const {
@@ -1208,7 +1208,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1, newMetadataHashes2],
               [[revealHashA]]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 3-Array mismatch');
         });
         it('should not allow using the same signature twice', async function () {
           const {
@@ -1431,7 +1431,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHash,
               [revealHashA]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it("should revert if amounts array isn't the same length as revealHashes array", async function () {
           const {
@@ -1462,7 +1462,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHash,
               [revealHashA, revealHashB]
             )
-          ).to.be.revertedWith('AssetReveal: Array mismatch');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
       });
       describe('Events', function () {

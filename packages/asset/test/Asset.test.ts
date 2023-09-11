@@ -330,7 +330,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             amounts,
             hashes
           )
-        ).to.be.revertedWith('Asset: Array mismatch');
+        ).to.be.revertedWith('Asset: 2-Array mismatch');
       });
       it("should not allow minting if the length of the ids and hashes don't match", async function () {
         const {AssetContractAsMinter, generateRandomTokenId, minter} =
@@ -345,7 +345,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             amounts,
             hashes
           )
-        ).to.be.revertedWith('Asset: Array mismatch');
+        ).to.be.revertedWith('Asset: 1-Array mismatch');
       });
     });
     describe('Mint Events', function () {

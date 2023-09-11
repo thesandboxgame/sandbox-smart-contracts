@@ -79,11 +79,11 @@ contract Catalyst is
         address _royaltyManager
     ) public initializer {
         require(bytes(_baseUri).length != 0, "Catalyst: URI empty");
-        require(_trustedForwarder != address(0), "Catalyst: Zero address");
-        require(_subscription != address(0), "Catalyst: Zero address");
-        require(_defaultAdmin != address(0), "Catalyst: Zero address");
-        require(_defaultMinter != address(0), "Catalyst: Zero address");
-        require(_royaltyManager != address(0), "Catalyst: Zero address");
+        require(_trustedForwarder != address(0), "Catalyst: 1-Zero address");
+        require(_subscription != address(0), "Catalyst: 2-Zero address");
+        require(_defaultAdmin != address(0), "Catalyst: 3-Zero address");
+        require(_defaultMinter != address(0), "Catalyst: 4-Zero address");
+        require(_royaltyManager != address(0), "Catalyst: 5-Zero address");
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();

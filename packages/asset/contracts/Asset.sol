@@ -101,8 +101,8 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(ids.length == metadataHashes.length, "Asset: Array mismatch");
-        require(ids.length == amounts.length, "Asset: Array mismatch");
+        require(ids.length == metadataHashes.length, "Asset: 1-Array mismatch");
+        require(ids.length == amounts.length, "Asset: 2-Array mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
