@@ -10,9 +10,9 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
     event TokenRoyaltyRemoved(uint256 tokenId);
     event DefaultRoyaltyBpsSet(uint16 royaltyBPS);
 
-    event DefaultRoyaltyReceiverSet(address recipient);
+    event DefaultRoyaltyReceiverSet(address indexed recipient);
 
-    event RoyaltyRecipientSet(address splitter, address recipient);
+    event RoyaltyRecipientSet(address indexed splitter, address indexed recipient);
 
     event TokenRoyaltySplitterSet(uint256 tokenId, address splitterAddress);
 
@@ -24,13 +24,17 @@ interface IMultiRoyaltyDistributor is IERC165, IMultiRoyaltyRecipients {
         Recipient[] recipients;
     }
 
-    ///@dev Set per token royalties.  Passing a recipient of address(0) will delete any existing configuration
+    ///@notice Set per token royalties.  Passing a recipient of address(0) will delete any existing configuration
+    ///@param tokenId The ID of the token for which to set the royalties.
+    ///@param recipient The address that will receive the royalties.
+    ///@param creator The creator's address for the token.
     function setTokenRoyalties(
         uint256 tokenId,
         address payable recipient,
         address creator
     ) external;
 
-    ///@dev Helper function to get all splits contracts
+    ///@notice Helper function to get all splits contracts
+    ///@return an array of royalty receiver
     function getAllSplits() external view returns (address payable[] memory);
 }

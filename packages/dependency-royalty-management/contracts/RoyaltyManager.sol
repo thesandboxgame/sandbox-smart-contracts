@@ -89,7 +89,8 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     }
 
     /// @notice get the current trustedForwarder address
-    function getTrustedForwarder() public view returns (address) {
+    /// @return trustedForwarder address of current TrustedForwarder
+    function getTrustedForwarder() external view returns (address trustedForwarder) {
         return _trustedForwarder;
     }
 
@@ -115,6 +116,7 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
 
     /// @notice called to set the EIP 2981 royalty split
     /// @dev can only be called by contract royalty setter.
+    /// @param contractAddress address of contract for which royalty is set
     /// @param _royaltyBps the royalty split for the EIP 2981
     function setContractRoyalty(address contractAddress, uint16 _royaltyBps)
         external
@@ -128,47 +130,46 @@ contract RoyaltyManager is AccessControlUpgradeable, IRoyaltyManager {
     /// @notice to be called by the splitters to get the common recipient and split
     /// @return recipient which has the common recipient and split
     function getCommonRecipient() external view override returns (Recipient memory recipient) {
-        recipient = Recipient({recipient: commonRecipient, bps: commonSplit});
-        return recipient;
+        return Recipient({recipient: commonRecipient, bps: commonSplit});
     }
 
     /// @notice deploys splitter for creator
     /// @dev should only called once per creator
     /// @param creator the address of the creator
     /// @param recipient the wallet of the recipient where they would receive their royalty
-    /// @return creatorSplitterAddress deployed for a creator
+    /// @return creatorSplitterAddress splitter's address deployed for a creator
     function deploySplitter(address creator, address payable recipient)
         external
         onlyRole(SPLITTER_DEPLOYER_ROLE)
-        returns (address payable)
+        returns (address payable creatorSplitterAddress)
     {
-        address payable _creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
-        if (_creatorSplitterAddress == address(0)) {
-            _creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
-            RoyaltySplitter(_creatorSplitterAddress).initialize(recipient, address(this));
-            creatorRoyaltiesSplitter[creator] = _creatorSplitterAddress;
-            emit SplitterDeployed(creator, recipient, _creatorSplitterAddress);
+        creatorSplitterAddress = creatorRoyaltiesSplitter[creator];
+        if (creatorSplitterAddress == address(0)) {
+            creatorSplitterAddress = payable(Clones.clone(_royaltySplitterCloneable));
+            RoyaltySplitter(creatorSplitterAddress).initialize(recipient, address(this));
+            creatorRoyaltiesSplitter[creator] = creatorSplitterAddress;
+            emit SplitterDeployed(creator, recipient, creatorSplitterAddress);
         }
-        return _creatorSplitterAddress;
+        return creatorSplitterAddress;
     }
 
     /// @notice returns the address of splitter of a creator.
     /// @param creator the address of the creator
-    /// @return creatorSplitterAddress deployed for a creator
-    function getCreatorRoyaltySplitter(address creator) external view returns (address payable) {
+    /// @return creatorSplitterAddress splitter's address deployed for a creator
+    function getCreatorRoyaltySplitter(address creator) external view returns (address payable creatorSplitterAddress) {
         return creatorRoyaltiesSplitter[creator];
     }
 
     /// @notice returns the amount of basis points allocated to the creator
     /// @return creatorSplit which is 10000 - commonSplit
-    function getCreatorSplit() external view returns (uint16) {
+    function getCreatorSplit() external view returns (uint16 creatorSplit) {
         return TOTAL_BASIS_POINTS - commonSplit;
     }
 
     /// @notice returns the commonRecipient and EIP2981 royalty bps
-    /// @return commonRecipient address of common royalty recipient
-    /// @return contract EIP2981 royalty bps
-    function getRoyaltyInfo() external view returns (address payable, uint16) {
+    /// @return recipient address of common royalty recipient
+    /// @return royaltySplit contract EIP2981 royalty bps
+    function getRoyaltyInfo() external view returns (address payable recipient, uint16 royaltySplit) {
         return (commonRecipient, contractRoyalty[msg.sender]);
     }
 

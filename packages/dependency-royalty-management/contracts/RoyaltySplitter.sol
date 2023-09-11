@@ -38,9 +38,6 @@ contract RoyaltySplitter is
     using SafeERC20 for IERC20;
 
     uint256 internal constant TOTAL_BASIS_POINTS = 10000;
-    uint256 internal constant IERC20_APPROVE_SELECTOR =
-        0x095ea7b300000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public recipient;
     IRoyaltyManager public royaltyManager;
@@ -57,25 +54,26 @@ contract RoyaltySplitter is
 
     /// @notice Query if a contract implements interface `id`.
     /// @param interfaceId the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(IERC165, ERC165Upgradeable)
-        returns (bool)
+        returns (bool isSupported)
     {
-        return interfaceId == type(IRoyaltySplitter).interfaceId || super.supportsInterface(interfaceId);
+        return (interfaceId == type(IRoyaltySplitter).interfaceId || super.supportsInterface(interfaceId));
     }
 
     /// @notice initialize the contract
     /// @dev can only be run once.
     /// @param recipientAddress the wallet of the creator when the contract is deployed
     /// @param _royaltyManager the address of the royalty manager contract
-    function initialize(address payable recipientAddress, address _royaltyManager) public initializer {
+    function initialize(address payable recipientAddress, address _royaltyManager) external initializer {
         royaltyManager = IRoyaltyManager(_royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _setRecipient(recipientAddress);
         __Ownable_init();
+        __ERC165_init();
     }
 
     /// @notice sets recipient for the splitter
@@ -87,17 +85,16 @@ contract RoyaltySplitter is
     }
 
     function _setRecipient(address payable recipientAddress) private {
-        delete recipient;
         recipient = recipientAddress;
         emit RecipientSet(recipientAddress);
     }
 
     /// @notice to get recipients of royalty through this splitter and their splits of royalty.
-    /// @return recipients of royalty through this splitter and their splits of royalty.
-    function getRecipients() external view override returns (Recipient[] memory) {
+    /// @return recipients array of royalty recipients through the splitter and their splits of royalty.
+    function getRecipients() external view override returns (Recipient[] memory recipients) {
         Recipient memory commonRecipient = royaltyManager.getCommonRecipient();
         uint16 creatorSplit = royaltyManager.getCreatorSplit();
-        Recipient[] memory recipients = new Recipient[](2);
+        recipients = new Recipient[](2);
         recipients[0].recipient = recipient;
         recipients[0].bps = creatorSplit;
         recipients[1] = commonRecipient;
@@ -112,7 +109,7 @@ contract RoyaltySplitter is
 
     /// @notice Splits and forwards ETH to the royalty receivers
     /// @dev normally ETH should be split automatically by receive function.
-    function splitETH() public payable {
+    function splitETH() external payable {
         _splitETH(address(this).balance);
     }
 
@@ -145,11 +142,11 @@ contract RoyaltySplitter is
     /// @notice split ERC20 Tokens owned by this contract.
     /// @dev can only be called by one of the recipients
     /// @param erc20Contract the address of the tokens to be split.
-    function splitERC20Tokens(IERC20 erc20Contract) public {
+    function splitERC20Tokens(IERC20 erc20Contract) external {
         require(_splitERC20Tokens(erc20Contract), "Split: ERC20 split failed");
     }
 
-    function _splitERC20Tokens(IERC20 erc20Contract) internal returns (bool) {
+    function _splitERC20Tokens(IERC20 erc20Contract) internal returns (bool success) {
         try erc20Contract.balanceOf(address(this)) returns (uint256 balance) {
             if (balance == 0) {
                 return false;
@@ -169,7 +166,6 @@ contract RoyaltySplitter is
             unchecked {
                 for (uint256 i = _recipients.length - 1; i > 0; i--) {
                     Recipient memory _recipient = _recipients[i];
-                    bool success;
                     (success, amountToSend) = balance.tryMul(_recipient.bps);
                     require(success, "RoyaltySplitter: Multiplication Overflow");
 
@@ -192,9 +188,14 @@ contract RoyaltySplitter is
 
     /// @notice verify whether a forwarder address is the trustedForwarder address, using the manager setting
     /// @dev this function is used to avoid having a trustedForwarder variable inside the splitter
-    /// @return bool whether the forwarder is the trusted address
-    function _isTrustedForwarder(address forwarder) internal view override(ERC2771HandlerAbstract) returns (bool) {
-        return forwarder == royaltyManager.getTrustedForwarder();
+    /// @return isTrusted bool whether the forwarder is the trusted address
+    function _isTrustedForwarder(address forwarder)
+        internal
+        view
+        override(ERC2771HandlerAbstract)
+        returns (bool isTrusted)
+    {
+        return (forwarder == royaltyManager.getTrustedForwarder());
     }
 
     function _msgSender()
@@ -212,7 +213,7 @@ contract RoyaltySplitter is
         view
         virtual
         override(ContextUpgradeable, ERC2771HandlerAbstract)
-        returns (bytes calldata)
+        returns (bytes calldata messageData)
     {
         return ERC2771HandlerAbstract._msgData();
     }
