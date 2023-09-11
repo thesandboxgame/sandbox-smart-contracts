@@ -38,9 +38,6 @@ contract RoyaltySplitter is
     using SafeERC20 for IERC20;
 
     uint256 internal constant TOTAL_BASIS_POINTS = 10000;
-    uint256 internal constant IERC20_APPROVE_SELECTOR =
-        0x095ea7b300000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant SELECTOR_MASK = 0xffffffff00000000000000000000000000000000000000000000000000000000;
 
     address payable public recipient;
     IRoyaltyManager public royaltyManager;
@@ -72,10 +69,11 @@ contract RoyaltySplitter is
     /// @dev can only be run once.
     /// @param recipientAddress the wallet of the creator when the contract is deployed
     /// @param _royaltyManager the address of the royalty manager contract
-    function initialize(address payable recipientAddress, address _royaltyManager) public initializer {
+    function initialize(address payable recipientAddress, address _royaltyManager) external initializer {
         royaltyManager = IRoyaltyManager(_royaltyManager); // set manager before Ownable_init for _isTrustedForwarder
         _setRecipient(recipientAddress);
         __Ownable_init();
+        __ERC165_init();
     }
 
     /// @notice sets recipient for the splitter
@@ -87,7 +85,6 @@ contract RoyaltySplitter is
     }
 
     function _setRecipient(address payable recipientAddress) private {
-        delete recipient;
         recipient = recipientAddress;
         emit RecipientSet(recipientAddress);
     }
@@ -112,7 +109,7 @@ contract RoyaltySplitter is
 
     /// @notice Splits and forwards ETH to the royalty receivers
     /// @dev normally ETH should be split automatically by receive function.
-    function splitETH() public payable {
+    function splitETH() external payable {
         _splitETH(address(this).balance);
     }
 
@@ -145,7 +142,7 @@ contract RoyaltySplitter is
     /// @notice split ERC20 Tokens owned by this contract.
     /// @dev can only be called by one of the recipients
     /// @param erc20Contract the address of the tokens to be split.
-    function splitERC20Tokens(IERC20 erc20Contract) public {
+    function splitERC20Tokens(IERC20 erc20Contract) external {
         require(_splitERC20Tokens(erc20Contract), "Split: ERC20 split failed");
     }
 
