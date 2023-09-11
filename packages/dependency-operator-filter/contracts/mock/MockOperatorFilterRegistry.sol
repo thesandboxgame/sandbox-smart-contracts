@@ -11,7 +11,7 @@ import {
 
 /**
  * @title  MockOperatorFilterRegistry
- * @notice Made based on the OperatorFilterRegistry of openSea at https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterRegistry.sol
+ * @notice Made based on the OperatorFilterRegistry of OpenSea at https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterRegistry.sol
  * @notice This contracts allows tokens or token owners to register specific addresses or codeHashes that may be
  * *       restricted according to the isOperatorAllowed function.
  */
