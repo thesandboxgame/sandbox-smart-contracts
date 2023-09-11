@@ -39,7 +39,7 @@ describe('Asset Royalties', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
 
@@ -103,7 +103,7 @@ describe('Asset Royalties', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
 
@@ -170,7 +170,7 @@ describe('Asset Royalties', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
 
@@ -416,7 +416,7 @@ describe('Asset Royalties', function () {
       const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
 
@@ -425,7 +425,7 @@ describe('Asset Royalties', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator.address);
+      expect(await splitterContract.recipient()).to.be.equal(creator.address);
 
       const tnx = await RoyaltyManagerContract.connect(
         await ethers.getSigner(creator.address)
@@ -433,7 +433,7 @@ describe('Asset Royalties', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -666,7 +666,7 @@ describe('Asset Royalties', function () {
 
       const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -674,14 +674,14 @@ describe('Asset Royalties', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator.address);
+      expect(await splitterContract.recipient()).to.be.equal(creator.address);
       const tnx = await RoyaltyManagerContract.connect(
         await ethers.getSigner(creator.address)
       ).setRoyaltyRecipient(royaltyReceiver.address);
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -828,37 +828,6 @@ describe('Asset Royalties', function () {
     });
   });
 
-  it('Can view all the royalty recipient of each asset', async function () {
-    const {
-      Asset,
-      seller,
-      commonRoyaltyReceiver,
-      creator,
-      deployer,
-      assetAsMinter,
-    } = await assetRoyaltyDistribution();
-
-    const id = generateAssetId(creator.address, 1);
-    await assetAsMinter.mint(seller.address, id, 1, '0x');
-    const id2 = generateAssetId(deployer.address, 1);
-    await assetAsMinter.mint(seller.address, id2, 1, '0x01');
-    const tokenRoyalties = await Asset.getTokenRoyalties();
-    expect(tokenRoyalties[0].tokenId).to.be.equal(id);
-    expect(tokenRoyalties[0].recipients[0].recipient).to.be.equal(
-      creator.address
-    );
-    expect(tokenRoyalties[0].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver.address
-    );
-    expect(tokenRoyalties[1].tokenId).to.be.equal(id2);
-    expect(tokenRoyalties[1].recipients[0].recipient).to.be.equal(
-      deployer.address
-    );
-    expect(tokenRoyalties[1].recipients[1].recipient).to.be.equal(
-      commonRoyaltyReceiver.address
-    );
-  });
-
   describe('Roles on Asset and Manager contract', function () {
     it('creator could change the recipient for his splitter', async function () {
       const {seller, RoyaltyManagerContract, creator, assetAsMinter} =
@@ -866,7 +835,7 @@ describe('Asset Royalties', function () {
 
       const id = generateAssetId(creator.address, 1);
       await assetAsMinter.mint(seller.address, id, 1, '0x');
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         creator.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -874,12 +843,12 @@ describe('Asset Royalties', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(creator.address);
+      expect(await splitterContract.recipient()).to.be.equal(creator.address);
       const tnx = await RoyaltyManagerContract.connect(
         await ethers.getSigner(creator.address)
       ).setRoyaltyRecipient(seller.address);
       await tnx.wait();
-      expect(await splitterContract._recipient()).to.be.equal(seller.address);
+      expect(await splitterContract.recipient()).to.be.equal(seller.address);
     });
 
     it('only creator could change the recipient for his splitter', async function () {
