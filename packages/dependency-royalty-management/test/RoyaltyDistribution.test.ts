@@ -2135,13 +2135,11 @@ describe('Royalty', function () {
       );
     });
     it('should support interface for royalty distributer', async function () {
-      const royaltyDistributerFactory = await ethers.getContractFactory(
-        'RoyaltyDistributor'
+      const {SingleReceiver} = await royaltyDistribution();
+
+      expect(await SingleReceiver.supportsInterface(0x2a55205a)).to.be.equal(
+        true
       );
-      const royaltyDistributer = await royaltyDistributerFactory.deploy();
-      expect(
-        await royaltyDistributer.supportsInterface(0x2a55205a)
-      ).to.be.equal(true);
     });
 
     it('should support interface for multiRoyalty distributer', async function () {
