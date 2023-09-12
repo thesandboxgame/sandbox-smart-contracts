@@ -6,14 +6,14 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {sandAdmin, backendCashbackWallet} = await getNamedAccounts();
+  const {sandAdmin, backendInstantGiveawayWallet} = await getNamedAccounts();
   const signerRole = await read('SignedMultiGiveaway', 'SIGNER_ROLE');
   if (
     !(await read(
       'SignedMultiGiveaway',
       'hasRole',
       signerRole,
-      backendCashbackWallet
+      backendInstantGiveawayWallet
     ))
   ) {
     await catchUnknownSigner(
@@ -22,7 +22,7 @@ const func: DeployFunction = async function (
         {from: sandAdmin, log: true},
         'grantRole',
         signerRole,
-        backendCashbackWallet
+        backendInstantGiveawayWallet
       )
     );
   }
