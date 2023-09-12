@@ -239,7 +239,7 @@ contract Asset is
     /// @param to address to which the token will be transfered.
     /// @param ids ids of each token type transfered.
     /// @param amounts amount of each token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
