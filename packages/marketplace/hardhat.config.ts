@@ -1,5 +1,7 @@
 import {HardhatUserConfig} from 'hardhat/config';
 
+import "@nomiclabs/hardhat-truffle5";
+
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required
   // to ensure packages use up-to-date dependencies
