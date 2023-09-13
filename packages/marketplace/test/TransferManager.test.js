@@ -84,7 +84,7 @@ contract('TransferManagerTest:doTransferTest()', (accounts) => {
             RTM.doTransfersExternal(left, right, {
               value: 100,
               from: accounts[0],
-              gasPrice: 1,
+              gasPrice: 0,
             })
           )
         )
