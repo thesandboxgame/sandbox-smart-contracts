@@ -1,5 +1,5 @@
 {
-  "name": "marketplace",
+  "name": "@sandbox-smart-contracts/marketplace",
   "version": "1.0.0",
   "description": "",
   "dependencies": {
@@ -8,7 +8,10 @@
   "devDependencies": {
     "@openzeppelin/contracts": "4.9.3",
     "@openzeppelin/contracts-upgradeable": "4.9.3",
+    "@types/chai": "^4.2.11",
     "hardhat": "^2.17.2",
+    "hardhat-contract-sizer": "^2.0.3",
+    "hardhat-deploy": "^0.10.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.0.5"
   },

@@ -9,6 +9,7 @@ import './tasks/importedPackages';
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
+  '@sandbox-smart-contracts/marketplace': 'src/',
 };
 
 const namedAccounts = {
@@ -95,6 +96,14 @@ const namedAccounts = {
     mainnet: 'sandSaleBeneficiary',
     polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
   }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
+
+  exchangeFeeRecipient: {
+    default: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    goerli: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    mumbai: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    mainnet: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    polygon: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+  },
 
   landAdmin: {
     default: 2,
@@ -242,6 +251,7 @@ const networks = {
 };
 
 const compilers = [
+  '0.8.19',
   '0.8.18',
   '0.8.15',
   '0.8.2',
