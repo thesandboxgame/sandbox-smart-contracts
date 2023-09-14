@@ -1,6 +1,6 @@
 {
     "name": "@sandbox-smart-contracts/giveaway",
-    "version": "0.0.3",
+    "version": "1.0.0",
     "description": "Contracts used for token claims",
     "license": "MIT",
     "main": "index.js",
