@@ -2034,7 +2034,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/giveaway@0.0.3, @sandbox-smart-contracts/giveaway@workspace:packages/giveaway":
+"@sandbox-smart-contracts/giveaway@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@sandbox-smart-contracts/giveaway@npm:0.0.3"
+  dependencies:
+    "@openzeppelin/contracts-upgradeable": ^4.9.0
+  checksum: 8f7794b9e8dd9422f56b016794ad22985f4cd737a40d3121084e47e74d1e812c1e79ccf9ea3880e609abd445e339f28e0131fc6bf8e83c2237cd66d901c74239
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/giveaway@workspace:packages/giveaway":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/giveaway@workspace:packages/giveaway"
   dependencies:
