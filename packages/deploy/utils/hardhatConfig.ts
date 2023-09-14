@@ -57,16 +57,53 @@ export function addNodeAndMnemonic(
   return networks;
 }
 
+export function skipDeploymentsOnLiveNetworks(
+  conf: HardhatUserConfig
+): HardhatUserConfig {
+  // We want to run deployments on hardhat but not on live nets
+  // The problem is that hardhat-deploy always run the fixtures when testing
+  // maybe there is a better way to do it:
+  const testingLive =
+    process.argv.some((x) => x === 'test') &&
+    process.argv.some((x) => x === '--network');
+  if (!conf.networks || !testingLive) {
+    return conf;
+  }
+  const networks = conf.networks as NetworksUserConfig;
+  return {
+    ...conf,
+    networks: Object.keys(networks).reduce(
+      (acc, val) => ({
+        ...acc,
+        [val]: {...networks[val], deploy: []},
+      }),
+      {}
+    ),
+  };
+}
+
 export function addForkingSupport(conf: HardhatUserConfig): HardhatUserConfig {
   if (!process.env.HARDHAT_FORK) {
     return conf;
   }
+  const d =
+    (conf.networks &&
+      conf.networks['hardhat'] &&
+      conf.networks['hardhat']?.deploy) ||
+    [];
+  const deploy = typeof d === 'string' ? [d] : d;
   return {
     ...conf,
     networks: {
       ...conf.networks,
       hardhat: {
         ...(conf.networks ? conf.networks['hardhat'] : {}),
+        deploy: process.env.HARDHAT_FORK_INCLUDE_MOCKS
+          ? deploy
+          : deploy.filter((x) => !x.includes('mock')),
+        accounts: {
+          mnemonic: getMnemonic(process.env.HARDHAT_FORK),
+        },
         forking: process.env.HARDHAT_FORK
           ? {
               enabled: true,

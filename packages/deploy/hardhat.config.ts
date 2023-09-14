@@ -3,7 +3,11 @@ import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-deploy';
-import {addForkingSupport, addNodeAndMnemonic} from './utils/hardhatConfig';
+import {
+  addForkingSupport,
+  addNodeAndMnemonic,
+  skipDeploymentsOnLiveNetworks,
+} from './utils/hardhatConfig';
 import './tasks/importedPackages';
 
 // Package name : solidity source code path
@@ -265,16 +269,18 @@ const compilers = [
   },
 }));
 
-const config = addForkingSupport({
-  importedPackages,
-  namedAccounts,
-  networks: addNodeAndMnemonic(networks),
-  mocha: {
-    timeout: 0,
-    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
-  },
-  solidity: {
-    compilers,
-  },
-});
+const config = skipDeploymentsOnLiveNetworks(
+  addForkingSupport({
+    importedPackages,
+    namedAccounts,
+    networks: addNodeAndMnemonic(networks),
+    mocha: {
+      timeout: 0,
+      ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
+    },
+    solidity: {
+      compilers,
+    },
+  })
+);
 export default config;
