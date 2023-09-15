@@ -405,7 +405,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if tier mismatches signed tier', async function () {
         const {
@@ -428,7 +428,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, txSuppliedTier, 1, true, metadataHashes[0])
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if amount mismatches signed amount', async function () {
         const {
@@ -457,7 +457,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             true,
             metadataHashes[0]
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if sender is not the creator for which the signature was generated', async function () {
         const {
@@ -478,7 +478,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if metadataHash mismatches signed metadataHash', async function () {
         const {
@@ -499,7 +499,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, 4, 1, true, '0x1234')
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if the signature has been used before', async function () {
         const {
@@ -524,7 +524,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it("should revert if user doesn't have enough catalysts", async function () {
         const {
@@ -896,7 +896,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if tiers mismatch signed values', async function () {
         const {
@@ -924,7 +924,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if sender is not the creator for which the signature was generated', async function () {
         const {
@@ -952,7 +952,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if tiers, amounts and metadatahashes are not of the same length', async function () {
         const {
@@ -981,7 +981,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             [...metadataHashes, additionalMetadataHash]
           )
-        ).to.be.revertedWith('Arrays must be same length');
+        ).to.be.revertedWith('AssetCreate: Arrays must be same length');
       });
       it('should revert if amounts mismatch signed values', async function () {
         const {
@@ -1009,7 +1009,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if metadataHashes mismatch signed values', async function () {
         const {
@@ -1038,7 +1038,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             [metadataHashes[1], additionalMetadataHash]
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it('should revert if signature has already been used', async function () {
         const {
@@ -1073,7 +1073,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Invalid signature');
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
       it("should revert if user doesn't have enough catalysts", async function () {
         const {

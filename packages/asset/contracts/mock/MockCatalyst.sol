@@ -9,6 +9,8 @@ contract MockCatalyst is Catalyst {
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
+        _setOperatorFilterRegistry(registry);
+        IOperatorFilterRegistry operatorFilterRegistry = _getOperatorFilterRegistry();
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
         operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
     }

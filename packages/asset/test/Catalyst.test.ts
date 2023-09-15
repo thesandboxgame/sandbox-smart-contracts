@@ -384,6 +384,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+    it('emits BaseURISet event on setting base uri', async function () {
+      const {catalystAsAdmin, catalyst} = await runCatalystSetup();
+
+      const setBaseURITx = await catalystAsAdmin.setBaseURI('ipfs////');
+      await expect(setBaseURITx)
+        .to.emit(catalyst, 'BaseURISet')
+        .withArgs(`ipfs////`);
+    });
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.addNewCatalystType('')).to.be.revertedWith(
@@ -605,6 +613,24 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(4);
     });
+    it('should fail on burning non existing token', async function () {
+      const {catalystAsBurner, user1} = await runCatalystSetup();
+      await expect(
+        catalystAsBurner.burnFrom(user1.address, 1, 1)
+      ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+    });
+    it('should fail on batch burning non existing tokens', async function () {
+      const {catalystAsBurner, user1} = await runCatalystSetup();
+      const catalystId = [1, 2];
+      const catalystAmount = [2, 2];
+      await expect(
+        catalystAsBurner.burnBatchFrom(
+          user1.address,
+          catalystId,
+          catalystAmount
+        )
+      ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+    });
   });
   describe('Metadata', function () {
     it("user can view token's metadata", async function () {
@@ -670,6 +696,31 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user2.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user2.address, 2)).to.be.equal(10);
     });
+    it('should fail on transfering non existing token', async function () {
+      const {catalyst, user1, user2} = await runCatalystSetup();
+
+      await expect(
+        catalyst
+          .connect(user1)
+          .safeTransferFrom(user1.address, user2.address, 1, 1, '0x')
+      ).to.be.revertedWith('ERC1155: insufficient balance for transfer');
+    });
+    it('should fail on batch transfering non existing tokens', async function () {
+      const {catalyst, user1, user2} = await runCatalystSetup();
+      const catalystId = [1, 2];
+      const catalystAmount = [2, 2];
+      await expect(
+        catalyst
+          .connect(user1)
+          .safeBatchTransferFrom(
+            user1.address,
+            user2.address,
+            catalystId,
+            catalystAmount,
+            '0x'
+          )
+      ).to.be.revertedWith('ERC1155: insufficient balance for transfer');
+    });
   });
   describe('OperatorFilterer', function () {
     describe('common subscription setup', function () {
@@ -709,7 +760,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalyst
           .connect(catalystAdmin)
           .setOperatorRegistry(operatorFilterRegistry.address);
-        expect(await catalyst.operatorFilterRegistry()).to.be.equals(
+        expect(await catalyst.getOperatorFilterRegistry()).to.be.equals(
           operatorFilterRegistry.address
         );
 

@@ -7,6 +7,51 @@ const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Royalty', function () {
   describe('Royalty distribution through splitter', function () {
+    it('should emit TrustedForwarderSet event with correct data when setting new trusted forwarder', async function () {
+      const {
+        deployer,
+        RoyaltyManagerContract,
+        RoyaltyManagerAsAdmin,
+        TrustedForwarder,
+      } = await royaltyDistribution();
+      expect(
+        await await RoyaltyManagerContract.getTrustedForwarder()
+      ).to.be.equal(TrustedForwarder.address);
+      await expect(RoyaltyManagerAsAdmin.setTrustedForwarder(deployer.address))
+        .to.emit(RoyaltyManagerContract, 'TrustedForwarderSet')
+        .withArgs(TrustedForwarder.address, deployer.address);
+    });
+
+    it('should emit SplitterDeployed event with correct data when deploying splitter', async function () {
+      const {
+        seller,
+        royaltyReceiver,
+        RoyaltyManagerContract,
+        RoyaltyManagerAsAdmin,
+        splitterDeployerRole,
+      } = await royaltyDistribution();
+
+      expect(
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
+      ).to.be.equals('0x0000000000000000000000000000000000000000');
+      await RoyaltyManagerAsAdmin.grantRole(
+        splitterDeployerRole,
+        seller.address
+      );
+
+      const splitterDeployedTx = await RoyaltyManagerContract.connect(
+        seller
+      ).deploySplitter(seller.address, royaltyReceiver.address);
+
+      await expect(splitterDeployedTx)
+        .to.emit(RoyaltyManagerContract, 'SplitterDeployed')
+        .withArgs(
+          seller.address,
+          royaltyReceiver.address,
+          await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
+        );
+    });
+
     it('should split ERC20 using EIP2981', async function () {
       const {
         ERC1155,
@@ -41,7 +86,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -76,6 +121,7 @@ describe('Royalty', function () {
         (1000000 * (erc1155Royalty / 10000)) / 2
       );
     });
+
     it('should split ERC20 using EIP2981 using trusted forwarder', async function () {
       const {
         ERC1155,
@@ -111,7 +157,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -380,7 +426,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -389,7 +435,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -399,7 +445,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver2.address
       );
 
@@ -655,7 +701,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -664,7 +710,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -674,7 +720,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver2.address
       );
 
@@ -863,7 +909,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -929,7 +975,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -964,7 +1010,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         seller.address
       );
 
@@ -973,7 +1019,7 @@ describe('Royalty', function () {
         splitter
       );
 
-      expect(await splitterContract._recipient()).to.be.equal(
+      expect(await splitterContract.recipient()).to.be.equal(
         royaltyReceiver.address
       );
 
@@ -983,7 +1029,7 @@ describe('Royalty', function () {
 
       await tnx.wait();
 
-      expect(await splitterContract._recipient()).to.be.equal(seller.address);
+      expect(await splitterContract.recipient()).to.be.equal(seller.address);
     });
 
     it('only creator could change the recipient for his splitter', async function () {
@@ -1093,6 +1139,47 @@ describe('Royalty', function () {
         `AccessControl: account ${seller.address.toLowerCase()} is missing role ${await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE()}`
       );
     });
+    it('should be reverted when caller do not have splitter deployer role', async function () {
+      const {
+        RoyaltyManagerContract,
+        seller,
+        royaltyReceiver,
+        splitterDeployerRole,
+      } = await royaltyDistribution();
+      await expect(
+        RoyaltyManagerContract.connect(seller).deploySplitter(
+          seller.address,
+          royaltyReceiver.address
+        )
+      ).to.be.revertedWith(
+        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${splitterDeployerRole}`
+      );
+    });
+    it('should not be reverted when caller have splitter deployer role', async function () {
+      const {
+        RoyaltyManagerContract,
+        seller,
+        royaltyReceiver,
+        splitterDeployerRole,
+        RoyaltyManagerAsAdmin,
+      } = await royaltyDistribution();
+      await RoyaltyManagerAsAdmin.grantRole(
+        splitterDeployerRole,
+        seller.address
+      );
+      expect(
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
+      ).to.be.equals('0x0000000000000000000000000000000000000000');
+
+      await RoyaltyManagerContract.connect(seller).deploySplitter(
+        seller.address,
+        royaltyReceiver.address
+      );
+
+      expect(
+        await RoyaltyManagerContract.creatorRoyaltiesSplitter(seller.address)
+      ).to.not.equals('0x0000000000000000000000000000000000000000');
+    });
   });
 
   describe('Multi contract splitter setup', function () {
@@ -1106,7 +1193,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter1 = await ERC1155._tokenRoyaltiesSplitter(1);
+      const splitter1 = await ERC1155.getTokenRoyaltiesSplitter(1);
 
       await ERC1155.connect(seller).mint(
         seller.address,
@@ -1116,7 +1203,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter2 = await ERC1155._tokenRoyaltiesSplitter(2);
+      const splitter2 = await ERC1155.getTokenRoyaltiesSplitter(2);
 
       expect(splitter1).to.be.equal(splitter2);
     });
@@ -1132,7 +1219,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter1 = await ERC1155._tokenRoyaltiesSplitter(1);
+      const splitter1 = await ERC1155.getTokenRoyaltiesSplitter(1);
 
       await ERC1155.connect(buyer).mint(
         buyer.address,
@@ -1142,7 +1229,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter2 = await ERC1155._tokenRoyaltiesSplitter(2);
+      const splitter2 = await ERC1155.getTokenRoyaltiesSplitter(2);
 
       expect(splitter1).to.not.be.equal(splitter2);
     });
@@ -1157,7 +1244,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter = await ERC1155._tokenRoyaltiesSplitter(1);
+      const splitter = await ERC1155.getTokenRoyaltiesSplitter(1);
 
       const royaltyInfo = await ERC1155.royaltyInfo(1, 10000);
 
@@ -1214,7 +1301,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1650,7 +1737,7 @@ describe('Royalty', function () {
         '0x'
       );
 
-      const splitter1 = await ERC1155._tokenRoyaltiesSplitter(1);
+      const splitter1 = await ERC1155.getTokenRoyaltiesSplitter(1);
 
       await ERC721.connect(seller).mint(
         seller.address,
@@ -1658,7 +1745,7 @@ describe('Royalty', function () {
         royaltyReceiver.address
       );
 
-      const splitter2 = await ERC721._tokenRoyaltiesSplitter(2);
+      const splitter2 = await ERC721.getTokenRoyaltiesSplitter(2);
 
       expect(splitter1).to.be.equal(splitter2);
     });
@@ -1681,7 +1768,94 @@ describe('Royalty', function () {
 
       expect(
         await RoyaltyManagerContract.getCreatorRoyaltySplitter(deployer.address)
-      ).to.be.equal(await ERC1155._tokenRoyaltiesSplitter(1));
+      ).to.be.equal(await ERC1155.getTokenRoyaltiesSplitter(1));
+    });
+    it('should emit Token Royalty Splitter set event when a token is minted for first time', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const splitterSetEvent = mintResult.events[5];
+      expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
+    });
+    it('should not emit Token Royalty Splitter set event when a token is minted for second time', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const splitterSetEvent = mintResult.events[5];
+      expect(splitterSetEvent.event).to.equal('TokenRoyaltySplitterSet');
+      const mintTx2 = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult2 = await mintTx2.wait();
+      for (let i = 0; i < mintResult2.events.length; i++) {
+        expect(mintResult.events[i].event).to.not.equal(
+          'TokenRoyaltySplitterSet'
+        );
+      }
+    });
+    it('should emit recipient set event when a token minted for the first time', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const log = mintResult.logs[1];
+      expect(log.topics[0]).to.be.equal(
+        ethers.utils.id('RecipientSet(address)')
+      );
+    });
+    it('should not emit recipient set event when token is minted for second time', async function () {
+      const {seller, ERC1155, deployer, royaltyReceiver} =
+        await royaltyDistribution();
+      const mintTx = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult = await mintTx.wait();
+      const log = mintResult.logs[1];
+      expect(log.topics[0]).to.be.equal(
+        ethers.utils.id('RecipientSet(address)')
+      );
+      const mintTx2 = await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const mintResult2 = await mintTx2.wait();
+      for (let i = 0; i < mintResult2.events.length; i++) {
+        expect(mintResult.logs[i].topics[0]).to.not.equal(
+          ethers.utils.id('RecipientSet(address)')
+        );
+      }
     });
   });
 
@@ -1768,7 +1942,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
       const splitterContract = await ethers.getContractAt(
@@ -1815,7 +1989,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1868,7 +2042,7 @@ describe('Royalty', function () {
         seller.address,
         true
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1893,6 +2067,43 @@ describe('Royalty', function () {
         )
       ).to.be.revertedWith('Manager: No splitter deployed for the creator');
     });
+
+    it('should revert on for overflow for try mul in splitter contract', async function () {
+      const {
+        ERC1155,
+        deployer,
+        seller,
+        royaltyReceiver,
+        RoyaltyManagerContract,
+      } = await royaltyDistribution();
+      await ERC1155.connect(deployer).mint(
+        seller.address,
+        1,
+        1,
+        royaltyReceiver.address,
+        '0x'
+      );
+      const TestERC20Factory = await ethers.getContractFactory(
+        'OverflowTestERC20'
+      );
+      const OverflowERC20 = await TestERC20Factory.deploy();
+
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
+        deployer.address
+      );
+
+      const splitterContract = await ethers.getContractAt(
+        splitterAbi,
+        splitter
+      );
+
+      await OverflowERC20.mintMax(splitter);
+      await expect(
+        splitterContract
+          .connect(royaltyReceiver)
+          .splitERC20Tokens(OverflowERC20.address)
+      ).to.be.revertedWith('RoyaltySplitter: Multiplication Overflow');
+    });
   });
 
   describe('Interfaces', function () {
@@ -1911,7 +2122,7 @@ describe('Royalty', function () {
         royaltyReceiver.address,
         '0x'
       );
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
+      const splitter = await RoyaltyManagerContract.creatorRoyaltiesSplitter(
         deployer.address
       );
 
@@ -1924,135 +2135,16 @@ describe('Royalty', function () {
       );
     });
     it('should support interface for royalty distributer', async function () {
-      const royaltyDistributerFactory = await ethers.getContractFactory(
-        'RoyaltyDistributor'
+      const {SingleReceiver} = await royaltyDistribution();
+
+      expect(await SingleReceiver.supportsInterface(0x2a55205a)).to.be.equal(
+        true
       );
-      const royaltyDistributer = await royaltyDistributerFactory.deploy();
-      expect(
-        await royaltyDistributer.supportsInterface(0x2a55205a)
-      ).to.be.equal(true);
     });
 
     it('should support interface for multiRoyalty distributer', async function () {
       const {ERC1155} = await royaltyDistribution();
       expect(await ERC1155.supportsInterface(0x2a55205a)).to.be.equal(true);
-    });
-  });
-
-  describe('Proxy method for extracting stuck NFTs on splitters', function () {
-    it('should transfer stuck Token using proxy call', async function () {
-      const {
-        RoyaltyManagerContract,
-        seller,
-        ERC1155,
-        deployer,
-        royaltyReceiver,
-        NFT,
-      } = await royaltyDistribution();
-      await ERC1155.connect(deployer).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
-        deployer.address
-      );
-
-      await NFT.mint(splitter, 1, 1);
-      expect(await NFT.balanceOf(splitter, 1)).to.be.equal(1);
-      const data = await NFT.populateTransaction[
-        'transfer(address,address,uint256,uint256)'
-      ](splitter, seller.address, 1, 1);
-
-      const splitterContract = await ethers.getContractAt(
-        splitterAbi,
-        splitter
-      );
-      await splitterContract
-        .connect(royaltyReceiver)
-        .proxyCall(NFT.address, data.data);
-      expect(await NFT.balanceOf(seller.address, 1)).to.be.equal(1);
-    });
-    it('should revert when approving ERC20 token using proxy call', async function () {
-      const {
-        RoyaltyManagerContract,
-        seller,
-        ERC1155,
-        deployer,
-        royaltyReceiver,
-        ERC20,
-        NFT,
-      } = await royaltyDistribution();
-      await ERC1155.connect(deployer).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
-        deployer.address
-      );
-
-      await NFT.mint(splitter, 1, 1);
-      await ERC20.mint(splitter, 1000000);
-      const data = await ERC20.populateTransaction['approve(address,uint256)'](
-        seller.address,
-        10000
-      );
-
-      const splitterContract = await ethers.getContractAt(
-        splitterAbi,
-        splitter
-      );
-      await expect(
-        splitterContract
-          .connect(royaltyReceiver)
-          .proxyCall(ERC20.address, data.data)
-      ).to.be.revertedWith('Split: ERC20 tokens must be split');
-    });
-    it('should revert when proxy call is called by non recipient', async function () {
-      const {
-        RoyaltyManagerContract,
-        seller,
-        ERC1155,
-        deployer,
-        royaltyReceiver,
-        ERC20,
-        NFT,
-      } = await royaltyDistribution();
-      await ERC1155.connect(deployer).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-
-      const splitter = await RoyaltyManagerContract._creatorRoyaltiesSplitter(
-        deployer.address
-      );
-
-      await NFT.mint(splitter, 1, 1);
-      await ERC20.mint(splitter, 1000000);
-      const data = await ERC20.populateTransaction['approve(address,uint256)'](
-        seller.address,
-        10000
-      );
-
-      const splitterContract = await ethers.getContractAt(
-        splitterAbi,
-        splitter
-      );
-      await expect(
-        splitterContract.proxyCall(ERC20.address, data.data)
-      ).to.be.revertedWith(
-        'Split: Can only be called by one of the recipients'
-      );
     });
   });
 
@@ -2090,7 +2182,7 @@ describe('Royalty', function () {
       );
 
       expect(await ERC1155.royaltyInfo(1, 0)).to.deep.equal([
-        await ERC1155._tokenRoyaltiesSplitter(1),
+        await ERC1155.getTokenRoyaltiesSplitter(1),
         0,
       ]);
     });
@@ -2124,7 +2216,7 @@ describe('Royalty', function () {
       );
       expect(await ERC1155.getAllSplits()).to.deep.equal([
         commonRoyaltyReceiver.address,
-        await ERC1155._tokenRoyaltiesSplitter(1),
+        await ERC1155.getTokenRoyaltiesSplitter(1),
       ]);
     });
     it('should return all the royalty recipient of a token', async function () {
@@ -2151,17 +2243,6 @@ describe('Royalty', function () {
       expect(recipients[1].recipient).to.deep.equal(
         commonRoyaltyReceiver.address
       );
-    });
-    it('should return the tokens for which the royalties is set', async function () {
-      const {ERC1155, seller, royaltyReceiver} = await royaltyDistribution();
-      await ERC1155.connect(seller).mint(
-        seller.address,
-        1,
-        1,
-        royaltyReceiver.address,
-        '0x'
-      );
-      expect((await ERC1155.getTokenRoyalties()).length).to.be.equals(1);
     });
   });
 });

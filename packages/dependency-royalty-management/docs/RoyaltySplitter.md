@@ -54,24 +54,10 @@ This contract calls the RoyaltyManager contract for the common recipient's addre
 ---
 
 ```Solidity
-    function proxyCall(
-        address payable target,
-        bytes calldata callData
-    ) external
-```
-
-- Made for unexpected scenarios when assets are sent to this contact such that they could be recovered.
-- first attempts to split ERC20 tokens.
-- `target` target of the call
-- `callData` for the call.
-
----
-
-```Solidity
 function splitERC20Tokens(IERC20 erc20Contract) public
 ```
 
-- This function allows recipients to split all available ERC20 at the provided address between the recipients 
+- This function allows recipients to split all available ERC20 at the provided address between the recipients
 - recipients(both creator and common) can only call this function to split all available tokens recipients.
 - `erc20Contract`: The ERC20 token contract to split
 

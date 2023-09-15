@@ -14,6 +14,17 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(hasRole).to.equal(true);
     });
+    it('should not allow DEFAULT_ADMIN_ROLE to be renounced', async function () {
+      const {authValidatorAdmin, AuthValidatorContract} = await runSetup();
+      const DEFAULT_ADMIN_ROLE =
+        await AuthValidatorContract.DEFAULT_ADMIN_ROLE();
+      await expect(
+        AuthValidatorContract.renounceRole(
+          DEFAULT_ADMIN_ROLE,
+          authValidatorAdmin.address
+        )
+      ).to.be.revertedWith("AuthSuperValidator: can't renounce admin role");
+    });
     it('should allow admin to set signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContractAsAdmin, backendSigner} =
         await runSetup();

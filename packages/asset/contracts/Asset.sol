@@ -30,6 +30,11 @@ import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 
+/// @title Asset
+/// @author The Sandbox
+/// @notice ERC1155 asset token contract
+/// @notice Minting and burning tokens is only allowed through separate authorized contracts
+/// @dev This contract is final and should not be inherited
 contract Asset is
     IAsset,
     Initializable,
@@ -56,6 +61,12 @@ contract Asset is
         _disableInitializers();
     }
 
+    /// @notice Initialize the contract
+    /// @param forwarder The address of the trusted forwarder
+    /// @param assetAdmin The address of the asset admin
+    /// @param baseUri The base URI for the token metadata
+    /// @param commonSubscription The address of the operator filter subscription
+    /// @param _manager The address of the royalty manager
     function initialize(
         address forwarder,
         address assetAdmin,
@@ -78,6 +89,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
+    /// @param metadataHash The metadata hash of the token to mint
     function mint(
         address to,
         uint256 id,
@@ -95,6 +107,7 @@ contract Asset is
     /// @param to The address of the recipient
     /// @param ids The ids of the tokens to mint
     /// @param amounts The amounts of the tokens to mint
+    /// @param metadataHashes The metadata hashes of the tokens to mint
     function mintBatch(
         address to,
         uint256[] memory ids,
@@ -163,15 +176,21 @@ contract Asset is
         public
         view
         override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
-        returns (string memory)
+        returns (string memory tokenURI)
     {
         return ERC1155URIStorageUpgradeable.uri(tokenId);
     }
 
-    function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256) {
+    /// @notice returns the tokenId associated with provided metadata hash
+    /// @param metadataHash The metadata hash to get tokenId for
+    /// @return tokenId the tokenId associated with the metadata hash
+    function getTokenIdByMetadataHash(string memory metadataHash) public view returns (uint256 tokenId) {
         return hashUsed[metadataHash];
     }
 
+    /// @notice sets the metadata hash for a given tokenId
+    /// @param tokenId The tokenId to set metadata hash for
+    /// @param metadataHash The metadata hash to set
     function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
         if (hashUsed[metadataHash] != 0) {
             require(hashUsed[metadataHash] == tokenId, "Asset: Hash already used");
@@ -191,13 +210,13 @@ contract Asset is
 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
+    /// @return supported `true` if the contract implements `id`.
     function supportsInterface(bytes4 id)
         public
         view
         virtual
         override(ERC1155Upgradeable, AccessControlUpgradeable, MultiRoyaltyDistributor)
-        returns (bool)
+        returns (bool supported)
     {
         return id == type(IRoyaltyUGC).interfaceId || super.supportsInterface(id);
     }
@@ -217,7 +236,7 @@ contract Asset is
         view
         virtual
         override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (bytes calldata)
+        returns (bytes calldata msgData)
     {
         return ERC2771HandlerUpgradeable._msgData();
     }
@@ -239,7 +258,7 @@ contract Asset is
     /// @param to address to which the token will be transfered.
     /// @param ids ids of each token type transfered.
     /// @param amounts amount of each token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -267,7 +286,7 @@ contract Asset is
     /// @param to address to which the token will be transfered.
     /// @param id the token type transfered.
     /// @param amount amount of token transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeTransferFrom(
         address from,
         address to,
@@ -282,7 +301,7 @@ contract Asset is
     /// @notice could be used to deploy splitter and set tokens royalties
     /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
     /// @param recipient the royalty recipient for the splitter of the creator.
-    /// @param creator the creactor of the tokens.
+    /// @param creator the creator of the tokens.
     function setTokenRoyalties(
         uint256 tokenId,
         address payable recipient,
@@ -307,33 +326,33 @@ contract Asset is
 
     /// @notice Extracts the revealed flag from a given token id
     /// @param tokenId The token id to extract the revealed flag from
-    /// @return isRevealed Whether the asset is revealed or not
-    function isRevealed(uint256 tokenId) external pure returns (bool) {
+    /// @return revealed Whether the asset is revealed or not
+    function isRevealed(uint256 tokenId) external pure returns (bool revealed) {
         return TokenIdUtils.isRevealed(tokenId);
     }
 
     /// @notice Extracts the asset nonce from a given token id
     /// @param tokenId The token id to extract the asset nonce from
     /// @return creatorNonce The asset creator nonce
-    function getCreatorNonce(uint256 tokenId) external pure returns (uint16) {
+    function getCreatorNonce(uint256 tokenId) external pure returns (uint16 creatorNonce) {
         return TokenIdUtils.getCreatorNonce(tokenId);
     }
 
     /// @notice Extracts the abilities and enhancements hash from a given token id
     /// @param tokenId The token id to extract reveal nonce from
     /// @return revealNonce The reveal nonce of the asset
-    function getRevealNonce(uint256 tokenId) external pure returns (uint16) {
+    function getRevealNonce(uint256 tokenId) external pure returns (uint16 revealNonce) {
         return TokenIdUtils.getRevealNonce(tokenId);
     }
 
     /// @notice Extracts the bridged flag from a given token id
     /// @param tokenId The token id to extract the bridged flag from
     /// @return bridged Whether the asset is bridged or not
-    function isBridged(uint256 tokenId) external pure returns (bool) {
+    function isBridged(uint256 tokenId) external pure returns (bool bridged) {
         return TokenIdUtils.isBridged(tokenId);
     }
 
-    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of Opensea.can only be called by admin.
+    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of OpenSea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
@@ -345,10 +364,12 @@ contract Asset is
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
-    /// @notice sets filter registry address deployed in test
+    /// @notice sets the operator filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(registry != address(0), "Asset: Zero address");
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
     }
+
+    uint256[49] private __gap;
 }

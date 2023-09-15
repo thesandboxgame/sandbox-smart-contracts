@@ -1025,7 +1025,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         await Asset.connect(assetAdmin).setOperatorRegistry(
           operatorFilterRegistry.address
         );
-        expect(await Asset.operatorFilterRegistry()).to.be.equals(
+        expect(await Asset.getOperatorFilterRegistry()).to.be.equals(
           operatorFilterRegistry.address
         );
 
@@ -1616,6 +1616,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
       it('it should not setApprovalForAll blacklisted market places', async function () {
         const {mockMarketPlace1, users} = await setupOperatorFilter();
+
         await expect(
           users[0].Asset.setApprovalForAll(mockMarketPlace1.address, true)
         ).to.be.reverted;

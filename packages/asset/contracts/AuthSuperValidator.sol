@@ -42,4 +42,13 @@ contract AuthSuperValidator is AccessControl {
         address recoveredSigner = ECDSA.recover(digest, signature);
         return recoveredSigner == signer;
     }
+
+    /// @notice Prevents the DEFAULT_ADMIN_ROLE from being renounced
+    /// @dev This function overrides the default renounceRole function to prevent the DEFAULT_ADMIN_ROLE from being renounced
+    /// @param role Role to renounce
+    /// @param account Account to renounce the role for
+    function renounceRole(bytes32 role, address account) public override {
+        require(role != DEFAULT_ADMIN_ROLE, "AuthSuperValidator: can't renounce admin role");
+        super.renounceRole(role, account);
+    }
 }
