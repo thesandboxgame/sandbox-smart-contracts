@@ -18,7 +18,7 @@ const func: DeployFunction = async function (
       'Catalyst',
       'hasRole',
       minterRole,
-      '0x803E1522e136121c058dc9541E7B3164957c200e' // Seba's mumbai wallet
+      '0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7' // Seba's mumbai wallet
     ))
   ) {
     await catchUnknownSigner(
@@ -27,10 +27,10 @@ const func: DeployFunction = async function (
         {from: catalystAdmin, log: true},
         'grantRole',
         minterRole,
-        '0x803E1522e136121c058dc9541E7B3164957c200e' // Seba's mumbai wallet
+        '0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7' // Seba's mumbai wallet
       )
     );
-    log(`MINTER_ROLE granted to 0x803E1522e136121c058dc9541E7B3164957c200e`);
+    log(`MINTER_ROLE granted to 0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7`);
   }
   // TODO END
 
