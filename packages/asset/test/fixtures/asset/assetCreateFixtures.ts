@@ -93,7 +93,13 @@ export async function runCreateTestSetup() {
   );
 
   await AssetContract.deployed();
-
+  const RoyaltyManagerAsAdmin = RoyaltyManagerContract.connect(managerAdmin);
+  const splitterDeployerRole =
+    await RoyaltyManagerContract.SPLITTER_DEPLOYER_ROLE();
+  await RoyaltyManagerAsAdmin.grantRole(
+    splitterDeployerRole,
+    AssetContract.address
+  );
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
   const CatalystContract = await upgrades.deployProxy(
     CatalystFactory,

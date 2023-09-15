@@ -10,31 +10,32 @@ import {
 import {IEIP2981} from "@manifoldxyz/royalty-registry-solidity/contracts/specs/IEIP2981.sol";
 import {IRoyaltyManager, Recipient} from "./interfaces/IRoyaltyManager.sol";
 
-/// @title MultiRoyaltyDistributer
+/// @title MultiRoyaltyDistributor
 /// @author The Sandbox
-/// @dev  The MultiRoyaltyDistributer contract implements the ERC-2981 and ERC-165 interfaces for a royalty payment system. This payment system can be used to pay royalties to multiple recipients through splitters.
-/// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to slip its royalty between the creator and Sandbox and use it for every token minted by that creator.
+/// @dev  The MultiRoyaltyDistributor contract implements the ERC-2981 and ERC-165 interfaces for a royalty payment system. This payment system can be used to pay royalties to multiple recipients through splitters.
+/// @dev  This contract calls to the Royalties manager contract to deploy RoyaltySplitter for a creator to split its royalty between the creator and Sandbox and use it for every token minted by that creator.
 abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor, ERC165Upgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-    address public royaltyManager;
+    address private royaltyManager;
 
-    mapping(uint256 => address payable) public _tokenRoyaltiesSplitter;
+    mapping(uint256 => address payable) private _tokenRoyaltiesSplitter;
     uint256[] private _tokensWithRoyalties;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __MultiRoyaltyDistributor_init(address _royaltyManager) internal {
-        royaltyManager = _royaltyManager;
+    function __MultiRoyaltyDistributor_init(address _royaltyManager) internal onlyInitializing {
+        _setRoyaltyManager(_royaltyManager);
+        __ERC165_init_unchained();
     }
 
-    /// @notice EIP 165 interface function
-    /// @dev used to check the interface implemented
-    /// @param interfaceId to be checked for implementation
+    /// @notice Query if a contract implements interface `id`.
+    /// @param interfaceId the interface identifier, as specified in ERC-165.
+    /// @return isSupported `true` if the contract implements `id`.
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
         override(ERC165Upgradeable, IERC165)
-        returns (bool)
+        returns (bool isSupported)
     {
         return
             interfaceId == type(IEIP2981).interfaceId ||
@@ -46,6 +47,7 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice sets token royalty
     /// @dev deploys a splitter if a creator doesn't have one
     /// @param tokenId id of token
+    /// @param recipient royalty recipient
     /// @param creator of the token
     function _setTokenRoyalties(
         uint256 tokenId,
@@ -53,33 +55,28 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
         address creator
     ) internal {
         address payable creatorSplitterAddress = IRoyaltyManager(royaltyManager).deploySplitter(creator, recipient);
-        _tokenRoyaltiesSplitter[tokenId] = creatorSplitterAddress;
-        _tokensWithRoyalties.push(tokenId);
-        emit TokenRoyaltySet(tokenId, recipient);
-    }
 
-    /// @notice Returns royalty receivers and their split of royalty for each token
-    /// @return royaltyConfigs receivers and their split array as long as the number of tokens.
-    function getTokenRoyalties() external view override returns (TokenRoyaltyConfig[] memory royaltyConfigs) {
-        royaltyConfigs = new TokenRoyaltyConfig[](_tokensWithRoyalties.length);
-        for (uint256 i; i < _tokensWithRoyalties.length; ++i) {
-            TokenRoyaltyConfig memory royaltyConfig;
-            uint256 tokenId = _tokensWithRoyalties[i];
-            address splitterAddress = _tokenRoyaltiesSplitter[tokenId];
-            if (splitterAddress != address(0)) {
-                royaltyConfig.recipients = IRoyaltySplitter(splitterAddress).getRecipients();
+        if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
+            if (_tokenRoyaltiesSplitter[tokenId] != creatorSplitterAddress) {
+                _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
             }
-            royaltyConfig.tokenId = tokenId;
-            royaltyConfigs[i] = royaltyConfig;
+        } else {
+            _tokensWithRoyalties.push(tokenId);
+            _setTokenRoyaltiesSplitter(tokenId, creatorSplitterAddress);
         }
     }
 
     /// @notice EIP 2981 royalty info function to return the royalty receiver and royalty amount
     /// @param tokenId of the token for which the royalty is needed to be distributed
     /// @param value the amount on which the royalty is calculated
-    /// @return address the royalty receiver
-    /// @return value the EIP2981 royalty
-    function royaltyInfo(uint256 tokenId, uint256 value) public view override returns (address, uint256) {
+    /// @return receiver address the royalty receiver
+    /// @return royaltyAmount value the EIP2981 royalty
+    function royaltyInfo(uint256 tokenId, uint256 value)
+        public
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
         (address payable _defaultRoyaltyReceiver, uint16 _defaultRoyaltyBPS) =
             IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (_tokenRoyaltiesSplitter[tokenId] != address(0)) {
@@ -114,15 +111,45 @@ abstract contract MultiRoyaltyDistributor is IEIP2981, IMultiRoyaltyDistributor,
     /// @notice returns the royalty recipients for each tokenId.
     /// @dev returns the default address for tokens with no recipients.
     /// @param tokenId is the token id for which the recipient should be returned.
-    /// @return addresses of royalty recipient of the token.
-    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory) {
+    /// @return recipients array of royalty recipients for the token
+    function getRecipients(uint256 tokenId) public view returns (Recipient[] memory recipients) {
         address payable splitterAddress = _tokenRoyaltiesSplitter[tokenId];
         (address payable _defaultRoyaltyReceiver, ) = IRoyaltyManager(royaltyManager).getRoyaltyInfo();
         if (splitterAddress != address(0)) {
             return IRoyaltySplitter(splitterAddress).getRecipients();
         }
-        Recipient[] memory defaultRecipient = new Recipient[](1);
-        defaultRecipient[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
-        return defaultRecipient;
+        recipients = new Recipient[](1);
+        recipients[0] = Recipient({recipient: _defaultRoyaltyReceiver, bps: TOTAL_BASIS_POINTS});
+        return recipients;
     }
+
+    /// @notice internal function to set the token royalty splitter
+    /// @param tokenId id of token
+    /// @param splitterAddress address of the splitter contract
+    function _setTokenRoyaltiesSplitter(uint256 tokenId, address payable splitterAddress) internal {
+        _tokenRoyaltiesSplitter[tokenId] = splitterAddress;
+        emit TokenRoyaltySplitterSet(tokenId, splitterAddress);
+    }
+
+    /// @notice returns the address of token royalty splitter.
+    /// @param tokenId is the token id for which royalty splitter should be returned.
+    /// @return splitterAddress address of royalty splitter for the token
+    function getTokenRoyaltiesSplitter(uint256 tokenId) external view returns (address payable splitterAddress) {
+        return _tokenRoyaltiesSplitter[tokenId];
+    }
+
+    /// @notice returns the address of royalty manager.
+    /// @return managerAddress address of royalty manager.
+    function getRoyaltyManager() external view returns (address managerAddress) {
+        return royaltyManager;
+    }
+
+    /// @notice set royalty manager address
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = _royaltyManager;
+        emit RoyaltyManagerSet(_royaltyManager);
+    }
+
+    uint256[47] private __gap;
 }
