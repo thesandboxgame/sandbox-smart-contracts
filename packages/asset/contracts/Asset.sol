@@ -355,7 +355,6 @@ contract Asset is
         return TokenIdUtils.isBridged(tokenId);
     }
 
-
     /// @notice This function is used to register Asset contract on the Operator Filterer Registry of OpenSea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
