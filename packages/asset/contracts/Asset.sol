@@ -258,7 +258,7 @@ contract Asset is
     /// @param to address to which the token will be transfered.
     /// @param ids ids of each token type transfered.
     /// @param amounts amount of each token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -286,7 +286,7 @@ contract Asset is
     /// @param to address to which the token will be transfered.
     /// @param id the token type transfered.
     /// @param amount amount of token transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param data additional data accompanying the transfer.
     function safeTransferFrom(
         address from,
         address to,
@@ -304,7 +304,7 @@ contract Asset is
     /// @notice could be used to deploy splitter and set tokens royalties
     /// @param tokenId the id of the token for which the EIP2981 royalty is set for.
     /// @param recipient the royalty recipient for the splitter of the creator.
-    /// @param creator the creactor of the tokens.
+    /// @param creator the creator of the tokens.
     function setTokenRoyalties(
         uint256 tokenId,
         address payable recipient,
@@ -355,7 +355,7 @@ contract Asset is
         return TokenIdUtils.isBridged(tokenId);
     }
 
-    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of OpenSea.can only be called by admin.
+    /// @notice This function is used to register Asset contract on the Operator Filterer Registry of OpenSea. Can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
