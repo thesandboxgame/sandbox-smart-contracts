@@ -104,6 +104,7 @@ library TokenIdUtils {
     /// @notice Extracts the asset data from a given token id
     /// @dev Created to limit the number of functions that need to be called when revealing an asset
     /// @param tokenId The token id to extract the asset data from
+    /// @return data The asset data struct
     function getData(uint256 tokenId) internal pure returns (IAsset.AssetData memory data) {
         data.creator = getCreatorAddress(tokenId);
         data.tier = getTier(tokenId);
