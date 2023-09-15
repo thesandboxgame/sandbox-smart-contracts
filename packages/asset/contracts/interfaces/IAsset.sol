@@ -73,5 +73,5 @@ interface IAsset {
     /// @notice returns the tokenId associated with provided metadata hash
     /// @param metadataHash The metadata hash to get tokenId for
     /// @return tokenId the tokenId associated with the metadata hash
-    function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256);
+    function getTokenIdByMetadataHash(string memory metadataHash) external view returns (uint256 tokenId);
 }

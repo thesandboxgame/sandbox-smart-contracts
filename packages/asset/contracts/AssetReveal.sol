@@ -367,10 +367,10 @@ contract AssetReveal is
     /// @dev This function also validates that we're not trying to reveal a tokenId that has already been revealed
     /// @param metadataHashes The hashes of the metadata
     /// @param prevTokenId The previous token id from which the assets are revealed
-    /// @return tokenIdArray The array of tokenIds to mint
+    /// @return tokenIds The array of tokenIds to mint
     function getRevealedTokenIds(string[] calldata metadataHashes, uint256 prevTokenId)
         internal
-        returns (uint256[] memory)
+        returns (uint256[] memory tokenIds)
     {
         IAsset.AssetData memory data = prevTokenId.getData();
         require(!data.revealed, "AssetReveal: already revealed");
@@ -393,20 +393,20 @@ contract AssetReveal is
     }
 
     /// @notice Get the status of a revealHash
-    /// @return Whether it has been used
-    function revealHashUsed(bytes32 revealHash) external view returns (bool) {
+    /// @return hashUsed Boolean representing whether the hash has been used
+    function revealHashUsed(bytes32 revealHash) external view returns (bool hashUsed) {
         return revealHashesUsed[revealHash];
     }
 
     /// @notice Get the asset contract address
-    /// @return The asset contract address
-    function getAssetContract() external view returns (address) {
+    /// @return assetContractAddres The asset contract address
+    function getAssetContract() external view returns (address assetContractAddres) {
         return address(assetContract);
     }
 
     /// @notice Get the auth validator address
-    /// @return The auth validator address
-    function getAuthValidator() external view returns (address) {
+    /// @return authValidatorContractAddress The auth validator address
+    function getAuthValidator() external view returns (address authValidatorContractAddress) {
         return address(authValidator);
     }
 
@@ -419,8 +419,8 @@ contract AssetReveal is
 
     /// @notice Get permission for instant reveal for a given tier
     /// @param tier The tier to check
-    /// @return Whether instant reveal is allowed for the given tier
-    function getTierInstantRevealAllowed(uint8 tier) external view returns (bool) {
+    /// @return instantRevealAllowed Boolean representing whether instant reveal is allowed for the given tier
+    function getTierInstantRevealAllowed(uint8 tier) external view returns (bool instantRevealAllowed) {
         return tierInstantRevealAllowed[tier];
     }
 

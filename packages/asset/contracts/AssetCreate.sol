@@ -195,20 +195,20 @@ contract AssetCreate is
     }
 
     /// @notice Get the asset contract address
-    /// @return The asset contract address
-    function getAssetContract() external view returns (address) {
+    /// @return assetContractAddress The asset contract address
+    function getAssetContract() external view returns (address assetContractAddress) {
         return address(assetContract);
     }
 
     /// @notice Get the catalyst contract address
-    /// @return The catalyst contract address
-    function getCatalystContract() external view returns (address) {
+    /// @return catalystContractAddress The catalyst contract address
+    function getCatalystContract() external view returns (address catalystContractAddress) {
         return address(catalystContract);
     }
 
     /// @notice Get the auth validator address
-    /// @return The auth validator address
-    function getAuthValidator() external view returns (address) {
+    /// @return authValidatorAddress The auth validator address
+    function getAuthValidator() external view returns (address authValidatorAddress) {
         return address(authValidator);
     }
 
