@@ -25,7 +25,12 @@ interface IAsset {
     /// @param id The id of the token to mint
     /// @param amount The amount of the token to mint
     /// @param metadataHash The metadata hash of the token to mint
-    function mint(address to, uint256 id, uint256 amount, string memory metadataHash) external;
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        string memory metadataHash
+    ) external;
 
     /// @notice Mint new tokens with catalyst tier chosen by the creator
     /// @dev Only callable by the minter role
@@ -46,7 +51,11 @@ interface IAsset {
     /// @param account The account to burn tokens from
     /// @param id The token id to burn
     /// @param amount The amount of tokens to burn
-    function burnFrom(address account, uint256 id, uint256 amount) external;
+    function burnFrom(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external;
 
     /// @notice Burn a batch of tokens from a given account
     /// @dev Only the minter role can burn tokens
@@ -55,7 +64,11 @@ interface IAsset {
     /// @param account The account to burn tokens from
     /// @param ids An array of token ids to burn
     /// @param amounts An array of amounts of tokens to burn
-    function burnBatchFrom(address account, uint256[] memory ids, uint256[] memory amounts) external;
+    function burnBatchFrom(
+        address account,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) external;
 
     /// @notice returns the tokenId associated with provided metadata hash
     /// @param metadataHash The metadata hash to get tokenId for
