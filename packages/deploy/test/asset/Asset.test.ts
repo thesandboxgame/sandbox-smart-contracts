@@ -255,7 +255,7 @@ describe('Asset', function () {
   describe('MultiRoyaltyDistributor', function () {
     it('RoyaltyManager contract is set correctly', async function () {
       const {AssetContract, RoyaltyManagerContract} = await setupTest();
-      expect(await AssetContract.royaltyManager()).to.be.equal(
+      expect(await AssetContract.getRoyaltyManager()).to.be.equal(
         RoyaltyManagerContract.address
       );
     });

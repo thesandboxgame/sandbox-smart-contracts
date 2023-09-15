@@ -26,7 +26,7 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
     /// @notice sets registry
     /// @param registry address of registry
     function setRegistry(address registry) external {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        _setOperatorFilterRegistry(registry);
     }
 
     /// @notice register contract
@@ -40,8 +40,8 @@ contract UnregisteredToken is ERC1155Upgradeable, OperatorFiltererUpgradeable, E
     /// @param registry address of registry
     /// @param subscription address to subscribe
     function setRegistryAndSubscribe(address registry, address subscription) external {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        operatorFilterRegistry.registerAndSubscribe(address(this), subscription);
+        _setOperatorFilterRegistry(registry);
+        IOperatorFilterRegistry(registry).registerAndSubscribe(address(this), subscription);
     }
 
     /// @notice Mint new tokens with out minter role

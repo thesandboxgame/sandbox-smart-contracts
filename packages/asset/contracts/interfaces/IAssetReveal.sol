@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+/// @title AssetReveal interface
+/// @author The Sandbox
 interface IAssetReveal {
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
     event AssetRevealBurn(address indexed revealer, uint256 unrevealedTokenId, uint256 amount);

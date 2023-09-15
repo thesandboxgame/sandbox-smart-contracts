@@ -76,17 +76,17 @@ export const splitterAbi = [
     type: 'event',
   },
   {
-    inputs: [],
-    name: '_recipient',
-    outputs: [
+    anonymous: false,
+    inputs: [
       {
-        internalType: 'address payable',
-        name: '',
+        indexed: true,
+        internalType: 'address',
+        name: 'recipientAddress',
         type: 'address',
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
+    name: 'RecipientSet',
+    type: 'event',
   },
   {
     inputs: [],
@@ -117,18 +117,37 @@ export const splitterAbi = [
     inputs: [
       {
         internalType: 'address payable',
-        name: 'recipient',
+        name: '_recipient',
         type: 'address',
       },
       {
         internalType: 'address',
-        name: 'sandBoxRegistry',
+        name: '_royaltyManager',
         type: 'address',
       },
     ],
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'forwarder',
+        type: 'address',
+      },
+    ],
+    name: 'isTrustedForwarder',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -145,21 +164,16 @@ export const splitterAbi = [
     type: 'function',
   },
   {
-    inputs: [
+    inputs: [],
+    name: 'recipient',
+    outputs: [
       {
         internalType: 'address payable',
-        name: 'target',
+        name: '',
         type: 'address',
       },
-      {
-        internalType: 'bytes',
-        name: 'callData',
-        type: 'bytes',
-      },
     ],
-    name: 'proxyCall',
-    outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -167,6 +181,19 @@ export const splitterAbi = [
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'royaltyManager',
+    outputs: [
+      {
+        internalType: 'contract IRoyaltyManager',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -211,7 +238,7 @@ export const splitterAbi = [
     inputs: [],
     name: 'splitETH',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {
