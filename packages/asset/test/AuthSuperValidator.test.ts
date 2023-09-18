@@ -23,7 +23,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
           DEFAULT_ADMIN_ROLE,
           authValidatorAdmin.address
         )
-      ).to.be.revertedWith("AuthSuperValidator: can't renounce admin role");
+      ).to.be.revertedWith('AuthSuperValidator: cant renounce admin role');
     });
     it('should allow admin to set signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContractAsAdmin, backendSigner} =
