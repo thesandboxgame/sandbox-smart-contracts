@@ -35,7 +35,7 @@ describe('SignedMultiGiveaway', function () {
       expect(
         await fixtures.contract.hasRole(
           signerRole,
-          fixtures.namedAccount.backendCashbackWallet
+          fixtures.namedAccount.backendInstantGiveawayWallet
         )
       ).to.be.true;
     });
