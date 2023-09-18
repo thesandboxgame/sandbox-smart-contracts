@@ -251,7 +251,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: CID can't be empty");
+      ).to.revertedWith('Catalyst: CID cant be empty');
     });
   });
   describe('Admin Role', function () {
@@ -395,7 +395,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.addNewCatalystType('')).to.be.revertedWith(
-        "Catalyst: CID can't be empty"
+        'Catalyst: CID cant be empty'
       );
     });
     it('cant set invalid trusted forwarder', async function () {
