@@ -96,7 +96,7 @@ contract Catalyst is
         _grantRole(MINTER_ROLE, _defaultMinter);
         __RoyaltyDistributor_init(_royaltyManager);
         for (uint256 i = 0; i < _catalystIpfsCID.length; i++) {
-            require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID can't be empty");
+            require(bytes(_catalystIpfsCID[i]).length != 0, "Catalyst: CID cant be empty");
             _setURI(i, _catalystIpfsCID[i]);
             highestTierIndex = i;
         }
@@ -156,7 +156,7 @@ contract Catalyst is
     /// @notice Add a new catalyst type, limited to DEFAULT_ADMIN_ROLE only
     /// @param ipfsCID The IPFS content identifiers for the catalyst
     function addNewCatalystType(string memory ipfsCID) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(bytes(ipfsCID).length != 0, "Catalyst: CID can't be empty");
+        require(bytes(ipfsCID).length != 0, "Catalyst: CID cant be empty");
         uint256 newCatId = ++highestTierIndex;
         ERC1155URIStorageUpgradeable._setURI(newCatId, ipfsCID);
         emit NewCatalystTypeAdded(newCatId);

@@ -48,7 +48,7 @@ contract AuthSuperValidator is AccessControl {
     /// @param role Role to renounce
     /// @param account Account to renounce the role for
     function renounceRole(bytes32 role, address account) public override {
-        require(role != DEFAULT_ADMIN_ROLE, "AuthSuperValidator: can't renounce admin role");
+        require(role != DEFAULT_ADMIN_ROLE, "AuthSuperValidator: cant renounce admin role");
         super.renounceRole(role, account);
     }
 }
