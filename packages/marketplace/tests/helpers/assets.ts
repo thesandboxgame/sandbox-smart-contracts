@@ -1,6 +1,4 @@
-// TODO: This is the same as the root folder scripts... fix it
 const ethUtil = require('ethereumjs-util');
-const Web3 = require('web3');
 
 function id(str) {
   return `0x${ethUtil
@@ -10,7 +8,6 @@ function id(str) {
 }
 
 function enc(token, tokenId) {
-  const web3 = new Web3();
   if (tokenId) {
     return web3.eth.abi.encodeParameters(
       ['address', 'uint256'],
@@ -22,7 +19,6 @@ function enc(token, tokenId) {
 }
 
 function encBundle(erc20, erc721, erc1155) {
-  const web3 = new Web3();
   return web3.eth.abi.encodeParameters(
     [
       {
@@ -80,10 +76,6 @@ function encBundle(erc20, erc721, erc1155) {
   );
 }
 
-function percentage(number, percentage) {
-  return (number * percentage) / 10000;
-}
-
 const ETH = id('ETH');
 const ERC20 = id('ERC20');
 const ERC721 = id('ERC721');
@@ -127,5 +119,4 @@ module.exports = {
   TO_LOCK,
   enc,
   encBundle,
-  percentage,
 };

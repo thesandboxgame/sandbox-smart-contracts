@@ -12,7 +12,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetMatcher = await deploy('AssetMatcher', {
     from: deployer,
-    contract: `@sandbox-smart-contracts/marketplace/src/exchange/AssetMatcher.sol:AssetMatcher`,
+    contract:
+      '@sandbox-smart-contracts/marketplace/src/exchange/AssetMatcher.sol:AssetMatcher',
     log: true,
     skipIfAlreadyDeployed: true,
   });
