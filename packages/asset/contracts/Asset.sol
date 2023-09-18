@@ -114,8 +114,8 @@ contract Asset is
         uint256[] memory amounts,
         string[] memory metadataHashes
     ) external onlyRole(MINTER_ROLE) {
-        require(ids.length == metadataHashes.length, "Asset: ids and metadataHash length mismatch");
-        require(ids.length == amounts.length, "Asset: ids and amounts length mismatch");
+        require(ids.length == metadataHashes.length, "Asset: 1-Array mismatch");
+        require(ids.length == amounts.length, "Asset: 2-Array mismatch");
         for (uint256 i = 0; i < ids.length; i++) {
             _setMetadataHash(ids[i], metadataHashes[i]);
         }
@@ -193,7 +193,7 @@ contract Asset is
     /// @param metadataHash The metadata hash to set
     function _setMetadataHash(uint256 tokenId, string memory metadataHash) internal {
         if (hashUsed[metadataHash] != 0) {
-            require(hashUsed[metadataHash] == tokenId, "Asset: not allowed to reuse metadata hash");
+            require(hashUsed[metadataHash] == tokenId, "Asset: Hash already used");
         } else {
             hashUsed[metadataHash] = tokenId;
             _setURI(tokenId, metadataHash);
@@ -204,7 +204,7 @@ contract Asset is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "Asset: trusted forwarder can't be zero address");
+        require(trustedForwarder != address(0), "Asset: Zero address");
         _setTrustedForwarder(trustedForwarder);
     }
 
@@ -294,10 +294,7 @@ contract Asset is
         uint256 amount,
         bytes memory data
     ) public virtual override onlyAllowedOperator(from) {
-        require(
-            from == _msgSender() || isApprovedForAll(from, _msgSender()),
-            "ERC1155: caller is not token owner or approved"
-        );
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "Asset: Transfer error");
         _safeTransferFrom(from, to, id, amount, data);
     }
 
@@ -363,14 +360,14 @@ contract Asset is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy != address(0), "Asset: subscription can't be zero address");
+        require(subscriptionOrRegistrantToCopy != address(0), "Asset: Zero address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets the operator filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Asset: registry can't be zero address");
+        require(registry != address(0), "Asset: Zero address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
     }
 

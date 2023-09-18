@@ -114,14 +114,14 @@ contract AssetReveal is
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) external whenNotPaused {
-        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
-        require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == revealHashes.length, "AssetReveal: 2-Array mismatch");
         require(
             authValidator.verify(
                 signature,
                 _hashReveal(_msgSender(), prevTokenId, amounts, metadataHashes, revealHashes)
             ),
-            "AssetReveal: Invalid revealMint signature"
+            "AssetReveal: Invalid signature"
         );
         uint256[] memory newTokenIds = _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
         emit AssetRevealMint(_msgSender(), prevTokenId, amounts, newTokenIds, revealHashes);
@@ -141,15 +141,15 @@ contract AssetReveal is
         string[][] calldata metadataHashes,
         bytes32[][] calldata revealHashes
     ) external whenNotPaused {
-        require(prevTokenIds.length == amounts.length, "AssetReveal: Invalid amounts length");
-        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid metadataHashes length");
-        require(prevTokenIds.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
+        require(prevTokenIds.length == amounts.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 2-Array mismatch");
+        require(prevTokenIds.length == revealHashes.length, "AssetReveal: 3-Array mismatch");
         require(
             authValidator.verify(
                 signature,
                 _hashBatchReveal(_msgSender(), prevTokenIds, amounts, metadataHashes, revealHashes)
             ),
-            "AssetReveal: Invalid revealBatchMint signature"
+            "AssetReveal: Invalid signature"
         );
         uint256[][] memory newTokenIds = new uint256[][](prevTokenIds.length);
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
@@ -174,16 +174,16 @@ contract AssetReveal is
         string[] calldata metadataHashes,
         bytes32[] calldata revealHashes
     ) external whenNotPaused {
-        require(amounts.length == metadataHashes.length, "AssetReveal: Invalid amounts length");
-        require(amounts.length == revealHashes.length, "AssetReveal: Invalid revealHashes length");
+        require(amounts.length == metadataHashes.length, "AssetReveal: 1-Array mismatch");
+        require(amounts.length == revealHashes.length, "AssetReveal: 2-Array mismatch");
         uint8 tier = prevTokenId.getTier();
-        require(tierInstantRevealAllowed[tier], "AssetReveal: Tier not allowed for instant reveal");
+        require(tierInstantRevealAllowed[tier], "AssetReveal: Not allowed");
         require(
             authValidator.verify(
                 signature,
                 _hashInstantReveal(_msgSender(), prevTokenId, amounts, metadataHashes, revealHashes)
             ),
-            "AssetReveal: Invalid burnAndReveal signature"
+            "AssetReveal: Invalid signature"
         );
         _burnAsset(prevTokenId, burnAmount);
         uint256[] memory newTokenIds = _revealAsset(prevTokenId, metadataHashes, amounts, revealHashes);
@@ -202,7 +202,7 @@ contract AssetReveal is
     ) internal returns (uint256[] memory) {
         uint256[] memory newTokenIds = getRevealedTokenIds(metadataHashes, prevTokenId);
         for (uint256 i = 0; i < revealHashes.length; i++) {
-            require(revealHashesUsed[revealHashes[i]] == false, "AssetReveal: RevealHash already used");
+            require(revealHashesUsed[revealHashes[i]] == false, "AssetReveal: Hash already used");
             revealHashesUsed[revealHashes[i]] = true;
         }
         if (newTokenIds.length == 1) {
@@ -231,8 +231,8 @@ contract AssetReveal is
 
     function _verifyBurnData(uint256 tokenId, uint256 amount) internal pure {
         IAsset.AssetData memory data = tokenId.getData();
-        require(!data.revealed, "AssetReveal: Asset is already revealed");
-        require(amount > 0, "AssetReveal: Burn amount should be greater than 0");
+        require(!data.revealed, "AssetReveal: Already revealed");
+        require(amount > 0, "AssetReveal: Invalid amount");
     }
 
     /// @notice Creates a hash of the reveal data
@@ -373,7 +373,7 @@ contract AssetReveal is
         returns (uint256[] memory tokenIds)
     {
         IAsset.AssetData memory data = prevTokenId.getData();
-        require(!data.revealed, "AssetReveal: already revealed");
+        require(!data.revealed, "AssetReveal: Already revealed");
         uint256[] memory tokenIdArray = new uint256[](metadataHashes.length);
         for (uint256 i = 0; i < metadataHashes.length; i++) {
             uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
@@ -438,7 +438,7 @@ contract AssetReveal is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "AssetReveal: trusted forwarder can't be zero address");
+        require(trustedForwarder != address(0), "AssetReveal: Zero address");
         _setTrustedForwarder(trustedForwarder);
     }
 

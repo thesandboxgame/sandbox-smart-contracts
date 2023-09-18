@@ -377,16 +377,14 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             await runRevealTestSetup();
           await expect(
             AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 0)
-          ).to.be.revertedWith(
-            'AssetReveal: Burn amount should be greater than 0'
-          );
+          ).to.be.revertedWith('AssetReveal: Invalid amount');
         });
         it('Should not be able to burn an asset that is already revealed', async function () {
           const {AssetRevealContractAsUser, revealedtokenId} =
             await runRevealTestSetup();
           await expect(
             AssetRevealContractAsUser.revealBurn(revealedtokenId, 1)
-          ).to.be.revertedWith('AssetReveal: Asset is already revealed');
+          ).to.be.revertedWith('AssetReveal: Already revealed');
         });
         it('Should not be able to burn more than owned by the caller', async function () {
           const {
@@ -544,7 +542,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             newMetadataHashes,
             [revealHashA]
           )
-        ).to.be.revertedWith('AssetReveal: Invalid revealMint signature');
+        ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
       it('Should not allow minting with invalid recipient', async function () {
         const {revealAsset, unrevealedtokenId, generateRevealSignature} =
@@ -569,7 +567,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             newMetadataHashes,
             [revealHashA]
           )
-        ).to.be.revertedWith('AssetReveal: Invalid revealMint signature');
+        ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
       it('Should not allow minting with invalid prevTokenId', async function () {
         const {
@@ -598,7 +596,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             newMetadataHashes,
             [revealHashA]
           )
-        ).to.be.revertedWith('AssetReveal: Invalid revealMint signature');
+        ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
       it('Should not allow minting with invalid metadataHashes', async function () {
         const {user, generateRevealSignature, unrevealedtokenId, revealAsset} =
@@ -623,7 +621,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             ['QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJE'], // invalid
             [revealHashA]
           )
-        ).to.be.revertedWith('AssetReveal: Invalid revealMint signature');
+        ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
     });
     describe('Single reveal mint', function () {
@@ -862,7 +860,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHashes,
               [revealHashA, revealHashB]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid amounts length');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it('Should revert if amounts array is not the same length as revealHashes array', async function () {
           const {
@@ -895,7 +893,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHashes,
               [revealHashA, revealHashB, revealHashC]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid revealHashes length');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
         it('Should not allow using the same signature twice', async function () {
           const {
@@ -934,7 +932,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHashes,
               [revealHashA]
             )
-          ).to.be.revertedWith('AssetReveal: RevealHash already used');
+          ).to.be.revertedWith('AssetReveal: Hash already used');
         });
       });
       describe('Events', function () {
@@ -1164,7 +1162,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1, newMetadataHashes2],
               [[revealHashA], [revealHashB]]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid amounts length');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it('Should revert if ids array and metadataHashes array are not the same length', async function () {
           const {
@@ -1194,7 +1192,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1],
               [[revealHashA], [revealHashB]]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid metadataHashes length');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
         it('Should revert if ids array and revealHashes array are not the same length', async function () {
           const {
@@ -1225,7 +1223,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1, newMetadataHashes2],
               [[revealHashA]]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid revealHashes length');
+          ).to.be.revertedWith('AssetReveal: 3-Array mismatch');
         });
         it('should not allow using the same signature twice', async function () {
           const {
@@ -1266,7 +1264,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               [newMetadataHashes1, newMetadataHashes2],
               [[revealHashA], [revealHashB]]
             )
-          ).to.be.revertedWith('AssetReveal: RevealHash already used');
+          ).to.be.revertedWith('AssetReveal: Hash already used');
         });
       });
       describe('Events', function () {
@@ -1421,9 +1419,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHash,
               [revealHashA]
             )
-          ).to.be.revertedWith(
-            'AssetReveal: Tier not allowed for instant reveal'
-          );
+          ).to.be.revertedWith('AssetReveal: Not allowed');
         });
         it("should revert if amounts array isn't the same length as metadataHashes array", async function () {
           const {
@@ -1454,7 +1450,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHash,
               [revealHashA]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid amounts length');
+          ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
         it("should revert if amounts array isn't the same length as revealHashes array", async function () {
           const {
@@ -1485,7 +1481,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
               newMetadataHash,
               [revealHashA, revealHashB]
             )
-          ).to.be.revertedWith('AssetReveal: Invalid revealHashes length');
+          ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
       });
       describe('Events', function () {

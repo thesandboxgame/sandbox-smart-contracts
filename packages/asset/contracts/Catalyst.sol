@@ -78,12 +78,12 @@ contract Catalyst is
         string[] memory _catalystIpfsCID,
         address _royaltyManager
     ) external initializer {
-        require(bytes(_baseUri).length != 0, "Catalyst: base uri can't be empty");
-        require(_trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero");
-        require(_subscription != address(0), "Catalyst: subscription can't be zero");
-        require(_defaultAdmin != address(0), "Catalyst: admin can't be zero");
-        require(_defaultMinter != address(0), "Catalyst: minter can't be zero");
-        require(_royaltyManager != address(0), "Catalyst: royalty manager can't be zero");
+        require(bytes(_baseUri).length != 0, "Catalyst: URI empty");
+        require(_trustedForwarder != address(0), "Catalyst: 1-Zero address");
+        require(_subscription != address(0), "Catalyst: 2-Zero address");
+        require(_defaultAdmin != address(0), "Catalyst: 3-Zero address");
+        require(_defaultMinter != address(0), "Catalyst: 4-Zero address");
+        require(_royaltyManager != address(0), "Catalyst: 5-Zero address");
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
@@ -166,7 +166,7 @@ contract Catalyst is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "Catalyst: trusted forwarder can't be zero address");
+        require(trustedForwarder != address(0), "Catalyst: Zero address");
         _setTrustedForwarder(trustedForwarder);
     }
 
@@ -178,14 +178,14 @@ contract Catalyst is
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyValidId(tokenId)
     {
-        require(bytes(metadataHash).length != 0, "Catalyst: metadataHash can't be empty");
+        require(bytes(metadataHash).length != 0, "Catalyst: Metadata hash empty");
         _setURI(tokenId, metadataHash);
     }
 
     /// @notice Set a new base URI
     /// @param baseURI The new base URI
     function setBaseURI(string memory baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(bytes(baseURI).length != 0, "Catalyst: base uri can't be empty");
+        require(bytes(baseURI).length != 0, "Catalyst: URI empty");
         _setBaseURI(baseURI);
         emit BaseURISet(baseURI);
     }
@@ -301,14 +301,14 @@ contract Catalyst is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy != address(0), "Catalyst: subscription can't be zero address");
+        require(subscriptionOrRegistrantToCopy != address(0), "Catalyst: Zero address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Catalyst: registry can't be zero address");
+        require(registry != address(0), "Catalyst: Zero address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
     }

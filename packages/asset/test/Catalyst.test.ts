@@ -88,7 +88,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: base uri can't be empty");
+      ).to.revertedWith('Catalyst: URI empty');
     });
     it("trusted forwarder can't be zero in initialization", async function () {
       const {
@@ -115,7 +115,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: trusted forwarder can't be zero");
+      ).to.revertedWith('Catalyst: 1-Zero address');
     });
     it("subscription can't be zero in initialization", async function () {
       const {
@@ -142,7 +142,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: subscription can't be zero");
+      ).to.revertedWith('Catalyst: 2-Zero address');
     });
     it("admin can't be zero in initialization", async function () {
       const {
@@ -169,7 +169,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: admin can't be zero");
+      ).to.revertedWith('Catalyst: 3-Zero address');
     });
     it("royalty manager can't be zero in initialization", async function () {
       const {
@@ -196,7 +196,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: royalty manager can't be zero");
+      ).to.revertedWith('Catalyst: 5-Zero address');
     });
     it("minter can't be zero in initialization", async function () {
       const {
@@ -223,7 +223,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
             initializer: 'initialize',
           }
         )
-      ).to.revertedWith("Catalyst: minter can't be zero");
+      ).to.revertedWith('Catalyst: 4-Zero address');
     });
     it("token CID can't be zero in initialization", async function () {
       const {
@@ -372,7 +372,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     it('empty base uri cant be set ', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setBaseURI('')).to.be.revertedWith(
-        "Catalyst: base uri can't be empty"
+        'Catalyst: URI empty'
       );
     });
     it('only Admin can set base uri', async function () {
@@ -402,7 +402,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(
         catalystAsAdmin.setTrustedForwarder(zeroAddress)
-      ).to.be.revertedWith("Catalyst: trusted forwarder can't be zero address");
+      ).to.be.revertedWith('Catalyst: Zero address');
     });
     it('cant set metadata hash for invalid catalyst', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
@@ -413,13 +413,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     it('cant set empty metadata hash', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setMetadataHash(1, '')).to.be.revertedWith(
-        "Catalyst: metadataHash can't be empty"
+        'Catalyst: Metadata hash empty'
       );
     });
     it('cant set invalid base uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setBaseURI('')).to.be.revertedWith(
-        "Catalyst: base uri can't be empty"
+        'Catalyst: URI empty'
       );
     });
   });
@@ -804,13 +804,13 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalyst.deployed();
         await expect(
           catalyst.connect(catalystAdmin).setOperatorRegistry(zeroAddress)
-        ).to.be.revertedWith("Catalyst: registry can't be zero address");
+        ).to.be.revertedWith('Catalyst: Zero address');
 
         await expect(
           catalyst
             .connect(catalystAdmin)
             .registerAndSubscribe(zeroAddress, true)
-        ).to.be.revertedWith("Catalyst: subscription can't be zero address");
+        ).to.be.revertedWith('Catalyst: Zero address');
       });
 
       it('should revert when registry is set and subscription is set by non-admin', async function () {

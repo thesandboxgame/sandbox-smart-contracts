@@ -38,7 +38,7 @@ contract AuthSuperValidator is AccessControl {
     /// @return bool
     function verify(bytes memory signature, bytes32 digest) public view returns (bool) {
         address signer = _signers[_msgSender()];
-        require(signer != address(0), "AuthSuperValidator: signer not set");
+        require(signer != address(0), "AuthSuperValidator: No signer");
         address recoveredSigner = ECDSA.recover(digest, signature);
         return recoveredSigner == signer;
     }

@@ -572,7 +572,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
         await expect(
           mintSingleAsset(signature2, 4, 2, true, metadataHashes[0])
-        ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+        ).to.be.revertedWith('Asset: Hash already used');
       });
       it('should NOT mint same token ids', async function () {
         const {
@@ -1142,7 +1142,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             metadataHashes
           )
-        ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+        ).to.be.revertedWith('Asset: Hash already used');
       });
     });
     describe('Event', function () {

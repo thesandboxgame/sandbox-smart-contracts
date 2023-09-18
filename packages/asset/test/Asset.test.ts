@@ -255,7 +255,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         await mintOne(undefined, undefined, undefined, metadataHashes[0]);
         await expect(
           mintOne(undefined, undefined, undefined, metadataHashes[0])
-        ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+        ).to.be.revertedWith('Asset: Hash already used');
       });
     });
     describe('Batch Mint', function () {
@@ -301,7 +301,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             metadataHashes[0],
             metadataHashes[0],
           ])
-        ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+        ).to.be.revertedWith('Asset: Hash already used');
       });
       it('should not allow minting with already existing metadata hash', async function () {
         const {mintOne, mintBatch, metadataHashes} = await runAssetSetup();
@@ -311,7 +311,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             metadataHashes[0],
             metadataHashes[1],
           ])
-        ).to.be.revertedWith('Asset: not allowed to reuse metadata hash');
+        ).to.be.revertedWith('Asset: Hash already used');
       });
       it("should not allow minting if the length of the ids and amounts don't match", async function () {
         const {AssetContractAsMinter, generateRandomTokenId, minter} =
@@ -330,7 +330,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             amounts,
             hashes
           )
-        ).to.be.revertedWith('Asset: ids and amounts length mismatch');
+        ).to.be.revertedWith('Asset: 2-Array mismatch');
       });
       it("should not allow minting if the length of the ids and hashes don't match", async function () {
         const {AssetContractAsMinter, generateRandomTokenId, minter} =
@@ -345,7 +345,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             amounts,
             hashes
           )
-        ).to.be.revertedWith('Asset: ids and metadataHash length mismatch');
+        ).to.be.revertedWith('Asset: 1-Array mismatch');
       });
     });
     describe('Mint Events', function () {
@@ -761,7 +761,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           5,
           '0x'
         )
-      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      ).to.be.revertedWith('Asset: Transfer error');
     });
     it('should not allow non-owner to transfer a batch of tokens if not approved', async function () {
       const {AssetContractAsOwner, mintBatch, minter} = await runAssetSetup();
@@ -1067,11 +1067,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         await expect(
           Asset.connect(assetAdmin).setOperatorRegistry(zeroAddress)
-        ).to.be.revertedWith("Asset: registry can't be zero address");
+        ).to.be.revertedWith('Asset: Zero address');
 
         await expect(
           Asset.connect(assetAdmin).registerAndSubscribe(zeroAddress, true)
-        ).to.be.revertedWith("Asset: subscription can't be zero address");
+        ).to.be.revertedWith('Asset: Zero address');
       });
 
       it('should revert when registry is set and subscription is set by non-admin', async function () {
