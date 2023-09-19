@@ -1,9 +1,14 @@
-import { ethers, getNamedAccounts, getUnnamedAccounts, deployments } from 'hardhat';
-import { BigNumber } from 'ethers';
-import { withSnapshot, expectEventWithArgs } from '../utils';
+import {
+  ethers,
+  getNamedAccounts,
+  getUnnamedAccounts,
+  deployments,
+} from 'hardhat';
+import {BigNumber} from 'ethers';
+import {withSnapshot, expectEventWithArgs} from '../utils';
 
 export const setupFaucet = withSnapshot(['Faucet'], async function () {
-  const { sandAdmin, sandBeneficiary, deployer } = await getNamedAccounts();
+  const {sandAdmin, sandBeneficiary, deployer} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 
   const sandContract = await ethers.getContract('Sand');
@@ -26,10 +31,10 @@ export const setupFaucet = withSnapshot(['Faucet'], async function () {
 
 export const setupFaucetERC1155 = withSnapshot([], async function () {
   const [owner] = await ethers.getSigners();
-  const { deploy } = deployments;
+  const {deploy} = deployments;
 
-  const Faucet = await ethers.getContractFactory("FaucetsERC1155");
-  const faucetsERC1155 = await Faucet.deploy();
+  const Faucet = await ethers.getContractFactory('FaucetsERC1155');
+  const faucetsERC1155 = await Faucet.deploy(owner.getAddress());
   await faucetsERC1155.deployed();
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
@@ -74,12 +79,12 @@ export const setupFaucetERC1155 = withSnapshot([], async function () {
       'TransferSingle'
     );
     const tokenId = transferEvent.args[3];
-    return { tokenId };
+    return {tokenId};
   }
 
   return {
     faucetsERC1155,
     mockAssetERC1155,
-    mintAssetERC1155
+    mintAssetERC1155,
   };
 });

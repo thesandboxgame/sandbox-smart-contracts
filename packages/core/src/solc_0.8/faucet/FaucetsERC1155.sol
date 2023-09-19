@@ -45,6 +45,10 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
     // Mapping from faucet address to its information.
     mapping(address => FaucetInfo) private faucets;
 
+    constructor(address owner) Ownable() {
+        _transferOwnership(owner);
+    }
+
     /**
      * @dev Gets the period of a given faucet.
      * @param faucet The address of the faucet.
@@ -83,7 +87,6 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
         faucets[faucet].limit = newLimit;
         emit LimitUpdated(faucet, newLimit);
     }
-
 
     // Modifier to check if the faucet exists.
     modifier exists(address faucet) {
