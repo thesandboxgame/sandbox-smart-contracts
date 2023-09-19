@@ -1702,6 +1702,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-metatx": 0.0.3
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
+    "@types/chai": ^4.3.6
     "@types/mocha": ^10.0.1
     "@types/node": ^20.2.5
     "@typescript-eslint/eslint-plugin": ^5.59.8
@@ -2020,6 +2021,13 @@ __metadata:
   version: 4.3.5
   resolution: "@types/chai@npm:4.3.5"
   checksum: c8f26a88c6b5b53a3275c7f5ff8f107028e3cbb9ff26795fff5f3d9dea07106a54ce9e2dce5e40347f7c4cc35657900aaf0c83934a25a1ae12e61e0f5516e431
+  languageName: node
+  linkType: hard
+
+"@types/chai@npm:^4.3.6":
+  version: 4.3.6
+  resolution: "@types/chai@npm:4.3.6"
+  checksum: 32a6c18bf53fb3dbd89d1bfcadb1c6fd45cc0007c34e436393cc37a0a5a556f9e6a21d1e8dd71674c40cc36589d2f30bf4d9369d7787021e54d6e997b0d7300a
   languageName: node
   linkType: hard
 

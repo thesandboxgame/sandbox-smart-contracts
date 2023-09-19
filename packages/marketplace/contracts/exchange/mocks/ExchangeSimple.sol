@@ -17,7 +17,13 @@ contract ExchangeSimple is ExchangeCore, SimpleTransferManager, ERC2771HandlerUp
         __ExchangeCoreInitialize(_nativeOrder, _metaNative, _orderValidatorAdress);
     }
 
-    function _msgSender() internal view virtual override(ERC2771HandlerUpgradeable, ContextUpgradeable) returns (address) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ERC2771HandlerUpgradeable, ContextUpgradeable)
+        returns (address)
+    {
         return ERC2771HandlerAbstract._msgSender();
     }
 
