@@ -251,6 +251,7 @@ const networks = {
 };
 
 const compilers = [
+  '0.8.21',
   '0.8.19',
   '0.8.18',
   '0.8.15',
