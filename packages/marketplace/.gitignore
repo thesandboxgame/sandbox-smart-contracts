@@ -1,5 +1,15 @@
-cache/
-artifacts/
-node_modules/
+node_modules
 .env
-.DS_Store
+coverage
+coverage.json
+typechain
+typechain-types
+
+# Hardhat files
+cache
+artifacts
+./artifacts
+./cache
+./typechain
+
+deployments

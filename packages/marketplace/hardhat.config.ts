@@ -1,11 +1,5 @@
-import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-etherscan';
-import '@nomicfoundation/hardhat-network-helpers';
-import '@nomicfoundation/hardhat-chai-matchers';
-import 'hardhat-deploy';
-import 'hardhat-contract-sizer';
-import 'solidity-coverage';
-import 'dotenv/config';
+import '@nomicfoundation/hardhat-toolbox';
+import {HardhatUserConfig} from 'hardhat/config';
 
 /**
  * TAGS:
@@ -66,9 +60,6 @@ const config = {
         },
       },
     ],
-  },
-  paths: {
-    sources: 'src',
   },
 };
 export default config;

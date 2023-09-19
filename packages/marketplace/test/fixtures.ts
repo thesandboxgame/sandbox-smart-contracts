@@ -7,7 +7,7 @@ export async function deploy(
 ): Promise<Contract[]> {
   const Contract = await ethers.getContractFactory(name);
   const contract = await Contract.deploy();
-  await contract.deployed();
+
   const ret = Array();
   for (const s of users) {
     ret.push(await contract.connect(s));
@@ -24,11 +24,11 @@ export async function deployWithProxy(
 
   const Proxy = await ethers.getContractFactory('FakeProxy');
   // This uses signers[0]
-  const proxy = await Proxy.deploy(contract[0].address);
-  await proxy.deployed();
+  const proxy = await Proxy.deploy(contract[0]);
+
   const ret = Array();
   for (let i = 0; i < contract.length; i++) {
-    ret[i] = await contract[i].attach(proxy.address);
+    ret[i] = await contract[i].attach(proxy);
   }
   // add implementation contract
   ret.push(contract[0]);

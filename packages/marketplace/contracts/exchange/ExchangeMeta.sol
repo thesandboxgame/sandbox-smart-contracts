@@ -42,11 +42,11 @@ contract ExchangeMeta is ExchangeCore, TransferManager, ERC2771HandlerUpgradeabl
         __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAdress);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771HandlerAbstract) returns (address) {
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (address) {
         return ERC2771HandlerAbstract._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerAbstract) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerAbstract._msgData();
     }
 
