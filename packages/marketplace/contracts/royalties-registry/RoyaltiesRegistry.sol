@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {IMultiRoyaltyRecipients} from "./IMultiRoyaltyRecipients.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
@@ -42,12 +42,11 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @return royaltiesProviders external providers
     mapping(address => uint256) public royaltiesProviders;
 
-    /// @dev total amount or supported royalties types
-    /// @dev 0 - royalties type is unset
-    /// @dev 1 - royaltiesByToken
-    /// @dev 2 - external provider
-    /// @dev 3 - EIP-2981
-    /// @dev 4 - unsupported/nonexistent royalties type
+    uint256 internal constant ROYALTIES_TYPE_UNSET = 0;
+    uint256 internal constant ROYALTIES_TYPE_BY_TOKEN = 1;
+    uint256 internal constant ROYALTIES_TYPE_EXTERNAL_PROVIDER = 2;
+    uint256 internal constant ROYALTIES_TYPE_EIP2981 = 3;
+    uint256 internal constant ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT = 4;
     uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;
 
     /// @notice Royalties registry initializer
@@ -60,7 +59,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param provider address of provider
     function setProviderByToken(address token, address provider) external {
         checkOwner(token);
-        setRoyaltiesType(token, 2, provider);
+        setRoyaltiesType(token, ROYALTIES_TYPE_EXTERNAL_PROVIDER, provider);
     }
 
     /// @notice returns provider address for token contract from royaltiesProviders mapping
@@ -86,7 +85,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
                 return i;
             }
         }
-        return 0;
+        return ROYALTIES_TYPE_UNSET;
     }
 
     /// @notice sets royalties type for token contract
@@ -152,20 +151,20 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
             bool result2981
         ) {
             if (result2981) {
-                return 3;
+                return ROYALTIES_TYPE_EIP2981;
             }
             // solhint-disable-next-line no-empty-blocks
         } catch {}
 
         if (royaltiesProvider != address(0)) {
-            return 2;
+            return ROYALTIES_TYPE_EXTERNAL_PROVIDER;
         }
 
         if (royaltiesByToken[token].initialized) {
-            return 1;
+            return ROYALTIES_TYPE_BY_TOKEN;
         }
 
-        return 4;
+        return ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT;
     }
 
     /// @notice returns royalties for token contract and token id
@@ -179,7 +178,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         uint256 royaltiesType = _getRoyaltiesType(royaltiesProviderData);
 
         // case when royaltiesType is not set
-        if (royaltiesType == 0) {
+        if (royaltiesType == ROYALTIES_TYPE_UNSET) {
             // calculating royalties type for token
             royaltiesType = calculateRoyaltiesType(token, royaltiesProvider);
 
@@ -188,22 +187,22 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
 
         //case royaltiesType = 1, royalties are set in royaltiesByToken
-        if (royaltiesType == 1) {
+        if (royaltiesType == ROYALTIES_TYPE_BY_TOKEN) {
             return royaltiesByToken[token].royalties;
         }
 
         //case royaltiesType = 2, royalties from external provider
-        if (royaltiesType == 2) {
+        if (royaltiesType == ROYALTIES_TYPE_EXTERNAL_PROVIDER) {
             return providerExtractor(token, tokenId, royaltiesProvider);
         }
 
         //case royaltiesType = 3, royalties EIP-2981
-        if (royaltiesType == 3) {
+        if (royaltiesType == ROYALTIES_TYPE_EIP2981) {
             return getRoyaltiesEIP2981(token, tokenId);
         }
 
         // case royaltiesType = 4, unknown/empty royalties
-        if (royaltiesType == 4) {
+        if (royaltiesType == ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT) {
             return new LibPart.Part[](0);
         }
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {TransferManager} from "../TransferManager.sol";
 import {LibERC721LazyMint} from "../../lazy-mint/erc-721/LibERC721LazyMint.sol";

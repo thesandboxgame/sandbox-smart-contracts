@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {LibOrder, LibAsset} from "../lib-order/LibOrder.sol";
 import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
@@ -105,7 +105,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @notice if ERC20 token is accepted
     /// @param tokenAddress ERC20 token address
     function verifyERC20Whitelist(address tokenAddress) external view {
-        if (erc20List && !erc20WhiteList[tokenAddress]) {
+        if (erc20List && !hasRole(ERC20_ROLE, tokenAddress)) {
             revert("payment token not allowed");
         }
     }
@@ -113,7 +113,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     function verifyWhiteList(address tokenAddress) internal view {
         if (open) {
             return;
-        } else if ((tsbOnly && tsbWhiteList[tokenAddress]) || (partners && partnerWhiteList[tokenAddress])) {
+        } else if ((tsbOnly && hasRole(TSB_ROLE, tokenAddress)) || (partners && hasRole(PARTNER_ROLE, tokenAddress))) {
             return;
         } else {
             revert("not allowed");

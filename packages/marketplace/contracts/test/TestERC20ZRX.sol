@@ -23,7 +23,7 @@
 */
 
 // solhint-disable-next-line one-contract-per-file
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 interface Token {
     /// @return total amount of tokens

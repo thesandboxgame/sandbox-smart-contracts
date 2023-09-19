@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 /// @title library for order data types
 /// @notice Data types, corresponding transfers/fees logic

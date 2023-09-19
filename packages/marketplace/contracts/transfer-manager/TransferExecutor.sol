@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
 import {IERC1155LazyMint} from "../lazy-mint/erc-1155/IERC1155LazyMint.sol";
@@ -21,6 +21,9 @@ import {LibAsset} from "../lib-asset/LibAsset.sol";
 /// @notice contains transfer functions for any assets as well as ERC20 tokens
 abstract contract TransferExecutor is Initializable, OwnableUpgradeable, ITransferExecutor {
     using LibTransfer for address payable;
+
+    /// @notice limit of assets for each type of bundles
+    uint256 public constant MAX_BUNDLE_LIMIT = 20;
 
     // Bundle Structs
     struct ERC20Details {
@@ -85,7 +88,12 @@ abstract contract TransferExecutor is Initializable, OwnableUpgradeable, ITransf
                 asset.assetType.data,
                 (ERC20Details[], ERC721Details[], ERC1155Details[])
             );
-            // TODO: Limit the max number of bundle assets to avoid issues
+
+            // check if bundles don't exceed the limit
+            require(erc20Details.length <= MAX_BUNDLE_LIMIT, "erc20 limit exceeded");
+            require(erc721Details.length <= MAX_BUNDLE_LIMIT, "erc721 limit exceeded");
+            require(erc1155Details.length <= MAX_BUNDLE_LIMIT, "erc1155 limit exceeded");
+
             // transfer ERC20
             for (uint256 i; i < erc20Details.length; ) {
                 if (from == address(this)) {

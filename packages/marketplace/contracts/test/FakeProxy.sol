@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {ERC1967UpgradeUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 

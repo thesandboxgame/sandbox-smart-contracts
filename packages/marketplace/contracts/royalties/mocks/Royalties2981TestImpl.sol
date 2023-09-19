@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {IERC2981} from "../IERC2981.sol";
 import {LibRoyalties2981} from "../LibRoyalties2981.sol";

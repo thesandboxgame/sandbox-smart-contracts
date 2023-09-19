@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {ExchangeCore} from "./ExchangeCore.sol";
-import {ERC2771HandlerUpgradeable, ERC2771HandlerAbstract} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771ContextUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
 
 /// @title Exchange contract with meta transactions
@@ -49,11 +49,11 @@ contract ExchangeMeta is ExchangeCore, TransferManager, ERC2771HandlerUpgradeabl
         override(ContextUpgradeable, ERC2771HandlerUpgradeable)
         returns (address)
     {
-        return ERC2771HandlerAbstract._msgSender();
+        return ERC2771HandlerUpgradeable._msgSender();
     }
 
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
-        return ERC2771HandlerAbstract._msgData();
+        return ERC2771HandlerUpgradeable._msgData();
     }
 
     /// @notice Change the address of the trusted forwarder for meta-transactions

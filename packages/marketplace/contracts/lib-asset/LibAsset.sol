@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 /// @title library for Assets
 /// @notice contains structs for Asset and AssetType
@@ -14,7 +14,6 @@ library LibAsset {
     bytes4 public constant ERC721_TSB_CLASS = bytes4(keccak256("ERC721_TSB"));
     bytes4 public constant ERC1155_TSB_CLASS = bytes4(keccak256("ERC1155_TSB"));
     bytes4 public constant BUNDLE = bytes4(keccak256("BUNDLE"));
-    bytes4 public constant COLLECTION = bytes4(keccak256("COLLECTION"));
 
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(bytes4 assetClass,bytes data)");
 

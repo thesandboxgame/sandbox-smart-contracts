@@ -1,13 +1,24 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IWhiteList} from "../interfaces/IWhiteList.sol";
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
-contract WhiteList is IWhiteList, OwnableUpgradeable {
+contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
+    /// @notice role for The Sandbox tokens
+    /// @return hash for TSB_ROLE
+    bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
+    /// @notice role for partner tokens
+    /// @return hash for PARTNER_ROLE
+    bytes32 public constant PARTNER_ROLE = keccak256("PARTNER_ROLE");
+    /// @notice role for ERC20 tokens
+    /// @return hash for ERC20_ROLE
+    bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
+
     /// @notice if status == tsbOnly, then only tsbListedContracts [small mapping]
     /// @return tsbOnly
     bool public tsbOnly;
@@ -24,48 +35,12 @@ contract WhiteList is IWhiteList, OwnableUpgradeable {
     /// @return erc20List
     bool public erc20List;
 
-    /// @notice mapping containing the list of contracts in the tsb white list
-    /// @return true if list contains address
-    mapping(address => bool) public tsbWhiteList;
-
-    /// @notice mapping containing the list of contracts in the partners white list
-    /// @return true if list contains address
-    mapping(address => bool) public partnerWhiteList;
-
-    /// @notice mapping containing the list of contracts in the erc20 white list
-    /// @return true if list contains address
-    mapping(address => bool) public erc20WhiteList;
-
     /// @notice event emitted when new permissions for tokens are added
     /// @param tsbOnly boolean indicating that TSB tokens are accepted
     /// @param partners boolean indicating that partner tokens are accepted
     /// @param open boolean indicating that all tokens are accepted
     /// @param erc20List boolean indicating that there is a restriction for ERC20 tokens
     event PermissionSetted(bool tsbOnly, bool partners, bool open, bool erc20List);
-
-    /// @notice event emitted when a new TSB token has been added
-    /// @param tokenAddress address of added token
-    event TSBAdded(address indexed tokenAddress);
-
-    /// @notice event emitted when a TSB token has been removed
-    /// @param tokenAddress address of removed token
-    event TSBRemoved(address indexed tokenAddress);
-
-    /// @notice event emitted when a new partner token has been added
-    /// @param tokenAddress address of added token
-    event PartnerAdded(address indexed tokenAddress);
-
-    /// @notice event emitted when a partner token has been removed
-    /// @param tokenAddress address of removed token
-    event PartnerRemoved(address indexed tokenAddress);
-
-    /// @notice event emitted when a new ERC20 token has been added
-    /// @param tokenAddress address of added token
-    event ERC20Added(address indexed tokenAddress);
-
-    /// @notice event emitted when a ERC20 token has been removed
-    /// @param tokenAddress address of removed token
-    event ERC20Removed(address indexed tokenAddress);
 
     /// @notice initializer for WhiteList
     /// @param newTsbOnly allows orders with The Sandbox token
@@ -74,6 +49,8 @@ contract WhiteList is IWhiteList, OwnableUpgradeable {
     /// @param newErc20List allows to pay orders with only whitelisted token
     function __Whitelist_init(bool newTsbOnly, bool newPartners, bool newOpen, bool newErc20List) internal initializer {
         __Ownable_init();
+        __AccessControl_init_unchained();
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         tsbOnly = newTsbOnly;
         partners = newPartners;
         open = newOpen;
@@ -97,51 +74,36 @@ contract WhiteList is IWhiteList, OwnableUpgradeable {
     /// @notice add token to tsb list
     /// @param tokenAddress token address
     function addTSB(address tokenAddress) external onlyOwner {
-        tsbWhiteList[tokenAddress] = true;
-
-        emit TSBAdded(tokenAddress);
+        grantRole(TSB_ROLE, tokenAddress);
     }
 
     /// @notice remove token from tsb list
     /// @param tokenAddress token address
     function removeTSB(address tokenAddress) external onlyOwner {
-        require(tsbWhiteList[tokenAddress], "not allowed");
-        tsbWhiteList[tokenAddress] = false;
-
-        emit TSBRemoved(tokenAddress);
+        revokeRole(TSB_ROLE, tokenAddress);
     }
 
     /// @notice add token to partners list
     /// @param tokenAddress token address
     function addPartner(address tokenAddress) external onlyOwner {
-        partnerWhiteList[tokenAddress] = true;
-
-        emit PartnerAdded(tokenAddress);
+        grantRole(PARTNER_ROLE, tokenAddress);
     }
 
     /// @notice remove token from partner list
     /// @param tokenAddress token address
     function removePartner(address tokenAddress) external onlyOwner {
-        require(partnerWhiteList[tokenAddress], "not allowed");
-        partnerWhiteList[tokenAddress] = false;
-
-        emit PartnerRemoved(tokenAddress);
+        revokeRole(PARTNER_ROLE, tokenAddress);
     }
 
     /// @notice add token to the ERC20 list
     /// @param tokenAddress token address
     function addERC20(address tokenAddress) external onlyOwner {
-        erc20WhiteList[tokenAddress] = true;
-
-        emit ERC20Added(tokenAddress);
+        grantRole(ERC20_ROLE, tokenAddress);
     }
 
     /// @notice remove token from ERC20 list
     /// @param tokenAddress token address
     function removeERC20(address tokenAddress) external onlyOwner {
-        require(erc20WhiteList[tokenAddress], "not allowed");
-        erc20WhiteList[tokenAddress] = false;
-
-        emit ERC20Removed(tokenAddress);
+        revokeRole(ERC20_ROLE, tokenAddress);
     }
 }
