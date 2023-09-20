@@ -24,7 +24,6 @@
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/contracts-upgradeable": "^4.9.0",
-    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@sandbox-smart-contracts/dependency-metatx": "*",
     "@sandbox-smart-contracts/dependency-operator-filter": "*",
     "@sandbox-smart-contracts/dependency-royalty-management": "*",
@@ -53,5 +52,12 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
     "typescript": "^5.0.4"
+  },
+  "mocha": {
+    "require": "hardhat/register",
+    "timeout": 40000,
+    "_": [
+      "test/**/*.ts"
+    ]
   }
 }

@@ -1,10 +1,11 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {setupUsers} from '../../util';
 import {
-  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../data/constants';
+import {deployProxy} from '../utils/upgrades';
 
 const DEFAULT_BPS = 300;
 
@@ -82,7 +83,7 @@ export async function setupOperatorFilter() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -99,7 +100,7 @@ export async function setupOperatorFilter() {
   await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('MockAsset');
-  const Asset = await upgrades.deployProxy(
+  const Asset = await deployProxy(
     AssetFactory,
     [
       TrustedForwarder.address,
@@ -133,7 +134,7 @@ export async function setupOperatorFilter() {
   );
 
   const CatalystFactory = await ethers.getContractFactory('MockCatalyst');
-  const Catalyst = await upgrades.deployProxy(
+  const Catalyst = await deployProxy(
     CatalystFactory,
     [
       CATALYST_BASE_URI,

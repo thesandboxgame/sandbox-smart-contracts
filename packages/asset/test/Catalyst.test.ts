@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {runCatalystSetup} from './fixtures/catalyst/catalystFixture';
 import {CATALYST_BASE_URI, CATALYST_IPFS_CID_PER_TIER} from '../data/constants';
 import {
@@ -11,6 +11,7 @@ import {
   ERC2981InterfaceId,
 } from './utils/interfaceIds';
 import {BigNumber} from 'ethers';
+import {deployProxy} from './utils/upgrades';
 
 const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
@@ -73,7 +74,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             '',
@@ -100,7 +101,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -127,7 +128,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -154,7 +155,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -181,7 +182,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -208,7 +209,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -236,7 +237,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       const CatalystFactory = await ethers.getContractFactory('Catalyst');
 
       await expect(
-        upgrades.deployProxy(
+        deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -741,7 +742,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const CatalystFactory = await ethers.getContractFactory('Catalyst');
-        const catalyst = await upgrades.deployProxy(
+        const catalyst = await deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -786,7 +787,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const CatalystFactory = await ethers.getContractFactory('Catalyst');
-        const catalyst = await upgrades.deployProxy(
+        const catalyst = await deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,
@@ -825,7 +826,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           operatorFilterRegistry,
         } = await setupOperatorFilter();
         const CatalystFactory = await ethers.getContractFactory('Catalyst');
-        const catalyst = await upgrades.deployProxy(
+        const catalyst = await deployProxy(
           CatalystFactory,
           [
             CATALYST_BASE_URI,

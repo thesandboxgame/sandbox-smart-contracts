@@ -1,9 +1,10 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {
-  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../../data/constants';
+import {deployProxy} from '../../utils/upgrades';
 
 export async function runCatalystSetup() {
   const [
@@ -51,7 +52,7 @@ export async function runCatalystSetup() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -68,7 +69,7 @@ export async function runCatalystSetup() {
   await RoyaltyManagerContract.deployed();
 
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
-  const catalyst = await upgrades.deployProxy(
+  const catalyst = await deployProxy(
     CatalystFactory,
     [
       CATALYST_BASE_URI,

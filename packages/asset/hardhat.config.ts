@@ -1,7 +1,6 @@
 import {HardhatUserConfig} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import 'solidity-coverage';
-import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
   paths: {

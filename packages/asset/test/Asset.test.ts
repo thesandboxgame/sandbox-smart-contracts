@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 import {
@@ -13,6 +13,8 @@ import {
   RoyaltyUGCInterfaceId,
 } from './utils/interfaceIds';
 import {BigNumber} from 'ethers';
+import {deployProxy} from './utils/upgrades';
+
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
@@ -1008,7 +1010,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
-        const Asset = await upgrades.deployProxy(
+        const Asset = await deployProxy(
           AssetFactory,
           [
             TrustedForwarder.address,
@@ -1051,7 +1053,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
-        const Asset = await upgrades.deployProxy(
+        const Asset = await deployProxy(
           AssetFactory,
           [
             TrustedForwarder.address,
@@ -1085,7 +1087,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           user1,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
-        const Asset = await upgrades.deployProxy(
+        const Asset = await deployProxy(
           AssetFactory,
           [
             TrustedForwarder.address,
@@ -1127,7 +1129,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           user1,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
-        const Asset = await upgrades.deployProxy(
+        const Asset = await deployProxy(
           AssetFactory,
           [
             TrustedForwarder.address,
