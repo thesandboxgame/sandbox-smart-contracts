@@ -8,9 +8,6 @@ const func: DeployFunction = async function (
   const {execute, catchUnknownSigner, log} = deployments;
   const {catalystMinter} = await getNamedAccounts();
 
-  // TODO Clarify whether the below is the correct contract name
-  const GiveawayContract = await deployments.get('MultiGiveawayV1');
-
   // TODO Specify amounts
   const amounts = {
     Common: 100,
@@ -21,8 +18,11 @@ const func: DeployFunction = async function (
     Mythic: 600,
   };
   await catchUnknownSigner(
-    execute('Catalyst', {from: catalystMinter, log: true}, 'mintBatch', [
-      GiveawayContract.address,
+    execute(
+      'Catalyst',
+      {from: catalystMinter, log: true},
+      'mintBatch',
+      '0x214d52880b1e4E17d020908cd8EAa988FfDD4020', // GiveawayContract
       [1, 2, 3, 4, 5, 6],
       [
         amounts.Common,
@@ -31,9 +31,8 @@ const func: DeployFunction = async function (
         amounts.Epic,
         amounts.Legendary,
         amounts.Mythic,
-      ],
-      [],
-    ])
+      ]
+    )
   );
   log(`Minted 6 NFTs to ${GiveawayContract.address}`);
 };
