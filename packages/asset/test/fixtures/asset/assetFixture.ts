@@ -1,5 +1,6 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {DEFAULT_SUBSCRIPTION} from '../../../data/constants';
+import {deployProxy} from '../../utils/upgrades';
 
 export function generateOldAssetId(
   creator: string,
@@ -98,7 +99,7 @@ export async function runAssetSetup() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -137,7 +138,7 @@ export async function runAssetSetup() {
       operatorFilterRegistry.address
     );
 
-  const AssetContract = await upgrades.deployProxy(
+  const AssetContract = await deployProxy(
     AssetFactory,
     [
       trustedForwarder.address,

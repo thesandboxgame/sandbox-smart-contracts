@@ -1,13 +1,14 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
 } from '../../utils/createSignature';
 import {
-  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../../data/constants';
+import {deployProxy} from '../../utils/upgrades';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
@@ -61,7 +62,7 @@ export async function runCreateTestSetup() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -78,7 +79,7 @@ export async function runCreateTestSetup() {
   await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('Asset');
-  const AssetContract = await upgrades.deployProxy(
+  const AssetContract = await deployProxy(
     AssetFactory,
     [
       trustedForwarder.address,
@@ -101,7 +102,7 @@ export async function runCreateTestSetup() {
     AssetContract.address
   );
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
-  const CatalystContract = await upgrades.deployProxy(
+  const CatalystContract = await deployProxy(
     CatalystFactory,
     [
       CATALYST_BASE_URI,
@@ -136,7 +137,7 @@ export async function runCreateTestSetup() {
 
   const AssetCreateFactory = await ethers.getContractFactory('AssetCreate');
 
-  const AssetCreateContract = await upgrades.deployProxy(
+  const AssetCreateContract = await deployProxy(
     AssetCreateFactory,
     [
       name,

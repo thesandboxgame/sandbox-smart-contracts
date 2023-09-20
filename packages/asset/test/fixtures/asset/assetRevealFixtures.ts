@@ -1,4 +1,4 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {Event} from 'ethers';
 import {
   batchRevealSignature,
@@ -6,10 +6,11 @@ import {
   revealSignature,
 } from '../../utils/revealSignature';
 import {
-  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../../data/constants';
+import {deployProxy} from '../../utils/upgrades';
 
 const name = 'Sandbox Asset Reveal';
 const version = '1.0';
@@ -63,7 +64,7 @@ export async function runRevealTestSetup() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -80,7 +81,7 @@ export async function runRevealTestSetup() {
   await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('Asset');
-  const AssetContract = await upgrades.deployProxy(
+  const AssetContract = await deployProxy(
     AssetFactory,
     [
       trustedForwarder.address,
@@ -111,7 +112,7 @@ export async function runRevealTestSetup() {
   await TokenIdUtilsContract.deployed();
 
   const CatalystFactory = await ethers.getContractFactory('Catalyst');
-  const CatalystContract = await upgrades.deployProxy(
+  const CatalystContract = await deployProxy(
     CatalystFactory,
     [
       CATALYST_BASE_URI,
@@ -146,7 +147,7 @@ export async function runRevealTestSetup() {
 
   const AssetRevealFactory = await ethers.getContractFactory('AssetReveal');
 
-  const AssetRevealContract = await upgrades.deployProxy(
+  const AssetRevealContract = await deployProxy(
     AssetRevealFactory,
     [
       name,

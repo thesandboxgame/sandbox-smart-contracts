@@ -1,5 +1,6 @@
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {DEFAULT_SUBSCRIPTION} from '../../../data/constants';
+import {deployProxy} from '../../utils/upgrades';
 
 const DEFAULT_BPS = 300;
 
@@ -71,7 +72,7 @@ export async function assetRoyaltyDistribution() {
   const RoyaltyManagerFactory = await ethers.getContractFactory(
     'RoyaltyManager'
   );
-  const RoyaltyManagerContract = await upgrades.deployProxy(
+  const RoyaltyManagerContract = await deployProxy(
     RoyaltyManagerFactory,
     [
       commonRoyaltyReceiver.address,
@@ -88,7 +89,7 @@ export async function assetRoyaltyDistribution() {
   await RoyaltyManagerContract.deployed();
 
   const AssetFactory = await ethers.getContractFactory('Asset');
-  const Asset = await upgrades.deployProxy(
+  const Asset = await deployProxy(
     AssetFactory,
     [
       TrustedForwarder.address,
