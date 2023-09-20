@@ -1,12 +1,13 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const func: DeployFunction = async function (
-  hre: HardhatRuntimeEnvironment
-): Promise<void> {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, catchUnknownSigner, log} = deployments;
   const {catalystMinter} = await getNamedAccounts();
+
+  // TODO Clarify whether the below is the correct contract name
+  const GiveawayContract = await deployments.get('MultiGiveawayV1');
 
   // TODO Specify amounts
   const amounts = {
@@ -22,7 +23,7 @@ const func: DeployFunction = async function (
       'Catalyst',
       {from: catalystMinter, log: true},
       'mintBatch',
-      '0x214d52880b1e4E17d020908cd8EAa988FfDD4020', // GiveawayContract
+      GiveawayContract.address,
       [1, 2, 3, 4, 5, 6],
       [
         amounts.Common,
