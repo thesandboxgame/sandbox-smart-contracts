@@ -6,8 +6,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {execute, catchUnknownSigner, log} = deployments;
   const {catalystMinter} = await getNamedAccounts();
 
-  // TODO Clarify whether the below is the correct contract name
-  const GiveawayContract = await deployments.get('MultiGiveawayV1');
+  const mumbaiGivewayContractAddress =
+    '0xfCE84d07909489508C5B293a850AF15Fb7147bc6';
+  const polygonGiveawayContractAddress =
+    '0x214d52880b1e4E17d020908cd8EAa988FfDD4020';
+
+  const giveawayContractAddress =
+    hre.network.name === 'mumbai'
+      ? mumbaiGivewayContractAddress
+      : polygonGiveawayContractAddress;
 
   // TODO Specify amounts
   const amounts = {
@@ -23,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'Catalyst',
       {from: catalystMinter, log: true},
       'mintBatch',
-      GiveawayContract.address,
+      giveawayContractAddress,
       [1, 2, 3, 4, 5, 6],
       [
         amounts.Common,
@@ -35,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ]
     )
   );
-  log(`Minted 6 NFTs to ${GiveawayContract.address}`);
+  log(`Minted 6 NFTs to ${giveawayContractAddress}`);
 };
 
 export default func;
