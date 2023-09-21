@@ -1,4 +1,3 @@
-import {BigNumber, BigNumberish, Contract, Signer} from 'ethers';
 import {
   Claim,
   compareClaim,
@@ -11,6 +10,7 @@ import {
 } from './signature';
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
+import {Contract, Signer} from 'ethers';
 
 export async function deploy(
   name: string,
@@ -18,7 +18,7 @@ export async function deploy(
 ): Promise<Contract[]> {
   const Contract = await ethers.getContractFactory(name);
   const contract = await Contract.deploy();
-  await contract.deployed();
+  await contract.waitForDeployment();
   const ret = [];
   for (const s of users) {
     ret.push(await contract.connect(s));
@@ -35,14 +35,14 @@ export async function deployWithProxy(
 
   const Proxy = await ethers.getContractFactory('FakeProxy');
   // This uses signers[0]
-  const proxy = await Proxy.deploy(contract[0].address);
-  await proxy.deployed();
+  const proxy = await Proxy.deploy(await contract[0].getAddress());
+  await proxy.waitForDeployment();
   const ret = [];
   for (let i = 0; i < contract.length; i++) {
-    ret[i] = await contract[i].attach(proxy.address);
+    ret[i] = await contract[i].attach(await proxy.getAddress());
   }
   // add implementation contract
-  ret.push(contract[0]);
+  ret.push(contract[contract.length - 1]);
   return ret;
 }
 
@@ -80,12 +80,18 @@ export async function setupSignedMultiGiveaway() {
   ]);
 
   // Initialize
-  await contractAsDeployer.initialize(trustedForwarder.address, admin.address);
+  await contractAsDeployer.initialize(
+    await trustedForwarder.getAddress(),
+    await admin.getAddress()
+  );
   // Grant roles.
   const signerRole = await contractAsAdmin.SIGNER_ROLE();
-  await contractAsAdmin.grantRole(signerRole, signer.address);
+  await contractAsAdmin.grantRole(signerRole, await signer.getAddress());
   const backofficeRole = await contractAsAdmin.BACKOFFICE_ROLE();
-  await contractAsAdmin.grantRole(backofficeRole, backofficeAdmin.address);
+  await contractAsAdmin.grantRole(
+    backofficeRole,
+    await backofficeAdmin.getAddress()
+  );
 
   interface ERC721Balance {
     tokenType: TokenType.ERC721 | TokenType.ERC721_SAFE;
@@ -111,7 +117,7 @@ export async function setupSignedMultiGiveaway() {
     claims: Claim[]
   ) {
     const pos = await balances(source, claims);
-    const postDest = await balances(dest.address, claims);
+    const postDest = await balances(await dest.getAddress(), claims);
     for (const [idx, c] of claims.entries()) {
       switch (c.tokenType) {
         case TokenType.ERC20:
@@ -121,20 +127,16 @@ export async function setupSignedMultiGiveaway() {
             const rDest = preDest[idx] as ERC20Claim;
             const s = pos[idx] as ERC20Claim;
             const sDest = postDest[idx] as ERC20Claim;
-            expect(s.amount).to.be.equal(
-              BigNumber.from(r.amount).sub(c.amount)
-            );
-            expect(sDest.amount).to.be.equal(
-              BigNumber.from(rDest.amount).add(c.amount)
-            );
+            expect(s.amount).to.be.equal(r.amount - c.amount);
+            expect(sDest.amount).to.be.equal(rDest.amount + c.amount);
           }
           break;
         case TokenType.ERC721:
           {
             const r = pre[idx] as ERC721Balance;
             const s = pos[idx] as ERC721Balance;
-            expect(r.owner).to.be.equal(contract.address);
-            expect(s.owner).to.be.equal(dest.address);
+            expect(r.owner).to.be.equal(await contract.getAddress());
+            expect(s.owner).to.be.equal(await dest.getAddress());
           }
           break;
       }
@@ -203,12 +205,22 @@ export async function setupSignedMultiGiveaway() {
           }
           break;
         case TokenType.ERC1155:
-          await c.token.mint(address, c.tokenId, c.amount, c.data);
+          await c.token.mint(
+            address,
+            c.tokenId,
+            c.amount,
+            ethers.getBytes(c.data)
+          );
           break;
         case TokenType.ERC1155_BATCH:
           {
             for (const [idx, tokenId] of c.tokenIds.entries()) {
-              await c.token.mint(address, tokenId, c.amounts[idx], c.data);
+              await c.token.mint(
+                address,
+                tokenId,
+                c.amounts[idx],
+                ethers.getBytes(c.data)
+              );
             }
           }
           break;
@@ -223,42 +235,42 @@ export async function setupSignedMultiGiveaway() {
     balances,
     checkBalances,
     signAndClaim: async (
-      claimIds: BigNumberish[],
+      claimIds: bigint[],
       claims: Claim[],
       signerUser = signer,
       expiration = 0
     ) => {
-      await mintToContract(contract.address, claims);
-      const pre = await balances(contract.address, claims);
-      const preDest = await balances(dest.address, claims);
+      await mintToContract(await contract.getAddress(), claims);
+      const pre = await balances(await contract.getAddress(), claims);
+      const preDest = await balances(await dest.getAddress(), claims);
       const {v, r, s} = await signedMultiGiveawaySignature(
         contract,
-        signerUser.address,
+        signerUser,
         claimIds,
         expiration,
-        contract.address,
-        dest.address,
-        getClaimEntires(claims)
+        await contract.getAddress(),
+        await dest.getAddress(),
+        await getClaimEntires(claims)
       );
       await expect(
         contract.claim(
           [{v, r, s}],
           claimIds,
           expiration,
-          contract.address,
-          dest.address,
-          getClaimEntires(claims)
+          await contract.getAddress(),
+          await dest.getAddress(),
+          await getClaimEntires(claims)
         )
       )
         .to.emit(contract, 'Claimed')
         .withArgs(
           claimIds,
-          contract.address,
-          dest.address,
-          compareClaim(claims),
-          other.address
+          await contract.getAddress(),
+          await dest.getAddress(),
+          compareClaim(await getClaimEntires(claims)),
+          await other.getAddress()
         );
-      await checkBalances(contract.address, pre, preDest, claims);
+      await checkBalances(await contract.getAddress(), pre, preDest, claims);
     },
     signedGiveaway,
     contract,
