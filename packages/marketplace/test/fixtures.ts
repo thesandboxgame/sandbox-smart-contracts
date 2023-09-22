@@ -1,8 +1,7 @@
 import {ethers, upgrades} from 'hardhat';
+import {ZeroAddress} from 'ethers';
 
 export async function deployFixtures() {
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
   const [deployer, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
@@ -55,6 +54,10 @@ export async function deployFixtures() {
   const ERC721Contract = await ERC721ContractFactory.deploy();
   await ERC721Contract.waitForDeployment();
 
+  // TODO: Do we always want this?
+  await ExchangeContractAsDeployer.setAssetMatcherContract(
+    await assetMatcherAsDeployer.getAddress()
+  );
   return {
     assetMatcherAsDeployer,
     assetMatcherAsUser,
@@ -63,10 +66,11 @@ export async function deployFixtures() {
     TrustedForwarder,
     ERC20Contract,
     ERC721Contract,
+    OrderValidator,
     deployer,
     user,
     user1,
     user2,
-    ZERO_ADDRESS,
+    ZERO_ADDRESS: ZeroAddress,
   };
 }
