@@ -1,7 +1,9 @@
+import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {expect, use} from 'chai';
-import {ethers} from 'hardhat';
+
+import {ETH_ASSET_CLASS, ERC20_ASSET_CLASS, enc} from '../utils/assets.ts';
+import {createOrder, createAsset} from '../utils/order.ts';
 
 describe('Exchange.sol', function () {
   it('should not set trusted forwarder if caller is not owner', async function () {
@@ -67,40 +69,38 @@ describe('Exchange.sol', function () {
     expect(await ExchangeContractAsDeployer.nativeOrder()).to.be.equal(false);
   });
 
-  it('should not cancel the order if caller is not maker', async function () {
+  it.only('should not cancel the order if caller is not maker', async function () {
     const {
       ExchangeContractAsDeployer,
       user1,
       user2,
       ZERO_ADDRESS,
       ERC20Contract,
-      ERC721Contract,
     } = await loadFixture(deployFixtures);
 
-    // TODO: generate orders similar to fixtures
-    const leftOrder = {
-      maker: user1.address,
-      makeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 100,
-      },
-      taker: ZERO_ADDRESS,
-      takeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 200,
-      },
-      salt: 1,
-      start: 0,
-      end: 0,
-      dataType: '0xffffffff',
-      data: '0x',
-    };
+    const makeAsset = createAsset(
+      ERC20_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+    const takeAsset = createAsset(
+      ETH_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+
+    const leftOrder = createOrder(
+      user1.address,
+      makeAsset,
+      ZERO_ADDRESS,
+      takeAsset,
+      1,
+      0,
+      0,
+      '0xffffffff',
+      '0x'
+    );
+
     await expect(
       ExchangeContractAsDeployer.connect(user2).cancel(
         leftOrder,
