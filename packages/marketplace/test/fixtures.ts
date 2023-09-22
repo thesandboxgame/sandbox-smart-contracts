@@ -1,9 +1,11 @@
 import {ethers, upgrades} from 'hardhat';
 
 export async function deployFixtures() {
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
   const [deployer, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
   const AssetMatcher = await ethers.getContractFactory('AssetMatcher');
   const assetMatcherAsDeployer = await AssetMatcher.deploy();
   const assetMatcherAsUser = await assetMatcherAsDeployer.connect(user);
@@ -46,11 +48,12 @@ export async function deployFixtures() {
   const ExchangeContractAsUser = await ExchangeContractAsDeployer.connect(user);
 
   const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
-  // TODO figure out to pass argument or use deploy proxy
   const ERC20Contract = await ERC20ContractFactory.deploy();
+  await ERC20Contract.waitForDeployment();
 
   const ERC721ContractFactory = await ethers.getContractFactory('TestERC721');
   const ERC721Contract = await ERC721ContractFactory.deploy();
+  await ERC721Contract.waitForDeployment();
 
   return {
     assetMatcherAsDeployer,
@@ -62,8 +65,8 @@ export async function deployFixtures() {
     ERC721Contract,
     deployer,
     user,
-    ZERO_ADDRESS,
     user1,
     user2,
+    ZERO_ADDRESS,
   };
 }
