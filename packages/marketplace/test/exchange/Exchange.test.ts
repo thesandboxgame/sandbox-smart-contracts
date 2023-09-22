@@ -69,7 +69,7 @@ describe('Exchange.sol', function () {
     expect(await ExchangeContractAsDeployer.nativeOrder()).to.be.equal(false);
   });
 
-  it.only('should not cancel the order if caller is not maker', async function () {
+  it('should not cancel the order if caller is not maker', async function () {
     const {
       ExchangeContractAsDeployer,
       user1,
