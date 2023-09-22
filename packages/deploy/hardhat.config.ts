@@ -9,7 +9,13 @@ import './tasks/importedPackages';
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
-  '@sandbox-smart-contracts/marketplace': 'contracts/',
+  '@sandbox-smart-contracts/marketplace': [
+    'contracts/royalties-registry/RoyaltiesRegistry.sol',
+    'contracts/exchange/OrderValidator.sol',
+    'contracts/exchange/ExchangeMeta.sol',
+    'contracts/exchange/Exchange.sol',
+    'contracts/exchange/AssetMatcher.sol',
+  ],
 };
 
 const namedAccounts = {

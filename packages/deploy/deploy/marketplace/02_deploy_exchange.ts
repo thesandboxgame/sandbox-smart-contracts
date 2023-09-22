@@ -18,6 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
 
+  // TODO: Do we need oll the combinations of flags ? Can we have two deployments scripts with different tags each ?
   // TODO: to be fetched from env?
   const deployMeta = process.env.DEPLOY_META;
   const nativeOrder = process.env.NATIVE_ORDER;
