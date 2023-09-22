@@ -3,7 +3,6 @@
 pragma solidity 0.8.21;
 
 contract TrustedForwarderMock {
-
     struct ForwardRequest {
         address from;
         address to;
@@ -13,13 +12,10 @@ contract TrustedForwarderMock {
         bytes data;
     }
 
-    function execute(ForwardRequest calldata req, bytes calldata)
-    public
-    payable
-    returns (bool, bytes memory)
-    {
-        (bool success, bytes memory returndata) =
-        req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));
+    function execute(ForwardRequest calldata req, bytes calldata) public payable returns (bool, bytes memory) {
+        (bool success, bytes memory returndata) = req.to.call{gas: req.gas, value: req.value}(
+            abi.encodePacked(req.data, req.from)
+        );
         assert(gasleft() > req.gas / 63);
         return (success, returndata);
     }
