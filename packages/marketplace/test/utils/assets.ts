@@ -14,7 +14,7 @@ export async function id(str: string) {
 }
 
 export async function enc(token: string, tokenId: number) {
-  const web3 = new Web3();
+  const web3 = new Web3('http://localhost:8545'); // Mock Provider URL to eliminate warnings
   if (tokenId) {
     return web3.eth.abi.encodeParameters(
       ['address', 'uint256'],

@@ -2,8 +2,19 @@ import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 
-import {ETH_ASSET_CLASS, ERC20_ASSET_CLASS, enc} from '../utils/assets.ts';
-import {createOrder, createAsset} from '../utils/order.ts';
+import {
+  ETH_ASSET_CLASS,
+  ERC20_ASSET_CLASS,
+  ERC721_ASSET_CLASS,
+  enc,
+} from '../utils/assets.ts';
+
+import {
+  createOrder,
+  createAsset,
+  DEFAULT_ORDER_TYPE,
+  UINT256_MAX_VALUE,
+} from '../utils/order.ts';
 
 describe('Exchange.sol', function () {
   it('should not set trusted forwarder if caller is not owner', async function () {
@@ -97,7 +108,7 @@ describe('Exchange.sol', function () {
       1,
       0,
       0,
-      '0xffffffff',
+      DEFAULT_ORDER_TYPE,
       '0x'
     );
 
@@ -110,114 +121,111 @@ describe('Exchange.sol', function () {
   });
 
   it('should not cancel order with zero salt', async function () {
-    const {ExchangeContractAsDeployer, user1, ZERO_ADDRESS} = await loadFixture(
-      deployFixtures
+    const {ExchangeContractAsUser, user, ERC20Contract, ZERO_ADDRESS} =
+      await loadFixture(deployFixtures);
+
+    const makeAsset = createAsset(
+      ERC20_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
     );
-    const leftOrder = {
-      maker: user1.address,
-      makeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 100,
-      },
-      taker: ZERO_ADDRESS,
-      takeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 200,
-      },
-      salt: 0,
-      start: 0,
-      end: 0,
-      dataType: '0xffffffff',
-      data: '0x',
-    };
+
+    const takeAsset = createAsset(
+      ETH_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+
+    const leftOrder = createOrder(
+      user.address,
+      makeAsset,
+      ZERO_ADDRESS,
+      takeAsset,
+      0, // setting salt value to 0
+      0,
+      0,
+      DEFAULT_ORDER_TYPE,
+      '0x'
+    );
+
     await expect(
-      ExchangeContractAsDeployer.connect(user1).cancel(
+      ExchangeContractAsUser.cancel(
         leftOrder,
-        await ExchangeContractAsDeployer.getHashKey(leftOrder)
+        await ExchangeContractAsUser.getHashKey(leftOrder)
       )
     ).to.be.revertedWith("ExchangeCore: 0 salt can't be used");
   });
 
   it('should not cancel the order with invalid order hash', async function () {
-    const {ExchangeContractAsDeployer, user1, ZERO_ADDRESS} = await loadFixture(
-      deployFixtures
+    const {ExchangeContractAsUser, user1, ERC20Contract, ZERO_ADDRESS} =
+      await loadFixture(deployFixtures);
+
+    const makeAsset = createAsset(
+      ERC20_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
     );
-    const leftOrder = {
-      maker: user1.address,
-      makeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 100,
-      },
-      taker: ZERO_ADDRESS,
-      takeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 200,
-      },
-      salt: 1,
-      start: 0,
-      end: 0,
-      dataType: '0xffffffff',
-      data: '0x',
-    };
+
+    const takeAsset = createAsset(
+      ETH_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+
+    const leftOrder = createOrder(
+      user1.address,
+      makeAsset,
+      ZERO_ADDRESS,
+      takeAsset,
+      1,
+      0,
+      0,
+      DEFAULT_ORDER_TYPE,
+      '0x'
+    );
+
     const invalidOrderHash =
       '0x1234567890123456789012345678901234567890123456789012345678901234';
     await expect(
-      ExchangeContractAsDeployer.connect(user1).cancel(
-        leftOrder,
-        invalidOrderHash
-      )
+      ExchangeContractAsUser.connect(user1).cancel(leftOrder, invalidOrderHash)
     ).to.be.revertedWith('ExchangeCore: Invalid orderHash');
   });
 
   it('should cancel an order and update fills mapping', async function () {
-    const {ExchangeContractAsDeployer, user1, ZERO_ADDRESS} = await loadFixture(
-      deployFixtures
+    const {ExchangeContractAsUser, user, ERC20Contract, ZERO_ADDRESS} =
+      await loadFixture(deployFixtures);
+
+    const makeAsset = createAsset(
+      ERC20_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
     );
-    const UINT256_MAX_VALUE =
-      115792089237316195423570985008687907853269984665640564039457584007913129639935n;
-    const leftOrder = {
-      maker: user1.address,
-      makeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 100,
-      },
-      taker: ZERO_ADDRESS,
-      takeAsset: {
-        assetType: {
-          assetClass: '0x00000000',
-          data: '0x',
-        },
-        value: 200,
-      },
-      salt: 1,
-      start: 0,
-      end: 0,
-      dataType: '0xffffffff',
-      data: '0x',
-    };
-    await ExchangeContractAsDeployer.connect(user1).cancel(
+
+    const takeAsset = createAsset(
+      ETH_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+
+    const leftOrder = createOrder(
+      user.address,
+      makeAsset,
+      ZERO_ADDRESS,
+      takeAsset,
+      1,
+      0,
+      0,
+      DEFAULT_ORDER_TYPE,
+      '0x'
+    );
+    await ExchangeContractAsUser.cancel(
       leftOrder,
-      await ExchangeContractAsDeployer.getHashKey(leftOrder)
+      await ExchangeContractAsUser.getHashKey(leftOrder)
     );
 
     expect(
-      await ExchangeContractAsDeployer.fills(
-        await ExchangeContractAsDeployer.getHashKey(leftOrder)
+      await ExchangeContractAsUser.fills(
+        await ExchangeContractAsUser.getHashKey(leftOrder)
       )
     ).to.be.equal(UINT256_MAX_VALUE);
   });
@@ -238,17 +246,29 @@ describe('Exchange.sol', function () {
       1
     );
 
+    const makeAsset = createAsset(
+      ERC721_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      1
+    );
+
+    const takeAsset = createAsset(
+      ERC20_ASSET_CLASS,
+      await enc(await ERC20Contract.getAddress(), 1),
+      100
+    );
+
     const purchase = {
       sellOrderMaker: user1.address,
       sellOrderNftAmount: 1,
-      nftAssetClass: '0x73ad2146', // bytes4(keccak256("ERC721"))
+      nftAssetClass: ERC721_ASSET_CLASS, // bytes4(keccak256("ERC721"))
       nftData: '0x0', // TODO provide nft data
       sellOrderPaymentAmount: 100,
       paymentToken: ERC20Contract.getAddress(),
       sellOrderSalt: 1,
       sellOrderStart: 0,
       sellOrderEnd: 0,
-      sellOrderDataType: '8ae85d84', // bytes4(keccak256("ERC20"));
+      sellOrderDataType: ERC20_ASSET_CLASS, // bytes4(keccak256("ERC20"));
       sellOrderData: '0x0', // TODO pass sell order data
       sellOrderSignature: '0x0', // TODO pass signature
       buyOrderPaymentAmount: 100,
@@ -258,27 +278,16 @@ describe('Exchange.sol', function () {
 
     const leftOrder = {
       maker: user1.address,
-      makeAsset: {
-        assetType: {
-          assetClass: '0x73ad2146',
-          data: '0x0',
-        },
-        value: 1,
-      },
+      makeAsset: makeAsset,
       taker: ZERO_ADDRESS,
-      takeAsset: {
-        assetType: {
-          assetClass: '8ae85d84',
-          data: '0x0',
-        },
-        value: 100,
-      },
+      takeAsset: takeAsset,
       salt: 1,
       start: 0,
       end: 0,
-      dataType: '0xffffffff',
+      dataType: DEFAULT_ORDER_TYPE,
       data: '0x',
     };
+
     // WIP
     // await ExchangeContractAsDeployer.directPurchase(user2.address, purchase);
   });

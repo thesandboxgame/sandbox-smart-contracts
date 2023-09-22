@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export const DEFAULT_ORDER_TYPE = '0xffffffff';
+export const UINT256_MAX_VALUE =
+  115792089237316195423570985008687907853269984665640564039457584007913129639935n;
+
 export function AssetType(assetClass: string, data: string) {
   return {assetClass, data};
 }
