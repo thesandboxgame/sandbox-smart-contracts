@@ -56,5 +56,8 @@
     "compile": "hardhat compile"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/hardhat-upgrades": "^2.2.1"
+  }
 }

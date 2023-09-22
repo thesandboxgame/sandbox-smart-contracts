@@ -1,4 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
 import {HardhatUserConfig} from 'hardhat/config';
 
 const config: HardhatUserConfig = {
@@ -16,6 +17,12 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  networks: {
+    hardhat: {
+      // TODO remove after size issue is resolved
+      allowUnlimitedContractSize: true,
+    },
   },
 };
 export default config;
