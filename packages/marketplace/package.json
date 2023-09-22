@@ -43,7 +43,8 @@
     "solidity-coverage": "^0.8.3",
     "ts-node": "^10.9.1",
     "typechain": "^8.2.0",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "web3": "^4.1.2"
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
