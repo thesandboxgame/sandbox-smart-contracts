@@ -36,6 +36,43 @@ export type Order = {
   data: BytesLike;
 };
 
+export type OrderBack = {
+  buyer: string;
+  maker: string;
+  makeAsset: Asset;
+  taker: string;
+  takeAsset: Asset;
+  salt: number;
+  start: number;
+  end: number;
+  dataType: string;
+  data: BytesLike;
+};
+
+export const OrderBack = async (
+  buyer: Signer,
+  maker: Signer,
+  makeAsset: Asset,
+  taker: Signer | ZeroAddress,
+  takeAsset: Asset,
+  salt: number,
+  start: number,
+  end: number,
+  dataType: string,
+  data: string
+): Promise<OrderBack> => ({
+  buyer: await buyer.getAddress(),
+  maker: await maker.getAddress(),
+  makeAsset,
+  taker: taker === ZeroAddress ? ZeroAddress : await taker.getAddress(),
+  takeAsset,
+  salt,
+  start,
+  end,
+  dataType: DEFAULT_ORDER_TYPE,
+  data: '0x',
+})
+
 export const OrderDefault = async (
   maker: Signer,
   makeAsset: Asset,
@@ -89,6 +126,7 @@ export const OrderSell = async (
     ]
   ),
 });
+
 export const OrderBuy = async (
   maker: Signer,
   makeAsset: Asset,
