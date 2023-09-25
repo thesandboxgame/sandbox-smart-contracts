@@ -6,10 +6,12 @@ import {
   AbiCoder,
   BytesLike,
   Contract,
+  ContractTransactionResponse,
   keccak256,
   solidityPackedKeccak256,
 } from 'ethers';
 import {bytes4Keccak, HashSignature} from './signature';
+import { TestERC20, TestERC721 } from '../../typechain-types';
 
 export const ETH_ASSET_CLASS = bytes4Keccak('ETH');
 export const ERC20_ASSET_CLASS = bytes4Keccak('ERC20');
@@ -48,7 +50,7 @@ export const AssetETH = (amount: number): Asset => ({
 });
 
 export const AssetERC20 = async (
-  tokenContract: Contract,
+  tokenContract: Contract | TestERC20 & { deploymentTransaction(): ContractTransactionResponse; },
   amount: number
 ): Promise<Asset> => ({
   assetType: {
@@ -62,7 +64,7 @@ export const AssetERC20 = async (
 });
 
 export const AssetERC721 = async (
-  tokenContract: Contract,
+  tokenContract: Contract | TestERC721 & { deploymentTransaction(): ContractTransactionResponse; },
   tokenId: number
 ): Promise<Asset> => ({
   assetType: {

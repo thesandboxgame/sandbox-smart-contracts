@@ -273,8 +273,9 @@ describe('Exchange.sol', function () {
       deployer,
       user1,
       user2,
+      ExchangeContractAsUser
     } = await loadFixture(deployFixtures);
-    await OrderValidator.connect(deployer).setSigningWallet(deployer.address);
+    await OrderValidator.setSigningWallet(deployer.address);
     await ERC721Contract.mint(user1.address, 1);
     await ERC20Contract.mint(user2.address, 100);
     await ERC721Contract.connect(user1).approve(
