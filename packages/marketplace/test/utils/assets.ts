@@ -36,20 +36,20 @@ export type AssetType = {
 
 export type Asset = {
   assetType: AssetType;
-  value: string;
+  value: number;
 };
 
-export const AssetETH = (amount: number): Asset => ({
+export const AssetETH = (): Asset => ({
   assetType: {
     assetClass: ETH_ASSET_CLASS,
     data: '0x',
   },
-  value: amount.toString(),
+  value: 1,
 });
 
 export const AssetERC20 = async (
   tokenContract: Contract,
-  amount: number
+  value: number
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC20_ASSET_CLASS,
@@ -58,12 +58,13 @@ export const AssetERC20 = async (
       [await tokenContract.getAddress()]
     ),
   },
-  value: amount.toString(),
+  value: value,
 });
 
 export const AssetERC721 = async (
   tokenContract: Contract,
-  tokenId: number
+  tokenId: number,
+  value: number
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC721_ASSET_CLASS,
@@ -72,13 +73,13 @@ export const AssetERC721 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
-  value: '1',
+  value: value,
 });
 
 export const AssetERC1155 = async (
   tokenContract: Contract,
   tokenId: number,
-  amount: number
+  value: number
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC1155_ASSET_CLASS,
@@ -87,35 +88,35 @@ export const AssetERC1155 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
-  value: amount.toString(),
+  value: value,
 });
 
 export const AssetBundle = async (
-  erc20: {tokenContract: Contract; amount: number}[],
-  erc721: {tokenContract: Contract; tokenId: number}[],
-  erc1155: {tokenContract: Contract; tokenId: number; amount: number}[]
+  erc20: {tokenContract: Contract; value: number}[],
+  erc721: {tokenContract: Contract; tokenId: number; value: number}[],
+  erc1155: {tokenContract: Contract; tokenId: number; value: number}[]
 ): Promise<Asset> => {
   const erc20Details = [];
   for (const x of erc20) {
     erc20Details.push({
       token: await x.tokenContract.getAddress(),
-      value: x.amount,
+      value: x.value,
     });
   }
-  const erc721Details = [];
+  const erc721Details: {token: string; id: number; value: number}[] = [];
   for (const x of erc721) {
     erc20Details.push({
       token: await x.tokenContract.getAddress(),
       id: x.tokenId,
-      value: '1',
+      value: x.value,
     });
   }
-  const erc1155Details = [];
+  const erc1155Details: {token: string; id: number; value: number}[] = [];
   for (const x of erc1155) {
     erc20Details.push({
       token: await x.tokenContract.getAddress(),
       id: x.tokenId,
-      value: x.amount,
+      value: x.value,
     });
   }
   return {
@@ -130,7 +131,7 @@ export const AssetBundle = async (
         [erc20Details, erc721Details, erc1155Details]
       ),
     },
-    value: '1',
+    value: 1,
   };
 };
 
