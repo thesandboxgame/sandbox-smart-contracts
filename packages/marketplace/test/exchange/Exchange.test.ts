@@ -2,9 +2,9 @@ import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
+  AssetERC1155,
   AssetERC20,
   AssetERC721,
-  AssetERC1155,
   AssetETH,
 } from '../utils/assets.ts';
 
@@ -12,12 +12,10 @@ import {
   hashKey,
   hashOrder,
   OrderDefault,
-  OrderBack,
   UINT256_MAX_VALUE,
-  DEFAULT_ORDER_TYPE,
 } from '../utils/order.ts';
-import {getBytes, ZeroAddress} from 'ethers';
-import {signOrder, signOrderBack} from '../utils/signature';
+import {ZeroAddress} from 'ethers';
+import {signOrder} from '../utils/signature';
 
 describe('Exchange.sol', function () {
   // TODO: Erase

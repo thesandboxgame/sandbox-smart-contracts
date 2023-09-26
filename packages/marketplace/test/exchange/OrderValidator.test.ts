@@ -132,8 +132,9 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1, user2} =
-      await loadFixture(deployFixtures);
+    const {OrderValidatorAsUser, ERC20Contract, user1} = await loadFixture(
+      deployFixtures
+    );
     const makerAsset = await AssetERC20(ERC20Contract, 100);
     const takerAsset = await AssetETH(100);
     const order = await OrderDefault(
@@ -173,8 +174,9 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when assetClass is ETH_ASSET_CLASS, salt is zero and Order maker is sender', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1, user2} =
-      await loadFixture(deployFixtures);
+    const {OrderValidatorAsUser, ERC20Contract, user1} = await loadFixture(
+      deployFixtures
+    );
     const makerAsset = await AssetETH(100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
@@ -234,8 +236,9 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should verify ERC20 Whitelist', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract} =
-      await loadFixture(deployFixtures);
+    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+      deployFixtures
+    );
     await expect(
       OrderValidatorAsUser.verifyERC20Whitelist(
         await ERC20Contract.getAddress()

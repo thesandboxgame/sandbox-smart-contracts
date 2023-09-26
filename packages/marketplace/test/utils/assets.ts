@@ -4,6 +4,7 @@
 // SEE: LibAsset.sol
 import {
   AbiCoder,
+  Numeric,
   BytesLike,
   Contract,
   keccak256,
@@ -19,7 +20,7 @@ export const ERC1155_ASSET_CLASS = bytes4Keccak('ERC1155');
 // export const ERC1155_TSB_CLASS = bytes4Keccak('ERC1155_TSB');
 export const BUNDLE_ASSET_CLASS = bytes4Keccak('BUNDLE');
 
-//TODO: export const ERC721_LAZY_ASSET_CLASS = bytes4Keccak('ERC721_LAZY');
+// TODO: export const ERC721_LAZY_ASSET_CLASS = bytes4Keccak('ERC721_LAZY');
 export const ASSET_TYPE_TYPEHASH = keccak256(
   Buffer.from('AssetType(bytes4 assetClass,bytes data)')
 );
@@ -36,20 +37,20 @@ export type AssetType = {
 
 export type Asset = {
   assetType: AssetType;
-  value: number;
+  value: Numeric;
 };
 
-export const AssetETH = (): Asset => ({
+export const AssetETH = (value: Numeric): Asset => ({
   assetType: {
     assetClass: ETH_ASSET_CLASS,
     data: '0x',
   },
-  value: 1,
+  value,
 });
 
 export const AssetERC20 = async (
   tokenContract: Contract,
-  value: number
+  value: Numeric
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC20_ASSET_CLASS,
@@ -63,7 +64,7 @@ export const AssetERC20 = async (
 
 export const AssetERC721 = async (
   tokenContract: Contract,
-  tokenId: number
+  tokenId: Numeric
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC721_ASSET_CLASS,
@@ -72,13 +73,14 @@ export const AssetERC721 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
+  // TODO: Test value !=1
   value: 1,
 });
 
 export const AssetERC1155 = async (
   tokenContract: Contract,
-  tokenId: number,
-  value: number
+  tokenId: Numeric,
+  value: Numeric
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC1155_ASSET_CLASS,
@@ -91,32 +93,33 @@ export const AssetERC1155 = async (
 });
 
 export const AssetBundle = async (
-  erc20: {tokenContract: Contract; value: number}[],
-  erc721: {tokenContract: Contract; tokenId: number; value: number}[],
-  erc1155: {tokenContract: Contract; tokenId: number; value: number}[]
+  erc20: {token: Contract; value: Numeric}[],
+  erc721: {
+    token: Contract;
+    tokenId: Numeric;
+  }[],
+  erc1155: {
+    token: Contract;
+    tokenId: Numeric;
+    value: Numeric;
+  }[]
 ): Promise<Asset> => {
   const erc20Details = [];
   for (const x of erc20) {
-    erc20Details.push({
-      token: await x.tokenContract.getAddress(),
-      value: x.value,
-    });
+    erc20Details.push([await x.token.getAddress(), x.value]);
   }
-  const erc721Details: {token: string; id: number}[] = [];
+  const erc721Details = [];
   for (const x of erc721) {
-    erc20Details.push({
-      token: await x.tokenContract.getAddress(),
-      id: x.tokenId,
-      value: 1,
-    });
+    erc721Details.push([
+      await x.token.getAddress(),
+      x.tokenId,
+      // TODO: Test value !=1
+      1,
+    ]);
   }
-  const erc1155Details: {token: string; id: number; value: number}[] = [];
+  const erc1155Details = [];
   for (const x of erc1155) {
-    erc20Details.push({
-      token: await x.tokenContract.getAddress(),
-      id: x.tokenId,
-      value: x.value,
-    });
+    erc1155Details.push([await x.token.getAddress(), x.tokenId, x.value]);
   }
   return {
     assetType: {
@@ -124,12 +127,13 @@ export const AssetBundle = async (
       data: AbiCoder.defaultAbiCoder().encode(
         [
           'tuple(address, uint256)[]',
-          'tuple(address, uint256,uint256)[]',
-          'tuple(address, uint256uint256)[]',
+          'tuple(address, uint256, uint256)[]',
+          'tuple(address, uint256, uint256)[]',
         ],
         [erc20Details, erc721Details, erc1155Details]
       ),
     },
+    // TODO: It make sense tho have multipler bundles >1 ????
     value: 1,
   };
 };

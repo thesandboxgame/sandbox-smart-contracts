@@ -2,7 +2,7 @@
 // SEE: LibOrder.sol and LibOrderData.sol
 import {Asset, hashAsset, hashAssetType} from './assets';
 import {bytes4Keccak} from './signature';
-import {AbiCoder, keccak256, Signer, ZeroAddress} from 'ethers';
+import {AbiCoder, Numeric, keccak256, Signer, ZeroAddress} from 'ethers';
 import {BytesLike} from 'ethers/src.ts/utils/index';
 
 export const ORDER_TYPEHASH = keccak256(
@@ -29,9 +29,9 @@ export type Order = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
-  salt: number;
-  start: number;
-  end: number;
+  salt: Numeric;
+  start: Numeric;
+  end: Numeric;
   dataType: string;
   data: BytesLike;
 };
@@ -42,9 +42,9 @@ export type OrderBack = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
-  salt: number;
-  start: number;
-  end: number;
+  salt: Numeric;
+  start: Numeric;
+  end: Numeric;
   dataType: string;
   data: BytesLike;
 };
@@ -55,9 +55,9 @@ export const OrderBack = async (
   makeAsset: Asset,
   taker: Signer | ZeroAddress,
   takeAsset: Asset,
-  salt: number,
-  start: number,
-  end: number,
+  salt: Numeric,
+  start: Numeric,
+  end: Numeric,
   dataType: string,
   data: string
 ): Promise<OrderBack> => ({
@@ -78,9 +78,9 @@ export const OrderDefault = async (
   makeAsset: Asset,
   taker: Signer | ZeroAddress,
   takeAsset: Asset,
-  salt: number,
-  start: number,
-  end: number
+  salt: Numeric,
+  start: Numeric,
+  end: Numeric
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
@@ -98,9 +98,9 @@ export const OrderSell = async (
   makeAsset: Asset,
   taker: Signer | ZeroAddress,
   takeAsset: Asset,
-  salt: number,
-  start: number,
-  end: number,
+  salt: Numeric,
+  start: Numeric,
+  end: Numeric,
   payouts: string, // TODO: better type
   originFeeFirst: string, // TODO: better type
   originFeeSecond: string, // TODO: better type
@@ -132,9 +132,9 @@ export const OrderBuy = async (
   makeAsset: Asset,
   taker: Signer | ZeroAddress,
   takeAsset: Asset,
-  salt: number,
-  start: number,
-  end: number,
+  salt: Numeric,
+  start: Numeric,
+  end: Numeric,
   payouts: string, // TODO: better type
   originFeeFirst: string, // TODO: better type
   originFeeSecond: string, // TODO: better type

@@ -1,7 +1,12 @@
 import {ethers, upgrades} from 'hardhat';
-import {ZeroAddress} from 'ethers';
+import {Signer, ZeroAddress} from 'ethers';
+import {OrderDefault} from './utils/order';
+import {randomInt} from 'crypto';
+import {signOrder} from './utils/signature';
+import {Asset} from './utils/assets';
 
-export async function deployFixtures() {
+// TODO: Split fixtures so we use only what is needed!!!
+async function deploy() {
   const [deployer, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
@@ -71,8 +76,11 @@ export async function deployFixtures() {
     ExchangeContractAsDeployer,
     ExchangeContractAsUser,
     TrustedForwarder,
+    ERC20ContractFactory,
     ERC20Contract,
+    ERC721ContractFactory,
     ERC721Contract,
+    ERC1155ContractFactory,
     ERC1155Contract,
     OrderValidatorAsDeployer,
     OrderValidatorAsUser,
@@ -82,4 +90,77 @@ export async function deployFixtures() {
     user2,
     ZERO_ADDRESS: ZeroAddress,
   };
+}
+
+// TODO: Use only one test token.
+export async function deployFixturesWithExtraTokens() {
+  const ret = await deploy();
+
+  const ERC20Contract2 = await ret.ERC20ContractFactory.deploy();
+  await ERC20Contract2.waitForDeployment();
+
+  const MintableERC721WithRoyaltiesFactory = await ethers.getContractFactory(
+    'MintableERC721WithRoyalties'
+  );
+  const MintableERC721WithRoyalties =
+    await MintableERC721WithRoyaltiesFactory.deploy();
+  await MintableERC721WithRoyalties.waitForDeployment();
+
+  const MintableERC1155WithRoyaltiesFactory = await ethers.getContractFactory(
+    'MintableERC1155WithRoyalties'
+  );
+  const MintableERC1155WithRoyalties =
+    await MintableERC1155WithRoyaltiesFactory.deploy();
+  await MintableERC1155WithRoyalties.waitForDeployment();
+  return {
+    ...ret,
+    ERC20Contract2,
+    MintableERC721WithRoyalties,
+    MintableERC1155WithRoyalties,
+    matchOrders: async (
+      maker: Signer,
+      makerAsset: Asset,
+      taker: Signer,
+      takerAsset: Asset
+    ) => {
+      const leftOrder = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        randomInt(200_000_000_000_000),
+        0,
+        0
+      );
+      const rightOrder = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        randomInt(200_000_000_000_000),
+        0,
+        0
+      );
+      const makerSig = await signOrder(
+        leftOrder,
+        maker,
+        ret.OrderValidatorAsDeployer
+      );
+      const takerSig = await signOrder(
+        rightOrder,
+        taker,
+        ret.OrderValidatorAsDeployer
+      );
+      await ret.ExchangeContractAsUser.matchOrders(
+        leftOrder,
+        makerSig,
+        rightOrder,
+        takerSig
+      );
+    },
+  };
+}
+
+export async function deployFixtures() {
+  return deploy();
 }
