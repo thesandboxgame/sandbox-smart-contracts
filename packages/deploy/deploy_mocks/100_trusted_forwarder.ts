@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
   await deploy('TRUSTED_FORWARDER_V2', {
     from: deployer,
-    contract: 'TrustedForwarderMock',
+    contract: 'contracts/mocks/TrustedForwarderMock.sol:TrustedForwarderMock',
     log: true,
   });
 };
