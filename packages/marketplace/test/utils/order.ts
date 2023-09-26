@@ -71,7 +71,7 @@ export const OrderBack = async (
   end,
   dataType: DEFAULT_ORDER_TYPE,
   data: '0x',
-})
+});
 
 export const OrderDefault = async (
   maker: Signer,

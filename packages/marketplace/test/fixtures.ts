@@ -19,13 +19,16 @@ export async function deployFixtures() {
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidatorTest'
   );
-  const OrderValidator = await upgrades.deployProxy(
+  const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
     [false, false, true, false],
     {
       initializer: '__OrderValidator_init_unchained',
     }
   );
+
+  const OrderValidatorAsUser = await OrderValidatorAsDeployer.connect(user);
+
   const ExchangeFactory = await ethers.getContractFactory('Exchange');
   const ExchangeContractAsDeployer = await upgrades.deployProxy(
     ExchangeFactory,
@@ -35,7 +38,7 @@ export async function deployFixtures() {
       250,
       defaultFeeReceiver.address,
       await RoyaltyRegistry.getAddress(),
-      await OrderValidator.getAddress(),
+      await OrderValidatorAsDeployer.getAddress(),
       true,
       true,
     ],
@@ -66,7 +69,8 @@ export async function deployFixtures() {
     TrustedForwarder,
     ERC20Contract,
     ERC721Contract,
-    OrderValidator,
+    OrderValidatorAsDeployer,
+    OrderValidatorAsUser,
     deployer,
     user,
     user1,

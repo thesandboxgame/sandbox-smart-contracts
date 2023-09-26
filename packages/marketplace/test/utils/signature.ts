@@ -67,7 +67,7 @@ export async function signOrderBack(
         {name: 'assetType', type: 'AssetType'},
         {name: 'value', type: 'uint256'},
       ],
-      Order: [
+      OrderBack: [
         {name: 'buyer', type: 'address'},
         {name: 'maker', type: 'address'},
         {name: 'makeAsset', type: 'Asset'},

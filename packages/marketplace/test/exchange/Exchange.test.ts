@@ -208,11 +208,10 @@ describe('Exchange.sol', function () {
     ).to.be.equal(UINT256_MAX_VALUE);
   });
 
-  // TODO: remove
   it('should be able to match two orders', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidator,
+      OrderValidatorAsDeployer,
       ERC20Contract,
       ERC721Contract,
       user,
@@ -251,8 +250,12 @@ describe('Exchange.sol', function () {
       0
     );
 
-    const makerSig = await signOrder(leftOrder, user, OrderValidator);
-    const takerSig = await signOrder(rightOrder, user2, OrderValidator);
+    const makerSig = await signOrder(leftOrder, user, OrderValidatorAsDeployer);
+    const takerSig = await signOrder(
+      rightOrder,
+      user2,
+      OrderValidatorAsDeployer
+    );
 
     await ExchangeContractAsUser.matchOrders(
       leftOrder,
@@ -264,71 +267,83 @@ describe('Exchange.sol', function () {
     // TODO: Check balances before and after, validate everything!!!
   });
 
-  it.only('should be able to execute direct purchase', async function () {
-    const {
-      ExchangeContractAsDeployer,
-      OrderValidator,
-      ERC20Contract,
-      ERC721Contract,
-      deployer,
-      user1,
-      user2,
-    } = await loadFixture(deployFixtures);
-    await OrderValidator.connect(deployer).setSigningWallet(deployer.address);
-    await ERC721Contract.mint(user1.address, 1);
-    await ERC20Contract.mint(user2.address, 100);
-    await ERC721Contract.connect(user1).approve(
-      await ExchangeContractAsDeployer.getAddress(),
-      1
-    );
+  // TODO remove
+  // it('should be able to execute direct purchase', async function () {
+  //   const {
+  //     ExchangeContractAsDeployer,
+  //     OrderValidatorAsDeployer,
+  //     ERC20Contract,
+  //     ERC721Contract,
+  //     deployer,
+  //     user1,
+  //     user2,
+  //   } = await loadFixture(deployFixtures);
+  //   await OrderValidatorAsDeployer.connect(deployer).setSigningWallet(
+  //     deployer.address
+  //   );
+  //   await ERC721Contract.mint(user1.address, 1);
+  //   await ERC20Contract.mint(user2.address, 100);
+  //   await ERC721Contract.connect(user1).approve(
+  //     await ExchangeContractAsDeployer.getAddress(),
+  //     1
+  //   );
 
-    const makerAsset = await AssetERC721(ERC721Contract, 1);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
-    const order = await OrderBack(
-      user2,
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0,
-      DEFAULT_ORDER_TYPE,
-      "0x"
-    );
-    // const hash = await ExchangeContractAsDeployer.getBEHashKey(order);
-    // const signature = await deployer.signMessage(hash);
-    const signature = await signOrderBack(order, deployer, ExchangeContractAsDeployer);
-    // const timestamp = await time.latest();
-    // const sellOrderStart = timestamp - 100000;
-    // const sellOrderEnd = timestamp + 100000;
+  //   const makerAsset = await AssetERC721(ERC721Contract, 1);
+  //   const takerAsset = await AssetERC20(ERC20Contract, 100);
+  //   const order = await OrderBack(
+  //     user2,
+  //     user1,
+  //     makerAsset,
+  //     ZeroAddress,
+  //     takerAsset,
+  //     1,
+  //     0,
+  //     0,
+  //     DEFAULT_ORDER_TYPE,
+  //     '0x'
+  //   );
+  //   // const hash = await ExchangeContractAsDeployer.getBEHashKey(order);
+  //   // const signature = await deployer.signMessage(hash);
+  //   // const signature = await signOrderBack(
+  //   //   order,
+  //   //   deployer,
+  //   //   ExchangeContractAsDeployer
+  //   // );
+  //   const signature = await signOrderBack(
+  //     order,
+  //     deployer,
+  //     OrderValidatorAsDeployer
+  //   );
+  //   // const timestamp = await time.latest();
+  //   // const sellOrderStart = timestamp - 100000;
+  //   // const sellOrderEnd = timestamp + 100000;
 
-    const purchase = {
-      sellOrderMaker: user1.address,
-      sellOrderNftAmount: 1,
-      nftAssetClass: makerAsset.assetType.assetClass,
-      nftData: makerAsset.assetType.data,
-      sellOrderPaymentAmount: 100,
-      paymentToken: await ERC20Contract.getAddress(),
-      sellOrderSalt: 1,
-      sellOrderStart: 0,
-      sellOrderEnd: 0,
-      sellOrderDataType: order.dataType,
-      sellOrderData: order.data,
-      sellOrderSignature: signature,
-      buyOrderPaymentAmount: 100,
-      buyOrderNftAmount: 1,
-      buyOrderData: getBytes('0x'), // TODO pass buy data
-    };
+  //   const purchase = {
+  //     sellOrderMaker: user1.address,
+  //     sellOrderNftAmount: 1,
+  //     nftAssetClass: makerAsset.assetType.assetClass,
+  //     nftData: makerAsset.assetType.data,
+  //     sellOrderPaymentAmount: 100,
+  //     paymentToken: await ERC20Contract.getAddress(),
+  //     sellOrderSalt: 1,
+  //     sellOrderStart: 0,
+  //     sellOrderEnd: 0,
+  //     sellOrderDataType: order.dataType,
+  //     sellOrderData: order.data,
+  //     sellOrderSignature: signature,
+  //     buyOrderPaymentAmount: 100,
+  //     buyOrderNftAmount: 1,
+  //     buyOrderData: getBytes('0x'), // TODO pass buy data
+  //   };
 
-    // TODO: WIP
-    // TODO: We need to test orderValidator first, a call to setSigningWallet is needed ?
-    // TODO: What is this backend signature stuff ?
-    // const backendSignature = getBytes('0x');
-    await ExchangeContractAsDeployer.directPurchase(
-      user2.address,
-      [purchase],
-      [signature]
-    );
-  });
+  //   // TODO: WIP
+  //   // TODO: We need to test orderValidator first, a call to setSigningWallet is needed ?
+  //   // TODO: What is this backend signature stuff ?
+  //   // const backendSignature = getBytes('0x');
+  //   await ExchangeContractAsDeployer.directPurchase(
+  //     user2.address,
+  //     [purchase],
+  //     [signature]
+  //   );
+  // });
 });
