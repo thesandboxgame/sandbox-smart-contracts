@@ -1,20 +1,20 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, sandAdmin} = await getNamedAccounts();
+  const {deployer, catalystMinter} = await getNamedAccounts();
   await deploy('FaucetsERC1155', {
     from: deployer,
+    contract:
+      '@sandbox-smart-contracts/faucets/contracts/FaucetsERC1155.sol:FaucetsERC1155',
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [sandAdmin],
+    args: [catalystMinter],
   });
 };
 
 func.tags = ['FaucetsERC1155', 'FaucetsERC1155_deploy'];
-func.skip = skipUnlessTestnet;
 
 export default func;

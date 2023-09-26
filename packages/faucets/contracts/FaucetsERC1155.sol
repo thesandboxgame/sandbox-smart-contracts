@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+pragma solidity 0.8.18;
 
-import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts-0.8/token/ERC1155/utils/ERC1155Holder.sol";
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 /**
  * @title FaucetsERC1155
@@ -101,12 +101,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
      * @param limit The maximum amount of tokens a user can claim at once.
      * @param tokenIds List of token IDs that this faucet will distribute.
      */
-    function addFaucet(
-        address faucet,
-        uint256 period,
-        uint256 limit,
-        uint256[] memory tokenIds
-    ) public onlyOwner {
+    function addFaucet(address faucet, uint256 period, uint256 limit, uint256[] memory tokenIds) public onlyOwner {
         require(!faucets[faucet].isFaucet, "Faucets: FAUCET_ALREADY_EXISTS");
         require(limit > 0, "Faucets: LIMIT_ZERO");
         require(tokenIds.length > 0, "Faucets: TOKENS_CANNOT_BE_EMPTY");
@@ -197,11 +192,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
      * @param tokenId ID of the token to be claimed.
      * @param amount Amount of tokens to be claimed.
      */
-    function claim(
-        address faucet,
-        uint256 tokenId,
-        uint256 amount
-    ) external exists(faucet) nonReentrant {
+    function claim(address faucet, uint256 tokenId, uint256 amount) external exists(faucet) nonReentrant {
         FaucetInfo storage faucetInfo = faucets[faucet];
         require(faucetInfo.isEnabled, "Faucets: FAUCET_DISABLED");
         require(faucetInfo.tokenIdExists[tokenId], "Faucets: TOKEN_DOES_NOT_EXIST");
@@ -249,11 +240,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
      * Requirements:
      * - The `tokenIds` must exist in the faucet.
      */
-    function _withdraw(
-        address faucet,
-        address receiver,
-        uint256[] memory tokenIds
-    ) internal {
+    function _withdraw(address faucet, address receiver, uint256[] memory tokenIds) internal {
         FaucetInfo storage faucetInfo = faucets[faucet];
         uint256[] memory balances = new uint256[](tokenIds.length);
 
@@ -279,11 +266,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
      * - The lengths of `tokenIds` and `amounts` arrays should be the same.
      * - Each tokenId must exist in the faucet.
      */
-    function claimBatch(
-        address faucet,
-        uint256[] memory tokenIds,
-        uint256[] memory amounts
-    ) external nonReentrant {
+    function claimBatch(address faucet, uint256[] memory tokenIds, uint256[] memory amounts) external nonReentrant {
         require(tokenIds.length == amounts.length, "Faucets: ARRAY_LENGTH_MISMATCH");
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
