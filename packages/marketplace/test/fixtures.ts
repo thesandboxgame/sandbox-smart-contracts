@@ -1,8 +1,7 @@
 import {ethers, upgrades} from 'hardhat';
+import {ZeroAddress} from 'ethers';
 
 export async function deployFixtures() {
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
   const [deployer, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
@@ -20,13 +19,16 @@ export async function deployFixtures() {
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidatorTest'
   );
-  const OrderValidator = await upgrades.deployProxy(
+  const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
     [false, false, true, false],
     {
       initializer: '__OrderValidator_init_unchained',
     }
   );
+
+  const OrderValidatorAsUser = await OrderValidatorAsDeployer.connect(user);
+
   const ExchangeFactory = await ethers.getContractFactory('Exchange');
   const ExchangeContractAsDeployer = await upgrades.deployProxy(
     ExchangeFactory,
@@ -36,7 +38,7 @@ export async function deployFixtures() {
       250,
       defaultFeeReceiver.address,
       await RoyaltyRegistry.getAddress(),
-      await OrderValidator.getAddress(),
+      await OrderValidatorAsDeployer.getAddress(),
       true,
       true,
     ],
@@ -55,6 +57,10 @@ export async function deployFixtures() {
   const ERC721Contract = await ERC721ContractFactory.deploy();
   await ERC721Contract.waitForDeployment();
 
+  // TODO: Do we always want this?
+  await ExchangeContractAsDeployer.setAssetMatcherContract(
+    await assetMatcherAsDeployer.getAddress()
+  );
   return {
     assetMatcherAsDeployer,
     assetMatcherAsUser,
@@ -63,10 +69,12 @@ export async function deployFixtures() {
     TrustedForwarder,
     ERC20Contract,
     ERC721Contract,
+    OrderValidatorAsDeployer,
+    OrderValidatorAsUser,
     deployer,
     user,
     user1,
     user2,
-    ZERO_ADDRESS,
+    ZERO_ADDRESS: ZeroAddress,
   };
 }
