@@ -63,8 +63,7 @@ export const AssetERC20 = async (
 
 export const AssetERC721 = async (
   tokenContract: Contract,
-  tokenId: number,
-  value: number
+  tokenId: number
 ): Promise<Asset> => ({
   assetType: {
     assetClass: ERC721_ASSET_CLASS,
@@ -73,7 +72,7 @@ export const AssetERC721 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
-  value: value,
+  value: 1,
 });
 
 export const AssetERC1155 = async (
@@ -103,12 +102,12 @@ export const AssetBundle = async (
       value: x.value,
     });
   }
-  const erc721Details: {token: string; id: number; value: number}[] = [];
+  const erc721Details: {token: string; id: number}[] = [];
   for (const x of erc721) {
     erc20Details.push({
       token: await x.tokenContract.getAddress(),
       id: x.tokenId,
-      value: x.value,
+      value: 1,
     });
   }
   const erc1155Details: {token: string; id: number; value: number}[] = [];

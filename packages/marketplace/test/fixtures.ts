@@ -57,6 +57,10 @@ export async function deployFixtures() {
   const ERC721Contract = await ERC721ContractFactory.deploy();
   await ERC721Contract.waitForDeployment();
 
+  const ERC1155ContractFactory = await ethers.getContractFactory('TestERC1155');
+  const ERC1155Contract = await ERC1155ContractFactory.deploy();
+  await ERC1155Contract.waitForDeployment();
+
   // TODO: Do we always want this?
   await ExchangeContractAsDeployer.setAssetMatcherContract(
     await assetMatcherAsDeployer.getAddress()
@@ -69,6 +73,7 @@ export async function deployFixtures() {
     TrustedForwarder,
     ERC20Contract,
     ERC721Contract,
+    ERC1155Contract,
     OrderValidatorAsDeployer,
     OrderValidatorAsUser,
     deployer,

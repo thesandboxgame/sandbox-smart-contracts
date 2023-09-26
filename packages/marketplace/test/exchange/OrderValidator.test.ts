@@ -71,7 +71,7 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    const makerAsset = await AssetERC721(ERC721Contract, 1, 1);
+    const makerAsset = await AssetERC721(ERC721Contract, 1);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderBack(
       user2,
@@ -106,7 +106,7 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    const makerAsset = await AssetERC721(ERC721Contract, 1, 1);
+    const makerAsset = await AssetERC721(ERC721Contract, 1);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderBack(
       user2,

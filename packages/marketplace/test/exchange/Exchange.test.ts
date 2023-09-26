@@ -1,7 +1,12 @@
 import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, AssetERC721, AssetETH} from '../utils/assets.ts';
+import {
+  AssetERC20,
+  AssetERC721,
+  AssetERC1155,
+  AssetETH,
+} from '../utils/assets.ts';
 
 import {
   hashKey,
@@ -206,5 +211,297 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.getHashKey(leftOrder)
       )
     ).to.be.equal(UINT256_MAX_VALUE);
+  });
+
+  it('should execute matchOrders', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC721Contract,
+      user1,
+      user2,
+    } = await loadFixture(deployFixtures);
+    await ERC721Contract.mint(user1.address, 1);
+    await ERC721Contract.connect(user1).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(user2.address, 100);
+    await ERC20Contract.connect(user2).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100
+    );
+
+    expect(await ERC721Contract.ownerOf(1)).to.be.equal(user1.address);
+    expect(await ERC20Contract.balanceOf(user2.address)).to.be.equal(100);
+    const makerAsset = await AssetERC721(ERC721Contract, 1);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const leftOrder = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      user2,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      user1,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      user2,
+      OrderValidatorAsDeployer
+    );
+
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      0
+    );
+
+    await ExchangeContractAsUser.matchOrders(
+      leftOrder,
+      makerSig,
+      rightOrder,
+      takerSig
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      100
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      1
+    );
+    expect(await ERC721Contract.ownerOf(1)).to.be.equal(user2.address);
+    // 98 = 100 - originFee
+    expect(await ERC20Contract.balanceOf(user1.address)).to.be.equal(98);
+  });
+
+  it('should revert matchOrders on mismatched asset types', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC721Contract,
+      ERC1155Contract,
+      user1,
+      user2,
+    } = await loadFixture(deployFixtures);
+    await ERC721Contract.mint(user1.address, 1);
+    await ERC721Contract.connect(user1).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(user2.address, 100);
+    await ERC20Contract.connect(user2).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100
+    );
+
+    expect(await ERC721Contract.ownerOf(1)).to.be.equal(user1.address);
+    expect(await ERC20Contract.balanceOf(user2.address)).to.be.equal(100);
+
+    const makerAssetForLeftOrder = await AssetERC721(ERC721Contract, 1);
+    const takerAssetForLeftOrder = await AssetERC20(ERC20Contract, 100);
+    const takerAssetForRightOrder = await AssetERC20(ERC20Contract, 50);
+    const makerAssetForRightOrder = await AssetERC1155(ERC1155Contract, 1, 5);
+    const leftOrder = await OrderDefault(
+      user1,
+      makerAssetForLeftOrder,
+      ZeroAddress,
+      takerAssetForLeftOrder,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      user2,
+      takerAssetForRightOrder,
+      ZeroAddress,
+      makerAssetForRightOrder,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      user1,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      user2,
+      OrderValidatorAsDeployer
+    );
+
+    await expect(
+      ExchangeContractAsUser.matchOrders(
+        leftOrder,
+        makerSig,
+        rightOrder,
+        takerSig
+      )
+    ).to.be.revertedWith("assets don't match");
+  });
+
+  it('should partially fill orders using matchOrders', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC1155Contract,
+      user1,
+      user2,
+    } = await loadFixture(deployFixtures);
+
+    await ERC1155Contract.mint(user1.address, 1, 10);
+    await ERC1155Contract.connect(user1).setApprovalForAll(
+      await ExchangeContractAsUser.getAddress(),
+      true
+    );
+
+    await ERC20Contract.mint(user2.address, 100);
+    await ERC20Contract.connect(user2).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100
+    );
+
+    expect(await ERC1155Contract.balanceOf(user1.address, 1)).to.be.equal(10);
+    expect(await ERC20Contract.balanceOf(user2.address)).to.be.equal(100);
+
+    const makerAssetForLeftOrder = await AssetERC1155(ERC1155Contract, 1, 10);
+    const takerAssetForLeftOrder = await AssetERC20(ERC20Contract, 100);
+    const takerAssetForRightOrder = await AssetERC20(ERC20Contract, 50);
+    const makerAssetForRightOrder = await AssetERC1155(ERC1155Contract, 1, 5);
+    const leftOrder = await OrderDefault(
+      user1,
+      makerAssetForLeftOrder,
+      ZeroAddress,
+      takerAssetForLeftOrder,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      user2,
+      takerAssetForRightOrder,
+      ZeroAddress,
+      makerAssetForRightOrder,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      user1,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      user2,
+      OrderValidatorAsDeployer
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      0
+    );
+    await ExchangeContractAsUser.matchOrders(
+      leftOrder,
+      makerSig,
+      rightOrder,
+      takerSig
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      50
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      5
+    );
+    expect(await ERC1155Contract.balanceOf(user1.address, 1)).to.be.equal(5);
+    expect(await ERC1155Contract.balanceOf(user2.address, 1)).to.be.equal(5);
+    expect(await ERC20Contract.balanceOf(user2.address)).to.be.equal(50);
+    // 49 = 50 -originFee
+    expect(await ERC20Contract.balanceOf(user1.address)).to.be.equal(49);
+  });
+
+  it('should revert for matching a cancelled order', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC721Contract,
+      user1,
+      user2,
+    } = await loadFixture(deployFixtures);
+    await ERC721Contract.mint(user1.address, 1);
+    await ERC721Contract.connect(user1).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(user2.address, 100);
+    await ERC20Contract.connect(user2).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100
+    );
+
+    expect(await ERC721Contract.ownerOf(1)).to.be.equal(user1.address);
+    expect(await ERC20Contract.balanceOf(user2.address)).to.be.equal(100);
+    const makerAsset = await AssetERC721(ERC721Contract, 1);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const leftOrder = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      user2,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      user1,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      user2,
+      OrderValidatorAsDeployer
+    );
+    await ExchangeContractAsUser.connect(user1).cancel(
+      leftOrder,
+      hashKey(leftOrder)
+    );
+    await expect(
+      ExchangeContractAsUser.matchOrders(
+        leftOrder,
+        makerSig,
+        rightOrder,
+        takerSig
+      )
+    ).to.be.reverted;
   });
 });
