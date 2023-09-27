@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.21;
 
-
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -47,11 +46,11 @@ contract ExchangeMeta is OwnableUpgradeable, ExchangeCore, TransferManager, ERC2
     }
 
     function _msgSender()
-    internal
-    view
-    virtual
-    override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-    returns (address)
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address)
     {
         return ERC2771HandlerUpgradeable._msgSender();
     }
