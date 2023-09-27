@@ -13,27 +13,9 @@ library LibOrder {
             "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end,bytes4 dataType,bytes data)Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)"
         );
 
-    bytes32 internal constant ORDER_BACK_TYPEHASH =
-        keccak256(
-            "OrderBack(address buyer,address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end,bytes4 dataType,bytes data)Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)"
-        );
-
     bytes4 internal constant DEFAULT_ORDER_TYPE = 0xffffffff;
 
     struct Order {
-        address maker;
-        LibAsset.Asset makeAsset;
-        address taker;
-        LibAsset.Asset takeAsset;
-        uint256 salt;
-        uint256 start;
-        uint256 end;
-        bytes4 dataType;
-        bytes data;
-    }
-
-    struct OrderBack {
-        address buyer;
         address maker;
         LibAsset.Asset makeAsset;
         address taker;
@@ -102,28 +84,6 @@ library LibOrder {
             keccak256(
                 abi.encode(
                     ORDER_TYPEHASH,
-                    order.maker,
-                    LibAsset.hash(order.makeAsset),
-                    order.taker,
-                    LibAsset.hash(order.takeAsset),
-                    order.salt,
-                    order.start,
-                    order.end,
-                    order.dataType,
-                    keccak256(order.data)
-                )
-            );
-    }
-
-    /// @notice calculate hash from backend order
-    /// @param order object to be hashed
-    /// @return hash key of order
-    function backendHash(OrderBack memory order) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    ORDER_BACK_TYPEHASH,
-                    order.buyer,
                     order.maker,
                     LibAsset.hash(order.makeAsset),
                     order.taker,

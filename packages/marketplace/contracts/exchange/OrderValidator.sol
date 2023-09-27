@@ -16,13 +16,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     using ECDSAUpgradeable for bytes32;
     using AddressUpgradeable for address;
 
-    address private _signingWallet;
-
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
-
-    /// @notice event for when a new _signingWallet is set
-    /// @param newSigningWallet The new address of the signing wallet
-    event SigningWallet(address indexed newSigningWallet);
 
     /// @notice initializer for OrderValidator
     /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
@@ -37,33 +31,6 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     ) public initializer {
         __EIP712_init_unchained("Exchange", "1");
         __Whitelist_init(newTsbOnly, newPartners, newOpen, newErc20);
-    }
-
-    /// @notice Update the signing wallet address
-    /// @param newSigningWallet The new address of the signing wallet
-    function setSigningWallet(address newSigningWallet) external onlyOwner {
-        require(newSigningWallet != address(0), "WALLET_ZERO_ADDRESS");
-        require(newSigningWallet != _signingWallet, "WALLET_ALREADY_SET");
-        _signingWallet = newSigningWallet;
-
-        emit SigningWallet(newSigningWallet);
-    }
-
-    /// @notice Get the wallet authorized for signing purchase-messages.
-    /// @return _signingWallet the address of the signing wallet
-    function getSigningWallet() external view returns (address) {
-        return _signingWallet;
-    }
-
-    /// @notice verifies if backend signature is valid
-    /// @param orderBack order to be validated
-    /// @param signature signature of order
-    /// @return boolean comparison between the recover signature and signing wallet
-    function isPurchaseValid(LibOrder.OrderBack memory orderBack, bytes memory signature) external view returns (bool) {
-        bytes32 hash = LibOrder.backendHash(orderBack);
-        address recoveredSigner = _hashTypedDataV4(hash).recover(signature);
-
-        return recoveredSigner == _signingWallet;
     }
 
     /// @notice verifies order

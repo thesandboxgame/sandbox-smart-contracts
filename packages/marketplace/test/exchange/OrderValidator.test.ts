@@ -1,11 +1,11 @@
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {AssetERC20, AssetERC721, AssetETH} from '../utils/assets.ts';
+import {AssetERC20, AssetETH} from '../utils/assets.ts';
 
-import {OrderDefault, OrderBack, DEFAULT_ORDER_TYPE} from '../utils/order.ts';
+import {OrderDefault} from '../utils/order.ts';
 import {ZeroAddress} from 'ethers';
-import {signOrder, signOrderBack} from '../utils/signature';
+import {signOrder} from '../utils/signature';
 
 // keccak256("TSB_ROLE")
 const TSBRole =
@@ -18,119 +18,6 @@ const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
 describe('OrderValidator.sol', function () {
-  it('should not set signing wallet if caller is not owner', async function () {
-    const {OrderValidatorAsUser, user1} = await loadFixture(deployFixtures);
-    await expect(
-      OrderValidatorAsUser.setSigningWallet(user1.address)
-    ).to.revertedWith('Ownable: caller is not the owner');
-  });
-
-  it('should not be able to set signing wallet as zero address', async function () {
-    const {OrderValidatorAsDeployer} = await loadFixture(deployFixtures);
-    await expect(
-      OrderValidatorAsDeployer.setSigningWallet(ZeroAddress)
-    ).to.revertedWith('WALLET_ZERO_ADDRESS');
-  });
-
-  it('should be able to set signing wallet', async function () {
-    const {OrderValidatorAsDeployer, deployer} = await loadFixture(
-      deployFixtures
-    );
-    await expect(OrderValidatorAsDeployer.setSigningWallet(deployer.address))
-      .to.emit(OrderValidatorAsDeployer, 'SigningWallet')
-      .withArgs(deployer.address);
-  });
-
-  it('should not be able to set same signing wallet again', async function () {
-    const {OrderValidatorAsDeployer, deployer} = await loadFixture(
-      deployFixtures
-    );
-    await OrderValidatorAsDeployer.setSigningWallet(deployer.address);
-    await expect(
-      OrderValidatorAsDeployer.setSigningWallet(deployer.address)
-    ).to.revertedWith('WALLET_ALREADY_SET');
-  });
-
-  it('should return signing wallet address', async function () {
-    const {OrderValidatorAsDeployer, deployer} = await loadFixture(
-      deployFixtures
-    );
-    await OrderValidatorAsDeployer.setSigningWallet(deployer.address);
-    expect(await OrderValidatorAsDeployer.getSigningWallet()).to.be.equal(
-      deployer.address
-    );
-  });
-
-  it('should not validate a purchase when signature is invalid', async function () {
-    const {
-      OrderValidatorAsDeployer,
-      ERC20Contract,
-      ERC721Contract,
-      deployer,
-      user2,
-      user1,
-    } = await loadFixture(deployFixtures);
-
-    const makerAsset = await AssetERC721(ERC721Contract, 1);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
-    const order = await OrderBack(
-      user2,
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0,
-      DEFAULT_ORDER_TYPE,
-      '0x'
-    );
-    const signature = await signOrderBack(
-      order,
-      user1,
-      OrderValidatorAsDeployer
-    );
-    await OrderValidatorAsDeployer.setSigningWallet(deployer.address);
-    expect(
-      await OrderValidatorAsDeployer.isPurchaseValid(order, signature)
-    ).to.be.equal(false);
-  });
-
-  it('should validate a purchase when the order and signature are valid', async function () {
-    const {
-      OrderValidatorAsDeployer,
-      ERC20Contract,
-      ERC721Contract,
-      deployer,
-      user2,
-      user1,
-    } = await loadFixture(deployFixtures);
-
-    const makerAsset = await AssetERC721(ERC721Contract, 1);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
-    const order = await OrderBack(
-      user2,
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0,
-      DEFAULT_ORDER_TYPE,
-      '0x'
-    );
-    const signature = await signOrderBack(
-      order,
-      deployer,
-      OrderValidatorAsDeployer
-    );
-    await OrderValidatorAsDeployer.setSigningWallet(deployer.address);
-    expect(
-      await OrderValidatorAsDeployer.isPurchaseValid(order, signature)
-    ).to.be.equal(true);
-  });
-
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
     const {OrderValidatorAsUser, ERC20Contract, user1} = await loadFixture(
       deployFixtures

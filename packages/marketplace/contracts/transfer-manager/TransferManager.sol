@@ -158,7 +158,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             origin[0].value = uint96(protocolFeeSecondary);
         }
 
-        (rest,) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
+        (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
