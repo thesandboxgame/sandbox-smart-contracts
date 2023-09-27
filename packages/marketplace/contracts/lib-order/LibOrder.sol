@@ -82,6 +82,7 @@ library LibOrder {
     function hash(Order memory order) internal pure returns (bytes32) {
         return
             keccak256(
+                // solhint-disable-next-line func-named-parameters
                 abi.encode(
                     ORDER_TYPEHASH,
                     order.maker,
@@ -100,7 +101,9 @@ library LibOrder {
     /// @notice validates order time
     /// @param order whose time we want to validate
     function validateOrderTime(LibOrder.Order memory order) internal view {
+        // solhint-disable-next-line not-rely-on-time
         require(order.start == 0 || order.start < block.timestamp, "Order start validation failed");
+        // solhint-disable-next-line not-rely-on-time
         require(order.end == 0 || order.end > block.timestamp, "Order end validation failed");
     }
 }
