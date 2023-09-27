@@ -2,10 +2,12 @@
 
 pragma solidity 0.8.21;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
 import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
-import {TransferExecutor, Initializable, OwnableUpgradeable, LibTransfer} from "../transfer-manager/TransferExecutor.sol";
+import {TransferExecutor, LibTransfer} from "../transfer-manager/TransferExecutor.sol";
 import {LibDeal, LibFeeSide, LibPart, LibAsset} from "../transfer-manager/lib/LibDeal.sol";
 import {LibOrderDataGeneric, LibOrder, LibOrderData} from "./libraries/LibOrderDataGeneric.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
@@ -13,7 +15,7 @@ import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace
-abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExecutor, ITransferManager {
+abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExecutor, ITransferManager {
     using LibTransfer for address payable;
 
     /// @notice AssetMatcher contract
@@ -60,8 +62,8 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
         uint256 valueLeft,
         uint256 valueRight
     );
-    event AssetMatcherSetted(address indexed contractAddress);
-    event OrderValidatorSetted(address indexed contractAddress);
+    event AssetMatcherSet(IAssetMatcher indexed contractAddress);
+    event OrderValidatorSet(IOrderValidator indexed contractAddress);
     event NativeUpdated(bool nativeOrder, bool metaNative);
 
     /// @notice initializer for ExchangeCore
@@ -71,48 +73,36 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
     function __ExchangeCoreInitialize(
         bool newNativeOrder,
         bool newMetaNative,
-        address newOrderValidatorAdress
+        IOrderValidator newOrderValidatorAddress
     ) internal {
-        nativeMeta = newMetaNative;
-        nativeOrder = newNativeOrder;
-        IOrderValidator _orderValidator = IOrderValidator(newOrderValidatorAdress);
-        orderValidator = _orderValidator;
+        _updateNative(newMetaNative, newNativeOrder);
+        _setOrderValidatorContract(newOrderValidatorAddress);
+        // TODO: call _setAssetMatcherContract
     }
 
     /// @notice set AssetMatcher address
     /// @param contractAddress new AssetMatcher contract address
-    function setAssetMatcherContract(address contractAddress) external onlyOwner {
-        IAssetMatcher _assetMatcher = IAssetMatcher(contractAddress);
-        assetMatcher = _assetMatcher;
-
-        emit AssetMatcherSetted(contractAddress);
+    function _setAssetMatcherContract(IAssetMatcher contractAddress) internal {
+        require(address(contractAddress) != address(0), "invalid asset matcher");
+        assetMatcher = contractAddress;
+        emit AssetMatcherSet(contractAddress);
     }
 
     /// @notice set OrderValidator address
     /// @param contractAddress new OrderValidator contract address
-    function setOrderValidatorContract(address contractAddress) external onlyOwner {
-        IOrderValidator _orderValidator = IOrderValidator(contractAddress);
-        orderValidator = _orderValidator;
-
-        emit OrderValidatorSetted(contractAddress);
-    }
-
-    /// @notice get order hashKey
-    /// @param order to generate the hashkey
-    /// @dev this function is a helper for the backend
-    /// @return hash of order
-    function getHashKey(LibOrder.Order memory order) external pure returns (bytes32) {
-        return LibOrder.hashKey(order);
+    function _setOrderValidatorContract(IOrderValidator contractAddress) internal {
+        require(address(contractAddress) != address(0), "invalid order validator");
+        orderValidator = contractAddress;
+        emit OrderValidatorSet(contractAddress);
     }
 
     /// @notice update permissions for native orders
     /// @param newNativeOrder for orders with native token
     /// @param newMetaNative for meta orders with native token
     /// @dev setter for permissions for native token exchange
-    function updateNative(bool newNativeOrder, bool newMetaNative) external onlyOwner {
+    function _updateNative(bool newNativeOrder, bool newMetaNative) internal {
         nativeMeta = newMetaNative;
         nativeOrder = newNativeOrder;
-
         emit NativeUpdated(newNativeOrder, newMetaNative);
     }
 
@@ -137,11 +127,11 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
         LibDirectTransfer.Purchase[] calldata direct,
         bytes[] calldata signature
     ) external payable {
-        for (uint256 i; i < direct.length; ) {
+        for (uint256 i; i < direct.length;) {
             _directPurchase(buyer, direct[i], signature[i]);
-            unchecked {
-                i++;
-            }
+        unchecked {
+            i++;
+        }
         }
     }
 
@@ -274,24 +264,24 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
         (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = matchAssets(orderLeft, orderRight);
 
         (
-            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-            LibFill.FillResult memory newFill
+        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
+        LibOrderDataGeneric.GenericOrderData memory rightOrderData,
+        LibFill.FillResult memory newFill
         ) = parseOrdersSetFillEmitMatch(orderLeft, orderRight);
 
         (uint256 totalMakeValue, uint256 totalTakeValue) = doTransfers(
             LibDeal.DealSide({
-                asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
-                payouts: leftOrderData.payouts,
-                originFees: leftOrderData.originFees,
-                from: orderLeft.maker
-            }),
+        asset : LibAsset.Asset({assetType : makeMatch, value : newFill.leftValue}),
+        payouts : leftOrderData.payouts,
+        originFees : leftOrderData.originFees,
+        from : orderLeft.maker
+        }),
             LibDeal.DealSide({
-                asset: LibAsset.Asset(takeMatch, newFill.rightValue),
-                payouts: rightOrderData.payouts,
-                originFees: rightOrderData.originFees,
-                from: orderRight.maker
-            }),
+        asset : LibAsset.Asset(takeMatch, newFill.rightValue),
+        payouts : rightOrderData.payouts,
+        originFees : rightOrderData.originFees,
+        from : orderRight.maker
+        }),
             getDealData(
                 makeMatch.assetClass,
                 takeMatch.assetClass,
@@ -333,12 +323,12 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     )
-        internal
-        returns (
-            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-            LibFill.FillResult memory newFill
-        )
+    internal
+    returns (
+        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
+        LibOrderDataGeneric.GenericOrderData memory rightOrderData,
+        LibFill.FillResult memory newFill
+    )
     {
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
@@ -468,14 +458,7 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
     ) internal returns (LibFill.FillResult memory newFill) {
         uint256 leftOrderFill = getOrderFill(orderLeft.salt, leftOrderKeyHash);
         uint256 rightOrderFill = getOrderFill(orderRight.salt, rightOrderKeyHash);
-        newFill = LibFill.fillOrder(
-            orderLeft,
-            orderRight,
-            leftOrderFill,
-            rightOrderFill,
-            leftMakeFill,
-            rightMakeFill
-        );
+        newFill = LibFill.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill, leftMakeFill, rightMakeFill);
 
         require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
 

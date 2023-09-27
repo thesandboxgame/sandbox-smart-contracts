@@ -2,24 +2,21 @@
 
 pragma solidity 0.8.21;
 
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {LibTransfer} from "./lib/LibTransfer.sol";
+import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
 import {IERC1155LazyMint} from "../lazy-mint/erc-1155/IERC1155LazyMint.sol";
 import {LibERC721LazyMint} from "../lazy-mint/erc-721/LibERC721LazyMint.sol";
 import {IERC721LazyMint} from "../lazy-mint/erc-721/IERC721LazyMint.sol";
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
-
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
-import {LibTransfer} from "./lib/LibTransfer.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
 
 /// @title abstract contract for TransferExecutor
 /// @notice contains transfer functions for any assets as well as ERC20 tokens
-abstract contract TransferExecutor is Initializable, OwnableUpgradeable, ITransferExecutor {
+abstract contract TransferExecutor is Initializable, ITransferExecutor {
     using LibTransfer for address payable;
 
     /// @notice limit of assets for each type of bundles

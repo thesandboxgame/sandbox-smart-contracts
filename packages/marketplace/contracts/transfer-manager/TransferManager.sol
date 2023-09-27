@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.21;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {LibERC721LazyMint} from "../lazy-mint/erc-721/LibERC721LazyMint.sol";
 import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
@@ -18,7 +17,7 @@ import {LibFeeSide} from "./lib/LibFeeSide.sol";
 /// @notice responsible for transferring all Assets
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
-abstract contract TransferManager is OwnableUpgradeable, ITransferManager, ERC165Upgradeable {
+abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     using BpLibrary for uint;
 
     bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
@@ -35,16 +34,18 @@ abstract contract TransferManager is OwnableUpgradeable, ITransferManager, ERC16
     /// @return address of royaltiesRegistry
     IRoyaltiesProvider public royaltiesRegistry;
 
-    address private defaultFeeReceiver;
+    /// @notice Default receiver of protocol fees
+    /// @return address of defaultFeeReceiver
+    address public defaultFeeReceiver;
 
     /// @notice event for when protocol fees are set
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
-    event ProtocolFeeSetted(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary);
+    event ProtocolFeeSet(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary);
 
     /// @notice event for when a royalties registry is set
     /// @param newRoyaltiesRegistry address of new royalties registry
-    event RoyaltiesRegistrySetted(IRoyaltiesProvider newRoyaltiesRegistry);
+    event RoyaltiesRegistrySet(IRoyaltiesProvider newRoyaltiesRegistry);
 
     /// @notice initializer for TransferExecutor
     /// @param newProtocolFeePrimary fee for primary market
@@ -57,30 +58,30 @@ abstract contract TransferManager is OwnableUpgradeable, ITransferManager, ERC16
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider
     ) internal {
-        protocolFeePrimary = newProtocolFeePrimary;
-        protocolFeeSecondary = newProtocolFeeSecondary;
+        _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
+        _setRoyaltiesRegistry(newRoyaltiesProvider);
         defaultFeeReceiver = newDefaultFeeReceiver;
-        royaltiesRegistry = newRoyaltiesProvider;
     }
 
     /// @notice setter for royalty registry
     /// @param newRoyaltiesRegistry address of new royalties registry
-    function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyOwner {
+    function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
+        require(address(newRoyaltiesRegistry) != address(0), "invalid Royalties Registry");
         royaltiesRegistry = newRoyaltiesRegistry;
 
-        emit RoyaltiesRegistrySetted(newRoyaltiesRegistry);
+        emit RoyaltiesRegistrySet(newRoyaltiesRegistry);
     }
 
     /// @notice setter for protocol fees
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
-    function setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) external onlyOwner {
+    function _setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) internal {
         require(newProtocolFeePrimary < 5000, "invalid primary fee");
         require(newProtocolFeeSecondary < 5000, "invalid secodary fee");
         protocolFeePrimary = newProtocolFeePrimary;
         protocolFeeSecondary = newProtocolFeeSecondary;
 
-        emit ProtocolFeeSetted(newProtocolFeePrimary, newProtocolFeeSecondary);
+        emit ProtocolFeeSet(newProtocolFeePrimary, newProtocolFeeSecondary);
     }
 
     /// @notice executes transfers for 2 matched orders
@@ -157,7 +158,7 @@ abstract contract TransferManager is OwnableUpgradeable, ITransferManager, ERC16
             origin[0].value = uint96(protocolFeeSecondary);
         }
 
-        (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
+        (rest,) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
