@@ -52,6 +52,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param newProtocolFeeSecondary fee for secondary market
     /// @param newDefaultFeeReceiver address for account receiving fees
     /// @param newRoyaltiesProvider address of royalties registry
+    // solhint-disable-next-line func-name-mixedcase
     function __TransferManager_init_unchained(
         uint256 newProtocolFeePrimary,
         uint256 newProtocolFeeSecondary,
