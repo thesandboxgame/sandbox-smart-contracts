@@ -3,7 +3,7 @@ import {ZeroAddress} from 'ethers';
 
 // TODO: Split fixtures so we use only what is needed!!!
 async function deploy() {
-  const [deployer, user, defaultFeeReceiver, user1, user2] =
+  const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
   const AssetMatcher = await ethers.getContractFactory('AssetMatcher');
@@ -34,6 +34,7 @@ async function deploy() {
   const ExchangeContractAsDeployer = await upgrades.deployProxy(
     ExchangeFactory,
     [
+      admin.address,
       await TrustedForwarder.getAddress(),
       0,
       250,
@@ -49,7 +50,9 @@ async function deploy() {
   );
 
   const ExchangeContractAsUser = await ExchangeContractAsDeployer.connect(user);
-
+  const ExchangeContractAsAdmin = await ExchangeContractAsDeployer.connect(
+    admin
+  );
   const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
   const ERC20Contract = await ERC20ContractFactory.deploy();
   await ERC20Contract.waitForDeployment();
@@ -66,13 +69,14 @@ async function deploy() {
   await ERC1155Contract.waitForDeployment();
 
   // TODO: Do we always want this?
-  await ExchangeContractAsDeployer.setAssetMatcherContract(
+  await ExchangeContractAsAdmin.setAssetMatcherContract(
     await assetMatcherAsDeployer.getAddress()
   );
   return {
     assetMatcherAsDeployer,
     assetMatcherAsUser,
     ExchangeContractAsDeployer,
+    ExchangeContractAsAdmin,
     ExchangeContractAsUser,
     TrustedForwarder,
     ERC20Contract,
@@ -82,6 +86,7 @@ async function deploy() {
     OrderValidatorAsDeployer,
     OrderValidatorAsUser,
     deployer,
+    admin,
     user,
     user1,
     user2,
