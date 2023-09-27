@@ -9,6 +9,8 @@ import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-met
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
+import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
+import {LibOrder} from "../lib-order/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @title Exchange contract with meta transactions
@@ -47,6 +49,71 @@ contract Exchange is Initializable, OwnableUpgradeable, ExchangeCore, TransferMa
         __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAddress);
     }
 
+    /// @notice Match orders and transact
+    /// @param orderLeft left order
+    /// @param signatureLeft signature for the left order
+    /// @param orderRight right signature
+    /// @param signatureRight signature for the right order
+    /// @dev validate orders through validateOrders before matchAndTransfer
+    function matchOrders(
+        LibOrder.Order memory orderLeft,
+        bytes memory signatureLeft,
+        LibOrder.Order memory orderRight,
+        bytes memory signatureRight
+    ) external payable {
+        _validateOrders(_msgSender(), orderLeft, signatureLeft, orderRight, signatureRight);
+        _matchAndTransfer(_msgSender(), orderLeft, orderRight);
+    }
+
+    /// @notice Match orders and transact
+    /// @param orderLeft left order
+    /// @param signatureLeft signature for the left order
+    /// @param orderRight right signature
+    /// @param signatureRight signature for the right order
+    /// @dev validate orders through validateOrders before matchAndTransfer
+    function matchOrdersFrom(
+        address from,
+        LibOrder.Order memory orderLeft,
+        bytes memory signatureLeft,
+        LibOrder.Order memory orderRight,
+        bytes memory signatureRight
+    ) external payable onlyOwner {
+        // TODO: replace onlyOwner by onlySand
+        _validateOrders(from, orderLeft, signatureLeft, orderRight, signatureRight);
+        _matchAndTransfer(from, orderLeft, orderRight);
+    }
+
+    /// @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
+    /// @param direct struct with parameters for accept bid operation
+    function directAcceptBid(LibDirectTransfer.AcceptBid calldata direct) external payable {
+        _directAcceptBid(_msgSender(), direct);
+    }
+
+    /// @notice direct purchase orders - can handle bulk purchases
+    /// @param direct array of purchase order
+    /// @param signature array of signed message specifying order details with the buyer
+    /// @dev The buyer param was added so the function is compatible with Sand approveAndCall
+    function directPurchase(
+        address buyer,
+        LibDirectTransfer.Purchase[] calldata direct,
+        bytes[] calldata signature
+    ) external payable {
+        for (uint256 i; i < direct.length; ) {
+            _directPurchase(_msgSender(), buyer, direct[i], signature[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// @notice cancel order
+    /// @param order to be canceled
+    /// @dev require msg sender to be order maker and salt different from 0
+    function cancel(LibOrder.Order memory order, bytes32 orderHash) external {
+        require(_msgSender() == order.maker, "ExchangeCore: not maker");
+        _cancel(order, orderHash);
+    }
+
     /// @notice setter for royalty registry
     /// @param newRoyaltiesRegistry address of new royalties registry
     function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyOwner {
@@ -81,11 +148,11 @@ contract Exchange is Initializable, OwnableUpgradeable, ExchangeCore, TransferMa
     }
 
     function _msgSender()
-    internal
-    view
-    virtual
-    override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-    returns (address)
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address)
     {
         return ERC2771HandlerUpgradeable._msgSender();
     }
