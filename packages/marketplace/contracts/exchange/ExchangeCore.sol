@@ -3,7 +3,6 @@
 pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
 import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
@@ -15,7 +14,7 @@ import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace
-abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExecutor, ITransferManager {
+abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferManager {
     using LibTransfer for address payable;
 
     /// @notice AssetMatcher contract
@@ -109,8 +108,7 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
     /// @notice cancel order
     /// @param order to be canceled
     /// @dev require msg sender to be order maker and salt different from 0
-    function cancel(LibOrder.Order memory order, bytes32 orderHash) external {
-        require(_msgSender() == order.maker, "ExchangeCore: not maker");
+    function _cancel(LibOrder.Order memory order, bytes32 orderHash) internal {
         require(order.salt != 0, "ExchangeCore: 0 salt can't be used");
         bytes32 orderKeyHash = LibOrder.hashKey(order);
         require(orderHash == orderKeyHash, "ExchangeCore: Invalid orderHash");
@@ -118,26 +116,11 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
         emit Cancel(orderKeyHash);
     }
 
-    /// @notice direct purchase orders - can handle bulk purchases
-    /// @param direct array of purchase order
-    /// @param signature array of signed message specifying order details with the buyer
-    /// @dev The buyer param was added so the function is compatible with Sand approveAndCall
-    function directPurchase(
-        address buyer,
-        LibDirectTransfer.Purchase[] calldata direct,
-        bytes[] calldata signature
-    ) external payable {
-        for (uint256 i; i < direct.length;) {
-            _directPurchase(buyer, direct[i], signature[i]);
-        unchecked {
-            i++;
-        }
-        }
-    }
-
     /// @notice generate sellOrder and buyOrder from parameters and call validateAndMatch() for purchase transaction
+    /// @param from the message sender
     /// @param direct purchase order
     function _directPurchase(
+        address from,
         address buyer,
         LibDirectTransfer.Purchase calldata direct,
         bytes calldata signature
@@ -183,13 +166,14 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
             direct.buyOrderData
         );
         orderValidator.verifyERC20Whitelist(direct.paymentToken);
-        validateFull(sellOrder, direct.sellOrderSignature);
-        matchAndTransfer(sellOrder, buyOrder);
+        _validateFull(from, sellOrder, direct.sellOrderSignature);
+        _matchAndTransfer(from, sellOrder, buyOrder);
     }
 
     ///  @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
+    /// @param from the message sender
     ///  @param direct struct with parameters for accept bid operation
-    function directAcceptBid(LibDirectTransfer.AcceptBid calldata direct) external payable {
+    function _directAcceptBid(address from, LibDirectTransfer.AcceptBid calldata direct) internal {
         LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
 
         LibOrder.Order memory buyOrder = LibOrder.Order(
@@ -216,39 +200,25 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
             direct.sellOrderData
         );
 
-        validateFull(buyOrder, direct.bidSignature);
-        matchAndTransfer(sellOrder, buyOrder);
-    }
-
-    /// @notice Match orders and transact
-    /// @param orderLeft left order
-    /// @param signatureLeft signature for the left order
-    /// @param orderRight right signature
-    /// @param signatureRight signature for the right order
-    /// @dev validate orders through validateOrders before matchAndTransfer
-    function matchOrders(
-        LibOrder.Order memory orderLeft,
-        bytes memory signatureLeft,
-        LibOrder.Order memory orderRight,
-        bytes memory signatureRight
-    ) external payable {
-        validateOrders(orderLeft, signatureLeft, orderRight, signatureRight);
-        matchAndTransfer(orderLeft, orderRight);
+        _validateFull(from, buyOrder, direct.bidSignature);
+        _matchAndTransfer(from, sellOrder, buyOrder);
     }
 
     /// @dev function, validate orders
+    /// @param from the message sender
     /// @param orderLeft left order
     /// @param signatureLeft order left signature
     /// @param orderRight right order
     /// @param signatureRight order right signature
-    function validateOrders(
+    function _validateOrders(
+        address from,
         LibOrder.Order memory orderLeft,
         bytes memory signatureLeft,
         LibOrder.Order memory orderRight,
         bytes memory signatureRight
     ) internal view {
-        validateFull(orderLeft, signatureLeft);
-        validateFull(orderRight, signatureRight);
+        _validateFull(from, orderLeft, signatureLeft);
+        _validateFull(from, orderRight, signatureRight);
         if (orderLeft.taker != address(0)) {
             if (orderRight.maker != address(0)) require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
@@ -258,30 +228,35 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
     }
 
     /// @notice matches valid orders and transfers their assets
+    /// @param from the message sender
     /// @param orderLeft the left order of the match
     /// @param orderRight the right order of the match
-    function matchAndTransfer(LibOrder.Order memory orderLeft, LibOrder.Order memory orderRight) internal {
+    function _matchAndTransfer(
+        address from,
+        LibOrder.Order memory orderLeft,
+        LibOrder.Order memory orderRight
+    ) internal {
         (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = matchAssets(orderLeft, orderRight);
 
         (
-        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-        LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-        LibFill.FillResult memory newFill
-        ) = parseOrdersSetFillEmitMatch(orderLeft, orderRight);
+            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
+            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
+            LibFill.FillResult memory newFill
+        ) = _parseOrdersSetFillEmitMatch(from, orderLeft, orderRight);
 
         (uint256 totalMakeValue, uint256 totalTakeValue) = doTransfers(
             LibDeal.DealSide({
-        asset : LibAsset.Asset({assetType : makeMatch, value : newFill.leftValue}),
-        payouts : leftOrderData.payouts,
-        originFees : leftOrderData.originFees,
-        from : orderLeft.maker
-        }),
+                asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
+                payouts: leftOrderData.payouts,
+                originFees: leftOrderData.originFees,
+                from: orderLeft.maker
+            }),
             LibDeal.DealSide({
-        asset : LibAsset.Asset(takeMatch, newFill.rightValue),
-        payouts : rightOrderData.payouts,
-        originFees : rightOrderData.originFees,
-        from : orderRight.maker
-        }),
+                asset: LibAsset.Asset(takeMatch, newFill.rightValue),
+                payouts: rightOrderData.payouts,
+                originFees: rightOrderData.originFees,
+                from: orderRight.maker
+            }),
             getDealData(
                 makeMatch.assetClass,
                 takeMatch.assetClass,
@@ -295,7 +270,8 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
         uint256 takeBuyAmount = newFill.rightValue;
         uint256 makeBuyAmount = newFill.leftValue;
 
-        if (((_msgSender() != msg.sender) && !nativeMeta) || ((_msgSender() == msg.sender) && !nativeOrder)) {
+        // TODO: this force me to pass from, do we want it ?
+        if (((from != msg.sender) && !nativeMeta) || ((from == msg.sender) && !nativeOrder)) {
             require(makeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
             require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
         }
@@ -303,48 +279,53 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
             require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
             require(makeBuyAmount >= totalMakeValue, "not enough eth");
             if (makeBuyAmount > totalMakeValue) {
+                // TODO: from ?
                 payable(msg.sender).transferEth(makeBuyAmount - totalMakeValue);
             }
         } else if (takeMatch.assetClass == LibAsset.ETH_ASSET_CLASS) {
             require(takeBuyAmount >= totalTakeValue, "not enough eth");
             if (takeBuyAmount > totalTakeValue) {
+                // TODO: from ?
                 payable(msg.sender).transferEth(takeBuyAmount - totalTakeValue);
             }
         }
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
+    /// @param from the message sender
     /// @param orderLeft left order
     /// @param orderRight right order
     /// @return leftOrderData generic order data from left order
     /// @return rightOrderData generic order data from right order
     /// @return newFill fill result
-    function parseOrdersSetFillEmitMatch(
+    function _parseOrdersSetFillEmitMatch(
+        address from,
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     )
-    internal
-    returns (
-        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-        LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-        LibFill.FillResult memory newFill
-    )
+        internal
+        returns (
+            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
+            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
+            LibFill.FillResult memory newFill
+        )
     {
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
 
-        address msgSender = _msgSender();
+        // TODO: this force me to pass from, do we want it ?
         if (orderLeft.maker == address(0)) {
-            orderLeft.maker = msgSender;
+            orderLeft.maker = from;
         }
         if (orderRight.maker == address(0)) {
-            orderRight.maker = msgSender;
+            orderRight.maker = from;
         }
 
         leftOrderData = LibOrderDataGeneric.parse(orderLeft);
         rightOrderData = LibOrderDataGeneric.parse(orderRight);
 
-        newFill = setFillEmitMatch(
+        newFill = _setFillEmitMatch(
+            from,
             orderLeft,
             orderRight,
             leftOrderKeyHash,
@@ -443,12 +424,14 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
     }
 
     ///    @notice calculates fills for the matched orders and set them in "fills" mapping
+    ///    @param from the message sender
     ///    @param orderLeft left order of the match
     ///    @param orderRight right order of the match
     ///    @param leftMakeFill true if the left orders uses make-side fills, false otherwise
     ///    @param rightMakeFill true if the right orders uses make-side fills, false otherwise
     ///    @return newFill returns change in orders' fills by the match
-    function setFillEmitMatch(
+    function _setFillEmitMatch(
+        address from,
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight,
         bytes32 leftOrderKeyHash,
@@ -478,8 +461,9 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
             }
         }
 
+        // TODO: can we move this out so we don't need to pass from ?
         emit Match(
-            _msgSender(),
+            from,
             leftOrderKeyHash,
             rightOrderKeyHash,
             newFill,
@@ -518,13 +502,14 @@ abstract contract ExchangeCore is Initializable, ContextUpgradeable, TransferExe
     }
 
     /// @notice full validation of an order
+    /// @param from the message sender
     /// @param order LibOrder.Order
     /// @param signature order signature
     /// @dev first validate time if order start and end are within the block timestamp
     /// @dev validate signature if maker is different from sender
-    function validateFull(LibOrder.Order memory order, bytes memory signature) internal view {
+    function _validateFull(address from, LibOrder.Order memory order, bytes memory signature) internal view {
         LibOrder.validateOrderTime(order);
-        orderValidator.validate(order, signature, _msgSender());
+        orderValidator.validate(order, signature, from);
     }
 
     /// @notice return the AssetType from the token contract
