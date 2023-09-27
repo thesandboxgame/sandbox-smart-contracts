@@ -1,9 +1,5 @@
 import {ethers, upgrades} from 'hardhat';
-import {Signer, ZeroAddress} from 'ethers';
-import {OrderDefault} from './utils/order';
-import {randomInt} from 'crypto';
-import {signOrder} from './utils/signature';
-import {Asset} from './utils/assets';
+import {ZeroAddress} from 'ethers';
 
 // TODO: Split fixtures so we use only what is needed!!!
 async function deploy() {
@@ -58,6 +54,9 @@ async function deploy() {
   const ERC20Contract = await ERC20ContractFactory.deploy();
   await ERC20Contract.waitForDeployment();
 
+  const ERC20Contract2 = await ERC20ContractFactory.deploy();
+  await ERC20Contract2.waitForDeployment();
+
   const ERC721ContractFactory = await ethers.getContractFactory('TestERC721');
   const ERC721Contract = await ERC721ContractFactory.deploy();
   await ERC721Contract.waitForDeployment();
@@ -76,11 +75,9 @@ async function deploy() {
     ExchangeContractAsDeployer,
     ExchangeContractAsUser,
     TrustedForwarder,
-    ERC20ContractFactory,
     ERC20Contract,
-    ERC721ContractFactory,
+    ERC20Contract2,
     ERC721Contract,
-    ERC1155ContractFactory,
     ERC1155Contract,
     OrderValidatorAsDeployer,
     OrderValidatorAsUser,
@@ -89,75 +86,6 @@ async function deploy() {
     user1,
     user2,
     ZERO_ADDRESS: ZeroAddress,
-  };
-}
-
-// TODO: Use only one test token.
-export async function deployFixturesWithExtraTokens() {
-  const ret = await deploy();
-
-  const ERC20Contract2 = await ret.ERC20ContractFactory.deploy();
-  await ERC20Contract2.waitForDeployment();
-
-  const MintableERC721WithRoyaltiesFactory = await ethers.getContractFactory(
-    'MintableERC721WithRoyalties'
-  );
-  const MintableERC721WithRoyalties =
-    await MintableERC721WithRoyaltiesFactory.deploy();
-  await MintableERC721WithRoyalties.waitForDeployment();
-
-  const MintableERC1155WithRoyaltiesFactory = await ethers.getContractFactory(
-    'MintableERC1155WithRoyalties'
-  );
-  const MintableERC1155WithRoyalties =
-    await MintableERC1155WithRoyaltiesFactory.deploy();
-  await MintableERC1155WithRoyalties.waitForDeployment();
-  return {
-    ...ret,
-    ERC20Contract2,
-    MintableERC721WithRoyalties,
-    MintableERC1155WithRoyalties,
-    matchOrders: async (
-      maker: Signer,
-      makerAsset: Asset,
-      taker: Signer,
-      takerAsset: Asset
-    ) => {
-      const leftOrder = await OrderDefault(
-        maker,
-        makerAsset,
-        ZeroAddress,
-        takerAsset,
-        randomInt(200_000_000_000_000),
-        0,
-        0
-      );
-      const rightOrder = await OrderDefault(
-        taker,
-        takerAsset,
-        ZeroAddress,
-        makerAsset,
-        randomInt(200_000_000_000_000),
-        0,
-        0
-      );
-      const makerSig = await signOrder(
-        leftOrder,
-        maker,
-        ret.OrderValidatorAsDeployer
-      );
-      const takerSig = await signOrder(
-        rightOrder,
-        taker,
-        ret.OrderValidatorAsDeployer
-      );
-      await ret.ExchangeContractAsUser.matchOrders(
-        leftOrder,
-        makerSig,
-        rightOrder,
-        takerSig
-      );
-    },
   };
 }
 
