@@ -42,13 +42,24 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
     /// @param  hash order hash
     event Cancel(bytes32 indexed hash);
 
-    /// @notice event when orders match
+    /*     /// @notice event when orders match
     /// @param from _msgSender
     /// @param leftHash left order hash
     /// @param rightHash right order hash
     /// @param newLeftFill fill for left order
     /// @param newRightFill fill for right order
-    event Match(address indexed from, bytes32 leftHash, bytes32 rightHash, uint256 newLeftFill, uint256 newRightFill);
+    /// @param totalFillLeft total fill left
+    /// @param totalFillRight total fill right */
+    event Match(
+        address indexed from,
+        bytes32 leftHash,
+        bytes32 rightHash,
+        LibFill.FillResult newFill,
+        uint256 totalFillLeft,
+        uint256 totalFillRight,
+        uint256 valueLeft,
+        uint256 valueRight
+    );
     event AssetMatcherSetted(address indexed contractAddress);
     event OrderValidatorSetted(address indexed contractAddress);
     event NativeUpdated(bool nativeOrder, bool metaNative);
@@ -446,7 +457,7 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
     ///    @param orderRight right order of the match
     ///    @param leftMakeFill true if the left orders uses make-side fills, false otherwise
     ///    @param rightMakeFill true if the right orders uses make-side fills, false otherwise
-    ///    @return returns change in orders' fills by the match
+    ///    @return newFill returns change in orders' fills by the match
     function setFillEmitMatch(
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight,
@@ -454,10 +465,10 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
         bytes32 rightOrderKeyHash,
         bool leftMakeFill,
         bool rightMakeFill
-    ) internal returns (LibFill.FillResult memory) {
+    ) internal returns (LibFill.FillResult memory newFill) {
         uint256 leftOrderFill = getOrderFill(orderLeft.salt, leftOrderKeyHash);
         uint256 rightOrderFill = getOrderFill(orderRight.salt, rightOrderKeyHash);
-        LibFill.FillResult memory newFill = LibFill.fillOrder(
+        newFill = LibFill.fillOrder(
             orderLeft,
             orderRight,
             leftOrderFill,
@@ -484,7 +495,16 @@ abstract contract ExchangeCore is Initializable, OwnableUpgradeable, TransferExe
             }
         }
 
-        emit Match(_msgSender(), leftOrderKeyHash, rightOrderKeyHash, newFill.rightValue, newFill.leftValue);
+        emit Match(
+            _msgSender(),
+            leftOrderKeyHash,
+            rightOrderKeyHash,
+            newFill,
+            fills[leftOrderKeyHash],
+            fills[rightOrderKeyHash],
+            orderLeft.makeAsset.value,
+            orderRight.makeAsset.value
+        );
 
         return newFill;
     }
