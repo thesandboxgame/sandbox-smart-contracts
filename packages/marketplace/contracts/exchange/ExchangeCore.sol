@@ -69,6 +69,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param newNativeOrder for orders with native token
     /// @param newMetaNative for meta orders with native token
     /// @dev initialize permissions for native token exchange
+    // solhint-disable-next-line func-name-mixedcase
     function __ExchangeCoreInitialize(
         bool newNativeOrder,
         bool newMetaNative,
@@ -121,29 +122,35 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param direct purchase order
     function _directPurchase(address from, address buyer, LibDirectTransfer.Purchase calldata direct) internal {
         LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
-        LibOrder.Order memory sellOrder = LibOrder.Order(
-            direct.sellOrderMaker,
-            LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.sellOrderNftAmount),
-            address(0),
-            LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
-            direct.sellOrderSalt,
-            direct.sellOrderStart,
-            direct.sellOrderEnd,
-            direct.sellOrderDataType,
-            direct.sellOrderData
-        );
+        LibOrder.Order memory sellOrder = LibOrder.Order({
+            maker: direct.sellOrderMaker,
+            makeAsset: LibAsset.Asset(
+                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
+                direct.sellOrderNftAmount
+            ),
+            taker: address(0),
+            takeAsset: LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
+            salt: direct.sellOrderSalt,
+            start: direct.sellOrderStart,
+            end: direct.sellOrderEnd,
+            dataType: direct.sellOrderDataType,
+            data: direct.sellOrderData
+        });
 
-        LibOrder.Order memory buyOrder = LibOrder.Order(
-            buyer,
-            LibAsset.Asset(paymentAssetType, direct.buyOrderPaymentAmount),
-            address(0),
-            LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.buyOrderNftAmount),
-            0,
-            0,
-            0,
-            getOtherOrderType(direct.sellOrderDataType),
-            direct.buyOrderData
-        );
+        LibOrder.Order memory buyOrder = LibOrder.Order({
+            maker: buyer,
+            makeAsset: LibAsset.Asset(paymentAssetType, direct.buyOrderPaymentAmount),
+            taker: address(0),
+            takeAsset: LibAsset.Asset(
+                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
+                direct.buyOrderNftAmount
+            ),
+            salt: 0,
+            start: 0,
+            end: 0,
+            dataType: getOtherOrderType(direct.sellOrderDataType),
+            data: direct.buyOrderData
+        });
         orderValidator.verifyERC20Whitelist(direct.paymentToken);
         _validateFull(from, sellOrder, direct.sellOrderSignature);
         _matchAndTransfer(from, sellOrder, buyOrder);
@@ -154,30 +161,32 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     ///  @param direct struct with parameters for accept bid operation
     function _directAcceptBid(address from, LibDirectTransfer.AcceptBid calldata direct) internal {
         LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
+        LibOrder.Order memory buyOrder = LibOrder.Order({
+            maker: direct.bidMaker,
+            makeAsset: LibAsset.Asset(paymentAssetType, direct.bidPaymentAmount),
+            taker: address(0),
+            takeAsset: LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.bidNftAmount),
+            salt: direct.bidSalt,
+            start: direct.bidStart,
+            end: direct.bidEnd,
+            dataType: direct.bidDataType,
+            data: direct.bidData
+        });
 
-        LibOrder.Order memory buyOrder = LibOrder.Order(
-            direct.bidMaker,
-            LibAsset.Asset(paymentAssetType, direct.bidPaymentAmount),
-            address(0),
-            LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.bidNftAmount),
-            direct.bidSalt,
-            direct.bidStart,
-            direct.bidEnd,
-            direct.bidDataType,
-            direct.bidData
-        );
-
-        LibOrder.Order memory sellOrder = LibOrder.Order(
-            address(0),
-            LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.sellOrderNftAmount),
-            address(0),
-            LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
-            0,
-            0,
-            0,
-            getOtherOrderType(direct.bidDataType),
-            direct.sellOrderData
-        );
+        LibOrder.Order memory sellOrder = LibOrder.Order({
+            maker: address(0),
+            makeAsset: LibAsset.Asset(
+                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
+                direct.sellOrderNftAmount
+            ),
+            taker: address(0),
+            takeAsset: LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
+            salt: 0,
+            start: 0,
+            end: 0,
+            dataType: getOtherOrderType(direct.bidDataType),
+            data: direct.sellOrderData
+        });
 
         _validateFull(from, buyOrder, direct.bidSignature);
         _matchAndTransfer(from, sellOrder, buyOrder);
@@ -441,17 +450,16 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         }
 
         // TODO: can we move this out so we don't need to pass from ?
-        emit Match(
-            from,
-            leftOrderKeyHash,
-            rightOrderKeyHash,
-            newFill,
-            fills[leftOrderKeyHash],
-            fills[rightOrderKeyHash],
-            orderLeft.makeAsset.value,
-            orderRight.makeAsset.value
-        );
-
+        emit Match({
+            from: from,
+            leftHash: leftOrderKeyHash,
+            rightHash: rightOrderKeyHash,
+            newFill: newFill,
+            totalFillLeft: fills[leftOrderKeyHash],
+            totalFillRight: fills[rightOrderKeyHash],
+            valueLeft: orderLeft.makeAsset.value,
+            valueRight: orderRight.makeAsset.value
+        });
         return newFill;
     }
 

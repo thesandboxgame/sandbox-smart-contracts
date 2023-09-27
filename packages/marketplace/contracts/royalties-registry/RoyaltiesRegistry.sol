@@ -50,6 +50,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;
 
     /// @notice Royalties registry initializer
+    // solhint-disable-next-line func-name-mixedcase
     function __RoyaltiesRegistry_init() external initializer {
         __Ownable_init();
     }

@@ -23,6 +23,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract
     /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract
     /// @param newErc20 boolean to activate the white list of ERC20 tokens
+    // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         bool newTsbOnly,
         bool newPartners,

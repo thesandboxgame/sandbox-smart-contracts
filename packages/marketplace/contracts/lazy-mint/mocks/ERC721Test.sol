@@ -9,6 +9,7 @@ import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/crypto
 contract ERC721Test is EIP712Upgradeable {
     using ECDSAUpgradeable for bytes32;
 
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC721Test_init() external initializer {
         __EIP712_init("Mint721", "1");
     }

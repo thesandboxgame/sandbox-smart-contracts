@@ -47,6 +47,7 @@ contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
     /// @param newPartners allows orders with partner token
     /// @param newOpen allows orders with any token
     /// @param newErc20List allows to pay orders with only whitelisted token
+    // solhint-disable-next-line func-name-mixedcase
     function __Whitelist_init(bool newTsbOnly, bool newPartners, bool newOpen, bool newErc20List) internal initializer {
         __Ownable_init();
         __AccessControl_init_unchained();

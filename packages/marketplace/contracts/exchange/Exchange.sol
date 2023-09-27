@@ -39,6 +39,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param orderValidatorAddress address of the OrderValidator contract, that validates orders
     /// @param newNativeOrder bool to indicate of the contract accepts or doesn't native tokens, i.e. ETH or Matic
     /// @param newMetaNative same as =nativeOrder but for metaTransactions
+    // solhint-disable-next-line func-name-mixedcase
     function __Exchange_init(
         address admin,
         address newTrustedForwarder,

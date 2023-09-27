@@ -18,7 +18,7 @@ async function deploy() {
   );
   const RoyaltyRegistry = await RoyaltyRegistryFactory.deploy();
   const OrderValidatorFactory = await ethers.getContractFactory(
-    'OrderValidatorTest'
+    'OrderValidator'
   );
   const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
