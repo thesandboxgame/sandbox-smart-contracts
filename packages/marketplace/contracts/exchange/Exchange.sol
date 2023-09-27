@@ -19,8 +19,6 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers
 contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
-
-
     /// @notice role erc1776 trusted meta transaction contracts (Sand for example).
     /// @return hash for ERC1776_OPERATOR_ROLE
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
@@ -53,7 +51,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         bool newMetaNative
     ) external initializer {
         __ERC2771Handler_init(newTrustedForwarder);
-        // TODO: Switch to a version that takes an admin address
         __AccessControl_init();
         __TransferManager_init_unchained(
             newProtocolFeePrimary,
@@ -107,25 +104,20 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
 
     /// @notice direct purchase orders - can handle bulk purchases
     /// @param direct array of purchase order
-    /// @param signature array of signed message specifying order details with the buyer
     /// @dev The buyer param was added so the function is compatible with Sand approveAndCall
-    function directPurchase(
-        address buyer,
-        LibDirectTransfer.Purchase[] calldata direct,
-        bytes[] calldata signature
-    ) external payable {
-        for (uint256 i; i < direct.length;) {
-            _directPurchase(_msgSender(), buyer, direct[i], signature[i]);
-        unchecked {
-            i++;
-        }
+    function directPurchase(address buyer, LibDirectTransfer.Purchase[] calldata direct) external payable {
+        for (uint256 i; i < direct.length; ) {
+            _directPurchase(_msgSender(), buyer, direct[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 
     /// @notice cancel order
     /// @param order to be canceled
     /// @dev require msg sender to be order maker and salt different from 0
-    function cancel(LibOrder.Order memory order, bytes32 orderHash) external {
+    function cancel(LibOrder.Order calldata order, bytes32 orderHash) external {
         require(_msgSender() == order.maker, "ExchangeCore: not maker");
         _cancel(order, orderHash);
     }
@@ -174,16 +166,24 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
-        return ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return
+            ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
-    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (address) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address)
+    {
         return ERC2771HandlerUpgradeable._msgSender();
     }
 
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
     }
-
 }

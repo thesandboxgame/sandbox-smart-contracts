@@ -11,12 +11,6 @@ export const ORDER_TYPEHASH = keccak256(
   )
 );
 
-export const ORDER_BACK_TYPEHASH = keccak256(
-  Buffer.from(
-    'OrderBack(address buyer,address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end,bytes4 dataType,bytes data)Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)'
-  )
-);
-
 const ORDER_DATA_BUY = bytes4Keccak('BUY');
 const ORDER_DATA_SELL = bytes4Keccak('SELL');
 
@@ -35,43 +29,6 @@ export type Order = {
   dataType: string;
   data: BytesLike;
 };
-
-export type OrderBack = {
-  buyer: string;
-  maker: string;
-  makeAsset: Asset;
-  taker: string;
-  takeAsset: Asset;
-  salt: Numeric;
-  start: Numeric;
-  end: Numeric;
-  dataType: string;
-  data: BytesLike;
-};
-
-export const OrderBack = async (
-  buyer: Signer,
-  maker: Signer,
-  makeAsset: Asset,
-  taker: Signer | ZeroAddress,
-  takeAsset: Asset,
-  salt: Numeric,
-  start: Numeric,
-  end: Numeric,
-  dataType: string,
-  data: string
-): Promise<OrderBack> => ({
-  buyer: await buyer.getAddress(),
-  maker: await maker.getAddress(),
-  makeAsset,
-  taker: taker === ZeroAddress ? ZeroAddress : await taker.getAddress(),
-  takeAsset,
-  salt,
-  start,
-  end,
-  dataType: DEFAULT_ORDER_TYPE,
-  data: '0x',
-});
 
 export const OrderDefault = async (
   maker: Signer,
