@@ -108,7 +108,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @notice cancel order
     /// @param order to be canceled
     /// @dev require msg sender to be order maker and salt different from 0
-    function _cancel(LibOrder.Order memory order, bytes32 orderHash) internal {
+    function _cancel(LibOrder.Order calldata order, bytes32 orderHash) internal {
         require(order.salt != 0, "ExchangeCore: 0 salt can't be used");
         bytes32 orderKeyHash = LibOrder.hashKey(order);
         require(orderHash == orderKeyHash, "ExchangeCore: Invalid orderHash");
@@ -119,29 +119,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @notice generate sellOrder and buyOrder from parameters and call validateAndMatch() for purchase transaction
     /// @param from the message sender
     /// @param direct purchase order
-    function _directPurchase(
-        address from,
-        address buyer,
-        LibDirectTransfer.Purchase calldata direct,
-        bytes calldata signature
-    ) internal {
+    function _directPurchase(address from, address buyer, LibDirectTransfer.Purchase calldata direct) internal {
         LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
-
-        LibOrder.OrderBack memory orderBack = LibOrder.OrderBack(
-            buyer,
-            direct.sellOrderMaker,
-            LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.sellOrderNftAmount),
-            address(0),
-            LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
-            direct.sellOrderSalt,
-            direct.sellOrderStart,
-            direct.sellOrderEnd,
-            direct.sellOrderDataType,
-            direct.sellOrderData
-        );
-
-        require(orderValidator.isPurchaseValid(orderBack, signature), "INVALID_PURCHASE");
-
         LibOrder.Order memory sellOrder = LibOrder.Order(
             direct.sellOrderMaker,
             LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.sellOrderNftAmount),
