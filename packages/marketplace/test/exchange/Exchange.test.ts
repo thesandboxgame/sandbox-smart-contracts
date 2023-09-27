@@ -22,25 +22,28 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser, user} = await loadFixture(deployFixtures);
     await expect(
       ExchangeContractAsUser.setTrustedForwarder(user.address)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should set trusted forwarder', async function () {
-    const {ExchangeContractAsDeployer, user, TrustedForwarder} =
-      await loadFixture(deployFixtures);
-    expect(await ExchangeContractAsDeployer.getTrustedForwarder()).to.be.equal(
+    const {ExchangeContractAsAdmin, user, TrustedForwarder} = await loadFixture(
+      deployFixtures
+    );
+    expect(await ExchangeContractAsAdmin.getTrustedForwarder()).to.be.equal(
       await TrustedForwarder.getAddress()
     );
-    await ExchangeContractAsDeployer.setTrustedForwarder(user.address);
-    expect(await ExchangeContractAsDeployer.getTrustedForwarder()).to.be.equal(
+    await ExchangeContractAsAdmin.setTrustedForwarder(user.address);
+    expect(await ExchangeContractAsAdmin.getTrustedForwarder()).to.be.equal(
       user.address
     );
   });
 
   it('should not be able to set trusted forwarder as zero address', async function () {
-    const {ExchangeContractAsDeployer} = await loadFixture(deployFixtures);
+    const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
     await expect(
-      ExchangeContractAsDeployer.setTrustedForwarder(ZeroAddress)
+      ExchangeContractAsAdmin.setTrustedForwarder(ZeroAddress)
     ).to.be.revertedWith('address must be different from 0');
   });
 
@@ -48,35 +51,37 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser, user} = await loadFixture(deployFixtures);
     await expect(
       ExchangeContractAsUser.setOrderValidatorContract(user.address)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to set Order Validator', async function () {
-    const {ExchangeContractAsDeployer, user} = await loadFixture(
-      deployFixtures
-    );
+    const {ExchangeContractAsAdmin, user} = await loadFixture(deployFixtures);
     await expect(
-      ExchangeContractAsDeployer.setOrderValidatorContract(user.address)
+      ExchangeContractAsAdmin.setOrderValidatorContract(user.address)
     )
-      .to.emit(ExchangeContractAsDeployer, 'OrderValidatorSet')
+      .to.emit(ExchangeContractAsAdmin, 'OrderValidatorSet')
       .withArgs(user.address);
   });
 
   it('should not update native order if caller is not owner', async function () {
-    const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
+    const {ExchangeContractAsUser, user} = await loadFixture(deployFixtures);
 
     await expect(
       ExchangeContractAsUser.updateNative(false, false)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should update native order', async function () {
-    const {ExchangeContractAsDeployer} = await loadFixture(deployFixtures);
-    expect(await ExchangeContractAsDeployer.nativeMeta()).to.be.equal(true);
-    expect(await ExchangeContractAsDeployer.nativeOrder()).to.be.equal(true);
-    await ExchangeContractAsDeployer.updateNative(false, false);
-    expect(await ExchangeContractAsDeployer.nativeMeta()).to.be.equal(false);
-    expect(await ExchangeContractAsDeployer.nativeOrder()).to.be.equal(false);
+    const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
+    expect(await ExchangeContractAsAdmin.nativeMeta()).to.be.equal(true);
+    expect(await ExchangeContractAsAdmin.nativeOrder()).to.be.equal(true);
+    await ExchangeContractAsAdmin.updateNative(false, false);
+    expect(await ExchangeContractAsAdmin.nativeMeta()).to.be.equal(false);
+    expect(await ExchangeContractAsAdmin.nativeOrder()).to.be.equal(false);
   });
 
   it('should not cancel the order if caller is not maker', async function () {
