@@ -19,7 +19,6 @@ contract TransferManagerTest is TransferManager, TransferExecutor {
         address newCommunityWallet,
         IRoyaltiesProvider newRoyaltiesProvider
     ) external initializer {
-        __Ownable_init();
         __TransferManager_init_unchained(
             newProtocolFeePrimary,
             newProtocolFeeSecondary,

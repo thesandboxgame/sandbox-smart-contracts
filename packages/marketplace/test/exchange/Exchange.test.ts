@@ -18,40 +18,6 @@ import {ZeroAddress} from 'ethers';
 import {signOrder} from '../utils/signature';
 
 describe('Exchange.sol', function () {
-  // TODO: Erase
-  it('check javascript hashing', async function () {
-    const {ExchangeContractAsDeployer, user, ERC20Contract} = await loadFixture(
-      deployFixtures
-    );
-    const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
-
-    const defaultOrder = await OrderDefault(
-      user,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1, // setting salt value to 0
-      0,
-      0
-    );
-    expect(
-      await ExchangeContractAsDeployer.getHashKey(defaultOrder)
-    ).to.be.equal(hashKey(defaultOrder));
-    const sellOrder = await OrderDefault(
-      user,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1, // setting salt value to 0
-      0,
-      0
-    );
-    expect(await ExchangeContractAsDeployer.getHashKey(sellOrder)).to.be.equal(
-      hashKey(sellOrder)
-    );
-  });
-
   it('should not set trusted forwarder if caller is not owner', async function () {
     const {ExchangeContractAsUser, user} = await loadFixture(deployFixtures);
     await expect(
@@ -92,7 +58,7 @@ describe('Exchange.sol', function () {
     await expect(
       ExchangeContractAsDeployer.setOrderValidatorContract(user.address)
     )
-      .to.emit(ExchangeContractAsDeployer, 'OrderValidatorSetted')
+      .to.emit(ExchangeContractAsDeployer, 'OrderValidatorSet')
       .withArgs(user.address);
   });
 
@@ -204,11 +170,9 @@ describe('Exchange.sol', function () {
 
     await ExchangeContractAsUser.cancel(leftOrder, hashKey(leftOrder));
 
-    expect(
-      await ExchangeContractAsUser.fills(
-        await ExchangeContractAsUser.getHashKey(leftOrder)
-      )
-    ).to.be.equal(UINT256_MAX_VALUE);
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      UINT256_MAX_VALUE
+    );
   });
 
   it('should execute a complete match order between ERC20 tokens', async function () {

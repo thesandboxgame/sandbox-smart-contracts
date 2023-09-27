@@ -2,23 +2,27 @@
 
 pragma solidity 0.8.21;
 
-import {ExchangeCore} from "./ExchangeCore.sol";
+
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
-import {ERC2771ContextUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
+import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
+import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @title Exchange contract with meta transactions
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers
-contract ExchangeMeta is ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
+contract ExchangeMeta is OwnableUpgradeable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
     /// @notice ExchangeMeta contract initializer
     /// @param newTrustedForwarder address for trusted forwarder that will execute meta transactions
     /// @param newProtocolFeePrimary protocol fee applied for primary markets
     /// @param newProtocolFeeSecondary protocol fee applied for secondary markets
     /// @param newDefaultFeeReceiver market fee receiver
     /// @param newRoyaltiesProvider registry for the different types of royalties
-    /// @param orderValidatorAdress address of the OrderValidator contract, that validates orders
+    /// @param orderValidatorAddress address of the OrderValidator contract, that validates orders
     /// @param newNativeOrder bool to indicate of the contract accepts or doesn't native tokens, i.e. ETH or Matic
     /// @param newMetaNative same as =nativeOrder but for metaTransactions
     function __Exchange_init(
@@ -27,7 +31,7 @@ contract ExchangeMeta is ExchangeCore, TransferManager, ERC2771HandlerUpgradeabl
         uint256 newProtocolFeeSecondary,
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
-        address orderValidatorAdress,
+        IOrderValidator orderValidatorAddress,
         bool newNativeOrder,
         bool newMetaNative
     ) external initializer {
@@ -39,15 +43,15 @@ contract ExchangeMeta is ExchangeCore, TransferManager, ERC2771HandlerUpgradeabl
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAdress);
+        __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAddress);
     }
 
     function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (address)
+    internal
+    view
+    virtual
+    override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+    returns (address)
     {
         return ERC2771HandlerUpgradeable._msgSender();
     }
