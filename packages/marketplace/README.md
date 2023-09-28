@@ -16,7 +16,7 @@ In top of that, the protocol features:
 - whitelist of the collections that can be traded
 - EIP1776 support to be able to execute exchanges through an operator (SAND contract)
 
-The protocol is divided in 5 main components:
+The protocol is divided into 5 main components:
 
 Component | Description
 ---------|----------
