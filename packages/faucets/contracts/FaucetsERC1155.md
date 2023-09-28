@@ -87,6 +87,14 @@ event Withdrawn(address indexed faucet, address indexed receiver, uint256[] toke
 modifier exists(address faucet)
 ```
 
+Modifier to check if the faucet exists.
+
+
+Parameters:
+
+| Name   | Type    | Description                |
+| :----- | :------ | :------------------------- |
+| faucet | address | The address of the faucet. |
 
 ## Functions info
 
@@ -183,6 +191,40 @@ Parameters:
 | faucet   | address | The address of the faucet.                                 |
 | newLimit | uint256 | The new maximum amount of tokens a user can claim at once. |
 
+### faucetExists (0x860ddec0)
+
+```solidity
+function faucetExists(address faucet) public view returns (bool)
+```
+
+External function to check the existence of a given faucet.
+
+
+Parameters:
+
+| Name   | Type    | Description                |
+| :----- | :------ | :------------------------- |
+| faucet | address | The address of the faucet. |
+
+### tokenExistsInFaucet (0xab9a7f86)
+
+```solidity
+function tokenExistsInFaucet(
+    address faucet,
+    uint256 tokenId
+) public view exists(faucet) returns (bool)
+```
+
+External function to check the existence of a given faucet and token.
+
+
+Parameters:
+
+| Name    | Type    | Description                 |
+| :------ | :------ | :-------------------------- |
+| faucet  | address | The address of the faucet.  |
+| tokenId | uint256 | The id of the token.        |
+
 ### addFaucet (0xe2337fa8)
 
 ```solidity
@@ -252,6 +294,23 @@ Parameters:
 | Name   | Type    | Description                           |
 | :----- | :------ | :------------------------------------ |
 | faucet | address | Address of the faucet to be disabled. |
+
+### isFaucetEnabled (0xfc490550)
+
+```solidity
+function isFaucetEnabled(
+    address faucet
+) public view exists(faucet) returns (bool)
+```
+
+Determines whether a faucet is enabled.
+
+
+Parameters:
+
+| Name   | Type    | Description            |
+| :----- | :------ | :--------------------- |
+| faucet | address | Address of the faucet. |
 
 ### removeTokens (0xecae5383)
 

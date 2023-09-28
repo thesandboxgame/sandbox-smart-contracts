@@ -88,10 +88,38 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
         emit LimitUpdated(faucet, newLimit);
     }
 
-    // Modifier to check if the faucet exists.
+    /**
+     * @dev Internal function to check the existence of a given faucet.
+     * @param faucet The address of the faucet.
+     */
+    function _exists(address faucet) internal view returns (bool) {
+        return faucets[faucet].isFaucet;
+    }
+
+    /**
+     * @dev External function to check the existence of a given faucet.
+     * @param faucet The address of the faucet.
+     */
+    function faucetExists(address faucet) public view returns (bool) {
+        return _exists(faucet);
+    }
+
+    /**
+     * @dev Modifier to check if the faucet exists.
+     * @param faucet The address of the faucet.
+     */
     modifier exists(address faucet) {
-        require(faucets[faucet].isFaucet, "Faucets: FAUCET_DOES_NOT_EXIST");
+        require(_exists(faucet), "Faucets: FAUCET_DOES_NOT_EXIST");
         _;
+    }
+
+    /**
+     * @dev External function to check the existence of a given faucet and token.
+     * @param faucet The address of the faucet.
+     * @param tokenId The id of the token.
+     */
+    function tokenExistsInFaucet(address faucet, uint256 tokenId) public view exists(faucet) returns (bool) {
+        return faucets[faucet].tokenIdExists[tokenId];
     }
 
     /**
@@ -102,7 +130,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
      * @param tokenIds List of token IDs that this faucet will distribute.
      */
     function addFaucet(address faucet, uint256 period, uint256 limit, uint256[] memory tokenIds) public onlyOwner {
-        require(!faucets[faucet].isFaucet, "Faucets: FAUCET_ALREADY_EXISTS");
+        require(!_exists(faucet), "Faucets: FAUCET_ALREADY_EXISTS");
         require(limit > 0, "Faucets: LIMIT_ZERO");
         require(tokenIds.length > 0, "Faucets: TOKENS_CANNOT_BE_EMPTY");
 
@@ -156,6 +184,15 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
     }
 
     /**
+     * @dev Determines whether a faucet is enabled.
+     * @param faucet Address of the faucet.
+     */
+    function isFaucetEnabled(address faucet) public view exists(faucet) returns (bool) {
+        FaucetInfo storage faucetInfo = faucets[faucet];
+        return faucetInfo.isEnabled;
+    }
+
+    /**
      * @dev Remove specific tokens from a faucet.
      * @param faucet Address of the faucet.
      * @param tokenIds List of token IDs to remove.
@@ -173,6 +210,7 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
             bool shouldSkip = false;
             for (uint256 j = 0; j < tokenIds.length; j++) {
                 if (currentTokenIds[i] == tokenIds[j]) {
+                    faucetInfo.tokenIdExists[currentTokenIds[i]] = false;
                     shouldSkip = true;
                     break;
                 }
