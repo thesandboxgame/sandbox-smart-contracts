@@ -29,19 +29,14 @@ export async function setupAvatarCollectionContract() {
     polygonSandContract,
     sandContractAsOwner
   } = await deployFakeSandContract(sandAdmin, mintToDeployerAmount);
-  // raffleSignWallet (taken from name accounts): wallet that can sign
-  // nftCollectionAdmin (taken from name accounts): owner of collection
-  // treasury (taken from name accounts): treasury
+
   const collectionName = 'MockAvatarTesting';
   const collectionSymbol = 'MAT';
   const MAX_SUPPLY = 500;
   const maxMarketingTokens = 50;
   const metadataUrl = 'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
 
-  // OpenSea configurations // // //
-  // defaultOperatorFiltererRegistry (taken from named accounts): address of registry
-  // defaultOperatorFiltererSubscription (taken from named accounts): address of filter subscription
-  const operatorFiltererSubscriptionSubscribe = true; // if to actually subscribe or just copy
+  const operatorFiltererSubscriptionSubscribe = true;
 
   // default values used for minting setups // // //
   const mintPrice = parseUnits('100', 'ether');
