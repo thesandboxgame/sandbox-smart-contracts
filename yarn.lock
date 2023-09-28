@@ -1801,7 +1801,7 @@ __metadata:
     mocha: ^10.2.0
     prettier: ^2.8.8
     prettier-plugin-solidity: ^1.1.3
-    solhint: ^3.4.1
+    solhint: ^3.6.2
     solhint-plugin-prettier: ^0.0.5
     solidity-coverage: ^0.8.3
     ts-node: ^10.9.1
@@ -10367,6 +10367,37 @@ __metadata:
   bin:
     solhint: solhint.js
   checksum: ae24b8b95c65df3a075a26a26ce92b1a41297c738e43444df77c1be81e1be44e1838b151970de0b5164c94b17a96e981758d634473d3b574ab5dca2109176559
+  languageName: node
+  linkType: hard
+
+"solhint@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "solhint@npm:3.6.2"
+  dependencies:
+    "@solidity-parser/parser": ^0.16.0
+    ajv: ^6.12.6
+    antlr4: ^4.11.0
+    ast-parents: ^0.0.1
+    chalk: ^4.1.2
+    commander: ^10.0.0
+    cosmiconfig: ^8.0.0
+    fast-diff: ^1.2.0
+    glob: ^8.0.3
+    ignore: ^5.2.4
+    js-yaml: ^4.1.0
+    lodash: ^4.17.21
+    pluralize: ^8.0.0
+    prettier: ^2.8.3
+    semver: ^7.5.2
+    strip-ansi: ^6.0.1
+    table: ^6.8.1
+    text-table: ^0.2.0
+  dependenciesMeta:
+    prettier:
+      optional: true
+  bin:
+    solhint: solhint.js
+  checksum: 96c2ab3c1444624facb45b929682c65d83019f392c7331463a45e8ed61f08122e24b6709a721b6086ddfb0d5e3c3d4281f175f74eb308415072917556bdeba22
   languageName: node
   linkType: hard
 
