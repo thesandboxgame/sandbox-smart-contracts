@@ -38,7 +38,7 @@ async function setupAvatar() {
 }
 
 /// eslint-disable-next-line mocha/no-skipped-tests
-describe.only(contractName, function () {
+describe(contractName, function () {
 
   it('allowedToExecuteMint works (plus invalidations)', async function () {
     const {

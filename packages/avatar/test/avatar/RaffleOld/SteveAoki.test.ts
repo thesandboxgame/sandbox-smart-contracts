@@ -1,14 +1,14 @@
 import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
 import {ZeroAddress} from 'ethers';
-import {preSetupAvatar} from './raffle.fixtures';
+import {preSetupAvatar} from './raffleold.fixtures';
 import { getTestingAccounts, setupMockERC20 } from '../fixtures';
 
 // ======================= collection differences ======================= 
 
-const contractName = 'MadBalls';
-const collectionSymbol = 'MAD';
-const COLLECTION_MAX_SUPPLY = 2023;
+const contractName = 'SteveAoki';
+const collectionSymbol = 'SA';
+const COLLECTION_MAX_SUPPLY = 3333;
 
 // ====================================================================== 
 
@@ -18,21 +18,16 @@ async function setupAvatar() {
   const {
     treasury,
     raffleSignWallet,
-    defaultOperatorFiltererRegistry,
-    defaultOperatorFiltererSubscription,
     trustedForwarder,
   } = await getTestingAccounts();
     
   const initializationArgs = [
       `https://contracts-demo.sandbox.game/${contractName}-unrevealed/`,
-      contractName,
+      'Steve Aoki',
       collectionSymbol,
       treasury.address,
       raffleSignWallet.address,
-      trustedForwarder.address,
-      defaultOperatorFiltererRegistry.address,
-      defaultOperatorFiltererSubscription.address,
-      true, // we want to subscribe to OpenSea's list
+      trustedForwarder.address
     ];
   return await preSetupAvatar(contractName, COLLECTION_MAX_SUPPLY, initializationArgs);
 }
