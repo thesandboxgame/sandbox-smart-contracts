@@ -23,11 +23,9 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @return hash for ERC1776_OPERATOR_ROLE
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
 
-    // TODO: Review the roles we need.
-    modifier onlyOwner() {
-        _checkRole(DEFAULT_ADMIN_ROLE);
-        _;
-    }
+    /// @notice role business addresses that can change for example: fees and royalties
+    /// @return hash for EXCHANGE_ADMIN_ROLE
+    bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
 
     /// @notice Exchange contract initializer
     /// @param admin the admin user that can grant/revoke roles, etc.
@@ -36,7 +34,8 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param newProtocolFeeSecondary protocol fee applied for secondary markets
     /// @param newDefaultFeeReceiver market fee receiver
     /// @param newRoyaltiesProvider registry for the different types of royalties
-    /// @param orderValidatorAddress address of the OrderValidator contract, that validates orders
+    /// @param orderValidatorAddress new OrderValidator contract address
+    /// @param newAssetMatcher new AssetMatcher contract address
     /// @param newNativeOrder bool to indicate of the contract accepts or doesn't native tokens, i.e. ETH or Matic
     /// @param newMetaNative same as =nativeOrder but for metaTransactions
     // solhint-disable-next-line func-name-mixedcase
@@ -48,6 +47,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
         IOrderValidator orderValidatorAddress,
+        IAssetMatcher newAssetMatcher,
         bool newNativeOrder,
         bool newMetaNative
     ) external initializer {
@@ -59,7 +59,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAddress);
+        __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAddress, newAssetMatcher);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -92,7 +92,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         LibOrder.Order calldata orderRight,
         bytes calldata signatureRight
     ) external payable onlyRole(ERC1776_OPERATOR_ROLE) {
-        // TODO: Whenever we emit a match we must also emit operator and from
         _validateOrders(from, orderLeft, signatureLeft, orderRight, signatureRight);
         _matchAndTransfer(from, orderLeft, orderRight);
     }
@@ -125,26 +124,19 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
 
     /// @notice setter for royalty registry
     /// @param newRoyaltiesRegistry address of new royalties registry
-    function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyOwner {
+    function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRoyaltiesRegistry(newRoyaltiesRegistry);
-    }
-
-    /// @notice setter for protocol fees
-    /// @param newProtocolFeePrimary fee for primary market
-    /// @param newProtocolFeeSecondary fee for secondary market
-    function setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) external onlyOwner {
-        _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
     }
 
     /// @notice set AssetMatcher address
     /// @param contractAddress new AssetMatcher contract address
-    function setAssetMatcherContract(IAssetMatcher contractAddress) external onlyOwner {
+    function setAssetMatcherContract(IAssetMatcher contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setAssetMatcherContract(contractAddress);
     }
 
     /// @notice set OrderValidator address
     /// @param contractAddress new OrderValidator contract address
-    function setOrderValidatorContract(IOrderValidator contractAddress) external onlyOwner {
+    function setOrderValidatorContract(IOrderValidator contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOrderValidatorContract(contractAddress);
     }
 
@@ -152,16 +144,30 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param newNativeOrder for orders with native token
     /// @param newMetaNative for meta orders with native token
     /// @dev setter for permissions for native token exchange
-    function updateNative(bool newNativeOrder, bool newMetaNative) external onlyOwner {
+    function updateNative(bool newNativeOrder, bool newMetaNative) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _updateNative(newNativeOrder, newMetaNative);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-transactions
     /// @param newTrustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address newTrustedForwarder) external virtual onlyOwner {
-        require(newTrustedForwarder != address(0), "address must be different from 0");
-
+    function setTrustedForwarder(address newTrustedForwarder) external virtual onlyRole(DEFAULT_ADMIN_ROLE) {
         _setTrustedForwarder(newTrustedForwarder);
+    }
+
+    /// @notice setter for protocol fees
+    /// @param newProtocolFeePrimary fee for primary market
+    /// @param newProtocolFeeSecondary fee for secondary market
+    function setProtocolFee(
+        uint256 newProtocolFeePrimary,
+        uint256 newProtocolFeeSecondary
+    ) external onlyRole(EXCHANGE_ADMIN_ROLE) {
+        _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
+    }
+
+    /// @notice setter for default fee receiver
+    /// @param newDefaultFeeReceiver address that gets the fees
+    function setDefaultFeeReceiver(address newDefaultFeeReceiver) external onlyRole(EXCHANGE_ADMIN_ROLE) {
+        _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
     /**

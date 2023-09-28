@@ -29,18 +29,20 @@ async function deploy() {
   );
 
   const OrderValidatorAsUser = await OrderValidatorAsDeployer.connect(user);
-
+  const protocolFeePrimary = 123;
+  const protocolFeeSecondary = 250;
   const ExchangeFactory = await ethers.getContractFactory('Exchange');
   const ExchangeContractAsDeployer = await upgrades.deployProxy(
     ExchangeFactory,
     [
       admin.address,
       await TrustedForwarder.getAddress(),
-      0,
-      250,
+      protocolFeePrimary,
+      protocolFeeSecondary,
       defaultFeeReceiver.address,
       await RoyaltyRegistry.getAddress(),
       await OrderValidatorAsDeployer.getAddress(),
+      await assetMatcherAsDeployer.getAddress(),
       true,
       true,
     ],
@@ -94,13 +96,17 @@ async function deploy() {
   const ERC1155Contract = await ERC1155ContractFactory.deploy();
   await ERC1155Contract.waitForDeployment();
 
-  // TODO: Do we always want this?
-  await ExchangeContractAsAdmin.setAssetMatcherContract(
-    await assetMatcherAsDeployer.getAddress()
-  );
+  const EXCHANGE_ADMIN_ROLE =
+    await ExchangeContractAsAdmin.EXCHANGE_ADMIN_ROLE();
+  const DEFAULT_ADMIN_ROLE = await ExchangeContractAsAdmin.DEFAULT_ADMIN_ROLE();
   return {
+    protocolFeePrimary,
+    protocolFeeSecondary,
+    EXCHANGE_ADMIN_ROLE,
+    DEFAULT_ADMIN_ROLE,
     assetMatcherAsDeployer,
     assetMatcherAsUser,
+    RoyaltyRegistry,
     ExchangeContractAsDeployer,
     ExchangeContractAsAdmin,
     ExchangeContractAsUser,
@@ -119,6 +125,7 @@ async function deploy() {
     user,
     user1,
     user2,
+    defaultFeeReceiver,
     ZERO_ADDRESS: ZeroAddress,
   };
 }

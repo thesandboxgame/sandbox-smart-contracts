@@ -68,20 +68,24 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @notice initializer for ExchangeCore
     /// @param newNativeOrder for orders with native token
     /// @param newMetaNative for meta orders with native token
+    /// @param newOrderValidatorAddress new OrderValidator contract address
+    /// @param newAssetMatcher new AssetMatcher contract address
     /// @dev initialize permissions for native token exchange
     // solhint-disable-next-line func-name-mixedcase
     function __ExchangeCoreInitialize(
         bool newNativeOrder,
         bool newMetaNative,
-        IOrderValidator newOrderValidatorAddress
+        IOrderValidator newOrderValidatorAddress,
+        IAssetMatcher newAssetMatcher
     ) internal {
         _updateNative(newMetaNative, newNativeOrder);
         _setOrderValidatorContract(newOrderValidatorAddress);
-        // TODO: call _setAssetMatcherContract
+        _setAssetMatcherContract(newAssetMatcher);
     }
 
     /// @notice set AssetMatcher address
     /// @param contractAddress new AssetMatcher contract address
+    /// @dev matches assets between left and right order
     function _setAssetMatcherContract(IAssetMatcher contractAddress) internal {
         require(address(contractAddress) != address(0), "invalid asset matcher");
         assetMatcher = contractAddress;
@@ -108,6 +112,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
     /// @notice cancel order
     /// @param order to be canceled
+    /// @param orderHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
     function _cancel(LibOrder.Order calldata order, bytes32 orderHash) internal {
         require(order.salt != 0, "ExchangeCore: 0 salt can't be used");
@@ -301,7 +306,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
 
-        // TODO: this force me to pass from, do we want it ?
         if (orderLeft.maker == address(0)) {
             orderLeft.maker = from;
         }
@@ -449,7 +453,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             }
         }
 
-        // TODO: can we move this out so we don't need to pass from ?
         emit Match({
             from: from,
             leftHash: leftOrderKeyHash,

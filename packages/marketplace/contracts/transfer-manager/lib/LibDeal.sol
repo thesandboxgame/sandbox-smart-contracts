@@ -15,7 +15,7 @@ library LibDeal {
     }
 
     struct DealData {
-        uint256 protocolFee; // TODO: check if necessary
+        uint256 protocolFee;
         uint256 maxFeesBasePoint;
         LibFeeSide.FeeSide feeSide;
     }
