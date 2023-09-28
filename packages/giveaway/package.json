@@ -54,9 +54,6 @@
             ]
         }
     },
-    "dependencies": {
-        "@openzeppelin/contracts-upgradeable": "^4.9.0"
-    },
     "devDependencies": {
         "@dlsl/hardhat-markup": "^1.0.0-rc.11",
         "@ethersproject/abi": "^5.7.0",
