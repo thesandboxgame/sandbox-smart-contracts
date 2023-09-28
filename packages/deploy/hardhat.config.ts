@@ -12,7 +12,6 @@ const importedPackages = {
   '@sandbox-smart-contracts/marketplace': [
     'contracts/royalties-registry/RoyaltiesRegistry.sol',
     'contracts/exchange/OrderValidator.sol',
-    'contracts/exchange/ExchangeMeta.sol',
     'contracts/exchange/Exchange.sol',
     'contracts/exchange/AssetMatcher.sol',
   ],
