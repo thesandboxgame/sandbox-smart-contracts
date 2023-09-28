@@ -20,11 +20,11 @@ The protocol is divided into 5 main components:
 
 Component | Description
 ---------|----------
- [Exchange](docs/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
- [OrderValidator](docs/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
- [RoyaltiesRegistry](docs/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
+ [Exchange](docs/exchange/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
+ [OrderValidator](docs/exchange/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
+ [RoyaltiesRegistry](docs/royalties-registry/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
  Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
- [TransferManager](docs/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
+ [TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
 
 ## Running the project locally
 
