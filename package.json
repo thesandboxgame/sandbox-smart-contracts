@@ -16,7 +16,7 @@
         "deploy": "nx run-many --target=deploy",
         "all": "nx run-many --all --parallel --targets=lint,format,test,deploy && nx run-many --all --targets=coverage",
         "test:ci": "nx affected --target=test --parallel=1",
-        "coverage:ci": "nx affected --target=coverage --parallel=1 && istanbul-combine -r lcov -r html 'packages/*/coverage.json'",
+        "coverage:ci": "nx affected --target=coverage --parallel=1",
         "lint:ci": "nx affected --target=lint",
         "format:ci": "nx affected --target=format",
         "deploy:ci": "nx affected --target=deploy --parallel=1",

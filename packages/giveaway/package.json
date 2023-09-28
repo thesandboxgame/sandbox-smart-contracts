@@ -9,6 +9,12 @@
         "README.md",
         "CHANGELOG.md"
     ],
+    "keywords": [
+        "ethereum",
+        "polygon",
+        "smart-contracts",
+        "The Sandbox"
+    ],
     "publishConfig": {
         "access": "public"
     },

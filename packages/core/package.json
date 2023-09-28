@@ -10,7 +10,8 @@
   "keywords": [
     "ethereum",
     "smart-contracts",
-    "The Sandbox"
+    "The Sandbox",
+    "matic"
   ],
   "resolutions": {
     "websocket": "1.0.32"

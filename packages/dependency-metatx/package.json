@@ -7,6 +7,12 @@
   "files": [
     "contracts"
   ],
+  "keywords": [
+    "ethereum",
+    "polygon",
+    "smart-contracts",
+    "The Sandbox"
+  ],
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
