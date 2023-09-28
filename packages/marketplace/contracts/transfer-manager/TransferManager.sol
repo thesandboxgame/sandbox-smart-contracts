@@ -47,6 +47,10 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param newRoyaltiesRegistry address of new royalties registry
     event RoyaltiesRegistrySet(IRoyaltiesProvider newRoyaltiesRegistry);
 
+    /// @notice event for when a default fee receiver is set
+    /// @param newDefaultFeeReceiver address that gets the fees
+    event DefaultFeeReceiverSet(address newDefaultFeeReceiver);
+
     /// @notice initializer for TransferExecutor
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
@@ -61,7 +65,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     ) internal {
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
-        defaultFeeReceiver = newDefaultFeeReceiver;
+        _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
     /// @notice setter for royalty registry
@@ -83,6 +87,15 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         protocolFeeSecondary = newProtocolFeeSecondary;
 
         emit ProtocolFeeSet(newProtocolFeePrimary, newProtocolFeeSecondary);
+    }
+
+    /// @notice setter for default fee receiver
+    /// @param newDefaultFeeReceiver address that gets the fees
+    function _setDefaultFeeReceiver(address newDefaultFeeReceiver) internal {
+        require(address(newDefaultFeeReceiver) != address(0), "invalid default fee receiver");
+        defaultFeeReceiver = newDefaultFeeReceiver;
+
+        emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
     }
 
     /// @notice executes transfers for 2 matched orders
