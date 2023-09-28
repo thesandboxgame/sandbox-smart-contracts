@@ -12,7 +12,7 @@ import {ethers} from 'hardhat';
 import {
   DefenderRelayProvider,
   DefenderRelaySigner,
-} from 'defender-relay-client/lib/ethers';
+} from '@openzeppelin/defender-relay-client/lib/ethers';
 
 const credentials = {
   apiKey: process.env.MUMBAI_RELAYER_API_KEY || '',

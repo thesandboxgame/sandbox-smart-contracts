@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import {
   DefenderRelayProvider,
   DefenderRelaySigner,
-} from 'defender-relay-client/lib/ethers';
+} from '@openzeppelin/defender-relay-client/lib/ethers';
 
 const credentials = {
   apiKey: process.env.GOERLI_RELAYER_API_KEY || '',
