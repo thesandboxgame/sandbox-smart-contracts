@@ -187,6 +187,36 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
     }
 
     /**
+     * @notice (Internal) Checks if the wallet address is eligible to claim the token from the faucet.
+     * @dev Calculates based on the lastTimestamp and the period in the faucetInfo, whether the walletAddress can currently claim the tokenId from the faucet.
+     * @param faucet The address of the faucet contract.
+     * @param tokenId The ID of the token being claimed.
+     * @param walletAddress The address of the wallet attempting to claim.
+     * @return bool Returns true if the wallet address can claim the token, false otherwise.
+     */
+    function _canClaim(address faucet, uint256 tokenId, address walletAddress) internal view returns (bool) {
+        FaucetInfo storage faucetInfo = faucets[faucet];
+        uint256 lastTimestamp = faucetInfo.lastTimestamps[tokenId][walletAddress];
+        return block.timestamp >= (lastTimestamp + faucetInfo.period);
+    }
+
+    /**
+     * @notice Determines whether a wallet address can claim a token from a specific faucet.
+     * @dev Calls the internal function _canClaim to get the result.
+     * @param faucet The address of the faucet contract.
+     * @param tokenId The ID of the token being claimed.
+     * @param walletAddress The address of the wallet attempting to claim.
+     * @return bool Returns true if the wallet address can claim the token, false otherwise.
+     */
+    function canClaim(
+        address faucet,
+        uint256 tokenId,
+        address walletAddress
+    ) external view exists(faucet) returns (bool) {
+        return _canClaim(faucet, tokenId, walletAddress);
+    }
+
+    /**
      * @dev Claim tokens from a faucet.
      * @param faucet Address of the faucet to claim from.
      * @param tokenId ID of the token to be claimed.
@@ -197,15 +227,48 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
         require(faucetInfo.isEnabled, "Faucets: FAUCET_DISABLED");
         require(faucetInfo.tokenIdExists[tokenId], "Faucets: TOKEN_DOES_NOT_EXIST");
         require(amount > 0 && amount <= faucetInfo.limit, "Faucets: AMOUNT_TOO_HIGH");
-
-        uint256 lastTimestamp = faucetInfo.lastTimestamps[tokenId][msg.sender];
-        require(block.timestamp >= (lastTimestamp + faucetInfo.period), "Faucets: CLAIM_PERIOD_NOT_PASSED");
+        require(_canClaim(faucet, tokenId, msg.sender), "Faucets: CLAIM_PERIOD_NOT_PASSED");
 
         uint256 balance = IERC1155(faucet).balanceOf(address(this), tokenId);
         require(balance >= amount, "Faucets: BALANCE_IS_NOT_ENOUGH");
+
         faucetInfo.lastTimestamps[tokenId][msg.sender] = block.timestamp;
         IERC1155(faucet).safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
         emit Claimed(faucet, msg.sender, tokenId, amount);
+    }
+
+    /**
+     * @notice Function to claim multiple tokens from a single faucet.
+     * @param faucet - The address of the ERC1155 contract (faucet) to claim from.
+     * @param tokenIds - An array of token IDs to be claimed from the faucet.
+     * @param amounts - An array of amounts of tokens to be claimed for respective token IDs.
+     *
+     * Emits multiple {Claimed} events for each claim.
+     *
+     * Requirements:
+     * - The lengths of `tokenIds` and `amounts` arrays should be the same.
+     * - Each tokenId must exist in the faucet.
+     */
+    function claimBatch(address faucet, uint256[] memory tokenIds, uint256[] memory amounts) external nonReentrant {
+        require(tokenIds.length == amounts.length, "Faucets: ARRAY_LENGTH_MISMATCH");
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            uint256 amount = amounts[i];
+
+            FaucetInfo storage faucetInfo = faucets[faucet];
+            require(faucetInfo.isEnabled, "Faucets: FAUCET_DISABLED");
+            require(faucetInfo.tokenIdExists[tokenId], "Faucets: TOKEN_DOES_NOT_EXIST");
+            require(amount > 0 && amount <= faucetInfo.limit, "Faucets: AMOUNT_TOO_HIGH");
+            require(_canClaim(faucet, tokenId, msg.sender), "Faucets: CLAIM_PERIOD_NOT_PASSED");
+
+            uint256 balance = IERC1155(faucet).balanceOf(address(this), tokenId);
+            require(balance >= amount, "Faucets: BALANCE_IS_NOT_ENOUGH");
+
+            faucetInfo.lastTimestamps[tokenId][msg.sender] = block.timestamp;
+            IERC1155(faucet).safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
+            emit Claimed(faucet, msg.sender, tokenId, amount);
+        }
     }
 
     /**
@@ -252,41 +315,5 @@ contract FaucetsERC1155 is Ownable, ERC1155Holder, ReentrancyGuard {
 
         IERC1155(faucet).safeBatchTransferFrom(address(this), receiver, tokenIds, balances, "");
         emit Withdrawn(faucet, receiver, tokenIds, balances);
-    }
-
-    /**
-     * @notice Function to claim multiple tokens from a single faucet.
-     * @param faucet - The address of the ERC1155 contract (faucet) to claim from.
-     * @param tokenIds - An array of token IDs to be claimed from the faucet.
-     * @param amounts - An array of amounts of tokens to be claimed for respective token IDs.
-     *
-     * Emits multiple {Claimed} events for each claim.
-     *
-     * Requirements:
-     * - The lengths of `tokenIds` and `amounts` arrays should be the same.
-     * - Each tokenId must exist in the faucet.
-     */
-    function claimBatch(address faucet, uint256[] memory tokenIds, uint256[] memory amounts) external nonReentrant {
-        require(tokenIds.length == amounts.length, "Faucets: ARRAY_LENGTH_MISMATCH");
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            uint256 amount = amounts[i];
-
-            // Using the existing logic of the `claim` function but without the `nonReentrant` modifier.
-            FaucetInfo storage faucetInfo = faucets[faucet];
-            require(faucetInfo.isEnabled, "Faucets: FAUCET_DISABLED");
-            require(faucetInfo.tokenIdExists[tokenId], "Faucets: TOKEN_DOES_NOT_EXIST");
-            require(amount > 0 && amount <= faucetInfo.limit, "Faucets: AMOUNT_TOO_HIGH");
-
-            uint256 lastTimestamp = faucetInfo.lastTimestamps[tokenId][msg.sender];
-            require(block.timestamp >= (lastTimestamp + faucetInfo.period), "Faucets: CLAIM_PERIOD_NOT_PASSED");
-
-            uint256 balance = IERC1155(faucet).balanceOf(address(this), tokenId);
-            require(balance >= amount, "Faucets: BALANCE_IS_NOT_ENOUGH");
-            faucetInfo.lastTimestamps[tokenId][msg.sender] = block.timestamp;
-            IERC1155(faucet).safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
-            emit Claimed(faucet, msg.sender, tokenId, amount);
-        }
     }
 }

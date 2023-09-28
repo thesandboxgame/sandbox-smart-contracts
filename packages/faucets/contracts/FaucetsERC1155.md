@@ -272,6 +272,36 @@ Parameters:
 | faucet   | address   | Address of the faucet.       |
 | tokenIds | uint256[] | List of token IDs to remove. |
 
+### canClaim (0xb178e559)
+
+```solidity
+function canClaim(
+    address faucet,
+    uint256 tokenId,
+    address walletAddress
+) external view exists(faucet) returns (bool)
+```
+
+Determines whether a wallet address can claim a token from a specific faucet.
+
+Calls the internal function _canClaim to get the result.
+
+
+Parameters:
+
+| Name          | Type    | Description                                     |
+| :------------ | :------ | :---------------------------------------------- |
+| faucet        | address | The address of the faucet contract.             |
+| tokenId       | uint256 | The ID of the token being claimed.              |
+| walletAddress | address | The address of the wallet attempting to claim.  |
+
+
+Return values:
+
+| Name | Type | Description                                                                   |
+| :--- | :--- | :---------------------------------------------------------------------------- |
+| [0]  | bool | bool Returns true if the wallet address can claim the token, false otherwise. |
+
 ### claim (0x2bc43fd9)
 
 ```solidity
@@ -293,27 +323,6 @@ Parameters:
 | tokenId | uint256 | ID of the token to be claimed.        |
 | amount  | uint256 | Amount of tokens to be claimed.       |
 
-### withdraw (0x893bd7c8)
-
-```solidity
-function withdraw(
-    address faucet,
-    address receiver,
-    uint256[] memory tokenIds
-) external onlyOwner exists(faucet) nonReentrant
-```
-
-Function to withdraw the total balance of tokens from the contract to a specified address.
-
-
-Parameters:
-
-| Name     | Type      | Description                                                                                                                    |
-| :------- | :-------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| faucet   | address   | - The address of the ERC1155 contract (faucet) containing the tokens to be withdrawn.                                          |
-| receiver | address   | - The address to which the tokens will be sent.                                                                                |
-| tokenIds | uint256[] | - An array of token IDs to be withdrawn.  Emits a {Withdrawn} event.  Requirements: - The `tokenIds` must exist in the faucet. |
-
 ### claimBatch (0xe59e53c2)
 
 ```solidity
@@ -334,3 +343,24 @@ Parameters:
 | faucet   | address   | - The address of the ERC1155 contract (faucet) to claim from.                                                                                                                                                                                         |
 | tokenIds | uint256[] | - An array of token IDs to be claimed from the faucet.                                                                                                                                                                                                |
 | amounts  | uint256[] | - An array of amounts of tokens to be claimed for respective token IDs.  Emits multiple {Claimed} events for each claim.  Requirements: - The lengths of `tokenIds` and `amounts` arrays should be the same. - Each tokenId must exist in the faucet. |
+
+### withdraw (0x893bd7c8)
+
+```solidity
+function withdraw(
+    address faucet,
+    address receiver,
+    uint256[] memory tokenIds
+) external onlyOwner exists(faucet) nonReentrant
+```
+
+Function to withdraw the total balance of tokens from the contract to a specified address.
+
+
+Parameters:
+
+| Name     | Type      | Description                                                                                                                    |
+| :------- | :-------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| faucet   | address   | - The address of the ERC1155 contract (faucet) containing the tokens to be withdrawn.                                          |
+| receiver | address   | - The address to which the tokens will be sent.                                                                                |
+| tokenIds | uint256[] | - An array of token IDs to be withdrawn.  Emits a {Withdrawn} event.  Requirements: - The `tokenIds` must exist in the faucet. |

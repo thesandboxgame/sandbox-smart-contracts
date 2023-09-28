@@ -279,7 +279,7 @@ describe('FaucetsERC1155', function () {
       .connect(otherAccount)
       .claimBatch(mockAssetERC1155Address, erc1155TokenIds, [faucetLimit, 10]);
 
-    await time.increase(faucetPeriod + 1);
+    await time.increase(faucetPeriod);
     await mine();
 
     await faucetsERC1155
@@ -314,5 +314,47 @@ describe('FaucetsERC1155', function () {
           [faucetLimit]
         )
     ).to.be.revertedWith('Faucets: TOKEN_DOES_NOT_EXIST');
+  });
+
+  it('Should correctly determine if a user can claim tokens or not', async function () {
+    const {
+      otherAccount,
+      mockAssetERC1155,
+      faucetsERC1155,
+      fakeAssets,
+      faucetLimit,
+      faucetPeriod,
+    } = await loadFixture(setupFaucetERC1155);
+
+    const mockAssetERC1155Address = await mockAssetERC1155.getAddress();
+    const otherAccountAddress = await otherAccount.getAddress();
+
+    let canClaim = await faucetsERC1155.canClaim(
+      mockAssetERC1155Address,
+      fakeAssets[0].id,
+      otherAccountAddress
+    );
+    expect(canClaim).to.equal(true);
+
+    await faucetsERC1155
+      .connect(otherAccount)
+      .claim(mockAssetERC1155Address, fakeAssets[0].id, faucetLimit);
+
+    canClaim = await faucetsERC1155.canClaim(
+      mockAssetERC1155Address,
+      fakeAssets[0].id,
+      otherAccountAddress
+    );
+    expect(canClaim).to.equal(false);
+
+    await time.increase(faucetPeriod);
+    await mine();
+
+    canClaim = await faucetsERC1155.canClaim(
+      mockAssetERC1155Address,
+      fakeAssets[0].id,
+      otherAccountAddress
+    );
+    expect(canClaim).to.equal(true);
   });
 });
