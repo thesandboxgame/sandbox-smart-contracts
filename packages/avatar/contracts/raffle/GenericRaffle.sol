@@ -145,7 +145,6 @@ contract GenericRaffle is
      * @notice mitigate a possible Implementation contract takeover, as indicate by
      *         https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializing_the_implementation_contract
      */
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
