@@ -1,6 +1,6 @@
 # Marketplace
 
-The Sandbox allows his users to buy or sell assets (NFTs) through a dedicated marketplace directly on the website.
+The Sandbox allows its users to buy or sell assets (NFTs) through a dedicated marketplace directly on the website.
 
 In that regard, this package enables an exchange of any kind of tokens (ERC20, ERC1155, ERC721) between two users. Each side of the exchange initializes an order to declare what he wants to buy or sell, signs it and the contract will try to match the two orders in order to execute the exchange.
 
