@@ -105,13 +105,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibDeal.DealSide memory right,
         LibFeeSide.FeeSide feeSide
     ) internal override {
-<<<<<<< HEAD
         if (feeSide == LibFeeSide.FeeSide.LEFT) {
             doTransfersWithRoyalties(left, right);
-=======
-        if (dealData.feeSide == LibFeeSide.FeeSide.LEFT) {
-            doTransfersWithFees(left, right, dealData.maxFeesBasePoint);
->>>>>>> format fix
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
         } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
             doTransfersWithRoyalties(right, left);
@@ -125,22 +120,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-<<<<<<< HEAD
-    /// @return totalAmount of fee-side asset
     function doTransfersWithRoyalties(
         LibDeal.DealSide memory paymentSide,
         LibDeal.DealSide memory nftSide
-    ) internal returns (uint256 totalAmount) {
-        uint256 rest = paymentSide.asset.value;
-=======
-    /// @param maxFeesBasePoint max fee for the sell-order (used and is > 0 for V3 orders only)
-    function doTransfersWithFees(
-        LibDeal.DealSide memory paymentSide,
-        LibDeal.DealSide memory nftSide,
-        uint256 maxFeesBasePoint
     ) internal {
-        uint256 rest = calculateTotalAmount(paymentSide.asset.value, paymentSide.originFees, maxFeesBasePoint);
->>>>>>> last changes
+        uint256 rest = paymentSide.asset.value;
 
         rest = transferRoyalties(
             paymentSide.asset.assetType,
