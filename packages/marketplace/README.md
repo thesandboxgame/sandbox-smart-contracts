@@ -16,6 +16,8 @@ In top of that, the protocol features:
 - whitelist of the collections that can be traded
 - EIP1776 support to be able to execute exchanges through an operator (SAND contract)
 
+## Architecture
+
 The protocol is divided into 5 main components:
 
 Component | Description
@@ -25,6 +27,29 @@ Component | Description
  [RoyaltiesRegistry](docs/royalties-registry/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
  Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
  [TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
+
+```mermaid
+---
+title: Deployments
+---
+flowchart
+   subgraph Exchange
+      TransferManager
+      TransferExecutor
+   end
+   subgraph OrderValidator
+      Whitelist
+   end
+   subgraph AssetMatcher
+   end
+   subgraph RoyaltiesRegistry
+   end   
+   Exchange-->OrderValidator
+   Exchange-->AssetMatcher
+   Exchange-->TransferManager
+   TransferManager-->TransferExecutor
+   TransferManager-->RoyaltiesRegistry
+```
 
 ## Running the project locally
 
