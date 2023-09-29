@@ -228,7 +228,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
 
-        // TODO: this force me to pass from, do we want it ? 
+        // TODO: this force me to pass from, do we want it ?
         // answer it was cut out with native orders
     }
 
