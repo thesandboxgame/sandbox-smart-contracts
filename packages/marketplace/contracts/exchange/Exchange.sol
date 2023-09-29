@@ -10,7 +10,6 @@ import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-met
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
-import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
@@ -73,24 +72,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         ExchangeMatch[] calldata matchedOrders
     ) external onlyRole(ERC1776_OPERATOR_ROLE) {
         _matchOrders(sender, matchedOrders);
-    }
-
-    /// @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
-    /// @param direct struct with parameters for accept bid operation
-    function directAcceptBid(LibDirectTransfer.AcceptBid calldata direct) external payable {
-        _directAcceptBid(_msgSender(), direct);
-    }
-
-    /// @notice direct purchase orders - can handle bulk purchases
-    /// @param direct array of purchase order
-    /// @dev The buyer param was added so the function is compatible with Sand approveAndCall
-    function directPurchase(address buyer, LibDirectTransfer.Purchase[] calldata direct) external payable {
-        for (uint256 i; i < direct.length; ) {
-            _directPurchase(_msgSender(), buyer, direct[i]);
-            unchecked {
-                i++;
-            }
-        }
     }
 
     /// @notice cancel order

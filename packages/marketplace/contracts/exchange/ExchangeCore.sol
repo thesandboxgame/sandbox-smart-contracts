@@ -4,12 +4,11 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
-import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferExecutor, LibTransfer} from "../transfer-manager/TransferExecutor.sol";
 import {LibDeal, LibAsset} from "../transfer-manager/lib/LibDeal.sol";
 import {LibFeeSide} from "../transfer-manager/lib/LibFeeSide.sol";
-import {LibOrderDataGeneric, LibOrder, LibOrderData} from "./libraries/LibOrderDataGeneric.sol";
+import {LibOrderDataGeneric, LibOrder} from "./libraries/LibOrderDataGeneric.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
@@ -108,81 +107,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         emit Cancel(orderKeyHash);
     }
 
-    /// @notice generate sellOrder and buyOrder from parameters and call validateAndMatch() for purchase transaction
-    /// @param from the message sender
-    /// @param direct purchase order
-    function _directPurchase(address from, address buyer, LibDirectTransfer.Purchase calldata direct) internal {
-        LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
-        LibOrder.Order memory sellOrder = LibOrder.Order({
-            maker: direct.sellOrderMaker,
-            makeAsset: LibAsset.Asset(
-                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
-                direct.sellOrderNftAmount
-            ),
-            taker: address(0),
-            takeAsset: LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
-            salt: direct.sellOrderSalt,
-            start: direct.sellOrderStart,
-            end: direct.sellOrderEnd,
-            dataType: direct.sellOrderDataType,
-            data: direct.sellOrderData
-        });
-
-        LibOrder.Order memory buyOrder = LibOrder.Order({
-            maker: buyer,
-            makeAsset: LibAsset.Asset(paymentAssetType, direct.buyOrderPaymentAmount),
-            taker: address(0),
-            takeAsset: LibAsset.Asset(
-                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
-                direct.buyOrderNftAmount
-            ),
-            salt: 0,
-            start: 0,
-            end: 0,
-            dataType: getOtherOrderType(direct.sellOrderDataType),
-            data: direct.buyOrderData
-        });
-        orderValidator.verifyERC20Whitelist(direct.paymentToken);
-        _validateFull(from, sellOrder, direct.sellOrderSignature);
-        _matchAndTransfer(from, sellOrder, buyOrder);
-    }
-
-    ///  @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
-    /// @param from the message sender
-    ///  @param direct struct with parameters for accept bid operation
-    function _directAcceptBid(address from, LibDirectTransfer.AcceptBid calldata direct) internal {
-        LibAsset.AssetType memory paymentAssetType = getPaymentAssetType(direct.paymentToken);
-        LibOrder.Order memory buyOrder = LibOrder.Order({
-            maker: direct.bidMaker,
-            makeAsset: LibAsset.Asset(paymentAssetType, direct.bidPaymentAmount),
-            taker: address(0),
-            takeAsset: LibAsset.Asset(LibAsset.AssetType(direct.nftAssetClass, direct.nftData), direct.bidNftAmount),
-            salt: direct.bidSalt,
-            start: direct.bidStart,
-            end: direct.bidEnd,
-            dataType: direct.bidDataType,
-            data: direct.bidData
-        });
-
-        LibOrder.Order memory sellOrder = LibOrder.Order({
-            maker: address(0),
-            makeAsset: LibAsset.Asset(
-                LibAsset.AssetType(direct.nftAssetClass, direct.nftData),
-                direct.sellOrderNftAmount
-            ),
-            taker: address(0),
-            takeAsset: LibAsset.Asset(paymentAssetType, direct.sellOrderPaymentAmount),
-            salt: 0,
-            start: 0,
-            end: 0,
-            dataType: getOtherOrderType(direct.bidDataType),
-            data: direct.sellOrderData
-        });
-
-        _validateFull(from, buyOrder, direct.bidSignature);
-        _matchAndTransfer(from, sellOrder, buyOrder);
-    }
-
     /// @notice Match orders and transact
     /// @param sender the original sender of the transaction
     /// @param matchedOrders a list of left/right orders that match each other
@@ -229,7 +153,10 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     ) internal {
-        (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = matchAssets(orderLeft, orderRight);
+        (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = _matchAssets(
+            orderLeft,
+            orderRight
+        );
 
         (
             LibOrderDataGeneric.GenericOrderData memory leftOrderData,
@@ -250,9 +177,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             }),
             LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
-
-        // TODO: this force me to pass from, do we want it ?
-        // answer it was cut out with native orders
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
@@ -314,8 +238,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         bool leftMakeFill,
         bool rightMakeFill
     ) internal returns (LibFill.FillResult memory newFill) {
-        uint256 leftOrderFill = getOrderFill(orderLeft.salt, leftOrderKeyHash);
-        uint256 rightOrderFill = getOrderFill(orderRight.salt, rightOrderKeyHash);
+        uint256 leftOrderFill = _getOrderFill(orderLeft.salt, leftOrderKeyHash);
+        uint256 rightOrderFill = _getOrderFill(orderRight.salt, rightOrderKeyHash);
         newFill = LibFill.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill, leftMakeFill, rightMakeFill);
 
         require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
@@ -352,7 +276,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @notice return fill corresponding to order hash
     /// @param salt if salt 0, fill = 0
     /// @param hash order hash
-    function getOrderFill(uint256 salt, bytes32 hash) internal view returns (uint256 fill) {
+    function _getOrderFill(uint256 salt, bytes32 hash) internal view returns (uint256 fill) {
         if (salt == 0) {
             fill = 0;
         } else {
@@ -364,7 +288,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param orderLeft left order
     /// @param orderRight right order
     /// @dev each make asset must correrspond to the other take asset and be different from 0
-    function matchAssets(
+    function _matchAssets(
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     ) internal view returns (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) {
@@ -383,32 +307,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     function _validateFull(address from, LibOrder.Order memory order, bytes memory signature) internal view {
         LibOrder.validateOrderTime(order);
         orderValidator.validate(order, signature, from);
-    }
-
-    /// @notice return the AssetType from the token contract
-    /// @param token contract address
-    function getPaymentAssetType(address token) internal pure returns (LibAsset.AssetType memory) {
-        LibAsset.AssetType memory result = LibAsset.AssetType(bytes4(0), new bytes(0));
-        if (token == address(0)) {
-            result.assetClass = LibAsset.ETH_ASSET_CLASS;
-        } else {
-            result.assetClass = LibAsset.ERC20_ASSET_CLASS;
-            result.data = abi.encode(token);
-        }
-        return result;
-    }
-
-    /// @notice get the other order type
-    /// @param dataType of order
-    /// @dev if SELL returns BUY else if BUY returns SELL
-    function getOtherOrderType(bytes4 dataType) internal pure returns (bytes4) {
-        if (dataType == LibOrderData.SELL) {
-            return LibOrderData.BUY;
-        }
-        if (dataType == LibOrderData.BUY) {
-            return LibOrderData.SELL;
-        }
-        return dataType;
     }
 
     uint256[49] private __gap;
