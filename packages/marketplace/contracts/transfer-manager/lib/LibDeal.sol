@@ -10,13 +10,6 @@ library LibDeal {
     struct DealSide {
         LibAsset.Asset asset;
         LibPart.Part[] payouts;
-        LibPart.Part[] originFees;
         address from;
-    }
-
-    struct DealData {
-        uint256 protocolFee;
-        uint256 maxFeesBasePoint;
-        LibFeeSide.FeeSide feeSide;
     }
 }

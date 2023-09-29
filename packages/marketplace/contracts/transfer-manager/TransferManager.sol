@@ -101,21 +101,20 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes transfers for 2 matched orders
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
-    /// @param dealData DealData of the match (see LibDeal.sol)
     /// @return totalLeftValue - total amount for the left order
     /// @return totalRightValue - total amount for the right order
     function doTransfers(
         LibDeal.DealSide memory left,
         LibDeal.DealSide memory right,
-        LibDeal.DealData memory dealData
+        LibFeeSide.FeeSide feeSide
     ) internal override returns (uint256 totalLeftValue, uint256 totalRightValue) {
         totalLeftValue = left.asset.value;
         totalRightValue = right.asset.value;
-        if (dealData.feeSide == LibFeeSide.FeeSide.LEFT) {
-            totalLeftValue = doTransfersWithFees(left, right, dealData.maxFeesBasePoint);
+        if (feeSide == LibFeeSide.FeeSide.LEFT) {
+            totalLeftValue = doTransfersWithRoyalties(left, right);
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
-        } else if (dealData.feeSide == LibFeeSide.FeeSide.RIGHT) {
-            totalRightValue = doTransfersWithFees(right, left, dealData.maxFeesBasePoint);
+        } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
+            totalRightValue = doTransfersWithRoyalties(right, left);
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
         } else {
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
@@ -126,15 +125,12 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-    /// @param maxFeesBasePoint max fee for the sell-order (used and is > 0 for V3 orders only)
     /// @return totalAmount of fee-side asset
-    function doTransfersWithFees(
+    function doTransfersWithRoyalties(
         LibDeal.DealSide memory paymentSide,
-        LibDeal.DealSide memory nftSide,
-        uint256 maxFeesBasePoint
+        LibDeal.DealSide memory nftSide
     ) internal returns (uint256 totalAmount) {
-        totalAmount = calculateTotalAmount(paymentSide.asset.value, paymentSide.originFees, maxFeesBasePoint);
-        uint256 rest = totalAmount;
+        uint256 rest = paymentSide.asset.value;
 
         rest = transferRoyalties(
             paymentSide.asset.assetType,
@@ -144,9 +140,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             paymentSide.asset.value,
             paymentSide.from
         );
-
-        LibPart.Part[] memory origin = new LibPart.Part[](1);
-        origin[0].account = payable(defaultFeeReceiver);
 
         bool primaryMarket = false;
 
@@ -166,13 +159,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
         }
-        if (primaryMarket) {
-            origin[0].value = uint96(protocolFeePrimary);
-        } else {
-            origin[0].value = uint96(protocolFeeSecondary);
-        }
-
-        (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
@@ -304,27 +290,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         if (rest > 0) {
             transfer(LibAsset.Asset(assetType, rest), from, lastPayout.account);
         }
-    }
-
-    /// @notice calculates total amount of fee-side asset that is going to be used in match
-    /// @param amount fee-side order value
-    /// @param orderOriginFees fee-side order's origin fee (it adds on top of the amount)
-    /// @param maxFeesBasePoint max fee for the sell-order (used and is > 0 for V3 orders only)
-    /// @return total amount of fee-side asset
-    function calculateTotalAmount(
-        uint256 amount,
-        LibPart.Part[] memory orderOriginFees,
-        uint256 maxFeesBasePoint
-    ) internal pure returns (uint256) {
-        if (maxFeesBasePoint > 0) {
-            return amount;
-        }
-        uint256 fees = 0;
-        for (uint256 i = 0; i < orderOriginFees.length; ++i) {
-            require(orderOriginFees[i].value <= 10000, "origin fee is too big");
-            fees = fees + orderOriginFees[i].value;
-        }
-        return amount + amount.bp(fees);
     }
 
     /// @notice subtract fees in BP, or base point

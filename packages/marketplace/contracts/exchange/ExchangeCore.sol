@@ -241,23 +241,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             LibDeal.DealSide({
                 asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
                 payouts: leftOrderData.payouts,
-                originFees: leftOrderData.originFees,
                 from: orderLeft.maker
             }),
             LibDeal.DealSide({
                 asset: LibAsset.Asset(takeMatch, newFill.rightValue),
                 payouts: rightOrderData.payouts,
-                originFees: rightOrderData.originFees,
                 from: orderRight.maker
             }),
-            getDealData(
-                makeMatch.assetClass,
-                takeMatch.assetClass,
-                orderLeft.dataType,
-                orderRight.dataType,
-                leftOrderData,
-                rightOrderData
-            )
+            LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
 
         uint256 takeBuyAmount = newFill.rightValue;
@@ -324,32 +315,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             rightOrderKeyHash,
             leftOrderData.isMakeFill,
             rightOrderData.isMakeFill
-        );
-    }
-
-    /// @notice return the deal data from orders
-    /// @param makeMatchAssetClass, class of make asset
-    /// @param takeMatchAssetClass, class of take asset
-    /// @param leftDataType data type of left order
-    /// @param rightDataType data type of right order
-    /// @param leftOrderData data of left order
-    /// @param rightOrderData  data of right order
-    /// @dev return deal data (feeSide and maxFeesBasePoint) from orders
-    function getDealData(
-        bytes4 makeMatchAssetClass,
-        bytes4 takeMatchAssetClass,
-        bytes4 leftDataType,
-        bytes4 rightDataType,
-        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-        LibOrderDataGeneric.GenericOrderData memory rightOrderData
-    ) internal pure returns (LibDeal.DealData memory dealData) {
-        dealData.feeSide = LibFeeSide.getFeeSide(makeMatchAssetClass, takeMatchAssetClass);
-        dealData.maxFeesBasePoint = getMaxFee(
-            leftDataType,
-            rightDataType,
-            leftOrderData,
-            rightOrderData,
-            dealData.feeSide
         );
     }
 
