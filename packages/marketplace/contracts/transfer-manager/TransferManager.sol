@@ -138,8 +138,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
         // check if primary or secondary market
         if (
-            nftSide.asset.assetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftSide.asset.assetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftSide.asset.assetType.data, (address, uint));
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
@@ -184,8 +184,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibPart.Part[] memory royalties = getRoyaltiesByAssetType(nftAssetType);
 
         if (
-            nftAssetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool resultInterface) {
@@ -214,8 +214,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @return calculated royalties (Array of LibPart.Part)
     function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
         if (
-            nftAssetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
             return royaltiesRegistry.getRoyalties(token, tokenId);

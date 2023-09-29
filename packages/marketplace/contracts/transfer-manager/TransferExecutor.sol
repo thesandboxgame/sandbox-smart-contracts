@@ -42,7 +42,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
     /// @param from account holding the asset
     /// @param to account that will receive the asset
     function transfer(LibAsset.Asset memory asset, address from, address to) internal override {
-        if (asset.assetType.assetClass == LibAsset.ERC721_ASSET_CLASS) {
+        if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
@@ -51,7 +51,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             } else {
                 erc721safeTransferFrom(IERC721Upgradeable(token), from, to, tokenId);
             }
-        } else if (asset.assetType.assetClass == LibAsset.ERC20_ASSET_CLASS) {
+        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
             if (from == address(this)) {
@@ -59,88 +59,13 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             } else {
                 erc20safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
             }
-        } else if (asset.assetType.assetClass == LibAsset.ERC1155_ASSET_CLASS) {
+        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             if (from == address(this)) {
                 IERC1155Upgradeable(token).safeTransferFrom(address(this), to, tokenId, asset.value, "");
             } else {
                 erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
-            }
-        } else if (asset.assetType.assetClass == LibAsset.ETH_ASSET_CLASS) {
-            if (to != address(this)) {
-                payable(to).transferEth(asset.value);
-            }
-        } else if (asset.assetType.assetClass == LibAsset.BUNDLE) {
-            // unpack the asset data
-            ERC20Details[] memory erc20Details;
-            ERC721Details[] memory erc721Details;
-            ERC1155Details[] memory erc1155Details;
-
-            (erc20Details, erc721Details, erc1155Details) = abi.decode(
-                asset.assetType.data,
-                (ERC20Details[], ERC721Details[], ERC1155Details[])
-            );
-
-            // check if bundles don't exceed the limit
-            require(erc20Details.length <= MAX_BUNDLE_LIMIT, "erc20 limit exceeded");
-            require(erc721Details.length <= MAX_BUNDLE_LIMIT, "erc721 limit exceeded");
-            require(erc1155Details.length <= MAX_BUNDLE_LIMIT, "erc1155 limit exceeded");
-
-            // transfer ERC20
-            for (uint256 i; i < erc20Details.length; ) {
-                if (from == address(this)) {
-                    require(
-                        erc20Details[i].token.transferFrom(from, to, erc20Details[i].value),
-                        "erc20 bundle transfer failed"
-                    );
-                } else {
-                    erc20safeTransferFrom(erc20Details[i].token, from, to, erc20Details[i].value);
-                }
-
-                unchecked {
-                    ++i;
-                }
-            }
-
-            // transfer ERC721 assets
-            for (uint256 i; i < erc721Details.length; ) {
-                require(erc721Details[i].value == 1, "erc721 value error");
-                if (from == address(this)) {
-                    erc721Details[i].token.safeTransferFrom(address(this), to, erc721Details[i].id);
-                } else {
-                    erc721safeTransferFrom(erc721Details[i].token, from, to, erc721Details[i].id);
-                }
-
-                unchecked {
-                    ++i;
-                }
-            }
-
-            // transfer ERC1155 assets
-            for (uint256 i; i < erc1155Details.length; ) {
-                if (from == address(this)) {
-                    erc1155Details[i].token.safeTransferFrom(
-                        address(this),
-                        to,
-                        erc1155Details[i].id,
-                        erc1155Details[i].value,
-                        ""
-                    );
-                } else {
-                    erc1155safeTransferFrom(
-                        erc1155Details[i].token,
-                        from,
-                        to,
-                        erc1155Details[i].id,
-                        erc1155Details[i].value,
-                        ""
-                    );
-                }
-
-                unchecked {
-                    ++i;
-                }
             }
         }
     }

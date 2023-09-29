@@ -5,7 +5,6 @@ import {
   AssetERC1155,
   AssetERC20,
   AssetERC721,
-  AssetETH,
   FeeRecipientsData,
   LibPartData,
 } from '../utils/assets.ts';
@@ -56,11 +55,16 @@ describe('Exchange.sol', function () {
   });
 
   it('should not cancel the order if caller is not maker', async function () {
-    const {ExchangeContractAsDeployer, user1, user2, ERC20Contract} =
-      await loadFixture(deployFixtures);
+    const {
+      ExchangeContractAsDeployer,
+      user1,
+      user2,
+      ERC20Contract,
+      ERC721Contract,
+    } = await loadFixture(deployFixtures);
 
     const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
+    const takerAsset = await AssetERC721(ERC721Contract, 100);
 
     const leftOrder = await OrderDefault(
       user1,
@@ -80,12 +84,11 @@ describe('Exchange.sol', function () {
   });
 
   it('should not cancel order with zero salt', async function () {
-    const {ExchangeContractAsUser, user, ERC20Contract} = await loadFixture(
-      deployFixtures
-    );
+    const {ExchangeContractAsUser, user, ERC20Contract, ERC721Contract} =
+      await loadFixture(deployFixtures);
 
     const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
+    const takerAsset = await AssetERC721(ERC721Contract, 100);
 
     const leftOrder = await OrderDefault(
       user,
@@ -102,12 +105,11 @@ describe('Exchange.sol', function () {
   });
 
   it('should not cancel the order with invalid order hash', async function () {
-    const {ExchangeContractAsUser, user1, ERC20Contract} = await loadFixture(
-      deployFixtures
-    );
+    const {ExchangeContractAsUser, user1, ERC20Contract, ERC721Contract} =
+      await loadFixture(deployFixtures);
 
     const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
+    const takerAsset = await AssetERC721(ERC721Contract, 100);
 
     const leftOrder = await OrderDefault(
       user1,
@@ -127,12 +129,11 @@ describe('Exchange.sol', function () {
   });
 
   it('should cancel an order and update fills mapping', async function () {
-    const {ExchangeContractAsUser, user, ERC20Contract} = await loadFixture(
-      deployFixtures
-    );
+    const {ExchangeContractAsUser, user, ERC20Contract, ERC721Contract} =
+      await loadFixture(deployFixtures);
 
     const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
+    const takerAsset = await AssetERC721(ERC721Contract, 100);
 
     const leftOrder = await OrderDefault(
       user,
