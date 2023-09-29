@@ -1,6 +1,7 @@
 # FaucetsERC1155
 
-This contract is designed to allow the distribution of ERC1155 tokens from multiple faucets. Each faucet can have its own distribution settings, and only the owner can manage these faucets.
+This contract is designed to allow the distribution of ERC1155 tokens from multiple faucets in *TESTNET* by using the admin dashboard. Each faucet can have its own distribution settings, and only the owner can manage these faucets.
+
 
 ## Running the project locally
 
