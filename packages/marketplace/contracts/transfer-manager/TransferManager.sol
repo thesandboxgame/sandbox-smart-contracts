@@ -105,8 +105,13 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibDeal.DealSide memory right,
         LibFeeSide.FeeSide feeSide
     ) internal override {
+<<<<<<< HEAD
         if (feeSide == LibFeeSide.FeeSide.LEFT) {
             doTransfersWithRoyalties(left, right);
+=======
+        if (dealData.feeSide == LibFeeSide.FeeSide.LEFT) {
+            doTransfersWithFees(left, right, dealData.maxFeesBasePoint);
+>>>>>>> format fix
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
         } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
             doTransfersWithRoyalties(right, left);
