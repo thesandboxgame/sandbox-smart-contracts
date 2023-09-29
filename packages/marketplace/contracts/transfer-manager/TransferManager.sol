@@ -120,10 +120,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-    function doTransfersWithRoyalties(
-        LibDeal.DealSide memory paymentSide,
-        LibDeal.DealSide memory nftSide
-    ) internal {
+    function doTransfersWithRoyalties(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
         rest = transferRoyalties(
