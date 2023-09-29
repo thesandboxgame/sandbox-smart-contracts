@@ -100,20 +100,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes transfers for 2 matched orders
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
-    /// @return totalLeftValue - total amount for the left order
-    /// @return totalRightValue - total amount for the right order
     function doTransfers(
         LibDeal.DealSide memory left,
         LibDeal.DealSide memory right,
         LibFeeSide.FeeSide feeSide
-    ) internal override returns (uint256 totalLeftValue, uint256 totalRightValue) {
-        totalLeftValue = left.asset.value;
-        totalRightValue = right.asset.value;
+    ) internal override {
         if (feeSide == LibFeeSide.FeeSide.LEFT) {
-            totalLeftValue = doTransfersWithRoyalties(left, right);
+            doTransfersWithRoyalties(left, right);
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
         } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
-            totalRightValue = doTransfersWithRoyalties(right, left);
+            doTransfersWithRoyalties(right, left);
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
         } else {
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);

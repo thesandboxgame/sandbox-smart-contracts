@@ -43,8 +43,6 @@ async function deploy() {
       await RoyaltyRegistry.getAddress(),
       await OrderValidatorAsDeployer.getAddress(),
       await assetMatcherAsDeployer.getAddress(),
-      true,
-      true,
     ],
     {
       initializer: '__Exchange_init',

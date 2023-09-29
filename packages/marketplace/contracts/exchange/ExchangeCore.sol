@@ -28,14 +28,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
     uint256 private constant UINT256_MAX = type(uint256).max;
 
-    /// @notice boolean to indicate if native tokens are accepted for meta transactions
-    /// @return true if native tokens are accepted for meta tx, false otherwise
-    bool public nativeMeta;
-
-    /// @notice boolean to indicate if native tokens are accepted
-    /// @return true if native tokens are accepted, false otherwise
-    bool public nativeOrder;
-
     /// @notice stores the fills for orders
     /// @return order fill
     mapping(bytes32 => uint256) public fills;
@@ -64,22 +56,16 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     );
     event AssetMatcherSet(IAssetMatcher indexed contractAddress);
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
-    event NativeUpdated(bool nativeOrder, bool metaNative);
 
     /// @notice initializer for ExchangeCore
-    /// @param newNativeOrder for orders with native token
-    /// @param newMetaNative for meta orders with native token
     /// @param newOrderValidatorAddress new OrderValidator contract address
     /// @param newAssetMatcher new AssetMatcher contract address
     /// @dev initialize permissions for native token exchange
     // solhint-disable-next-line func-name-mixedcase
     function __ExchangeCoreInitialize(
-        bool newNativeOrder,
-        bool newMetaNative,
         IOrderValidator newOrderValidatorAddress,
         IAssetMatcher newAssetMatcher
     ) internal {
-        _updateNative(newMetaNative, newNativeOrder);
         _setOrderValidatorContract(newOrderValidatorAddress);
         _setAssetMatcherContract(newAssetMatcher);
     }
@@ -99,16 +85,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         require(address(contractAddress) != address(0), "invalid order validator");
         orderValidator = contractAddress;
         emit OrderValidatorSet(contractAddress);
-    }
-
-    /// @notice update permissions for native orders
-    /// @param newNativeOrder for orders with native token
-    /// @param newMetaNative for meta orders with native token
-    /// @dev setter for permissions for native token exchange
-    function _updateNative(bool newNativeOrder, bool newMetaNative) internal {
-        nativeMeta = newMetaNative;
-        nativeOrder = newNativeOrder;
-        emit NativeUpdated(newNativeOrder, newMetaNative);
     }
 
     /// @notice cancel order
@@ -238,7 +214,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             LibFill.FillResult memory newFill
         ) = _parseOrdersSetFillEmitMatch(from, orderLeft, orderRight);
 
-        (uint256 totalMakeValue, uint256 totalTakeValue) = doTransfers(
+        doTransfers(
             LibDeal.DealSide({
                 asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
                 payouts: leftOrderData.payouts,
@@ -252,28 +228,12 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
 
-        uint256 takeBuyAmount = newFill.rightValue;
-        uint256 makeBuyAmount = newFill.leftValue;
+        // TODO: this force me to pass from, do we want it ? 
+        // answer it was cut out with native orders
 
-        // TODO: this force me to pass from, do we want it ?
-        if (((from != msg.sender) && !nativeMeta) || ((from == msg.sender) && !nativeOrder)) {
-            require(makeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
-            require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
-        }
-        if (makeMatch.assetClass == LibAsset.ETH_ASSET_CLASS) {
-            require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
-            require(makeBuyAmount >= totalMakeValue, "not enough eth");
-            if (makeBuyAmount > totalMakeValue) {
-                // TODO: from ?
-                payable(msg.sender).transferEth(makeBuyAmount - totalMakeValue);
-            }
-        } else if (takeMatch.assetClass == LibAsset.ETH_ASSET_CLASS) {
-            require(takeBuyAmount >= totalTakeValue, "not enough eth");
-            if (takeBuyAmount > totalTakeValue) {
-                // TODO: from ?
-                payable(msg.sender).transferEth(takeBuyAmount - totalTakeValue);
-            }
-        }
+        // TODO: keep this here or verify in asset matcher?
+        require(makeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
+        require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()

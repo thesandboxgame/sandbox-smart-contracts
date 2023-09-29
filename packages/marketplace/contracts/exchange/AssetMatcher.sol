@@ -46,12 +46,14 @@ contract AssetMatcher is Ownable, IAssetMatcher {
     ) private view returns (LibAsset.AssetType memory) {
         bytes4 classLeft = leftAssetType.assetClass;
         bytes4 classRight = rightAssetType.assetClass;
-        if (classLeft == LibAsset.ETH_ASSET_CLASS) {
+        require(classLeft != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
+        require(classRight != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
+       /*  if (classLeft == LibAsset.ETH_ASSET_CLASS) {
             if (classRight == LibAsset.ETH_ASSET_CLASS) {
                 return leftAssetType;
             }
             return LibAsset.AssetType(0, EMPTY);
-        }
+        } */
         if (classLeft == LibAsset.ERC20_ASSET_CLASS) {
             if (classRight == LibAsset.ERC20_ASSET_CLASS) {
                 return simpleMatch(leftAssetType, rightAssetType);
