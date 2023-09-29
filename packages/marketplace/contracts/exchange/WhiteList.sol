@@ -42,6 +42,12 @@ contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
     /// @param erc20List boolean indicating that there is a restriction for ERC20 tokens
     event PermissionSetted(bool tsbOnly, bool partners, bool open, bool erc20List);
 
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice initializer for WhiteList
     /// @param newTsbOnly allows orders with The Sandbox token
     /// @param newPartners allows orders with partner token
