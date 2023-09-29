@@ -11,5 +11,5 @@ abstract contract ITransferManager is ITransferExecutor {
         LibDeal.DealSide memory left,
         LibDeal.DealSide memory right,
         LibFeeSide.FeeSide feeSide
-    ) internal virtual returns (uint256 totalMakeValue, uint256 totalTakeValue);
+    ) internal virtual;
 }

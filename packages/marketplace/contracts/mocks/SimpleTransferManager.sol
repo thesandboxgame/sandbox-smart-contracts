@@ -9,11 +9,9 @@ abstract contract SimpleTransferManager is ITransferManager {
         LibDeal.DealSide memory left,
         LibDeal.DealSide memory right,
         LibFeeSide.FeeSide /* feeSide */
-    ) internal override returns (uint256 totalMakeValue, uint256 totalTakeValue) {
+    ) internal override {
         transfer(left.asset, left.from, right.from);
         transfer(right.asset, right.from, left.from);
-        totalMakeValue = left.asset.value;
-        totalTakeValue = right.asset.value;
     }
 
     uint256[50] private __gap;

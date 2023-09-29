@@ -36,8 +36,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param newRoyaltiesProvider registry for the different types of royalties
     /// @param orderValidatorAddress new OrderValidator contract address
     /// @param newAssetMatcher new AssetMatcher contract address
-    /// @param newNativeOrder bool to indicate of the contract accepts or doesn't native tokens, i.e. ETH or Matic
-    /// @param newMetaNative same as =nativeOrder but for metaTransactions
     // solhint-disable-next-line func-name-mixedcase
     function __Exchange_init(
         address admin,
@@ -47,9 +45,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
         IOrderValidator orderValidatorAddress,
-        IAssetMatcher newAssetMatcher,
-        bool newNativeOrder,
-        bool newMetaNative
+        IAssetMatcher newAssetMatcher
     ) external initializer {
         __ERC2771Handler_init(newTrustedForwarder);
         __AccessControl_init();
@@ -59,7 +55,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(newNativeOrder, newMetaNative, orderValidatorAddress, newAssetMatcher);
+        __ExchangeCoreInitialize(orderValidatorAddress, newAssetMatcher);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -138,14 +134,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param contractAddress new OrderValidator contract address
     function setOrderValidatorContract(IOrderValidator contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOrderValidatorContract(contractAddress);
-    }
-
-    /// @notice update permissions for native orders
-    /// @param newNativeOrder for orders with native token
-    /// @param newMetaNative for meta orders with native token
-    /// @dev setter for permissions for native token exchange
-    function updateNative(bool newNativeOrder, bool newMetaNative) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _updateNative(newNativeOrder, newMetaNative);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-transactions

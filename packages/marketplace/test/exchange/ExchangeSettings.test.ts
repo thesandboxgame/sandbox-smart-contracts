@@ -26,8 +26,6 @@ describe('Exchange.sol settings', function () {
     expect(await ExchangeContractAsAdmin.orderValidator()).to.be.equal(
       await OrderValidatorAsDeployer.getAddress()
     );
-    expect(await ExchangeContractAsAdmin.nativeMeta()).to.be.equal(true);
-    expect(await ExchangeContractAsAdmin.nativeOrder()).to.be.equal(true);
     expect(await ExchangeContractAsAdmin.getTrustedForwarder()).to.be.equal(
       await TrustedForwarder.getAddress()
     );
@@ -49,25 +47,6 @@ describe('Exchange.sol settings', function () {
         'setOrderValidatorContract',
         'OrderValidatorSet'
       );
-      it('should update native order', async function () {
-        const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
-        expect(await ExchangeContractAsAdmin.nativeMeta()).to.be.equal(true);
-        expect(await ExchangeContractAsAdmin.nativeOrder()).to.be.equal(true);
-        await expect(ExchangeContractAsAdmin.updateNative(false, false))
-          .to.emit(ExchangeContractAsAdmin, 'NativeUpdated')
-          .withArgs(false, false);
-        expect(await ExchangeContractAsAdmin.nativeMeta()).to.be.equal(false);
-        expect(await ExchangeContractAsAdmin.nativeOrder()).to.be.equal(false);
-      });
-      it('should not update native order if caller is not owner', async function () {
-        const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
-          await loadFixture(deployFixtures);
-        await expect(
-          ExchangeContractAsUser.updateNative(false, false)
-        ).to.be.revertedWith(
-          `AccessControl: account ${user.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
-        );
-      });
       it('should not set trusted forwarder if caller is not owner', async function () {
         const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
           await loadFixture(deployFixtures);
