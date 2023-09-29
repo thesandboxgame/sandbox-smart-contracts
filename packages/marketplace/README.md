@@ -57,6 +57,21 @@ flowchart
    TransferManager-->RoyaltiesRegistry
 ```
 
+Also, the contracts use a set of libraries as helper.
+
+Library | Description
+---------|----------
+ LibFill | Calculate the amount exchanged between 2 orders, and how orders are filled
+ LibOrderDataGeneric | Help manipulating the data (payouts, fees) of an order
+ LibAsset | Contains the structures, constants and hash functions related to an asset (ERC20, ERC1155, ERC721)
+ BpLibrary | Base Point calculation library
+ LibMath | Rounding calculation library
+ LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order
+ LibPart | Library for the parts receiving fees or royalties
+ LibRoyalties2981 | Library for constants and functions related to ERC2891
+ LibDeal | Define the structure that represents the data of each side of a deal (tokens, payouts)
+ LibFeeSide | Helps defining which side of the exchange is paying the fee
+
 ## Running the project locally
 
 Install dependencies with
