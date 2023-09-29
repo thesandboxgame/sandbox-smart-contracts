@@ -73,7 +73,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     function __ExchangeCoreInitialize(
         IOrderValidator newOrderValidatorAddress,
         IAssetMatcher newAssetMatcher
-    ) internal {
+    ) internal onlyInitializing {
         _setOrderValidatorContract(newOrderValidatorAddress);
         _setAssetMatcherContract(newAssetMatcher);
     }

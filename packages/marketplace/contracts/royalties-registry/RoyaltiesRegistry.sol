@@ -49,6 +49,12 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     uint256 internal constant ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT = 4;
     uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;
 
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Royalties registry initializer
     // solhint-disable-next-line func-name-mixedcase
     function __RoyaltiesRegistry_init() external initializer {

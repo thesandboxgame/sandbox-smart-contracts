@@ -26,6 +26,12 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @return hash for EXCHANGE_ADMIN_ROLE
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
 
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Exchange contract initializer
     /// @param admin the admin user that can grant/revoke roles, etc.
     /// @param newTrustedForwarder address for trusted forwarder that will execute meta transactions
