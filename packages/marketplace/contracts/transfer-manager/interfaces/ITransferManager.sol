@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.21;
 
-import {LibDeal, LibFeeSide} from "../lib/LibDeal.sol";
+import {LibDeal} from "../lib/LibDeal.sol";
+import {LibFeeSide} from "../lib/LibFeeSide.sol";
 import {ITransferExecutor} from "./ITransferExecutor.sol";
 
 abstract contract ITransferManager is ITransferExecutor {
