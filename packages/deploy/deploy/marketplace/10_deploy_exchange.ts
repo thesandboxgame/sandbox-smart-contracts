@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, upgradeAdmin, exchangeFeeRecipient} =
+  const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
   let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER');
@@ -17,32 +17,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
+  const assetMatcher = await deployments.get('AssetMatcher');
 
-  // TODO: Do we need oll the combinations of flags ? Can we have two deployments scripts with different tags each ?
-  // TODO: to be fetched from env?
-  const deployMeta = process.env.DEPLOY_META;
-  const nativeOrder = process.env.NATIVE_ORDER;
-  const metaNative = process.env.META_NATIVE;
-
-  const contract = deployMeta ? 'ExchangeMeta' : 'Exchange';
+  const newProtocolFeePrimary = 0;
+  const newProtocolFeeSecondary = 250;
 
   await deploy('Exchange', {
     from: deployer,
-    contract: `@sandbox-smart-contracts/marketplace/contracts/exchange/${contract}.sol:${contract}`,
+    contract: `@sandbox-smart-contracts/marketplace/contracts/exchange/Exchange.sol:Exchange`,
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: '__Exchange_init',
         args: [
+          sandAdmin,
           TRUSTED_FORWARDER.address,
-          0,
-          250,
+          newProtocolFeePrimary,
+          newProtocolFeeSecondary,
           exchangeFeeRecipient,
-          royaltiesRegistry,
+          royaltiesRegistry.address,
           orderValidator.address,
-          nativeOrder,
-          metaNative,
+          assetMatcher.address,
         ],
       },
       upgradeIndex: 0,
@@ -53,4 +49,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Exchange', 'Exchange_deploy'];
-func.dependencies = ['RoyaltiesRegistry_deploy', 'OrderValidator_deploy'];
+func.dependencies = [
+  'RoyaltiesRegistry_deploy',
+  'OrderValidator_deploy',
+  'AssetMatcher_deploy',
+];
