@@ -70,7 +70,7 @@ Library | Description
  LibPart | Library for the parts receiving fees or royalties
  LibRoyalties2981 | Library for constants and functions related to ERC2891
  LibDeal | Define the structure that represents the data of each side of a deal (tokens, payouts)
- LibFeeSide | Helps defining which side of the exchange is paying the fee
+ LibFeeSide | Helps defining which side of the exchange is paying for the fees
 
 ## Running the project locally
 
