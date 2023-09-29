@@ -28,6 +28,12 @@ Component | Description
  Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
  [TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
 
+The protocol is deployed on 4 different addresses:
+- Exchange
+- OrderValidator
+- AssetMatcher
+- RoyaltiesRegistry
+
 ```mermaid
 ---
 title: Deployments
