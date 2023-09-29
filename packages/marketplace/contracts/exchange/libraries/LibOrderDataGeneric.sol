@@ -9,22 +9,17 @@ import {LibPart} from "../../lib-part/LibPart.sol";
 library LibOrderDataGeneric {
     struct GenericOrderData {
         LibPart.Part[] payouts;
-        LibPart.Part[] originFees;
         bool isMakeFill;
-        uint256 maxFeesBasePoint;
     }
 
     function parse(LibOrder.Order memory order) internal pure returns (GenericOrderData memory dataOrder) {
         if (order.dataType == LibOrderData.SELL) {
             LibOrderData.DataSell memory data = abi.decode(order.data, (LibOrderData.DataSell));
             dataOrder.payouts = parsePayouts(data.payouts);
-            dataOrder.originFees = parseOriginFeeData(data.originFeeFirst, data.originFeeSecond);
             dataOrder.isMakeFill = true;
-            dataOrder.maxFeesBasePoint = data.maxFeesBasePoint;
         } else if (order.dataType == LibOrderData.BUY) {
             LibOrderData.DataBuy memory data = abi.decode(order.data, (LibOrderData.DataBuy));
             dataOrder.payouts = parsePayouts(data.payouts);
-            dataOrder.originFees = parseOriginFeeData(data.originFeeFirst, data.originFeeSecond);
             dataOrder.isMakeFill = false;
             // solhint-disable-next-line no-empty-blocks
         } else if (order.dataType == 0xffffffff) {} else {
