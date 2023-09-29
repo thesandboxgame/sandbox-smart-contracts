@@ -8,10 +8,6 @@ import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibTransfer} from "./lib/LibTransfer.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
-import {IERC1155LazyMint} from "../lazy-mint/erc-1155/IERC1155LazyMint.sol";
-import {LibERC721LazyMint} from "../lazy-mint/erc-721/LibERC721LazyMint.sol";
-import {IERC721LazyMint} from "../lazy-mint/erc-721/IERC721LazyMint.sol";
 import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 
 /// @title abstract contract for TransferExecutor
@@ -146,8 +142,6 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
                     ++i;
                 }
             }
-        } else {
-            lazyTransfer(asset, from, to);
         }
     }
 
@@ -184,27 +178,6 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
         bytes memory data
     ) internal {
         token.safeTransferFrom(from, to, id, value, data);
-    }
-
-    /// @notice function for lazy transfer
-    /// @param asset asset that will be lazy transferred
-    /// @param from address that minted token
-    /// @param to address that will receive tokens
-    function lazyTransfer(LibAsset.Asset memory asset, address from, address to) internal {
-        if (asset.assetType.assetClass == LibERC721LazyMint.ERC721_LAZY_ASSET_CLASS) {
-            require(asset.value == 1, "erc721 value error");
-            (address token, LibERC721LazyMint.Mint721Data memory data) = abi.decode(
-                asset.assetType.data,
-                (address, LibERC721LazyMint.Mint721Data)
-            );
-            IERC721LazyMint(token).transferFromOrMint(data, from, to);
-        } else if (asset.assetType.assetClass == LibERC1155LazyMint.ERC1155_LAZY_ASSET_CLASS) {
-            (address token, LibERC1155LazyMint.Mint1155Data memory data) = abi.decode(
-                asset.assetType.data,
-                (address, LibERC1155LazyMint.Mint1155Data)
-            );
-            IERC1155LazyMint(token).transferFromOrMint(data, from, to, asset.value);
-        }
     }
 
     uint256[49] private __gap;

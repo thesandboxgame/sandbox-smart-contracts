@@ -20,7 +20,6 @@ export const ERC1155_ASSET_CLASS = bytes4Keccak('ERC1155');
 // export const ERC1155_TSB_CLASS = bytes4Keccak('ERC1155_TSB');
 export const BUNDLE_ASSET_CLASS = bytes4Keccak('BUNDLE');
 
-// TODO: export const ERC721_LAZY_ASSET_CLASS = bytes4Keccak('ERC721_LAZY');
 export const ASSET_TYPE_TYPEHASH = keccak256(
   Buffer.from('AssetType(bytes4 assetClass,bytes data)')
 );
