@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.21;
 
-import {LibOrder, LibAsset} from "../lib-order/LibOrder.sol";
+import {LibOrder} from "../lib-order/LibOrder.sol";
 import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -45,10 +45,10 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param signature signature of order
     /// @param sender order sender
     function validate(LibOrder.Order memory order, bytes memory signature, address sender) public view {
-        if (order.makeAsset.assetType.assetClass != LibAsset.ETH_ASSET_CLASS) {
-            address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
-            verifyWhiteList(makeToken);
-        }
+        LibOrder.validateOrderTime(order);
+
+        address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
+        verifyWhiteList(makeToken);
 
         if (order.salt == 0) {
             if (order.maker != address(0)) {

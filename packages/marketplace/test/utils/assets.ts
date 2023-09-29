@@ -4,33 +4,31 @@
 // SEE: LibAsset.sol
 import {
   AbiCoder,
-  Numeric,
   BytesLike,
   Contract,
   keccak256,
+  Numeric,
   solidityPackedKeccak256,
 } from 'ethers';
-import {bytes4Keccak, HashSignature} from './signature';
 
-export const ETH_ASSET_CLASS = bytes4Keccak('ETH');
-export const ERC20_ASSET_CLASS = bytes4Keccak('ERC20');
-export const ERC721_ASSET_CLASS = bytes4Keccak('ERC721');
-export const ERC1155_ASSET_CLASS = bytes4Keccak('ERC1155');
-// export const ERC721_TSB_CLASS = bytes4Keccak('ERC721_TSB');
-// export const ERC1155_TSB_CLASS = bytes4Keccak('ERC1155_TSB');
-export const BUNDLE_ASSET_CLASS = bytes4Keccak('BUNDLE');
+export enum AssetClassType {
+  INVALID_ASSET_CLASS = '0x0',
+  ERC20_ASSET_CLASS = '0x1',
+  ERC721_ASSET_CLASS = '0x2',
+  ERC1155_ASSET_CLASS = '0x3',
+}
 
 export const ASSET_TYPE_TYPEHASH = keccak256(
-  Buffer.from('AssetType(bytes4 assetClass,bytes data)')
+  Buffer.from('AssetType(uint256 assetClass,bytes data)')
 );
 export const ASSET_TYPEHASH = keccak256(
   Buffer.from(
-    'Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)'
+    'Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
   )
 );
 
 export type AssetType = {
-  assetClass: HashSignature;
+  assetClass: AssetClassType;
   data: BytesLike;
 };
 
@@ -39,20 +37,12 @@ export type Asset = {
   value: Numeric;
 };
 
-export const AssetETH = (value: Numeric): Asset => ({
-  assetType: {
-    assetClass: ETH_ASSET_CLASS,
-    data: '0x',
-  },
-  value,
-});
-
 export const AssetERC20 = async (
   tokenContract: Contract,
   value: Numeric
 ): Promise<Asset> => ({
   assetType: {
-    assetClass: ERC20_ASSET_CLASS,
+    assetClass: AssetClassType.ERC20_ASSET_CLASS,
     data: AbiCoder.defaultAbiCoder().encode(
       ['address'],
       [await tokenContract.getAddress()]
@@ -66,7 +56,7 @@ export const AssetERC721 = async (
   tokenId: Numeric
 ): Promise<Asset> => ({
   assetType: {
-    assetClass: ERC721_ASSET_CLASS,
+    assetClass: AssetClassType.ERC721_ASSET_CLASS,
     data: AbiCoder.defaultAbiCoder().encode(
       ['address', 'uint256'],
       [await tokenContract.getAddress(), tokenId]
@@ -82,7 +72,7 @@ export const AssetERC1155 = async (
   value: Numeric
 ): Promise<Asset> => ({
   assetType: {
-    assetClass: ERC1155_ASSET_CLASS,
+    assetClass: AssetClassType.ERC1155_ASSET_CLASS,
     data: AbiCoder.defaultAbiCoder().encode(
       ['address', 'uint256'],
       [await tokenContract.getAddress(), tokenId]
@@ -138,13 +128,13 @@ export const AssetBundle = async (
 };
 
 export function hashAssetType(a: AssetType) {
-  if (a.assetClass.length !== 10) {
+  if (a.assetClass === AssetClassType.INVALID_ASSET_CLASS) {
     throw new Error('Invalid assetClass' + a.assetClass);
   }
   // There is aproblem with solidityPackedKeccak256 and byte4 =>  a.assetClass + '0'.repeat(56)
   return solidityPackedKeccak256(
-    ['bytes32', 'bytes32', 'bytes32'],
-    [ASSET_TYPE_TYPEHASH, a.assetClass + '0'.repeat(56), keccak256(a.data)]
+    ['bytes32', 'uint256', 'bytes32'],
+    [ASSET_TYPE_TYPEHASH, a.assetClass, keccak256(a.data)]
   );
 }
 

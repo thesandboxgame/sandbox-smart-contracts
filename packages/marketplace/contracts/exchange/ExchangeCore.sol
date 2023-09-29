@@ -122,20 +122,20 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     }
 
     /// @dev function, validate orders
-    /// @param from the message sender
+    /// @param sender the message sender
     /// @param orderLeft left order
     /// @param signatureLeft order left signature
     /// @param orderRight right order
     /// @param signatureRight order right signature
     function _validateOrders(
-        address from,
+        address sender,
         LibOrder.Order memory orderLeft,
         bytes memory signatureLeft,
         LibOrder.Order memory orderRight,
         bytes memory signatureRight
     ) internal view {
-        _validateFull(from, orderLeft, signatureLeft);
-        _validateFull(from, orderRight, signatureRight);
+        orderValidator.validate(orderLeft, signatureLeft, sender);
+        orderValidator.validate(orderRight, signatureRight, sender);
         if (orderLeft.taker != address(0)) {
             if (orderRight.maker != address(0)) require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
@@ -145,11 +145,11 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     }
 
     /// @notice matches valid orders and transfers their assets
-    /// @param from the message sender
+    /// @param sender the message sender
     /// @param orderLeft the left order of the match
     /// @param orderRight the right order of the match
     function _matchAndTransfer(
-        address from,
+        address sender,
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     ) internal {
@@ -162,7 +162,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             LibOrderDataGeneric.GenericOrderData memory leftOrderData,
             LibOrderDataGeneric.GenericOrderData memory rightOrderData,
             LibFill.FillResult memory newFill
-        ) = _parseOrdersSetFillEmitMatch(from, orderLeft, orderRight);
+        ) = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
             LibDeal.DealSide({
@@ -180,14 +180,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
-    /// @param from the message sender
+    /// @param sender the message sender
     /// @param orderLeft left order
     /// @param orderRight right order
     /// @return leftOrderData generic order data from left order
     /// @return rightOrderData generic order data from right order
     /// @return newFill fill result
     function _parseOrdersSetFillEmitMatch(
-        address from,
+        address sender,
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight
     )
@@ -202,17 +202,17 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
 
         if (orderLeft.maker == address(0)) {
-            orderLeft.maker = from;
+            orderLeft.maker = sender;
         }
         if (orderRight.maker == address(0)) {
-            orderRight.maker = from;
+            orderRight.maker = sender;
         }
 
         leftOrderData = LibOrderDataGeneric.parse(orderLeft);
         rightOrderData = LibOrderDataGeneric.parse(orderRight);
 
         newFill = _setFillEmitMatch(
-            from,
+            sender,
             orderLeft,
             orderRight,
             leftOrderKeyHash,
@@ -223,14 +223,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     }
 
     ///    @notice calculates fills for the matched orders and set them in "fills" mapping
-    ///    @param from the message sender
+    ///    @param sender the message sender
     ///    @param orderLeft left order of the match
     ///    @param orderRight right order of the match
     ///    @param leftMakeFill true if the left orders uses make-side fills, false otherwise
     ///    @param rightMakeFill true if the right orders uses make-side fills, false otherwise
     ///    @return newFill returns change in orders' fills by the match
     function _setFillEmitMatch(
-        address from,
+        address sender,
         LibOrder.Order memory orderLeft,
         LibOrder.Order memory orderRight,
         bytes32 leftOrderKeyHash,
@@ -261,7 +261,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         }
 
         emit Match({
-            from: from,
+            from: sender,
             leftHash: leftOrderKeyHash,
             rightHash: rightOrderKeyHash,
             newFill: newFill,
@@ -293,20 +293,9 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibOrder.Order memory orderRight
     ) internal view returns (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) {
         makeMatch = assetMatcher.matchAssets(orderLeft.makeAsset.assetType, orderRight.takeAsset.assetType);
-        require(makeMatch.assetClass != 0, "assets don't match");
+        require(makeMatch.assetClass != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "assets don't match");
         takeMatch = assetMatcher.matchAssets(orderLeft.takeAsset.assetType, orderRight.makeAsset.assetType);
-        require(takeMatch.assetClass != 0, "assets don't match");
-    }
-
-    /// @notice full validation of an order
-    /// @param from the message sender
-    /// @param order LibOrder.Order
-    /// @param signature order signature
-    /// @dev first validate time if order start and end are within the block timestamp
-    /// @dev validate signature if maker is different from sender
-    function _validateFull(address from, LibOrder.Order memory order, bytes memory signature) internal view {
-        LibOrder.validateOrderTime(order);
-        orderValidator.validate(order, signature, from);
+        require(takeMatch.assetClass != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "assets don't match");
     }
 
     uint256[49] private __gap;

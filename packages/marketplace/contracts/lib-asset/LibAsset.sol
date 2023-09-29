@@ -7,24 +7,19 @@ pragma solidity 0.8.21;
 /// @dev Asset represents any asset on ethereum blockchain.
 /// @dev AssetType is a type of a specific asset
 library LibAsset {
-    bytes4 public constant ETH_ASSET_CLASS = bytes4(keccak256("ETH"));
-    bytes4 public constant ERC20_ASSET_CLASS = bytes4(keccak256("ERC20"));
-    bytes4 public constant ERC721_ASSET_CLASS = bytes4(keccak256("ERC721"));
-    bytes4 public constant ERC1155_ASSET_CLASS = bytes4(keccak256("ERC1155"));
-    // TODO: Unused ?
-    bytes4 public constant ERC721_TSB_CLASS = bytes4(keccak256("ERC721_TSB"));
-    // TODO: Unused ?
-    bytes4 public constant ERC1155_TSB_CLASS = bytes4(keccak256("ERC1155_TSB"));
-    // TODO: rename to BUNDLE_ASSET_CLASS ?
-    bytes4 public constant BUNDLE = bytes4(keccak256("BUNDLE"));
-
-    bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(bytes4 assetClass,bytes data)");
+    enum AssetClassType {
+        INVALID_ASSET_CLASS,
+        ERC20_ASSET_CLASS,
+        ERC721_ASSET_CLASS,
+        ERC1155_ASSET_CLASS
+    }
+    bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
 
     bytes32 internal constant ASSET_TYPEHASH =
-        keccak256("Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)");
+        keccak256("Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)");
 
     struct AssetType {
-        bytes4 assetClass;
+        LibAsset.AssetClassType assetClass;
         bytes data;
     }
 
