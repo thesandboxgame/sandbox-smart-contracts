@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.21;
 
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
@@ -55,9 +56,9 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
             if (from == address(this)) {
-                require(IERC20Upgradeable(token).transfer(to, asset.value), "erc20 transfer failed");
+                SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(token), to, asset.value);
             } else {
-                erc20safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
+                SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
             }
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
@@ -68,15 +69,6 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
                 erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
             }
         }
-    }
-
-    /// @notice function for safe transfer of ERC20 tokens
-    /// @param token ERC20 token to be transferred
-    /// @param from address from which tokens will be taken
-    /// @param to address that will receive tokens
-    /// @param value how many tokens are going to be transferred
-    function erc20safeTransferFrom(IERC20Upgradeable token, address from, address to, uint256 value) internal {
-        require(token.transferFrom(from, to, value), "failure while transferring");
     }
 
     /// @notice function for safe transfer of ERC721 tokens
