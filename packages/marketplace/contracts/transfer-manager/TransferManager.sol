@@ -8,10 +8,9 @@ import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
-import {ITransferManager, LibDeal} from "./interfaces/ITransferManager.sol";
+import {ITransferManager, LibDeal, LibFeeSide} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
-import {LibFeeSide} from "./lib/LibFeeSide.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets
