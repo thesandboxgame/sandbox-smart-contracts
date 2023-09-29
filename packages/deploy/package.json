@@ -15,7 +15,7 @@
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "private": true,
     "dependencies": {
-        "@sandbox-smart-contracts/giveaway": "*"
+        "@sandbox-smart-contracts/giveaway": "0.0.3"
     },
     "files": [
         "deployments"
@@ -60,7 +60,7 @@
         "eslint-plugin-mocha": "^10.1.0",
         "eslint-plugin-prettier": "^4.2.1",
         "ethers": "5",
-        "hardhat": "^2.16.0",
+        "hardhat": "~2.15.0",
         "hardhat-deploy": "^0.11.30",
         "prettier": "^2.8.8",
         "ts-node": "^10.9.1",

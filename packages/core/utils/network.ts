@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export function node_url(networkName: string): string {
   if (networkName) {
@@ -77,10 +77,7 @@ export async function skipUnlessTestnet(
 
 // Helper function to fix a bug in hardhat-deploy for the "hardhat" network.
 export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
-  return (
-    (hre.network.tags && hre.network.tags[key]) ||
-    (hre.network.config.tags && hre.network.config.tags.includes(key))
-  );
+  return hre.network.tags?.[key] || hre.network.config.tags?.includes(key);
 }
 
 export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
@@ -88,9 +85,18 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
 }
 
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
-  return (
-    hre.network.name === HARDHAT_NETWORK_NAME ||
-    hre.network.name === 'localhost' ||
-    !!process.env.HARDHAT_FORK
-  );
+  if (shouldSkipTestDeployments()) return false;
+  return isTestNetwork(hre) || isFork();
+}
+
+function shouldSkipTestDeployments(): boolean {
+  return !!process.env.SKIP_TEST_DEPLOYMENTS;
+}
+
+function isTestNetwork(hre: HardhatRuntimeEnvironment): boolean {
+  return [HARDHAT_NETWORK_NAME, 'localhost'].includes(hre.network.name);
+}
+
+function isFork(): boolean {
+  return !!process.env.HARDHAT_FORK;
 }
