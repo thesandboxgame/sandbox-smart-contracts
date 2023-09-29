@@ -3,8 +3,6 @@
 pragma solidity 0.8.21;
 
 import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {LibERC721LazyMint} from "../lazy-mint/erc-721/LibERC721LazyMint.sol";
-import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
@@ -211,7 +209,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         return result;
     }
 
-    /// @notice calculates royalties by asset type. If it's a lazy NFT, then royalties are extracted from asset. otherwise using royaltiesRegistry
+    /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
     function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
@@ -221,18 +219,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         ) {
             (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
             return royaltiesRegistry.getRoyalties(token, tokenId);
-        } else if (nftAssetType.assetClass == LibERC1155LazyMint.ERC1155_LAZY_ASSET_CLASS) {
-            (, LibERC1155LazyMint.Mint1155Data memory data) = abi.decode(
-                nftAssetType.data,
-                (address, LibERC1155LazyMint.Mint1155Data)
-            );
-            return data.royalties;
-        } else if (nftAssetType.assetClass == LibERC721LazyMint.ERC721_LAZY_ASSET_CLASS) {
-            (, LibERC721LazyMint.Mint721Data memory data) = abi.decode(
-                nftAssetType.data,
-                (address, LibERC721LazyMint.Mint721Data)
-            );
-            return data.royalties;
         }
         LibPart.Part[] memory empty;
         return empty;
