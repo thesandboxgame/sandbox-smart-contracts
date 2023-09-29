@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.21;
 
-import {ITransferManager, LibDeal, LibFeeSide} from "../../transfer-manager/interfaces/ITransferManager.sol";
+import {ITransferManager, LibDeal, LibFeeSide} from "../transfer-manager/interfaces/ITransferManager.sol";
 
 abstract contract SimpleTransferManager is ITransferManager {
     function doTransfers(
