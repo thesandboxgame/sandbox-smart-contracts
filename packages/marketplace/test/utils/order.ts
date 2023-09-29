@@ -138,6 +138,27 @@ export function hashKey(order: Order): string {
   return keccak256(encoded);
 }
 
+export const getSymmetricOrder = async (
+  o: Order,
+  taker?: Signer
+): Promise<Order> => {
+  const ret = {
+    ...o,
+    makeAsset: o.takeAsset,
+    taker: o.maker,
+    takeAsset: o.makeAsset,
+  };
+  if (taker) {
+    return {...ret, maker: await taker.getAddress()};
+  }
+  if (o.taker === ZeroAddress) {
+    throw new Error(
+      'Original order was for anybody, the taker is needed to create the order'
+    );
+  }
+  return {...ret, maker: o.taker};
+};
+
 // TODO: Test it.
 export function hashOrder(order: Order): string {
   const encoded = AbiCoder.defaultAbiCoder().encode(

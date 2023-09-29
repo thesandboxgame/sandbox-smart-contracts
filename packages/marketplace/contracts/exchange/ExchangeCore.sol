@@ -18,6 +18,15 @@ import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferManager {
     using LibTransfer for address payable;
 
+    // a list of left/right orders that match each other
+    // left and right are symmetrical except for fees that are taken from left side first.
+    struct ExchangeMatch {
+        LibOrder.Order orderLeft; // left order
+        bytes signatureLeft; // signature for the left order
+        LibOrder.Order orderRight; // right order
+        bytes signatureRight; // signature for the right order
+    }
+
     /// @notice AssetMatcher contract
     /// @return AssetMatcher address
     IAssetMatcher public assetMatcher;
@@ -172,6 +181,20 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
         _validateFull(from, buyOrder, direct.bidSignature);
         _matchAndTransfer(from, sellOrder, buyOrder);
+    }
+
+    /// @notice Match orders and transact
+    /// @param sender the original sender of the transaction
+    /// @param matchedOrders a list of left/right orders that match each other
+    /// @dev validate orders through validateOrders before matchAndTransfer
+    function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
+        uint256 len = matchedOrders.length;
+        require(len > 0, "invalid exchange match");
+        for (uint256 i; i < len; i++) {
+            ExchangeMatch calldata m = matchedOrders[i];
+            _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
+            _matchAndTransfer(sender, m.orderLeft, m.orderRight);
+        }
     }
 
     /// @dev function, validate orders

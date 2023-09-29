@@ -60,36 +60,19 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     }
 
     /// @notice Match orders and transact
-    /// @param orderLeft left order
-    /// @param signatureLeft signature for the left order
-    /// @param orderRight right signature
-    /// @param signatureRight signature for the right order
-    /// @dev validate orders through validateOrders before matchAndTransfer
-    function matchOrders(
-        LibOrder.Order calldata orderLeft,
-        bytes calldata signatureLeft,
-        LibOrder.Order calldata orderRight,
-        bytes calldata signatureRight
-    ) external payable {
-        _validateOrders(_msgSender(), orderLeft, signatureLeft, orderRight, signatureRight);
-        _matchAndTransfer(_msgSender(), orderLeft, orderRight);
+    /// @param matchedOrders a list of left/right orders that match each other
+    function matchOrders(ExchangeMatch[] calldata matchedOrders) external {
+        _matchOrders(_msgSender(), matchedOrders);
     }
 
     /// @notice Match orders and transact
-    /// @param orderLeft left order
-    /// @param signatureLeft signature for the left order
-    /// @param orderRight right signature
-    /// @param signatureRight signature for the right order
-    /// @dev validate orders through validateOrders before matchAndTransfer
+    /// @param sender the original sender of the transaction
+    /// @param matchedOrders a list of left/right orders that match each other
     function matchOrdersFrom(
-        address from,
-        LibOrder.Order calldata orderLeft,
-        bytes calldata signatureLeft,
-        LibOrder.Order calldata orderRight,
-        bytes calldata signatureRight
-    ) external payable onlyRole(ERC1776_OPERATOR_ROLE) {
-        _validateOrders(from, orderLeft, signatureLeft, orderRight, signatureRight);
-        _matchAndTransfer(from, orderLeft, orderRight);
+        address sender,
+        ExchangeMatch[] calldata matchedOrders
+    ) external onlyRole(ERC1776_OPERATOR_ROLE) {
+        _matchOrders(sender, matchedOrders);
     }
 
     /// @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
