@@ -1,5 +1,5 @@
 import {Contract, keccak256, Signer} from 'ethers';
-import {Order, OrderBack} from './order';
+import {Order} from './order';
 
 export type HashSignature = string;
 
@@ -22,7 +22,7 @@ export async function signOrder(
     },
     {
       AssetType: [
-        {name: 'assetClass', type: 'bytes4'},
+        {name: 'assetClass', type: 'uint256'},
         {name: 'data', type: 'bytes'},
       ],
       Asset: [
@@ -30,45 +30,6 @@ export async function signOrder(
         {name: 'value', type: 'uint256'},
       ],
       Order: [
-        {name: 'maker', type: 'address'},
-        {name: 'makeAsset', type: 'Asset'},
-        {name: 'taker', type: 'address'},
-        {name: 'takeAsset', type: 'Asset'},
-        {name: 'salt', type: 'uint256'},
-        {name: 'start', type: 'uint256'},
-        {name: 'end', type: 'uint256'},
-        {name: 'dataType', type: 'bytes4'},
-        {name: 'data', type: 'bytes'},
-      ],
-    },
-    order
-  );
-}
-
-export async function signOrderBack(
-  order: OrderBack,
-  account: Signer,
-  verifyingContract: Contract
-) {
-  const network = await verifyingContract.runner?.provider?.getNetwork();
-  return account.signTypedData(
-    {
-      name: 'Exchange',
-      version: '1',
-      chainId: network.chainId,
-      verifyingContract: await verifyingContract.getAddress(),
-    },
-    {
-      AssetType: [
-        {name: 'assetClass', type: 'bytes4'},
-        {name: 'data', type: 'bytes'},
-      ],
-      Asset: [
-        {name: 'assetType', type: 'AssetType'},
-        {name: 'value', type: 'uint256'},
-      ],
-      OrderBack: [
-        {name: 'buyer', type: 'address'},
         {name: 'maker', type: 'address'},
         {name: 'makeAsset', type: 'Asset'},
         {name: 'taker', type: 'address'},

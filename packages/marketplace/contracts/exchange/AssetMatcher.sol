@@ -3,26 +3,11 @@
 pragma solidity 0.8.21;
 
 import {IAssetMatcher, LibAsset} from "../interfaces/IAssetMatcher.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title AssetMatcher contract
 /// @notice matchAssets function should calculate if Asset types match with each other
-contract AssetMatcher is Ownable, IAssetMatcher {
+contract AssetMatcher is IAssetMatcher {
     bytes internal constant EMPTY = "";
-    mapping(bytes4 => address) internal matchers;
-
-    /// @notice event emitted when an AssetMacher is set
-    /// @param assetType represented by bytes4
-    /// @param matcher address of the matcher
-    event MatcherChange(bytes4 indexed assetType, address indexed matcher);
-
-    /// @notice set AssetMacher
-    /// @param assetType to be matched by the matcher contract
-    /// @param matcher address of the matcher
-    function setAssetMatcher(bytes4 assetType, address matcher) external onlyOwner {
-        matchers[assetType] = matcher;
-        emit MatcherChange(assetType, matcher);
-    }
 
     /// @notice calculate if Asset types match with each other
     /// @param leftAssetType to be matched with rightAssetType
@@ -31,55 +16,15 @@ contract AssetMatcher is Ownable, IAssetMatcher {
     function matchAssets(
         LibAsset.AssetType memory leftAssetType,
         LibAsset.AssetType memory rightAssetType
-    ) external view returns (LibAsset.AssetType memory) {
-        LibAsset.AssetType memory result = matchAssetOneSide(leftAssetType, rightAssetType);
-        if (result.assetClass == 0) {
-            return matchAssetOneSide(rightAssetType, leftAssetType);
-        } else {
-            return result;
-        }
-    }
-
-    function matchAssetOneSide(
-        LibAsset.AssetType memory leftAssetType,
-        LibAsset.AssetType memory rightAssetType
-    ) private view returns (LibAsset.AssetType memory) {
-        bytes4 classLeft = leftAssetType.assetClass;
-        bytes4 classRight = rightAssetType.assetClass;
-        require(classLeft != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
-        require(classRight != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
-        if (classLeft == LibAsset.ERC20_ASSET_CLASS) {
-            if (classRight == LibAsset.ERC20_ASSET_CLASS) {
-                return simpleMatch(leftAssetType, rightAssetType);
-            }
-            return LibAsset.AssetType(0, EMPTY);
-        }
-        if (classLeft == LibAsset.ERC721_ASSET_CLASS) {
-            if (classRight == LibAsset.ERC721_ASSET_CLASS) {
-                return simpleMatch(leftAssetType, rightAssetType);
-            }
-            return LibAsset.AssetType(0, EMPTY);
-        }
-        if (classLeft == LibAsset.ERC1155_ASSET_CLASS) {
-            if (classRight == LibAsset.ERC1155_ASSET_CLASS) {
-                return simpleMatch(leftAssetType, rightAssetType);
-            }
-            return LibAsset.AssetType(0, EMPTY);
-        }
-        if (classLeft == LibAsset.BUNDLE) {
-            if (classRight == LibAsset.BUNDLE) {
-                return simpleMatch(leftAssetType, rightAssetType);
-            }
-            return LibAsset.AssetType(0, EMPTY);
-        }
-        address matcher = matchers[classLeft];
-        if (matcher != address(0)) {
-            return IAssetMatcher(matcher).matchAssets(leftAssetType, rightAssetType);
-        }
+    ) external pure returns (LibAsset.AssetType memory) {
+        LibAsset.AssetClassType classLeft = leftAssetType.assetClass;
+        LibAsset.AssetClassType classRight = rightAssetType.assetClass;
+        require(classLeft != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
+        require(classRight != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
         if (classLeft == classRight) {
             return simpleMatch(leftAssetType, rightAssetType);
         }
-        revert("not found IAssetMatcher");
+        return LibAsset.AssetType(LibAsset.AssetClassType.INVALID_ASSET_CLASS, EMPTY);
     }
 
     function simpleMatch(
@@ -91,6 +36,6 @@ contract AssetMatcher is Ownable, IAssetMatcher {
         if (leftHash == rightHash) {
             return leftAssetType;
         }
-        return LibAsset.AssetType(0, EMPTY);
+        return LibAsset.AssetType(LibAsset.AssetClassType.INVALID_ASSET_CLASS, EMPTY);
     }
 }

@@ -10,7 +10,7 @@ import {LibMath} from "./LibMath.sol";
 library LibOrder {
     bytes32 internal constant ORDER_TYPEHASH =
         keccak256(
-            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end,bytes4 dataType,bytes data)Asset(AssetType assetType,uint256 value)AssetType(bytes4 assetClass,bytes data)"
+            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end,bytes4 dataType,bytes data)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
 
     bytes4 internal constant DEFAULT_ORDER_TYPE = 0xffffffff;
