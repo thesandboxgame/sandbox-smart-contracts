@@ -230,10 +230,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
         // TODO: this force me to pass from, do we want it ? 
         // answer it was cut out with native orders
-
-        // TODO: keep this here or verify in asset matcher?
-        require(makeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "maker cannot transfer native token");
-        require(takeMatch.assetClass != LibAsset.ETH_ASSET_CLASS, "taker cannot transfer native token");
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
