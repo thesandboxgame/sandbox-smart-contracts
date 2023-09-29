@@ -7,7 +7,7 @@ import {LibFill} from "./libraries/LibFill.sol";
 import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferExecutor, LibTransfer} from "../transfer-manager/TransferExecutor.sol";
-import {LibDeal, LibPart, LibAsset} from "../transfer-manager/lib/LibDeal.sol";
+import {LibDeal, LibAsset} from "../transfer-manager/lib/LibDeal.sol";
 import {LibFeeSide} from "../transfer-manager/lib/LibFeeSide.sol";
 import {LibOrderDataGeneric, LibOrder, LibOrderData} from "./libraries/LibOrderDataGeneric.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
@@ -317,68 +317,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             leftOrderData.isMakeFill,
             rightOrderData.isMakeFill
         );
-    }
-
-    ///    @notice determines the max amount of fees for the match
-    ///    @param dataTypeLeft data type of the left order
-    ///    @param dataTypeRight data type of the right order
-    ///    @param leftOrderData data of the left order
-    ///    @param rightOrderData data of the right order
-    ///    @param feeSide fee side of the match
-    ///    @return max fee amount in base points
-    function getMaxFee(
-        bytes4 dataTypeLeft,
-        bytes4 dataTypeRight,
-        LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-        LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-        LibFeeSide.FeeSide feeSide
-    ) internal pure returns (uint256) {
-        if (
-            dataTypeLeft != LibOrderData.SELL &&
-            dataTypeRight != LibOrderData.SELL &&
-            dataTypeLeft != LibOrderData.BUY &&
-            dataTypeRight != LibOrderData.BUY
-        ) {
-            return 0;
-        }
-
-        uint256 matchFees = getSumFees(leftOrderData.originFees, rightOrderData.originFees);
-        uint256 maxFee;
-        if (feeSide == LibFeeSide.FeeSide.LEFT) {
-            maxFee = rightOrderData.maxFeesBasePoint;
-            require(dataTypeLeft == LibOrderData.BUY && dataTypeRight == LibOrderData.SELL, "wrong V3 type1");
-        } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
-            maxFee = leftOrderData.maxFeesBasePoint;
-            require(dataTypeRight == LibOrderData.BUY && dataTypeLeft == LibOrderData.SELL, "wrong V3 type2");
-        } else {
-            return 0;
-        }
-        require(maxFee > 0 && maxFee >= matchFees && maxFee <= 1000, "wrong maxFee");
-
-        return maxFee;
-    }
-
-    ///    @notice calculates amount of fees for the match
-    ///    @param originLeft origin fees of the left order
-    ///    @param originRight origin fees of the right order
-    ///    @return sum of all fees for the match (protcolFee + leftOrder.originFees + rightOrder.originFees)
-    function getSumFees(
-        LibPart.Part[] memory originLeft,
-        LibPart.Part[] memory originRight
-    ) internal pure returns (uint256) {
-        uint256 result = 0;
-
-        //adding left origin fees
-        for (uint256 i; i < originLeft.length; i++) {
-            result = result + originLeft[i].value;
-        }
-
-        //adding right origin fees
-        for (uint256 i; i < originRight.length; i++) {
-            result = result + originRight[i].value;
-        }
-
-        return result;
     }
 
     ///    @notice calculates fills for the matched orders and set them in "fills" mapping

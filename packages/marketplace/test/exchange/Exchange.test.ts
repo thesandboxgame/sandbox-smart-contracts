@@ -181,7 +181,7 @@ describe('Exchange.sol', function () {
     );
 
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(200);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(195);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
   });
@@ -260,7 +260,7 @@ describe('Exchange.sol', function () {
       100
     );
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(maker.address);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(98);
   });
 
   it('should execute a complete match order between ERC20 and ERC1155 tokens', async function () {
@@ -340,7 +340,7 @@ describe('Exchange.sol', function () {
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(98);
   });
 
   it('should execute a complete match order between ERC721 and ERC20 tokens', async function () {
@@ -416,7 +416,7 @@ describe('Exchange.sol', function () {
       1
     );
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
-    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(98);
   });
 
   it('should execute a complete match order between ERC1155 and ERC20 tokens', async function () {
@@ -496,7 +496,7 @@ describe('Exchange.sol', function () {
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(98);
   });
 
   it('should partially fill orders using matchOrders between ERC20 tokens', async function () {
@@ -579,7 +579,7 @@ describe('Exchange.sol', function () {
       50
     );
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(50);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(49);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
   });
@@ -662,7 +662,7 @@ describe('Exchange.sol', function () {
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(5);
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(5);
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(50);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(49);
   });
 
   it('should fully fill a order using partial matches between ERC20 tokens', async function () {
@@ -745,7 +745,7 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.fills(hashKey(rightOrderForFirstMatch))
     ).to.be.equal(50);
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(50);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(49);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
 
@@ -776,7 +776,7 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.fills(hashKey(rightOrderForSecondMatch))
     ).to.be.equal(50);
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(98);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(200);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
   });
@@ -860,7 +860,7 @@ describe('Exchange.sol', function () {
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(5);
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(5);
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(50);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(49);
     const rightOrderForSecondMatch = await OrderDefault(
       taker,
       takerAssetForRightOrder,
@@ -890,7 +890,7 @@ describe('Exchange.sol', function () {
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(98);
   });
 
   it('should revert matchOrders on mismatched asset types', async function () {

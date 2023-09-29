@@ -140,6 +140,9 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             paymentSide.from
         );
 
+        LibPart.Part[] memory origin = new LibPart.Part[](1);
+        origin[0].account = payable(defaultFeeReceiver);
+
         bool primaryMarket = false;
 
         // check if primary or secondary market
@@ -158,6 +161,14 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
         }
+
+        if (primaryMarket) {
+            origin[0].value = uint96(protocolFeePrimary);
+        } else {
+            origin[0].value = uint96(protocolFeeSecondary);
+        }
+
+        (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
