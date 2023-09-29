@@ -18,6 +18,12 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
 
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice initializer for OrderValidator
     /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
     /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract

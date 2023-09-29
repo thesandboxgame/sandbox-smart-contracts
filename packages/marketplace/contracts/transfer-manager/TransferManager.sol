@@ -61,7 +61,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 newProtocolFeeSecondary,
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider
-    ) internal {
+    ) internal onlyInitializing {
+        __ERC165_init();
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
