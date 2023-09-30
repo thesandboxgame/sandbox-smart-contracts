@@ -414,6 +414,96 @@ describe('Exchange.sol', function () {
     );
   });
 
+  it('should execute a complete match order between ERC721 and ERC20 tokens in primary market', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC721WithRoyaltyV2981,
+      defaultFeeReceiver,
+      deployer: maker, // making deployer the maker to sell in primary market
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+      await FeeRecipientsData(maker.address, 10000),
+    ]);
+
+    await ERC721WithRoyaltyV2981.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(taker.address, 100000000000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100000000000
+    );
+
+    expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      100000000000
+    );
+    const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+    const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+    const leftOrder = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      maker,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      taker,
+      OrderValidatorAsDeployer
+    );
+
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      0
+    );
+
+    await ExchangeContractAsUser.matchOrders(
+      leftOrder,
+      makerSig,
+      rightOrder,
+      takerSig
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      100000000000
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      1
+    );
+    expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(taker.address);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      98770000000
+    );
+
+    // check primary market protocol fee
+    expect(
+      await ERC20Contract.balanceOf(defaultFeeReceiver.address)
+    ).to.be.equal(1230000000); // 123 * 100000000000 / 10000 = 1230000000
+  });
+
   it('should execute a complete match order between ERC721 and ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,

@@ -106,10 +106,10 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibFeeSide.FeeSide feeSide
     ) internal override {
         if (feeSide == LibFeeSide.FeeSide.LEFT) {
-            doTransfersWithRoyalties(left, right);
+            doTransfersWithFees(left, right);
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
         } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
-            doTransfersWithRoyalties(right, left);
+            doTransfersWithFees(right, left);
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
         } else {
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
@@ -120,7 +120,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-    function doTransfersWithRoyalties(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
+    function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
         rest = transferRoyalties(
