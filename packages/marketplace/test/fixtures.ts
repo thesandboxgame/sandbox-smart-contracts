@@ -69,7 +69,7 @@ async function deploy() {
   );
 
   const TestERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
-    'TestERC721WithRoyaltyV2981'
+    'TestERC721WithRoyaltyV2981Multi'
   );
   const ERC721WithRoyaltyV2981 = await upgrades.deployProxy(
     TestERC721WithRoyaltyV2981Factory,
@@ -78,6 +78,7 @@ async function deploy() {
       initializer: 'initialize',
     }
   );
+  await ERC721WithRoyaltyV2981.waitForDeployment();
 
   const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
   const ERC20Contract = await ERC20ContractFactory.deploy();

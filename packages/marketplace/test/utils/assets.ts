@@ -7,6 +7,7 @@ import {
   Numeric,
   BytesLike,
   Contract,
+  AddressLike,
   keccak256,
   solidityPackedKeccak256,
 } from 'ethers';
@@ -30,6 +31,11 @@ export const ASSET_TYPEHASH = keccak256(
   )
 );
 
+export type FeeRecipients = {
+  recipient: AddressLike;
+  bps: Numeric;
+};
+
 export type AssetType = {
   assetClass: HashSignature;
   data: BytesLike;
@@ -46,6 +52,14 @@ export const AssetETH = (value: Numeric): Asset => ({
     data: '0x',
   },
   value,
+});
+
+export const FeeRecipientsData = async (
+  recipient: AddressLike,
+  bps: Numeric
+): Promise<FeeRecipients> => ({
+  recipient,
+  bps,
 });
 
 export const AssetERC20 = async (
