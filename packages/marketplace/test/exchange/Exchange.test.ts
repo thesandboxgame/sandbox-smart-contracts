@@ -18,6 +18,41 @@ import {ZeroAddress} from 'ethers';
 import {signOrder} from '../utils/signature';
 
 describe('Exchange.sol', function () {
+  it('should return the correct value of protocol fee', async function () {
+    const {
+      ExchangeContractAsDeployer,
+      protocolFeePrimary,
+      protocolFeeSecondary,
+    } = await loadFixture(deployFixtures);
+
+    expect(await ExchangeContractAsDeployer.protocolFeePrimary()).to.be.equal(
+      protocolFeePrimary
+    );
+    expect(await ExchangeContractAsDeployer.protocolFeeSecondary()).to.be.equal(
+      protocolFeeSecondary
+    );
+  });
+
+  it('should return the correct fee receiver address', async function () {
+    const {ExchangeContractAsDeployer, defaultFeeReceiver} = await loadFixture(
+      deployFixtures
+    );
+
+    expect(await ExchangeContractAsDeployer.defaultFeeReceiver()).to.be.equal(
+      defaultFeeReceiver.address
+    );
+  });
+
+  it('should return the correct royalty registry address', async function () {
+    const {ExchangeContractAsDeployer, RoyaltyRegistry} = await loadFixture(
+      deployFixtures
+    );
+
+    expect(await ExchangeContractAsDeployer.royaltiesRegistry()).to.be.equal(
+      await RoyaltyRegistry.getAddress()
+    );
+  });
+
   it('should not cancel the order if caller is not maker', async function () {
     const {ExchangeContractAsDeployer, user1, user2, ERC20Contract} =
       await loadFixture(deployFixtures);
