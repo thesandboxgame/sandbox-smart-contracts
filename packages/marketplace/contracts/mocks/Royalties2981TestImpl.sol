@@ -5,7 +5,6 @@ pragma solidity 0.8.21;
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
-import "hardhat/console.sol";
 
 contract Royalties2981TestImpl is IERC2981 {
     uint256 public royaltiesBasePoint;
