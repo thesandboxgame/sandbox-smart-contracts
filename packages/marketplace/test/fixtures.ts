@@ -91,6 +91,12 @@ async function deploy() {
   const ERC1155Contract = await ERC1155ContractFactory.deploy();
   await ERC1155Contract.waitForDeployment();
 
+  const RoyaltiesProviderFactory = await ethers.getContractFactory(
+    'RoyaltiesProviderTest'
+  );
+  const RoyaltiesProvider = await RoyaltiesProviderFactory.deploy();
+  await RoyaltiesProvider.waitForDeployment();
+
   const EXCHANGE_ADMIN_ROLE =
     await ExchangeContractAsAdmin.EXCHANGE_ADMIN_ROLE();
   const DEFAULT_ADMIN_ROLE = await ExchangeContractAsAdmin.DEFAULT_ADMIN_ROLE();
@@ -114,6 +120,7 @@ async function deploy() {
     RoyaltiesRegistryAsDeployer,
     RoyaltiesRegistryAsUser,
     ERC721WithRoyaltyV2981,
+    RoyaltiesProvider,
     deployer,
     admin,
     user,

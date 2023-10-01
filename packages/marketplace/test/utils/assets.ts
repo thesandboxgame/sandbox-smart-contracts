@@ -31,6 +31,11 @@ export const ASSET_TYPEHASH = keccak256(
   )
 );
 
+export type LibPart = {
+  account: AddressLike;
+  value: Numeric;
+};
+
 export type FeeRecipients = {
   recipient: AddressLike;
   bps: Numeric;
@@ -60,6 +65,14 @@ export const FeeRecipientsData = async (
 ): Promise<FeeRecipients> => ({
   recipient,
   bps,
+});
+
+export const LibPartData = async (
+  account: AddressLike,
+  value: Numeric
+): Promise<LibPart> => ({
+  account,
+  value,
 });
 
 export const AssetERC20 = async (
