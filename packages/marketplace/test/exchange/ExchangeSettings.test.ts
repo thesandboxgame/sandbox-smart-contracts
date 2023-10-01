@@ -10,7 +10,7 @@ describe('Exchange.sol settings', function () {
       protocolFeePrimary,
       protocolFeeSecondary,
       ExchangeContractAsAdmin,
-      RoyaltyRegistry,
+      RoyaltiesRegistryAsDeployer,
       assetMatcherAsUser,
       OrderValidatorAsDeployer,
       TrustedForwarder,
@@ -18,7 +18,7 @@ describe('Exchange.sol settings', function () {
     } = await loadFixture(deployFixtures);
 
     expect(await ExchangeContractAsAdmin.royaltiesRegistry()).to.be.equal(
-      await RoyaltyRegistry.getAddress()
+      await RoyaltiesRegistryAsDeployer.getAddress()
     );
     expect(await ExchangeContractAsAdmin.assetMatcher()).to.be.equal(
       await assetMatcherAsUser.getAddress()

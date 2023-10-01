@@ -5,19 +5,26 @@ pragma solidity 0.8.21;
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
+import "hardhat/console.sol";
 
 contract Royalties2981TestImpl is IERC2981 {
     uint256 public royaltiesBasePoint;
 
+    mapping(uint256 => address) public royaltiesReceiver;
+
     function setRoyalties(uint256 _value) public {
         royaltiesBasePoint = _value;
+    }
+
+    function setRoyaltiesReceiver(uint256 _tokenId, address _receiver) public {
+        royaltiesReceiver[_tokenId] = _receiver;
     }
 
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        receiver = address(uint160(_tokenId >> 96));
+        receiver = royaltiesReceiver[_tokenId];
         royaltyAmount = (_salePrice * royaltiesBasePoint) / 10000;
     }
 
