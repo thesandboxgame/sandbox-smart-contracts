@@ -13,10 +13,20 @@ async function deploy() {
     'TrustedForwarderMock'
   );
   const TrustedForwarder = await TrustedForwarderFactory.deploy();
-  const RoyaltyRegistryFactory = await ethers.getContractFactory(
-    'TestRoyaltiesRegistry'
+  const RoyaltiesRegistryFactory = await ethers.getContractFactory(
+    'RoyaltiesRegistry'
   );
-  const RoyaltyRegistry = await RoyaltyRegistryFactory.deploy();
+  const RoyaltiesRegistryAsDeployer = await upgrades.deployProxy(
+    RoyaltiesRegistryFactory,
+    [],
+    {
+      initializer: '__RoyaltiesRegistry_init',
+    }
+  );
+
+  const RoyaltiesRegistryAsUser = await RoyaltiesRegistryAsDeployer.connect(
+    user
+  );
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidator'
   );
@@ -40,7 +50,7 @@ async function deploy() {
       protocolFeePrimary,
       protocolFeeSecondary,
       defaultFeeReceiver.address,
-      await RoyaltyRegistry.getAddress(),
+      await RoyaltiesRegistryAsDeployer.getAddress(),
       await OrderValidatorAsDeployer.getAddress(),
       await assetMatcherAsDeployer.getAddress(),
     ],
@@ -52,20 +62,6 @@ async function deploy() {
   const ExchangeContractAsUser = await ExchangeContractAsDeployer.connect(user);
   const ExchangeContractAsAdmin = await ExchangeContractAsDeployer.connect(
     admin
-  );
-  const RoyaltiesRegistryFactory = await ethers.getContractFactory(
-    'RoyaltiesRegistry'
-  );
-  const RoyaltiesRegistryAsDeployer = await upgrades.deployProxy(
-    RoyaltiesRegistryFactory,
-    [],
-    {
-      initializer: '__RoyaltiesRegistry_init',
-    }
-  );
-
-  const RoyaltiesRegistryAsUser = await RoyaltiesRegistryAsDeployer.connect(
-    user
   );
 
   const TestERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
@@ -105,7 +101,6 @@ async function deploy() {
     DEFAULT_ADMIN_ROLE,
     assetMatcherAsDeployer,
     assetMatcherAsUser,
-    RoyaltyRegistry,
     ExchangeContractAsDeployer,
     ExchangeContractAsAdmin,
     ExchangeContractAsUser,
