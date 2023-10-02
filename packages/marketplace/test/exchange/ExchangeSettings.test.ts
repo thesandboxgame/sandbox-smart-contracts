@@ -47,7 +47,7 @@ describe('Exchange.sol settings', function () {
         'setOrderValidatorContract',
         'OrderValidatorSet'
       );
-      it('should not set trusted forwarder if caller is not owner', async function () {
+      it('should not set trusted forwarder if caller is not in the role', async function () {
         const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
           await loadFixture(deployFixtures);
         await expect(
@@ -66,8 +66,25 @@ describe('Exchange.sol settings', function () {
         );
       });
     });
+    describe('backoffice admin', function () {
+      it('should not pause if caller is not in the role', async function () {
+        const {ExchangeContractAsUser, BACKOFFICE_ROLE, user} =
+          await loadFixture(deployFixtures);
+        await expect(ExchangeContractAsUser.pause()).to.be.revertedWith(
+          `AccessControl: account ${user.address.toLowerCase()} is missing role ${BACKOFFICE_ROLE}`
+        );
+      });
+      it('should be able to pause the contract', async function () {
+        const {ExchangeContractAsAdmin, BACKOFFICE_ROLE, user2} =
+          await loadFixture(deployFixtures);
+        await ExchangeContractAsAdmin.grantRole(BACKOFFICE_ROLE, user2);
+        expect(await ExchangeContractAsAdmin.paused()).to.be.false;
+        await ExchangeContractAsAdmin.connect(user2).pause();
+        expect(await ExchangeContractAsAdmin.paused()).to.be.true;
+      });
+    });
     describe('exchange admin', function () {
-      it('should not set setProtocolFee if caller is not owner', async function () {
+      it('should not set setProtocolFee if caller is not in the role', async function () {
         const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
           await loadFixture(deployFixtures);
         const newProtocolFeePrimary = 123;
@@ -100,8 +117,32 @@ describe('Exchange.sol settings', function () {
           .to.emit(ExchangeContractAsAdmin, 'ProtocolFeeSet')
           .withArgs(newProtocolFeePrimary, newProtocolFeeSecondary);
       });
+      it('should not unpause if caller is not in the role', async function () {
+        const {ExchangeContractAsUser, EXCHANGE_ADMIN_ROLE, user} =
+          await loadFixture(deployFixtures);
+        await expect(ExchangeContractAsUser.unpause()).to.be.revertedWith(
+          `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
+        );
+      });
+      it('should be able to unpause the contract', async function () {
+        const {
+          ExchangeContractAsAdmin,
+          ExchangeContractAsUser,
+          BACKOFFICE_ROLE,
+          EXCHANGE_ADMIN_ROLE,
+          user,
+          user2,
+        } = await loadFixture(deployFixtures);
+        await ExchangeContractAsAdmin.grantRole(BACKOFFICE_ROLE, user2);
+        await ExchangeContractAsAdmin.grantRole(EXCHANGE_ADMIN_ROLE, user);
+
+        await ExchangeContractAsAdmin.connect(user2).pause();
+        expect(await ExchangeContractAsAdmin.paused()).to.be.true;
+        await ExchangeContractAsUser.unpause();
+        expect(await ExchangeContractAsAdmin.paused()).to.be.false;
+      });
     });
-    it('should not set setDefaultFeeReceiver if caller is not exchange admin', async function () {
+    it('should not set setDefaultFeeReceiver if caller is not in the role', async function () {
       const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
         await loadFixture(deployFixtures);
       await expect(
@@ -202,7 +243,7 @@ function shouldNotBeAbleToSetAsZero(name, err) {
 }
 
 function checkPermsForDefaultAdmin(name, eventName) {
-  it(`should not set ${name} if caller is not owner`, async function () {
+  it(`should not set ${name} if caller is not in the role`, async function () {
     const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
       await loadFixture(deployFixtures);
     await expect(ExchangeContractAsUser[name](user.address)).to.be.revertedWith(

@@ -42,7 +42,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
     /// @notice event signaling that an order was canceled
     /// @param  hash order hash
-    event Cancel(bytes32 indexed hash);
+    event Cancel(bytes32 indexed hash, LibOrder.Order order);
 
     /*     /// @notice event when orders match
     /// @param from _msgSender
@@ -97,14 +97,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
     /// @notice cancel order
     /// @param order to be canceled
-    /// @param orderHash used as a checksum to avoid mistakes in the values of order
+    /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
-    function _cancel(LibOrder.Order calldata order, bytes32 orderHash) internal {
+    function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) internal {
         require(order.salt != 0, "ExchangeCore: 0 salt can't be used");
-        bytes32 orderKeyHash = LibOrder.hashKey(order);
-        require(orderHash == orderKeyHash, "ExchangeCore: Invalid orderHash");
+        bytes32 _orderKeyHash = LibOrder.hashKey(order);
+        require(_orderKeyHash == orderKeyHash, "ExchangeCore: Invalid orderHash");
         fills[orderKeyHash] = UINT256_MAX;
-        emit Cancel(orderKeyHash);
+        emit Cancel(orderKeyHash, order);
     }
 
     /// @notice Match orders and transact
