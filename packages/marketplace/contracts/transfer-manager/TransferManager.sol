@@ -3,6 +3,7 @@
 pragma solidity 0.8.21;
 
 import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
@@ -14,10 +15,14 @@ import {LibPart} from "../lib-part/LibPart.sol";
 /// @notice responsible for transferring all Assets
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
-abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
+abstract contract TransferManager is ERC165Upgradeable, AccessControlUpgradeable, ITransferManager {
     using BpLibrary for uint;
 
     bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
+
+    /// @notice role to identify the sandbox accounts
+    /// @return hash for TSB_WALLET
+    bytes32 public constant TSB_WALLET = keccak256("TSB_WALLET");
 
     /// @notice fee for primary sales
     /// @return uint256 of primary sale fee
@@ -61,6 +66,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         IRoyaltiesProvider newRoyaltiesProvider
     ) internal onlyInitializing {
         __ERC165_init();
+        __AccessControl_init();
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
@@ -120,8 +126,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
     function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
-        uint256 rest = paymentSide.asset.value;
+        if (hasRole(TSB_WALLET, paymentSide.from)) {
+            return;
+        }
 
+        uint256 rest = paymentSide.asset.value;
         rest = transferRoyalties(
             paymentSide.asset.assetType,
             nftSide.asset.assetType,
@@ -306,6 +315,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             newValue = 0;
             realFee = value;
         }
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return
+            ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
     uint256[46] private __gap;
