@@ -1,7 +1,7 @@
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {AssetERC20, AssetETH} from '../utils/assets.ts';
+import {AssetERC20, AssetERC721} from '../utils/assets.ts';
 
 import {OrderDefault} from '../utils/order.ts';
 import {ZeroAddress} from 'ethers';
@@ -19,11 +19,10 @@ const ERC20Role =
 
 describe('OrderValidator.sol', function () {
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1} = await loadFixture(
-      deployFixtures
-    );
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1} =
+      await loadFixture(deployFixtures);
     const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetETH(100);
+    const takerAsset = await AssetERC721(ERC721Contract, 100);
     const order = await OrderDefault(
       user1,
       makerAsset,
@@ -39,10 +38,10 @@ describe('OrderValidator.sol', function () {
       .to.not.be.reverted;
   });
 
-  it('should revert validate when assetClass is ETH_ASSET_CLASS, salt is zero and Order maker is not sender', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1, user2} =
+  it('should revert validate when salt is zero and Order maker is not sender', async function () {
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
       await loadFixture(deployFixtures);
-    const makerAsset = await AssetETH(100);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
@@ -60,11 +59,10 @@ describe('OrderValidator.sol', function () {
     ).to.be.revertedWith('maker is not tx sender');
   });
 
-  it('should validate when assetClass is ETH_ASSET_CLASS, salt is zero and Order maker is sender', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1} = await loadFixture(
-      deployFixtures
-    );
-    const makerAsset = await AssetETH(100);
+  it('should validate when salt is zero and Order maker is sender', async function () {
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1} =
+      await loadFixture(deployFixtures);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
@@ -82,9 +80,9 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not validate when sender and signature signer is not Order maker', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1, user2} =
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
       await loadFixture(deployFixtures);
-    const makerAsset = await AssetETH(100);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
@@ -103,9 +101,9 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when sender is not Order maker but signature signer is Order maker', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, user1, user2} =
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
       await loadFixture(deployFixtures);
-    const makerAsset = await AssetETH(100);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,

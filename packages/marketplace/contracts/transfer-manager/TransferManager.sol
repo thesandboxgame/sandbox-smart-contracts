@@ -3,8 +3,6 @@
 pragma solidity 0.8.21;
 
 import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {LibERC721LazyMint} from "../lazy-mint/erc-721/LibERC721LazyMint.sol";
-import {LibERC1155LazyMint} from "../lazy-mint/erc-1155/LibERC1155LazyMint.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
@@ -61,7 +59,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 newProtocolFeeSecondary,
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider
-    ) internal {
+    ) internal onlyInitializing {
+        __ERC165_init();
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
@@ -139,8 +138,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
         // check if primary or secondary market
         if (
-            nftSide.asset.assetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftSide.asset.assetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftSide.asset.assetType.data, (address, uint));
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
@@ -185,8 +184,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibPart.Part[] memory royalties = getRoyaltiesByAssetType(nftAssetType);
 
         if (
-            nftAssetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool resultInterface) {
@@ -210,28 +209,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         return result;
     }
 
-    /// @notice calculates royalties by asset type. If it's a lazy NFT, then royalties are extracted from asset. otherwise using royaltiesRegistry
+    /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
     function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
         if (
-            nftAssetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
         ) {
             (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
             return royaltiesRegistry.getRoyalties(token, tokenId);
-        } else if (nftAssetType.assetClass == LibERC1155LazyMint.ERC1155_LAZY_ASSET_CLASS) {
-            (, LibERC1155LazyMint.Mint1155Data memory data) = abi.decode(
-                nftAssetType.data,
-                (address, LibERC1155LazyMint.Mint1155Data)
-            );
-            return data.royalties;
-        } else if (nftAssetType.assetClass == LibERC721LazyMint.ERC721_LAZY_ASSET_CLASS) {
-            (, LibERC721LazyMint.Mint721Data memory data) = abi.decode(
-                nftAssetType.data,
-                (address, LibERC721LazyMint.Mint721Data)
-            );
-            return data.royalties;
         }
         LibPart.Part[] memory empty;
         return empty;

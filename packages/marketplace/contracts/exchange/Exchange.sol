@@ -10,7 +10,6 @@ import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-met
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
-import {LibDirectTransfer} from "./libraries/LibDirectTransfer.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
@@ -26,6 +25,12 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @notice role business addresses that can change for example: fees and royalties
     /// @return hash for EXCHANGE_ADMIN_ROLE
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
+
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice Exchange contract initializer
     /// @param admin the admin user that can grant/revoke roles, etc.
@@ -60,54 +65,19 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     }
 
     /// @notice Match orders and transact
-    /// @param orderLeft left order
-    /// @param signatureLeft signature for the left order
-    /// @param orderRight right signature
-    /// @param signatureRight signature for the right order
-    /// @dev validate orders through validateOrders before matchAndTransfer
-    function matchOrders(
-        LibOrder.Order calldata orderLeft,
-        bytes calldata signatureLeft,
-        LibOrder.Order calldata orderRight,
-        bytes calldata signatureRight
-    ) external payable {
-        _validateOrders(_msgSender(), orderLeft, signatureLeft, orderRight, signatureRight);
-        _matchAndTransfer(_msgSender(), orderLeft, orderRight);
+    /// @param matchedOrders a list of left/right orders that match each other
+    function matchOrders(ExchangeMatch[] calldata matchedOrders) external {
+        _matchOrders(_msgSender(), matchedOrders);
     }
 
     /// @notice Match orders and transact
-    /// @param orderLeft left order
-    /// @param signatureLeft signature for the left order
-    /// @param orderRight right signature
-    /// @param signatureRight signature for the right order
-    /// @dev validate orders through validateOrders before matchAndTransfer
+    /// @param sender the original sender of the transaction
+    /// @param matchedOrders a list of left/right orders that match each other
     function matchOrdersFrom(
-        address from,
-        LibOrder.Order calldata orderLeft,
-        bytes calldata signatureLeft,
-        LibOrder.Order calldata orderRight,
-        bytes calldata signatureRight
-    ) external payable onlyRole(ERC1776_OPERATOR_ROLE) {
-        _validateOrders(from, orderLeft, signatureLeft, orderRight, signatureRight);
-        _matchAndTransfer(from, orderLeft, orderRight);
-    }
-
-    /// @dev function, generate sellOrder and buyOrder from parameters and call validateAndMatch() for accept bid transaction
-    /// @param direct struct with parameters for accept bid operation
-    function directAcceptBid(LibDirectTransfer.AcceptBid calldata direct) external payable {
-        _directAcceptBid(_msgSender(), direct);
-    }
-
-    /// @notice direct purchase orders - can handle bulk purchases
-    /// @param direct array of purchase order
-    /// @dev The buyer param was added so the function is compatible with Sand approveAndCall
-    function directPurchase(address buyer, LibDirectTransfer.Purchase[] calldata direct) external payable {
-        for (uint256 i; i < direct.length; ) {
-            _directPurchase(_msgSender(), buyer, direct[i]);
-            unchecked {
-                i++;
-            }
-        }
+        address sender,
+        ExchangeMatch[] calldata matchedOrders
+    ) external onlyRole(ERC1776_OPERATOR_ROLE) {
+        _matchOrders(sender, matchedOrders);
     }
 
     /// @notice cancel order
