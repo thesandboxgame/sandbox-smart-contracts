@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.21;
 
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -17,7 +18,14 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers
-contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
+contract Exchange is
+    Initializable,
+    AccessControlUpgradeable,
+    ExchangeCore,
+    TransferManager,
+    ERC2771HandlerUpgradeable,
+    PausableUpgradeable
+{
     /// @notice role erc1776 trusted meta transaction contracts (Sand for example).
     /// @return hash for ERC1776_OPERATOR_ROLE
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
@@ -25,6 +33,10 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @notice role business addresses that can change for example: fees and royalties
     /// @return hash for EXCHANGE_ADMIN_ROLE
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
+
+    /// @notice role business addresses that can react on an emergency, pause/unpause
+    /// @return hash for BACKOFFICE_ROLE
+    bytes32 public constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE");
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -52,8 +64,9 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         IOrderValidator orderValidatorAddress,
         IAssetMatcher newAssetMatcher
     ) external initializer {
-        __ERC2771Handler_init(newTrustedForwarder);
-        __AccessControl_init();
+        __ERC2771Handler_init_unchained(newTrustedForwarder);
+        __AccessControl_init_unchained();
+        __Pausable_init_unchained();
         __TransferManager_init_unchained(
             newProtocolFeePrimary,
             newProtocolFeeSecondary,
@@ -66,7 +79,7 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
 
     /// @notice Match orders and transact
     /// @param matchedOrders a list of left/right orders that match each other
-    function matchOrders(ExchangeMatch[] calldata matchedOrders) external {
+    function matchOrders(ExchangeMatch[] calldata matchedOrders) external whenNotPaused {
         _matchOrders(_msgSender(), matchedOrders);
     }
 
@@ -77,15 +90,17 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         address sender,
         ExchangeMatch[] calldata matchedOrders
     ) external onlyRole(ERC1776_OPERATOR_ROLE) {
+        require(sender != address(0), "invalid sender");
         _matchOrders(sender, matchedOrders);
     }
 
     /// @notice cancel order
     /// @param order to be canceled
+    /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
-    function cancel(LibOrder.Order calldata order, bytes32 orderHash) external {
+    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external {
         require(_msgSender() == order.maker, "ExchangeCore: not maker");
-        _cancel(order, orderHash);
+        _cancel(order, orderKeyHash);
     }
 
     /// @notice setter for royalty registry
@@ -128,9 +143,18 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    // @notice Triggers stopped state.
+    function pause() external onlyRole(BACKOFFICE_ROLE) {
+        _pause();
+    }
+
+    /// @notice Returns to normal state.
+    function unpause() external onlyRole(EXCHANGE_ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /// @notice See {IERC165-supportsInterface}.
+    /// @param interfaceId interface id to check
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
