@@ -50,7 +50,7 @@ library LibOrder {
     /// @notice calculate hash key from order
     /// @param order object to be hashed
     /// @return hash key of order
-    function hashKey(Order memory order) internal pure returns (bytes32) {
+    function hashKey(Order calldata order) internal pure returns (bytes32) {
         if (order.dataType == DEFAULT_ORDER_TYPE) {
             return
                 keccak256(
@@ -79,7 +79,7 @@ library LibOrder {
     /// @notice calculate hash from order
     /// @param order object to be hashed
     /// @return hash of order
-    function hash(Order memory order) internal pure returns (bytes32) {
+    function hash(Order calldata order) internal pure returns (bytes32) {
         return
             keccak256(
                 // solhint-disable-next-line func-named-parameters

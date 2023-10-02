@@ -134,13 +134,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibOrder.Order memory orderRight,
         bytes memory signatureRight
     ) internal view {
+        // validate must force order.maker != address(0)
         orderValidator.validate(orderLeft, signatureLeft, sender);
         orderValidator.validate(orderRight, signatureRight, sender);
         if (orderLeft.taker != address(0)) {
-            if (orderRight.maker != address(0)) require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
+            require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
         if (orderRight.taker != address(0)) {
-            if (orderLeft.maker != address(0)) require(orderRight.taker == orderLeft.maker, "rightOrder.taker failed");
+            require(orderRight.taker == orderLeft.maker, "rightOrder.taker failed");
         }
     }
 
@@ -150,8 +151,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param orderRight the right order of the match
     function _matchAndTransfer(
         address sender,
-        LibOrder.Order memory orderLeft,
-        LibOrder.Order memory orderRight
+        LibOrder.Order calldata orderLeft,
+        LibOrder.Order calldata orderRight
     ) internal {
         (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = _matchAssets(
             orderLeft,
@@ -188,8 +189,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @return newFill fill result
     function _parseOrdersSetFillEmitMatch(
         address sender,
-        LibOrder.Order memory orderLeft,
-        LibOrder.Order memory orderRight
+        LibOrder.Order calldata orderLeft,
+        LibOrder.Order calldata orderRight
     )
         internal
         returns (
@@ -200,13 +201,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     {
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
-
-        if (orderLeft.maker == address(0)) {
-            orderLeft.maker = sender;
-        }
-        if (orderRight.maker == address(0)) {
-            orderRight.maker = sender;
-        }
 
         leftOrderData = LibOrderDataGeneric.parse(orderLeft);
         rightOrderData = LibOrderDataGeneric.parse(orderRight);
@@ -231,8 +225,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     ///    @return newFill returns change in orders' fills by the match
     function _setFillEmitMatch(
         address sender,
-        LibOrder.Order memory orderLeft,
-        LibOrder.Order memory orderRight,
+        LibOrder.Order calldata orderLeft,
+        LibOrder.Order calldata orderRight,
         bytes32 leftOrderKeyHash,
         bytes32 rightOrderKeyHash,
         bool leftMakeFill,
