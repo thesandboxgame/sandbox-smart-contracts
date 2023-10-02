@@ -74,7 +74,7 @@ export const AssetERC20 = async (
       [await tokenContract.getAddress()]
     ),
   },
-  value: value,
+  value,
 });
 
 export const AssetERC721 = async (
@@ -104,7 +104,7 @@ export const AssetERC1155 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
-  value: value,
+  value,
 });
 
 export function hashAssetType(a: AssetType) {
