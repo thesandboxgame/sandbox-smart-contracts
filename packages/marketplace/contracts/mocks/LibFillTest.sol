@@ -10,10 +10,15 @@ contract LibFillTest {
         LibOrder.Order calldata leftOrder,
         LibOrder.Order calldata rightOrder,
         uint256 leftOrderFill,
-        uint256 rightOrderFill,
-        bool leftIsMakeFill,
-        bool rightIsMakeFill
+        uint256 rightOrderFill
     ) external pure returns (LibFill.FillResult memory) {
-        return LibFill.fillOrder(leftOrder, rightOrder, leftOrderFill, rightOrderFill, leftIsMakeFill, rightIsMakeFill);
+        return LibFill.fillOrder(leftOrder, rightOrder, leftOrderFill, rightOrderFill);
+    }
+
+    function calculateRemaining(
+        LibOrder.Order calldata order,
+        uint256 fill
+    ) external pure returns (uint256 makeAmount, uint256 takeAmount) {
+        return LibFill.calculateRemaining(order, fill);
     }
 }
