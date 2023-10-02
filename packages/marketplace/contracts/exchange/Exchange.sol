@@ -3,9 +3,7 @@
 pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
@@ -17,7 +15,7 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers
-contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
+contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
     /// @notice role erc1776 trusted meta transaction contracts (Sand for example).
     /// @return hash for ERC1776_OPERATOR_ROLE
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
@@ -53,7 +51,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
         IAssetMatcher newAssetMatcher
     ) external initializer {
         __ERC2771Handler_init(newTrustedForwarder);
-        __AccessControl_init();
         __TransferManager_init_unchained(
             newProtocolFeePrimary,
             newProtocolFeeSecondary,
@@ -126,16 +123,6 @@ contract Exchange is Initializable, AccessControlUpgradeable, ExchangeCore, Tran
     /// @param newDefaultFeeReceiver address that gets the fees
     function setDefaultFeeReceiver(address newDefaultFeeReceiver) external onlyRole(EXCHANGE_ADMIN_ROLE) {
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
-    }
-
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
-        return
-            ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
     function _msgSender()
