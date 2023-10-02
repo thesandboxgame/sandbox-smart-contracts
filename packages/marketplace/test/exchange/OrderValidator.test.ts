@@ -79,6 +79,46 @@ describe('OrderValidator.sol', function () {
       .to.not.be.reverted;
   });
 
+  it('should validate when salt is non zero and Order maker is sender', async function () {
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1} =
+      await loadFixture(deployFixtures);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const order = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const signature = await signOrder(order, user1, OrderValidatorAsUser);
+
+    await expect(OrderValidatorAsUser.validate(order, signature, user1.address))
+      .to.not.be.reverted;
+  });
+  it('should not validate when maker is address zero', async function () {
+    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
+      await loadFixture(deployFixtures);
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const order = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    order.maker = ZeroAddress;
+    const signature = await signOrder(order, user2, OrderValidatorAsUser);
+    await expect(
+      OrderValidatorAsUser.validate(order, signature, user2.address)
+    ).to.be.revertedWith('no maker');
+  });
+
   it('should not validate when sender and signature signer is not Order maker', async function () {
     const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
       await loadFixture(deployFixtures);
@@ -349,4 +389,7 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(false);
   });
+  // TODO:
+  // it('should check start / end', async function () {});
+  // it('should check validate through the whitelist', async function () {});
 });

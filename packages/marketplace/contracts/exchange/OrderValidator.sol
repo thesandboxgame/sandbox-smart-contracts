@@ -44,35 +44,37 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param order order to be validated
     /// @param signature signature of order
     /// @param sender order sender
-    function validate(LibOrder.Order memory order, bytes memory signature, address sender) public view {
+    function validate(LibOrder.Order calldata order, bytes memory signature, address sender) public view {
+        require(order.maker != address(0), "no maker");
+
         LibOrder.validateOrderTime(order);
 
         address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
         verifyWhiteList(makeToken);
 
         if (order.salt == 0) {
-            if (order.maker != address(0)) {
-                require(sender == order.maker, "maker is not tx sender");
-            }
-        } else {
-            if (sender != order.maker) {
-                bytes32 hash = LibOrder.hash(order);
-                // if maker is contract checking ERC1271 signature
-                if (order.maker.isContract()) {
-                    require(
-                        IERC1271Upgradeable(order.maker).isValidSignature(_hashTypedDataV4(hash), signature) ==
-                            MAGICVALUE,
-                        "contract order signature verification error"
-                    );
-                } else {
-                    // if maker is not contract then checking ECDSA signature
-                    if (_hashTypedDataV4(hash).recover(signature) != order.maker) {
-                        revert("order signature verification error");
-                    } else {
-                        require(order.maker != address(0), "no maker");
-                    }
-                }
-            }
+            require(sender == order.maker, "maker is not tx sender");
+            // No partial fill the order is reusable forever
+            return;
+        }
+
+        if (sender == order.maker) {
+            return;
+        }
+
+        bytes32 hash = LibOrder.hash(order);
+        // if maker is contract checking ERC1271 signature
+        if (order.maker.isContract()) {
+            require(
+                IERC1271Upgradeable(order.maker).isValidSignature(_hashTypedDataV4(hash), signature) == MAGICVALUE,
+                "contract order signature verification error"
+            );
+            return;
+        }
+
+        // if maker is not contract then checking ECDSA signature
+        if (_hashTypedDataV4(hash).recover(signature) != order.maker) {
+            revert("order signature verification error");
         }
     }
 
