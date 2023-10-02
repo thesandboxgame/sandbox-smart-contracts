@@ -129,7 +129,7 @@ abstract contract TransferManager is ERC165Upgradeable, AccessControlUpgradeable
     function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
-        if(!hasRole(TSB_WALLET, paymentSide.from)) {
+        if (!hasRole(TSB_WALLET, paymentSide.from)) {
             rest = transferRoyalties(
                 paymentSide.asset.assetType,
                 nftSide.asset.assetType,
@@ -167,7 +167,13 @@ abstract contract TransferManager is ERC165Upgradeable, AccessControlUpgradeable
                 origin[0].value = uint96(protocolFeeSecondary);
             }
 
-            (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
+            (rest, ) = transferFees(
+                paymentSide.asset.assetType,
+                rest,
+                paymentSide.asset.value,
+                origin,
+                paymentSide.from
+            );
         }
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
