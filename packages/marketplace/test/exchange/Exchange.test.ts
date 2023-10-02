@@ -606,7 +606,7 @@ describe('Exchange.sol', function () {
     );
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
 
-    // check primary market protocol fee
+    // check protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
     ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
@@ -718,7 +718,7 @@ describe('Exchange.sol', function () {
     );
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
 
-    // check primary market protocol fee
+    // check protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
     ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
@@ -825,7 +825,7 @@ describe('Exchange.sol', function () {
     );
     expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(taker.address);
 
-    // check primary market protocol fee
+    // check protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
     ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
@@ -837,6 +837,114 @@ describe('Exchange.sol', function () {
 
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
       47500000000 // 100000000000 - royalty - protocolFee
+    );
+  });
+
+  it('should execute a complete match order without fee and royalties for TSB seller', async function () {
+    const {
+      ExchangeContractAsUser,
+      ExchangeContractAsDeployer,
+      OrderValidatorAsDeployer,
+      ERC20Contract,
+      ERC721WithRoyaltyV2981,
+      defaultFeeReceiver,
+      deployer,
+      user1: maker,
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+      await FeeRecipientsData(maker.address, 10000),
+    ]);
+
+    await ERC721WithRoyaltyV2981.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+
+    // set up receiver
+    await ERC721WithRoyaltyV2981.setRoyaltiesReceiver(1, deployer.address);
+
+    // grant TSB Wallet role to seller
+    const TSB_WALLET =
+      '0x1c3ffa8a78d1cdbeb9812a2ae7c540d20292531d0254f9ac1fa85e0ac44b9ad0'; // keccak256("TSB_WALLET")
+    await ExchangeContractAsDeployer.connect(deployer).grantRole(
+      TSB_WALLET,
+      taker.address
+    );
+
+    await ERC20Contract.mint(taker.address, 100000000000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100000000000
+    );
+
+    expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      100000000000
+    );
+    const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+    const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+    const leftOrder = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const rightOrder = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(
+      leftOrder,
+      maker,
+      OrderValidatorAsDeployer
+    );
+    const takerSig = await signOrder(
+      rightOrder,
+      taker,
+      OrderValidatorAsDeployer
+    );
+
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      0
+    );
+
+    await ExchangeContractAsUser.matchOrders(
+      leftOrder,
+      makerSig,
+      rightOrder,
+      takerSig
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(leftOrder))).to.be.equal(
+      100000000000
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(rightOrder))).to.be.equal(
+      1
+    );
+    expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(taker.address);
+
+    // no protocol fee paid
+    expect(
+      await ERC20Contract.balanceOf(defaultFeeReceiver.address)
+    ).to.be.equal(0);
+
+    // no royalties paid
+    expect(await ERC20Contract.balanceOf(deployer.address)).to.be.equal(0);
+
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      100000000000
     );
   });
 

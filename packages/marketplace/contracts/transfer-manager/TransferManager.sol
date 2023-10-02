@@ -67,6 +67,7 @@ abstract contract TransferManager is ERC165Upgradeable, AccessControlUpgradeable
     ) internal onlyInitializing {
         __ERC165_init();
         __AccessControl_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
@@ -126,49 +127,48 @@ abstract contract TransferManager is ERC165Upgradeable, AccessControlUpgradeable
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
     function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
-        if (hasRole(TSB_WALLET, paymentSide.from)) {
-            return;
-        }
-
         uint256 rest = paymentSide.asset.value;
-        rest = transferRoyalties(
-            paymentSide.asset.assetType,
-            nftSide.asset.assetType,
-            nftSide.payouts,
-            rest,
-            paymentSide.asset.value,
-            paymentSide.from
-        );
 
-        LibPart.Part[] memory origin = new LibPart.Part[](1);
-        origin[0].account = payable(defaultFeeReceiver);
+        if(!hasRole(TSB_WALLET, paymentSide.from)) {
+            rest = transferRoyalties(
+                paymentSide.asset.assetType,
+                nftSide.asset.assetType,
+                nftSide.payouts,
+                rest,
+                paymentSide.asset.value,
+                paymentSide.from
+            );
 
-        bool primaryMarket = false;
+            LibPart.Part[] memory origin = new LibPart.Part[](1);
+            origin[0].account = payable(defaultFeeReceiver);
 
-        // check if primary or secondary market
-        if (
-            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
-            nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
-        ) {
-            (address token, uint256 tokenId) = abi.decode(nftSide.asset.assetType.data, (address, uint));
-            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
-                if (result) {
-                    address creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-                    if (nftSide.from == creator) {
-                        primaryMarket = true;
+            bool primaryMarket = false;
+
+            // check if primary or secondary market
+            if (
+                nftSide.asset.assetType.assetClass == LibAsset.ERC1155_ASSET_CLASS ||
+                nftSide.asset.assetType.assetClass == LibAsset.ERC721_ASSET_CLASS
+            ) {
+                (address token, uint256 tokenId) = abi.decode(nftSide.asset.assetType.data, (address, uint));
+                try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
+                    if (result) {
+                        address creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
+                        if (nftSide.from == creator) {
+                            primaryMarket = true;
+                        }
                     }
-                }
-                // solhint-disable-next-line no-empty-blocks
-            } catch {}
-        }
+                    // solhint-disable-next-line no-empty-blocks
+                } catch {}
+            }
 
-        if (primaryMarket) {
-            origin[0].value = uint96(protocolFeePrimary);
-        } else {
-            origin[0].value = uint96(protocolFeeSecondary);
-        }
+            if (primaryMarket) {
+                origin[0].value = uint96(protocolFeePrimary);
+            } else {
+                origin[0].value = uint96(protocolFeeSecondary);
+            }
 
-        (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
+            (rest, ) = transferFees(paymentSide.asset.assetType, rest, paymentSide.asset.value, origin, paymentSide.from);
+        }
 
         transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
