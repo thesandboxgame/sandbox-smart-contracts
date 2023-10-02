@@ -47,27 +47,20 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
-            if (from == address(this)) {
-                IERC721Upgradeable(token).safeTransferFrom(address(this), to, tokenId);
-            } else {
+            
                 erc721safeTransferFrom(IERC721Upgradeable(token), from, to, tokenId);
-            }
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
-            if (from == address(this)) {
-                SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(token), to, asset.value);
-            } else {
+            
                 SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
             }
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-            if (from == address(this)) {
-                IERC1155Upgradeable(token).safeTransferFrom(address(this), to, tokenId, asset.value, "");
-            } else {
+            
                 erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
-            }
+            
         }
     }
 
