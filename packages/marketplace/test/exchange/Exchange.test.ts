@@ -14,10 +14,10 @@ import {
   hashKey,
   hashOrder,
   OrderDefault,
+  signOrder,
   UINT256_MAX_VALUE,
 } from '../utils/order.ts';
 import {ZeroAddress} from 'ethers';
-import {signOrder} from '../utils/signature';
 
 describe('Exchange.sol', function () {
   it('should return the correct value of protocol fee', async function () {
@@ -183,7 +183,6 @@ describe('Exchange.sol', function () {
 
     const makerAsset = await AssetERC20(ERC20Contract, 200);
     const takerAsset = await AssetERC20(ERC20Contract2, 100);
-
     const orderLeft = await OrderDefault(
       maker,
       makerAsset,

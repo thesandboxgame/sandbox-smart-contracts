@@ -3,9 +3,8 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from '../utils/assets.ts';
 
-import {OrderDefault} from '../utils/order.ts';
+import {OrderDefault, signOrder} from '../utils/order.ts';
 import {ZeroAddress} from 'ethers';
-import {signOrder} from '../utils/signature';
 
 // keccak256("TSB_ROLE")
 const TSBRole =
