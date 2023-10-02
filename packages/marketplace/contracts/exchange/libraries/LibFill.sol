@@ -27,8 +27,8 @@ library LibFill {
     /// @dev 2nd: right order should be fully filled or 3d: both should be fully filled if required values are the same
     /// @return the fill result of both orders
     function fillOrder(
-        LibOrder.Order memory leftOrder,
-        LibOrder.Order memory rightOrder,
+        LibOrder.Order calldata leftOrder,
+        LibOrder.Order calldata rightOrder,
         uint256 leftOrderFill,
         uint256 rightOrderFill,
         bool leftIsMakeFill,
