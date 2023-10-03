@@ -840,7 +840,7 @@ describe('Exchange.sol', function () {
     );
   });
 
-  it('should execute a complete match order without fee and royalties for TSB seller', async function () {
+  it('should execute a complete match order without fee and royalties for privileged seller', async function () {
     const {
       ExchangeContractAsUser,
       ExchangeContractAsDeployer,
@@ -866,11 +866,11 @@ describe('Exchange.sol', function () {
     // set up receiver
     await ERC721WithRoyaltyV2981.setRoyaltiesReceiver(1, deployer.address);
 
-    // grant Skip Fees role to seller
-    const SKIP_FEES_ROLE =
-      '0x9c14d84aa0a4264a5c33560cb08e43e3ed227d0565fa3d19078d0f01304516eb'; // keccak256("SKIP_FEES_ROLE")
+    // grant exchange admin role to seller
+    const EXCHANGE_ADMIN_ROLE =
+      '0x541943c4a49765b7940b4b1392c4b1f8ede6efd4e23572572987ae02e569a786'; // keccak256("EXCHANGE_ADMIN_ROLE")
     await ExchangeContractAsDeployer.connect(admin).grantRole(
-      SKIP_FEES_ROLE,
+      EXCHANGE_ADMIN_ROLE,
       taker.address
     );
 
