@@ -2,14 +2,16 @@
 
 pragma solidity 0.8.21;
 
-import {LibDeal} from "../lib/LibDeal.sol";
-import {LibFeeSide} from "../lib/LibFeeSide.sol";
 import {ITransferExecutor} from "./ITransferExecutor.sol";
+import {LibAsset} from "../../lib-asset/LibAsset.sol";
+import {LibPart} from "../../lib-part/LibPart.sol";
 
 abstract contract ITransferManager is ITransferExecutor {
-    function doTransfers(
-        LibDeal.DealSide memory left,
-        LibDeal.DealSide memory right,
-        LibFeeSide.FeeSide feeSide
-    ) internal virtual;
+    struct DealSide {
+        LibAsset.Asset asset;
+        LibPart.Part[] payouts;
+        address from;
+    }
+
+    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal virtual;
 }
