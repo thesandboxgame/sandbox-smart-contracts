@@ -743,10 +743,13 @@ describe('Exchange.sol', function () {
       deployer: royaltyReceiver,
       user1: maker,
       user2: taker,
+      admin: receiver1,
+      user: receiver2,
     } = await loadFixture(deployFixtures);
 
     await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
-      await FeeRecipientsData(maker.address, 10000),
+      await FeeRecipientsData(receiver1.address, 3000),
+      await FeeRecipientsData(receiver2.address, 7000),
     ]);
 
     await ERC721WithRoyaltyV2981.connect(maker).approve(
@@ -828,12 +831,15 @@ describe('Exchange.sol', function () {
     // check primary market protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
-    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
+    ).to.be.equal(2500000000); // 250 * 100000000000 / 10000 = 2500000000
 
-    // check paid royalty
-    expect(await ERC20Contract.balanceOf(royaltyReceiver.address)).to.be.equal(
-      50000000000
-    ); // 50% of the amount
+    expect(await ERC20Contract.balanceOf(receiver1.address)).to.be.equal(
+      15000000000 // 1500 * 100000000000 / 10000 = 15000000000
+    );
+
+    expect(await ERC20Contract.balanceOf(receiver2.address)).to.be.equal(
+      35000000000 // 3500 * 100000000000 / 10000 = 35000000000
+    );
 
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
       47500000000 // 100000000000 - royalty - protocolFee
