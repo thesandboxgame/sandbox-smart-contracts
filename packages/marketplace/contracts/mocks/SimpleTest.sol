@@ -11,5 +11,8 @@ contract SimpleTest is TransferManager, TransferExecutor {
         return getRoyaltiesByAssetType(matchNft);
     }
 
-    function _applyFees(address from) internal virtual override returns (bool) {}
+    /// @dev returning false for mock contract
+    function _applyFees(address /* from */) internal pure override returns (bool) {
+        return false;
+    }
 }
