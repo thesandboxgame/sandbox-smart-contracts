@@ -9,7 +9,6 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
-import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
@@ -52,7 +51,6 @@ contract Exchange is
     /// @param newDefaultFeeReceiver market fee receiver
     /// @param newRoyaltiesProvider registry for the different types of royalties
     /// @param orderValidatorAddress new OrderValidator contract address
-    /// @param newAssetMatcher new AssetMatcher contract address
     // solhint-disable-next-line func-name-mixedcase
     function __Exchange_init(
         address admin,
@@ -61,8 +59,7 @@ contract Exchange is
         uint256 newProtocolFeeSecondary,
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
-        IOrderValidator orderValidatorAddress,
-        IAssetMatcher newAssetMatcher
+        IOrderValidator orderValidatorAddress
     ) external initializer {
         __ERC2771Handler_init_unchained(newTrustedForwarder);
         __AccessControl_init_unchained();
@@ -73,7 +70,7 @@ contract Exchange is
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(orderValidatorAddress, newAssetMatcher);
+        __ExchangeCoreInitialize(orderValidatorAddress);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -107,12 +104,6 @@ contract Exchange is
     /// @param newRoyaltiesRegistry address of new royalties registry
     function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRoyaltiesRegistry(newRoyaltiesRegistry);
-    }
-
-    /// @notice set AssetMatcher address
-    /// @param contractAddress new AssetMatcher contract address
-    function setAssetMatcherContract(IAssetMatcher contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setAssetMatcherContract(contractAddress);
     }
 
     /// @notice set OrderValidator address

@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
-import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
@@ -23,10 +22,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibOrder.Order orderRight; // right order
         bytes signatureRight; // signature for the right order
     }
-
-    /// @notice AssetMatcher contract
-    /// @return AssetMatcher address
-    IAssetMatcher public assetMatcher;
 
     /// @notice OrderValidator contract
     /// @return OrderValidator address
@@ -60,29 +55,14 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         uint256 valueLeft,
         uint256 valueRight
     );
-    event AssetMatcherSet(IAssetMatcher indexed contractAddress);
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
     /// @notice initializer for ExchangeCore
     /// @param newOrderValidatorAddress new OrderValidator contract address
-    /// @param newAssetMatcher new AssetMatcher contract address
     /// @dev initialize permissions for native token exchange
     // solhint-disable-next-line func-name-mixedcase
-    function __ExchangeCoreInitialize(
-        IOrderValidator newOrderValidatorAddress,
-        IAssetMatcher newAssetMatcher
-    ) internal onlyInitializing {
+    function __ExchangeCoreInitialize(IOrderValidator newOrderValidatorAddress) internal onlyInitializing {
         _setOrderValidatorContract(newOrderValidatorAddress);
-        _setAssetMatcherContract(newAssetMatcher);
-    }
-
-    /// @notice set AssetMatcher address
-    /// @param contractAddress new AssetMatcher contract address
-    /// @dev matches assets between left and right order
-    function _setAssetMatcherContract(IAssetMatcher contractAddress) internal {
-        require(address(contractAddress) != address(0), "invalid asset matcher");
-        assetMatcher = contractAddress;
-        emit AssetMatcherSet(contractAddress);
     }
 
     /// @notice set OrderValidator address
@@ -152,12 +132,17 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight
     ) internal {
-        (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) = _matchAssets(
-            orderLeft,
-            orderRight
+        LibAsset.AssetType memory makeMatch = LibAsset.matchAssets(
+            orderLeft.makeAsset.assetType,
+            orderRight.takeAsset.assetType
+        );
+        LibAsset.AssetType memory takeMatch = LibAsset.matchAssets(
+            orderLeft.takeAsset.assetType,
+            orderRight.makeAsset.assetType
         );
 
         LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
+
         doTransfers(
             ITransferManager.DealSide({
                 asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
@@ -232,20 +217,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         } else {
             fill = fills[hash];
         }
-    }
-
-    /// @notice match assets from orders
-    /// @param orderLeft left order
-    /// @param orderRight right order
-    /// @dev each make asset must correrspond to the other take asset and be different from 0
-    function _matchAssets(
-        LibOrder.Order memory orderLeft,
-        LibOrder.Order memory orderRight
-    ) internal view returns (LibAsset.AssetType memory makeMatch, LibAsset.AssetType memory takeMatch) {
-        makeMatch = assetMatcher.matchAssets(orderLeft.makeAsset.assetType, orderRight.takeAsset.assetType);
-        require(makeMatch.assetClass != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "assets don't match");
-        takeMatch = assetMatcher.matchAssets(orderLeft.takeAsset.assetType, orderRight.makeAsset.assetType);
-        require(takeMatch.assetClass != LibAsset.AssetClassType.INVALID_ASSET_CLASS, "assets don't match");
     }
 
     uint256[49] private __gap;
