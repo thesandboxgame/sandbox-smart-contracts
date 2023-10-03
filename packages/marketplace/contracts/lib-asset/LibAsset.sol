@@ -56,9 +56,9 @@ library LibAsset {
         return keccak256(abi.encode(ASSET_TYPE_TYPEHASH, assetType.assetClass, keccak256(assetType.data)));
     }
 
-    /// @notice calculate hash of asset
-    /// @param asset to be hashed
-    /// @return hash of asset
+    ///    @notice calculate hash of asset
+    ///    @param asset to be hashed
+    ///    @return hash of asset
     function hash(Asset memory asset) internal pure returns (bytes32) {
         return keccak256(abi.encode(ASSET_TYPEHASH, hash(asset.assetType), asset.value));
     }
