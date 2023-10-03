@@ -11,7 +11,6 @@ describe('Exchange.sol settings', function () {
       protocolFeeSecondary,
       ExchangeContractAsAdmin,
       RoyaltiesRegistryAsDeployer,
-      assetMatcherAsUser,
       OrderValidatorAsDeployer,
       TrustedForwarder,
       defaultFeeReceiver,
@@ -19,9 +18,6 @@ describe('Exchange.sol settings', function () {
 
     expect(await ExchangeContractAsAdmin.royaltiesRegistry()).to.be.equal(
       await RoyaltiesRegistryAsDeployer.getAddress()
-    );
-    expect(await ExchangeContractAsAdmin.assetMatcher()).to.be.equal(
-      await assetMatcherAsUser.getAddress()
     );
     expect(await ExchangeContractAsAdmin.orderValidator()).to.be.equal(
       await OrderValidatorAsDeployer.getAddress()
@@ -42,7 +38,6 @@ describe('Exchange.sol settings', function () {
   describe('roles', function () {
     describe('default admin', function () {
       checkPermsForDefaultAdmin('setRoyaltiesRegistry', 'RoyaltiesRegistrySet');
-      checkPermsForDefaultAdmin('setAssetMatcherContract', 'AssetMatcherSet');
       checkPermsForDefaultAdmin(
         'setOrderValidatorContract',
         'OrderValidatorSet'
@@ -170,10 +165,6 @@ describe('Exchange.sol settings', function () {
   shouldNotBeAbleToSetAsZero(
     'setRoyaltiesRegistry',
     'invalid Royalties Registry'
-  );
-  shouldNotBeAbleToSetAsZero(
-    'setAssetMatcherContract',
-    'invalid asset matcher'
   );
   shouldNotBeAbleToSetAsZero(
     'setOrderValidatorContract',

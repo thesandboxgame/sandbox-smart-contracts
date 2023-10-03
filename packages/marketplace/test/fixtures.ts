@@ -6,9 +6,6 @@ async function deploy() {
   const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
-  const AssetMatcher = await ethers.getContractFactory('AssetMatcher');
-  const assetMatcherAsDeployer = await AssetMatcher.deploy();
-  const assetMatcherAsUser = await assetMatcherAsDeployer.connect(user);
   const TrustedForwarderFactory = await ethers.getContractFactory(
     'TrustedForwarderMock'
   );
@@ -52,7 +49,6 @@ async function deploy() {
       defaultFeeReceiver.address,
       await RoyaltiesRegistryAsDeployer.getAddress(),
       await OrderValidatorAsDeployer.getAddress(),
-      await assetMatcherAsDeployer.getAddress(),
     ],
     {
       initializer: '__Exchange_init',
@@ -107,8 +103,6 @@ async function deploy() {
     EXCHANGE_ADMIN_ROLE,
     DEFAULT_ADMIN_ROLE,
     PAUSER_ROLE,
-    assetMatcherAsDeployer,
-    assetMatcherAsUser,
     ExchangeContractAsDeployer,
     ExchangeContractAsAdmin,
     ExchangeContractAsUser,

@@ -13,7 +13,6 @@ const importedPackages = {
     'contracts/royalties-registry/RoyaltiesRegistry.sol',
     'contracts/exchange/OrderValidator.sol',
     'contracts/exchange/Exchange.sol',
-    'contracts/exchange/AssetMatcher.sol',
   ],
 };
 

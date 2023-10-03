@@ -49,6 +49,28 @@ library LibAsset {
         return FeeSide.NONE;
     }
 
+    /// @notice calculate if Asset types match with each other
+    /// @param leftType to be matched with rightAssetType
+    /// @param rightType to be matched with leftAssetType
+    /// @return AssetType of the match
+    function matchAssets(
+        AssetType calldata leftType,
+        AssetType calldata rightType
+    ) internal pure returns (AssetType memory) {
+        AssetClassType classLeft = leftType.assetClass;
+        AssetClassType classRight = rightType.assetClass;
+
+        require(classLeft != AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
+        require(classRight != AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
+        require(classLeft == classRight, "assets don't match");
+
+        bytes32 leftHash = keccak256(leftType.data);
+        bytes32 rightHash = keccak256(rightType.data);
+        require(leftHash == rightHash, "assets don't match");
+
+        return leftType;
+    }
+
     /// @notice calculate hash of asset type
     /// @param assetType to be hashed
     /// @return hash of assetType
