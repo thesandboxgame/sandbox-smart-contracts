@@ -171,49 +171,53 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not set permission for token if caller is not owner', async function () {
-    const {OrderValidatorAsUser} = await loadFixture(deployFixtures);
+    const {OrderValidatorAsUser, user} = await loadFixture(deployFixtures);
     await expect(
       OrderValidatorAsUser.setPermissions(true, true, true, true)
-    ).to.revertedWith('Ownable: caller is not the owner');
+    ).to.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to set permission for token', async function () {
-    const {OrderValidatorAsDeployer} = await loadFixture(deployFixtures);
-    expect(await OrderValidatorAsDeployer.tsbOnly()).to.be.equal(false);
-    expect(await OrderValidatorAsDeployer.partners()).to.be.equal(false);
-    expect(await OrderValidatorAsDeployer.open()).to.be.equal(true);
-    expect(await OrderValidatorAsDeployer.erc20List()).to.be.equal(false);
+    const {OrderValidatorAsAdmin} = await loadFixture(deployFixtures);
+    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.erc20List()).to.be.equal(false);
 
-    await OrderValidatorAsDeployer.setPermissions(true, true, false, true);
+    await OrderValidatorAsAdmin.setPermissions(true, true, false, true);
 
-    expect(await OrderValidatorAsDeployer.tsbOnly()).to.be.equal(true);
-    expect(await OrderValidatorAsDeployer.partners()).to.be.equal(true);
-    expect(await OrderValidatorAsDeployer.open()).to.be.equal(false);
-    expect(await OrderValidatorAsDeployer.erc20List()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.erc20List()).to.be.equal(true);
   });
 
   it('should not be able to add token to tsb list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
     await expect(
       OrderValidatorAsUser.addTSB(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to add token to tsb list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         TSBRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addTSB(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         TSBRole,
         await ERC20Contract.getAddress()
       )
@@ -221,35 +225,37 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not be able to remove token from tsb list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
     await expect(
       OrderValidatorAsUser.removeTSB(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to remove token from tsb list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         TSBRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addTSB(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         TSBRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsDeployer.removeTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.removeTSB(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         TSBRole,
         await ERC20Contract.getAddress()
       )
@@ -257,27 +263,29 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not be able to add token to partners list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
     await expect(
       OrderValidatorAsUser.addPartner(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to add token to partners list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addPartner(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addPartner(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
         await ERC20Contract.getAddress()
       )
@@ -285,37 +293,37 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not be able to remove token from partners list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
     await expect(
       OrderValidatorAsUser.removePartner(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to remove token from partners list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addPartner(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addPartner(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsDeployer.removePartner(
-      await ERC20Contract.getAddress()
-    );
+    await OrderValidatorAsAdmin.removePartner(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
         await ERC20Contract.getAddress()
       )
@@ -323,28 +331,30 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not be able to add token to ERC20 list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
 
     await expect(
       OrderValidatorAsUser.addERC20(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to add token to ERC20 list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addERC20(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addERC20(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
         await ERC20Contract.getAddress()
       )
@@ -352,37 +362,37 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not be able to remove token from ERC20 list if caller is not owner', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsUser, ERC20Contract, user} = await loadFixture(
       deployFixtures
     );
     await expect(
       OrderValidatorAsUser.removeERC20(await ERC20Contract.getAddress())
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWith(
+      `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    );
   });
 
   it('should be able to remove token from ERC20 list', async function () {
-    const {OrderValidatorAsDeployer, ERC20Contract} = await loadFixture(
+    const {OrderValidatorAsAdmin, ERC20Contract} = await loadFixture(
       deployFixtures
     );
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsDeployer.addERC20(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.addERC20(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsDeployer.removeERC20(
-      await ERC20Contract.getAddress()
-    );
+    await OrderValidatorAsAdmin.removeERC20(await ERC20Contract.getAddress());
     expect(
-      await OrderValidatorAsDeployer.hasRole(
+      await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
         await ERC20Contract.getAddress()
       )

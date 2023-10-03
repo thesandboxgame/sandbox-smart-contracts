@@ -2,13 +2,12 @@
 
 pragma solidity 0.8.21;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IWhiteList} from "../interfaces/IWhiteList.sol";
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
-contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
+contract WhiteList is IWhiteList, AccessControlUpgradeable {
     /// @notice role for The Sandbox tokens
     /// @return hash for TSB_ROLE
     bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
@@ -49,15 +48,21 @@ contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
     }
 
     /// @notice initializer for WhiteList
+    /// @param admin whitelist admin
     /// @param newTsbOnly allows orders with The Sandbox token
     /// @param newPartners allows orders with partner token
     /// @param newOpen allows orders with any token
     /// @param newErc20List allows to pay orders with only whitelisted token
     // solhint-disable-next-line func-name-mixedcase
-    function __Whitelist_init(bool newTsbOnly, bool newPartners, bool newOpen, bool newErc20List) internal initializer {
-        __Ownable_init();
+    function __Whitelist_init(
+        address admin,
+        bool newTsbOnly,
+        bool newPartners,
+        bool newOpen,
+        bool newErc20List
+    ) internal initializer {
         __AccessControl_init_unchained();
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
         tsbOnly = newTsbOnly;
         partners = newPartners;
         open = newOpen;
@@ -69,7 +74,12 @@ contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
     /// @param newPartners allows orders with partner token
     /// @param newOpen allows orders with any token
     /// @param newErc20List allows to pay orders with only whitelisted token
-    function setPermissions(bool newTsbOnly, bool newPartners, bool newOpen, bool newErc20List) external onlyOwner {
+    function setPermissions(
+        bool newTsbOnly,
+        bool newPartners,
+        bool newOpen,
+        bool newErc20List
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tsbOnly = newTsbOnly;
         partners = newPartners;
         open = newOpen;
@@ -80,37 +90,37 @@ contract WhiteList is IWhiteList, OwnableUpgradeable, AccessControlUpgradeable {
 
     /// @notice add token to tsb list
     /// @param tokenAddress token address
-    function addTSB(address tokenAddress) external onlyOwner {
+    function addTSB(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(TSB_ROLE, tokenAddress);
     }
 
     /// @notice remove token from tsb list
     /// @param tokenAddress token address
-    function removeTSB(address tokenAddress) external onlyOwner {
+    function removeTSB(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(TSB_ROLE, tokenAddress);
     }
 
     /// @notice add token to partners list
     /// @param tokenAddress token address
-    function addPartner(address tokenAddress) external onlyOwner {
+    function addPartner(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(PARTNER_ROLE, tokenAddress);
     }
 
     /// @notice remove token from partner list
     /// @param tokenAddress token address
-    function removePartner(address tokenAddress) external onlyOwner {
+    function removePartner(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(PARTNER_ROLE, tokenAddress);
     }
 
     /// @notice add token to the ERC20 list
     /// @param tokenAddress token address
-    function addERC20(address tokenAddress) external onlyOwner {
+    function addERC20(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(ERC20_ROLE, tokenAddress);
     }
 
     /// @notice remove token from ERC20 list
     /// @param tokenAddress token address
-    function removeERC20(address tokenAddress) external onlyOwner {
+    function removeERC20(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(ERC20_ROLE, tokenAddress);
     }
 }
