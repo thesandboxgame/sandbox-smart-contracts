@@ -34,7 +34,7 @@ contract Exchange is
     /// @return hash for EXCHANGE_ADMIN_ROLE
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
 
-    /// @notice role business addresses that can react on an emergency, pause/unpause
+    /// @notice role business addresses that can react on an emergency, pause
     /// @return hash for PAUSER_ROLE
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
