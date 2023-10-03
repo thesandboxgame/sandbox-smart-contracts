@@ -100,13 +100,13 @@ async function deploy() {
   const EXCHANGE_ADMIN_ROLE =
     await ExchangeContractAsAdmin.EXCHANGE_ADMIN_ROLE();
   const DEFAULT_ADMIN_ROLE = await ExchangeContractAsAdmin.DEFAULT_ADMIN_ROLE();
-  const BACKOFFICE_ROLE = await ExchangeContractAsAdmin.BACKOFFICE_ROLE();
+  const PAUSER_ROLE = await ExchangeContractAsAdmin.PAUSER_ROLE();
   return {
     protocolFeePrimary,
     protocolFeeSecondary,
     EXCHANGE_ADMIN_ROLE,
     DEFAULT_ADMIN_ROLE,
-    BACKOFFICE_ROLE,
+    PAUSER_ROLE,
     assetMatcherAsDeployer,
     assetMatcherAsUser,
     ExchangeContractAsDeployer,

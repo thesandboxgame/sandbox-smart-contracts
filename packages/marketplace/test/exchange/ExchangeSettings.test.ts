@@ -66,18 +66,20 @@ describe('Exchange.sol settings', function () {
         );
       });
     });
-    describe('backoffice admin', function () {
+    describe('pauser role', function () {
       it('should not pause if caller is not in the role', async function () {
-        const {ExchangeContractAsUser, BACKOFFICE_ROLE, user} =
-          await loadFixture(deployFixtures);
+        const {ExchangeContractAsUser, PAUSER_ROLE, user} = await loadFixture(
+          deployFixtures
+        );
         await expect(ExchangeContractAsUser.pause()).to.be.revertedWith(
-          `AccessControl: account ${user.address.toLowerCase()} is missing role ${BACKOFFICE_ROLE}`
+          `AccessControl: account ${user.address.toLowerCase()} is missing role ${PAUSER_ROLE}`
         );
       });
       it('should be able to pause the contract', async function () {
-        const {ExchangeContractAsAdmin, BACKOFFICE_ROLE, user2} =
-          await loadFixture(deployFixtures);
-        await ExchangeContractAsAdmin.grantRole(BACKOFFICE_ROLE, user2);
+        const {ExchangeContractAsAdmin, PAUSER_ROLE, user2} = await loadFixture(
+          deployFixtures
+        );
+        await ExchangeContractAsAdmin.grantRole(PAUSER_ROLE, user2);
         expect(await ExchangeContractAsAdmin.paused()).to.be.false;
         await ExchangeContractAsAdmin.connect(user2).pause();
         expect(await ExchangeContractAsAdmin.paused()).to.be.true;
@@ -128,12 +130,12 @@ describe('Exchange.sol settings', function () {
         const {
           ExchangeContractAsAdmin,
           ExchangeContractAsUser,
-          BACKOFFICE_ROLE,
+          PAUSER_ROLE,
           EXCHANGE_ADMIN_ROLE,
           user,
           user2,
         } = await loadFixture(deployFixtures);
-        await ExchangeContractAsAdmin.grantRole(BACKOFFICE_ROLE, user2);
+        await ExchangeContractAsAdmin.grantRole(PAUSER_ROLE, user2);
         await ExchangeContractAsAdmin.grantRole(EXCHANGE_ADMIN_ROLE, user);
 
         await ExchangeContractAsAdmin.connect(user2).pause();

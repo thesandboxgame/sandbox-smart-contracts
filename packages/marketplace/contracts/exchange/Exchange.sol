@@ -35,8 +35,8 @@ contract Exchange is
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
 
     /// @notice role business addresses that can react on an emergency, pause/unpause
-    /// @return hash for BACKOFFICE_ROLE
-    bytes32 public constant BACKOFFICE_ROLE = keccak256("BACKOFFICE_ROLE");
+    /// @return hash for PAUSER_ROLE
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -89,7 +89,7 @@ contract Exchange is
     function matchOrdersFrom(
         address sender,
         ExchangeMatch[] calldata matchedOrders
-    ) external onlyRole(ERC1776_OPERATOR_ROLE) {
+    ) external onlyRole(ERC1776_OPERATOR_ROLE) whenNotPaused {
         require(sender != address(0), "invalid sender");
         _matchOrders(sender, matchedOrders);
     }
@@ -98,7 +98,7 @@ contract Exchange is
     /// @param order to be canceled
     /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
-    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external {
+    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external whenNotPaused {
         require(_msgSender() == order.maker, "ExchangeCore: not maker");
         _cancel(order, orderKeyHash);
     }
@@ -144,7 +144,7 @@ contract Exchange is
     }
 
     // @notice Triggers stopped state.
-    function pause() external onlyRole(BACKOFFICE_ROLE) {
+    function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
