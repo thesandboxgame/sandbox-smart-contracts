@@ -16,9 +16,6 @@ import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 abstract contract TransferExecutor is Initializable, ITransferExecutor {
     using LibTransfer for address payable;
 
-    /// @notice limit of assets for each type of bundles
-    uint256 public constant MAX_BUNDLE_LIMIT = 20;
-
     // Bundle Structs
     struct ERC20Details {
         IERC20Upgradeable token;
