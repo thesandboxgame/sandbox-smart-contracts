@@ -73,9 +73,8 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         }
 
         // if maker is not contract then checking ECDSA signature
-        if (_hashTypedDataV4(hash).recover(signature) != order.maker) {
-            revert("order signature verification error");
-        }
+        address recovered = _hashTypedDataV4(hash).recover(signature);
+        require(recovered == order.maker, "order signature verification error");
     }
 
     /// @notice if ERC20 token is accepted
