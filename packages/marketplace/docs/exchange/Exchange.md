@@ -1,0 +1,170 @@
+# Exchange
+
+## Introduction
+
+The `Exchange` contract is the entrypoint and main contract to the marketplace protocol.
+It safely offers a decentralized way to exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.
+
+## Concepts
+
+### Order
+
+An exchange consists of a trade between two parties. Each side of the trade is called an order. That order contains all the information required to define what a party is asking for. Let's consider this use case:
+
+Order A
+```
+Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 SAND (ERC20).
+```
+
+The order represents this intent and includes the address of the seller, the address of the NFT, the token id, the address of the ERC20 and the amount the seller is asking for.
+
+### Maker & Taker
+
+The maker and taker represent the 2 parties of the exchange. Each order can define what should contain each party where the maker represent your side and the taker the other side.
+
+For instance, as a seller, I can decide to sell a NFT to anybody. But, I could also specify that I only want to sell it to a particular user. In order to do that, you have to input the taker address.
+Same reasoning, if I want to buy a NFT but I don't mind which seller is selling me the NFT, all I have to do is creating an order without a taker address. Otherwise, if I precisely want to buy it from a seller, I can specify his address in the order.
+
+### Matching
+
+To execute a trade, you need two parties (and so 2 orders) that match. So, the contract takes in 2 orders and check that both orders are actually a match and satisfy each party. For instance, let's take again our seller use case:
+
+`Order A`
+```
+Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
+```
+
+An order satisfying Order A could simply be:
+
+`Order B`
+```
+Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
+```
+
+### Validation
+
+In order to validate the maker of each order, the contract supports two ways to validate an order:
+- the sender of the transaction has to be the maker of the order
+- the sender has to provide the signature of the order signed by the order's maker
+
+It brings a powerful asynchronous system but also users should be careful when signing an order because anybody can send a transaction to match 2 orders if that user gets the signatures.
+For instance:
+- Alice signs `Order A`
+- Bob signs `Order B`
+- Carol executes the trades with the 2 orders `Order A` and `Order B` and the 2 signatures
+
+But you could save an action by not asking the signature for the `Order B`:
+- Alice signs `Order A`
+- Bob executes the trades with the 2 orders `Order A` and `Order B` but only the signature of the `Order A`
+
+## Order filling
+
+`Order A` and `Order B` are completely matching, both are consider fully filled. But what happens if one party can't fully satisfy his counter party ?
+For instance, let's consider `Order C` and `Order D`:
+
+`Order C`
+```
+Alice wants to sell to anybody 10 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
+```
+
+`Order D`
+```
+Bob wants to buy from anybody 1 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
+```
+
+The selling order can't be fully matched because the buyer can only buy 1 ASSET of 10. In that case, the `Order C` is partially filled. `Order C` can be re-matched with another order until being fully filled.
+Partial filling can be disable for an order that is executed by the maker by setting the salt to 0 in that order.
+
+### User-Generated Content (UGC) & Creator
+
+UGC collection is a collection where the tokens are created by any user, and not necessarily by the editor of the collection.
+The `creator` of a NFT represents not the ownership of the token but the creation of the NFT which is essential to distribute the royalties to the real creator.
+In a nutshell, UGC collections need a royalty per token, not per collection.
+The protocol supports the interface `IRoyaltyUGC` to get the creator of a NFT during an exchange in order to apply different fee value.
+
+### Fees
+
+The protocol permits to define a fee (%) applied to each exchange. That fee usually covers the costs of running the marketplace.
+The value of the protocol fee is determined according to nature of the exchange: primary or secondary market.
+The notion of primary market means that the seller of the NFT is also its `creator`.
+Note that the fees are applied only when a side of an exchange is an ERC20 and another side is a NFT (ERC721 or ERC1155). The fee is taken from the ERC20 side.
+the fees are sent to an address (called the `Fee Receiver`) defined when deploying the contract.
+
+For instance, the primary market fee is set at 2% whereas the secondary market fee is set 5%.
+
+Bob is the creator of the ASSET (ERC1155) with token id 1.
+```
+Bob sells 1 ASSET (ERC1155) with token id 1 to Alice for 100 SAND (ERC20)
+Bob receives 98 SAND from Alice
+Fee Receiver receives 2 SAND from Alice
+Alice receives 1 ASSET (ERC1155) with token id 1
+```
+
+Carol is the creator of the ASSET (ERC1155) with token id 2.
+```
+Bob sells 1 ASSET (ERC1155) with token id 2 to Alice for 100 SAND (ERC20)
+Bob receives 95 SAND from Alice
+Fee Receiver receives 5 SAND from Alice
+Alice receives 1 ASSET (ERC1155) with token id 1
+```
+
+If a collection doesn't support the interface `IRoyaltyUGC`, the secondary market fee is always applied.
+
+### Royalties
+
+The royalties are the share returning to the creator of the collection or token after a sale.
+The protocol handles multiple types of royalties (ERC2981, royalties registry, external provider).
+See the [royalties registry contract](../royalties-registry/RoyaltiesRegistry.md) for more information.
+
+### Payouts
+
+The payouts define what is due for each party of the exchange. For the buyer order, the payout is the NFT while for the seller order, the payout is the ERC20 tokens.
+
+## Roles
+
+The protocol is secured with the Open Zeppelin access control component.
+4 roles are defined:
+- `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings (trquted forwarder, order validator addresses)
+- `EXCHANGE_ADMIN_ROLE`: handle the business decisions of the marketplace, for instance defining the fees, the wallet receiving the fees or if the fees apply
+- `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of a sender
+- `PAUSER_ROLE`: allow to control the pausing of the contract
+
+## Features
+
+### Matching an order
+
+The main feature is obviously to execute an exchange by matching two orders.
+
+// @TODO: add sequence diagram
+
+### Canceling an order
+
+An order can be cancelled by providing the identifier of that order and that order. An cancelled order is then considered fully filled (set to max integer).
+An order with no salt cannot be cancelled.
+
+### Batch matching orders
+
+Multiple pair of orders can be matched through batching. Note that if a pair cannot be match or validated, the whole batch reverts.
+
+### Meta Transactions
+
+The contract supports the ERC2771 to enable meta transactions.
+
+### Skipping fees
+
+If a maker is granted the role `EXCHANGE_ADMIN_ROLE`, the fees are skipped for that order.
+
+### Whitelisting
+
+The protocol offers to enable whitelists on:
+- payment tokens (ERC20) that can be traded
+- collections (ERC1155 and ERC721) that can be traded
+
+### Upgradeable
+
+The contract `Exchange` is using initializers & gaps to provide upgradability.
+
+### Pausing
+
+The contract can be paused for emergency measures for users granted the role `PAUSER_ROLE`.
+No more orders can be matched or cancelled when paused.
