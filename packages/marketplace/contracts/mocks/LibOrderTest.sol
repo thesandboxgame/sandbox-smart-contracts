@@ -5,14 +5,6 @@ pragma solidity 0.8.21;
 import {LibOrder, LibAsset} from "../lib-order/LibOrder.sol";
 
 contract LibOrderTest {
-    function calculateRemaining(
-        LibOrder.Order calldata order,
-        uint256 fill,
-        bool isMakeFill
-    ) external pure returns (uint256 makeAmount, uint256 takeAmount) {
-        return LibOrder.calculateRemaining(order, fill, isMakeFill);
-    }
-
     function hashKey(LibOrder.Order calldata order) external pure returns (bytes32) {
         return LibOrder.hashKey(order);
     }

@@ -7,15 +7,12 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {LibTransfer} from "./lib/LibTransfer.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 
 /// @title abstract contract for TransferExecutor
 /// @notice contains transfer functions for any assets as well as ERC20 tokens
 abstract contract TransferExecutor is Initializable, ITransferExecutor {
-    using LibTransfer for address payable;
-
     /// @notice limit of assets for each type of bundles
     uint256 public constant MAX_BUNDLE_LIMIT = 20;
 

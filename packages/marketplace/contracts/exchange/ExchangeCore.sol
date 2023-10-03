@@ -5,18 +5,18 @@ pragma solidity 0.8.21;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
-import {TransferExecutor, LibTransfer} from "../transfer-manager/TransferExecutor.sol";
-import {LibDeal, LibAsset} from "../transfer-manager/lib/LibDeal.sol";
+import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
 import {LibFeeSide} from "../transfer-manager/lib/LibFeeSide.sol";
-import {LibOrderDataGeneric, LibOrder} from "./libraries/LibOrderDataGeneric.sol";
+import {LibDeal} from "../transfer-manager/lib/LibDeal.sol";
+import {LibAsset} from "../lib-asset/LibAsset.sol";
+import {LibOrder} from "../lib-order/LibOrder.sol";
+import {LibPart} from "../lib-part/LibPart.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace
 abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferManager {
-    using LibTransfer for address payable;
-
     // a list of left/right orders that match each other
     // left and right are symmetrical except for fees that are taken from left side first.
     struct ExchangeMatch {
@@ -159,99 +159,57 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
             orderRight
         );
 
-        (
-            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-            LibFill.FillResult memory newFill
-        ) = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
-
+        LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
         doTransfers(
             LibDeal.DealSide({
                 asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
-                payouts: leftOrderData.payouts,
+                payouts: _payToMaker(orderLeft),
                 from: orderLeft.maker
             }),
             LibDeal.DealSide({
                 asset: LibAsset.Asset(takeMatch, newFill.rightValue),
-                payouts: rightOrderData.payouts,
+                payouts: _payToMaker(orderRight),
                 from: orderRight.maker
             }),
             LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
     }
 
+    /// @notice create a payout array that pays to maker 100%
+    /// @param order the order from which the maker is taken
+    /// @return an array with just one entry that pays to order.maker
+    function _payToMaker(LibOrder.Order memory order) internal pure returns (LibPart.Part[] memory) {
+        LibPart.Part[] memory payout = new LibPart.Part[](1);
+        payout[0].account = order.maker;
+        payout[0].value = 10000;
+        return payout;
+    }
+
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
     /// @param sender the message sender
     /// @param orderLeft left order
     /// @param orderRight right order
-    /// @return leftOrderData generic order data from left order
-    /// @return rightOrderData generic order data from right order
     /// @return newFill fill result
     function _parseOrdersSetFillEmitMatch(
         address sender,
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight
-    )
-        internal
-        returns (
-            LibOrderDataGeneric.GenericOrderData memory leftOrderData,
-            LibOrderDataGeneric.GenericOrderData memory rightOrderData,
-            LibFill.FillResult memory newFill
-        )
-    {
+    ) internal returns (LibFill.FillResult memory newFill) {
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
 
-        leftOrderData = LibOrderDataGeneric.parse(orderLeft);
-        rightOrderData = LibOrderDataGeneric.parse(orderRight);
-
-        newFill = _setFillEmitMatch(
-            sender,
-            orderLeft,
-            orderRight,
-            leftOrderKeyHash,
-            rightOrderKeyHash,
-            leftOrderData.isMakeFill,
-            rightOrderData.isMakeFill
-        );
-    }
-
-    ///    @notice calculates fills for the matched orders and set them in "fills" mapping
-    ///    @param sender the message sender
-    ///    @param orderLeft left order of the match
-    ///    @param orderRight right order of the match
-    ///    @param leftMakeFill true if the left orders uses make-side fills, false otherwise
-    ///    @param rightMakeFill true if the right orders uses make-side fills, false otherwise
-    ///    @return newFill returns change in orders' fills by the match
-    function _setFillEmitMatch(
-        address sender,
-        LibOrder.Order calldata orderLeft,
-        LibOrder.Order calldata orderRight,
-        bytes32 leftOrderKeyHash,
-        bytes32 rightOrderKeyHash,
-        bool leftMakeFill,
-        bool rightMakeFill
-    ) internal returns (LibFill.FillResult memory newFill) {
         uint256 leftOrderFill = _getOrderFill(orderLeft.salt, leftOrderKeyHash);
         uint256 rightOrderFill = _getOrderFill(orderRight.salt, rightOrderKeyHash);
-        newFill = LibFill.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill, leftMakeFill, rightMakeFill);
+        newFill = LibFill.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
 
         require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
 
         if (orderLeft.salt != 0) {
-            if (leftMakeFill) {
-                fills[leftOrderKeyHash] = leftOrderFill + newFill.leftValue;
-            } else {
-                fills[leftOrderKeyHash] = leftOrderFill + newFill.rightValue;
-            }
+            fills[leftOrderKeyHash] = leftOrderFill + newFill.rightValue;
         }
 
         if (orderRight.salt != 0) {
-            if (rightMakeFill) {
-                fills[rightOrderKeyHash] = rightOrderFill + newFill.rightValue;
-            } else {
-                fills[rightOrderKeyHash] = rightOrderFill + newFill.leftValue;
-            }
+            fills[rightOrderKeyHash] = rightOrderFill + newFill.leftValue;
         }
 
         emit Match({
