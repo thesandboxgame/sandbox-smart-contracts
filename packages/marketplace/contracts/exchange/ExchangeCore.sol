@@ -6,8 +6,6 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {LibFill} from "./libraries/LibFill.sol";
 import {IAssetMatcher} from "../interfaces/IAssetMatcher.sol";
 import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
-import {LibFeeSide} from "../transfer-manager/lib/LibFeeSide.sol";
-import {LibDeal} from "../transfer-manager/lib/LibDeal.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
@@ -161,17 +159,17 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
 
         LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
         doTransfers(
-            LibDeal.DealSide({
+            ITransferManager.DealSide({
                 asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
                 payouts: _payToMaker(orderLeft),
                 from: orderLeft.maker
             }),
-            LibDeal.DealSide({
+            ITransferManager.DealSide({
                 asset: LibAsset.Asset(takeMatch, newFill.rightValue),
                 payouts: _payToMaker(orderRight),
                 from: orderRight.maker
             }),
-            LibFeeSide.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
+            LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
     }
 
