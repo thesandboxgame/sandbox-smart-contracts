@@ -15,6 +15,7 @@
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "private": true,
     "dependencies": {
+        "@sandbox-smart-contracts/avatar": "workspace:^",
         "@sandbox-smart-contracts/giveaway": "0.0.3"
     },
     "files": [
@@ -33,7 +34,8 @@
         "fork:mainnet": "cross-env HARDHAT_FORK=mainnet HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mainnet HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
         "fork:polygon": "cross-env HARDHAT_FORK=polygon HARDHAT_DEPLOY_ACCOUNTS_NETWORK=polygon HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
         "fork:goerli": "cross-env HARDHAT_FORK=goerli HARDHAT_DEPLOY_ACCOUNTS_NETWORK=goerli HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
-        "fork:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test"
+        "fork:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "fork:deploy:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat deploy"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
