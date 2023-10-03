@@ -849,6 +849,7 @@ describe('Exchange.sol', function () {
       ERC721WithRoyaltyV2981,
       defaultFeeReceiver,
       deployer,
+      admin,
       user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures);
@@ -865,11 +866,11 @@ describe('Exchange.sol', function () {
     // set up receiver
     await ERC721WithRoyaltyV2981.setRoyaltiesReceiver(1, deployer.address);
 
-    // grant TSB Wallet role to seller
-    const TSB_WALLET =
-      '0x1c3ffa8a78d1cdbeb9812a2ae7c540d20292531d0254f9ac1fa85e0ac44b9ad0'; // keccak256("TSB_WALLET")
-    await ExchangeContractAsDeployer.connect(deployer).grantRole(
-      TSB_WALLET,
+    // grant Skip Fees role to seller
+    const SKIP_FEES_ROLE =
+      '0x9c14d84aa0a4264a5c33560cb08e43e3ed227d0565fa3d19078d0f01304516eb'; // keccak256("SKIP_FEES_ROLE")
+    await ExchangeContractAsDeployer.connect(admin).grantRole(
+      SKIP_FEES_ROLE,
       taker.address
     );
 

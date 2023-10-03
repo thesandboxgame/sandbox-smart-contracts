@@ -10,4 +10,6 @@ contract SimpleTest is TransferManager, TransferExecutor {
     function getRoyaltiesByAssetTest(LibAsset.AssetType memory matchNft) external returns (LibPart.Part[] memory) {
         return getRoyaltiesByAssetType(matchNft);
     }
+
+    function _skipFees(address from) internal virtual override returns (bool) {}
 }
