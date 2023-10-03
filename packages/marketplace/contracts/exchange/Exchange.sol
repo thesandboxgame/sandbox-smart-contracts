@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.21;
 
+import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
@@ -15,7 +17,14 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers
-contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771HandlerUpgradeable {
+contract Exchange is
+    Initializable,
+    ERC165Upgradeable,
+    AccessControlUpgradeable,
+    ExchangeCore,
+    TransferManager,
+    ERC2771HandlerUpgradeable
+{
     /// @notice role erc1776 trusted meta transaction contracts (Sand for example).
     /// @return hash for ERC1776_OPERATOR_ROLE
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
@@ -23,6 +32,10 @@ contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771Handle
     /// @notice role business addresses that can change for example: fees and royalties
     /// @return hash for EXCHANGE_ADMIN_ROLE
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
+
+    /// @notice role to identify the sandbox accounts
+    /// @return hash for SKIP_FEES_ROLE
+    bytes32 public constant SKIP_FEES_ROLE = keccak256("SKIP_FEES_ROLE");
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -58,6 +71,7 @@ contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771Handle
             newRoyaltiesProvider
         );
         __ExchangeCoreInitialize(orderValidatorAddress, newAssetMatcher);
+        __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -125,6 +139,10 @@ contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771Handle
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
+    function _skipFees(address from) internal view override returns (bool) {
+        return !hasRole(SKIP_FEES_ROLE, from);
+    }
+
     function _msgSender()
         internal
         view
@@ -137,5 +155,15 @@ contract Exchange is Initializable, ExchangeCore, TransferManager, ERC2771Handle
 
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return
+            ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 }
