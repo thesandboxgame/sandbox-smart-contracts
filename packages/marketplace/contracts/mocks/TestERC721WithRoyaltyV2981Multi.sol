@@ -18,6 +18,8 @@ contract TestERC721WithRoyaltyV2981Multi is
 
     bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
 
+    bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
+
     struct Recipient {
         address payable recipient;
         uint16 bps;
@@ -39,6 +41,7 @@ contract TestERC721WithRoyaltyV2981Multi is
         bytes4 interfaceId
     ) public view virtual override(ERC721Upgradeable, Royalties2981TestImpl) returns (bool) {
         return
+            interfaceId == INTERFACE_ID_GET_RECIPIENTS ||
             interfaceId == LibRoyalties2981._INTERFACE_ID_ROYALTIES ||
             interfaceId == INTERFACE_ID_IROYALTYUGC ||
             ERC721Upgradeable.supportsInterface(interfaceId) ||
@@ -58,7 +61,7 @@ contract TestERC721WithRoyaltyV2981Multi is
         require(totalBPS == BASIS_POINTS, "Total bps must be 10000");
     }
 
-    function getRecipients() external view returns (Recipient[] memory) {
+    function getRecipients(uint256 /* tokenId */) external view returns (Recipient[] memory) {
         return _recipients;
     }
 
