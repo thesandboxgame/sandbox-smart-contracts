@@ -122,7 +122,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
-        if (_skipFees(paymentSide.from)) {
+        if (_applyFees(paymentSide.from)) {
             rest = transferRoyalties(
                 paymentSide.asset.assetType,
                 nftSide.asset.assetType,
@@ -316,7 +316,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         }
     }
 
-    function _skipFees(address from) internal virtual returns (bool);
+    function _applyFees(address from) internal virtual returns (bool);
 
     uint256[46] private __gap;
 }
