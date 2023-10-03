@@ -13,28 +13,6 @@ import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 /// @title abstract contract for TransferExecutor
 /// @notice contains transfer functions for any assets as well as ERC20 tokens
 abstract contract TransferExecutor is Initializable, ITransferExecutor {
-    /// @notice limit of assets for each type of bundles
-    uint256 public constant MAX_BUNDLE_LIMIT = 20;
-
-    // Bundle Structs
-    struct ERC20Details {
-        IERC20Upgradeable token;
-        uint256 value;
-    }
-
-    struct ERC721Details {
-        IERC721Upgradeable token;
-        uint256 id;
-        uint256 value;
-    }
-
-    struct ERC1155Details {
-        IERC1155Upgradeable token;
-        uint256 id;
-        uint256 value;
-        // bytes data;
-    }
-
     /// @notice function should be able to transfer any supported Asset
     /// @param asset Asset to be transferred
     /// @param from account holding the asset
@@ -44,17 +22,14 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
-
             erc721safeTransferFrom(IERC721Upgradeable(token), from, to, tokenId);
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
-
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-
             erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
         }
     }
