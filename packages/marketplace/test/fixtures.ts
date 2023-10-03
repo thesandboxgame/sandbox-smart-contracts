@@ -32,13 +32,14 @@ async function deploy() {
   );
   const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
-    [false, false, true, false],
+    [admin.address, false, false, true, false],
     {
       initializer: '__OrderValidator_init_unchained',
     }
   );
 
   const OrderValidatorAsUser = await OrderValidatorAsDeployer.connect(user);
+  const OrderValidatorAsAdmin = await OrderValidatorAsDeployer.connect(admin);
   const protocolFeePrimary = 123;
   const protocolFeeSecondary = 250;
   const ExchangeFactory = await ethers.getContractFactory('Exchange');
@@ -51,7 +52,7 @@ async function deploy() {
       protocolFeeSecondary,
       defaultFeeReceiver.address,
       await RoyaltiesRegistryAsDeployer.getAddress(),
-      await OrderValidatorAsDeployer.getAddress(),
+      await OrderValidatorAsAdmin.getAddress(),
       await assetMatcherAsDeployer.getAddress(),
     ],
     {
@@ -115,7 +116,7 @@ async function deploy() {
     ERC20Contract2,
     ERC721Contract,
     ERC1155Contract,
-    OrderValidatorAsDeployer,
+    OrderValidatorAsAdmin,
     OrderValidatorAsUser,
     RoyaltiesRegistryAsDeployer,
     RoyaltiesRegistryAsUser,

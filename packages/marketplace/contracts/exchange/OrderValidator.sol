@@ -25,19 +25,21 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     }
 
     /// @notice initializer for OrderValidator
+    /// @param admin OrderValidator and Whiteist admin
     /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
     /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract
     /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract
     /// @param newErc20 boolean to activate the white list of ERC20 tokens
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
+        address admin,
         bool newTsbOnly,
         bool newPartners,
         bool newOpen,
         bool newErc20
     ) public initializer {
         __EIP712_init_unchained("Exchange", "1");
-        __Whitelist_init(newTsbOnly, newPartners, newOpen, newErc20);
+        __Whitelist_init(admin, newTsbOnly, newPartners, newOpen, newErc20);
     }
 
     /// @notice verifies order

@@ -155,7 +155,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC20Contract2,
       defaultFeeReceiver,
@@ -203,16 +203,8 @@ describe('Exchange.sol', function () {
       0
     );
 
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     await ExchangeContractAsUser.matchOrders([
       {
         orderLeft,
@@ -238,7 +230,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC20 and ERC721 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       defaultFeeReceiver,
@@ -282,16 +274,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -330,7 +314,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC20 and ERC1155 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC1155Contract,
       defaultFeeReceiver,
@@ -377,16 +361,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
     );
@@ -425,7 +401,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC721 and ERC20 tokens in primary market', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyaltyV2981,
       defaultFeeReceiver,
@@ -471,16 +447,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -518,7 +486,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order with external royalties provider(type 1)', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       RoyaltiesRegistryAsDeployer,
@@ -571,16 +539,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -624,7 +584,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order with external royalties provider(type 2)', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       RoyaltiesRegistryAsDeployer,
@@ -683,16 +643,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -736,7 +688,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order with royalties 2981(type 3)', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyaltyV2981,
       defaultFeeReceiver,
@@ -790,16 +742,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -844,7 +788,7 @@ describe('Exchange.sol', function () {
     const {
       ExchangeContractAsUser,
       ExchangeContractAsDeployer,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyaltyV2981,
       defaultFeeReceiver,
@@ -904,16 +848,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -954,7 +890,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC721 and ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       user1: maker,
@@ -993,16 +929,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -1032,7 +960,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order between ERC1155 and ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC1155Contract,
       user1: maker,
@@ -1075,16 +1003,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
     );
@@ -1114,7 +1034,7 @@ describe('Exchange.sol', function () {
   it('should partially fill orders using matchOrders between ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC20Contract2,
       user1: maker,
@@ -1162,16 +1082,8 @@ describe('Exchange.sol', function () {
       0
     );
 
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
     );
@@ -1201,7 +1113,7 @@ describe('Exchange.sol', function () {
   it('should partially fill orders using matchOrders between ERC1155 and ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC1155Contract,
       user1: maker,
@@ -1245,16 +1157,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
     );
@@ -1284,7 +1188,7 @@ describe('Exchange.sol', function () {
   it('should fully fill a order using partial matches between ERC20 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC20Contract2,
       user1: maker,
@@ -1332,15 +1236,11 @@ describe('Exchange.sol', function () {
       0
     );
 
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
     const takerSigForFirstMatch = await signOrder(
       rightOrderForFirstMatch,
       taker,
-      OrderValidatorAsDeployer
+      OrderValidatorAsAdmin
     );
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -1379,7 +1279,7 @@ describe('Exchange.sol', function () {
     const takerSigForSecondMatch = await signOrder(
       rightOrderForSecondMatch,
       taker,
-      OrderValidatorAsDeployer
+      OrderValidatorAsAdmin
     );
     await ExchangeContractAsUser.matchOrders([
       {
@@ -1404,7 +1304,7 @@ describe('Exchange.sol', function () {
   it('should fully fill a order using partial matches between ERC20 and ERC1155 tokens', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC1155Contract,
       user1: maker,
@@ -1449,15 +1349,11 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
     const takerSigForFirstMatch = await signOrder(
       rightOrderForFirstMatch,
       taker,
-      OrderValidatorAsDeployer
+      OrderValidatorAsAdmin
     );
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -1495,7 +1391,7 @@ describe('Exchange.sol', function () {
     const takerSigForSecondMatch = await signOrder(
       rightOrderForSecondMatch,
       taker,
-      OrderValidatorAsDeployer
+      OrderValidatorAsAdmin
     );
     await ExchangeContractAsUser.matchOrders([
       {
@@ -1520,7 +1416,7 @@ describe('Exchange.sol', function () {
   it('should revert matchOrders on mismatched asset types', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       ERC1155Contract,
@@ -1563,16 +1459,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     await expect(
       ExchangeContractAsUser.matchOrders([
@@ -1589,7 +1477,7 @@ describe('Exchange.sol', function () {
   it('should revert for matching a cancelled order', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721Contract,
       user1: maker,
@@ -1628,16 +1516,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     await ExchangeContractAsUser.connect(maker).cancel(
       orderLeft,
       hashKey(orderLeft)
@@ -1658,7 +1538,7 @@ describe('Exchange.sol', function () {
     it('should be able to buy two tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
-        OrderValidatorAsDeployer,
+        OrderValidatorAsAdmin,
         ERC20Contract,
         ERC721Contract,
         user: taker,
@@ -1709,21 +1589,13 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.matchOrders([
         {
           orderLeft: left1,
-          signatureLeft: await signOrder(
-            left1,
-            maker,
-            OrderValidatorAsDeployer
-          ),
+          signatureLeft: await signOrder(left1, maker, OrderValidatorAsAdmin),
           orderRight: await getSymmetricOrder(left1, taker),
           signatureRight: '0x',
         },
         {
           orderLeft: left2,
-          signatureLeft: await signOrder(
-            left2,
-            maker,
-            OrderValidatorAsDeployer
-          ),
+          signatureLeft: await signOrder(left2, maker, OrderValidatorAsAdmin),
           orderRight: await getSymmetricOrder(left2, taker),
           signatureRight: '0x',
         },
