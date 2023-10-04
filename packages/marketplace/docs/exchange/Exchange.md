@@ -129,7 +129,7 @@ If a collection doesn't support the interface `IRoyaltyUGC`, the secondary marke
 
 The royalties are the share returning to the creator (or owner) of the collection or token after a sale.
 The protocol handles multiple types of royalties (ERC2981, royalties registry, external provider).
-See the [RoyaltiesRegistry contract](../royalties-registry/RoyaltiesRegistry.md) for more information.
+See the [RoyaltiesRegistry](../royalties-registry/RoyaltiesRegistry.md) contract for more information.
 
 ### Payouts
 
@@ -233,7 +233,7 @@ The protocol offers to enable whitelists on:
 - payment tokens (ERC20) that can be traded
 - collections (ERC1155 and ERC721) that can be traded
 
-See the [OrderValidator contract](../exchange/OrderValidator.md) for more information.
+See the [OrderValidator](../exchange/OrderValidator.md) contract for more information.
 
 ### Upgradeable
 
