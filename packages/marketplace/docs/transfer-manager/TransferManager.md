@@ -2,7 +2,7 @@
 
 ## Introduction
 
-After an exchange has been validated between two parties, the [Exchange contract](../exchange/Exchange.md) relies on the [TransferManager contract](../../contracts/transfer-manager/TransferManager.sol) to handle the preparation of the fees, royalties and asset transfers of the two orders of the exchange.
+After an exchange has been validated between two parties, the [Exchange](../exchange/Exchange.md) contract relies on the [TransferManager](../../contracts/transfer-manager/TransferManager.sol) contract to handle the preparation of the fees, royalties and asset transfers of the two orders of the exchange.
 
 ## Features
 

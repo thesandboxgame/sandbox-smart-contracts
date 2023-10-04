@@ -18,7 +18,7 @@ The contract supports the ERC2981 standard as a main type of royalties.
 ### Multi Recipients
 
 By default, the ERC2981 only handles one receiver for the royalties.
-If the ERC2981 is enabled for a token, this contract will also check if the token contract supports the [multi recipient interface](../../contracts/royalties-registry/IMultiRoyaltyRecipients.sol). It means that the royalties are splitted (equally or not) among several receivers.
+If the ERC2981 is enabled for a token, this contract will also check if the token contract supports the [multi recipient](../../contracts/royalties-registry/IMultiRoyaltyRecipients.sol) interface. It means that the royalties are splitted (equally or not) among several receivers.
 
 ### External provider
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The [OrderValidator contract](../../contracts/exchange/OrderValidator.sol) is the central security component of the exchange. It checks the validity of the orders being traded: 
+The [OrderValidator](../../contracts/exchange/OrderValidator.sol) contract is the central security component of the exchange. It checks the validity of the orders being traded: 
 - makers validity
 - expiration dates
 - whitelisted tokens
@@ -23,7 +23,7 @@ The contract follows the EIP712 to validate the signatures. Users must sign its 
 
 ### ERC1271
 
-By supporting the ERC1271, the contract allows contract to sign orders (ie Gnosis).
+By supporting the ERC1271, the contract allows contracts to sign orders (ie Gnosis).
 
 ### Dates validation
 
