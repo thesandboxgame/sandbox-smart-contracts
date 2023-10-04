@@ -1938,6 +1938,314 @@ describe('Exchange.sol', function () {
         ])
       ).to.be.revertedWith('not allowed');
     });
+
+    it('should allow ERC721 tokens exchange if tsbOnly is activated and token is whitelisted', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721WithRoyaltyV2981,
+        deployer: maker, // making deployer the maker to sell in primary market
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+        await FeeRecipientsData(maker.address, 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+      await ERC20Contract.mint(taker.address, 100000000000);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100000000000
+      );
+
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        maker.address
+      );
+      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+        100000000000
+      );
+      const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+
+      await OrderValidatorAsAdmin.setPermissions(true, false, false, false);
+      await OrderValidatorAsAdmin.addTSB(ERC721WithRoyaltyV2981);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+    });
+
+    it('should NOT allow ERC721 tokens exchange if partners is activated and token is not whitelisted', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721WithRoyaltyV2981,
+        deployer: maker, // making deployer the maker to sell in primary market
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+        await FeeRecipientsData(maker.address, 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+      await ERC20Contract.mint(taker.address, 100000000000);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100000000000
+      );
+
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        maker.address
+      );
+      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+        100000000000
+      );
+      const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+
+      await OrderValidatorAsAdmin.setPermissions(false, true, false, false);
+
+      await expect(
+        ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ])
+      ).to.be.revertedWith('not allowed');
+    });
+
+    it('should allow ERC721 tokens exchange if partners is activated and token is whitelisted', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721WithRoyaltyV2981,
+        deployer: maker, // making deployer the maker to sell in primary market
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+        await FeeRecipientsData(maker.address, 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+      await ERC20Contract.mint(taker.address, 100000000000);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100000000000
+      );
+
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        maker.address
+      );
+      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+        100000000000
+      );
+      const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+
+      await OrderValidatorAsAdmin.setPermissions(false, true, false, false);
+      await OrderValidatorAsAdmin.addPartner(ERC721WithRoyaltyV2981);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+    });
+
+    it('should allow ERC721 tokens exchange if tsbOnly and partners are activated but so is open', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721WithRoyaltyV2981,
+        deployer: maker, // making deployer the maker to sell in primary market
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+        await FeeRecipientsData(maker.address, 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+      await ERC20Contract.mint(taker.address, 100000000000);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100000000000
+      );
+
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        maker.address
+      );
+      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+        100000000000
+      );
+      const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+
+      await OrderValidatorAsAdmin.setPermissions(true, true, true, false);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+    });
   });
   // TODO
   // describe("test match from", function () {});
