@@ -353,6 +353,7 @@ export function getDeadline(
   }
   if (isTestnet(hre)) {
     hre.deployments.log('increasing deadline by 10 year');
+    console.log(`Original Deadline sector ${sector}:`, new Date(deadline * 1000).toISOString())
     deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
   console.log(`Deadline sector ${sector}:`, new Date(deadline * 1000).toISOString())
