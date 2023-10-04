@@ -18,9 +18,7 @@ The contract supports the [IRoyaltyUGC](../../contracts/transfer-manager/interfa
 
 The contract delegates the retrieval of the royalties to the [RoyaltiesRegistry](../royalties-registry/RoyaltiesRegistry.md) contract. 
 
-Once the calculations of the fees are done, the contract calls the [TransferExecutor](../../contracts/transfer-manager/TransferExecutor.sol) contract to execute the transfers. 
-
-The TransferExecutor contract is responsible of calling the tokens contract to transfer the assets accordingly to the type of token (supports ERC20, ERC1155, ERC721).
+Once the calculations of the fees are done, the contract calls the [TransferExecutor](../../contracts/transfer-manager/TransferExecutor.sol) contract to execute the transfers. The TransferExecutor contract is responsible of calling the tokens contract to transfer the assets accordingly to the type of token (supports ERC20, ERC1155, ERC721).
 
 ### Payouts
 
