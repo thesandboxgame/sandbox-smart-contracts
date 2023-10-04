@@ -1867,7 +1867,6 @@ describe('Exchange.sol', function () {
         OrderValidatorAsAdmin,
         ERC20Contract,
         ERC721WithRoyaltyV2981,
-        defaultFeeReceiver,
         deployer: maker, // making deployer the maker to sell in primary market
         user2: taker,
       } = await loadFixture(deployFixtures);
