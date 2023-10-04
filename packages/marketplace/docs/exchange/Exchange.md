@@ -76,6 +76,20 @@ Bob wants to buy from anybody 1 ASSET (ERC1155) with token id 1000 against 100 M
 The selling order can't be fully matched because the buyer can only buy 1 ASSET of 10. In that case, the `Order C` is partially filled. `Order C` can be re-matched with another order until being fully filled.
 Partial filling can be disable for an order that is executed by the maker by setting the salt to 0 in that order.
 
+### Hash Key Order
+
+An order is identified with a hash key composed of:
+- the maker address
+- the assets (type & contract address) being traded
+- a salt
+
+As you can see, the hash key doesn't include all the fields of the order, meaning that 2 different orders with the same maker, assets and salt will have the same hash key.
+
+The consequences are multiple:
+- since the filling is based on the hash key, different orders can share the same filling
+- canceling an order means canceling all orders with the same hash key
+- signing a new order with the same hash key than a former order will not invalidate the latter
+
 ### User-Generated Content (UGC) & Creator
 
 UGC collection is a collection where the tokens are created by any user, and not necessarily by the owner of the collection.
@@ -139,6 +153,9 @@ participant OrderA
 participant OrderB
 participant Exchange
 participant OrderValidator
+participant TransferManager
+participant RoyaltiesRegistry
+participant TransferExecutor
 
 Alice->>OrderA: signs order
 Alice->>Carol: lends the order & its signature
@@ -149,7 +166,7 @@ Exchange->>OrderValidator: validate orders (dates, whitelist, signatures)
 OrderValidator->>Exchange: returns the result of the validation
 Exchange->>Exchange: match the 2 orders & calculate fillings
 Exchange->>TransferManager: executes the transfers of the exchange
-TransferManager->>RoyaltyManager: gets the royalties info
+TransferManager->>RoyaltiesRegistry: gets the royalties info
 TransferManager->>TransferExecutor: transfer the royalties
 TransferManager->>TransferExecutor: transfer the fees
 TransferManager->>TransferExecutor: transfer the payouts
@@ -157,7 +174,7 @@ TransferManager->>TransferExecutor: transfer the payouts
 
 ### Canceling an order
 
-An order can be cancelled by providing the identifier of that order and that order. An cancelled order is then considered fully filled (set to max integer).
+An order can be cancelled by providing the identifier of that order (hash key) and that order. An cancelled order is then considered fully filled (set to max integer).
 An order with no salt cannot be cancelled.
 
 ### Batch matching orders

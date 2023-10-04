@@ -39,22 +39,23 @@ The protocol is deployed on 4 different addresses:
 title: Deployments
 ---
 flowchart
-   subgraph Exchange
-      TransferManager
-      TransferExecutor
-   end
-   subgraph OrderValidator
-      Whitelist
-   end
-   subgraph AssetMatcher
-   end
-   subgraph RoyaltiesRegistry
-   end   
-   Exchange-->OrderValidator
-   Exchange-->AssetMatcher
-   Exchange-->TransferManager
-   TransferManager-->TransferExecutor
-   TransferManager-->RoyaltiesRegistry
+
+subgraph Exchange
+   TransferManager
+   TransferExecutor
+end
+subgraph OrderValidator
+   Whitelist
+end
+subgraph AssetMatcher
+end
+subgraph RoyaltiesRegistry
+end   
+Exchange-->OrderValidator
+Exchange-->AssetMatcher
+Exchange-->TransferManager
+TransferManager-->TransferExecutor
+TransferManager-->RoyaltiesRegistry
 ```
 
 Also, the contracts use a set of libraries as helper.
