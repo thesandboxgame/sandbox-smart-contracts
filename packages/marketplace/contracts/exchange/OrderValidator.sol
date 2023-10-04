@@ -3,6 +3,7 @@
 pragma solidity 0.8.21;
 
 import {LibOrder} from "../lib-order/LibOrder.sol";
+import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -50,8 +51,10 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
-
         address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
+        if (order.makeAsset.assetType.assetClass != LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
+            verifyERC20Whitelist(makeToken);
+        }
         verifyWhiteList(makeToken);
 
         if (order.salt == 0) {
@@ -81,12 +84,14 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
     /// @notice if ERC20 token is accepted
     /// @param tokenAddress ERC20 token address
-    function verifyERC20Whitelist(address tokenAddress) external view {
+    function verifyERC20Whitelist(address tokenAddress) internal view {
         if (erc20List && !hasRole(ERC20_ROLE, tokenAddress)) {
             revert("payment token not allowed");
         }
     }
 
+    /// @notice if token is whitelisted
+    /// @param tokenAddress ERC20 token address
     function verifyWhiteList(address tokenAddress) internal view {
         if (open) {
             return;
