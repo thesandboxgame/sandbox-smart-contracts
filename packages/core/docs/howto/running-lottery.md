@@ -8,7 +8,7 @@ description: Running a lottery
 
 If you haven't done it, follow the [getting started](../intro/index.md) tutorial first.
 
-Here the inputs you need to run a lottery:
+Here are the inputs you need to run a lottery:
 
 - the block number to use during the lottery
 - the maximum number of users that can win the lottery
@@ -54,7 +54,7 @@ yarn execute mainnet scripts/rouleth/rouleth.ts
     }
     ```
 
-The winners are displayed in a json containing the list of adresses
+The winners are displayed in a json containing the list of addresses
 
 !!! example
     ```json
@@ -74,7 +74,7 @@ The winners are displayed in a json containing the list of adresses
 
 ## How the script works
 
-The script is divided in 4 main modules.
+The script is divided into 4 main modules.
 
 - main() deal with the arguments, call the other modules
 - getAddressFromGraph() query the sandbox subgraph to get the 1. addresses that owned a land at the time of the snapshot and 2. the number of lands they had

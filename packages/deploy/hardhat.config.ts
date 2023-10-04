@@ -154,6 +154,12 @@ const namedAccounts = {
     default: 'backendReferralWallet',
     polygon: '0x564c8aADBd35b6175C0d18595cc335106AA250Dc',
   },
+  backendInstantGiveawayWallet: {
+    // default is computed from private key:
+    // "0x4242424242424242424242424242424242424242424242424242424242424242"
+    default: 'backendReferralWallet',
+    polygon: '0x45966Edc0cB7D14f6383921d76963b1274a2c95A',
+  },
   raffleSignWallet: {
     // default is computed from private key:
     // "0x4242424242424242424242424242424242424242424242424242424242424242"
