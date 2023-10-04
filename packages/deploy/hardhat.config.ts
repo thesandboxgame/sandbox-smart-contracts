@@ -8,7 +8,10 @@ import './tasks/importedPackages';
 
 // Package name : solidity source code path
 const importedPackages = {
+  '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
+  '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
+  '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
 };
 
 const namedAccounts = {
@@ -34,6 +37,8 @@ const namedAccounts = {
     polygon: 'sandAdmin',
   },
 
+  filterOperatorSubscription: 'deployer',
+
   upgradeAdmin: 'sandAdmin',
 
   multiGiveawayAdmin: {
@@ -57,6 +62,7 @@ const namedAccounts = {
   mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
   sandBeneficiary: 'sandAdmin', // will be the owner of all initial SAND
   assetAdmin: 'sandAdmin', // can add super operator and change admin to Asset
+  assetPauser: 'sandAdmin', // can pause AssetCreate and AssetReveal
   assetMinterAdmin: 'sandAdmin', // can set metaTxProcessors & types
   assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
   sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
@@ -64,7 +70,11 @@ const namedAccounts = {
   defaultMinterAdmin: 'sandAdmin', // can change the fees
   genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
   assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
-  assetAuctionAdmin: 'sandAdmin', // can change fee collector
+  assetAuctionAdmin: 'sandAdmin', // can change fee collector,
+
+  commonRoyaltyReceiver: 'treasury', // The Sandbox royalty receiver
+  royaltyManagerAdmin: 'sandAdmin', // default admin for RoyaltyManager contract
+  contractRoyaltySetter: 'sandAdmin', // can set the EIP 2981 royalty split for contracts via RoyaltyManager
 
   sandSaleBeneficiary: {
     default: 3,
