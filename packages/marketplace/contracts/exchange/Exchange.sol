@@ -153,6 +153,8 @@ contract Exchange is
             ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
+    /// @dev Apply the fees & royalties only for users NOT granted with the role EXCHANGE_ADMIN_ROLE
+    /// @param from address to check
     function _applyFees(address from) internal view override returns (bool) {
         return !hasRole(EXCHANGE_ADMIN_ROLE, from);
     }

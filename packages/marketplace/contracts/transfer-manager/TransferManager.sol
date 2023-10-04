@@ -312,6 +312,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         }
     }
 
+    /// @dev function deciding if the fees are applied or not, to be overriden
+    /// @param from address to check
     function _applyFees(address from) internal virtual returns (bool);
 
     uint256[46] private __gap;
