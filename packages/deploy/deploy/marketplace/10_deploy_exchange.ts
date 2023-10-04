@@ -17,7 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
-  const assetMatcher = await deployments.get('AssetMatcher');
 
   const newProtocolFeePrimary = 0;
   const newProtocolFeeSecondary = 250;
@@ -38,7 +37,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           exchangeFeeRecipient,
           royaltiesRegistry.address,
           orderValidator.address,
-          assetMatcher.address,
         ],
       },
       upgradeIndex: 0,
@@ -49,8 +47,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Exchange', 'Exchange_deploy'];
-func.dependencies = [
-  'RoyaltiesRegistry_deploy',
-  'OrderValidator_deploy',
-  'AssetMatcher_deploy',
-];
+func.dependencies = ['RoyaltiesRegistry_deploy', 'OrderValidator_deploy'];
