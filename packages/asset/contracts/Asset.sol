@@ -23,8 +23,7 @@ import {
     MultiRoyaltyDistributor
 } from "@sandbox-smart-contracts/dependency-royalty-management/contracts/MultiRoyaltyDistributor.sol";
 import {
-    OperatorFiltererUpgradeable,
-    IOperatorFilterRegistry
+    OperatorFiltererUpgradeable
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {IAsset} from "./interfaces/IAsset.sol";

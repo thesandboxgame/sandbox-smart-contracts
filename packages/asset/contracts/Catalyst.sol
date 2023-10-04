@@ -17,8 +17,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {
-    OperatorFiltererUpgradeable,
-    IOperatorFilterRegistry
+    OperatorFiltererUpgradeable
 } from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 import {
     RoyaltyDistributor

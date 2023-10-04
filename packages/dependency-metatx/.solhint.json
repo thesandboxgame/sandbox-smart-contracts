@@ -8,14 +8,10 @@
         "endOfLine": "auto"
       }
     ],
-    "code-complexity": ["error", 7],
     "compiler-version": ["error", "^0.8.0"],
-    "const-name-snakecase": "off",
-    "func-name-mixedcase": "off",
-    "constructor-syntax": "error",
+    "custom-errors": "off",
     "func-visibility": ["error", {"ignoreConstructors": true}],
-    "not-rely-on-time": "off",
-    "no-inline-assembly": "off",
+    "func-named-parameters": ["error", 3],
     "reason-string": ["warn", {"maxLength": 64}]
   }
 }

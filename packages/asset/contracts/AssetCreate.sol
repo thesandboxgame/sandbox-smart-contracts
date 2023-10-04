@@ -135,9 +135,9 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        require(tiers.length == amounts.length, "AssetCreate: Arrays must be same length");
-        require(amounts.length == metadataHashes.length, "AssetCreate: Arrays must be same length");
-        require(metadataHashes.length == revealed.length, "AssetCreate: Arrays must be same length");
+        require(tiers.length == amounts.length, "AssetCreate: 1-Array lengths");
+        require(amounts.length == metadataHashes.length, "AssetCreate: 2-Array lengths");
+        require(metadataHashes.length == revealed.length, "AssetCreate: 3-Array lengths");
 
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);

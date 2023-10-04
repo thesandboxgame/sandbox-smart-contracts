@@ -2,7 +2,10 @@
 
 pragma solidity 0.8.18;
 
-import {Catalyst, IOperatorFilterRegistry} from "../Catalyst.sol";
+import {Catalyst} from "../Catalyst.sol";
+import {
+    IOperatorFilterRegistry
+} from "@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFiltererUpgradeable.sol";
 
 contract MockCatalyst is Catalyst {
     /// @notice sets registry and subscribe to subscription

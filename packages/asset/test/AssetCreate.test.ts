@@ -981,7 +981,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             [...metadataHashes, additionalMetadataHash]
           )
-        ).to.be.revertedWith('AssetCreate: Arrays must be same length');
+        ).to.be.revertedWith('AssetCreate: 2-Array lengths');
       });
       it('should revert if amounts mismatch signed values', async function () {
         const {

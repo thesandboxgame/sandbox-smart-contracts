@@ -18,7 +18,7 @@
         "@sandbox-smart-contracts/asset": "*",
         "@sandbox-smart-contracts/dependency-operator-filter": "*",
         "@sandbox-smart-contracts/dependency-royalty-management": "*",
-        "@sandbox-smart-contracts/giveaway": "*"
+        "@sandbox-smart-contracts/giveaway": "0.0.3"
     },
     "files": [
         "deployments"
