@@ -63,8 +63,8 @@ describe('Exchange.sol', function () {
       ERC721Contract,
     } = await loadFixture(deployFixtures);
 
-    const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetERC721(ERC721Contract, 100);
+    const makerAsset = await AssetERC20(ERC20Contract, 123000000);
+    const takerAsset = await AssetERC721(ERC721Contract, 456000000);
 
     const leftOrder = await OrderDefault(
       user1,
@@ -158,31 +158,29 @@ describe('Exchange.sol', function () {
       OrderValidatorAsAdmin,
       ERC20Contract,
       ERC20Contract2,
-      defaultFeeReceiver,
-      protocolFeeSecondary,
       user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures);
 
-    await ERC20Contract.mint(maker.address, 200);
+    await ERC20Contract.mint(maker.address, 123000000);
     await ERC20Contract.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
-      200
+      123000000
     );
 
-    await ERC20Contract2.mint(taker.address, 100);
+    await ERC20Contract2.mint(taker.address, 456000000);
     await ERC20Contract2.connect(taker).approve(
       await ExchangeContractAsUser.getAddress(),
-      100
+      456000000
     );
 
-    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(200);
+    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(123000000);
     expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
+    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(456000000);
 
-    const makerAsset = await AssetERC20(ERC20Contract, 200);
-    const takerAsset = await AssetERC20(ERC20Contract2, 100);
+    const makerAsset = await AssetERC20(ERC20Contract, 123000000);
+    const takerAsset = await AssetERC20(ERC20Contract2, 456000000);
     const orderLeft = await OrderDefault(
       maker,
       makerAsset,
@@ -214,16 +212,9 @@ describe('Exchange.sol', function () {
     ]);
 
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(195); // 200 - protocolFee
-    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(123000000);
+    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(456000000);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-
-    // check protocol fee -> 250 * 200 / 10000 = 5
-    expect(
-      await ERC20Contract.balanceOf(defaultFeeReceiver.address)
-    ).to.be.equal(
-      (Number(protocolFeeSecondary) * Number(makerAsset.value)) / 10000
-    );
   });
 
   it('should execute a complete match order between ERC20 and ERC721 tokens', async function () {
@@ -328,7 +319,7 @@ describe('Exchange.sol', function () {
       10000000000
     );
 
-    await ERC1155Contract.mint(taker.address, 1, 10);
+    await ERC1155Contract.mint(taker.address, 1, 123000000);
     await ERC1155Contract.connect(taker).setApprovalForAll(
       await ExchangeContractAsUser.getAddress(),
       true
@@ -337,10 +328,12 @@ describe('Exchange.sol', function () {
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
       10000000000
     );
-    expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
+    expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(
+      123000000
+    );
 
     const makerAsset = await AssetERC20(ERC20Contract, 10000000000);
-    const takerAsset = await AssetERC1155(ERC1155Contract, 1, 10);
+    const takerAsset = await AssetERC1155(ERC1155Contract, 1, 123000000);
 
     const orderLeft = await OrderDefault(
       maker,
@@ -377,12 +370,14 @@ describe('Exchange.sol', function () {
       },
     ]);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
-      10
+      123000000
     );
     expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
       10000000000
     );
-    expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
+    expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(
+      123000000
+    );
     expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
@@ -687,7 +682,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order with royalties 2981(type 3) transferred to royaltyReceiver', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyalty,
       defaultFeeReceiver,
@@ -745,16 +740,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
@@ -1020,16 +1007,16 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.getAddress(),
       1
     );
-    await ERC20Contract.mint(taker.address, 100);
+    await ERC20Contract.mint(taker.address, 123000000);
     await ERC20Contract.connect(taker).approve(
       await ExchangeContractAsUser.getAddress(),
-      100
+      123000000
     );
 
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(maker.address);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(100);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(123000000);
     const makerAsset = await AssetERC721(ERC721Contract, 1);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const takerAsset = await AssetERC20(ERC20Contract, 123000000);
     const orderLeft = await OrderDefault(
       maker,
       makerAsset,
@@ -1067,13 +1054,15 @@ describe('Exchange.sol', function () {
       },
     ]);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
-      100
+      123000000
     );
     expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
       1
     );
     expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
-    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(98);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      123000000 * (1 - 2.5 / 100)
+    );
   });
 
   it('should execute a complete match order between ERC1155 and ERC20 tokens', async function () {
@@ -1086,23 +1075,25 @@ describe('Exchange.sol', function () {
       user2: taker,
     } = await loadFixture(deployFixtures);
 
-    await ERC1155Contract.mint(maker.address, 1, 10);
+    await ERC1155Contract.mint(maker.address, 1, 123000000);
     await ERC1155Contract.connect(maker).setApprovalForAll(
       await ExchangeContractAsUser.getAddress(),
       true
     );
 
-    await ERC20Contract.mint(taker.address, 100);
+    await ERC20Contract.mint(taker.address, 456000000);
     await ERC20Contract.connect(taker).approve(
       await ExchangeContractAsUser.getAddress(),
-      100
+      456000000
     );
 
-    expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
-    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(100);
+    expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(
+      123000000
+    );
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(456000000);
 
-    const makerAsset = await AssetERC1155(ERC1155Contract, 1, 10);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const makerAsset = await AssetERC1155(ERC1155Contract, 1, 123000000);
+    const takerAsset = await AssetERC20(ERC20Contract, 456000000);
 
     const orderLeft = await OrderDefault(
       maker,
@@ -1139,15 +1130,17 @@ describe('Exchange.sol', function () {
       },
     ]);
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
-      100
+      456000000
     );
     expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
-      10
+      123000000
     );
     expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
-    expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
+    expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(
+      123000000
+    );
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(98);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(444600000);
   });
 
   it('should partially fill orders using matchOrders between ERC20 tokens', async function () {
@@ -1224,7 +1217,7 @@ describe('Exchange.sol', function () {
       50
     );
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(49);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(50);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
   });
@@ -1382,7 +1375,7 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.fills(hashKey(rightOrderForFirstMatch))
     ).to.be.equal(50);
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(50);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(49);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(50);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
 
@@ -1415,7 +1408,7 @@ describe('Exchange.sol', function () {
       await ExchangeContractAsUser.fills(hashKey(rightOrderForSecondMatch))
     ).to.be.equal(50);
     expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(98);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(100);
     expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(200);
     expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
   });

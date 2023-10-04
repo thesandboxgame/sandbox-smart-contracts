@@ -13,13 +13,15 @@ library LibAsset {
         ERC721_ASSET_CLASS,
         ERC1155_ASSET_CLASS
     }
-    bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
 
-    bytes32 internal constant ASSET_TYPEHASH =
-        keccak256("Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)");
+    enum FeeSide {
+        NONE,
+        LEFT,
+        RIGHT
+    }
 
     struct AssetType {
-        LibAsset.AssetClassType assetClass;
+        AssetClassType assetClass;
         bytes data;
     }
 
@@ -28,16 +30,35 @@ library LibAsset {
         uint256 value;
     }
 
-    ///    @notice calculate hash of asset type
-    ///    @param assetType to be hashed
-    ///    @return hash of assetType
+    bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
+
+    bytes32 internal constant ASSET_TYPEHASH =
+        keccak256("Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)");
+
+    /// @notice decides if the fees will be taken and from which side
+    /// @param leftClass left side asset class type
+    /// @param rightClass right side asset class type
+    /// @return side from which the fees will be taken or none
+    function getFeeSide(AssetClassType leftClass, AssetClassType rightClass) internal pure returns (FeeSide) {
+        if (leftClass == AssetClassType.ERC20_ASSET_CLASS && rightClass != AssetClassType.ERC20_ASSET_CLASS) {
+            return FeeSide.LEFT;
+        }
+        if (rightClass == AssetClassType.ERC20_ASSET_CLASS && leftClass != AssetClassType.ERC20_ASSET_CLASS) {
+            return FeeSide.RIGHT;
+        }
+        return FeeSide.NONE;
+    }
+
+    /// @notice calculate hash of asset type
+    /// @param assetType to be hashed
+    /// @return hash of assetType
     function hash(AssetType memory assetType) internal pure returns (bytes32) {
         return keccak256(abi.encode(ASSET_TYPE_TYPEHASH, assetType.assetClass, keccak256(assetType.data)));
     }
 
-    ///    @notice calculate hash of asset
-    ///    @param asset to be hashed
-    ///    @return hash of asset
+    /// @notice calculate hash of asset
+    /// @param asset to be hashed
+    /// @return hash of asset
     function hash(Asset memory asset) internal pure returns (bytes32) {
         return keccak256(abi.encode(ASSET_TYPEHASH, hash(asset.assetType), asset.value));
     }

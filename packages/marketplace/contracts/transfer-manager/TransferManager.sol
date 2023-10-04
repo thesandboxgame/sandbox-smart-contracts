@@ -6,7 +6,7 @@ import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upg
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
-import {ITransferManager, LibDeal, LibFeeSide} from "./interfaces/ITransferManager.sol";
+import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
 
@@ -99,15 +99,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes transfers for 2 matched orders
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
-    function doTransfers(
-        LibDeal.DealSide memory left,
-        LibDeal.DealSide memory right,
-        LibFeeSide.FeeSide feeSide
-    ) internal override {
-        if (feeSide == LibFeeSide.FeeSide.LEFT) {
+    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
+        if (feeSide == LibAsset.FeeSide.LEFT) {
             doTransfersWithFees(left, right);
             transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
-        } else if (feeSide == LibFeeSide.FeeSide.RIGHT) {
+        } else if (feeSide == LibAsset.FeeSide.RIGHT) {
             doTransfersWithFees(right, left);
             transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
         } else {
@@ -119,7 +115,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-    function doTransfersWithFees(LibDeal.DealSide memory paymentSide, LibDeal.DealSide memory nftSide) internal {
+    function doTransfersWithFees(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
         if (_applyFees(paymentSide.from)) {
