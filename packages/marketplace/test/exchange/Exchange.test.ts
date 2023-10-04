@@ -682,7 +682,7 @@ describe('Exchange.sol', function () {
   it('should execute a complete match order with royalties 2981(type 3) transferred to royaltyReceiver', async function () {
     const {
       ExchangeContractAsUser,
-      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyalty,
       defaultFeeReceiver,
@@ -740,16 +740,8 @@ describe('Exchange.sol', function () {
       0,
       0
     );
-    const makerSig = await signOrder(
-      orderLeft,
-      maker,
-      OrderValidatorAsDeployer
-    );
-    const takerSig = await signOrder(
-      orderRight,
-      taker,
-      OrderValidatorAsDeployer
-    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
     expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
       0
