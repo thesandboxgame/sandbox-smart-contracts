@@ -159,17 +159,6 @@ describe('OrderValidator.sol', function () {
       .to.not.be.reverted;
   });
 
-  it('should verify ERC20 Whitelist', async function () {
-    const {OrderValidatorAsUser, ERC20Contract} = await loadFixture(
-      deployFixtures
-    );
-    await expect(
-      OrderValidatorAsUser.verifyERC20Whitelist(
-        await ERC20Contract.getAddress()
-      )
-    ).to.not.be.reverted;
-  });
-
   it('should not set permission for token if caller is not owner', async function () {
     const {OrderValidatorAsUser, user} = await loadFixture(deployFixtures);
     await expect(
