@@ -1723,6 +1723,223 @@ describe('Exchange.sol', function () {
       expect(await ERC721Contract.ownerOf(345)).to.be.equal(taker.address);
     });
   });
+  describe('Whitelisting tokens', function () {
+    it('should NOT execute a complete match order between ERC20 tokens if whitelisting for ERC20 is ON', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC20Contract2,
+        user1: maker,
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC20Contract.mint(maker.address, 200);
+      await ERC20Contract.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        200
+      );
+
+      await ERC20Contract2.mint(taker.address, 100);
+      await ERC20Contract2.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100
+      );
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(200);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
+
+      const makerAsset = await AssetERC20(ERC20Contract, 200);
+      const takerAsset = await AssetERC20(ERC20Contract2, 100);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+
+      await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
+
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+      await expect(
+        ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ])
+      ).to.be.revertedWith('payment token not allowed');
+    });
+
+    it('should execute a complete match order between ERC20 tokens if added to whitelist and ERC20 is ON', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC20Contract2,
+        user1: maker,
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC20Contract.mint(maker.address, 200);
+      await ERC20Contract.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        200
+      );
+
+      await ERC20Contract2.mint(taker.address, 100);
+      await ERC20Contract2.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100
+      );
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(200);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(100);
+
+      const makerAsset = await AssetERC20(ERC20Contract, 200);
+      const takerAsset = await AssetERC20(ERC20Contract2, 100);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+
+      await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
+      await OrderValidatorAsAdmin.addERC20(ERC20Contract);
+      await OrderValidatorAsAdmin.addERC20(ERC20Contract2);
+
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+    });
+
+    it('should NOT allow ERC721 tokens exchange if tsbOnly is activated and token is not whitelisted', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721WithRoyaltyV2981,
+        defaultFeeReceiver,
+        deployer: maker, // making deployer the maker to sell in primary market
+        user2: taker,
+      } = await loadFixture(deployFixtures);
+
+      await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+        await FeeRecipientsData(maker.address, 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+      await ERC20Contract.mint(taker.address, 100000000000);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        100000000000
+      );
+
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        maker.address
+      );
+      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+        100000000000
+      );
+      const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+      const orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      const orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+      const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      const takerSig = await signOrder(
+        orderRight,
+        taker,
+        OrderValidatorAsAdmin
+      );
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+
+      await OrderValidatorAsAdmin.setPermissions(true, false, false, false);
+
+      await expect(
+        ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ])
+      ).to.be.revertedWith('not allowed');
+    });
+  });
   // TODO
   // describe("test match from", function () {});
   // describe("test on pause", function () {});
