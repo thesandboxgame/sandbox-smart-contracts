@@ -6,7 +6,7 @@ description: Preparing a LAND sale
 
 ## Requirements
 
-If you haven't done it, follow the [getting started](../intro/index.md) tutorial first. Here the inputs you need to prepare a LAND sale:
+If you haven't done it, follow the [getting started](../intro/index.md) tutorial first. Here are the inputs you need to prepare a LAND sale:
 
 - the bundles and sectors files provided by the backend team
 - the deadline of the LAND sale
@@ -36,7 +36,7 @@ cp -a $LAND_SALE_PATH/bundles.mainnet.json $LAND_SALE_PATH/bundles.rinkeby.json
 cp -a $LAND_SALE_PATH/sectors.mainnet.json $LAND_SALE_PATH/sectors.rinkeby.json
 ```
 
-You also need to modify `data/landSales/deadlines.ts` to add a new deadline which will mark then end of the sale).
+You also need to modify `data/landSales/deadlines.ts` to add a new deadline which will mark the end of the sale).
 
 !!! example
     ```ts
@@ -52,7 +52,7 @@ You also need to modify `data/landSales/deadlines.ts` to add a new deadline whic
 ## Prepare the deployment
 
 Create a new deploy file in `deploy/09_landsale/`
-You can copy an existing one. Don't forget to increment the prefix and to replace the `x` by your LAND sale number.
+You can copy an existing one. Don't forget to increment the prefix and to replace the `x` with your LAND sale number.
 ```shell
 cp -a deploy/09_landsale/00_deploy_land_sale_7.ts deploy/09_landsale/01_deploy_land_sale_x.ts
 ```
@@ -80,7 +80,7 @@ And then on the mainnet
 yarn deploy mainnet
 ```
 
-This will generate one or more file on the root folder called:
+This will generate one or more files on the root folder called:
 
 `.proofs_<name above>_<sector_number>_<network>.json`
 

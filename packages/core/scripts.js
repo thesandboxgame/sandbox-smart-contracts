@@ -1,11 +1,8 @@
-#!/usr/bin/env node
-'use strict';
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {spawn} = require('child_process');
-require('dotenv').config();
-
+const {spawnSync} = require('child_process');
+const dotenv = require('dotenv');
 const rawArgs = process.argv.slice(2);
+
+dotenv.config();
 
 function parseArgs(numFixedArgs, expectedOptions) {
   const fixedArgs = [];
@@ -25,134 +22,104 @@ function parseArgs(numFixedArgs, expectedOptions) {
           i++;
           options[optionName] = rawArgs[i];
         }
-      } else {
-        if (fixedArgs.length < numFixedArgs) {
-          throw new Error(
-            `expected ${numFixedArgs} fied agrs, got only ${fixedArgs.length}`
-          );
-        } else {
-          extra.push(rawArg);
-        }
+        continue;
       }
+    }
+    if (fixedArgs.length < numFixedArgs) {
+      if (Object.keys(alreadyCounted).length) {
+        throw new Error(
+          `expected ${numFixedArgs} fixed args, got only ${fixedArgs.length}`
+        );
+      }
+      fixedArgs.push(rawArg);
     } else {
-      if (fixedArgs.length < numFixedArgs) {
-        fixedArgs.push(rawArg);
-      } else {
-        for (const opt of Object.keys(expectedOptions)) {
-          alreadyCounted[opt] = true;
-        }
-        extra.push(rawArg);
-      }
+      extra.push(rawArg);
     }
   }
   return {options, extra, fixedArgs};
 }
 
 function execute(command) {
-  return new Promise((resolve, reject) => {
-    const onExit = (error) => {
-      if (error) {
-        return reject(error);
-      }
-      resolve();
-    };
-    spawn(command.split(' ')[0], command.split(' ').slice(1), {
-      stdio: 'inherit',
-      shell: true,
-    }).on('exit', onExit);
+  return spawnSync(command.split(' ')[0], command.split(' ').slice(1), {
+    stdio: 'inherit',
+    shell: true,
   });
 }
 
 void (async () => {
-  const firstArg = rawArgs[0];
-  if (firstArg === 'run') {
-    const {fixedArgs, extra} = parseArgs(3, {});
-    await execute(
-      `cross-env HARDHAT_NETWORK=${fixedArgs[1]} ts-node --files ${
-        fixedArgs[2]
-      } ${extra.join(' ')}`
-    );
-  } else if (firstArg === 'deploy') {
-    const {fixedArgs, extra} = parseArgs(2, {});
-    await execute(
-      `hardhat --network ${fixedArgs[1]} deploy ${extra.join(' ')}`
-    );
-  } else if (firstArg === 'export') {
-    const {fixedArgs} = parseArgs(3, {});
-    await execute(
-      `hardhat --network ${fixedArgs[1]} export --export ${fixedArgs[2]}`
-    );
-  } else if (firstArg === 'fork:run') {
-    const {fixedArgs, options, extra} = parseArgs(3, {
-      deploy: 'boolean',
-      blockNumber: 'string',
-      'no-impersonation': 'boolean',
-    });
-    await execute(
-      `cross-env ${
-        options.deploy ? 'HARDHAT_DEPLOY_FIXTURE=true' : ''
-      } HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${fixedArgs[1]} HARDHAT_FORK=${
-        fixedArgs[1]
-      } ${
-        options.blockNumber ? `HARDHAT_FORK_NUMBER=${options.blockNumber}` : ''
-      } ${
-        options['no-impersonation']
-          ? `HARDHAT_DEPLOY_NO_IMPERSONATION=true`
-          : ''
-      } ts-node --files ${fixedArgs[2]} ${extra.join(' ')}`
-    );
-  } else if (firstArg === 'fork:deploy') {
-    const {fixedArgs, options, extra} = parseArgs(2, {
-      blockNumber: 'string',
-      'no-impersonation': 'boolean',
-    });
-
-    await execute(
-      `cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${fixedArgs[1]} HARDHAT_FORK=${
-        fixedArgs[1]
-      } ${
-        options.blockNumber ? `HARDHAT_FORK_NUMBER=${options.blockNumber}` : ''
-      } ${
-        options['no-impersonation']
-          ? `HARDHAT_DEPLOY_NO_IMPERSONATION=true`
-          : ''
-      } hardhat deploy ${extra.join(' ')}`
-    ).catch((error) => {
-      process.exit(error);
-    });
-  } else if (firstArg === 'fork:test') {
-    const {fixedArgs, options, extra} = parseArgs(2, {
-      blockNumber: 'string',
-      'no-impersonation': 'boolean',
-    });
-    await execute(
-      `cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${fixedArgs[1]} HARDHAT_FORK=${
-        fixedArgs[1]
-      } ${
-        options.blockNumber ? `HARDHAT_FORK_NUMBER=${options.blockNumber}` : ''
-      } ${
-        options['no-impersonation']
-          ? `HARDHAT_DEPLOY_NO_IMPERSONATION=true`
-          : ''
-      } HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test ${extra.join(
-        ' '
-      )}`
-    );
-  } else if (firstArg === 'fork:dev') {
-    const {fixedArgs, options, extra} = parseArgs(2, {
-      blockNumber: 'string',
-      'no-impersonation': 'boolean',
-    });
-    await execute(
-      `cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${fixedArgs[1]} HARDHAT_FORK=${
-        fixedArgs[1]
-      } ${
-        options.blockNumber ? `HARDHAT_FORK_NUMBER=${options.blockNumber}` : ''
-      } ${
-        options['no-impersonation']
-          ? `HARDHAT_DEPLOY_NO_IMPERSONATION=true`
-          : ''
-      } hardhat node --watch --export contractsInfo.json ${extra.join(' ')}`
-    );
+  const [command, network, file] = rawArgs;
+  const {options, extra} = parseArgs(getFixedArgsCount(command), {
+    blockNumber: 'string',
+    'no-impersonation': 'boolean',
+    'skip-test-deployments': 'boolean',
+    ntd: 'boolean',
+  });
+  const crossEnv = command.includes('fork')
+    ? getForkCrossEnv({network, options, extra})
+    : getCrossEnv({options, extra});
+  const extraArgs = extra.join(' ');
+  switch (command) {
+    case 'run':
+      await execute(
+        `${crossEnv} HARDHAT_NETWORK=${network} ts-node --files ${file} ${extraArgs}`
+      );
+      break;
+    case 'deploy':
+      await execute(
+        `${crossEnv} hardhat --network ${network} deploy ${extraArgs}`
+      );
+      break;
+    case 'export':
+      await execute(
+        `${crossEnv} hardhat --network ${network} export --export ${file}`
+      );
+      break;
+    case 'fork:run':
+      await execute(`${crossEnv} ts-node --files ${file} ${extraArgs}`);
+      break;
+    case 'fork:deploy':
+      await execute(`${crossEnv} hardhat deploy ${extraArgs}`);
+      break;
+    case 'fork:test':
+      await execute(
+        `${crossEnv} HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test ${extraArgs}`
+      );
+      break;
+    case 'fork:dev':
+      await execute(
+        `${crossEnv} hardhat node --watch --export contractsInfo.json ${extraArgs}`
+      );
+      break;
   }
 })();
+
+function getFixedArgsCount(command) {
+  return ['run', 'export', 'fork:run'].includes(command) ? 3 : 2;
+}
+
+function getCrossEnv({options, extra}) {
+  const env = [];
+  if (options.blockNumber)
+    env.push(`HARDHAT_FORK_NUMBER=${options.blockNumber}`);
+  if (options['no-impersonation'])
+    env.push(`HARDHAT_DEPLOY_NO_IMPERSONATION=true`);
+  if (options['skip-test-deployments'] || options.ntd) {
+    env.push(`SKIP_TEST_DEPLOYMENTS=true`);
+    ['--skip-test-deployments', '--ntd'].forEach((key) => {
+      if (extra.includes(key))
+        extra.slice(
+          extra.findIndex((e) => e === key),
+          1
+        );
+    });
+  }
+  return `cross-env ${env.join(' ')}`;
+}
+
+function getForkCrossEnv({network, options, extra}) {
+  const env = [
+    `HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${network}`,
+    `HARDHAT_FORK=${network}`,
+  ];
+  return `${getCrossEnv({options, extra})} ${env.join(' ')}`;
+}
