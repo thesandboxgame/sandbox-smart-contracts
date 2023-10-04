@@ -49,9 +49,10 @@ In order to validate the maker of each order, the contract supports two ways to 
 
 It brings a powerful asynchronous system but also users should be careful when signing an order because anybody can send a transaction to match 2 orders if that user gets the signatures.
 For instance:
-- Alice signs `Order A`
-- Bob signs `Order B`
+- Alice signs `Order A` and lends the signature to Carol
+- Bob signs `Order B` and lends the signature to Carol
 - Carol executes the trades with the 2 orders `Order A` and `Order B` and the 2 signatures
+- Alice & Bob must trust Carol
 
 But you could save an action by not asking the signature for the `Order B`:
 - Alice signs `Order A`
@@ -77,7 +78,7 @@ Partial filling can be disable for an order that is executed by the maker by set
 
 ### User-Generated Content (UGC) & Creator
 
-UGC collection is a collection where the tokens are created by any user, and not necessarily by the editor of the collection.
+UGC collection is a collection where the tokens are created by any user, and not necessarily by the owner of the collection.
 The `creator` of a NFT represents not the ownership of the token but the creation of the NFT which is essential to distribute the royalties to the real creator.
 In a nutshell, UGC collections need a royalty per token, not per collection.
 The protocol supports the interface `IRoyaltyUGC` to get the creator of a NFT during an exchange in order to apply different fee value.
@@ -88,7 +89,7 @@ The protocol permits to define a fee (%) applied to each exchange. That fee usua
 The value of the protocol fee is determined according to nature of the exchange: primary or secondary market.
 The notion of primary market means that the seller of the NFT is also its `creator`.
 Note that the fees are applied only when a side of an exchange is an ERC20 and another side is a NFT (ERC721 or ERC1155). The fee is taken from the ERC20 side.
-the fees are sent to an address (called the `Fee Receiver`) defined when deploying the contract.
+The fees are sent to an address (called the `Fee Receiver`) defined when deploying the contract.
 
 For instance, the primary market fee is set at 2% whereas the secondary market fee is set 5%.
 
@@ -114,7 +115,7 @@ If a collection doesn't support the interface `IRoyaltyUGC`, the secondary marke
 
 The royalties are the share returning to the creator of the collection or token after a sale.
 The protocol handles multiple types of royalties (ERC2981, royalties registry, external provider).
-See the [royalties registry contract](../royalties-registry/RoyaltiesRegistry.md) for more information.
+See the [RoyaltiesRegistry contract](../royalties-registry/RoyaltiesRegistry.md) for more information.
 
 ### Payouts
 
@@ -135,7 +136,33 @@ The protocol is secured with the Open Zeppelin access control component.
 
 The main feature is obviously to execute an exchange by matching two orders.
 
-// @TODO: add sequence diagram
+```mermaid
+sequenceDiagram
+
+title: Matching orders
+
+actor Alice
+actor Bob
+actor Carol
+participant OrderA
+participant OrderB
+participant Exchange
+participant OrderValidator
+
+Alice->>OrderA: signs order
+Alice->>Carol: lends the order & its signature
+Bob->>OrderB: signs order
+Bob->>Carol: lends the order & its signature
+Carol->>Exchange: executes the exchange 
+Exchange->>OrderValidator: validate orders (dates, whitelist, signatures)
+OrderValidator->>Exchange: returns the result of the validation
+Exchange->>Exchange: match the 2 orders & calculate fillings
+Exchange->>TransferManager: executes the transfers of the exchange
+TransferManager->>RoyaltyManager: gets the royalties info
+TransferManager->>TransferExecutor: transfer the royalties
+TransferManager->>TransferExecutor: transfer the fees
+TransferManager->>TransferExecutor: transfer the payouts
+```
 
 ### Canceling an order
 
@@ -150,6 +177,33 @@ Multiple pair of orders can be matched through batching. Note that if a pair can
 
 The contract supports the ERC2771 to enable meta transactions.
 
+### ERC1776
+
+In order to support the former native meta transactions standard which is used by the [SAND contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/packages/core/src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol#L15), the `Exchange` contract can be the receiver of ERC1776 meta transactions on the function `matchOrdersFrom`. The latter is protected with the role `ERC1776_OPERATOR_ROLE`.
+In a nutshell, the protocol trusts an address to give it the real sender as first argument during a call.
+
+```mermaid
+sequenceDiagram
+
+title: Matching orders through ERC1776
+
+actor Alice
+actor Bob
+
+participant OrderA
+participant OrderB
+participant SAND
+participant Exchange
+
+Alice->>OrderA: signs the order
+Alice->>Bob: lends the signature
+Bob->>SAND: calls approveAndCall
+SAND->>SAND: approve the exchange for the amount of SAND
+SAND->>Exchange: calls matchOrdersFrom with the real sender
+Exchange->>Exchange: checks if the sender is authorized
+Exchange->>Exchange: proceed with the exchange by setting the sender to Bob
+```
+
 ### Skipping fees
 
 If a maker is granted the role `EXCHANGE_ADMIN_ROLE`, the fees are skipped for that order.
@@ -160,11 +214,13 @@ The protocol offers to enable whitelists on:
 - payment tokens (ERC20) that can be traded
 - collections (ERC1155 and ERC721) that can be traded
 
+See the [OrderValidator contract](../exchange/OrderValidator.md) for more information.
+
 ### Upgradeable
 
 The contract `Exchange` is using initializers & gaps to provide upgradability.
 
 ### Pausing
 
-The contract can be paused for emergency measures for users granted the role `PAUSER_ROLE`.
+The contract can be paused for emergency measures by users granted the role `PAUSER_ROLE`.
 No more orders can be matched or cancelled when paused.
