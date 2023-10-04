@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The `Exchange` contract is the entrypoint and main contract to the marketplace protocol.
+The [Exchange contract](../../contracts/exchange/Exchange.sol) is the entrypoint and main contract to the marketplace protocol.
 It safely offers a decentralized way to exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.
 
 ## Concepts
@@ -16,11 +16,11 @@ Order A
 Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 SAND (ERC20).
 ```
 
-The order represents this intent and includes the address of the seller, the address of the NFT, the token id, the address of the ERC20 and the amount the seller is asking for.
+The order represents this intent and includes the address of the seller, the address of the NFT, the token id, the address of the ERC20 and the amount the seller is asking for (and more).
 
 ### Maker & Taker
 
-The maker and taker represent the 2 parties of the exchange. Each order can define what should contain each party where the maker represent your side and the taker the other side.
+The maker and taker represent the 2 parties of the exchange. Each order can define what should contain each party where the maker represents your side and the taker the other side.
 
 For instance, as a seller, I can decide to sell a NFT to anybody. But, I could also specify that I only want to sell it to a particular user. In order to do that, you have to input the taker address.
 Same reasoning, if I want to buy a NFT but I don't mind which seller is selling me the NFT, all I have to do is creating an order without a taker address. Otherwise, if I precisely want to buy it from a seller, I can specify his address in the order.
@@ -34,7 +34,7 @@ To execute a trade, you need two parties (and so 2 orders) that match. So, the c
 Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
 ```
 
-An order satisfying Order A could simply be:
+An order satisfying `Order A` could simply be:
 
 `Order B`
 ```
@@ -45,10 +45,9 @@ Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 MAT
 
 In order to validate the maker of each order, the contract supports two ways to validate an order:
 - the sender of the transaction has to be the maker of the order
-- the sender has to provide the signature of the order signed by the order's maker
+- the sender has to provide the [signature](https://eips.ethereum.org/EIPS/eip-712) of the order signed by the order's maker
 
-It brings a powerful asynchronous system but also users should be careful when signing an order because anybody can send a transaction to match 2 orders if that user gets the signatures.
-For instance:
+It brings a powerful asynchronous system but also users should be careful when signing an order because anybody can send a transaction to match 2 orders if that user gets the signatures. For instance:
 - Alice signs `Order A` and lends the signature to Carol
 - Bob signs `Order B` and lends the signature to Carol
 - Carol executes the trades with the 2 orders `Order A` and `Order B` and the 2 signatures
@@ -60,7 +59,8 @@ But you could save an action by not asking the signature for the `Order B`:
 
 ## Order filling
 
-`Order A` and `Order B` are completely matching, both are consider fully filled. But what happens if one party can't fully satisfy his counter party ?
+`Order A` and `Order B` are completely matching, both orders are considered fully filled. But what happens if one party can't fully satisfy his counter party ?
+
 For instance, let's consider `Order C` and `Order D`:
 
 `Order C`
@@ -81,14 +81,14 @@ Partial filling can be disable for an order that is executed by the maker by set
 UGC collection is a collection where the tokens are created by any user, and not necessarily by the owner of the collection.
 The `creator` of a NFT represents not the ownership of the token but the creation of the NFT which is essential to distribute the royalties to the real creator.
 In a nutshell, UGC collections need a royalty per token, not per collection.
-The protocol supports the interface `IRoyaltyUGC` to get the creator of a NFT during an exchange in order to apply different fee value.
+The protocol supports the interface [IRoyaltyUGC](../../contracts/transfer-manager/interfaces/IRoyaltyUGC.sol) to get the creator of a NFT during an exchange in order to apply different fee value.
 
 ### Fees
 
 The protocol permits to define a fee (%) applied to each exchange. That fee usually covers the costs of running the marketplace.
 The value of the protocol fee is determined according to nature of the exchange: primary or secondary market.
-The notion of primary market means that the seller of the NFT is also its `creator`.
-Note that the fees are applied only when a side of an exchange is an ERC20 and another side is a NFT (ERC721 or ERC1155). The fee is taken from the ERC20 side.
+The notion of primary market means that the seller of the NFT is also its creator.
+Note that the fees are applied only when a side of an exchange is an ERC20 and another side is a NFT (ERC721 or ERC1155). The fee is always taken from the ERC20 side.
 The fees are sent to an address (called the `Fee Receiver`) defined when deploying the contract.
 
 For instance, the primary market fee is set at 2% whereas the secondary market fee is set 5%.
@@ -113,22 +113,13 @@ If a collection doesn't support the interface `IRoyaltyUGC`, the secondary marke
 
 ### Royalties
 
-The royalties are the share returning to the creator of the collection or token after a sale.
+The royalties are the share returning to the creator (or owner) of the collection or token after a sale.
 The protocol handles multiple types of royalties (ERC2981, royalties registry, external provider).
 See the [RoyaltiesRegistry contract](../royalties-registry/RoyaltiesRegistry.md) for more information.
 
 ### Payouts
 
 The payouts define what is due for each party of the exchange. For the buyer order, the payout is the NFT while for the seller order, the payout is the ERC20 tokens.
-
-## Roles
-
-The protocol is secured with the Open Zeppelin access control component.
-4 roles are defined:
-- `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings (trquted forwarder, order validator addresses)
-- `EXCHANGE_ADMIN_ROLE`: handle the business decisions of the marketplace, for instance defining the fees, the wallet receiving the fees or if the fees apply
-- `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of a sender
-- `PAUSER_ROLE`: allow to control the pausing of the contract
 
 ## Features
 
@@ -171,15 +162,26 @@ An order with no salt cannot be cancelled.
 
 ### Batch matching orders
 
-Multiple pair of orders can be matched through batching. Note that if a pair cannot be match or validated, the whole batch reverts.
+Multiple pair of orders can be matched through batching. Note that if a pair cannot be matched or validated, the whole batch reverts.
 
 ### Meta Transactions
 
-The contract supports the ERC2771 to enable meta transactions.
+The contract supports the ERC2771 standard to enable meta transactions.
+
+### Access Control
+
+The protocol is secured with the Open Zeppelin access control component.
+
+4 roles are defined:
+- `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings (trusted forwarder, order validator contract addresses)
+- `EXCHANGE_ADMIN_ROLE`: handle the business decisions of the marketplace, for instance defining the fees, the wallet receiving the fees or if the fees apply
+- `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of a sender
+- `PAUSER_ROLE`: allow to control the pausing of the contract
 
 ### ERC1776
 
-In order to support the former native meta transactions standard which is used by the [SAND contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/packages/core/src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol#L15), the `Exchange` contract can be the receiver of ERC1776 meta transactions on the function `matchOrdersFrom`. The latter is protected with the role `ERC1776_OPERATOR_ROLE`.
+In order to support the former native meta transactions standard which is used by the [SAND contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/packages/core/src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol#L15), the Exchange contract can be the receiver of ERC1776 meta transactions on the function `matchOrdersFrom`. The latter is protected with the role `ERC1776_OPERATOR_ROLE`.
+
 In a nutshell, the protocol trusts an address to give it the real sender as first argument during a call.
 
 ```mermaid
@@ -206,7 +208,7 @@ Exchange->>Exchange: proceed with the exchange by setting the sender to Bob
 
 ### Skipping fees
 
-If a maker is granted the role `EXCHANGE_ADMIN_ROLE`, the fees are skipped for that order.
+If a maker is granted the role `EXCHANGE_ADMIN_ROLE`, the fees and royalties are skipped for that order.
 
 ### Whitelisting
 
@@ -218,7 +220,7 @@ See the [OrderValidator contract](../exchange/OrderValidator.md) for more inform
 
 ### Upgradeable
 
-The contract `Exchange` is using initializers & gaps to provide upgradability.
+The Exchange contract is using initializers & gaps to provide upgradability.
 
 ### Pausing
 
