@@ -174,7 +174,7 @@ TransferManager->>TransferExecutor: transfer the payouts
 
 ### Canceling an order
 
-An order can be cancelled by providing the identifier of that order (hash key) and that order. An cancelled order is then considered fully filled (set to max integer).
+An order can be cancelled by providing the identifier of that order (hash key) and that order. A cancelled order is then considered fully filled (set to max integer).
 An order with no salt cannot be cancelled.
 
 ### Batch matching orders
