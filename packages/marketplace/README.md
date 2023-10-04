@@ -22,16 +22,15 @@ The protocol is divided into 5 main components:
 
 Component | Description
 ---------|----------
- [Exchange](docs/exchange/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
- [OrderValidator](docs/exchange/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
- [RoyaltiesRegistry](docs/royalties-registry/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
- Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
- [TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
+[Exchange](docs/exchange/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
+[OrderValidator](docs/exchange/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
+[TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
+[RoyaltiesRegistry](docs/royalties-registry/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
+Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
 
-The protocol is deployed on 4 different addresses:
+The protocol is deployed on 3 different addresses:
 - Exchange
 - OrderValidator
-- AssetMatcher
 - RoyaltiesRegistry
 
 ```mermaid
@@ -47,12 +46,9 @@ end
 subgraph OrderValidator
    Whitelist
 end
-subgraph AssetMatcher
-end
 subgraph RoyaltiesRegistry
 end   
 Exchange-->OrderValidator
-Exchange-->AssetMatcher
 Exchange-->TransferManager
 TransferManager-->TransferExecutor
 TransferManager-->RoyaltiesRegistry
@@ -63,15 +59,12 @@ Also, the contracts use a set of libraries as helper.
 Library | Description
 ---------|----------
  LibFill | Calculate the amount exchanged between 2 orders, and how orders are filled
- LibOrderDataGeneric | Help manipulating the data (payouts, fees) of an order
  LibAsset | Contains the structures, constants and hash functions related to an asset (ERC20, ERC1155, ERC721)
  BpLibrary | Base Point calculation library
  LibMath | Rounding calculation library
  LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order
  LibPart | Library for the parts receiving fees or royalties
  LibRoyalties2981 | Library for constants and functions related to ERC2891
- LibDeal | Define the structure that represents the data of each side of a deal (tokens, payouts)
- LibFeeSide | Helps defining which side of the exchange is paying for the fees
 
 ## Running the project locally
 

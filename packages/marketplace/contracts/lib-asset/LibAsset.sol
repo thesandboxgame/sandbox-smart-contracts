@@ -4,8 +4,6 @@ pragma solidity 0.8.21;
 
 /// @title library for Assets
 /// @notice contains structs for Asset and AssetType
-/// @dev Asset represents any asset on ethereum blockchain.
-/// @dev AssetType is a type of a specific asset
 library LibAsset {
     enum AssetClassType {
         INVALID_ASSET_CLASS,
@@ -20,11 +18,14 @@ library LibAsset {
         RIGHT
     }
 
+    /// @dev AssetType is a type of a specific asset. For example AssetType is specific ERC-721 token (key is token + tokenId) or specific ERC-20 token (DAI for example).
+    /// @dev It consists of asset class and generic data (format of data is different for different asset classes). For example, for asset class ERC20 data holds address of the token, for ERC-721 data holds smart contract address and tokenId.
     struct AssetType {
         AssetClassType assetClass;
         bytes data;
     }
 
+    /// @dev Asset represents any asset on ethereum blockchain. Asset has type and value (amount of an asset).
     struct Asset {
         AssetType assetType;
         uint256 value;

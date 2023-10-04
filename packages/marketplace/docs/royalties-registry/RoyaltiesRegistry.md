@@ -1,6 +1,6 @@
 # RoyaltiesRegistry
 
-The job of the [RoyaltiesRegistry](../../contracts/royalties-registry/RoyaltiesRegistry.sol) contract is to retreive the royalties information for a given token necessary for the [TransferManager](../transfer-manager/TransferManager.md) to pay the royalties and complete the exchange.
+The job of the [RoyaltiesRegistry](../../contracts/royalties-registry/RoyaltiesRegistry.sol) contract is to retrieve the royalties information for a given token necessary for the [TransferManager](../transfer-manager/TransferManager.md) to pay the royalties and complete the exchange.
 
 The contract supports 3 types of royalties:
 - ERC2981
@@ -26,7 +26,7 @@ By defining an external provider, the contract is able to query an external addr
 
 ### Royalties By Token
 
-The royalties for a given token contract address can be setup by the owner (Ownable) of that contract or the owner of the RoyaltiesRegistry contract and saved into the contract.
+The royalties for a given token contract address can be set up by the owner (Ownable) of that contract or the owner of the RoyaltiesRegistry contract and saved into the contract.
 
 ### Upgradeable
 
