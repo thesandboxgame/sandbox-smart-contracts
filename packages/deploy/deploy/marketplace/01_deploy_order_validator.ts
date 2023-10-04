@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer, sandAdmin, upgradeAdmin} = await getNamedAccounts();
 
   await deploy('OrderValidator', {
     from: deployer,
@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: '__OrderValidator_init_unchained',
-        args: [false, false, true, false],
+        args: [sandAdmin, false, false, true, false],
       },
       upgradeIndex: 0,
     },
