@@ -63,43 +63,4 @@ library LibMath {
         uint256 remainder = mulmod(target, numerator, denominator);
         isError = remainder * 1000 >= numerator * target;
     }
-
-    function safeGetPartialAmountCeil(
-        uint256 numerator,
-        uint256 denominator,
-        uint256 target
-    ) internal pure returns (uint256 partialAmount) {
-        if (isRoundingErrorCeil(numerator, denominator, target)) {
-            revert("rounding error");
-        }
-        partialAmount = (numerator * target) + ((denominator - 1) / denominator);
-    }
-
-    /// @dev Checks if rounding error >= 0.1% when rounding up.
-    /// @param numerator Numerator.
-    /// @param denominator Denominator.
-    /// @param target Value to multiply with numerator/denominator.
-    /// @return isError Rounding error is present.
-    function isRoundingErrorCeil(
-        uint256 numerator,
-        uint256 denominator,
-        uint256 target
-    ) internal pure returns (bool isError) {
-        if (denominator == 0) {
-            revert("division by zero");
-        }
-
-        // See the comments in `isRoundingError`.
-        if (target == 0 || numerator == 0) {
-            // When either is zero, the ideal value and rounded value are zero
-            // and there is no rounding error. (Although the relative error
-            // is undefined.)
-            return false;
-        }
-        // Compute remainder as before
-        uint256 remainder = mulmod(target, numerator, denominator);
-        remainder = (denominator - remainder) % denominator;
-        isError = remainder * 1000 >= numerator * target;
-        return isError;
-    }
 }

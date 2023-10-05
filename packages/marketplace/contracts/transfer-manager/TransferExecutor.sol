@@ -28,7 +28,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
+        } else {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             _erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
