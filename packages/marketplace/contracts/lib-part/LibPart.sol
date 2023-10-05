@@ -13,11 +13,4 @@ library LibPart {
         address account;
         uint96 value;
     }
-
-    /// @notice hash part object
-    /// @param part to be hashed
-    /// @return resulting hash
-    function hash(Part memory part) internal pure returns (bytes32) {
-        return keccak256(abi.encode(TYPE_HASH, part.account, part.value));
-    }
 }
