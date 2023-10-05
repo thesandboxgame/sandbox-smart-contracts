@@ -105,6 +105,10 @@ async function deploy() {
   const RoyaltiesProvider = await RoyaltiesProviderFactory.deploy();
   await RoyaltiesProvider.waitForDeployment();
 
+  const ERC1271ContractFactory = await ethers.getContractFactory('TestERC1271');
+  const ERC1271Contract = await ERC1271ContractFactory.deploy();
+  await ERC1271Contract.waitForDeployment();
+
   const EXCHANGE_ADMIN_ROLE =
     await ExchangeContractAsAdmin.EXCHANGE_ADMIN_ROLE();
   const DEFAULT_ADMIN_ROLE = await ExchangeContractAsAdmin.DEFAULT_ADMIN_ROLE();
@@ -133,6 +137,7 @@ async function deploy() {
     ERC721WithRoyaltyV2981,
     ERC721WithRoyalty,
     RoyaltiesProvider,
+    ERC1271Contract,
     deployer,
     admin,
     user,
