@@ -42,12 +42,12 @@ __metadata:
   linkType: hard
 
 "@aws-sdk/types@npm:^3.1.0":
-  version: 3.418.0
-  resolution: "@aws-sdk/types@npm:3.418.0"
+  version: 3.425.0
+  resolution: "@aws-sdk/types@npm:3.425.0"
   dependencies:
-    "@smithy/types": ^2.3.3
+    "@smithy/types": ^2.3.4
     tslib: ^2.5.0
-  checksum: b3e7526538a95b36d69498a8d807b8d1494a2f21190052a322096d3c555998b5b1fefc573ce7707badaa7540b84ff7c961ef01fe33e1c2bc6e3df7c24c780eb8
+  checksum: 82ab4741179a16cc90ff75549bf07c7174cf4d0db9b3c2e1d7283c7489eb41a1ec49607d4c7bb33975e6424dfb809783ff0e243d721d4544dc21b7b31d94acc0
   languageName: node
   linkType: hard
 
@@ -1838,14 +1838,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0":
+"@openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0, @openzeppelin/contracts@npm:^4.9.2":
   version: 4.9.3
   resolution: "@openzeppelin/contracts@npm:4.9.3"
   checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-base-client@npm:^1.46.0":
+"@openzeppelin/defender-admin-client@npm:^1.48.0":
+  version: 1.48.0
+  resolution: "@openzeppelin/defender-admin-client@npm:1.48.0"
+  dependencies:
+    "@openzeppelin/defender-base-client": 1.48.0
+    axios: ^1.4.0
+    ethers: ^5.7.2
+    lodash: ^4.17.19
+    node-fetch: ^2.6.0
+  checksum: 22d0202ed29f3a57c73547cb51e670bcc1311995c2fcad86653d63c652cacf985ec8a1ec0fdc606314469959de548e97896b8ce9406ad8495681d0fc21fc5b80
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-base-client@npm:1.48.0, @openzeppelin/defender-base-client@npm:^1.46.0, @openzeppelin/defender-base-client@npm:^1.48.0, @openzeppelin/defender-base-client@npm:^1.48.0-rc.1":
   version: 1.48.0
   resolution: "@openzeppelin/defender-base-client@npm:1.48.0"
   dependencies:
@@ -1882,6 +1895,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/hardhat-upgrades@npm:^2.2.1":
+  version: 2.3.1
+  resolution: "@openzeppelin/hardhat-upgrades@npm:2.3.1"
+  dependencies:
+    "@openzeppelin/defender-admin-client": ^1.48.0
+    "@openzeppelin/defender-base-client": ^1.48.0
+    "@openzeppelin/platform-deploy-client": ^0.10.0
+    "@openzeppelin/upgrades-core": ^1.30.0
+    chalk: ^4.1.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.1.5
+    proper-lockfile: ^4.1.1
+    undici: ^5.14.0
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@nomicfoundation/hardhat-verify": ^1.1.0
+    ethers: ^6.6.0
+    hardhat: ^2.0.2
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-verify":
+      optional: true
+  bin:
+    migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
+  checksum: 930e17095c3b0267dcb5b0a0d0db6595dd1229faa0590c65e8b5944caa72382a7fe28efa54f79e5dbc253244009085ccf247c40978017f446daa9e34941a0333
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/platform-deploy-client@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "@openzeppelin/platform-deploy-client@npm:0.10.0"
+  dependencies:
+    "@ethersproject/abi": ^5.6.3
+    "@openzeppelin/defender-base-client": ^1.48.0-rc.1
+    axios: ^1.4.0
+    lodash: ^4.17.19
+    node-fetch: ^2.6.0
+  checksum: e3933c10b3d33a6404cc2fd7eeed77b7ad07bc6d6a382ff307d65919643ab26c6cfda2e14541ca9c9dc3289f01f353ac274823c9fa6c2d7ee110f37fc678c9cb
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/platform-deploy-client@npm:^0.8.0":
   version: 0.8.0
   resolution: "@openzeppelin/platform-deploy-client@npm:0.8.0"
@@ -1895,7 +1948,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/upgrades-core@npm:^1.27.0":
+"@openzeppelin/upgrades-core@npm:^1.27.0, @openzeppelin/upgrades-core@npm:^1.30.0":
   version: 1.30.0
   resolution: "@openzeppelin/upgrades-core@npm:1.30.0"
   dependencies:
@@ -2125,6 +2178,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sandbox-smart-contracts/dependency-metatx@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@sandbox-smart-contracts/dependency-metatx@npm:0.0.3"
+  checksum: fd18639d1746e023ca110d9cb239eb514fc0083fc23083a03b404a450f3d97558def87e4ebc91b4a1796b54bff3762fdf25343b11dd066b6bd5efdc322e062ea
+  languageName: node
+  linkType: hard
+
 "@sandbox-smart-contracts/dependency-operator-filter@*, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter"
@@ -2225,6 +2285,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@sandbox-smart-contracts/giveaway": 0.0.3
+    "@sandbox-smart-contracts/marketplace": "*"
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
@@ -2246,6 +2307,7 @@ __metadata:
     eslint-plugin-prettier: ^4.2.1
     ethers: 5
     hardhat: ~2.15.0
+    hardhat-contract-sizer: ^2.10.0
     hardhat-deploy: ^0.11.30
     prettier: ^2.8.8
     ts-node: ^10.9.1
@@ -2338,6 +2400,47 @@ __metadata:
     solhint: ^3.4.1
     solhint-plugin-prettier: ^0.0.5
     solidity-coverage: ^0.8.2
+    ts-node: ^10.9.1
+    typechain: ^8.2.0
+    typescript: 5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@sandbox-smart-contracts/marketplace@*, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
+  version: 0.0.0-use.local
+  resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
+  dependencies:
+    "@nomicfoundation/hardhat-chai-matchers": ^2.0.1
+    "@nomicfoundation/hardhat-ethers": ^3.0.3
+    "@nomicfoundation/hardhat-network-helpers": ^1.0.8
+    "@nomicfoundation/hardhat-toolbox": ^3.0.0
+    "@nomicfoundation/hardhat-verify": ^1.0.0
+    "@nomiclabs/hardhat-etherscan": ^3.1.7
+    "@openzeppelin/contracts": ^4.9.2
+    "@openzeppelin/contracts-upgradeable": ^4.9.2
+    "@openzeppelin/hardhat-upgrades": ^2.2.1
+    "@sandbox-smart-contracts/dependency-metatx": 0.0.3
+    "@typechain/ethers-v6": ^0.4.0
+    "@typechain/hardhat": ^8.0.0
+    "@types/chai": ^4.3.6
+    "@types/mocha": ^10.0.1
+    "@types/node": ^20.2.5
+    "@typescript-eslint/eslint-plugin": ^5.59.8
+    "@typescript-eslint/parser": ^5.59.8
+    chai: ^4.3.7
+    eslint: ^8.41.0
+    eslint-config-prettier: ^8.8.0
+    eslint-plugin-mocha: ^10.1.0
+    eslint-plugin-prettier: ^4.2.1
+    ethers: ^6.6.2
+    hardhat: ^2.14.1
+    hardhat-gas-reporter: ^1.0.9
+    mocha: ^10.2.0
+    prettier: ^2.8.8
+    prettier-plugin-solidity: ^1.1.3
+    solhint: ^3.6.2
+    solhint-plugin-prettier: ^0.0.5
+    solidity-coverage: ^0.8.3
     ts-node: ^10.9.1
     typechain: ^8.2.0
     typescript: 5.0.4
@@ -2482,7 +2585,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@smithy/types@npm:^2.3.3":
+"@smithy/types@npm:^2.3.4":
   version: 2.3.4
   resolution: "@smithy/types@npm:2.3.4"
   dependencies:
@@ -2679,7 +2782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:*, @types/chai@npm:^4.2.11, @types/chai@npm:^4.3.5":
+"@types/chai@npm:*, @types/chai@npm:^4.2.11, @types/chai@npm:^4.3.5, @types/chai@npm:^4.3.6":
   version: 4.3.6
   resolution: "@types/chai@npm:4.3.6"
   checksum: 32a6c18bf53fb3dbd89d1bfcadb1c6fd45cc0007c34e436393cc37a0a5a556f9e6a21d1e8dd71674c40cc36589d2f30bf4d9369d7787021e54d6e997b0d7300a
@@ -7467,7 +7570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat-contract-sizer@npm:^2.0.3":
+"hardhat-contract-sizer@npm:^2.0.3, hardhat-contract-sizer@npm:^2.10.0":
   version: 2.10.0
   resolution: "hardhat-contract-sizer@npm:2.10.0"
   dependencies:
