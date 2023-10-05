@@ -1,0 +1,36 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/mocks/TrustedForwarderMock.sol": {
+      "content": "//SPDX-License-Identifier: MIT\n// solhint-disable-next-line compiler-version\npragma solidity 0.8.2;\n\ncontract TrustedForwarderMock {\n\n    struct ForwardRequest {\n        address from;\n        address to;\n        uint256 value;\n        uint256 gas;\n        uint256 nonce;\n        bytes data;\n    }\n\n    function execute(ForwardRequest calldata req, bytes calldata)\n    public\n    payable\n    returns (bool, bytes memory)\n    {\n        (bool success, bytes memory returndata) =\n        req.to.call{gas : req.gas, value : req.value}(abi.encodePacked(req.data, req.from));\n        assert(gasleft() > req.gas / 63);\n        return (success, returndata);\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "evmVersion": "istanbul",
+    "optimizer": {
+      "enabled": true,
+      "runs": 2000
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

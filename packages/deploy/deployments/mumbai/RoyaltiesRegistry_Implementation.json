@@ -1,0 +1,752 @@
+{
+  "address": "0x74504e0e5c7da578da2d6630ba66fa20a54e1bfc",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint96",
+              "name": "value",
+              "type": "uint96"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct LibPart.Part[]",
+          "name": "royalties",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "RoyaltiesSetForContract",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint96",
+              "name": "value",
+              "type": "uint96"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct LibPart.Part[]",
+          "name": "royalties",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "RoyaltiesSetForToken",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "__RoyaltiesRegistry_init",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "clearRoyaltiesType",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "royaltiesType",
+          "type": "uint256"
+        }
+      ],
+      "name": "forceSetRoyaltiesType",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getProvider",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRoyalties",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint96",
+              "name": "value",
+              "type": "uint96"
+            }
+          ],
+          "internalType": "struct LibPart.Part[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getRoyaltiesType",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "royaltiesByToken",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "initialized",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "royaltiesByTokenAndTokenId",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "initialized",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "royaltiesProviders",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "provider",
+          "type": "address"
+        }
+      ],
+      "name": "setProviderByToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint96",
+              "name": "value",
+              "type": "uint96"
+            }
+          ],
+          "internalType": "struct LibPart.Part[]",
+          "name": "royalties",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "setRoyaltiesByToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xc0338e74a01bab4dd4b875f3534fc7c2309c2331b1417e61a2db8252283cd4a5",
+  "receipt": {
+    "to": null,
+    "from": "0x5f890c9522dce5670d741d4277bfcc2d9ca8af02",
+    "contractAddress": "0x74504e0e5c7da578da2d6630ba66fa20a54e1bfc",
+    "transactionIndex": "0x2",
+    "gasUsed": "0x17e5bb",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000008000001000000000000000000000000000000000000000000000000000800000000000000000000100000000005000000000000000000000000000000000000000000000000080000000000000000000000004000000000000000000000000000000000080000000000000200000200000000000000000000000000400000000000000000000000000000000004000000000000000000001000000040000000000000000000000108040000000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x1652f0ea8e0f6011a8d9b4209a1f58e16ff0d0e4769b5ee3ce84727718699cb3",
+    "transactionHash": "0x8c002a62d4e99e1f44a7652bffe47597892b3c06ba5007c55b8e2926b797d01b",
+    "logs": [
+      {
+        "address": "0x74504e0e5c7da578da2d6630ba66fa20a54e1bfc",
+        "topics": [
+          "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+        "blockNumber": "0x26fa11a",
+        "transactionHash": "0x8c002a62d4e99e1f44a7652bffe47597892b3c06ba5007c55b8e2926b797d01b",
+        "transactionIndex": "0x2",
+        "blockHash": "0x1652f0ea8e0f6011a8d9b4209a1f58e16ff0d0e4769b5ee3ce84727718699cb3",
+        "logIndex": "0xa",
+        "removed": false
+      },
+      {
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x000000000000000000000000be188d6641e8b680743a4815dfa0f6208038960f"
+        ],
+        "data": "0x000000000000000000000000000000000000000000000000000a03e9460e173100000000000000000000000000000000000000000000000f8a9b29cd93f28f330000000000000000000000000000000000000000000034aaa4c15902cb8dab1100000000000000000000000000000000000000000000000f8a9125e44de478020000000000000000000000000000000000000000000034aaa4cb5cec119bc242",
+        "blockNumber": "0x26fa11a",
+        "transactionHash": "0x8c002a62d4e99e1f44a7652bffe47597892b3c06ba5007c55b8e2926b797d01b",
+        "transactionIndex": "0x2",
+        "blockHash": "0x1652f0ea8e0f6011a8d9b4209a1f58e16ff0d0e4769b5ee3ce84727718699cb3",
+        "logIndex": "0xb",
+        "removed": false
+      }
+    ],
+    "blockNumber": "0x26fa11a",
+    "cumulativeGasUsed": "0x1d1057",
+    "status": "0x1"
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "ecd1b268b7f8423b750f66ee2d2cf788",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"value\",\"type\":\"uint96\"}],\"indexed\":false,\"internalType\":\"struct LibPart.Part[]\",\"name\":\"royalties\",\"type\":\"tuple[]\"}],\"name\":\"RoyaltiesSetForContract\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"value\",\"type\":\"uint96\"}],\"indexed\":false,\"internalType\":\"struct LibPart.Part[]\",\"name\":\"royalties\",\"type\":\"tuple[]\"}],\"name\":\"RoyaltiesSetForToken\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"__RoyaltiesRegistry_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"clearRoyaltiesType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"royaltiesType\",\"type\":\"uint256\"}],\"name\":\"forceSetRoyaltiesType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"getProvider\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getRoyalties\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"value\",\"type\":\"uint96\"}],\"internalType\":\"struct LibPart.Part[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"getRoyaltiesType\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"royaltiesByToken\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"initialized\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"royaltiesByTokenAndTokenId\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"initialized\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"royaltiesProviders\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"setProviderByToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"value\",\"type\":\"uint96\"}],\"internalType\":\"struct LibPart.Part[]\",\"name\":\"royalties\",\"type\":\"tuple[]\"}],\"name\":\"setRoyaltiesByToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"Initialized(uint8)\":{\"details\":\"Triggered when the contract has been initialized or reinitialized.\"},\"RoyaltiesSetForContract(address,(address,uint96)[])\":{\"params\":{\"royalties\":\"array of royalties\",\"token\":\"token address\"}},\"RoyaltiesSetForToken(address,uint256,(address,uint96)[])\":{\"params\":{\"royalties\":\"deprecated\",\"token\":\"deprecated\",\"tokenId\":\"deprecated\"}}},\"kind\":\"dev\",\"methods\":{\"clearRoyaltiesType(address)\":{\"params\":{\"token\":\"address of token\"}},\"constructor\":{\"custom:oz-upgrades-unsafe-allow\":\"constructor\",\"details\":\"this protects the implementation contract from being initialized.\"},\"forceSetRoyaltiesType(address,uint256)\":{\"params\":{\"royaltiesType\":\"roayalty type\",\"token\":\"address of token\"}},\"getProvider(address)\":{\"params\":{\"token\":\"token address\"},\"returns\":{\"_0\":\"address of provider\"}},\"getRoyalties(address,uint256)\":{\"params\":{\"token\":\"address of token\",\"tokenId\":\"id of token\"},\"returns\":{\"_0\":\"royalties in form of an array of Parts\"}},\"getRoyaltiesType(address)\":{\"params\":{\"token\":\"token address\"},\"returns\":{\"_0\":\"royalty type\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"setProviderByToken(address,address)\":{\"params\":{\"provider\":\"address of provider\",\"token\":\"token address\"}},\"setRoyaltiesByToken(address,(address,uint96)[])\":{\"params\":{\"royalties\":\"array of royalties\",\"token\":\"address of token\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"stateVariables\":{\"royaltiesProviders\":{\"return\":\"royaltiesProviders external providers\",\"returns\":{\"_0\":\"royaltiesProviders external providers\"}}},\"title\":\"royalties registry contract\",\"version\":1},\"userdoc\":{\"events\":{\"RoyaltiesSetForContract(address,(address,uint96)[])\":{\"notice\":\"emitted when royalties is set for token\"},\"RoyaltiesSetForToken(address,uint256,(address,uint96)[])\":{\"notice\":\"deprecated\"}},\"kind\":\"user\",\"methods\":{\"__RoyaltiesRegistry_init()\":{\"notice\":\"Royalties registry initializer\"},\"clearRoyaltiesType(address)\":{\"notice\":\"clears royalties type for token contract\"},\"forceSetRoyaltiesType(address,uint256)\":{\"notice\":\"clears and sets new royalties type for token contract\"},\"getProvider(address)\":{\"notice\":\"returns provider address for token contract from royaltiesProviders mapping\"},\"getRoyalties(address,uint256)\":{\"notice\":\"returns royalties for token contract and token id\"},\"getRoyaltiesType(address)\":{\"notice\":\"returns royalties type for token contract\"},\"royaltiesByToken(address)\":{\"notice\":\"stores royalties for token contract, set in setRoyaltiesByToken() method\"},\"royaltiesByTokenAndTokenId(bytes32)\":{\"notice\":\"deprecated\"},\"royaltiesProviders(address)\":{\"notice\":\"stores external provider and royalties type for token contract\"},\"setProviderByToken(address,address)\":{\"notice\":\"sets external provider for token contract, and royalties type = 4\"},\"setRoyaltiesByToken(address,(address,uint96)[])\":{\"notice\":\"sets royalties for token contract in royaltiesByToken mapping and royalties type = 1\"}},\"notice\":\"contract allows to processing different types of royalties\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol\":\"RoyaltiesRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    function __Ownable_init() internal onlyInitializing {\\n        __Ownable_init_unchained();\\n    }\\n\\n    function __Ownable_init_unchained() internal onlyInitializing {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n\\n    /**\\n     * @dev This empty reserved space is put in place to allow future versions to add new\\n     * variables without shifting down storage in the inheritance chain.\\n     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps\\n     */\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x4075622496acc77fd6d4de4cc30a8577a744d5c75afad33fdeacf1704d6eda98\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.2;\\n\\nimport \\\"../../utils/AddressUpgradeable.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since proxied contracts do not make use of a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * The initialization functions use a version number. Once a version number is used, it is consumed and cannot be\\n * reused. This mechanism prevents re-execution of each \\\"step\\\" but allows the creation of new initialization steps in\\n * case an upgrade adds a module that needs to be initialized.\\n *\\n * For example:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```solidity\\n * contract MyToken is ERC20Upgradeable {\\n *     function initialize() initializer public {\\n *         __ERC20_init(\\\"MyToken\\\", \\\"MTK\\\");\\n *     }\\n * }\\n *\\n * contract MyTokenV2 is MyToken, ERC20PermitUpgradeable {\\n *     function initializeV2() reinitializer(2) public {\\n *         __ERC20Permit_init(\\\"MyToken\\\");\\n *     }\\n * }\\n * ```\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To prevent the implementation contract from being used, you should invoke\\n * the {_disableInitializers} function in the constructor to automatically lock it when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() {\\n *     _disableInitializers();\\n * }\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     * @custom:oz-retyped-from bool\\n     */\\n    uint8 private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Triggered when the contract has been initialized or reinitialized.\\n     */\\n    event Initialized(uint8 version);\\n\\n    /**\\n     * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,\\n     * `onlyInitializing` functions can be used to initialize parent contracts.\\n     *\\n     * Similar to `reinitializer(1)`, except that functions marked with `initializer` can be nested in the context of a\\n     * constructor.\\n     *\\n     * Emits an {Initialized} event.\\n     */\\n    modifier initializer() {\\n        bool isTopLevelCall = !_initializing;\\n        require(\\n            (isTopLevelCall && _initialized < 1) || (!AddressUpgradeable.isContract(address(this)) && _initialized == 1),\\n            \\\"Initializable: contract is already initialized\\\"\\n        );\\n        _initialized = 1;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n        }\\n        _;\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n            emit Initialized(1);\\n        }\\n    }\\n\\n    /**\\n     * @dev A modifier that defines a protected reinitializer function that can be invoked at most once, and only if the\\n     * contract hasn't been initialized to a greater version before. In its scope, `onlyInitializing` functions can be\\n     * used to initialize parent contracts.\\n     *\\n     * A reinitializer may be used after the original initialization step. This is essential to configure modules that\\n     * are added through upgrades and that require initialization.\\n     *\\n     * When `version` is 1, this modifier is similar to `initializer`, except that functions marked with `reinitializer`\\n     * cannot be nested. If one is invoked in the context of another, execution will revert.\\n     *\\n     * Note that versions can jump in increments greater than 1; this implies that if multiple reinitializers coexist in\\n     * a contract, executing them in the right order is up to the developer or operator.\\n     *\\n     * WARNING: setting the version to 255 will prevent any future reinitialization.\\n     *\\n     * Emits an {Initialized} event.\\n     */\\n    modifier reinitializer(uint8 version) {\\n        require(!_initializing && _initialized < version, \\\"Initializable: contract is already initialized\\\");\\n        _initialized = version;\\n        _initializing = true;\\n        _;\\n        _initializing = false;\\n        emit Initialized(version);\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} and {reinitializer} modifiers, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.\\n     * Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized\\n     * to any version. It is recommended to use this to lock implementation contracts that are designed to be called\\n     * through proxies.\\n     *\\n     * Emits an {Initialized} event the first time it is successfully executed.\\n     */\\n    function _disableInitializers() internal virtual {\\n        require(!_initializing, \\\"Initializable: contract is initializing\\\");\\n        if (_initialized != type(uint8).max) {\\n            _initialized = type(uint8).max;\\n            emit Initialized(type(uint8).max);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the highest version that has been initialized. See {reinitializer}.\\n     */\\n    function _getInitializedVersion() internal view returns (uint8) {\\n        return _initialized;\\n    }\\n\\n    /**\\n     * @dev Returns `true` if the contract is currently initializing. See {onlyInitializing}.\\n     */\\n    function _isInitializing() internal view returns (bool) {\\n        return _initializing;\\n    }\\n}\\n\",\"keccak256\":\"0x89be10e757d242e9b18d5a32c9fbe2019f6d63052bbe46397a430a1d60d7f794\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/introspection/IERC165Upgradeable.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC721 compliant contract.\\n */\\ninterface IERC721Upgradeable is IERC165Upgradeable {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721\\n     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\\n     * understand this adds an external call which potentially creates a reentrancy vulnerability.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the caller.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xbe63437e37e32162d5d11ea8f11a44378c092b4bcbb05b51a813fe4bf33297d4\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (utils/Address.sol)\\n\\npragma solidity ^0.8.1;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary AddressUpgradeable {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     *\\n     * Furthermore, `isContract` will also return true if the target contract within\\n     * the same transaction is already scheduled for destruction by `SELFDESTRUCT`,\\n     * which only has an effect at the end of a transaction.\\n     * ====\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * You shouldn't rely on `isContract` to protect against flash loan attacks!\\n     *\\n     * Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets\\n     * like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract\\n     * constructor.\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize/address.code.length, which returns 0\\n        // for contracts in construction, since the code is only stored at the end\\n        // of the constructor execution.\\n\\n        return account.code.length > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.8.0/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResultFromTarget(target, success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResultFromTarget(target, success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionDelegateCall(target, data, \\\"Address: low-level delegate call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        (bool success, bytes memory returndata) = target.delegatecall(data);\\n        return verifyCallResultFromTarget(target, success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verify that a low level call to smart-contract was successful, and revert (either by bubbling\\n     * the revert reason or using the provided one) in case of unsuccessful call or if target was not a contract.\\n     *\\n     * _Available since v4.8._\\n     */\\n    function verifyCallResultFromTarget(\\n        address target,\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        if (success) {\\n            if (returndata.length == 0) {\\n                // only check isContract if the call was successful and the return data is empty\\n                // otherwise we already know that it was a contract\\n                require(isContract(target), \\\"Address: call to non-contract\\\");\\n            }\\n            return returndata;\\n        } else {\\n            _revert(returndata, errorMessage);\\n        }\\n    }\\n\\n    /**\\n     * @dev Tool to verify that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason or using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            _revert(returndata, errorMessage);\\n        }\\n    }\\n\\n    function _revert(bytes memory returndata, string memory errorMessage) private pure {\\n        // Look for revert reason and bubble it up if present\\n        if (returndata.length > 0) {\\n            // The easiest way to bubble the revert reason is using memory via assembly\\n            /// @solidity memory-safe-assembly\\n            assembly {\\n                let returndata_size := mload(returndata)\\n                revert(add(32, returndata), returndata_size)\\n            }\\n        } else {\\n            revert(errorMessage);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x9c80f545915582e63fe206c6ce27cbe85a86fc10b9cd2a0e8c9488fb7c2ee422\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    /**\\n     * @dev This empty reserved space is put in place to allow future versions to add new\\n     * variables without shifting down storage in the inheritance chain.\\n     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps\\n     */\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x963ea7f0b48b032eef72fe3a7582edf78408d6f834115b9feadd673a4d5bd149\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165Upgradeable {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xc6cef87559d0aeffdf0a99803de655938a7779ec0a3cd5d4383483ad85565a09\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/interfaces/IRoyaltiesProvider.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.21;\\n\\nimport {LibPart} from \\\"../lib-part/LibPart.sol\\\";\\n\\n/// @title interface for the RoyaltiesProvider contract\\n/// @notice contains the signature for the getRoyalties function\\ninterface IRoyaltiesProvider {\\n    /// @notice calculates all roaylties in token for tokenId\\n    /// @param token address of token\\n    /// @param tokenId of the token we want to calculate royalites\\n    /// @return a LibPart.Part with allroyalties for token\\n    function getRoyalties(address token, uint256 tokenId) external returns (LibPart.Part[] memory);\\n}\\n\",\"keccak256\":\"0x86bc8bca3b5cab3a6e0ce9f41a3f8e89d0fc8e19e143fcac1b5b8e3cb4e0c994\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/lib-part/LibPart.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.21;\\n\\n/// @title library for parts of transaction fees\\n/// @notice contains the struct for Part, containing the fee recipient and value\\nlibrary LibPart {\\n    /// @notice type hash of Part struct\\n    /// @return hash of Part struct\\n    bytes32 public constant TYPE_HASH = keccak256(\\\"Part(address account,uint96 value)\\\");\\n\\n    struct Part {\\n        address account;\\n        uint96 value;\\n    }\\n\\n    /// @notice hash part object\\n    /// @param part to be hashed\\n    /// @return resulting hash\\n    function hash(Part memory part) internal pure returns (bytes32) {\\n        return keccak256(abi.encode(TYPE_HASH, part.account, part.value));\\n    }\\n}\\n\",\"keccak256\":\"0xe5688703d282c860c702f436bff69206520899860c958bd6e2b442d467e6219e\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/royalties-registry/IMultiRoyaltyRecipients.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport {IERC165} from \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\n\\n/// @title interface for MultiRoyaltyRecipients\\n/// @notice Multi-receiver EIP2981 reference override implementation\\ninterface IMultiRoyaltyRecipients is IERC165 {\\n    struct Recipient {\\n        address payable recipient;\\n        uint16 bps;\\n    }\\n\\n    /// @notice get recipients of token royalties\\n    /// @param tokenId token identifier\\n    /// @return array of royalties recipients\\n    function getRecipients(uint256 tokenId) external view returns (Recipient[] memory);\\n}\\n\",\"keccak256\":\"0x60e13f29182760523eea47c15b9450c22078b07c57e7c2a260e899c4b65a8274\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.21;\\n\\nimport {IMultiRoyaltyRecipients} from \\\"./IMultiRoyaltyRecipients.sol\\\";\\nimport {IRoyaltiesProvider} from \\\"../interfaces/IRoyaltiesProvider.sol\\\";\\nimport {LibRoyalties2981} from \\\"../royalties/LibRoyalties2981.sol\\\";\\nimport {LibPart} from \\\"../lib-part/LibPart.sol\\\";\\nimport {IERC2981} from \\\"../royalties/IERC2981.sol\\\";\\nimport {IERC165Upgradeable} from \\\"@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol\\\";\\nimport {OwnableUpgradeable} from \\\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\\\";\\n\\n/// @title royalties registry contract\\n/// @notice contract allows to processing different types of royalties\\ncontract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {\\n    /// @notice deprecated\\n    /// @param token deprecated\\n    /// @param tokenId deprecated\\n    /// @param royalties deprecated\\n    event RoyaltiesSetForToken(address indexed token, uint256 indexed tokenId, LibPart.Part[] royalties);\\n\\n    /// @notice emitted when royalties is set for token\\n    /// @param token token address\\n    /// @param royalties array of royalties\\n    event RoyaltiesSetForContract(address indexed token, LibPart.Part[] royalties);\\n\\n    /// @dev struct to store royalties in royaltiesByToken\\n    struct RoyaltiesSet {\\n        bool initialized;\\n        LibPart.Part[] royalties;\\n    }\\n\\n    bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;\\n\\n    /// @notice deprecated\\n    mapping(bytes32 => RoyaltiesSet) public royaltiesByTokenAndTokenId;\\n\\n    /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method\\n    mapping(address => RoyaltiesSet) public royaltiesByToken;\\n\\n    /// @notice stores external provider and royalties type for token contract\\n    /// @return royaltiesProviders external providers\\n    mapping(address => uint256) public royaltiesProviders;\\n\\n    uint256 internal constant ROYALTIES_TYPE_UNSET = 0;\\n    uint256 internal constant ROYALTIES_TYPE_BY_TOKEN = 1;\\n    uint256 internal constant ROYALTIES_TYPE_EXTERNAL_PROVIDER = 2;\\n    uint256 internal constant ROYALTIES_TYPE_EIP2981 = 3;\\n    uint256 internal constant ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT = 4;\\n    uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;\\n\\n    /// @dev this protects the implementation contract from being initialized.\\n    /// @custom:oz-upgrades-unsafe-allow constructor\\n    constructor() {\\n        _disableInitializers();\\n    }\\n\\n    /// @notice Royalties registry initializer\\n    // solhint-disable-next-line func-name-mixedcase\\n    function __RoyaltiesRegistry_init() external initializer {\\n        __Ownable_init();\\n    }\\n\\n    /// @notice sets external provider for token contract, and royalties type = 4\\n    /// @param token token address\\n    /// @param provider address of provider\\n    function setProviderByToken(address token, address provider) external {\\n        checkOwner(token);\\n        setRoyaltiesType(token, ROYALTIES_TYPE_EXTERNAL_PROVIDER, provider);\\n    }\\n\\n    /// @notice returns provider address for token contract from royaltiesProviders mapping\\n    /// @param token token address\\n    /// @return address of provider\\n    function getProvider(address token) public view returns (address) {\\n        return address(uint160(royaltiesProviders[token]));\\n    }\\n\\n    /// @notice returns royalties type for token contract\\n    /// @param token token address\\n    /// @return royalty type\\n    function getRoyaltiesType(address token) external view returns (uint256) {\\n        return _getRoyaltiesType(royaltiesProviders[token]);\\n    }\\n\\n    /// @notice returns royalties type from uint\\n    /// @param data in uint256\\n    /// @return royalty type\\n    function _getRoyaltiesType(uint256 data) internal pure returns (uint256) {\\n        for (uint256 i = 1; i <= ROYALTIES_TYPES_AMOUNT; ++i) {\\n            if (data / 2 ** (256 - i) == 1) {\\n                return i;\\n            }\\n        }\\n        return ROYALTIES_TYPE_UNSET;\\n    }\\n\\n    /// @notice sets royalties type for token contract\\n    /// @param token address of token\\n    /// @param royaltiesType uint256 of royalty type\\n    /// @param royaltiesProvider address of royalty provider\\n    function setRoyaltiesType(address token, uint256 royaltiesType, address royaltiesProvider) internal {\\n        require(royaltiesType > 0 && royaltiesType <= ROYALTIES_TYPES_AMOUNT, \\\"wrong royaltiesType\\\");\\n        royaltiesProviders[token] = uint(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);\\n    }\\n\\n    /// @notice clears and sets new royalties type for token contract\\n    /// @param token address of token\\n    /// @param royaltiesType roayalty type\\n    function forceSetRoyaltiesType(address token, uint256 royaltiesType) external {\\n        checkOwner(token);\\n        setRoyaltiesType(token, royaltiesType, getProvider(token));\\n    }\\n\\n    /// @notice clears royalties type for token contract\\n    /// @param token address of token\\n    function clearRoyaltiesType(address token) external {\\n        checkOwner(token);\\n        royaltiesProviders[token] = uint(uint160(getProvider(token)));\\n    }\\n\\n    /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1\\n    /// @param token address of token\\n    /// @param royalties array of royalties\\n    function setRoyaltiesByToken(address token, LibPart.Part[] memory royalties) external {\\n        checkOwner(token);\\n        //clearing royaltiesProviders value for the token\\n        delete royaltiesProviders[token];\\n        // setting royaltiesType = 1 for the token\\n        setRoyaltiesType(token, 1, address(0));\\n        uint256 sumRoyalties = 0;\\n        delete royaltiesByToken[token];\\n        for (uint256 i = 0; i < royalties.length; ++i) {\\n            require(royalties[i].account != address(0x0), \\\"RoyaltiesByToken recipient should be present\\\");\\n            require(royalties[i].value != 0, \\\"Royalty value for RoyaltiesByToken should be > 0\\\");\\n            royaltiesByToken[token].royalties.push(royalties[i]);\\n            sumRoyalties += royalties[i].value;\\n        }\\n        require(sumRoyalties < 10000, \\\"Set by token royalties sum more, than 100%\\\");\\n        royaltiesByToken[token].initialized = true;\\n        emit RoyaltiesSetForContract(token, royalties);\\n    }\\n\\n    /// @notice checks if msg.sender is owner of this contract or owner of the token contract\\n    /// @param token address of token\\n    function checkOwner(address token) internal view {\\n        if ((owner() != _msgSender()) && (OwnableUpgradeable(token).owner() != _msgSender())) {\\n            revert(\\\"Token owner not detected\\\");\\n        }\\n    }\\n\\n    /// @notice calculates royalties type for token contract\\n    /// @param token address of token\\n    /// @param royaltiesProvider address of royalty provider\\n    /// @return royalty type\\n    function calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (uint256) {\\n        try IERC165Upgradeable(token).supportsInterface(LibRoyalties2981._INTERFACE_ID_ROYALTIES) returns (\\n            bool result2981\\n        ) {\\n            if (result2981) {\\n                return ROYALTIES_TYPE_EIP2981;\\n            }\\n            // solhint-disable-next-line no-empty-blocks\\n        } catch {}\\n\\n        if (royaltiesProvider != address(0)) {\\n            return ROYALTIES_TYPE_EXTERNAL_PROVIDER;\\n        }\\n\\n        if (royaltiesByToken[token].initialized) {\\n            return ROYALTIES_TYPE_BY_TOKEN;\\n        }\\n\\n        return ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT;\\n    }\\n\\n    /// @notice returns royalties for token contract and token id\\n    /// @param token address of token\\n    /// @param tokenId id of token\\n    /// @return royalties in form of an array of Parts\\n    function getRoyalties(address token, uint256 tokenId) external override returns (LibPart.Part[] memory) {\\n        uint256 royaltiesProviderData = royaltiesProviders[token];\\n\\n        address royaltiesProvider = address(uint160(royaltiesProviderData));\\n        uint256 royaltiesType = _getRoyaltiesType(royaltiesProviderData);\\n\\n        // case when royaltiesType is not set\\n        if (royaltiesType == ROYALTIES_TYPE_UNSET) {\\n            // calculating royalties type for token\\n            royaltiesType = calculateRoyaltiesType(token, royaltiesProvider);\\n\\n            //saving royalties type\\n            setRoyaltiesType(token, royaltiesType, royaltiesProvider);\\n        }\\n\\n        //case royaltiesType = 1, royalties are set in royaltiesByToken\\n        if (royaltiesType == ROYALTIES_TYPE_BY_TOKEN) {\\n            return royaltiesByToken[token].royalties;\\n        }\\n\\n        //case royaltiesType = 2, royalties from external provider\\n        if (royaltiesType == ROYALTIES_TYPE_EXTERNAL_PROVIDER) {\\n            return providerExtractor(token, tokenId, royaltiesProvider);\\n        }\\n\\n        //case royaltiesType = 3, royalties EIP-2981\\n        if (royaltiesType == ROYALTIES_TYPE_EIP2981) {\\n            return getRoyaltiesEIP2981(token, tokenId);\\n        }\\n\\n        // case royaltiesType = 4, unknown/empty royalties\\n        if (royaltiesType == ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT) {\\n            return new LibPart.Part[](0);\\n        }\\n\\n        revert(\\\"something wrong in getRoyalties\\\");\\n    }\\n\\n    /// @notice tries to get royalties EIP-2981 for token and tokenId\\n    /// @param token address of token\\n    /// @param tokenId id of token\\n    /// @return royalties 2981 royalty array\\n    function getRoyaltiesEIP2981(\\n        address token,\\n        uint256 tokenId\\n    ) internal view returns (LibPart.Part[] memory royalties) {\\n        try IERC2981(token).royaltyInfo(tokenId, LibRoyalties2981._WEIGHT_VALUE) returns (\\n            address receiver,\\n            uint256 royaltyAmount\\n        ) {\\n            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {\\n                if (result) {\\n                    try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (\\n                        IMultiRoyaltyRecipients.Recipient[] memory multiRecipients\\n                    ) {\\n                        uint256 multiRecipientsLength = multiRecipients.length;\\n                        royalties = new LibPart.Part[](multiRecipientsLength);\\n                        uint256 sum = 0;\\n                        for (uint256 i; i < multiRecipientsLength; i++) {\\n                            IMultiRoyaltyRecipients.Recipient memory splitRecipient = multiRecipients[i];\\n                            royalties[i].account = splitRecipient.recipient;\\n                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;\\n                            royalties[i].value = uint96(splitAmount);\\n                            sum += splitAmount;\\n                        }\\n                        // sum can be less than amount, otherwise small-value listings can break\\n                        require(sum <= royaltyAmount, \\\"RoyaltiesRegistry: Invalid split\\\");\\n                        return royalties;\\n                    } catch {\\n                        return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);\\n                    }\\n                } else {\\n                    return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);\\n                }\\n            } catch {\\n                return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);\\n            }\\n        } catch {\\n            return new LibPart.Part[](0);\\n        }\\n    }\\n\\n    /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders\\n    /// @param token address of token\\n    /// @param tokenId id of token\\n    /// @param providerAddress address of external provider\\n    /// @return external royalties\\n    function providerExtractor(\\n        address token,\\n        uint256 tokenId,\\n        address providerAddress\\n    ) internal returns (LibPart.Part[] memory) {\\n        try IRoyaltiesProvider(providerAddress).getRoyalties(token, tokenId) returns (LibPart.Part[] memory result) {\\n            return result;\\n        } catch {\\n            return new LibPart.Part[](0);\\n        }\\n    }\\n\\n    uint256[46] private __gap;\\n}\\n\",\"keccak256\":\"0xe2af977474cf00abe69325887cf5417db3a44b64a7f77b286be82983da850c76\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/royalties/IERC2981.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.21;\\n\\n/// @title Interface for ERC2981\\n/// @notice NFT Royalty Standard\\ninterface IERC2981 {\\n    /// @notice Called with the sale price to determine how much royalty is owed and to whom.\\n    /// @param _tokenId - the NFT asset queried for royalty information\\n    /// @param _salePrice - the sale price of the NFT asset specified by _tokenId\\n    /// @return receiver - address of who should be sent the royalty payment\\n    /// @return royaltyAmount - the royalty payment amount for _salePrice\\n    function royaltyInfo(\\n        uint256 _tokenId,\\n        uint256 _salePrice\\n    ) external view returns (address receiver, uint256 royaltyAmount);\\n}\\n\",\"keccak256\":\"0xdfb1672f4a508abb7d0d8177a503be476f077ea5f27e5cd586a4723ef7674d64\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/marketplace/contracts/royalties/LibRoyalties2981.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.21;\\n\\nimport {LibPart} from \\\"../lib-part/LibPart.sol\\\";\\n\\n/// @title library for constants and functions related to ERC2891\\n/// @notice standard for signature validation\\nlibrary LibRoyalties2981 {\\n    bytes4 public constant _INTERFACE_ID_ROYALTIES = 0x2a55205a;\\n    uint96 internal constant _WEIGHT_VALUE = 1e6;\\n\\n    /// @notice method for converting amount to percent and forming LibPart\\n    /// @param to recipient of royalties\\n    /// @param amount of royalties\\n    /// @return LibPart with account and value\\n    function calculateRoyalties(address to, uint256 amount) internal pure returns (LibPart.Part[] memory) {\\n        LibPart.Part[] memory result;\\n        if (amount == 0) {\\n            return result;\\n        }\\n        uint256 percent = (amount * 10000) / _WEIGHT_VALUE;\\n        require(percent < 10000, \\\"Royalties 2981 exceeds 100%\\\");\\n        result = new LibPart.Part[](1);\\n        result[0].account = payable(to);\\n        result[0].value = uint96(percent);\\n        return result;\\n    }\\n}\\n\",\"keccak256\":\"0x63a5259396aa8676000fad30712363929dac92f43b889c90c90fa191efda9e6d\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061001961001e565b6100dd565b600054610100900460ff161561008a5760405162461bcd60e51b815260206004820152602760248201527f496e697469616c697a61626c653a20636f6e747261637420697320696e697469604482015266616c697a696e6760c81b606482015260840160405180910390fd5b60005460ff908116146100db576000805460ff191660ff9081179091556040519081527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b565b611af9806100ec6000396000f3fe608060405234801561001057600080fd5b50600436106100ea5760003560e01c80639ca7dc7a1161008c578063d836f01311610066578063d836f01314610215578063f2fde38b14610228578063f39cc7061461023b578063fc73be001461025b57600080fd5b80639ca7dc7a146101bf578063acf14efb146101df578063d1da3cce146101f257600080fd5b806355f21eb7116100c857806355f21eb714610144578063715018a61461018557806382b19f121461018d5780638da5cb5b146101ae57600080fd5b806305df952f146100ef57806327fff8ab1461012757806336eff6c214610131575b600080fd5b6101126100fd3660046114a2565b60666020526000908152604090205460ff1681565b60405190151581526020015b60405180910390f35b61012f61026e565b005b61012f61013f3660046114bf565b610393565b61016d6101523660046114a2565b6001600160a01b031660009081526067602052604090205490565b6040516001600160a01b03909116815260200161011e565b61012f6103c9565b6101a061019b3660046114a2565b6103dd565b60405190815260200161011e565b6033546001600160a01b031661016d565b6101d26101cd3660046114bf565b610405565b60405161011e91906114eb565b61012f6101ed3660046115ff565b6105c2565b6101126102003660046116e0565b60656020526000908152604090205460ff1681565b61012f6102233660046116f9565b61092b565b61012f6102363660046114a2565b610940565b6101a06102493660046114a2565b60676020526000908152604090205481565b61012f6102693660046114a2565b6109cd565b600054610100900460ff161580801561028e5750600054600160ff909116105b806102a85750303b1580156102a8575060005460ff166001145b61031f5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a656400000000000000000000000000000000000060648201526084015b60405180910390fd5b6000805460ff191660011790558015610342576000805461ff0019166101001790555b61034a6109f8565b8015610390576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b50565b61039c82610a7d565b6103c582826103c0856001600160a01b031660009081526067602052604090205490565b610b58565b5050565b6103d1610c00565b6103db6000610c5a565b565b6001600160a01b0381166000908152606760205260408120546103ff90610cc4565b92915050565b6001600160a01b038216600090815260676020526040812054606091819061042c82610cc4565b90508061044a5761043d8683610d18565b905061044a868284610b58565b600181036104fb576001600160a01b038616600090815260666020908152604080832060010180548251818502810185019093528083529193909284015b828210156104ed57600084815260209081902060408051808201909152908401546001600160a01b03811682527401000000000000000000000000000000000000000090046bffffffffffffffffffffffff1681830152825260019092019101610488565b5050505093505050506103ff565b600281036105185761050e868684610e14565b93505050506103ff565b6003810361052a5761050e8686610ef4565b6004810361057a57604080516000808252602082019092529061056f565b60408051808201909152600080825260208201528152602001906001900390816105485790505b5093505050506103ff565b60405162461bcd60e51b815260206004820152601f60248201527f736f6d657468696e672077726f6e6720696e20676574526f79616c74696573006044820152606401610316565b6105cb82610a7d565b6001600160a01b03821660009081526067602052604081208190556105f4908390600190610b58565b6001600160a01b0382166000908152606660205260408120805460ff1916815581610622600183018261145b565b505060005b82518110156108535760006001600160a01b031683828151811061064d5761064d611732565b6020026020010151600001516001600160a01b0316036106d55760405162461bcd60e51b815260206004820152602c60248201527f526f79616c746965734279546f6b656e20726563697069656e742073686f756c60448201527f642062652070726573656e7400000000000000000000000000000000000000006064820152608401610316565b8281815181106106e7576106e7611732565b6020026020010151602001516bffffffffffffffffffffffff166000036107765760405162461bcd60e51b815260206004820152603060248201527f526f79616c74792076616c756520666f7220526f79616c746965734279546f6b60448201527f656e2073686f756c64206265203e2030000000000000000000000000000000006064820152608401610316565b60666000856001600160a01b03166001600160a01b031681526020019081526020016000206001018382815181106107b0576107b0611732565b6020908102919091018101518254600181018455600093845292829020815191909201516bffffffffffffffffffffffff1674010000000000000000000000000000000000000000026001600160a01b0390911617910155825183908290811061081c5761081c611732565b6020026020010151602001516bffffffffffffffffffffffff1682610841919061175e565b915061084c81611771565b9050610627565b5061271081106108cb5760405162461bcd60e51b815260206004820152602a60248201527f53657420627920746f6b656e20726f79616c746965732073756d206d6f72652c60448201527f207468616e2031303025000000000000000000000000000000000000000000006064820152608401610316565b6001600160a01b03831660008181526066602052604090819020805460ff19166001179055517fc026171b9a7c9009d6a748a19a0a3cb877978a585e1647a87a786d724bbde1279061091e9085906114eb565b60405180910390a2505050565b61093482610a7d565b6103c582600283610b58565b610948610c00565b6001600160a01b0381166109c45760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f64647265737300000000000000000000000000000000000000000000000000006064820152608401610316565b61039081610c5a565b6109d681610a7d565b6001600160a01b03908116600090815260676020526040902080549091169055565b600054610100900460ff16610a755760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e670000000000000000000000000000000000000000006064820152608401610316565b6103db6112a2565b6033546001600160a01b03163314801590610b0b5750336001600160a01b0316816001600160a01b0316638da5cb5b6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610adb573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610aff919061178b565b6001600160a01b031614155b156103905760405162461bcd60e51b815260206004820152601860248201527f546f6b656e206f776e6572206e6f7420646574656374656400000000000000006044820152606401610316565b600082118015610b69575060048211155b610bb55760405162461bcd60e51b815260206004820152601360248201527f77726f6e6720726f79616c7469657354797065000000000000000000000000006044820152606401610316565b610bc1826101006117a8565b610bcc90600261189f565b610bdf906001600160a01b03831661175e565b6001600160a01b039093166000908152606760205260409020929092555050565b6033546001600160a01b031633146103db5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610316565b603380546001600160a01b038381167fffffffffffffffffffffffff0000000000000000000000000000000000000000831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600060015b60048111610d0f57610cdd816101006117a8565b610ce890600261189f565b610cf290846118ab565b600103610cff5792915050565b610d0881611771565b9050610cc9565b50600092915050565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000081527f2a55205a0000000000000000000000000000000000000000000000000000000060048201526000906001600160a01b038416906301ffc9a790602401602060405180830381865afa925050508015610db4575060408051601f3d908101601f19168201909252610db1918101906118cd565b60015b15610dcb578015610dc95760039150506103ff565b505b6001600160a01b03821615610de2575060026103ff565b6001600160a01b03831660009081526066602052604090205460ff1615610e0b575060016103ff565b50600492915050565b6040517f9ca7dc7a0000000000000000000000000000000000000000000000000000000081526001600160a01b0384811660048301526024820184905260609190831690639ca7dc7a906044016000604051808303816000875af1925050508015610ea157506040513d6000823e601f3d908101601f19168201604052610e9e91908101906118ef565b60015b610eea576040805160008082526020820190925290610ee2565b6040805180820190915260008082526020820152815260200190600190039081610ebb5790505b509050610eed565b90505b9392505050565b6040517f2a55205a00000000000000000000000000000000000000000000000000000000815260048101829052620f424060248201526060906001600160a01b03841690632a55205a906044016040805180830381865afa925050508015610f79575060408051601f3d908101601f19168201909252610f76918101906119b8565b60015b610fc2576040805160008082526020820190925290610fba565b6040805180820190915260008082526020820152815260200190600190039081610f935790505b5090506103ff565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000081527ffd90e8970000000000000000000000000000000000000000000000000000000060048201526001600160a01b038616906301ffc9a790602401602060405180830381865afa92505050801561105b575060408051601f3d908101601f19168201909252611058918101906118cd565b60015b611072576110698282611328565b925050506103ff565b8015611298576040517ffd90e897000000000000000000000000000000000000000000000000000000008152600481018690526001600160a01b0387169063fd90e89790602401600060405180830381865afa9250505080156110f757506040513d6000823e601f3d908101601f191682016040526110f491908101906119e6565b60015b6111055761050e8383611328565b80518067ffffffffffffffff81111561112057611120611551565b60405190808252806020026020018201604052801561116557816020015b604080518082019091526000808252602082015281526020019060019003908161113e5790505b5095506000805b8281101561123c57600084828151811061118857611188611732565b6020026020010151905080600001518983815181106111a9576111a9611732565b6020908102919091018101516001600160a01b03909216909152810151600090620f4240906111dd908a9061ffff16611aac565b6111e791906118ab565b9050808a84815181106111fc576111fc611732565b6020908102919091018101516bffffffffffffffffffffffff909216910152611225818561175e565b93505050808061123490611771565b91505061116c565b508481111561128d5760405162461bcd60e51b815260206004820181905260248201527f526f79616c7469657352656769737472793a20496e76616c69642073706c69746044820152606401610316565b5050505050506103ff565b61050e8383611328565b600054610100900460ff1661131f5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e670000000000000000000000000000000000000000006064820152608401610316565b6103db33610c5a565b6060808260000361133a5790506103ff565b6000620f424061134c85612710611aac565b61135691906118ab565b905061271081106113a95760405162461bcd60e51b815260206004820152601b60248201527f526f79616c7469657320323938312065786365656473203130302500000000006044820152606401610316565b60408051600180825281830190925290816020015b60408051808201909152600080825260208201528152602001906001900390816113be57905050915084826000815181106113fb576113fb611732565b6020026020010151600001906001600160a01b031690816001600160a01b031681525050808260008151811061143357611433611732565b6020908102919091018101516bffffffffffffffffffffffff90921691015250905092915050565b508054600082559060005260206000209081019061039091905b808211156114895760008155600101611475565b5090565b6001600160a01b038116811461039057600080fd5b6000602082840312156114b457600080fd5b8135610eed8161148d565b600080604083850312156114d257600080fd5b82356114dd8161148d565b946020939093013593505050565b602080825282518282018190526000919060409081850190868401855b8281101561154457815180516001600160a01b031685528601516bffffffffffffffffffffffff16868501529284019290850190600101611508565b5091979650505050505050565b634e487b7160e01b600052604160045260246000fd5b6040805190810167ffffffffffffffff8111828210171561158a5761158a611551565b60405290565b604051601f8201601f1916810167ffffffffffffffff811182821017156115b9576115b9611551565b604052919050565b600067ffffffffffffffff8211156115db576115db611551565b5060051b60200190565b6bffffffffffffffffffffffff8116811461039057600080fd5b600080604080848603121561161357600080fd5b833561161e8161148d565b925060208481013567ffffffffffffffff81111561163b57600080fd5b8501601f8101871361164c57600080fd5b803561165f61165a826115c1565b611590565b81815260069190911b8201830190838101908983111561167e57600080fd5b928401925b828410156116d05785848b03121561169b5760008081fd5b6116a3611567565b84356116ae8161148d565b8152848601356116bd816115e5565b8187015282529285019290840190611683565b8096505050505050509250929050565b6000602082840312156116f257600080fd5b5035919050565b6000806040838503121561170c57600080fd5b82356117178161148d565b915060208301356117278161148d565b809150509250929050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052601160045260246000fd5b808201808211156103ff576103ff611748565b6000600019820361178457611784611748565b5060010190565b60006020828403121561179d57600080fd5b8151610eed8161148d565b818103818111156103ff576103ff611748565b600181815b808511156117f65781600019048211156117dc576117dc611748565b808516156117e957918102915b93841c93908002906117c0565b509250929050565b60008261180d575060016103ff565b8161181a575060006103ff565b8160018114611830576002811461183a57611856565b60019150506103ff565b60ff84111561184b5761184b611748565b50506001821b6103ff565b5060208310610133831016604e8410600b8410161715611879575081810a6103ff565b61188383836117bb565b806000190482111561189757611897611748565b029392505050565b6000610eed83836117fe565b6000826118c857634e487b7160e01b600052601260045260246000fd5b500490565b6000602082840312156118df57600080fd5b81518015158114610eed57600080fd5b6000602080838503121561190257600080fd5b825167ffffffffffffffff81111561191957600080fd5b8301601f8101851361192a57600080fd5b805161193861165a826115c1565b81815260069190911b8201830190838101908783111561195757600080fd5b928401925b828410156119ad57604084890312156119755760008081fd5b61197d611567565b84516119888161148d565b815284860151611997816115e5565b818701528252604093909301929084019061195c565b979650505050505050565b600080604083850312156119cb57600080fd5b82516119d68161148d565b6020939093015192949293505050565b600060208083850312156119f957600080fd5b825167ffffffffffffffff811115611a1057600080fd5b8301601f81018513611a2157600080fd5b8051611a2f61165a826115c1565b81815260069190911b82018301908381019087831115611a4e57600080fd5b928401925b828410156119ad5760408489031215611a6c5760008081fd5b611a74611567565b8451611a7f8161148d565b81528486015161ffff81168114611a965760008081fd5b8187015282526040939093019290840190611a53565b80820281158282048414176103ff576103ff61174856fea2646970667358221220250d401ba179c2783ab09b3f3c91945cb03ff28b13e0754440bfec1c0306754464736f6c63430008150033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100ea5760003560e01c80639ca7dc7a1161008c578063d836f01311610066578063d836f01314610215578063f2fde38b14610228578063f39cc7061461023b578063fc73be001461025b57600080fd5b80639ca7dc7a146101bf578063acf14efb146101df578063d1da3cce146101f257600080fd5b806355f21eb7116100c857806355f21eb714610144578063715018a61461018557806382b19f121461018d5780638da5cb5b146101ae57600080fd5b806305df952f146100ef57806327fff8ab1461012757806336eff6c214610131575b600080fd5b6101126100fd3660046114a2565b60666020526000908152604090205460ff1681565b60405190151581526020015b60405180910390f35b61012f61026e565b005b61012f61013f3660046114bf565b610393565b61016d6101523660046114a2565b6001600160a01b031660009081526067602052604090205490565b6040516001600160a01b03909116815260200161011e565b61012f6103c9565b6101a061019b3660046114a2565b6103dd565b60405190815260200161011e565b6033546001600160a01b031661016d565b6101d26101cd3660046114bf565b610405565b60405161011e91906114eb565b61012f6101ed3660046115ff565b6105c2565b6101126102003660046116e0565b60656020526000908152604090205460ff1681565b61012f6102233660046116f9565b61092b565b61012f6102363660046114a2565b610940565b6101a06102493660046114a2565b60676020526000908152604090205481565b61012f6102693660046114a2565b6109cd565b600054610100900460ff161580801561028e5750600054600160ff909116105b806102a85750303b1580156102a8575060005460ff166001145b61031f5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201527f647920696e697469616c697a656400000000000000000000000000000000000060648201526084015b60405180910390fd5b6000805460ff191660011790558015610342576000805461ff0019166101001790555b61034a6109f8565b8015610390576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b50565b61039c82610a7d565b6103c582826103c0856001600160a01b031660009081526067602052604090205490565b610b58565b5050565b6103d1610c00565b6103db6000610c5a565b565b6001600160a01b0381166000908152606760205260408120546103ff90610cc4565b92915050565b6001600160a01b038216600090815260676020526040812054606091819061042c82610cc4565b90508061044a5761043d8683610d18565b905061044a868284610b58565b600181036104fb576001600160a01b038616600090815260666020908152604080832060010180548251818502810185019093528083529193909284015b828210156104ed57600084815260209081902060408051808201909152908401546001600160a01b03811682527401000000000000000000000000000000000000000090046bffffffffffffffffffffffff1681830152825260019092019101610488565b5050505093505050506103ff565b600281036105185761050e868684610e14565b93505050506103ff565b6003810361052a5761050e8686610ef4565b6004810361057a57604080516000808252602082019092529061056f565b60408051808201909152600080825260208201528152602001906001900390816105485790505b5093505050506103ff565b60405162461bcd60e51b815260206004820152601f60248201527f736f6d657468696e672077726f6e6720696e20676574526f79616c74696573006044820152606401610316565b6105cb82610a7d565b6001600160a01b03821660009081526067602052604081208190556105f4908390600190610b58565b6001600160a01b0382166000908152606660205260408120805460ff1916815581610622600183018261145b565b505060005b82518110156108535760006001600160a01b031683828151811061064d5761064d611732565b6020026020010151600001516001600160a01b0316036106d55760405162461bcd60e51b815260206004820152602c60248201527f526f79616c746965734279546f6b656e20726563697069656e742073686f756c60448201527f642062652070726573656e7400000000000000000000000000000000000000006064820152608401610316565b8281815181106106e7576106e7611732565b6020026020010151602001516bffffffffffffffffffffffff166000036107765760405162461bcd60e51b815260206004820152603060248201527f526f79616c74792076616c756520666f7220526f79616c746965734279546f6b60448201527f656e2073686f756c64206265203e2030000000000000000000000000000000006064820152608401610316565b60666000856001600160a01b03166001600160a01b031681526020019081526020016000206001018382815181106107b0576107b0611732565b6020908102919091018101518254600181018455600093845292829020815191909201516bffffffffffffffffffffffff1674010000000000000000000000000000000000000000026001600160a01b0390911617910155825183908290811061081c5761081c611732565b6020026020010151602001516bffffffffffffffffffffffff1682610841919061175e565b915061084c81611771565b9050610627565b5061271081106108cb5760405162461bcd60e51b815260206004820152602a60248201527f53657420627920746f6b656e20726f79616c746965732073756d206d6f72652c60448201527f207468616e2031303025000000000000000000000000000000000000000000006064820152608401610316565b6001600160a01b03831660008181526066602052604090819020805460ff19166001179055517fc026171b9a7c9009d6a748a19a0a3cb877978a585e1647a87a786d724bbde1279061091e9085906114eb565b60405180910390a2505050565b61093482610a7d565b6103c582600283610b58565b610948610c00565b6001600160a01b0381166109c45760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f64647265737300000000000000000000000000000000000000000000000000006064820152608401610316565b61039081610c5a565b6109d681610a7d565b6001600160a01b03908116600090815260676020526040902080549091169055565b600054610100900460ff16610a755760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e670000000000000000000000000000000000000000006064820152608401610316565b6103db6112a2565b6033546001600160a01b03163314801590610b0b5750336001600160a01b0316816001600160a01b0316638da5cb5b6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610adb573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610aff919061178b565b6001600160a01b031614155b156103905760405162461bcd60e51b815260206004820152601860248201527f546f6b656e206f776e6572206e6f7420646574656374656400000000000000006044820152606401610316565b600082118015610b69575060048211155b610bb55760405162461bcd60e51b815260206004820152601360248201527f77726f6e6720726f79616c7469657354797065000000000000000000000000006044820152606401610316565b610bc1826101006117a8565b610bcc90600261189f565b610bdf906001600160a01b03831661175e565b6001600160a01b039093166000908152606760205260409020929092555050565b6033546001600160a01b031633146103db5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610316565b603380546001600160a01b038381167fffffffffffffffffffffffff0000000000000000000000000000000000000000831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600060015b60048111610d0f57610cdd816101006117a8565b610ce890600261189f565b610cf290846118ab565b600103610cff5792915050565b610d0881611771565b9050610cc9565b50600092915050565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000081527f2a55205a0000000000000000000000000000000000000000000000000000000060048201526000906001600160a01b038416906301ffc9a790602401602060405180830381865afa925050508015610db4575060408051601f3d908101601f19168201909252610db1918101906118cd565b60015b15610dcb578015610dc95760039150506103ff565b505b6001600160a01b03821615610de2575060026103ff565b6001600160a01b03831660009081526066602052604090205460ff1615610e0b575060016103ff565b50600492915050565b6040517f9ca7dc7a0000000000000000000000000000000000000000000000000000000081526001600160a01b0384811660048301526024820184905260609190831690639ca7dc7a906044016000604051808303816000875af1925050508015610ea157506040513d6000823e601f3d908101601f19168201604052610e9e91908101906118ef565b60015b610eea576040805160008082526020820190925290610ee2565b6040805180820190915260008082526020820152815260200190600190039081610ebb5790505b509050610eed565b90505b9392505050565b6040517f2a55205a00000000000000000000000000000000000000000000000000000000815260048101829052620f424060248201526060906001600160a01b03841690632a55205a906044016040805180830381865afa925050508015610f79575060408051601f3d908101601f19168201909252610f76918101906119b8565b60015b610fc2576040805160008082526020820190925290610fba565b6040805180820190915260008082526020820152815260200190600190039081610f935790505b5090506103ff565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000081527ffd90e8970000000000000000000000000000000000000000000000000000000060048201526001600160a01b038616906301ffc9a790602401602060405180830381865afa92505050801561105b575060408051601f3d908101601f19168201909252611058918101906118cd565b60015b611072576110698282611328565b925050506103ff565b8015611298576040517ffd90e897000000000000000000000000000000000000000000000000000000008152600481018690526001600160a01b0387169063fd90e89790602401600060405180830381865afa9250505080156110f757506040513d6000823e601f3d908101601f191682016040526110f491908101906119e6565b60015b6111055761050e8383611328565b80518067ffffffffffffffff81111561112057611120611551565b60405190808252806020026020018201604052801561116557816020015b604080518082019091526000808252602082015281526020019060019003908161113e5790505b5095506000805b8281101561123c57600084828151811061118857611188611732565b6020026020010151905080600001518983815181106111a9576111a9611732565b6020908102919091018101516001600160a01b03909216909152810151600090620f4240906111dd908a9061ffff16611aac565b6111e791906118ab565b9050808a84815181106111fc576111fc611732565b6020908102919091018101516bffffffffffffffffffffffff909216910152611225818561175e565b93505050808061123490611771565b91505061116c565b508481111561128d5760405162461bcd60e51b815260206004820181905260248201527f526f79616c7469657352656769737472793a20496e76616c69642073706c69746044820152606401610316565b5050505050506103ff565b61050e8383611328565b600054610100900460ff1661131f5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201527f6e697469616c697a696e670000000000000000000000000000000000000000006064820152608401610316565b6103db33610c5a565b6060808260000361133a5790506103ff565b6000620f424061134c85612710611aac565b61135691906118ab565b905061271081106113a95760405162461bcd60e51b815260206004820152601b60248201527f526f79616c7469657320323938312065786365656473203130302500000000006044820152606401610316565b60408051600180825281830190925290816020015b60408051808201909152600080825260208201528152602001906001900390816113be57905050915084826000815181106113fb576113fb611732565b6020026020010151600001906001600160a01b031690816001600160a01b031681525050808260008151811061143357611433611732565b6020908102919091018101516bffffffffffffffffffffffff90921691015250905092915050565b508054600082559060005260206000209081019061039091905b808211156114895760008155600101611475565b5090565b6001600160a01b038116811461039057600080fd5b6000602082840312156114b457600080fd5b8135610eed8161148d565b600080604083850312156114d257600080fd5b82356114dd8161148d565b946020939093013593505050565b602080825282518282018190526000919060409081850190868401855b8281101561154457815180516001600160a01b031685528601516bffffffffffffffffffffffff16868501529284019290850190600101611508565b5091979650505050505050565b634e487b7160e01b600052604160045260246000fd5b6040805190810167ffffffffffffffff8111828210171561158a5761158a611551565b60405290565b604051601f8201601f1916810167ffffffffffffffff811182821017156115b9576115b9611551565b604052919050565b600067ffffffffffffffff8211156115db576115db611551565b5060051b60200190565b6bffffffffffffffffffffffff8116811461039057600080fd5b600080604080848603121561161357600080fd5b833561161e8161148d565b925060208481013567ffffffffffffffff81111561163b57600080fd5b8501601f8101871361164c57600080fd5b803561165f61165a826115c1565b611590565b81815260069190911b8201830190838101908983111561167e57600080fd5b928401925b828410156116d05785848b03121561169b5760008081fd5b6116a3611567565b84356116ae8161148d565b8152848601356116bd816115e5565b8187015282529285019290840190611683565b8096505050505050509250929050565b6000602082840312156116f257600080fd5b5035919050565b6000806040838503121561170c57600080fd5b82356117178161148d565b915060208301356117278161148d565b809150509250929050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052601160045260246000fd5b808201808211156103ff576103ff611748565b6000600019820361178457611784611748565b5060010190565b60006020828403121561179d57600080fd5b8151610eed8161148d565b818103818111156103ff576103ff611748565b600181815b808511156117f65781600019048211156117dc576117dc611748565b808516156117e957918102915b93841c93908002906117c0565b509250929050565b60008261180d575060016103ff565b8161181a575060006103ff565b8160018114611830576002811461183a57611856565b60019150506103ff565b60ff84111561184b5761184b611748565b50506001821b6103ff565b5060208310610133831016604e8410600b8410161715611879575081810a6103ff565b61188383836117bb565b806000190482111561189757611897611748565b029392505050565b6000610eed83836117fe565b6000826118c857634e487b7160e01b600052601260045260246000fd5b500490565b6000602082840312156118df57600080fd5b81518015158114610eed57600080fd5b6000602080838503121561190257600080fd5b825167ffffffffffffffff81111561191957600080fd5b8301601f8101851361192a57600080fd5b805161193861165a826115c1565b81815260069190911b8201830190838101908783111561195757600080fd5b928401925b828410156119ad57604084890312156119755760008081fd5b61197d611567565b84516119888161148d565b815284860151611997816115e5565b818701528252604093909301929084019061195c565b979650505050505050565b600080604083850312156119cb57600080fd5b82516119d68161148d565b6020939093015192949293505050565b600060208083850312156119f957600080fd5b825167ffffffffffffffff811115611a1057600080fd5b8301601f81018513611a2157600080fd5b8051611a2f61165a826115c1565b81815260069190911b82018301908381019087831115611a4e57600080fd5b928401925b828410156119ad5760408489031215611a6c5760008081fd5b611a74611567565b8451611a7f8161148d565b81528486015161ffff81168114611a965760008081fd5b8187015282526040939093019290840190611a53565b80820281158282048414176103ff576103ff61174856fea2646970667358221220250d401ba179c2783ab09b3f3c91945cb03ff28b13e0754440bfec1c0306754464736f6c63430008150033",
+  "devdoc": {
+    "events": {
+      "Initialized(uint8)": {
+        "details": "Triggered when the contract has been initialized or reinitialized."
+      },
+      "RoyaltiesSetForContract(address,(address,uint96)[])": {
+        "params": {
+          "royalties": "array of royalties",
+          "token": "token address"
+        }
+      },
+      "RoyaltiesSetForToken(address,uint256,(address,uint96)[])": {
+        "params": {
+          "royalties": "deprecated",
+          "token": "deprecated",
+          "tokenId": "deprecated"
+        }
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "clearRoyaltiesType(address)": {
+        "params": {
+          "token": "address of token"
+        }
+      },
+      "constructor": {
+        "custom:oz-upgrades-unsafe-allow": "constructor",
+        "details": "this protects the implementation contract from being initialized."
+      },
+      "forceSetRoyaltiesType(address,uint256)": {
+        "params": {
+          "royaltiesType": "roayalty type",
+          "token": "address of token"
+        }
+      },
+      "getProvider(address)": {
+        "params": {
+          "token": "token address"
+        },
+        "returns": {
+          "_0": "address of provider"
+        }
+      },
+      "getRoyalties(address,uint256)": {
+        "params": {
+          "token": "address of token",
+          "tokenId": "id of token"
+        },
+        "returns": {
+          "_0": "royalties in form of an array of Parts"
+        }
+      },
+      "getRoyaltiesType(address)": {
+        "params": {
+          "token": "token address"
+        },
+        "returns": {
+          "_0": "royalty type"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "setProviderByToken(address,address)": {
+        "params": {
+          "provider": "address of provider",
+          "token": "token address"
+        }
+      },
+      "setRoyaltiesByToken(address,(address,uint96)[])": {
+        "params": {
+          "royalties": "array of royalties",
+          "token": "address of token"
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "stateVariables": {
+      "royaltiesProviders": {
+        "return": "royaltiesProviders external providers",
+        "returns": {
+          "_0": "royaltiesProviders external providers"
+        }
+      }
+    },
+    "title": "royalties registry contract",
+    "version": 1
+  },
+  "userdoc": {
+    "events": {
+      "RoyaltiesSetForContract(address,(address,uint96)[])": {
+        "notice": "emitted when royalties is set for token"
+      },
+      "RoyaltiesSetForToken(address,uint256,(address,uint96)[])": {
+        "notice": "deprecated"
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "__RoyaltiesRegistry_init()": {
+        "notice": "Royalties registry initializer"
+      },
+      "clearRoyaltiesType(address)": {
+        "notice": "clears royalties type for token contract"
+      },
+      "forceSetRoyaltiesType(address,uint256)": {
+        "notice": "clears and sets new royalties type for token contract"
+      },
+      "getProvider(address)": {
+        "notice": "returns provider address for token contract from royaltiesProviders mapping"
+      },
+      "getRoyalties(address,uint256)": {
+        "notice": "returns royalties for token contract and token id"
+      },
+      "getRoyaltiesType(address)": {
+        "notice": "returns royalties type for token contract"
+      },
+      "royaltiesByToken(address)": {
+        "notice": "stores royalties for token contract, set in setRoyaltiesByToken() method"
+      },
+      "royaltiesByTokenAndTokenId(bytes32)": {
+        "notice": "deprecated"
+      },
+      "royaltiesProviders(address)": {
+        "notice": "stores external provider and royalties type for token contract"
+      },
+      "setProviderByToken(address,address)": {
+        "notice": "sets external provider for token contract, and royalties type = 4"
+      },
+      "setRoyaltiesByToken(address,(address,uint96)[])": {
+        "notice": "sets royalties for token contract in royaltiesByToken mapping and royalties type = 1"
+      }
+    },
+    "notice": "contract allows to processing different types of royalties",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 586,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint8"
+      },
+      {
+        "astId": 589,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 1974,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 419,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_address"
+      },
+      {
+        "astId": 539,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "52",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 6436,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "royaltiesByTokenAndTokenId",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_mapping(t_bytes32,t_struct(RoyaltiesSet)6427_storage)"
+      },
+      {
+        "astId": 6442,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "royaltiesByToken",
+        "offset": 0,
+        "slot": "102",
+        "type": "t_mapping(t_address,t_struct(RoyaltiesSet)6427_storage)"
+      },
+      {
+        "astId": 6447,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "royaltiesProviders",
+        "offset": 0,
+        "slot": "103",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 7166,
+        "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "104",
+        "type": "t_array(t_uint256)46_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_struct(Part)6333_storage)dyn_storage": {
+        "base": "t_struct(Part)6333_storage",
+        "encoding": "dynamic_array",
+        "label": "struct LibPart.Part[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_uint256)46_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[46]",
+        "numberOfBytes": "1472"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_struct(RoyaltiesSet)6427_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct RoyaltiesRegistry.RoyaltiesSet)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoyaltiesSet)6427_storage"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_bytes32,t_struct(RoyaltiesSet)6427_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct RoyaltiesRegistry.RoyaltiesSet)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoyaltiesSet)6427_storage"
+      },
+      "t_struct(Part)6333_storage": {
+        "encoding": "inplace",
+        "label": "struct LibPart.Part",
+        "members": [
+          {
+            "astId": 6330,
+            "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+            "label": "account",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 6332,
+            "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+            "label": "value",
+            "offset": 20,
+            "slot": "0",
+            "type": "t_uint96"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_struct(RoyaltiesSet)6427_storage": {
+        "encoding": "inplace",
+        "label": "struct RoyaltiesRegistry.RoyaltiesSet",
+        "members": [
+          {
+            "astId": 6422,
+            "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+            "label": "initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool"
+          },
+          {
+            "astId": 6426,
+            "contract": "@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry",
+            "label": "royalties",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_struct(Part)6333_storage)dyn_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      },
+      "t_uint96": {
+        "encoding": "inplace",
+        "label": "uint96",
+        "numberOfBytes": "12"
+      }
+    }
+  }
+}
