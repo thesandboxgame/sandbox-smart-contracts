@@ -15,7 +15,10 @@
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "private": true,
     "dependencies": {
-        "@sandbox-smart-contracts/giveaway": "*",
+        "@sandbox-smart-contracts/asset": "*",
+        "@sandbox-smart-contracts/dependency-operator-filter": "*",
+        "@sandbox-smart-contracts/dependency-royalty-management": "*",
+        "@sandbox-smart-contracts/giveaway": "0.0.3",
         "@sandbox-smart-contracts/marketplace": "*"
     },
     "files": [
@@ -23,7 +26,7 @@
     ],
     "scripts": {
         "compile": "hardhat compile",
-        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test",
         "void:deploy": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
         "deploy": "npm run void:deploy",
         "hardhat": "hardhat",
@@ -31,10 +34,10 @@
         "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
         "format": "prettier --check \"**/*.{ts,js}\"",
         "format:fix": "prettier --write \"**/*.{ts,js}\"",
-        "fork:mainnet": "cross-env HARDHAT_FORK=mainnet HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mainnet HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
-        "fork:polygon": "cross-env HARDHAT_FORK=polygon HARDHAT_DEPLOY_ACCOUNTS_NETWORK=polygon HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
-        "fork:goerli": "cross-env HARDHAT_FORK=goerli HARDHAT_DEPLOY_ACCOUNTS_NETWORK=goerli HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
-        "fork:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test"
+        "verify": "yarn hardhat etherscan-verify --network",
+        "live:deploy": "node ./utils/npmScriptHelper.js deploy",
+        "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
+        "fork:test": "node ./utils/npmScriptHelper.js fork:test"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
@@ -52,6 +55,7 @@
         "@typescript-eslint/eslint-plugin": "^5.59.8",
         "@typescript-eslint/parser": "^5.59.8",
         "chai": "^4.3.7",
+        "child_process": "^1.0.2",
         "cross-env": "^7.0.3",
         "dotenv": "^16.1.4",
         "dotenv-cli": "^7.2.1",

@@ -10,7 +10,7 @@ When using [uniswap](https://uniswap.org), you can stake your SAND in liquidity 
 
 If you haven't done it, follow the [getting started](../intro/index.md) tutorial first.
 
-Here the inputs you need to get a snapshot of everyone who staked SAND up until a date of your choice:
+Here are the inputs you need to get a snapshot of everyone who staked SAND up until a date of your choice:
 
 - the date to consider for the rewards (it will determine the block number)
 

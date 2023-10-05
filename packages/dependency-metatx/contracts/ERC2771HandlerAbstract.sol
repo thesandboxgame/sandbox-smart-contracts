@@ -38,6 +38,6 @@ abstract contract ERC2771HandlerAbstract {
     /// @notice return true if the forwarder is the trusted forwarder
     /// @param forwarder trusted forwarder address to check
     /// @return true if the address is the same as the trusted forwarder
-    /// @dev TODO: IMPLEMENT!!!
+    /// @dev this function must be IMPLEMENTED
     function _isTrustedForwarder(address forwarder) internal view virtual returns (bool);
 }
