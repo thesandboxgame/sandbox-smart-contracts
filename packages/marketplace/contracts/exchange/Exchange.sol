@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
@@ -19,7 +19,7 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 /// @dev TransferManager is used to execute token transfers
 contract Exchange is
     Initializable,
-    AccessControlUpgradeable,
+    AccessControlEnumerableUpgradeable,
     ExchangeCore,
     TransferManager,
     ERC2771HandlerUpgradeable,
@@ -62,7 +62,7 @@ contract Exchange is
         IOrderValidator orderValidatorAddress
     ) external initializer {
         __ERC2771Handler_init_unchained(newTrustedForwarder);
-        __AccessControl_init_unchained();
+        __AccessControlEnumerable_init_unchained();
         __Pausable_init_unchained();
         __TransferManager_init_unchained(
             newProtocolFeePrimary,
@@ -148,9 +148,10 @@ contract Exchange is
     /// @param interfaceId interface id to check
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, AccessControlUpgradeable) returns (bool) {
+    ) public view virtual override(ERC165Upgradeable, AccessControlEnumerableUpgradeable) returns (bool) {
         return
-            ERC165Upgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
+            ERC165Upgradeable.supportsInterface(interfaceId) ||
+            AccessControlEnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
     /// @dev Apply the fees & royalties only for users NOT granted with the role EXCHANGE_ADMIN_ROLE
