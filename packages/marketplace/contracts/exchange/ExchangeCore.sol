@@ -34,8 +34,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     mapping(bytes32 => uint256) public fills;
 
     /// @notice event signaling that an order was canceled
-    /// @param  hash order hash
-    event Cancel(bytes32 indexed hash, LibOrder.Order order);
+    /// @param  orderKeyHash order hash
+    event Cancel(bytes32 indexed orderKeyHash, LibOrder.Order order);
 
     /*     /// @notice event when orders match
     /// @param from _msgSender
