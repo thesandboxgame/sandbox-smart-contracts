@@ -34,7 +34,7 @@ const namedAccounts = {
 
   sandAdmin: {
     default: 2,
-    mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+    mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
     polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
