@@ -9,49 +9,7 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner, log} = deployments;
-  const {catalystAdmin, contractRoyaltySetter} = await getNamedAccounts();
-
-  // TODO Remove below before mainnet deployment
-  const minterRole = await read('Catalyst', 'MINTER_ROLE');
-  if (
-    !(await read(
-      'Catalyst',
-      'hasRole',
-      minterRole,
-      '0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7' // Diego's mumbai wallet
-    ))
-  ) {
-    await catchUnknownSigner(
-      execute(
-        'Catalyst',
-        {from: catalystAdmin, log: true},
-        'grantRole',
-        minterRole,
-        '0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7'
-      )
-    );
-    log(`MINTER_ROLE granted to 0xf41671100948bcb80CB9eFbD3fba16c2898d9ef7`);
-  }
-  if (
-    !(await read(
-      'Catalyst',
-      'hasRole',
-      minterRole,
-      '0x803E1522e136121c058dc9541E7B3164957c200e' // Seba's mumbai wallet
-    ))
-  ) {
-    await catchUnknownSigner(
-      execute(
-        'Catalyst',
-        {from: catalystAdmin, log: true},
-        'grantRole',
-        minterRole,
-        '0x803E1522e136121c058dc9541E7B3164957c200e'
-      )
-    );
-    log(`MINTER_ROLE granted to 0x803E1522e136121c058dc9541E7B3164957c200e`);
-  }
-  // TODO END
+  const {contractRoyaltySetter} = await getNamedAccounts();
 
   // set catalyst on Royalty Manager
   const catalyst = await deployments.get('Catalyst');
