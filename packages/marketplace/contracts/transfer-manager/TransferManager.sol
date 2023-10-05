@@ -98,7 +98,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param newProtocolFeeSecondary fee for secondary market
     function _setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) internal {
         require(newProtocolFeePrimary < 5000, "invalid primary fee");
-        require(newProtocolFeeSecondary < 5000, "invalid secodary fee");
+        require(newProtocolFeeSecondary < 5000, "invalid secondary fee");
         protocolFeePrimary = newProtocolFeePrimary;
         protocolFeeSecondary = newProtocolFeeSecondary;
 
