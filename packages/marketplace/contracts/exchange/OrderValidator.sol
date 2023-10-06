@@ -53,8 +53,8 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         LibOrder.validateOrderTime(order);
         address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
         if (order.makeAsset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
-            verifyERC20Whitelist(makeToken);
-        } else verifyWhiteList(makeToken);
+            _verifyERC20Whitelist(makeToken);
+        } else _verifyWhiteList(makeToken);
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
@@ -83,7 +83,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
     /// @notice if ERC20 token is accepted
     /// @param tokenAddress ERC20 token address
-    function verifyERC20Whitelist(address tokenAddress) internal view {
+    function _verifyERC20Whitelist(address tokenAddress) internal view {
         if (erc20List && !hasRole(ERC20_ROLE, tokenAddress)) {
             revert("payment token not allowed");
         }
@@ -91,7 +91,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
     /// @notice if token is whitelisted
     /// @param tokenAddress ERC20 token address
-    function verifyWhiteList(address tokenAddress) internal view {
+    function _verifyWhiteList(address tokenAddress) internal view {
         if (open) {
             return;
         } else if ((tsbOnly && hasRole(TSB_ROLE, tokenAddress)) || (partners && hasRole(PARTNER_ROLE, tokenAddress))) {
