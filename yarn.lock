@@ -2039,6 +2039,7 @@ __metadata:
     "@openzeppelin/contracts": ^4.9.0
     "@openzeppelin/contracts-upgradeable": ^4.9.0
     "@openzeppelin/hardhat-upgrades": ^1.28.0
+    "@release-it/keep-a-changelog": ^4.0.0
     "@sandbox-smart-contracts/dependency-metatx": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
@@ -2061,6 +2062,7 @@ __metadata:
     operator-filter-registry: ^1.4.2
     prettier: ^2.8.8
     prettier-plugin-solidity: 1.0.0-beta.11
+    release-it: ^16.1.5
     solhint: ^3.6.2
     solhint-plugin-prettier: ^0.0.5
     solidity-coverage: ^0.8.2

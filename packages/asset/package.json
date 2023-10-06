@@ -1,7 +1,17 @@
 {
   "name": "@sandbox-smart-contracts/asset",
-  "version": "0.0.1",
-  "description": "Asset L2 smart contracts",
+  "version": "1.0.0",
+  "description": "Asset and Catalyst L2 smart contracts",
+  "license": "MIT",
+  "main": "index.js",
+  "files": [
+    "contracts",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
@@ -10,7 +20,36 @@
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "node": "hardhat node --no-deploy",
     "compile": "hardhat compile",
+    "release": "release-it",
     "test": "hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesandboxgame/sandbox-smart-contracts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
+  },
+  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/asset release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/asset release v${version}",
+      "tagName": "@sandbox-smart-contracts/asset@v${version}"
+    },
+    "plugins": {
+      "@release-it/keep-a-changelog": {}
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -22,9 +61,8 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts": "^4.9.0",
-    "@openzeppelin/contracts-upgradeable": "^4.9.0",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "@release-it/keep-a-changelog": "^4.0.0",
     "@sandbox-smart-contracts/dependency-metatx": "*",
     "@sandbox-smart-contracts/dependency-operator-filter": "*",
     "@sandbox-smart-contracts/dependency-royalty-management": "*",
@@ -47,6 +85,7 @@
     "operator-filter-registry": "^1.4.2",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "1.0.0-beta.11",
+    "release-it": "^16.1.5",
     "solhint": "^3.6.2",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2",
