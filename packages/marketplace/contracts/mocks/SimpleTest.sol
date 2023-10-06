@@ -8,7 +8,7 @@ import {LibPart} from "../lib-part/LibPart.sol";
 
 contract SimpleTest is TransferManager, TransferExecutor {
     function getRoyaltiesByAssetTest(LibAsset.AssetType memory matchNft) external returns (LibPart.Part[] memory) {
-        return getRoyaltiesByAssetType(matchNft);
+        return _getRoyaltiesByAssetType(matchNft);
     }
 
     /// @dev returning false for mock contract
