@@ -120,48 +120,6 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         emit RoyaltiesSetForContract(token, royalties);
     }
 
-    /// @notice returns royalties for token contract and token id
-    /// @param token address of token
-    /// @param tokenId id of token
-    /// @return royalties in form of an array of Parts
-    function getRoyalties(address token, uint256 tokenId) external override returns (LibPart.Part[] memory) {
-        uint256 royaltiesProviderData = royaltiesProviders[token];
-
-        address royaltiesProvider = address(uint160(royaltiesProviderData));
-        uint256 royaltiesType = _getRoyaltiesType(royaltiesProviderData);
-
-        // case when royaltiesType is not set
-        if (royaltiesType == ROYALTIES_TYPE_UNSET) {
-            // calculating royalties type for token
-            royaltiesType = _calculateRoyaltiesType(token, royaltiesProvider);
-
-            //saving royalties type
-            _setRoyaltiesType(token, royaltiesType, royaltiesProvider);
-        }
-
-        //case royaltiesType = 1, royalties are set in royaltiesByToken
-        if (royaltiesType == ROYALTIES_TYPE_BY_TOKEN) {
-            return royaltiesByToken[token].royalties;
-        }
-
-        //case royaltiesType = 2, royalties from external provider
-        if (royaltiesType == ROYALTIES_TYPE_EXTERNAL_PROVIDER) {
-            return _providerExtractor(token, tokenId, royaltiesProvider);
-        }
-
-        //case royaltiesType = 3, royalties EIP-2981
-        if (royaltiesType == ROYALTIES_TYPE_EIP2981) {
-            return _getRoyaltiesEIP2981(token, tokenId);
-        }
-
-        // case royaltiesType = 4, unknown/empty royalties
-        if (royaltiesType == ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT) {
-            return new LibPart.Part[](0);
-        }
-
-        revert("something wrong in getRoyalties");
-    }
-
     /// @notice returns royalties type from uint
     /// @param data in uint256
     /// @return royalty type
@@ -214,6 +172,43 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
 
         return ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT;
+    }
+
+    /// @notice returns royalties for token contract and token id
+    /// @param token address of token
+    /// @param tokenId id of token
+    /// @return royalties in form of an array of Parts
+    function getRoyalties(address token, uint256 tokenId) external override returns (LibPart.Part[] memory) {
+        uint256 royaltiesProviderData = royaltiesProviders[token];
+
+        address royaltiesProvider = address(uint160(royaltiesProviderData));
+        uint256 royaltiesType = _getRoyaltiesType(royaltiesProviderData);
+
+        // case when royaltiesType is not set
+        if (royaltiesType == ROYALTIES_TYPE_UNSET) {
+            // calculating royalties type for token
+            royaltiesType = _calculateRoyaltiesType(token, royaltiesProvider);
+
+            //saving royalties type
+            _setRoyaltiesType(token, royaltiesType, royaltiesProvider);
+        }
+
+        //case royaltiesType = 1, royalties are set in royaltiesByToken
+        if (royaltiesType == ROYALTIES_TYPE_BY_TOKEN) {
+            return royaltiesByToken[token].royalties;
+        }
+
+        //case royaltiesType = 2, royalties from external provider
+        if (royaltiesType == ROYALTIES_TYPE_EXTERNAL_PROVIDER) {
+            return _providerExtractor(token, tokenId, royaltiesProvider);
+        }
+
+        //case royaltiesType = 3, royalties EIP-2981
+        if (royaltiesType == ROYALTIES_TYPE_EIP2981) {
+            return _getRoyaltiesEIP2981(token, tokenId);
+        }
+        // case royaltiesType = 4, unknown/empty royalties
+        return new LibPart.Part[](0);
     }
 
     /// @notice tries to get royalties EIP-2981 for token and tokenId
