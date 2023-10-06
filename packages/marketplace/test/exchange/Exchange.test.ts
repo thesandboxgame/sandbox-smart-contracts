@@ -1158,7 +1158,7 @@ describe('Exchange.sol', function () {
     // check protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
-    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
+    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 2500000000
 
     // check paid royalty
     expect(await ERC20Contract.balanceOf(royaltyReceiver.address)).to.be.equal(
@@ -1262,7 +1262,7 @@ describe('Exchange.sol', function () {
     // check protocol fee
     expect(
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
-    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 250000000
+    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 2500000000
 
     // check paid royalty
     expect(await ERC20Contract.balanceOf(royaltyReceiver.address)).to.be.equal(
@@ -2626,6 +2626,322 @@ describe('Exchange.sol', function () {
         },
       ])
     ).to.be.revertedWith('erc721 value error');
+  });
+
+  it('should not execute match order when royalties exceed 50%', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      ERC721WithRoyaltyV2981,
+      deployer: maker,
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    // set royalty greater than 50%
+    await ERC721WithRoyaltyV2981.setRoyalties(1000000);
+
+    await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
+      await FeeRecipientsData(maker.address, 10000),
+    ]);
+
+    await ERC721WithRoyaltyV2981.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(taker.address, 1000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1000
+    );
+
+    expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(1000);
+    const makerAsset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+    const takerAsset = await AssetERC20(ERC20Contract, 1000);
+    const orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+    expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
+      0
+    );
+
+    await expect(
+      ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ])
+    ).to.be.revertedWith('Royalties are too high (>50%)');
+  });
+
+  it('should not execute match orders when royalties exceed 50% for token without IROYALTYUGC support', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      user1: maker,
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    // set royalty greater than 50%
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+      await FeeRecipientsData(maker.address, 10000),
+    ]);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(taker.address, 1000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1000
+    );
+
+    expect(
+      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
+    ).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(1000);
+    const makerAsset = await AssetERC721(
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      1
+    );
+    const takerAsset = await AssetERC20(ERC20Contract, 1000);
+    const orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+    expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
+      0
+    );
+
+    await expect(
+      ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ])
+    ).to.be.revertedWith('Royalties are too high (>50%)');
+  });
+
+  it('should not execute match orders when royalties exceed 50% for token without IROYALTYUGC and royalty.length != 1', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      user1: maker,
+      user2: taker,
+      admin: receiver1,
+      user: receiver2,
+    } = await loadFixture(deployFixtures);
+
+    // set royalty greater than 50%
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+      await FeeRecipientsData(receiver1.address, 3000),
+      await FeeRecipientsData(receiver2.address, 7000),
+    ]);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(taker.address, 1000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1000
+    );
+
+    expect(
+      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
+    ).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(1000);
+    const makerAsset = await AssetERC721(
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      1
+    );
+    const takerAsset = await AssetERC20(ERC20Contract, 1000);
+    const orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+    expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
+      0
+    );
+
+    await expect(
+      ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ])
+    ).to.be.revertedWith('Royalties are too high (>50%)');
+  });
+  it('should execute match orders for token without IROYALTYUGC support', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      defaultFeeReceiver,
+      user1: maker,
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+      await FeeRecipientsData(maker.address, 10000),
+    ]);
+
+    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      1
+    );
+    await ERC20Contract.mint(taker.address, 100000000000);
+    await ERC20Contract.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      100000000000
+    );
+
+    expect(
+      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
+    ).to.be.equal(maker.address);
+    expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      100000000000
+    );
+    const makerAsset = await AssetERC721(
+      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      1
+    );
+    const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
+    const orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+    expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
+      0
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
+      0
+    );
+
+    await ExchangeContractAsUser.matchOrders([
+      {
+        orderLeft,
+        signatureLeft: makerSig,
+        orderRight,
+        signatureRight: takerSig,
+      },
+    ]);
+    expect(await ExchangeContractAsUser.fills(hashKey(orderLeft))).to.be.equal(
+      100000000000
+    );
+    expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
+      1
+    );
+    expect(
+      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
+    ).to.be.equal(taker.address);
+    expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      97500000000
+    );
+
+    // check protocol fee
+    expect(
+      await ERC20Contract.balanceOf(defaultFeeReceiver.address)
+    ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 2500000000
   });
 
   it('should require the message sender to be the maker for a zero-salt left order', async function () {
