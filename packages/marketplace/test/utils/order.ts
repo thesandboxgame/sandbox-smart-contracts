@@ -81,7 +81,6 @@ export const getSymmetricOrder = async (
   return {...ret, maker: o.taker};
 };
 
-// TODO: Test it.
 export function hashOrder(order: Order): string {
   const encoded = AbiCoder.defaultAbiCoder().encode(
     [

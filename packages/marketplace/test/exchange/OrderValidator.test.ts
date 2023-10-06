@@ -387,7 +387,4 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(false);
   });
-  // TODO:
-  // it('should check start / end', async function () {});
-  // it('should check validate through the whitelist', async function () {});
 });

@@ -88,7 +88,6 @@ export const AssetERC721 = async (
       [await tokenContract.getAddress(), tokenId]
     ),
   },
-  // TODO: Test value !=1
   value: 1,
 });
 

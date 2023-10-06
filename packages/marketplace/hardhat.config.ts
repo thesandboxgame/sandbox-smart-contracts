@@ -20,8 +20,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      // TODO remove after size issue is resolved
-      allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: false,
     },
   },
 };
