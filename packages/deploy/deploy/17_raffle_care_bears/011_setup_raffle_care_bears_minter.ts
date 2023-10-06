@@ -3,18 +3,25 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
-  const {get, read, execute, catchUnknownSigner} = deployments;
+  const {read, execute, catchUnknownSigner} = deployments;
 
-  const sandContract = await get('PolygonSand');
+  let sandContractAddress;
+  if (hre.network.name === 'polygon') {
+    sandContractAddress = '0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683';
+  } else {
+    // hre.network.name === 'mumbai'
+    sandContractAddress = '0x592daadC9eA7F56A81De1FD27A723Bd407709c46';
+  }
+  // const sandContract = await get('PolygonSand');
   const minter = await read('RaffleCareBears', 'allowedToExecuteMint');
-  if (minter !== sandContract.address) {
+  if (minter !== sandContractAddress) {
     const owner = await read('RaffleCareBears', 'owner');
     await catchUnknownSigner(
       execute(
         'RaffleCareBears',
         {from: owner, log: true},
         'setAllowedExecuteMint',
-        sandContract.address
+        sandContractAddress
       )
     );
   }
@@ -26,4 +33,5 @@ func.tags = [
   'RaffleCareBears_setup',
   'RaffleCareBears_setup_minter',
 ];
-func.dependencies = ['PolygonSand_deploy', 'RaffleCareBears_deploy'];
+// func.dependencies = ['PolygonSand_deploy', 'RaffleCareBears_deploy'];
+func.dependencies = ['RaffleCareBears_deploy'];
