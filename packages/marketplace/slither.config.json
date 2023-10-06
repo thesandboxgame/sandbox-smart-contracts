@@ -1,0 +1,4 @@
+{
+    "detectors_to_exclude": "naming-convention",  
+    "filter_paths": "(mocks/|@openzeppelin/|@sandbox-smart-contracts/)"
+}

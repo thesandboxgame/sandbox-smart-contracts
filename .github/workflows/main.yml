@@ -19,6 +19,22 @@ jobs:
       - name: Formatting
         run: yarn format:ci
 
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: "./.github/setup"
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install slither
+        run: pip3 install slither-analyzer
+
+      - name: Running Slither
+        run: yarn analyze:ci
+
   test:
     runs-on: ubuntu-latest
     steps:
