@@ -6,6 +6,6 @@ module.exports = {
   skipFiles: [
     'contracts/mocks',
     'contracts/raffleold/contracts/PeopleOfCrypto.sol',
-    'contracts/raffleold/contracts/Raffle.sol'
+    'contracts/raffleold/contracts/Raffle.sol',
   ],
 };
