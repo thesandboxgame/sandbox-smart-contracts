@@ -21,6 +21,7 @@ This mono-repo contains The Sandbox smart contracts, underpinning The Sandbox me
 
 - ⚙️ [NodeJS](https://nodejs.org/)
 - 🧰 [Yarn](https://yarnpkg.com/)
+- 🐍 [Python](https://www.python.org/)
 
 ## Tech stack and getting started
 
@@ -43,6 +44,11 @@ Each package should follow the [audit best practices](./audit-best-practices.md)
 
 ```bash
 yarn install
+```
+
+Install Slither (optional)
+```bash
+pip3 install -r requirements.txt
 ```
 
 ## Architecture Overview

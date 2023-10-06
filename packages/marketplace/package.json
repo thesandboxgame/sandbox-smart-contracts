@@ -48,6 +48,7 @@
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
     "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
+    "analyze": "slither .",
     "hardhat": "hardhat",
     "compile": "hardhat compile"
   },
