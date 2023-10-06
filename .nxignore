@@ -7,3 +7,7 @@ secret/
 # We don't want the CI to run over all the packages, we decided to ignore it for now
 yarn.lock
 .yarn/*
+
+# We don't do anything with docs right now, specifically we don't want to run over the core package.
+/**/documentation
+/**/docs

@@ -1,12 +1,17 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.5.9;
 
-import "./AdminV2.sol";
+import {AdminV2} from "./AdminV2.sol";
 
+/// @title SuperOperatorsV2
+/// @author The Sandbox
+/// @notice Implements a super operator role on the contract
+/// @dev The contract inheriting SuperOperatorsV2 is able to use a super operator role
 contract SuperOperatorsV2 is AdminV2 {
 
     mapping(address => bool) internal _superOperators;
 
-    event SuperOperator(address superOperator, bool enabled);
+    event SuperOperator(address indexed superOperator, bool enabled);
 
     /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
     /// @param superOperator address that will be given/removed superOperator right.

@@ -40,7 +40,7 @@ export type SectorEstate = {
   coordinateY: number;
   ownerAddress: string;
   type: number;
-  lands: {coordinateX: number; coordinateY: number}[];
+  lands: SectorLand[];
   bundleId?: string;
 };
 
@@ -259,7 +259,6 @@ export async function getLandSales(
   const landSales = [];
   for (const sectorData of sectors) {
     const fixedSectorData = await excludeMinted(sectorData)
-    console.log({lands: sectorData.lands.length, unmintedLands: fixedSectorData.lands.length})
     const {lands} = await generateLandsForMerkleTree(
       fixedSectorData,
       bundles,
@@ -354,6 +353,7 @@ export function getDeadline(
   }
   if (isTestnet(hre)) {
     hre.deployments.log('increasing deadline by 10 year');
+    console.log(`Original Deadline sector ${sector}:`, new Date(deadline * 1000).toISOString())
     deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
   console.log(`Deadline sector ${sector}:`, new Date(deadline * 1000).toISOString())

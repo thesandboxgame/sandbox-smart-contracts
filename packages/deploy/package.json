@@ -1,0 +1,79 @@
+{
+    "name": "@sandbox-smart-contracts/deploy",
+    "version": "0.0.1",
+    "description": "TheSandbox game smart contracts deployment",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/thesandboxgame/sandbox-smart-contracts.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
+    },
+    "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
+    "private": true,
+    "dependencies": {
+        "@sandbox-smart-contracts/avatar": "workspace:^",
+        "@sandbox-smart-contracts/giveaway": "0.0.3"
+    },
+    "files": [
+        "deployments"
+    ],
+    "scripts": {
+        "compile": "hardhat compile",
+        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "void:deploy": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
+        "deploy": "npm run void:deploy",
+        "hardhat": "hardhat",
+        "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\"",
+        "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
+        "format": "prettier --check \"**/*.{ts,js}\"",
+        "format:fix": "prettier --write \"**/*.{ts,js}\"",
+        "fork:mainnet": "cross-env HARDHAT_FORK=mainnet HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mainnet HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "fork:polygon": "cross-env HARDHAT_FORK=polygon HARDHAT_DEPLOY_ACCOUNTS_NETWORK=polygon HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "fork:goerli": "cross-env HARDHAT_FORK=goerli HARDHAT_DEPLOY_ACCOUNTS_NETWORK=goerli HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "fork:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true NODE_ENV=test hardhat test",
+        "fork:deploy:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat deploy"
+    },
+    "devDependencies": {
+        "@ethersproject/abi": "^5.7.0",
+        "@ethersproject/providers": "^5.7.2",
+        "@nomicfoundation/hardhat-chai-matchers": "1",
+        "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
+        "@nomiclabs/hardhat-ethers": "^2.2.3",
+        "@typechain/ethers-v5": "^11.0.0",
+        "@typechain/hardhat": "^8.0.0",
+        "@types/chai": "^4.3.5",
+        "@types/eslint": "^8",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^20.2.5",
+        "@types/prettier": "^2",
+        "@typescript-eslint/eslint-plugin": "^5.59.8",
+        "@typescript-eslint/parser": "^5.59.8",
+        "chai": "^4.3.7",
+        "cross-env": "^7.0.3",
+        "dotenv": "^16.1.4",
+        "dotenv-cli": "^7.2.1",
+        "eslint": "^8.43.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-json": "^3.1.0",
+        "eslint-plugin-mocha": "^10.1.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "ethers": "5",
+        "hardhat": "~2.15.0",
+        "hardhat-deploy": "^0.11.30",
+        "prettier": "^2.8.8",
+        "ts-node": "^10.9.1",
+        "typechain": "^8.2.0",
+        "typescript": "5.0.4"
+    },
+    "mocha": {
+        "require": "hardhat/register",
+        "timeout": 40000,
+        "_": [
+            "test/**/*.ts"
+        ]
+    }
+}
