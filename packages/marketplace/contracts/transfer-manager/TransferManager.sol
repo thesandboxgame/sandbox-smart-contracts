@@ -190,16 +190,9 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
-    function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
-        if (
-            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
-        ) {
-            (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
-            return royaltiesRegistry.getRoyalties(token, tokenId);
-        }
-        LibPart.Part[] memory empty;
-        return empty;
+    function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
+        (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
+        return royaltiesRegistry.getRoyalties(token, tokenId);
     }
 
     /// @notice Transfer fees
@@ -240,23 +233,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         address from,
         LibPart.Part[] memory payouts
     ) internal {
-        require(payouts.length > 0, "transferPayouts: nothing to transfer");
-        uint256 sumBps = 0;
-        uint256 rest = amount;
-        for (uint256 i = 0; i < payouts.length - 1; ++i) {
-            uint256 currentAmount = amount.bp(payouts[i].value);
-            sumBps = sumBps + payouts[i].value;
-            if (currentAmount > 0) {
-                rest = rest - currentAmount;
-                transfer(LibAsset.Asset(assetType, currentAmount), from, payouts[i].account);
-            }
-        }
-        LibPart.Part memory lastPayout = payouts[payouts.length - 1];
-        sumBps = sumBps + lastPayout.value;
-        require(sumBps == 10000, "Sum payouts Bps not equal 100%");
-        if (rest > 0) {
-            transfer(LibAsset.Asset(assetType, rest), from, lastPayout.account);
-        }
+        transfer(LibAsset.Asset(assetType, amount), from, payouts[0].account);
     }
 
     /// @notice subtract fees in BP, or base point
