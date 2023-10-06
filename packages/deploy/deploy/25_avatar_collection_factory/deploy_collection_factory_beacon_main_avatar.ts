@@ -17,11 +17,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const owner = await deployments.read('CollectionFactory', 'owner');
   const factory = await deployments.get('CollectionFactory');
-  const factoryContractAsOwner = await ethers.getContractAt(
+  const factoryContract = await ethers.getContractAt(
     'CollectionFactory',
     factory.address
   );
-
+  const factoryContractAsOwner = factoryContract.connect(
+    ethers.provider.getSigner(owner)
+  );
   console.log('CollectionFactory:', factoryContractAsOwner.address);
   console.log('CollectionFactory owner:', owner);
 

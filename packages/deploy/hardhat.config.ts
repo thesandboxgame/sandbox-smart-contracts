@@ -278,32 +278,32 @@ const networks = {
 const compilers = [
   '0.8.21',
   '0.8.19',
-  // '0.8.18',
-  '0.8.15',
+  '0.8.18',
+  // '0.8.15',
   '0.8.2',
   '0.7.5',
   '0.7.6',
   '0.6.5',
   '0.5.9',
-]
-  .map((version) => ({
-    version,
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 2000,
-      },
+].map((version) => ({
+  version,
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 2000,
     },
-  }))
-  .push({
-    version: '0.8.18',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-      },
+  },
+}));
+
+compilers.push({
+  version: '0.8.15',
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
     },
-  });
+  },
+});
 
 const config = skipDeploymentsOnLiveNetworks(
   addForkingSupport({
