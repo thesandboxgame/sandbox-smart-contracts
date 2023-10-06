@@ -17,12 +17,13 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
     /// @param asset Asset to be transferred
     /// @param from account holding the asset
     /// @param to account that will receive the asset
+    /// @dev this is the main entry point, when used as a separated contract this method will be external
     function transfer(LibAsset.Asset memory asset, address from, address to) internal override {
         if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
-            erc721safeTransferFrom(IERC721Upgradeable(token), from, to, tokenId);
+            _erc721safeTransferFrom(IERC721Upgradeable(token), from, to, tokenId);
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             address token = abi.decode(asset.assetType.data, (address));
@@ -30,7 +31,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             //not using transfer proxy when transferring from this contract
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-            erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
+            _erc1155safeTransferFrom(IERC1155Upgradeable(token), from, to, tokenId, asset.value, "");
         }
     }
 
@@ -39,7 +40,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
     /// @param from address from which token will be taken
     /// @param to address that will receive token
     /// @param tokenId id of the token being transferred
-    function erc721safeTransferFrom(IERC721Upgradeable token, address from, address to, uint256 tokenId) internal {
+    function _erc721safeTransferFrom(IERC721Upgradeable token, address from, address to, uint256 tokenId) internal {
         token.safeTransferFrom(from, to, tokenId);
     }
 
@@ -49,7 +50,7 @@ abstract contract TransferExecutor is Initializable, ITransferExecutor {
     /// @param to address that will receive tokens
     /// @param id id of the tokens being transferred
     /// @param value how many tokens will be transferred
-    function erc1155safeTransferFrom(
+    function _erc1155safeTransferFrom(
         IERC1155Upgradeable token,
         address from,
         address to,
