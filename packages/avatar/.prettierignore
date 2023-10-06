@@ -14,3 +14,11 @@ generated-markups
 
 # editors
 .idea
+
+artifacts/
+cache/
+node_modules/
+package.json
+docs/
+contracts/raffleold/
+contracts/raffle/

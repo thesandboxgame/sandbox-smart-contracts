@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-// core/src/solc_0.8/polygon/child/sand/PolygonSand.sol 
+// core/src/solc_0.8/polygon/child/sand/PolygonSand.sol
 import {PolygonSand} from "@sandbox-smart-contracts/core/src/solc_0.8/polygon/child/sand/PolygonSand.sol";
 
 contract FakePolygonSand is PolygonSand {

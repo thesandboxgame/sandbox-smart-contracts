@@ -2,9 +2,7 @@
 pragma solidity ^0.8.4;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
-import {
-    ReentrancyGuardUpgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
 
 contract MockUpgradableV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     string public constant VERSION = "V2";
