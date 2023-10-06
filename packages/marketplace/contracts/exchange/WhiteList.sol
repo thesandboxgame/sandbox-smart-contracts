@@ -2,12 +2,13 @@
 
 pragma solidity 0.8.21;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {IWhiteList} from "../interfaces/IWhiteList.sol";
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
-contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
+contract WhiteList is Initializable, IWhiteList, AccessControlEnumerableUpgradeable {
     /// @notice role for The Sandbox tokens
     /// @return hash for TSB_ROLE
     bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
@@ -60,7 +61,7 @@ contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
         bool newPartners,
         bool newOpen,
         bool newErc20List
-    ) internal initializer {
+    ) internal onlyInitializing {
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _setPermissions(newTsbOnly, newPartners, newOpen, newErc20List);
