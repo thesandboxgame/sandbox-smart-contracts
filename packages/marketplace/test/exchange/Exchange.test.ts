@@ -80,7 +80,7 @@ describe('Exchange.sol', function () {
         leftOrder,
         hashOrder(leftOrder)
       )
-    ).to.be.revertedWith('ExchangeCore: not maker');
+    ).to.be.revertedWith('not maker');
   });
 
   it('should not cancel order with zero salt', async function () {
@@ -101,7 +101,7 @@ describe('Exchange.sol', function () {
     );
     await expect(
       ExchangeContractAsUser.cancel(leftOrder, hashKey(leftOrder))
-    ).to.be.revertedWith("ExchangeCore: 0 salt can't be used");
+    ).to.be.revertedWith("0 salt can't be used");
   });
 
   it('should not cancel the order with invalid order hash', async function () {
@@ -125,7 +125,7 @@ describe('Exchange.sol', function () {
       '0x1234567890123456789012345678901234567890123456789012345678901234';
     await expect(
       ExchangeContractAsUser.connect(user1).cancel(leftOrder, invalidOrderHash)
-    ).to.be.revertedWith('ExchangeCore: Invalid orderHash');
+    ).to.be.revertedWith('Invalid orderHash');
   });
 
   it('should cancel an order and update fills mapping', async function () {

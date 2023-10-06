@@ -83,6 +83,7 @@ contract Exchange is
     /// @notice Match orders and transact
     /// @param sender the original sender of the transaction
     /// @param matchedOrders a list of left/right orders that match each other
+    /// @dev this method is used to support ERC1776 native meta transactions
     function matchOrdersFrom(
         address sender,
         ExchangeMatch[] calldata matchedOrders
@@ -96,7 +97,7 @@ contract Exchange is
     /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
     function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external whenNotPaused {
-        require(_msgSender() == order.maker, "ExchangeCore: not maker");
+        require(_msgSender() == order.maker, "not maker");
         _cancel(order, orderKeyHash);
     }
 
