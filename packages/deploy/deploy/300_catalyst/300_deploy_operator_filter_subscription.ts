@@ -3,9 +3,9 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy,read,catchUnknownSigner,execute} = deployments;
+  const {deploy, read, catchUnknownSigner, execute} = deployments;
 
-  const {deployer,sandAdmin} = await getNamedAccounts();
+  const {deployer, sandAdmin} = await getNamedAccounts();
 
   // TODO: review subscriptions for Catalyst and Asset
 
