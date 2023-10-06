@@ -41,6 +41,10 @@ export function getMnemonic(networkName?: string): string {
   return mnemonic;
 }
 
+export function getVerifyApiKey(networkName?: string): string {
+  return process.env[`ETHERSCAN_API_KEY_${networkName?.toUpperCase()}`] || '';
+}
+
 export function addNodeAndMnemonic(
   networks: NetworksUserConfig
 ): NetworksUserConfig {
@@ -51,6 +55,11 @@ export function addNodeAndMnemonic(
       url: nodeUrl(k),
       accounts: {
         mnemonic: getMnemonic(k),
+      },
+      verify: {
+        etherscan: {
+          apiKey: getVerifyApiKey(k),
+        },
       },
     };
   }
