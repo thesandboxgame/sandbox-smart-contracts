@@ -3,8 +3,10 @@ import {HardhatUserConfig} from 'hardhat/config';
 import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
-  // solidity compiler version may be updated for new packages as required
-  // to ensure packages use up-to-date dependencies
+  mocha: {
+    timeout: 0,
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
+  },
   solidity: {
     compilers: [
       {
