@@ -1646,7 +1646,7 @@ describe('Exchange.sol', function () {
     ).to.be.reverted;
   });
   describe('batching', function () {
-    it('should be able to buy two tokens from different orders in one txs', async function () {
+    it('should be able to buy 2 tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -1697,7 +1697,7 @@ describe('Exchange.sol', function () {
         0,
         0
       );
-      await ExchangeContractAsUser.matchOrders([
+      let tx = await ExchangeContractAsUser.matchOrders([
         {
           orderLeft: left1,
           signatureLeft: await signOrder(left1, maker, OrderValidatorAsAdmin),
@@ -1712,6 +1712,9 @@ describe('Exchange.sol', function () {
         },
       ]);
 
+      let receipt = await tx.wait();
+      console.log('Gas used for 2 tokens: ' + receipt.gasUsed);
+
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
       // 4 == fees?
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
@@ -1721,7 +1724,317 @@ describe('Exchange.sol', function () {
       expect(await ERC721Contract.ownerOf(123)).to.be.equal(taker.address);
       expect(await ERC721Contract.ownerOf(345)).to.be.equal(taker.address);
     });
+
+    it('should be able to buy 3 tokens from different orders in one txs', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721Contract,
+        user: taker,
+        user2: maker,
+      } = await loadFixture(deployFixtures);
+      const totalPayment = 300;
+      await ERC20Contract.mint(taker.address, totalPayment);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        totalPayment
+      );
+
+      for (let i = 0; i < 3; i++) {
+        await ERC721Contract.mint(maker.address, i);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          i
+        );
+      }
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+
+      for (let i = 0; i < 3; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
+      }
+
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 3);
+
+      let leftOrders = [];
+      for (let i = 0; i < 3; i++) {
+        let leftorder = await OrderDefault(
+          maker,
+          await AssetERC721(ERC721Contract, i),
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+        leftOrders.push(leftorder);
+      }
+
+      let rightOrders = [];
+      for (let i = 0; i < 3; i++) {
+        let rightorder = {
+          orderLeft: leftOrders[i],
+          signatureLeft: await signOrder(
+            leftOrders[i],
+            maker,
+            OrderValidatorAsAdmin
+          ),
+          orderRight: await getSymmetricOrder(leftOrders[i], taker),
+          signatureRight: '0x',
+        };
+        rightOrders.push(rightorder);
+      }
+
+      let tx = await ExchangeContractAsUser.matchOrders(rightOrders);
+
+      let receipt = await tx.wait();
+      console.log('Gas used for 3 tokens: ' + receipt.gasUsed);
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
+        totalPayment - 2 * 3
+      );
+      for (let i = 0; i < 3; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
+      }
+    });
+
+    it('should be able to buy 20 tokens from different orders in one txs', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721Contract,
+        user: taker,
+        user2: maker,
+      } = await loadFixture(deployFixtures);
+      const totalPayment = 2000;
+      await ERC20Contract.mint(taker.address, totalPayment);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        totalPayment
+      );
+
+      for (let i = 0; i < 20; i++) {
+        await ERC721Contract.mint(maker.address, i);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          i
+        );
+      }
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+
+      for (let i = 0; i < 20; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
+      }
+
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 20);
+
+      let leftOrders = [];
+      for (let i = 0; i < 20; i++) {
+        let leftorder = await OrderDefault(
+          maker,
+          await AssetERC721(ERC721Contract, i),
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+        leftOrders.push(leftorder);
+      }
+
+      let rightOrders = [];
+      for (let i = 0; i < 20; i++) {
+        let rightorder = {
+          orderLeft: leftOrders[i],
+          signatureLeft: await signOrder(
+            leftOrders[i],
+            maker,
+            OrderValidatorAsAdmin
+          ),
+          orderRight: await getSymmetricOrder(leftOrders[i], taker),
+          signatureRight: '0x',
+        };
+        rightOrders.push(rightorder);
+      }
+
+      let tx = await ExchangeContractAsUser.matchOrders(rightOrders);
+
+      let receipt = await tx.wait();
+      console.log('Gas used for 20 tokens: ' + receipt.gasUsed);
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
+        totalPayment - 40
+      );
+
+      for (let i = 0; i < 20; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
+      }
+    });
+
+    it('should be able to buy 100 tokens from different orders in one txs', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721Contract,
+        user: taker,
+        user2: maker,
+      } = await loadFixture(deployFixtures);
+      const totalPayment = 10000;
+      await ERC20Contract.mint(taker.address, totalPayment);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        totalPayment
+      );
+
+      for (let i = 0; i < 100; i++) {
+        await ERC721Contract.mint(maker.address, i);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          i
+        );
+      }
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+
+      for (let i = 0; i < 100; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
+      }
+
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 100);
+
+      let leftOrders = [];
+      for (let i = 0; i < 100; i++) {
+        let leftorder = await OrderDefault(
+          maker,
+          await AssetERC721(ERC721Contract, i),
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+        leftOrders.push(leftorder);
+      }
+
+      let rightOrders = [];
+      for (let i = 0; i < 100; i++) {
+        let rightorder = {
+          orderLeft: leftOrders[i],
+          signatureLeft: await signOrder(
+            leftOrders[i],
+            maker,
+            OrderValidatorAsAdmin
+          ),
+          orderRight: await getSymmetricOrder(leftOrders[i], taker),
+          signatureRight: '0x',
+        };
+        rightOrders.push(rightorder);
+      }
+
+      let tx = await ExchangeContractAsUser.matchOrders(rightOrders);
+
+      let receipt = await tx.wait();
+      console.log('Gas used for 100 tokens: ' + receipt.gasUsed);
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
+        totalPayment - 2 * 100
+      );
+      for (let i = 0; i < 100; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
+      }
+    });
+
+    it('should be able to buy 150 tokens from different orders in one txs', async function () {
+      const {
+        ExchangeContractAsUser,
+        OrderValidatorAsAdmin,
+        ERC20Contract,
+        ERC721Contract,
+        user: taker,
+        user2: maker,
+      } = await loadFixture(deployFixtures);
+      const totalPayment = 15000;
+      await ERC20Contract.mint(taker.address, totalPayment);
+      await ERC20Contract.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        totalPayment
+      );
+
+      for (let i = 0; i < 150; i++) {
+        await ERC721Contract.mint(maker.address, i);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          i
+        );
+      }
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+
+      for (let i = 0; i < 150; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
+      }
+
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 150);
+
+      let leftOrders = [];
+      for (let i = 0; i < 150; i++) {
+        let leftorder = await OrderDefault(
+          maker,
+          await AssetERC721(ERC721Contract, i),
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+        leftOrders.push(leftorder);
+      }
+
+      let rightOrders = [];
+      for (let i = 0; i < 150; i++) {
+        let rightorder = {
+          orderLeft: leftOrders[i],
+          signatureLeft: await signOrder(
+            leftOrders[i],
+            maker,
+            OrderValidatorAsAdmin
+          ),
+          orderRight: await getSymmetricOrder(leftOrders[i], taker),
+          signatureRight: '0x',
+        };
+        rightOrders.push(rightorder);
+      }
+
+      let tx = await ExchangeContractAsUser.matchOrders(rightOrders);
+
+      let receipt = await tx.wait();
+      console.log('Gas used for 150 tokens: ' + receipt.gasUsed);
+
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
+        totalPayment - 2 * 150
+      );
+      for (let i = 0; i < 150; i++) {
+        expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
+      }
+    });
   });
+
   describe('Whitelisting tokens', function () {
     it('should NOT execute a complete match order between ERC20 tokens if whitelisting for ERC20 is ON', async function () {
       const {
