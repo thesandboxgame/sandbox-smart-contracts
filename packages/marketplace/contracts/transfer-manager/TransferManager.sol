@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.21;
 
-import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {BpLibrary} from "../lib-bp/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
@@ -66,6 +67,23 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
+    /// @notice executes transfers for 2 matched orders
+    /// @param left DealSide from the left order (see LibDeal.sol)
+    /// @param right DealSide from the right order (see LibDeal.sol)
+    /// @dev this is the main entry point, when used as a separated contract this method will be external
+    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
+        if (feeSide == LibAsset.FeeSide.LEFT) {
+            _doTransfersWithFees(left, right);
+            _transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
+        } else if (feeSide == LibAsset.FeeSide.RIGHT) {
+            _doTransfersWithFees(right, left);
+            _transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
+        } else {
+            _transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
+            _transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
+        }
+    }
+
     /// @notice setter for royalty registry
     /// @param newRoyaltiesRegistry address of new royalties registry
     function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
@@ -96,30 +114,14 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
     }
 
-    /// @notice executes transfers for 2 matched orders
-    /// @param left DealSide from the left order (see LibDeal.sol)
-    /// @param right DealSide from the right order (see LibDeal.sol)
-    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
-        if (feeSide == LibAsset.FeeSide.LEFT) {
-            doTransfersWithFees(left, right);
-            transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
-        } else if (feeSide == LibAsset.FeeSide.RIGHT) {
-            doTransfersWithFees(right, left);
-            transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
-        } else {
-            transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
-            transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
-        }
-    }
-
     /// @notice executes the fee-side transfers (payment + fees)
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
-    function doTransfersWithFees(DealSide memory paymentSide, DealSide memory nftSide) internal {
+    function _doTransfersWithFees(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
 
         if (_applyFees(paymentSide.from)) {
-            rest = transferRoyalties(
+            rest = _transferRoyalties(
                 paymentSide.asset.assetType,
                 nftSide.asset.assetType,
                 nftSide.payouts,
@@ -131,32 +133,14 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             LibPart.Part[] memory origin = new LibPart.Part[](1);
             origin[0].account = payable(defaultFeeReceiver);
 
-            bool primaryMarket = false;
-
-            // check if primary or secondary market
-            if (
-                nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
-                nftSide.asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
-            ) {
-                (address token, uint256 tokenId) = abi.decode(nftSide.asset.assetType.data, (address, uint));
-                try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
-                    if (result) {
-                        address creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-                        if (nftSide.from == creator) {
-                            primaryMarket = true;
-                        }
-                    }
-                    // solhint-disable-next-line no-empty-blocks
-                } catch {}
-            }
-
-            if (primaryMarket) {
+            address creator = _getCreator(nftSide.asset.assetType);
+            if (creator != address(0) && creator == nftSide.from) {
                 origin[0].value = uint96(protocolFeePrimary);
             } else {
                 origin[0].value = uint96(protocolFeeSecondary);
             }
 
-            (rest, ) = transferFees(
+            (rest, ) = _transferFees(
                 paymentSide.asset.assetType,
                 rest,
                 paymentSide.asset.value,
@@ -165,7 +149,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             );
         }
 
-        transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
+        _transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
     }
 
     /// @notice transfer royalties. If there is only one royalties receiver and one address in payouts and they match,
@@ -177,7 +161,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param amount total amount of asset that is going to be transferred
     /// @param from owner of the Asset to transfer
     /// @return How much left after transferring royalties
-    function transferRoyalties(
+    function _transferRoyalties(
         LibAsset.AssetType memory paymentAssetType,
         LibAsset.AssetType memory nftAssetType,
         LibPart.Part[] memory payouts,
@@ -185,30 +169,20 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 amount,
         address from
     ) internal returns (uint256) {
-        LibPart.Part[] memory royalties = getRoyaltiesByAssetType(nftAssetType);
+        LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftAssetType);
 
-        if (
-            nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
-            nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
-        ) {
-            (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
-            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool resultInterface) {
-                if (resultInterface) {
-                    address creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-                    if (payouts.length == 1 && payouts[0].account == creator) {
-                        require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
-                        return rest;
-                    }
-                }
-                // solhint-disable-next-line no-empty-blocks
-            } catch {}
+        if (payouts.length == 1) {
+            address creator = _getCreator(nftAssetType);
+            if (creator != address(0) && payouts[0].account == creator) {
+                require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
+                return rest;
+            }
+            if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
+                require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
+                return rest;
+            }
         }
-        if (royalties.length == 1 && payouts.length == 1 && royalties[0].account == payouts[0].account) {
-            require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
-            return rest;
-        }
-
-        (uint256 result, uint256 totalRoyalties) = transferFees(paymentAssetType, rest, amount, royalties, from);
+        (uint256 result, uint256 totalRoyalties) = _transferFees(paymentAssetType, rest, amount, royalties, from);
         require(totalRoyalties <= 5000, "Royalties are too high (>50%)");
         return result;
     }
@@ -216,7 +190,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
-    function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
+    function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
         if (
             nftAssetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
             nftAssetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
@@ -236,7 +210,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param from owner of the Asset to transfer
     /// @return newRest how much left after transferring fees
     /// @return totalFees total number of fees in bp
-    function transferFees(
+    function _transferFees(
         LibAsset.AssetType memory assetType,
         uint256 rest,
         uint256 amount,
@@ -248,7 +222,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         for (uint256 i = 0; i < fees.length; ++i) {
             totalFees = totalFees + fees[i].value;
             uint256 feeValue;
-            (newRest, feeValue) = subFeeInBp(newRest, amount, fees[i].value);
+            (newRest, feeValue) = _subFeeInBp(newRest, amount, fees[i].value);
             if (feeValue > 0) {
                 transfer(LibAsset.Asset(assetType, feeValue), from, fees[i].account);
             }
@@ -260,7 +234,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param amount Amount of the asset to transfer
     /// @param from Current owner of the asset
     /// @param payouts List of payouts - receivers of the Asset
-    function transferPayouts(
+    function _transferPayouts(
         LibAsset.AssetType memory assetType,
         uint256 amount,
         address from,
@@ -289,12 +263,12 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param value amount left from amount after fees are discounted
     /// @param total total price for asset
     /// @param feeInBp fee in basepoint to be deducted
-    function subFeeInBp(
+    function _subFeeInBp(
         uint256 value,
         uint256 total,
         uint256 feeInBp
     ) internal pure returns (uint256 newValue, uint256 realFee) {
-        return subFee(value, total.bp(feeInBp));
+        return _subFee(value, total.bp(feeInBp));
     }
 
     /// @notice subtract fee from value
@@ -302,7 +276,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param fee to deduct from value
     /// @return newValue result from deduction, 0 if value < fee
     /// @return realFee fee value if value > fee, otherwise return value input
-    function subFee(uint256 value, uint256 fee) internal pure returns (uint256 newValue, uint256 realFee) {
+    function _subFee(uint256 value, uint256 fee) internal pure returns (uint256 newValue, uint256 realFee) {
         if (value > fee) {
             newValue = value - fee;
             realFee = fee;
@@ -312,7 +286,25 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         }
     }
 
-    /// @dev function deciding if the fees are applied or not, to be overriden
+    /// @notice return the creator of the token if the token supports INTERFACE_ID_IROYALTYUGC
+    /// @param assetType asset type
+    /// @return creator address or zero if is not able to retrieve it
+    function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
+        if (
+            assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
+            assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
+        ) {
+            (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
+            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
+                if (result) {
+                    creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
+                }
+                // solhint-disable-next-line no-empty-blocks
+            } catch {}
+        }
+    }
+
+    /// @notice function deciding if the fees are applied or not, to be overriden
     /// @param from address to check
     function _applyFees(address from) internal virtual returns (bool);
 
