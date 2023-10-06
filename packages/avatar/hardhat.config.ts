@@ -1,6 +1,6 @@
 import '@nomicfoundation/hardhat-toolbox';
 import {HardhatUserConfig} from 'hardhat/config';
-import "@openzeppelin/hardhat-upgrades";
+import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required
@@ -34,7 +34,6 @@ const config: HardhatUserConfig = {
           },
         },
       },
-
     ],
   },
 };

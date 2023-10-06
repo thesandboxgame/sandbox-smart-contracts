@@ -2,23 +2,24 @@ import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
 import {parseUnits} from 'ethers';
 
-
 import {
   setupAvatar,
   setupAvatarAndMint,
   COLLECTION_MAX_SUPPLY,
   collectionName,
 } from './AvatarCollection.fixtures';
-import { setupAvatarCollectionContract } from '../collectionSetup';
-import { getTestingAccounts, topUpAddressWithETH, setupMockERC20 } from '../fixtures';
+import {setupAvatarCollectionContract} from '../collectionSetup';
+import {
+  getTestingAccounts,
+  topUpAddressWithETH,
+  setupMockERC20,
+} from '../fixtures';
 
 const BATCH_SIZE = 50;
 // eslint-disable-next-line mocha/no-skipped-tests
 describe(collectionName, function () {
   it('setMarketingMint sets appropriate data', async function () {
-    const {
-      collectionContractAsOwner,
-    } = await setupAvatarCollectionContract();
+    const {collectionContractAsOwner} = await setupAvatarCollectionContract();
 
     await collectionContractAsOwner.setMarketingMint();
     const expectedWaveMaxTokens = 50;
@@ -62,10 +63,7 @@ describe(collectionName, function () {
       'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = parseUnits(
-      '100',
-      'ether'
-    );
+    const expectedWaveSingleTokenPrice = parseUnits('100', 'ether');
     assert.equal(
       (await collectionContractAsOwner.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
@@ -91,10 +89,7 @@ describe(collectionName, function () {
       'waveMaxTokensPerWallet is not set correctly'
     );
 
-    const expectedWaveSingleTokenPrice = parseUnits(
-      '100',
-      'ether'
-    );
+    const expectedWaveSingleTokenPrice = parseUnits('100', 'ether');
     assert.equal(
       (await collectionContractAsOwner.waveSingleTokenPrice()).toString(),
       expectedWaveSingleTokenPrice.toString(),
@@ -184,7 +179,9 @@ describe(collectionName, function () {
     ).to.be.revertedWith('Pausable: paused');
 
     // burn should revert (would revert because not tokens are minted if not paused)
-    await expect(collectionContract.burn(0)).to.be.revertedWith('Pausable: paused');
+    await expect(collectionContract.burn(0)).to.be.revertedWith(
+      'Pausable: paused'
+    );
 
     // reveal should revert (it would of reverted because token was not minted regardless)
     await expect(collectionContract.reveal(1, 0, signature)).to.be.revertedWith(
@@ -236,11 +233,16 @@ describe(collectionName, function () {
 
     const personalizationMask = 32n;
 
-    const oldPersonalization = await collectionContract.personalizationOf(mintedTokenId);
+    const oldPersonalization = await collectionContract.personalizationOf(
+      mintedTokenId
+    );
     // sanity check
     assert.equal(oldPersonalization, 0n);
 
-    await collectionContract.operatorPersonalize(mintedTokenId, personalizationMask);
+    await collectionContract.operatorPersonalize(
+      mintedTokenId,
+      personalizationMask
+    );
 
     const currentPersonalization = await collectionContract.personalizationOf(
       mintedTokenId
@@ -256,16 +258,19 @@ describe(collectionName, function () {
     } = await setupAvatar();
 
     const {deployer} = await getTestingAccounts();
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setAllowedExecuteMint // // // // // // // // // // // // // // // // // // // // // //
 
-    const oldAllowedToExecuteMint = await collectionContract.allowedToExecuteMint();
+    const oldAllowedToExecuteMint =
+      await collectionContract.allowedToExecuteMint();
     const randomTokenContract = await setupMockERC20();
     const randomToken = await randomTokenContract.getAddress();
     await collectionContract.setAllowedExecuteMint(randomToken);
-    const newAllowedToExecuteMint = await collectionContract.allowedToExecuteMint();
+    const newAllowedToExecuteMint =
+      await collectionContract.allowedToExecuteMint();
 
     assert.notEqual(oldAllowedToExecuteMint, newAllowedToExecuteMint);
     assert.equal(randomToken, newAllowedToExecuteMint);
@@ -287,8 +292,9 @@ describe(collectionName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setTreasury // // // // // // // // // // // // // // // // // // // // // //
     const oldTreasury = await contract.mintTreasury();
@@ -298,9 +304,9 @@ describe(collectionName, function () {
     assert.notEqual(oldTreasury, newTreasury);
     assert.equal(randomAddress, newTreasury);
 
-    await expect(collectionContractAsRandomWallet.setTreasury(randomAddress)).to.be.revertedWith(
-      'Ownable: caller is not the owner'
-    );
+    await expect(
+      collectionContractAsRandomWallet.setTreasury(randomAddress)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
     await expect(contract.setTreasury(ethers.ZeroAddress)).to.be.revertedWith(
       'AvatarCollection: owner is zero address'
@@ -313,8 +319,9 @@ describe(collectionName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setSignAddress // // // // // // // // // // // // // // // // // // // // // //
     const oldSignAddress = await contract.signAddress();
@@ -328,9 +335,9 @@ describe(collectionName, function () {
       collectionContractAsRandomWallet.setSignAddress(randomAddress)
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    await expect(contract.setSignAddress(ethers.ZeroAddress)).to.be.revertedWith(
-      'AvatarCollection: sign address is zero address'
-    );
+    await expect(
+      contract.setSignAddress(ethers.ZeroAddress)
+    ).to.be.revertedWith('AvatarCollection: sign address is zero address');
   });
 
   it('setBaseURI works (plus invalidations)', async function () {
@@ -339,8 +346,9 @@ describe(collectionName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setBaseURI // // // // // // // // // // // // // // // // // // // // // //
     const oldBaseURI = await contract.baseTokenURI();
@@ -351,9 +359,9 @@ describe(collectionName, function () {
     assert.notEqual(oldBaseURI, newBaseURI);
     assert.equal(toSetNewURI, newBaseURI);
 
-    await expect(collectionContractAsRandomWallet.setBaseURI(randomAddress)).to.be.revertedWith(
-      'CollectionAccessControl: sender not authorized'
-    );
+    await expect(
+      collectionContractAsRandomWallet.setBaseURI(randomAddress)
+    ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
 
     await expect(contract.setBaseURI('')).to.be.revertedWith(
       'AvatarCollection: baseURI is not set'
@@ -470,11 +478,7 @@ describe(collectionName, function () {
     let totalMinted = 0;
     let signatureId = 0;
     for (const waveSize of waves) {
-      await setupWave(
-        waveSize,
-        waveSize,
-        nftPriceInSand.toString()
-      );
+      await setupWave(waveSize, waveSize, nftPriceInSand.toString());
       const mintingQuantities = getSupplySplittedInBatches(
         waveSize,
         BATCH_SIZE
@@ -580,9 +584,7 @@ describe(collectionName, function () {
       personalizationMask
     );
 
-    const personalizationOf = await contract.personalizationOf(
-      tokenId
-    );
+    const personalizationOf = await contract.personalizationOf(tokenId);
 
     assert.equal(personalizationOf, personalizationMask);
   });
@@ -759,10 +761,15 @@ describe(collectionName, function () {
     );
 
     const contractAsDeployer = contract.connect(deployer);
-    
-    const personalizeTx = await contractAsDeployer.personalize(1, signature, tokenId, personalizationMask);
+
+    const personalizeTx = await contractAsDeployer.personalize(
+      1,
+      signature,
+      tokenId,
+      personalizationMask
+    );
     await personalizeTx.wait();
-    
+
     await expect(
       contractAsDeployer.personalize(1, signature, tokenId, personalizationMask)
     ).to.be.revertedWith('AvatarCollection: signatureId already used');
@@ -791,7 +798,8 @@ describe(collectionName, function () {
     const randomAddress = raffleSignWallet.address;
     await topUpAddressWithETH(randomAddress, 100);
 
-    const avatarContractAsRandomAddress = avatarCollectionContract.connect(raffleSignWallet);
+    const avatarContractAsRandomAddress =
+      avatarCollectionContract.connect(raffleSignWallet);
 
     // check that the owner (minter) of the token is indeed minterAddress
     assert.equal(await avatarContractAsMinter.ownerOf(tokenId), minterAddress);
@@ -885,8 +893,10 @@ describe(collectionName, function () {
     );
 
     // check that all noted tokens as being burned were in the minted list. Count is already checked
-    const burnedTokensCount = await avatarContractAsMinter.burnedTokensCount(minterAddress);
-    
+    const burnedTokensCount = await avatarContractAsMinter.burnedTokensCount(
+      minterAddress
+    );
+
     for (const burnedTokenId of [...Array(burnedTokensCount).keys()]) {
       const burnedToken = await avatarContractAsMinter.burnedTokens(
         minterAddress,
@@ -913,10 +923,8 @@ describe(collectionName, function () {
 
   it('CollectionAccess control: adding, revoking and checking roles for CONFIGURATOR_ROLE', async function () {
     // setup
-    const {
-      collectionContract,
-      collectionContractAsOwner: contract,
-    } = await setupAvatar();
+    const {collectionContract, collectionContractAsOwner: contract} =
+      await setupAvatar();
 
     const {deployer, raffleSignWallet} = await getTestingAccounts();
 
@@ -928,9 +936,9 @@ describe(collectionName, function () {
     const contractAsUser = collectionContract.connect(raffleSignWallet);
 
     // check owner can't set 0 address
-    await expect(contract.addConfigurator(ethers.ZeroAddress)).to.be.revertedWith(
-      'CollectionAccessControl: account is zero address'
-    );
+    await expect(
+      contract.addConfigurator(ethers.ZeroAddress)
+    ).to.be.revertedWith('CollectionAccessControl: account is zero address');
 
     // check simple operation restriction
     await expect(contractAsUser.setBaseURI(toSetNewURI)).to.be.revertedWith(
@@ -977,7 +985,7 @@ describe(collectionName, function () {
       collectionContractAsOwner: contract,
       collectionContractAsRandomWallet,
       randomWallet,
-      mintedIdx
+      mintedIdx,
     } = await setupAvatarAndMint(1);
 
     const randomAddress = randomWallet.address;
@@ -985,13 +993,16 @@ describe(collectionName, function () {
     const personalizationMask = 42;
 
     // check owner can't set 0 address for transformer role
-    await expect(contract.addTransformer(ethers.ZeroAddress)).to.be.revertedWith(
-      'CollectionAccessControl: account is zero address'
-    );
+    await expect(
+      contract.addTransformer(ethers.ZeroAddress)
+    ).to.be.revertedWith('CollectionAccessControl: account is zero address');
 
     // check simple operation restriction
     await expect(
-      collectionContractAsRandomWallet.operatorPersonalize(tokenId, personalizationMask)
+      collectionContractAsRandomWallet.operatorPersonalize(
+        tokenId,
+        personalizationMask
+      )
     ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
 
     // check that role is not given
@@ -1008,7 +1019,10 @@ describe(collectionName, function () {
     );
 
     // now it should actually work
-    await collectionContractAsRandomWallet.operatorPersonalize(tokenId, personalizationMask);
+    await collectionContractAsRandomWallet.operatorPersonalize(
+      tokenId,
+      personalizationMask
+    );
 
     // verify that it was actually modified
     assert.equal(

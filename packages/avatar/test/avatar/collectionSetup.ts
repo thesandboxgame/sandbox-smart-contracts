@@ -1,10 +1,9 @@
-import { ethers } from 'hardhat';
+import {ethers} from 'hardhat';
 import {parseUnits} from 'ethers';
-import {deployFakeSandContract, getTestingAccounts} from "./fixtures";
-import { setupCollectionFactory } from './factory';
+import {deployFakeSandContract, getTestingAccounts} from './fixtures';
+import {setupCollectionFactory} from './factory';
 
 export async function setupAvatarCollectionContract() {
-
   const {
     treasury,
     raffleSignWallet,
@@ -20,21 +19,20 @@ export async function setupAvatarCollectionContract() {
     collectionFactoryAsOwner,
     factoryOwner,
     avatarCollectionContract,
-    randomWallet,    
+    randomWallet,
   } = await setupCollectionFactory();
 
   const mintToDeployerAmount = parseUnits('100000000', 'ether');
   // setup arguments
-  const {
-    polygonSandContract,
-    sandContractAsOwner
-  } = await deployFakeSandContract(sandAdmin, mintToDeployerAmount);
+  const {polygonSandContract, sandContractAsOwner} =
+    await deployFakeSandContract(sandAdmin, mintToDeployerAmount);
 
   const collectionName = 'MockAvatarTesting';
   const collectionSymbol = 'MAT';
   const MAX_SUPPLY = 500;
   const maxMarketingTokens = 50;
-  const metadataUrl = 'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
+  const metadataUrl =
+    'https://contracts-demo.sandbox.game/avatarcollection-unrevealed/';
 
   const operatorFiltererSubscriptionSubscribe = true;
 
@@ -46,10 +44,9 @@ export async function setupAvatarCollectionContract() {
   // references to implementation
   const implementationAlias = ethers.encodeBytes32String('main-avatar');
 
-  // encode arguments to be used as initialize data for the collection  
-  const encodedInitializationArgs = avatarCollectionContract.interface.encodeFunctionData(
-    'initialize',
-    [
+  // encode arguments to be used as initialize data for the collection
+  const encodedInitializationArgs =
+    avatarCollectionContract.interface.encodeFunctionData('initialize', [
       nftCollectionAdmin.address,
       metadataUrl,
       collectionName,
@@ -70,8 +67,7 @@ export async function setupAvatarCollectionContract() {
         maxAllowlistTokensPerWallet,
         maxMarketingTokens,
       ],
-    ]
-  );
+    ]);
   // console.log(`encodedInitializationArgs:`, encodedInitializationArgs);
   // console.log(`deploying "${collectionName}" ...`);
   const deployTx = await collectionFactoryAsOwner.deployCollection(
@@ -79,7 +75,7 @@ export async function setupAvatarCollectionContract() {
     encodedInitializationArgs
   );
   await deployTx.wait(); // a must
-  
+
   // for now, the last CollectionAdded is taken. If this is not ok, will use a TX parser
   const collectionAddedEvents = await collectionFactoryAsOwner.queryFilter(
     collectionFactoryAsOwner.filters.CollectionAdded()
@@ -87,10 +83,13 @@ export async function setupAvatarCollectionContract() {
   const collectionAddress = collectionAddedEvents.slice(-1)[0].args?.[1];
   // console.log(`deployed at ${collectionAddress} (tx: ${deployTx.hash})`);
 
-  const collectionContract = await ethers.getContractAt("AvatarCollection", collectionAddress);
-  
+  const collectionContract = await ethers.getContractAt(
+    'AvatarCollection',
+    collectionAddress
+  );
+
   // avatarCollectionAsRandomWallet
-  const owner = await collectionContract.owner();  
+  const owner = await collectionContract.owner();
   const collectionContractAsOwner = collectionContract.connect(
     await ethers.provider.getSigner(owner)
   );
@@ -99,16 +98,16 @@ export async function setupAvatarCollectionContract() {
     await ethers.provider.getSigner(randomWallet.address)
   );
 
-  return {    
+  return {
     polygonSandContract,
     sandContractAsOwner,
     collectionFactoryContract,
     collectionFactoryAsOwner,
     factoryOwner,
     collectionContract,
-    collectionOwner: owner,    
+    collectionOwner: owner,
     collectionContractAsOwner,
     randomWallet,
-    collectionContractAsRandomWallet
-  }
-};
+    collectionContractAsRandomWallet,
+  };
+}

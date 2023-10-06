@@ -1,70 +1,69 @@
 import {assert} from 'chai';
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
+import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, network} from 'hardhat';
 import {Wallet, parseUnits} from 'ethers';
-import { AvatarCollection } from '../../../typechain-types/contracts/avatar/AvatarCollection';
-import { FakePolygonSand, PolygonSand } from '../../../typechain-types';
-import { getTestingAccounts, topUpAddressWithETH } from '../fixtures';
-import { setupAvatarCollectionContract } from '../collectionSetup';
-
+import {AvatarCollection} from '../../../typechain-types/contracts/avatar/AvatarCollection';
+import {FakePolygonSand, PolygonSand} from '../../../typechain-types';
+import {getTestingAccounts, topUpAddressWithETH} from '../fixtures';
+import {setupAvatarCollectionContract} from '../collectionSetup';
 
 export const collectionName = 'MockAvatarTesting';
 export const COLLECTION_MAX_SUPPLY = 500;
 
 export const setupAvatar = async () => {
+  const {
+    polygonSandContract,
+    sandContractAsOwner,
+    collectionFactoryContract,
+    collectionFactoryAsOwner,
+    factoryOwner,
+    collectionContract,
+    collectionOwner,
+    collectionContractAsOwner,
+    randomWallet,
+    collectionContractAsRandomWallet,
+  } = await setupAvatarCollectionContract();
 
-    const {
-      polygonSandContract,
-      sandContractAsOwner,
-      collectionFactoryContract,
-      collectionFactoryAsOwner,
-      factoryOwner,
-      collectionContract,
-      collectionOwner,    
-      collectionContractAsOwner,
-      randomWallet,
-      collectionContractAsRandomWallet
-    } = await setupAvatarCollectionContract();
-  
-    await topUpAddressWithETH(await sandContractAsOwner.owner(), 1000);
+  await topUpAddressWithETH(await sandContractAsOwner.owner(), 1000);
 
-    return {
-      network,
-      collectionFactoryContract,
-      collectionFactoryAsOwner,
-      factoryOwner,
+  return {
+    network,
+    collectionFactoryContract,
+    collectionFactoryAsOwner,
+    factoryOwner,
+    collectionContract,
+    collectionOwner,
+    collectionContractAsOwner,
+    randomWallet,
+    collectionContractAsRandomWallet,
+    sandContract: polygonSandContract,
+    setupWave: await createSetupWave(collectionContractAsOwner),
+    signAuthMessageAs,
+    transferSand: await setupTransferSand(sandContractAsOwner),
+    mint: mintSetup(collectionContract, polygonSandContract),
+    personalizeSignature: validPersonalizeSignature,
+    personalize: personalizeSetup(
       collectionContract,
-      collectionOwner,    
-      collectionContractAsOwner,
-      randomWallet,
-      collectionContractAsRandomWallet,
-      sandContract: polygonSandContract,
-      setupWave: await createSetupWave(collectionContractAsOwner),
-      signAuthMessageAs,
-      transferSand: await setupTransferSand(sandContractAsOwner),
-      mint: mintSetup(collectionContract, polygonSandContract),
-      personalizeSignature: validPersonalizeSignature,
-      personalize: personalizeSetup(
-        collectionContract,
-        validPersonalizeSignature
-      ),
-      personalizeInvalidSignature: personalizeSetup(
-        collectionContract,
-        invalidPersonalizeSignature
-      ),
-    };
-}
+      validPersonalizeSignature
+    ),
+    personalizeInvalidSignature: personalizeSetup(
+      collectionContract,
+      invalidPersonalizeSignature
+    ),
+  };
+};
 
 async function createSetupWave(contract: AvatarCollection) {
-  return async (  waveMaxTokens: number,
+  return async (
+    waveMaxTokens: number,
     waveMaxTokensToBuy: number,
     waveSingleTokenPrice: string
   ) => {
     const {raffleSignWallet} = await getTestingAccounts();
 
     await contract.setSignAddress(raffleSignWallet);
-  
+
     await contract.setupWave(
       waveMaxTokens,
       waveMaxTokensToBuy,
@@ -102,13 +101,8 @@ export async function setupAvatarAndMint(
 ): Promise<AvatarMintingSetup> {
   const avatarSetup = await setupAvatar();
 
-  const {
-    collectionContract,
-    network,
-    transferSand,
-    setupWave,
-    mint,
-  } = avatarSetup;
+  const {collectionContract, network, transferSand, setupWave, mint} =
+    avatarSetup;
   const {deployer, raffleSignWallet} = await getTestingAccounts();
   await transferSand(deployer.address, '1000');
   await setupWave(mintCount * 2, mintCount, '1');
@@ -168,9 +162,7 @@ function validPersonalizeSignature(
     ]
   );
 
-  return wallet.signMessage(
-    ethers.getBytes(ethers.keccak256(hashedData))
-  );
+  return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
 function invalidPersonalizeSignature(
@@ -187,9 +179,7 @@ function invalidPersonalizeSignature(
     [signatureId, contractAddress, chainId, personalizationMask, tokenId]
   );
 
-  return wallet.signMessage(
-    ethers.getBytes(ethers.keccak256(hashedData))
-  );
+  return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
 function signAuthMessageAs(
@@ -205,22 +195,20 @@ function signAuthMessageAs(
     [address, signatureId, contractAddress, chainId]
   );
   // https://docs.ethers.org/v6/migrating/
-  return wallet.signMessage(
-    ethers.getBytes(ethers.keccak256(hashedData))
-  );
+  return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
 async function setupTransferSand(sandContractAsOwner: FakePolygonSand) {
   return async (address: string, amount: string) => {
-    const amountToSend = parseUnits(amount.toString(), 'ether');    
-    await sandContractAsOwner.donateTo(address, amountToSend)
+    const amountToSend = parseUnits(amount.toString(), 'ether');
+    await sandContractAsOwner.donateTo(address, amountToSend);
   };
 }
 
 function mintSetup(
   collectionContract: AvatarCollection,
-  sandContract: PolygonSand) 
-{
+  sandContract: PolygonSand
+) {
   return async (
     wallet: Wallet | SignerWithAddress | HardhatEthersSigner,
     address: string,
@@ -237,18 +225,18 @@ function mintSetup(
       contractAddress,
       chainId
     );
-    const encodedData = collectionContract.interface.encodeFunctionData('mint', [
-      address,
-      amount,
-      signatureId,
-      signature,
-    ]);
-    const contract = sandContract.connect(await ethers.provider.getSigner(address));
+    const encodedData = collectionContract.interface.encodeFunctionData(
+      'mint',
+      [address, amount, signatureId, signature]
+    );
+    const contract = sandContract.connect(
+      await ethers.provider.getSigner(address)
+    );
     const mintTx = await contract.approveAndCall(
-        await collectionContract.getAddress(),
-        approvalAmount,
-        encodedData
-      );
+      await collectionContract.getAddress(),
+      approvalAmount,
+      encodedData
+    );
     await mintTx.wait();
     return mintTx;
   };
@@ -284,8 +272,15 @@ function personalizeSetup(
       personalizationMask
     );
 
-    const contract = collectionContract.connect(await ethers.provider.getSigner(address));
+    const contract = collectionContract.connect(
+      await ethers.provider.getSigner(address)
+    );
 
-    return await contract.personalize(signatureId, signature, tokenId, personalizationMask);
+    return await contract.personalize(
+      signatureId,
+      signature,
+      tokenId,
+      personalizationMask
+    );
   };
 }

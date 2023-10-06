@@ -20,10 +20,8 @@ async function main() {
   const collections: string[] = await contract.getCollections();
   const factoryOwner = await contract.owner();
 
-  const aliases: string[] = (
-    await contract.getBeaconAliases()
-  ).map((bytes32Value: string) =>
-    ethers.utils.parseBytes32String(bytes32Value)
+  const aliases: string[] = (await contract.getBeaconAliases()).map(
+    (bytes32Value: string) => ethers.utils.parseBytes32String(bytes32Value)
   );
 
   console.log('Factory owner:', factoryOwner);

@@ -2,54 +2,57 @@ import {expect, assert} from 'chai';
 import {ethers} from 'hardhat';
 import {ZeroAddress} from 'ethers';
 import {preSetupAvatar} from './raffleold.fixtures';
-import { getTestingAccounts, setupMockERC20 } from '../fixtures';
+import {getTestingAccounts, setupMockERC20} from '../fixtures';
 
-// ======================= collection differences ======================= 
+// ======================= collection differences =======================
 
 const contractName = 'PlayboyPartyPeople';
 const collectionSymbol = 'PPP';
 const COLLECTION_MAX_SUPPLY = 1969;
 
-// ====================================================================== 
+// ======================================================================
 
 const BATCH_SIZE = 50;
 
 async function setupAvatar() {
-  const {
-    treasury,
-    raffleSignWallet,
-    trustedForwarder,
-  } = await getTestingAccounts();
-    
+  const {treasury, raffleSignWallet, trustedForwarder} =
+    await getTestingAccounts();
+
   const initializationArgs = [
-      `https://contracts-demo.sandbox.game/${contractName}-unrevealed/`,
-      'Playboy Party People',
-      collectionSymbol,
-      treasury.address,
-      raffleSignWallet.address,
-      trustedForwarder.address
-    ];
-  return await preSetupAvatar(contractName, COLLECTION_MAX_SUPPLY, initializationArgs);
+    `https://contracts-demo.sandbox.game/${contractName}-unrevealed/`,
+    'Playboy Party People',
+    collectionSymbol,
+    treasury.address,
+    raffleSignWallet.address,
+    trustedForwarder.address,
+  ];
+  return await preSetupAvatar(
+    contractName,
+    COLLECTION_MAX_SUPPLY,
+    initializationArgs
+  );
 }
 
 /// eslint-disable-next-line mocha/no-skipped-tests
 describe(contractName, function () {
-
   it('allowedToExecuteMint works (plus invalidations)', async function () {
     const {
       collectionContractAsOwner: collectionContract,
       collectionContractAsRandomWallet,
     } = await setupAvatar();
     const {deployer} = await getTestingAccounts();
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setAllowedExecuteMint // // // // // // // // // // // // // // // // // // // // // //
-    const oldAllowedToExecuteMint = await collectionContract.allowedToExecuteMint();
+    const oldAllowedToExecuteMint =
+      await collectionContract.allowedToExecuteMint();
     const randomTokenContract = await setupMockERC20();
     const randomToken = await randomTokenContract.getAddress();
     await collectionContract.setAllowedExecuteMint(randomToken);
-    const newAllowedToExecuteMint = await collectionContract.allowedToExecuteMint();
+    const newAllowedToExecuteMint =
+      await collectionContract.allowedToExecuteMint();
 
     assert.notEqual(oldAllowedToExecuteMint, newAllowedToExecuteMint);
     assert.equal(randomToken, newAllowedToExecuteMint);
@@ -60,9 +63,7 @@ describe(contractName, function () {
 
     await expect(
       collectionContract.setAllowedExecuteMint(ZeroAddress)
-    ).to.be.revertedWith(
-      'Address is zero address'
-    );
+    ).to.be.revertedWith('Address is zero address');
   });
 
   it('setTreasury works (plus invalidations)', async function () {
@@ -71,8 +72,9 @@ describe(contractName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setSandOwnerAddress // // // // // // // // // // // // // // // // // // // // // //
     const oldSandOwner = await contract.sandOwner();
@@ -82,13 +84,13 @@ describe(contractName, function () {
     assert.notEqual(oldSandOwner, newTreasury);
     assert.equal(randomAddress, newTreasury);
 
-    await expect(collectionContractAsRandomWallet.setSandOwnerAddress(randomAddress)).to.be.revertedWith(
-      'Ownable: caller is not the owner'
-    );
+    await expect(
+      collectionContractAsRandomWallet.setSandOwnerAddress(randomAddress)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    await expect(contract.setSandOwnerAddress(ethers.ZeroAddress)).to.be.revertedWith(
-      'Owner is zero address'
-    );
+    await expect(
+      contract.setSandOwnerAddress(ethers.ZeroAddress)
+    ).to.be.revertedWith('Owner is zero address');
   });
 
   it('setSignAddress works (plus invalidations)', async function () {
@@ -97,8 +99,9 @@ describe(contractName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setSignAddress // // // // // // // // // // // // // // // // // // // // // //
     const oldSignAddress = await contract.signAddress();
@@ -112,9 +115,9 @@ describe(contractName, function () {
       collectionContractAsRandomWallet.setSignAddress(randomAddress)
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    await expect(contract.setSignAddress(ethers.ZeroAddress)).to.be.revertedWith(
-      'Sign address is zero address'
-    );
+    await expect(
+      contract.setSignAddress(ethers.ZeroAddress)
+    ).to.be.revertedWith('Sign address is zero address');
   });
 
   it('setBaseURI works (plus invalidations)', async function () {
@@ -123,8 +126,9 @@ describe(contractName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const randomAddress = ethers.Wallet.createRandom().connect(ethers.provider)
-      .address;
+    const randomAddress = ethers.Wallet.createRandom().connect(
+      ethers.provider
+    ).address;
 
     // setBaseURI // // // // // // // // // // // // // // // // // // // // // //
     const oldBaseURI = await contract.baseTokenURI();
@@ -135,9 +139,9 @@ describe(contractName, function () {
     assert.notEqual(oldBaseURI, newBaseURI);
     assert.equal(toSetNewURI, newBaseURI);
 
-    await expect(collectionContractAsRandomWallet.setBaseURI(randomAddress)).to.be.revertedWith(
-      'Ownable: caller is not the owner'
-    );
+    await expect(
+      collectionContractAsRandomWallet.setBaseURI(randomAddress)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
     await expect(contract.setBaseURI('')).to.be.revertedWith(
       'baseURI is not set'
@@ -254,11 +258,7 @@ describe(contractName, function () {
     let totalMinted = 0;
     let signatureId = 0;
     for (const waveSize of waves) {
-      await setupWave(
-        waveSize,
-        waveSize,
-        nftPriceInSand.toString()
-      );
+      await setupWave(waveSize, waveSize, nftPriceInSand.toString());
       const mintingQuantities = getSupplySplittedInBatches(
         waveSize,
         BATCH_SIZE
@@ -364,9 +364,7 @@ describe(contractName, function () {
       personalizationMask
     );
 
-    const personalizationOf = await contract.personalizationOf(
-      tokenId
-    );
+    const personalizationOf = await contract.personalizationOf(tokenId);
 
     assert.equal(personalizationOf, personalizationMask);
   });
@@ -543,10 +541,15 @@ describe(contractName, function () {
     );
 
     const contractAsDeployer = contract.connect(deployer);
-    
-    const personalizeTx = await contractAsDeployer.personalize(1, signature, tokenId, personalizationMask);
+
+    const personalizeTx = await contractAsDeployer.personalize(
+      1,
+      signature,
+      tokenId,
+      personalizationMask
+    );
     await personalizeTx.wait();
-    
+
     await expect(
       contractAsDeployer.personalize(1, signature, tokenId, personalizationMask)
     ).to.be.revertedWith('SignatureId already used');

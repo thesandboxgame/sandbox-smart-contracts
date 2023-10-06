@@ -1,7 +1,6 @@
-import { expect, assert } from 'chai';
-import { ethers, artifacts } from 'hardhat';
-import { getTestingAccounts } from '../fixtures';
-
+import {expect, assert} from 'chai';
+import {ethers, artifacts} from 'hardhat';
+import {getTestingAccounts} from '../fixtures';
 
 import {
   setupFactory,
@@ -13,7 +12,7 @@ import {
 } from './CollectionFactory.fixtures';
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe("CollectionFactory", function () {
+describe('CollectionFactory', function () {
   it('deployBeacon works accordingly', async function () {
     const {
       factoryContractAsOwner,
@@ -70,15 +69,15 @@ describe("CollectionFactory", function () {
       factoryContractAsOwner,
       factoryContractAsRandomWallet,
       mockImplementationContract,
-    } = await setupFactory();    
+    } = await setupFactory();
     const beaconContract = await createBeaconWithImplementation(
       await mockImplementationContract.getAddress(),
       true
     );
-    const beaconContractAddress = await beaconContract.getAddress();    
+    const beaconContractAddress = await beaconContract.getAddress();
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
     const secondaryAlias = ethers.encodeBytes32String('secondary-avatar');
-    
+
     // only owner can call the function
     await expect(
       factoryContractAsRandomWallet.addBeacon(
@@ -86,7 +85,7 @@ describe("CollectionFactory", function () {
         implementationAlias
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
-    
+
     // alias must be a value
     const emptyAlias = ethers.encodeBytes32String('');
     await expect(
@@ -120,7 +119,9 @@ describe("CollectionFactory", function () {
     );
 
     // transfer ownership to beacon
-    await beaconContract.transferOwnership(await factoryContractAsOwner.getAddress());
+    await beaconContract.transferOwnership(
+      await factoryContractAsOwner.getAddress()
+    );
 
     // successful beacon addition
     await factoryContractAsOwner.addBeacon(
@@ -149,8 +150,10 @@ describe("CollectionFactory", function () {
       mockUpgradableV2Contract,
     } = await setupFactory();
 
-    const mockUpgradableContractAddress = await mockUpgradableContract.getAddress();
-    const mockUpgradableV2ContractAddress = await mockUpgradableV2Contract.getAddress();
+    const mockUpgradableContractAddress =
+      await mockUpgradableContract.getAddress();
+    const mockUpgradableV2ContractAddress =
+      await mockUpgradableV2Contract.getAddress();
 
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
 
@@ -174,9 +177,7 @@ describe("CollectionFactory", function () {
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    const nonExistingAlias = ethers.encodeBytes32String(
-      'nonExistingAlias'
-    );
+    const nonExistingAlias = ethers.encodeBytes32String('nonExistingAlias');
 
     await expect(
       factoryContractAsOwner.updateBeaconImplementation(
@@ -209,9 +210,10 @@ describe("CollectionFactory", function () {
 
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
 
-    const mockUpgradableContractAddress = await mockUpgradableContract.getAddress();
-    const mockUpgradableV2ContractAddress = await mockUpgradableV2Contract.getAddress();
-
+    const mockUpgradableContractAddress =
+      await mockUpgradableContract.getAddress();
+    const mockUpgradableV2ContractAddress =
+      await mockUpgradableV2Contract.getAddress();
 
     const beaconAddress = await deployBeacon(
       factoryContractAsOwner,
@@ -233,9 +235,7 @@ describe("CollectionFactory", function () {
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    const nonExistingAlias = ethers.encodeBytes32String(
-      'nonExistingAlias'
-    );
+    const nonExistingAlias = ethers.encodeBytes32String('nonExistingAlias');
 
     await expect(
       factoryContractAsOwner.transferBeacon(
@@ -246,7 +246,10 @@ describe("CollectionFactory", function () {
 
     // new beacon cannot be 0 address
     await expect(
-      factoryContractAsOwner.transferBeacon(implementationAlias, ethers.ZeroAddress)
+      factoryContractAsOwner.transferBeacon(
+        implementationAlias,
+        ethers.ZeroAddress
+      )
     ).to.be.revertedWith('Ownable: new owner is the zero address');
 
     // sanity check beacon owner is address
@@ -254,7 +257,8 @@ describe("CollectionFactory", function () {
     assert.equal(oldOwnership, await factoryContractAsOwner.getAddress());
 
     // initial alias list
-    const originalAliases: string[] = await factoryContractAsRandomWallet.getBeaconAliases();
+    const originalAliases: string[] =
+      await factoryContractAsRandomWallet.getBeaconAliases();
     assert.equal(originalAliases.includes(implementationAlias), true);
 
     // normal execution
@@ -267,9 +271,10 @@ describe("CollectionFactory", function () {
     assert.equal(await beaconAddress.owner(), randomAddress);
 
     // check that events were sent
-    const beaconOwnershipChangedEvent = await factoryContractAsOwner.queryFilter(
-      factoryContractAsOwner.filters.BeaconOwnershipChanged()
-    );
+    const beaconOwnershipChangedEvent =
+      await factoryContractAsOwner.queryFilter(
+        factoryContractAsOwner.filters.BeaconOwnershipChanged()
+      );
     assert.equal(beaconOwnershipChangedEvent.length, 1);
 
     const beaconRemovedEvent = await factoryContractAsOwner.queryFilter(
@@ -278,7 +283,8 @@ describe("CollectionFactory", function () {
     assert.equal(beaconRemovedEvent.length, 1);
 
     // check alias was removed
-    const aliasesNow: string[] = await factoryContractAsRandomWallet.getBeaconAliases();
+    const aliasesNow: string[] =
+      await factoryContractAsRandomWallet.getBeaconAliases();
     assert.equal(aliasesNow.includes(implementationAlias), false);
   });
 
@@ -309,9 +315,7 @@ describe("CollectionFactory", function () {
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
-    const nonExistingAlias = ethers.encodeBytes32String(
-      'nonExistingAlias'
-    );
+    const nonExistingAlias = ethers.encodeBytes32String('nonExistingAlias');
 
     await expect(
       factoryContractAsOwner.deployCollection(
@@ -321,8 +325,10 @@ describe("CollectionFactory", function () {
     ).to.be.revertedWith('CollectionFactory: beacon is not tracked');
 
     // sanity checks
-    const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-    const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const beforeCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
+    const beforeCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
     assert.equal(
       beforeCollections.length,
       0,
@@ -357,7 +363,8 @@ describe("CollectionFactory", function () {
     const collectionAddress = collectionAddedEvents[0].args?.[1];
 
     // check internal accounting has collection tracked
-    const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const afterCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
     assert.equal(
       afterCollections.length,
       1,
@@ -368,7 +375,8 @@ describe("CollectionFactory", function () {
       'address not in collection set'
     );
 
-    const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
+    const afterCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
     assert.equal(
       afterCollectionCount,
       1n,
@@ -385,7 +393,8 @@ describe("CollectionFactory", function () {
       mockUpgradableV2Contract,
     } = await setupFactory();
 
-    const mockUpgradableContractAddress = await mockUpgradableContract.getAddress();
+    const mockUpgradableContractAddress =
+      await mockUpgradableContract.getAddress();
 
     const emptyInitializationArgs = '0x';
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
@@ -435,9 +444,7 @@ describe("CollectionFactory", function () {
       'CollectionFactory: caller is not collection or factory owner'
     );
 
-    const nonExistingAlias = ethers.encodeBytes32String(
-      'nonExistingAlias'
-    );
+    const nonExistingAlias = ethers.encodeBytes32String('nonExistingAlias');
 
     await expect(
       factoryContractAsRandomWallet.updateCollection(
@@ -486,7 +493,8 @@ describe("CollectionFactory", function () {
       mockUpgradableContract,
     } = await setupFactory();
 
-    const mockUpgradableContractAddress = await mockUpgradableContract.getAddress();
+    const mockUpgradableContractAddress =
+      await mockUpgradableContract.getAddress();
 
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
     const initializationArgs = await getMockInitializationArgs(
@@ -517,15 +525,20 @@ describe("CollectionFactory", function () {
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
     await expect(
-      factoryContractAsOwner.transferCollections(collections, ethers.ZeroAddress)
+      factoryContractAsOwner.transferCollections(
+        collections,
+        ethers.ZeroAddress
+      )
     ).to.be.revertedWith('ERC1967: new admin is the zero address');
 
     // sanity checks
     const collectionContract = await collectionProxyAsContract(
       collectionAddress
     );
-    const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-    const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const beforeCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
+    const beforeCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
     assert.isTrue(
       beforeCollections.includes(collectionAddress),
       'beforeCollections includes sanity check failed'
@@ -560,15 +573,13 @@ describe("CollectionFactory", function () {
     );
 
     // check that internal accounting changed
-    const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-    const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const afterCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
+    const afterCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
 
     assert.equal(afterCollections.length, 0, 'afterCollections check failed');
-    assert.equal(
-      afterCollectionCount,
-      0n,
-      'afterCollectionCount check failed'
-    );
+    assert.equal(afterCollectionCount, 0n, 'afterCollectionCount check failed');
 
     // check events were sent
     const collectionRemovedEvents = await factoryContractAsOwner.queryFilter(
@@ -580,9 +591,10 @@ describe("CollectionFactory", function () {
       'collectionRemovedEvents check event failed'
     );
 
-    const collectionProxyAdminChangedEvents = await factoryContractAsOwner.queryFilter(
-      factoryContractAsOwner.filters.CollectionProxyAdminChanged()
-    );
+    const collectionProxyAdminChangedEvents =
+      await factoryContractAsOwner.queryFilter(
+        factoryContractAsOwner.filters.CollectionProxyAdminChanged()
+      );
     assert.equal(
       collectionProxyAdminChangedEvents.length,
       1,
@@ -604,7 +616,8 @@ describe("CollectionFactory", function () {
       mockUpgradableContract,
     } = await setupFactory();
 
-    const mockUpgradableContractAddress = await mockUpgradableContract.getAddress();
+    const mockUpgradableContractAddress =
+      await mockUpgradableContract.getAddress();
 
     const implementationAlias = ethers.encodeBytes32String('main-avatar');
     const initializationArgs = await getMockInitializationArgs(
@@ -619,9 +632,10 @@ describe("CollectionFactory", function () {
       implementationAlias,
       initializationArgs
     );
-    const collectionAddedEventsBefore = await factoryContractAsOwner.queryFilter(
-      factoryContractAsOwner.filters.CollectionAdded()
-    );
+    const collectionAddedEventsBefore =
+      await factoryContractAsOwner.queryFilter(
+        factoryContractAsOwner.filters.CollectionAdded()
+      );
     const collectionAddress = collectionAddedEventsBefore[0].args?.[1];
     const collections: string[] = [collectionAddress];
 
@@ -689,8 +703,10 @@ describe("CollectionFactory", function () {
     );
 
     // sanity checks
-    const beforeCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-    const beforeCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const beforeCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
+    const beforeCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
     assert.equal(
       beforeCollections.length,
       0,
@@ -716,8 +732,10 @@ describe("CollectionFactory", function () {
     );
 
     // check that internal accounting changed
-    const afterCollectionCount = await factoryContractAsRandomWallet.collectionCount();
-    const afterCollections: string[] = await factoryContractAsRandomWallet.getCollections();
+    const afterCollectionCount =
+      await factoryContractAsRandomWallet.collectionCount();
+    const afterCollections: string[] =
+      await factoryContractAsRandomWallet.getCollections();
 
     assert.isTrue(
       afterCollections.includes(collectionAddress),
