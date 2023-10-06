@@ -37,14 +37,15 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param  orderKeyHash order hash
     event Cancel(bytes32 indexed orderKeyHash, LibOrder.Order order);
 
-    /*     /// @notice event when orders match
-    /// @param from _msgSender
+    /// @notice event when orders match
+    /// @param from _msgSender or operator if used with approve and call
     /// @param leftHash left order hash
     /// @param rightHash right order hash
-    /// @param newLeftFill fill for left order
-    /// @param newRightFill fill for right order
+    /// @param newFill fill for left order
     /// @param totalFillLeft total fill left
-    /// @param totalFillRight total fill right */
+    /// @param totalFillRight total fill right
+    /// @param valueLeft asset value for left order
+    /// @param valueRight asset value for right order
     event Match(
         address indexed from,
         bytes32 leftHash,
@@ -78,9 +79,9 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
     /// @dev require msg sender to be order maker and salt different from 0
     function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) internal {
-        require(order.salt != 0, "ExchangeCore: 0 salt can't be used");
+        require(order.salt != 0, "0 salt can't be used");
         bytes32 _orderKeyHash = LibOrder.hashKey(order);
-        require(_orderKeyHash == orderKeyHash, "ExchangeCore: Invalid orderHash");
+        require(_orderKeyHash == orderKeyHash, "Invalid orderHash");
         fills[orderKeyHash] = UINT256_MAX;
         emit Cancel(orderKeyHash, order);
     }
