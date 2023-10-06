@@ -84,6 +84,24 @@ async function deploy() {
   );
   await ERC721WithRoyalty.waitForDeployment();
 
+  const TestERC1155WithRoyaltyFactory = await ethers.getContractFactory(
+    'TestERC1155WithRoyaltyV2981'
+  );
+  const ERC1155WithRoyalty = await upgrades.deployProxy(
+    TestERC1155WithRoyaltyFactory,
+    [],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await ERC1155WithRoyalty.waitForDeployment();
+
+  const TestRoyaltyInfoFactory = await ethers.getContractFactory(
+    'TestRoyaltyInfo'
+  );
+  const TestRoyaltyInfo = await TestRoyaltyInfoFactory.deploy();
+  await TestRoyaltyInfo.waitForDeployment();
+
   const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
   const ERC20Contract = await ERC20ContractFactory.deploy();
   await ERC20Contract.waitForDeployment();
@@ -136,6 +154,8 @@ async function deploy() {
     RoyaltiesRegistryAsUser,
     ERC721WithRoyaltyV2981,
     ERC721WithRoyalty,
+    ERC1155WithRoyalty,
+    TestRoyaltyInfo,
     RoyaltiesProvider,
     ERC1271Contract,
     deployer,

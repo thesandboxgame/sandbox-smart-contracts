@@ -308,6 +308,148 @@ describe('RoyaltiesRegistry.sol', function () {
     ).to.be.deep.eq([user1.address, 1n]);
   });
 
+  it('should getRoyalties for token with royaltiesType 2 when provider address does not implement getRoyalties', async function () {
+    const {
+      RoyaltiesRegistryAsDeployer,
+      RoyaltiesRegistryAsUser,
+      ERC721WithRoyaltyV2981,
+      ERC20Contract: ProviderContract,
+    } = await loadFixture(deployFixtures);
+    await loadFixture(deployFixtures);
+
+    await RoyaltiesRegistryAsDeployer.setProviderByToken(
+      await ERC721WithRoyaltyV2981.getAddress(),
+      await ProviderContract.getAddress()
+    );
+
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
+      await ERC721WithRoyaltyV2981.getAddress(),
+      2
+    );
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyaltiesType(
+        await ERC721WithRoyaltyV2981.getAddress()
+      )
+    ).to.be.equal(2);
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyalties.staticCall(
+        await ERC721WithRoyaltyV2981.getAddress(),
+        1
+      )
+    ).to.be.deep.eq([]);
+  });
+
+  it('should getRoyalties for token with royaltiesType 3 when token address do not implements royaltyInfo', async function () {
+    const {
+      RoyaltiesRegistryAsDeployer,
+      RoyaltiesRegistryAsUser,
+      ERC20Contract,
+    } = await loadFixture(deployFixtures);
+    await loadFixture(deployFixtures);
+
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
+      await ERC20Contract.getAddress(),
+      3
+    );
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyaltiesType(
+        await ERC20Contract.getAddress()
+      )
+    ).to.be.equal(3);
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyalties.staticCall(
+        await ERC20Contract.getAddress(),
+        1
+      )
+    ).to.be.deep.eq([]);
+  });
+
+  it('should getRoyalties for token with royaltiesType 3 that only implements royaltyInfo', async function () {
+    const {
+      RoyaltiesRegistryAsDeployer,
+      RoyaltiesRegistryAsUser,
+      TestRoyaltyInfo,
+    } = await loadFixture(deployFixtures);
+    await loadFixture(deployFixtures);
+
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
+      await TestRoyaltyInfo.getAddress(),
+      3
+    );
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyaltiesType(
+        await TestRoyaltyInfo.getAddress()
+      )
+    ).to.be.equal(3);
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyalties.staticCall(
+        await TestRoyaltyInfo.getAddress(),
+        1
+      )
+    ).to.be.deep.eq([]);
+  });
+
+  it('should not getRoyalties for token with royaltiesType 3 with partial support when royalties exceed 100%', async function () {
+    const {
+      RoyaltiesRegistryAsDeployer,
+      RoyaltiesRegistryAsUser,
+      ERC1155WithRoyalty,
+    } = await loadFixture(deployFixtures);
+    await loadFixture(deployFixtures);
+
+    await ERC1155WithRoyalty.setRoyalties(1000000);
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
+      await ERC1155WithRoyalty.getAddress(),
+      3
+    );
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyaltiesType(
+        await ERC1155WithRoyalty.getAddress()
+      )
+    ).to.be.equal(3);
+
+    await expect(
+      RoyaltiesRegistryAsUser.getRoyalties.staticCall(
+        await ERC1155WithRoyalty.getAddress(),
+        1
+      )
+    ).to.be.revertedWith('Royalties 2981 exceeds 100%');
+  });
+
+  it('should getRoyalties for token with royaltiesType 3 with partial support', async function () {
+    const {
+      RoyaltiesRegistryAsDeployer,
+      RoyaltiesRegistryAsUser,
+      ERC1155WithRoyalty,
+    } = await loadFixture(deployFixtures);
+    await loadFixture(deployFixtures);
+
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
+      await ERC1155WithRoyalty.getAddress(),
+      3
+    );
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyaltiesType(
+        await ERC1155WithRoyalty.getAddress()
+      )
+    ).to.be.equal(3);
+
+    expect(
+      await RoyaltiesRegistryAsUser.getRoyalties.staticCall(
+        await ERC1155WithRoyalty.getAddress(),
+        1
+      )
+    ).to.be.deep.eq([]);
+  });
+
   it('should getRoyalties for token with royaltiesType 4', async function () {
     const {
       RoyaltiesRegistryAsUser,
