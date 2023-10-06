@@ -60,7 +60,7 @@ async function createSetupWave(contract: AvatarCollection) {
     waveMaxTokensToBuy: number,
     waveSingleTokenPrice: string
   ) => {
-    const {raffleSignWallet, deployer} = await getTestingAccounts();
+    const {raffleSignWallet} = await getTestingAccounts();
 
     await contract.setSignAddress(raffleSignWallet);
 
