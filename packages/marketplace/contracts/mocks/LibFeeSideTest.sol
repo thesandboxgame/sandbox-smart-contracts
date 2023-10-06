@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 
-// TODO: MAKE THE TESTS!!!
 contract LibFeeSideTest {
     function getFeeSideTest(
         LibAsset.AssetClassType maker,

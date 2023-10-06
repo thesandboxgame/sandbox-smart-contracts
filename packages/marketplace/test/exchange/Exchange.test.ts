@@ -1646,7 +1646,6 @@ describe('Exchange.sol', function () {
     ).to.be.reverted;
   });
   describe('batching', function () {
-    // TODO: Add a lot more tests on batches.
     it('should be able to buy two tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
@@ -2247,7 +2246,4 @@ describe('Exchange.sol', function () {
       ]);
     });
   });
-  // TODO
-  // describe("test match from", function () {});
-  // describe("test on pause", function () {});
 });

@@ -1,7 +1,6 @@
 import {ethers, upgrades} from 'hardhat';
 import {ZeroAddress} from 'ethers';
 
-// TODO: Split fixtures so we use only what is needed!!!
 async function deploy() {
   const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
