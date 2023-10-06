@@ -285,7 +285,8 @@ const compilers = [
   '0.7.6',
   '0.6.5',
   '0.5.9',
-].map((version) => ({
+]
+  .map((version) => ({
     version,
     settings: {
       optimizer: {
