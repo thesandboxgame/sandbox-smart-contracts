@@ -1,11 +1,6 @@
 import {ethers, artifacts} from 'hardhat';
 import {assert} from 'chai';
-import {
-  BaseContract,
-  Contract,
-  ContractTransactionResponse,
-  parseUnits,
-} from 'ethers';
+import {BaseContract, Contract, ContractTransactionResponse} from 'ethers';
 import {CollectionFactory} from '../../../typechain-types/contracts/proxy/CollectionFactory';
 import {UpgradeableBeacon} from '../../../typechain-types/@openzeppelin/contracts-0.8.15/proxy/beacon';
 import {deployCollectionFactory} from '../factory';

@@ -15,6 +15,7 @@ import {setupRaffleContract} from '../raffleSetup';
 export const preSetupAvatar = async (
   contractName: string,
   collectionMaxSupply: number,
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   initializationArgs: Array<any>
 ) => {
   const {

@@ -7,6 +7,7 @@ import {GenericRaffle} from '../../typechain-types/contracts/raffleold/contracts
 export async function setupRaffleContract(
   contractName: string,
   collectionMaxSupply: number,
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   initializationArgs: Array<any>
 ): Promise<{
   collectionContract: GenericRaffle;

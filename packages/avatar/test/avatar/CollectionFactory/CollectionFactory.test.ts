@@ -390,7 +390,6 @@ describe('CollectionFactory', function () {
       factoryContractAsOwner,
       factoryContractAsRandomWallet,
       mockUpgradableContract,
-      mockUpgradableV2Contract,
     } = await setupFactory();
 
     const mockUpgradableContractAddress =

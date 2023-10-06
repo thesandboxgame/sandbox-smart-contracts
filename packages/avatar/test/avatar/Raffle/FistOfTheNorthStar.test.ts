@@ -48,7 +48,6 @@ describe(contractName, function () {
       collectionContractAsOwner: collectionContract,
       collectionContractAsRandomWallet,
     } = await setupAvatar();
-    const {deployer} = await getTestingAccounts();
     const randomAddress = ethers.Wallet.createRandom().connect(
       ethers.provider
     ).address;
@@ -207,7 +206,6 @@ describe(contractName, function () {
       COLLECTION_MAX_SUPPLY,
       BATCH_SIZE
     );
-    let totalMinted = 0;
     for (const i in mintingQuantities) {
       const index = parseInt(i);
       const mintingBatch = mintingQuantities[index];
@@ -236,7 +234,6 @@ describe(contractName, function () {
       );
       assert.equal(transferEvents.length, mintingBatch);
 
-      totalMinted += mintingBatch;
       for (const event of transferEvents) {
         assert.exists(event.args);
         const tokenId = event.args?.tokenId.toString();
@@ -263,7 +260,6 @@ describe(contractName, function () {
 
     const waves = getSupplySplittedIn3Waves();
     const tokens = [];
-    let totalMinted = 0;
     let signatureId = 0;
     for (const waveSize of waves) {
       await setupWave(waveSize, waveSize, nftPriceInSand.toString());
@@ -304,7 +300,6 @@ describe(contractName, function () {
         );
         assert.equal(transferEvents.length, mintingBatch);
 
-        totalMinted += mintingBatch;
         for (const event of transferEvents) {
           assert.exists(event.args);
           const tokenId = event.args?.tokenId.toString();

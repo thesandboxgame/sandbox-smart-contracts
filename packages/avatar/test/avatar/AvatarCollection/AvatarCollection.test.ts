@@ -257,7 +257,6 @@ describe(collectionName, function () {
       collectionContractAsRandomWallet,
     } = await setupAvatar();
 
-    const {deployer} = await getTestingAccounts();
     const randomAddress = ethers.Wallet.createRandom().connect(
       ethers.provider
     ).address;
@@ -926,7 +925,7 @@ describe(collectionName, function () {
     const {collectionContract, collectionContractAsOwner: contract} =
       await setupAvatar();
 
-    const {deployer, raffleSignWallet} = await getTestingAccounts();
+    const {raffleSignWallet} = await getTestingAccounts();
 
     const toSetNewURI = 'http://test.test';
 
