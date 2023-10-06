@@ -39,7 +39,7 @@ contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
     /// @param partners boolean indicating that partner tokens are accepted
     /// @param open boolean indicating that all tokens are accepted
     /// @param erc20List boolean indicating that there is a restriction for ERC20 tokens
-    event PermissionSetted(bool tsbOnly, bool partners, bool open, bool erc20List);
+    event PermissionSet(bool tsbOnly, bool partners, bool open, bool erc20List);
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -63,10 +63,7 @@ contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
     ) internal initializer {
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        tsbOnly = newTsbOnly;
-        partners = newPartners;
-        open = newOpen;
-        erc20List = newErc20List;
+        _setPermissions(newTsbOnly, newPartners, newOpen, newErc20List);
     }
 
     /// @notice setting permissions for tokens
@@ -80,12 +77,7 @@ contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
         bool newOpen,
         bool newErc20List
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        tsbOnly = newTsbOnly;
-        partners = newPartners;
-        open = newOpen;
-        erc20List = newErc20List;
-
-        emit PermissionSetted(tsbOnly, partners, open, erc20List);
+        _setPermissions(newTsbOnly, newPartners, newOpen, newErc20List);
     }
 
     /// @notice add token to tsb list
@@ -122,5 +114,19 @@ contract WhiteList is IWhiteList, AccessControlEnumerableUpgradeable {
     /// @param tokenAddress token address
     function removeERC20(address tokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(ERC20_ROLE, tokenAddress);
+    }
+
+    /// @notice setting permissions for tokens
+    /// @param newTsbOnly allows orders with The Sandbox token
+    /// @param newPartners allows orders with partner token
+    /// @param newOpen allows orders with any token
+    /// @param newErc20List allows to pay orders with only whitelisted token
+    function _setPermissions(bool newTsbOnly, bool newPartners, bool newOpen, bool newErc20List) internal {
+        tsbOnly = newTsbOnly;
+        partners = newPartners;
+        open = newOpen;
+        erc20List = newErc20List;
+
+        emit PermissionSet(tsbOnly, partners, open, erc20List);
     }
 }
