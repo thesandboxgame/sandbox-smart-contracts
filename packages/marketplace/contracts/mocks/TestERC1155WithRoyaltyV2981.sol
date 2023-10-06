@@ -18,6 +18,8 @@ contract TestERC1155WithRoyaltyV2981 is
 {
     uint256 internal constant BASIS_POINTS = 10000;
 
+    bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
+
     function initialize() public initializer {
         __Ownable_init();
     }
@@ -32,6 +34,7 @@ contract TestERC1155WithRoyaltyV2981 is
     ) public view virtual override(ERC1155Upgradeable, Royalties2981TestImpl) returns (bool) {
         return
             interfaceId == LibRoyalties2981._INTERFACE_ID_ROYALTIES ||
+            interfaceId == INTERFACE_ID_GET_RECIPIENTS ||
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             Royalties2981TestImpl.supportsInterface(interfaceId);
     }
