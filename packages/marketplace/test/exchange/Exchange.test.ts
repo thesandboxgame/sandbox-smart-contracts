@@ -2943,7 +2943,7 @@ describe('Exchange.sol', function () {
       await ERC20Contract.balanceOf(defaultFeeReceiver.address)
     ).to.be.equal(2500000000); // 250 * 10000000000 / 10000 = 2500000000
   });
- 
+
   it('should require the message sender to be the maker for a zero-salt left order', async function () {
     const {
       ExchangeContractAsUser,
