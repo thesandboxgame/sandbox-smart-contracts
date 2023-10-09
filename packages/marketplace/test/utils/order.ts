@@ -30,7 +30,7 @@ export type Order = {
 };
 
 export const OrderDefault = async (
-  maker: Signer,
+  maker: {getAddress: () => Promise<string>},
   makeAsset: Asset,
   taker: Signer | ZeroAddress,
   takeAsset: Asset,
@@ -40,7 +40,8 @@ export const OrderDefault = async (
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
-  taker: taker === ZeroAddress ? ZeroAddress : await taker.getAddress(),
+  taker:
+    taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
   salt,
   start,
