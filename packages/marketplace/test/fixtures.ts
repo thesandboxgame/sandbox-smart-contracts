@@ -107,11 +107,9 @@ async function deploy() {
   );
   await TestERC721WithRoyaltyWithoutIROYALTYUGC.waitForDeployment();
 
-  const TestRoyaltyInfoFactory = await ethers.getContractFactory(
-    'TestRoyaltyInfo'
-  );
-  const TestRoyaltyInfo = await TestRoyaltyInfoFactory.deploy();
-  await TestRoyaltyInfo.waitForDeployment();
+  const RoyaltyInfoFactory = await ethers.getContractFactory('RoyaltyInfoMock');
+  const RoyaltyInfo = await RoyaltyInfoFactory.deploy();
+  await RoyaltyInfo.waitForDeployment();
 
   const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
   const ERC20Contract = await ERC20ContractFactory.deploy();
@@ -167,7 +165,7 @@ async function deploy() {
     ERC721WithRoyalty,
     ERC1155WithRoyalty,
     TestERC721WithRoyaltyWithoutIROYALTYUGC,
-    TestRoyaltyInfo,
+    RoyaltyInfo,
     RoyaltiesProvider,
     ERC1271Contract,
     deployer,

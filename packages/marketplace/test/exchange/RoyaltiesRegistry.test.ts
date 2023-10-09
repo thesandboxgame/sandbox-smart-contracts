@@ -369,27 +369,24 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 3 that only implements royaltyInfo', async function () {
-    const {
-      RoyaltiesRegistryAsDeployer,
-      RoyaltiesRegistryAsUser,
-      TestRoyaltyInfo,
-    } = await loadFixture(deployFixtures);
+    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser, RoyaltyInfo} =
+      await loadFixture(deployFixtures);
     await loadFixture(deployFixtures);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
-      await TestRoyaltyInfo.getAddress(),
+      await RoyaltyInfo.getAddress(),
       3
     );
 
     expect(
       await RoyaltiesRegistryAsUser.getRoyaltiesType(
-        await TestRoyaltyInfo.getAddress()
+        await RoyaltyInfo.getAddress()
       )
     ).to.be.equal(3);
 
     expect(
       await RoyaltiesRegistryAsUser.getRoyalties.staticCall(
-        await TestRoyaltyInfo.getAddress(),
+        await RoyaltyInfo.getAddress(),
         1
       )
     ).to.be.deep.eq([]);
