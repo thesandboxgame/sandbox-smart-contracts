@@ -28,6 +28,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     IOrderValidator public orderValidator;
 
     uint256 private constant UINT256_MAX = type(uint256).max;
+    uint256 private TRANSFER_MAX;
 
     /// @notice stores the fills for orders
     /// @return order fill
@@ -58,12 +59,18 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     );
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
+    /// @notice event for setting new maximum for transfers
+    /// @param newMaxTransferValue new maximum 
+    event MaxTransferSet(uint256 newMaxTransferValue);
+
     /// @notice initializer for ExchangeCore
     /// @param newOrderValidatorAddress new OrderValidator contract address
     /// @dev initialize permissions for native token exchange
     // solhint-disable-next-line func-name-mixedcase
-    function __ExchangeCoreInitialize(IOrderValidator newOrderValidatorAddress) internal onlyInitializing {
+    function __ExchangeCoreInitialize(IOrderValidator newOrderValidatorAddress, uint256 maxTransfer) internal onlyInitializing {
         _setOrderValidatorContract(newOrderValidatorAddress);
+        TRANSFER_MAX = maxTransfer;
+
     }
 
     /// @notice set OrderValidator address
@@ -72,6 +79,13 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         require(address(contractAddress) != address(0), "invalid order validator");
         orderValidator = contractAddress;
         emit OrderValidatorSet(contractAddress);
+    }
+
+    /// @notice setter for max transfer value
+    /// @param maxTransfer new vaue of max transfers
+    function _setMaxTransferValue(uint256 maxTransfer) internal {
+        MAX_TRANSFER = maxTransfer;
+        emit MaxTransferSet(MAX_TRANSFER);
     }
 
     /// @notice cancel order
@@ -92,7 +106,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0, "invalid exchange match");
+        require(len > 0 && len < TRANSFER_MAX, "invalid exchange match quantities");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);

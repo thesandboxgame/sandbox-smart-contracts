@@ -1957,7 +1957,7 @@ describe('Exchange.sol', function () {
       }
     });
 
-    it('should be able to buy 150 tokens from different orders in one txs', async function () {
+    it('should not be able to buy 150 tokens from different orders in one txs, max transfers = 150', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -2019,19 +2019,11 @@ describe('Exchange.sol', function () {
         rightOrders.push(rightorder);
       }
 
-      const tx = await ExchangeContractAsUser.matchOrders(rightOrders);
+      await expect(
+        ExchangeContractAsUser.matchOrders(rightOrders)
+        
+      ).to.be.revertedWith('invalid exchange match quantities');
 
-      const receipt = await tx.wait();
-      console.log('Gas used for 150 tokens: ' + receipt.gasUsed);
-
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
-        totalPayment - 2 * 150
-      );
-      for (let i = 0; i < 150; i++) {
-        expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
-      }
     });
   });
 
