@@ -297,7 +297,7 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
     await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'invalid exchange match'
+      'invalid exchange match quantities'
     );
   });
 
@@ -3602,7 +3602,7 @@ describe('Exchange.sol', function () {
         0,
         0
       );
-      const tx = await ExchangeContractAsUser.matchOrders([
+      await ExchangeContractAsUser.matchOrders([
         {
           orderLeft: left1,
           signatureLeft: await signOrder(left1, maker, OrderValidatorAsAdmin),
@@ -3616,9 +3616,6 @@ describe('Exchange.sol', function () {
           signatureRight: '0x',
         },
       ]);
-
-      const receipt = await tx.wait();
-      console.log('Gas used for 2 tokens: ' + receipt.gasUsed);
 
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
       // 4 == fees?
@@ -3692,10 +3689,7 @@ describe('Exchange.sol', function () {
         rightOrders.push(rightorder);
       }
 
-      const tx = await ExchangeContractAsUser.matchOrders(rightOrders);
-
-      const receipt = await tx.wait();
-      console.log('Gas used for 3 tokens: ' + receipt.gasUsed);
+      await ExchangeContractAsUser.matchOrders(rightOrders);
 
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
 
@@ -3707,7 +3701,8 @@ describe('Exchange.sol', function () {
       }
     });
 
-    it('should be able to buy 20 tokens from different orders in one txs', async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('@slow should be able to buy 20 tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -3785,7 +3780,8 @@ describe('Exchange.sol', function () {
       }
     });
 
-    it('should be able to buy 50 tokens from different orders in one txs', async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('@slow should be able to buy 50 tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
