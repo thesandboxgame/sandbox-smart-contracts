@@ -76,13 +76,13 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
         if (feeSide == LibAsset.FeeSide.LEFT) {
             _doTransfersWithFees(left, right);
-            _transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
+            transfer(right.asset, right.from, left.to);
         } else if (feeSide == LibAsset.FeeSide.RIGHT) {
             _doTransfersWithFees(right, left);
-            _transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
+            transfer(left.asset, left.from, right.to);
         } else {
-            _transferPayouts(left.asset.assetType, left.asset.value, left.from, right.payouts);
-            _transferPayouts(right.asset.assetType, right.asset.value, right.from, left.payouts);
+            transfer(left.asset, left.from, right.to);
+            transfer(right.asset, right.from, left.to);
         }
     }
 
@@ -121,71 +121,71 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param nftSide DealSide of the nft-side order
     function _doTransfersWithFees(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 rest = paymentSide.asset.value;
-
         if (_applyFees(paymentSide.from)) {
-            rest = _transferRoyalties(
-                paymentSide.asset.assetType,
-                nftSide.asset.assetType,
-                nftSide.payouts,
-                rest,
-                paymentSide.asset.value,
-                paymentSide.from
-            );
-
-            LibPart.Part[] memory origin = new LibPart.Part[](1);
-            origin[0].account = payable(defaultFeeReceiver);
-
-            address creator = _getCreator(nftSide.asset.assetType);
-            if (creator != address(0) && creator == nftSide.from) {
-                origin[0].value = uint96(protocolFeePrimary);
-            } else {
-                origin[0].value = uint96(protocolFeeSecondary);
-            }
-
-            (rest, ) = _transferFees(
-                paymentSide.asset.assetType,
-                rest,
-                paymentSide.asset.value,
-                origin,
-                paymentSide.from
-            );
+            rest = _transferRoyalties(paymentSide, nftSide, rest);
+            rest = _transferFees(paymentSide, nftSide, rest);
         }
-
-        _transferPayouts(paymentSide.asset.assetType, rest, paymentSide.from, nftSide.payouts);
+        transfer(LibAsset.Asset(paymentSide.asset.assetType, rest), paymentSide.from, nftSide.to);
     }
 
-    /// @notice transfer royalties. If there is only one royalties receiver and one address in payouts and they match,
-    /// @dev nothing is transferred in this function
-    /// @param paymentAssetType Asset Type which represents payment
-    /// @param nftAssetType Asset Type which represents NFT to pay royalties for
-    /// @param payouts Payouts to be made
+    /// @notice transfer royalties. If there is only one royalties receiver and one address in payouts and they match.
+    /// @param paymentSide DealSide of the fee-side order
+    /// @param nftSide DealSide of the nft-side order
     /// @param rest How much of the amount left after previous transfers
-    /// @param amount total amount of asset that is going to be transferred
-    /// @param from owner of the Asset to transfer
-    /// @return How much left after transferring royalties
+    /// @return How much left after paying fees
     function _transferRoyalties(
-        LibAsset.AssetType memory paymentAssetType,
-        LibAsset.AssetType memory nftAssetType,
-        LibPart.Part[] memory payouts,
-        uint256 rest,
-        uint256 amount,
-        address from
+        DealSide memory paymentSide,
+        DealSide memory nftSide,
+        uint256 rest
     ) internal returns (uint256) {
-        LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftAssetType);
+        LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
+        uint256 len = royalties.length;
+        address creator = _getCreator(nftSide.asset.assetType);
 
-        address creator = _getCreator(nftAssetType);
-        if (creator != address(0) && payouts[0].account == creator) {
-            require(royalties[0].value <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
-            return rest;
-        }
-        if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
+        // When the creator buys his own tokens he doesn't pay royalties to anybody.
+        if (creator != address(0) && nftSide.to == creator) {
             require(royalties[0].value <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
             return rest;
         }
 
-        (uint256 result, uint256 totalRoyalties) = _transferFees(paymentAssetType, rest, amount, royalties, from);
+        // This is an optimization to avoid doing two transfers
+        // in the case that the buyer has royalties over the token he is buying in this tx.
+        if (len == 1 && royalties[0].account == nftSide.to) {
+            require(royalties[0].value <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
+            return rest;
+        }
+
+        uint256 totalRoyalties;
+        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
+        for (uint256 i; i < len; i++) {
+            LibPart.Part memory r = royalties[i];
+            totalRoyalties = totalRoyalties + r.value;
+            (rest, payment.value) = _subFeeInBp(rest, paymentSide.asset.value, r.value);
+            if (payment.value > 0) {
+                transfer(payment, paymentSide.from, r.account);
+            }
+        }
+
         require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
-        return result;
+        return rest;
+    }
+
+    /// @notice Transfer fees
+    /// @param paymentSide DealSide of the fee-side order
+    /// @param nftSide DealSide of the nft-side order
+    /// @param rest How much of the amount left after previous transfers
+    /// @return How much left after paying fees
+    function _transferFees(
+        DealSide memory paymentSide,
+        DealSide memory nftSide,
+        uint256 rest
+    ) internal returns (uint256) {
+        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
+        (rest, payment.value) = _subFeeInBp(rest, paymentSide.asset.value, _getProtocolFeesBP(nftSide));
+        if (payment.value > 0) {
+            transfer(payment, paymentSide.from, defaultFeeReceiver);
+        }
+        return rest;
     }
 
     /// @notice calculates royalties by asset type.
@@ -194,47 +194,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
         (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
         return royaltiesRegistry.getRoyalties(token, tokenId);
-    }
-
-    /// @notice Transfer fees
-    /// @param assetType Asset Type to transfer
-    /// @param rest How much of the amount left after previous transfers
-    /// @param amount Total amount of the Asset. Used as a base to calculate part from (100%)
-    /// @param fees Array of LibPart.Part which represents fees to pay
-    /// @param from owner of the Asset to transfer
-    /// @return newRest how much left after transferring fees
-    /// @return totalFees total number of fees in bp
-    function _transferFees(
-        LibAsset.AssetType memory assetType,
-        uint256 rest,
-        uint256 amount,
-        LibPart.Part[] memory fees,
-        address from
-    ) internal returns (uint256 newRest, uint256 totalFees) {
-        totalFees = 0;
-        newRest = rest;
-        for (uint256 i = 0; i < fees.length; ++i) {
-            totalFees = totalFees + fees[i].value;
-            uint256 feeValue;
-            (newRest, feeValue) = _subFeeInBp(newRest, amount, fees[i].value);
-            if (feeValue > 0) {
-                transfer(LibAsset.Asset(assetType, feeValue), from, fees[i].account);
-            }
-        }
-    }
-
-    /// @notice transfers main part of the asset (payout)
-    /// @param assetType Asset Type to transfer
-    /// @param amount Amount of the asset to transfer
-    /// @param from Current owner of the asset
-    /// @param payouts List of payouts - receivers of the Asset
-    function _transferPayouts(
-        LibAsset.AssetType memory assetType,
-        uint256 amount,
-        address from,
-        LibPart.Part[] memory payouts
-    ) internal {
-        transfer(LibAsset.Asset(assetType, amount), from, payouts[0].account);
     }
 
     /// @notice subtract fees in BP, or base point
@@ -246,15 +205,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 total,
         uint256 feeInBp
     ) internal pure returns (uint256 newValue, uint256 realFee) {
-        return _subFee(value, total.bp(feeInBp));
-    }
-
-    /// @notice subtract fee from value
-    /// @param value from which the fees will be deducted
-    /// @param fee to deduct from value
-    /// @return newValue result from deduction, 0 if value < fee
-    /// @return realFee fee value if value > fee, otherwise return value input
-    function _subFee(uint256 value, uint256 fee) internal pure returns (uint256 newValue, uint256 realFee) {
+        uint256 fee = total.bp(feeInBp);
         if (value > fee) {
             newValue = value - fee;
             realFee = fee;
@@ -262,6 +213,17 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             newValue = 0;
             realFee = value;
         }
+    }
+
+    /// @notice return protocol fee depending if it is primary or secondary market
+    /// @param nftSide DealSide of the nft-side order
+    /// @return the protocol fee percent in base points
+    function _getProtocolFeesBP(DealSide memory nftSide) internal view returns (uint256) {
+        address creator = _getCreator(nftSide.asset.assetType);
+        if (creator != address(0) && creator == nftSide.from) {
+            return protocolFeePrimary;
+        }
+        return protocolFeeSecondary;
     }
 
     /// @notice return the creator of the token if the token supports INTERFACE_ID_IROYALTYUGC
