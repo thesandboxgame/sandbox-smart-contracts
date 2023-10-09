@@ -4,8 +4,7 @@ pragma solidity 0.8.21;
 
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
-import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
@@ -14,10 +13,8 @@ import {WhiteList} from "./WhiteList.sol";
 /// @title contract for order validation
 /// @notice validate orders and contains a white list of tokens
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, WhiteList {
-    using ECDSAUpgradeable for bytes32;
     using AddressUpgradeable for address;
-
-    bytes4 internal constant MAGICVALUE = 0x1626ba7e;
+    using SignatureCheckerUpgradeable for address;
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -67,18 +64,9 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         }
 
         bytes32 hash = LibOrder.hash(order);
-        // if maker is contract checking ERC1271 signature
-        if (order.maker.isContract()) {
-            require(
-                IERC1271Upgradeable(order.maker).isValidSignature(_hashTypedDataV4(hash), signature) == MAGICVALUE,
-                "contract order signature verification error"
-            );
-            return;
-        }
-
-        // if maker is not contract then checking ECDSA signature
-        address recovered = _hashTypedDataV4(hash).recover(signature);
-        require(recovered == order.maker, "order signature verification error");
+        
+        require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "order signature verification error");
+        
     }
 
     /// @notice if ERC20 token is accepted
