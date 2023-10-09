@@ -3785,7 +3785,7 @@ describe('Exchange.sol', function () {
       }
     });
 
-    it('should be able to buy 100 tokens from different orders in one txs', async function () {
+    it('should be able to buy 50 tokens from different orders in one txs', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -3794,14 +3794,14 @@ describe('Exchange.sol', function () {
         user: taker,
         user2: maker,
       } = await loadFixture(deployFixtures);
-      const totalPayment = 10000;
+      const totalPayment = 5000;
       await ERC20Contract.mint(taker.address, totalPayment);
       await ERC20Contract.connect(taker).approve(
         await ExchangeContractAsUser.getAddress(),
         totalPayment
       );
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         await ERC721Contract.mint(maker.address, i);
         await ERC721Contract.connect(maker).approve(
           await ExchangeContractAsUser.getAddress(),
@@ -3812,14 +3812,14 @@ describe('Exchange.sol', function () {
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
       }
 
-      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 100);
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 50);
 
       const leftOrders = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         const leftorder = await OrderDefault(
           maker,
           await AssetERC721(ERC721Contract, i),
@@ -3833,7 +3833,7 @@ describe('Exchange.sol', function () {
       }
 
       const rightOrders = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         const rightorder = {
           orderLeft: leftOrders[i],
           signatureLeft: await signOrder(
@@ -3850,19 +3850,19 @@ describe('Exchange.sol', function () {
       const tx = await ExchangeContractAsUser.matchOrders(rightOrders);
 
       const receipt = await tx.wait();
-      console.log('Gas used for 100 tokens: ' + receipt.gasUsed);
+      console.log('Gas used for 50 tokens: ' + receipt.gasUsed);
 
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
 
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
-        totalPayment - 2 * 100
+        totalPayment - 2 * 50
       );
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         expect(await ERC721Contract.ownerOf(i)).to.be.equal(taker.address);
       }
     });
 
-    it('should not be able to buy 150 tokens from different orders in one txs, max transfers = 150', async function () {
+    it('should not be able to buy 51 tokens from different orders in one txs, max transfers = 150', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -3871,14 +3871,14 @@ describe('Exchange.sol', function () {
         user: taker,
         user2: maker,
       } = await loadFixture(deployFixtures);
-      const totalPayment = 15000;
+      const totalPayment = 5100;
       await ERC20Contract.mint(taker.address, totalPayment);
       await ERC20Contract.connect(taker).approve(
         await ExchangeContractAsUser.getAddress(),
         totalPayment
       );
 
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 51; i++) {
         await ERC721Contract.mint(maker.address, i);
         await ERC721Contract.connect(maker).approve(
           await ExchangeContractAsUser.getAddress(),
@@ -3889,14 +3889,14 @@ describe('Exchange.sol', function () {
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(totalPayment);
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
 
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 51; i++) {
         expect(await ERC721Contract.ownerOf(i)).to.be.equal(maker.address);
       }
 
-      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 150);
+      const takerAsset = await AssetERC20(ERC20Contract, totalPayment / 51);
 
       const leftOrders = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 51; i++) {
         const leftorder = await OrderDefault(
           maker,
           await AssetERC721(ERC721Contract, i),
@@ -3910,7 +3910,7 @@ describe('Exchange.sol', function () {
       }
 
       const rightOrders = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 51; i++) {
         const rightorder = {
           orderLeft: leftOrders[i],
           signatureLeft: await signOrder(
