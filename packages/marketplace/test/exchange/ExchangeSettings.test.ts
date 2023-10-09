@@ -163,7 +163,7 @@ describe('Exchange.sol settings', function () {
     it('should not set setMaxTransferValue if caller is not in the role', async function () {
       const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
         await loadFixture(deployFixtures);
-        const newMaxTransfer = 200;
+      const newMaxTransfer = 200;
       await expect(
         ExchangeContractAsUser.setMaxTransferValue(newMaxTransfer)
       ).to.be.revertedWith(
