@@ -38,7 +38,7 @@ async function deploy() {
   const OrderValidatorAsAdmin = await OrderValidatorAsDeployer.connect(admin);
   const protocolFeePrimary = 123;
   const protocolFeeSecondary = 250;
-  const maxTransfers = 150;
+  const matchOrdersLimit = 150;
   const ExchangeFactory = await ethers.getContractFactory('Exchange');
   const ExchangeContractAsDeployer = await upgrades.deployProxy(
     ExchangeFactory,
@@ -50,7 +50,7 @@ async function deploy() {
       defaultFeeReceiver.address,
       await RoyaltiesRegistryAsDeployer.getAddress(),
       await OrderValidatorAsAdmin.getAddress(),
-      maxTransfers,
+      matchOrdersLimit,
     ],
     {
       initializer: '__Exchange_init',
