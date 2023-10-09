@@ -8,6 +8,9 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {Royalties2981TestImpl} from "./Royalties2981TestImpl.sol";
 
+/// @title TestERC721WithRoyaltyWithoutIROYALTYUGC contract
+/// @dev Contract that do not supports INTERFACE_ID_IROYALTYUGC.
+/// @dev used to set royalty greater than 50%
 contract TestERC721WithRoyaltyWithoutIROYALTYUGC is
     Initializable,
     Royalties2981TestImpl,
@@ -15,8 +18,6 @@ contract TestERC721WithRoyaltyWithoutIROYALTYUGC is
     OwnableUpgradeable
 {
     uint256 internal constant BASIS_POINTS = 10000;
-
-    bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
 
     bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
 

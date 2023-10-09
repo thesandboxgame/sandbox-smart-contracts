@@ -9,6 +9,8 @@ import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {AbstractRoyalties, LibPart} from "./AbstractRoyalties.sol";
 import {Royalties2981TestImpl} from "./Royalties2981TestImpl.sol";
 
+/// @title TestERC1155WithRoyaltyV2981 contract
+/// @dev contract that supports INTERFACE_ID_GET_RECIPIENTS but do not implements getRecipients function.
 contract TestERC1155WithRoyaltyV2981 is
     Initializable,
     Royalties2981TestImpl,
