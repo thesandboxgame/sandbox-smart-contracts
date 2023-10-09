@@ -6,6 +6,8 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
 
+/// @title Royalties2981TestImpl Contract
+/// @dev serves as an implementation of the IERC2981
 contract Royalties2981TestImpl is IERC2981 {
     uint256 public royaltiesBasePoint;
 

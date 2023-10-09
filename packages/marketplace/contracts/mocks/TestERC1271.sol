@@ -4,6 +4,8 @@ pragma solidity 0.8.21;
 
 import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
 
+/// @title TestERC1271 Contract
+/// @dev implements the ERC1271 standard for signature validation
 contract TestERC1271 is IERC1271Upgradeable {
     bool private returnSuccessfulValidSignature;
 
