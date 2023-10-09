@@ -171,17 +171,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     ) internal returns (uint256) {
         LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftAssetType);
 
-        if (payouts.length == 1) {
-            address creator = _getCreator(nftAssetType);
-            if (creator != address(0) && payouts[0].account == creator) {
-                require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
-                return rest;
-            }
-            if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
-                require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
-                return rest;
-            }
+        address creator = _getCreator(nftAssetType);
+        if (creator != address(0) && payouts[0].account == creator) {
+            require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
+            return rest;
         }
+        if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
+            require(royalties[0].value <= 5000, "Royalties are too high (>50%)");
+            return rest;
+        }
+
         (uint256 result, uint256 totalRoyalties) = _transferFees(paymentAssetType, rest, amount, royalties, from);
         require(totalRoyalties <= 5000, "Royalties are too high (>50%)");
         return result;
@@ -190,7 +189,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
-    function getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
+    function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
         (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
         return royaltiesRegistry.getRoyalties(token, tokenId);
     }
@@ -267,18 +266,13 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param assetType asset type
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
-        if (
-            assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS ||
-            assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS
-        ) {
-            (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
-            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
-                if (result) {
-                    creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-                }
-                // solhint-disable-next-line no-empty-blocks
-            } catch {}
-        }
+        (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
+        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
+            if (result) {
+                creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
+            }
+            // solhint-disable-next-line no-empty-blocks
+        } catch {}
     }
 
     /// @notice function deciding if the fees are applied or not, to be overriden

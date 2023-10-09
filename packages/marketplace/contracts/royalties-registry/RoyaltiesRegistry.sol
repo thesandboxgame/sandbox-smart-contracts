@@ -167,10 +167,6 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
             return ROYALTIES_TYPE_EXTERNAL_PROVIDER;
         }
 
-        if (royaltiesByToken[token].initialized) {
-            return ROYALTIES_TYPE_BY_TOKEN;
-        }
-
         return ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT;
     }
 
@@ -207,6 +203,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         if (royaltiesType == ROYALTIES_TYPE_EIP2981) {
             return _getRoyaltiesEIP2981(token, tokenId);
         }
+
         // case royaltiesType = 4, unknown/empty royalties
         return new LibPart.Part[](0);
     }
