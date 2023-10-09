@@ -73,7 +73,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         uint256 maxTransfer
     ) internal onlyInitializing {
         _setOrderValidatorContract(newOrderValidatorAddress);
-        transferMax = maxTransfer;
+        _setMaxTransferValue(maxTransfer);
     }
 
     /// @notice set OrderValidator address
