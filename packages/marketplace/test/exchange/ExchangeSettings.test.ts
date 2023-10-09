@@ -160,6 +160,29 @@ describe('Exchange.sol settings', function () {
         .to.emit(ExchangeContractAsAdmin, 'DefaultFeeReceiverSet')
         .withArgs(user.address);
     });
+    it('should not set setMaxTransferValue if caller is not in the role', async function () {
+      const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
+        await loadFixture(deployFixtures);
+        const newMaxTransfer = 200;
+      await expect(
+        ExchangeContractAsUser.setMaxTransferValue(newMaxTransfer)
+      ).to.be.revertedWith(
+        `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
+      );
+    });
+    it('should be able to set setMaxTransferValue', async function () {
+      const {
+        EXCHANGE_ADMIN_ROLE,
+        ExchangeContractAsAdmin,
+        ExchangeContractAsUser,
+        user,
+      } = await loadFixture(deployFixtures);
+      const newMaxTransfer = 200;
+      await ExchangeContractAsAdmin.grantRole(EXCHANGE_ADMIN_ROLE, user);
+      await expect(ExchangeContractAsUser.setMaxTransferValue(newMaxTransfer))
+        .to.emit(ExchangeContractAsAdmin, 'MaxTransferSet')
+        .withArgs(newMaxTransfer);
+    });
   });
 
   shouldNotBeAbleToSetAsZero(
