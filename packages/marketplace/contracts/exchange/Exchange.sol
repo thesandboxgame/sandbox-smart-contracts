@@ -60,7 +60,7 @@ contract Exchange is
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
         IOrderValidator orderValidatorAddress,
-        uint256 maxTransfer
+        uint256 matchOrdersLimit
     ) external initializer {
         __ERC2771Handler_init_unchained(newTrustedForwarder);
         __AccessControlEnumerable_init_unchained();
@@ -71,7 +71,7 @@ contract Exchange is
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(orderValidatorAddress, maxTransfer);
+        __ExchangeCoreInitialize(orderValidatorAddress, matchOrdersLimit);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -115,9 +115,9 @@ contract Exchange is
     }
 
     /// @notice setter for max transfer value
-    /// @param maxTransfer new vaue of max transfers
-    function setMaxTransferValue(uint256 maxTransfer) external onlyRole(EXCHANGE_ADMIN_ROLE) {
-        _setMaxTransferValue(maxTransfer);
+    /// @param matchOrdersLimit new vaue of max orders that can be matched
+    function setMatchOrdersLimit(uint256 matchOrdersLimit) external onlyRole(EXCHANGE_ADMIN_ROLE) {
+        _setMatchOrdersLimit(matchOrdersLimit);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-transactions
