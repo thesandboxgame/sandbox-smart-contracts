@@ -3862,7 +3862,7 @@ describe('Exchange.sol', function () {
       }
     });
 
-    it('should not be able to buy 51 tokens from different orders in one txs, max transfers = 150', async function () {
+    it('should not be able to buy 51 tokens from different orders in one txs, match orders limit = 50', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
