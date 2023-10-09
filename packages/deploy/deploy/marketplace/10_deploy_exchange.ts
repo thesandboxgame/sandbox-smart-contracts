@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const newProtocolFeePrimary = 0;
   const newProtocolFeeSecondary = 250;
-  const newMatchOrdersLimit = 150;
+  const newMatchOrdersLimit = 50;
 
   await deploy('Exchange', {
     from: deployer,
