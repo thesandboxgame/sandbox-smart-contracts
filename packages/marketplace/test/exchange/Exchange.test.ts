@@ -2021,9 +2021,7 @@ describe('Exchange.sol', function () {
 
       await expect(
         ExchangeContractAsUser.matchOrders(rightOrders)
-        
       ).to.be.revertedWith('invalid exchange match quantities');
-
     });
   });
 

@@ -28,7 +28,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     IOrderValidator public orderValidator;
 
     uint256 private constant UINT256_MAX = type(uint256).max;
-    uint256 private TRANSFER_MAX;
+    uint256 private transferMax;
 
     /// @notice stores the fills for orders
     /// @return order fill
@@ -60,17 +60,20 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
     /// @notice event for setting new maximum for transfers
-    /// @param newMaxTransferValue new maximum 
+    /// @param newMaxTransferValue new maximum
     event MaxTransferSet(uint256 newMaxTransferValue);
 
     /// @notice initializer for ExchangeCore
     /// @param newOrderValidatorAddress new OrderValidator contract address
+    /// @param maxTransfer max number of transfers
     /// @dev initialize permissions for native token exchange
     // solhint-disable-next-line func-name-mixedcase
-    function __ExchangeCoreInitialize(IOrderValidator newOrderValidatorAddress, uint256 maxTransfer) internal onlyInitializing {
+    function __ExchangeCoreInitialize(
+        IOrderValidator newOrderValidatorAddress,
+        uint256 maxTransfer
+    ) internal onlyInitializing {
         _setOrderValidatorContract(newOrderValidatorAddress);
-        TRANSFER_MAX = maxTransfer;
-
+        transferMax = maxTransfer;
     }
 
     /// @notice set OrderValidator address
@@ -84,8 +87,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @notice setter for max transfer value
     /// @param maxTransfer new vaue of max transfers
     function _setMaxTransferValue(uint256 maxTransfer) internal {
-        MAX_TRANSFER = maxTransfer;
-        emit MaxTransferSet(MAX_TRANSFER);
+        transferMax = maxTransfer;
+        emit MaxTransferSet(transferMax);
     }
 
     /// @notice cancel order
@@ -106,7 +109,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0 && len < TRANSFER_MAX, "invalid exchange match quantities");
+        require(len > 0 && len < transferMax, "invalid exchange match quantities");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);

@@ -50,7 +50,7 @@ async function deploy() {
       defaultFeeReceiver.address,
       await RoyaltiesRegistryAsDeployer.getAddress(),
       await OrderValidatorAsAdmin.getAddress(),
-      maxTransfers
+      maxTransfers,
     ],
     {
       initializer: '__Exchange_init',
