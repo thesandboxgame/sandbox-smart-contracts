@@ -8,7 +8,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {Royalties2981TestImpl} from "./Royalties2981TestImpl.sol";
 
-/// @title TestERC721WithRoyaltyWithoutIROYALTYUGC contract
+/// @title TestERC721WithRoyaltyWithoutIROYALTYUGC Contract
 /// @dev Contract that do not supports INTERFACE_ID_IROYALTYUGC.
 /// @dev used to set royalty greater than 50%
 contract TestERC721WithRoyaltyWithoutIROYALTYUGC is
