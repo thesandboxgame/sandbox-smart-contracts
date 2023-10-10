@@ -162,10 +162,10 @@ contract Exchange is
             AccessControlEnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
-    /// @dev Apply the fees & royalties only for users NOT granted with the role EXCHANGE_ADMIN_ROLE
+    /// @dev Skip the fees & royalties only for users granted with the role EXCHANGE_ADMIN_ROLE
     /// @param from address to check
-    function _applyFees(address from) internal view override returns (bool) {
-        return !hasRole(EXCHANGE_ADMIN_ROLE, from);
+    function _mustSkipFees(address from) internal view override returns (bool) {
+        return hasRole(EXCHANGE_ADMIN_ROLE, from);
     }
 
     function _msgSender()
