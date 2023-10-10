@@ -48,6 +48,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     uint256 internal constant ROYALTIES_TYPE_EIP2981 = 3;
     uint256 internal constant ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT = 4;
     uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;
+    uint256 internal constant BASIS_POINTS = 10000;
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -115,7 +116,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
             royaltiesByToken[token].royalties.push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "Set by token royalties sum more, than 100%");
+        require(sumRoyalties < BASIS_POINTS, "Set by token royalties sum more, than 100%");
         royaltiesByToken[token].initialized = true;
         emit RoyaltiesSetForContract(token, royalties);
     }
