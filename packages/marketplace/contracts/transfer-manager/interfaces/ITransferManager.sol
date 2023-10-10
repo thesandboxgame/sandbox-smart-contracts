@@ -7,8 +7,6 @@ import {LibAsset} from "../../lib-asset/LibAsset.sol";
 import {LibPart} from "../../lib-part/LibPart.sol";
 
 abstract contract ITransferManager is ITransferExecutor {
-    uint256 internal constant BASIS_POINTS = 10000;
-
     struct DealSide {
         LibAsset.Asset asset;
         LibPart.Part[] payouts;

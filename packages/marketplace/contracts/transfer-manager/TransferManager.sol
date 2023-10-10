@@ -19,6 +19,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     using BpLibrary for uint;
 
     bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
+    uint256 internal constant protocolFeeShareLimit = 5000;
+    uint256 internal constant royaltyShareLimit = 5000;
 
     /// @notice fee for primary sales
     /// @return uint256 of primary sale fee
@@ -97,8 +99,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
     function _setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) internal {
-        require(newProtocolFeePrimary < BASIS_POINTS / 2, "invalid primary fee");
-        require(newProtocolFeeSecondary < BASIS_POINTS / 2, "invalid secondary fee");
+        require(newProtocolFeePrimary < protocolFeeShareLimit, "invalid primary fee");
+        require(newProtocolFeeSecondary < protocolFeeShareLimit, "invalid secondary fee");
         protocolFeePrimary = newProtocolFeePrimary;
         protocolFeeSecondary = newProtocolFeeSecondary;
 
@@ -173,16 +175,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
         address creator = _getCreator(nftAssetType);
         if (creator != address(0) && payouts[0].account == creator) {
-            require(royalties[0].value <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
+            require(royalties[0].value <= royaltyShareLimit, "Royalties are too high (>50%)");
             return rest;
         }
         if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
-            require(royalties[0].value <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
+            require(royalties[0].value <= royaltyShareLimit, "Royalties are too high (>50%)");
             return rest;
         }
 
         (uint256 result, uint256 totalRoyalties) = _transferFees(paymentAssetType, rest, amount, royalties, from);
-        require(totalRoyalties <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
+        require(totalRoyalties <= royaltyShareLimit, "Royalties are too high (>50%)");
         return result;
     }
 
