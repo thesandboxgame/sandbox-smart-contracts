@@ -10,7 +10,7 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
-import {LibOrder} from "../lib-order/LibOrder.sol";
+import {LibOrder} from "../libraries/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @title Exchange contract with meta transactions

@@ -5,7 +5,7 @@ pragma solidity 0.8.21;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
+import {LibRoyalties2981} from "../royalties-registry/libraries/LibRoyalties2981.sol";
 import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
 
 contract ERC721WithRoyaltyV2981MultiMock is

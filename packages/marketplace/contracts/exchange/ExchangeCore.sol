@@ -5,9 +5,9 @@ pragma solidity 0.8.21;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
 import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibOrder} from "../lib-order/LibOrder.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibAsset} from "../libraries/LibAsset.sol";
+import {LibOrder} from "../libraries/LibOrder.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 

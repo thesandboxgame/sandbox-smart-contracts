@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
-import {LibOrder} from "../../lib-order/LibOrder.sol";
+import {LibOrder} from "../../libraries/LibOrder.sol";
 import {LibMath} from "./LibMath.sol";
 
 /// @title This library provides `fillOrder` function.

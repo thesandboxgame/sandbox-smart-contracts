@@ -5,11 +5,11 @@ pragma solidity 0.8.21;
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
-import {BpLibrary} from "../lib-bp/BpLibrary.sol";
+import {BpLibrary} from "../libraries/BpLibrary.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibAsset} from "../libraries/LibAsset.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets

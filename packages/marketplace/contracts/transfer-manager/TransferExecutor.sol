@@ -7,7 +7,7 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
+import {LibAsset} from "../libraries/LibAsset.sol";
 import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 
 /// @title abstract contract for TransferExecutor

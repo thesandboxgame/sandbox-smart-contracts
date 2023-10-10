@@ -7,8 +7,8 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibRoyalties2981} from "./libraries/LibRoyalties2981.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title royalties registry contract
