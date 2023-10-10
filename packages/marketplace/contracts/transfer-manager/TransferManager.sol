@@ -87,7 +87,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         // Transfer NFT or left side if FeeSide.NONE
         _transfer(nftSide.asset, nftSide.account, paymentSide.account);
         // Transfer ERC20 or right side if FeeSide.NONE
-        if (feeSide == LibAsset.FeeSide.NONE || !_applyFees(paymentSide.account)) {
+        if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
             _transfer(paymentSide.asset, paymentSide.account, nftSide.account);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
@@ -260,9 +260,9 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         }
     }
 
-    /// @notice function deciding if the fees are applied or not, to be overriden
+    /// @notice function deciding if the fees are applied or not, to be override
     /// @param from address to check
-    function _applyFees(address from) internal virtual returns (bool);
+    function _mustSkipFees(address from) internal virtual returns (bool);
 
     uint256[46] private __gap;
 }
