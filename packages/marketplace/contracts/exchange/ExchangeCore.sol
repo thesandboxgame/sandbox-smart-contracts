@@ -7,7 +7,6 @@ import {LibFill} from "./libraries/LibFill.sol";
 import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
 import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
@@ -163,16 +162,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
-            ITransferManager.DealSide({
-                asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
-                payouts: _payToMaker(orderLeft),
-                from: orderLeft.maker
-            }),
-            ITransferManager.DealSide({
-                asset: LibAsset.Asset(takeMatch, newFill.rightValue),
-                payouts: _payToMaker(orderRight),
-                from: orderRight.maker
-            }),
+            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
+            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue), orderRight.maker),
             LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
     }

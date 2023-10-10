@@ -2634,17 +2634,22 @@ describe('Exchange.sol', function () {
       OrderValidatorAsAdmin,
       ERC20Contract,
       ERC721WithRoyaltyV2981,
-      deployer: maker,
+      deployer: creator,
+      user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures);
 
     // set royalty greater than 50%
     await ERC721WithRoyaltyV2981.setRoyalties(1000000);
 
-    await ERC721WithRoyaltyV2981.mint(maker.address, 1, [
-      await FeeRecipientsData(maker.address, 10000),
+    await ERC721WithRoyaltyV2981.mint(creator.address, 1, [
+      await FeeRecipientsData(creator.address, 10000),
     ]);
-
+    await ERC721WithRoyaltyV2981.connect(creator).transferFrom(
+      creator.address,
+      maker.address,
+      1
+    );
     await ERC721WithRoyaltyV2981.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
       1
