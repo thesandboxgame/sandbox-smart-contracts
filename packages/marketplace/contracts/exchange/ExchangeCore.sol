@@ -28,6 +28,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     IOrderValidator public orderValidator;
 
     uint256 private constant UINT256_MAX = type(uint256).max;
+    uint256 internal constant BASIS_POINTS = 10000;
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
