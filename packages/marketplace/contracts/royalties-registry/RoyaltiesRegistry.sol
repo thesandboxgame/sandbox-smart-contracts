@@ -2,12 +2,13 @@
 
 pragma solidity 0.8.21;
 
-import {IMultiRoyaltyRecipients} from "./IMultiRoyaltyRecipients.sol";
+import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
+import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
-import {IERC2981} from "../royalties/IERC2981.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title royalties registry contract
@@ -224,13 +225,13 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
                 if (result) {
                     try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
-                        IMultiRoyaltyRecipients.Recipient[] memory multiRecipients
+                        Recipient[] memory multiRecipients
                     ) {
                         uint256 multiRecipientsLength = multiRecipients.length;
                         royalties = new LibPart.Part[](multiRecipientsLength);
                         uint256 sum = 0;
                         for (uint256 i; i < multiRecipientsLength; i++) {
-                            IMultiRoyaltyRecipients.Recipient memory splitRecipient = multiRecipients[i];
+                            Recipient memory splitRecipient = multiRecipients[i];
                             royalties[i].account = splitRecipient.recipient;
                             uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;
                             royalties[i].value = uint96(splitAmount);
