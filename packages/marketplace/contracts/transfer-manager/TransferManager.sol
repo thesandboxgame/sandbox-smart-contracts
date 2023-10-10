@@ -19,7 +19,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     using BpLibrary for uint;
 
     bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
-    uint256 internal constant HALF_BASIS_POINTS = 5000;
 
     /// @notice fee for primary sales
     /// @return uint256 of primary sale fee
@@ -98,8 +97,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
     function _setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) internal {
-        require(newProtocolFeePrimary < HALF_BASIS_POINTS, "invalid primary fee");
-        require(newProtocolFeeSecondary < HALF_BASIS_POINTS, "invalid secondary fee");
+        require(newProtocolFeePrimary < BASIS_POINTS / 2, "invalid primary fee");
+        require(newProtocolFeeSecondary < BASIS_POINTS / 2, "invalid secondary fee");
         protocolFeePrimary = newProtocolFeePrimary;
         protocolFeeSecondary = newProtocolFeeSecondary;
 
@@ -174,16 +173,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
         address creator = _getCreator(nftAssetType);
         if (creator != address(0) && payouts[0].account == creator) {
-            require(royalties[0].value <= HALF_BASIS_POINTS, "Royalties are too high (>50%)");
+            require(royalties[0].value <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
             return rest;
         }
         if (royalties.length == 1 && royalties[0].account == payouts[0].account) {
-            require(royalties[0].value <= HALF_BASIS_POINTS, "Royalties are too high (>50%)");
+            require(royalties[0].value <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
             return rest;
         }
 
         (uint256 result, uint256 totalRoyalties) = _transferFees(paymentAssetType, rest, amount, royalties, from);
-        require(totalRoyalties <= HALF_BASIS_POINTS, "Royalties are too high (>50%)");
+        require(totalRoyalties <= BASIS_POINTS / 2, "Royalties are too high (>50%)");
         return result;
     }
 
