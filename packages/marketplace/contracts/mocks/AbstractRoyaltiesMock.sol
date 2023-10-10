@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 
 import {LibPart} from "../lib-part/LibPart.sol";
 
-abstract contract AbstractRoyalties {
+abstract contract AbstractRoyaltiesMock {
     mapping(uint256 => LibPart.Part[]) internal royalties;
 
     function _saveRoyalties(uint256 id, LibPart.Part[] memory _royalties) internal {

@@ -6,11 +6,11 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
-import {Royalties2981TestImpl} from "./Royalties2981TestImpl.sol";
+import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
 
-contract TestERC721WithRoyaltyV2981Multi is
+contract ERC721WithRoyaltyV2981MultiMock is
     Initializable,
-    Royalties2981TestImpl,
+    Royalties2981ImplMock,
     ERC721Upgradeable,
     OwnableUpgradeable
 {
@@ -39,13 +39,13 @@ contract TestERC721WithRoyaltyV2981Multi is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721Upgradeable, Royalties2981TestImpl) returns (bool) {
+    ) public view virtual override(ERC721Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
             interfaceId == INTERFACE_ID_GET_RECIPIENTS ||
             interfaceId == LibRoyalties2981._INTERFACE_ID_ROYALTIES ||
             interfaceId == INTERFACE_ID_IROYALTYUGC ||
             ERC721Upgradeable.supportsInterface(interfaceId) ||
-            Royalties2981TestImpl.supportsInterface(interfaceId);
+            Royalties2981ImplMock.supportsInterface(interfaceId);
     }
 
     function _setRecipients(Recipient[] memory recipients) internal {

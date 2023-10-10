@@ -62,11 +62,11 @@ async function deploy() {
     admin
   );
 
-  const TestERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
-    'TestERC721WithRoyaltyV2981Multi'
+  const MockERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
+    'ERC721WithRoyaltyV2981MultiMock'
   );
   const ERC721WithRoyaltyV2981 = await upgrades.deployProxy(
-    TestERC721WithRoyaltyV2981Factory,
+    MockERC721WithRoyaltyV2981Factory,
     [],
     {
       initializer: 'initialize',
@@ -74,11 +74,11 @@ async function deploy() {
   );
   await ERC721WithRoyaltyV2981.waitForDeployment();
 
-  const TestERC721WithRoyaltyFactory = await ethers.getContractFactory(
-    'TestERC721WithRoyaltyV2981'
+  const MockERC721WithRoyaltyFactory = await ethers.getContractFactory(
+    'ERC721WithRoyaltyV2981Mock'
   );
   const ERC721WithRoyalty = await upgrades.deployProxy(
-    TestERC721WithRoyaltyFactory,
+    MockERC721WithRoyaltyFactory,
     [],
     {
       initializer: 'initialize',
@@ -86,11 +86,11 @@ async function deploy() {
   );
   await ERC721WithRoyalty.waitForDeployment();
 
-  const TestERC1155WithRoyaltyFactory = await ethers.getContractFactory(
-    'TestERC1155WithRoyaltyV2981'
+  const MockERC1155WithRoyaltyFactory = await ethers.getContractFactory(
+    'ERC1155WithRoyaltyV2981Mock'
   );
   const ERC1155WithRoyalty = await upgrades.deployProxy(
-    TestERC1155WithRoyaltyFactory,
+    MockERC1155WithRoyaltyFactory,
     [],
     {
       initializer: 'initialize',
@@ -98,43 +98,43 @@ async function deploy() {
   );
   await ERC1155WithRoyalty.waitForDeployment();
 
-  const TestERC721WithRoyaltyWithoutIROYALTYUGCFactory =
-    await ethers.getContractFactory('TestERC721WithRoyaltyWithoutIROYALTYUGC');
-  const TestERC721WithRoyaltyWithoutIROYALTYUGC = await upgrades.deployProxy(
-    TestERC721WithRoyaltyWithoutIROYALTYUGCFactory,
+  const ERC721WithRoyaltyWithoutIROYALTYUGCFactory =
+    await ethers.getContractFactory('ERC721WithRoyaltyWithoutIROYALTYUGCMock');
+  const ERC721WithRoyaltyWithoutIROYALTYUGC = await upgrades.deployProxy(
+    ERC721WithRoyaltyWithoutIROYALTYUGCFactory,
     [],
     {
       initializer: 'initialize',
     }
   );
-  await TestERC721WithRoyaltyWithoutIROYALTYUGC.waitForDeployment();
+  await ERC721WithRoyaltyWithoutIROYALTYUGC.waitForDeployment();
 
   const RoyaltyInfoFactory = await ethers.getContractFactory('RoyaltyInfoMock');
   const RoyaltyInfo = await RoyaltyInfoFactory.deploy();
   await RoyaltyInfo.waitForDeployment();
 
-  const ERC20ContractFactory = await ethers.getContractFactory('TestERC20');
+  const ERC20ContractFactory = await ethers.getContractFactory('ERC20Mock');
   const ERC20Contract = await ERC20ContractFactory.deploy();
   await ERC20Contract.waitForDeployment();
 
   const ERC20Contract2 = await ERC20ContractFactory.deploy();
   await ERC20Contract2.waitForDeployment();
 
-  const ERC721ContractFactory = await ethers.getContractFactory('TestERC721');
+  const ERC721ContractFactory = await ethers.getContractFactory('ERC721Mock');
   const ERC721Contract = await ERC721ContractFactory.deploy();
   await ERC721Contract.waitForDeployment();
 
-  const ERC1155ContractFactory = await ethers.getContractFactory('TestERC1155');
+  const ERC1155ContractFactory = await ethers.getContractFactory('ERC1155Mock');
   const ERC1155Contract = await ERC1155ContractFactory.deploy();
   await ERC1155Contract.waitForDeployment();
 
   const RoyaltiesProviderFactory = await ethers.getContractFactory(
-    'RoyaltiesProviderTest'
+    'RoyaltiesProviderMock'
   );
   const RoyaltiesProvider = await RoyaltiesProviderFactory.deploy();
   await RoyaltiesProvider.waitForDeployment();
 
-  const ERC1271ContractFactory = await ethers.getContractFactory('TestERC1271');
+  const ERC1271ContractFactory = await ethers.getContractFactory('ERC1271Mock');
   const ERC1271Contract = await ERC1271ContractFactory.deploy();
   await ERC1271Contract.waitForDeployment();
 
@@ -166,7 +166,7 @@ async function deploy() {
     ERC721WithRoyaltyV2981,
     ERC721WithRoyalty,
     ERC1155WithRoyalty,
-    TestERC721WithRoyaltyWithoutIROYALTYUGC,
+    ERC721WithRoyaltyWithoutIROYALTYUGC,
     RoyaltyInfo,
     RoyaltiesProvider,
     ERC1271Contract,

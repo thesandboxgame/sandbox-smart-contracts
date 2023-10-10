@@ -1,14 +1,14 @@
-import {deployLibAssetTest} from '../fixtures';
+import {deployLibAssetMock} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetClassType} from '../utils/assets';
 import {ethers} from 'hardhat';
 
-async function deployLibAssetTest() {
+async function deployLibAssetMock() {
   const [deployer, user] = await ethers.getSigners();
-  const LibAssetTest = await ethers.getContractFactory('LibAssetTest');
-  const libAssetTest = await LibAssetTest.deploy();
-  const assetMatcherAsUser = libAssetTest.connect(user);
+  const LibAssetMock = await ethers.getContractFactory('LibAssetMock');
+  const libAssetMock = await LibAssetMock.deploy();
+  const assetMatcherAsUser = libAssetMock.connect(user);
   return {
     deployer,
     user,
@@ -18,7 +18,7 @@ async function deployLibAssetTest() {
 
 describe('AssetMatcher.sol', function () {
   it('should revert matchAsset call if asset class is invalid', async function () {
-    const {assetMatcherAsUser} = await loadFixture(deployLibAssetTest);
+    const {assetMatcherAsUser} = await loadFixture(deployLibAssetMock);
 
     const leftAssetType = {
       assetClass: AssetClassType.INVALID_ASSET_CLASS,
@@ -38,7 +38,7 @@ describe('AssetMatcher.sol', function () {
   });
 
   it('should call return the expected AssetType', async function () {
-    const {assetMatcherAsUser} = await loadFixture(deployLibAssetTest);
+    const {assetMatcherAsUser} = await loadFixture(deployLibAssetMock);
 
     const leftAssetType = {
       assetClass: AssetClassType.ERC721_ASSET_CLASS,
@@ -58,7 +58,7 @@ describe('AssetMatcher.sol', function () {
   });
 
   it('should revert when asset class does not match', async function () {
-    const {assetMatcherAsUser} = await loadFixture(deployLibAssetTest);
+    const {assetMatcherAsUser} = await loadFixture(deployLibAssetMock);
 
     const leftAssetType = {
       assetClass: AssetClassType.ERC721_ASSET_CLASS,
@@ -74,7 +74,7 @@ describe('AssetMatcher.sol', function () {
     ).to.revertedWith("assets don't match");
   });
   it('should revert when data does not match', async function () {
-    const {assetMatcherAsUser} = await loadFixture(deployLibAssetTest);
+    const {assetMatcherAsUser} = await loadFixture(deployLibAssetMock);
 
     const leftAssetType = {
       assetClass: AssetClassType.ERC721_ASSET_CLASS,

@@ -5,7 +5,7 @@ pragma solidity 0.8.21;
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
 
-contract RoyaltiesProviderTest is IRoyaltiesProvider {
+contract RoyaltiesProviderMock is IRoyaltiesProvider {
     mapping(address => mapping(uint256 => LibPart.Part[])) internal royaltiesTest;
 
     function initializeProvider(address token, uint256 tokenId, LibPart.Part[] memory royalties) public {

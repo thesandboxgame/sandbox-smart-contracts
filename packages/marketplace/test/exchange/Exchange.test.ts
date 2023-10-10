@@ -2704,19 +2704,19 @@ describe('Exchange.sol', function () {
       ExchangeContractAsUser,
       OrderValidatorAsAdmin,
       ERC20Contract,
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures);
 
     // set royalty greater than 50%
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
       await FeeRecipientsData(maker.address, 10000),
     ]);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
       1
     );
@@ -2726,12 +2726,12 @@ describe('Exchange.sol', function () {
       1000
     );
 
-    expect(
-      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
-    ).to.be.equal(maker.address);
+    expect(await ERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)).to.be.equal(
+      maker.address
+    );
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(1000);
     const makerAsset = await AssetERC721(
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       1
     );
     const takerAsset = await AssetERC20(ERC20Contract, 1000);
@@ -2780,7 +2780,7 @@ describe('Exchange.sol', function () {
       ExchangeContractAsUser,
       OrderValidatorAsAdmin,
       ERC20Contract,
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       user1: maker,
       user2: taker,
       admin: receiver1,
@@ -2788,14 +2788,14 @@ describe('Exchange.sol', function () {
     } = await loadFixture(deployFixtures);
 
     // set royalty greater than 50%
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.setRoyalties(1000000);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
       await FeeRecipientsData(receiver1.address, 3000),
       await FeeRecipientsData(receiver2.address, 7000),
     ]);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
       1
     );
@@ -2805,12 +2805,12 @@ describe('Exchange.sol', function () {
       1000
     );
 
-    expect(
-      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
-    ).to.be.equal(maker.address);
+    expect(await ERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)).to.be.equal(
+      maker.address
+    );
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(1000);
     const makerAsset = await AssetERC721(
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       1
     );
     const takerAsset = await AssetERC20(ERC20Contract, 1000);
@@ -2858,17 +2858,17 @@ describe('Exchange.sol', function () {
       ExchangeContractAsUser,
       OrderValidatorAsAdmin,
       ERC20Contract,
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       defaultFeeReceiver,
       user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.mint(maker.address, 1, [
       await FeeRecipientsData(maker.address, 10000),
     ]);
 
-    await TestERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
+    await ERC721WithRoyaltyWithoutIROYALTYUGC.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
       1
     );
@@ -2878,14 +2878,14 @@ describe('Exchange.sol', function () {
       100000000000
     );
 
-    expect(
-      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
-    ).to.be.equal(maker.address);
+    expect(await ERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)).to.be.equal(
+      maker.address
+    );
     expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
       100000000000
     );
     const makerAsset = await AssetERC721(
-      TestERC721WithRoyaltyWithoutIROYALTYUGC,
+      ERC721WithRoyaltyWithoutIROYALTYUGC,
       1
     );
     const takerAsset = await AssetERC20(ERC20Contract, 100000000000);
@@ -2931,9 +2931,9 @@ describe('Exchange.sol', function () {
     expect(await ExchangeContractAsUser.fills(hashKey(orderRight))).to.be.equal(
       1
     );
-    expect(
-      await TestERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)
-    ).to.be.equal(taker.address);
+    expect(await ERC721WithRoyaltyWithoutIROYALTYUGC.ownerOf(1)).to.be.equal(
+      taker.address
+    );
     expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
       97500000000
     );

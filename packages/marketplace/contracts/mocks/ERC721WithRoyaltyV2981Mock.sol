@@ -6,13 +6,13 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
-import {Royalties2981TestImpl} from "./Royalties2981TestImpl.sol";
-import {AbstractRoyalties, LibPart} from "./AbstractRoyalties.sol";
+import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
+import {AbstractRoyaltiesMock, LibPart} from "./AbstractRoyaltiesMock.sol";
 
-contract TestERC721WithRoyaltyV2981 is
+contract ERC721WithRoyaltyV2981Mock is
     Initializable,
-    Royalties2981TestImpl,
-    AbstractRoyalties,
+    Royalties2981ImplMock,
+    AbstractRoyaltiesMock,
     ERC721Upgradeable,
     OwnableUpgradeable
 {
@@ -27,11 +27,11 @@ contract TestERC721WithRoyaltyV2981 is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721Upgradeable, Royalties2981TestImpl) returns (bool) {
+    ) public view virtual override(ERC721Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
             interfaceId == LibRoyalties2981._INTERFACE_ID_ROYALTIES ||
             ERC721Upgradeable.supportsInterface(interfaceId) ||
-            Royalties2981TestImpl.supportsInterface(interfaceId);
+            Royalties2981ImplMock.supportsInterface(interfaceId);
     }
 
     // solhint-disable-next-line no-empty-blocks

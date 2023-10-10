@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 
-contract LibAssetTest {
+contract LibAssetMock {
     function getFeeSide(
         LibAsset.AssetClassType leftClass,
         LibAsset.AssetClassType rightClass
