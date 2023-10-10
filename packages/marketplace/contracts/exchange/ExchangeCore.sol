@@ -28,6 +28,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     IOrderValidator public orderValidator;
 
     uint256 private constant UINT256_MAX = type(uint256).max;
+    uint96 internal constant BASIS_POINTS = 10000;
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
@@ -183,7 +184,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     function _payToMaker(LibOrder.Order memory order) internal pure returns (LibPart.Part[] memory) {
         LibPart.Part[] memory payout = new LibPart.Part[](1);
         payout[0].account = order.maker;
-        payout[0].value = 10000;
+        payout[0].value = BASIS_POINTS;
         return payout;
     }
 
