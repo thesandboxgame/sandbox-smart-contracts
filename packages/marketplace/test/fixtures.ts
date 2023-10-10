@@ -62,11 +62,11 @@ async function deploy() {
     admin
   );
 
-  const MockERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
+  const ERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
     'ERC721WithRoyaltyV2981MultiMock'
   );
   const ERC721WithRoyaltyV2981 = await upgrades.deployProxy(
-    MockERC721WithRoyaltyV2981Factory,
+    ERC721WithRoyaltyV2981Factory,
     [],
     {
       initializer: 'initialize',
@@ -74,11 +74,11 @@ async function deploy() {
   );
   await ERC721WithRoyaltyV2981.waitForDeployment();
 
-  const MockERC721WithRoyaltyFactory = await ethers.getContractFactory(
+  const ERC721WithRoyaltyFactory = await ethers.getContractFactory(
     'ERC721WithRoyaltyV2981Mock'
   );
   const ERC721WithRoyalty = await upgrades.deployProxy(
-    MockERC721WithRoyaltyFactory,
+    ERC721WithRoyaltyFactory,
     [],
     {
       initializer: 'initialize',
@@ -86,11 +86,11 @@ async function deploy() {
   );
   await ERC721WithRoyalty.waitForDeployment();
 
-  const MockERC1155WithRoyaltyFactory = await ethers.getContractFactory(
+  const ERC1155WithRoyaltyFactory = await ethers.getContractFactory(
     'ERC1155WithRoyaltyV2981Mock'
   );
   const ERC1155WithRoyalty = await upgrades.deployProxy(
-    MockERC1155WithRoyaltyFactory,
+    ERC1155WithRoyaltyFactory,
     [],
     {
       initializer: 'initialize',
