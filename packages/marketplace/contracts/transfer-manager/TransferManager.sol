@@ -4,6 +4,10 @@ pragma solidity 0.8.21;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
+import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -81,10 +85,10 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             nftSide = left;
         }
         // Transfer NFT or left side if FeeSide.NONE
-        transfer(nftSide.asset, nftSide.account, paymentSide.account);
+        _transfer(nftSide.asset, nftSide.account, paymentSide.account);
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || !_applyFees(paymentSide.account)) {
-            transfer(paymentSide.asset, paymentSide.account, nftSide.account);
+            _transfer(paymentSide.asset, paymentSide.account, nftSide.account);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
         }
@@ -137,7 +141,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees);
         }
         if (remainder > 0) {
-            transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
+            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
         }
     }
 
@@ -190,7 +194,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
         (remainder, payment.value) = _subFeeInBp(remainder, paymentSide.asset.value, percentageInBp);
         if (payment.value > 0) {
-            transfer(payment, paymentSide.account, to);
+            _transfer(payment, paymentSide.account, to);
         }
         return remainder;
     }
@@ -232,6 +236,28 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             }
             // solhint-disable-next-line no-empty-blocks
         } catch {}
+    }
+
+    /// @notice function should be able to transfer any supported Asset
+    /// @param asset Asset to be transferred
+    /// @param from account holding the asset
+    /// @param to account that will receive the asset
+    /// @dev this is the main entry point, when used as a separated contract this method will be external
+    function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
+        if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
+            //not using transfer proxy when transferring from this contract
+            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+            require(asset.value == 1, "erc721 value error");
+            IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
+        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
+            //not using transfer proxy when transferring from this contract
+            address token = abi.decode(asset.assetType.data, (address));
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
+        } else {
+            //not using transfer proxy when transferring from this contract
+            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+            IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
+        }
     }
 
     /// @notice function deciding if the fees are applied or not, to be overriden

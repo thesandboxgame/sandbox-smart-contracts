@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
-import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
 import {LibAsset} from "../lib-asset/LibAsset.sol";
 import {LibOrder} from "../lib-order/LibOrder.sol";
 import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
@@ -12,7 +11,7 @@ import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace
-abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferManager {
+abstract contract ExchangeCore is Initializable, ITransferManager {
     // a list of left/right orders that match each other
     // left and right are symmetrical except for fees that are taken from left side first.
     struct ExchangeMatch {
