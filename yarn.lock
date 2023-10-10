@@ -840,6 +840,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@manifoldxyz/royalty-registry-solidity@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@manifoldxyz/royalty-registry-solidity@npm:3.0.0"
+  dependencies:
+    "@manifoldxyz/libraries-solidity": ^1.0.4
+    "@openzeppelin/contracts": ^4.8.0
+    "@openzeppelin/contracts-upgradeable": ^4.8.0
+  checksum: 71d9d6b784de65158640d51989f590f325f83c1694bd625a6091fedd9a2cbadd0128869d2a759128af088674e063b3efe884547b02720560091a8cb338fd27cc
+  languageName: node
+  linkType: hard
+
 "@maticnetwork/fx-portal@npm:^1.0.5":
   version: 1.0.5
   resolution: "@maticnetwork/fx-portal@npm:1.0.5"
@@ -2412,6 +2423,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
   dependencies:
+    "@manifoldxyz/royalty-registry-solidity": ^3.0.0
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.1
     "@nomicfoundation/hardhat-ethers": ^3.0.3
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
