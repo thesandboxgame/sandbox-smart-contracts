@@ -2,10 +2,9 @@
 
 pragma solidity 0.8.21;
 
-import {ITransferExecutor} from "./ITransferExecutor.sol";
 import {LibAsset} from "../../lib-asset/LibAsset.sol";
 
-abstract contract ITransferManager is ITransferExecutor {
+abstract contract ITransferManager {
     struct DealSide {
         LibAsset.Asset asset;
         address account;
