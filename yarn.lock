@@ -2422,6 +2422,7 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^4.9.2
     "@openzeppelin/hardhat-upgrades": ^2.2.1
     "@sandbox-smart-contracts/dependency-metatx": 0.0.3
+    "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.6
