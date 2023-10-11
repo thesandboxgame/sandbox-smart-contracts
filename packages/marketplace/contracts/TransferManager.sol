@@ -12,6 +12,7 @@ import {IRoyaltiesProvider} from "./interfaces/IRoyaltiesProvider.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
+import {LibMath} from "./libraries/LibMath.sol";
 import {LibPart} from "./libraries/LibPart.sol";
 
 /// @title TransferManager contract
@@ -210,7 +211,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 total,
         uint256 percentageInBp
     ) internal pure returns (uint256 newValue, uint256 realFee) {
-        uint256 fee = (total * percentageInBp) / 10000;
+        uint256 fee = (total * percentageInBp) / LibMath.BASIS_POINTS;
         if (remainder > fee) {
             return (remainder - fee, fee);
         }
