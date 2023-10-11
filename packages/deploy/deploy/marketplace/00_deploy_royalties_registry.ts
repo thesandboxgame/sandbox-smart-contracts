@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('RoyaltiesRegistry', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/marketplace/contracts/royalties-registry/RoyaltiesRegistry.sol:RoyaltiesRegistry',
+      '@sandbox-smart-contracts/marketplace/contracts/RoyaltiesRegistry.sol:RoyaltiesRegistry',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
