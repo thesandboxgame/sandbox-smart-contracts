@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.21;
 
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 /// @title interface for the RoyaltiesProvider contract
 /// @notice contains the signature for the getRoyalties function

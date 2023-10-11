@@ -4,10 +4,10 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibOrder} from "../lib-order/LibOrder.sol";
-import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
-import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
+import {LibAsset} from "./libraries/LibAsset.sol";
+import {LibOrder} from "./libraries/LibOrder.sol";
+import {ITransferManager} from "./interfaces/ITransferManager.sol";
+import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace

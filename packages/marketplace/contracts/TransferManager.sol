@@ -8,11 +8,11 @@ import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider} from "./interfaces/IRoyaltiesProvider.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibAsset} from "./libraries/LibAsset.sol";
+import {LibPart} from "./libraries/LibPart.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets
