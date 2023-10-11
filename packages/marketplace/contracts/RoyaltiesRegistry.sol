@@ -265,7 +265,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
         result = new Part[](1);
         result[0].account = payable(to);
-        result[0].value = uint96(percent);
+        result[0].value = percent;
         return result;
     }
 
