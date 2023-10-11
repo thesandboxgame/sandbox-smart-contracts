@@ -5,27 +5,26 @@ pragma solidity 0.8.19;
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {IRoyaltiesProvider} from "./interfaces/IRoyaltiesProvider.sol";
-import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {LibRoyalties2981} from "./libraries/LibRoyalties2981.sol";
-import {LibPart} from "./libraries/LibPart.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
+import {IRoyaltiesProvider, BASIS_POINTS, WEIGHT_VALUE} from "./interfaces/IRoyaltiesProvider.sol";
 
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
-contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
+contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
-    event RoyaltiesSetForContract(address indexed token, LibPart.Part[] royalties);
+    event RoyaltiesSetForContract(address indexed token, Part[] royalties);
 
     /// @dev struct to store royalties in royaltiesByToken
     struct RoyaltiesSet {
         bool initialized;
-        LibPart.Part[] royalties;
+        Part[] royalties;
     }
 
     bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
+    bytes4 internal constant INTERFACE_ID_ROYALTIES = 0x2a55205a;
 
     /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
     mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;
@@ -39,7 +38,6 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     uint256 internal constant ROYALTIES_TYPE_EIP2981 = 3;
     uint256 internal constant ROYALTIES_TYPE_UNSUPPORTED_NONEXISTENT = 4;
     uint256 internal constant ROYALTIES_TYPES_AMOUNT = 4;
-    uint256 internal constant BASIS_POINTS = 10000;
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -93,7 +91,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1
     /// @param token address of token
     /// @param royalties array of royalties
-    function setRoyaltiesByToken(address token, LibPart.Part[] memory royalties) external {
+    function setRoyaltiesByToken(address token, Part[] memory royalties) external {
         _checkOwner(token);
         //clearing royaltiesProviders value for the token
         delete royaltiesProviders[token];
@@ -147,9 +145,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param royaltiesProvider address of royalty provider
     /// @return royalty type
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (uint256) {
-        try IERC165Upgradeable(token).supportsInterface(LibRoyalties2981._INTERFACE_ID_ROYALTIES) returns (
-            bool result2981
-        ) {
+        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_ROYALTIES) returns (bool result2981) {
             if (result2981) {
                 return ROYALTIES_TYPE_EIP2981;
             }
@@ -167,7 +163,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param token address of token
     /// @param tokenId id of token
     /// @return royalties in form of an array of Parts
-    function getRoyalties(address token, uint256 tokenId) external override returns (LibPart.Part[] memory) {
+    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
         uint256 royaltiesProviderData = royaltiesProviders[token];
 
         address royaltiesProvider = address(uint160(royaltiesProviderData));
@@ -198,50 +194,44 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
 
         // case royaltiesType = 4, unknown/empty royalties
-        return new LibPart.Part[](0);
+        return new Part[](0);
     }
 
     /// @notice tries to get royalties EIP-2981 for token and tokenId
     /// @param token address of token
     /// @param tokenId id of token
     /// @return royalties 2981 royalty array
-    function _getRoyaltiesEIP2981(
-        address token,
-        uint256 tokenId
-    ) internal view returns (LibPart.Part[] memory royalties) {
-        try IERC2981(token).royaltyInfo(tokenId, LibRoyalties2981._WEIGHT_VALUE) returns (
-            address receiver,
-            uint256 royaltyAmount
-        ) {
+    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
+        try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
             try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
                 if (result) {
                     try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
                         Recipient[] memory multiRecipients
                     ) {
                         uint256 multiRecipientsLength = multiRecipients.length;
-                        royalties = new LibPart.Part[](multiRecipientsLength);
+                        royalties = new Part[](multiRecipientsLength);
                         uint256 sum = 0;
                         for (uint256 i; i < multiRecipientsLength; i++) {
                             Recipient memory splitRecipient = multiRecipients[i];
                             royalties[i].account = splitRecipient.recipient;
-                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;
-                            royalties[i].value = uint96(splitAmount);
+                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
+                            royalties[i].value = splitAmount;
                             sum += splitAmount;
                         }
                         // sum can be less than amount, otherwise small-value listings can break
                         require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
                         return royalties;
                     } catch {
-                        return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+                        return _calculateRoyalties(receiver, royaltyAmount);
                     }
                 } else {
-                    return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+                    return _calculateRoyalties(receiver, royaltyAmount);
                 }
             } catch {
-                return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+                return _calculateRoyalties(receiver, royaltyAmount);
             }
         } catch {
-            return new LibPart.Part[](0);
+            return new Part[](0);
         }
     }
 
@@ -254,12 +244,29 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         address token,
         uint256 tokenId,
         address providerAddress
-    ) internal returns (LibPart.Part[] memory) {
-        try IRoyaltiesProvider(providerAddress).getRoyalties(token, tokenId) returns (LibPart.Part[] memory result) {
+    ) internal returns (Part[] memory) {
+        try IRoyaltiesProvider(providerAddress).getRoyalties(token, tokenId) returns (Part[] memory result) {
             return result;
         } catch {
-            return new LibPart.Part[](0);
+            return new Part[](0);
         }
+    }
+
+    /// @notice method for converting amount to percent and forming LibPart
+    /// @param to recipient of royalties
+    /// @param amount of royalties
+    /// @return LibPart with account and value
+    function _calculateRoyalties(address to, uint256 amount) internal pure returns (Part[] memory) {
+        Part[] memory result;
+        if (amount == 0) {
+            return result;
+        }
+        uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
+        require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
+        result = new Part[](1);
+        result[0].account = payable(to);
+        result[0].value = uint96(percent);
+        return result;
     }
 
     // slither-disable-next-line unused-state

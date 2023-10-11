@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.19;
 
-import {LibPart} from "../libraries/LibPart.sol";
+import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 
 abstract contract AbstractRoyaltiesMock {
-    mapping(uint256 => LibPart.Part[]) internal royalties;
+    mapping(uint256 => IRoyaltiesProvider.Part[]) internal royalties;
 
-    function _saveRoyalties(uint256 id, LibPart.Part[] memory _royalties) internal {
+    function _saveRoyalties(uint256 id, IRoyaltiesProvider.Part[] memory _royalties) internal {
         uint256 totalValue;
         for (uint256 i = 0; i < _royalties.length; ++i) {
             require(_royalties[i].account != address(0x0), "Recipient should be present");
@@ -28,5 +28,5 @@ abstract contract AbstractRoyaltiesMock {
         }
     }
 
-    function _onRoyaltiesSet(uint256 id, LibPart.Part[] memory _royalties) internal virtual;
+    function _onRoyaltiesSet(uint256 id, IRoyaltiesProvider.Part[] memory _royalties) internal virtual;
 }

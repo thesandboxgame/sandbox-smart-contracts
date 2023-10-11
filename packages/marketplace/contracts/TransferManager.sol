@@ -8,12 +8,10 @@ import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IRoyaltiesProvider} from "./interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
-import {LibRoyalties2981} from "./libraries/LibRoyalties2981.sol";
-import {LibPart} from "./libraries/LibPart.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets
@@ -170,11 +168,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
+        IRoyaltiesProvider.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
-            LibPart.Part memory r = royalties[i];
+            IRoyaltiesProvider.Part memory r = royalties[i];
             totalRoyalties = totalRoyalties + r.value;
             if (r.account == nftSide.account) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
@@ -217,7 +215,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 total,
         uint256 percentageInBp
     ) internal pure returns (uint256, uint256) {
-        uint256 fee = (total * percentageInBp) / LibRoyalties2981.BASIS_POINTS;
+        uint256 fee = (total * percentageInBp) / BASIS_POINTS;
         if (remainder > fee) {
             return (remainder - fee, fee);
         }
@@ -226,8 +224,10 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
     /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
-    /// @return calculated royalties (Array of LibPart.Part)
-    function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
+    /// @return calculated royalties (Array of IRoyaltiesProvider.Part)
+    function _getRoyaltiesByAssetType(
+        LibAsset.AssetType memory nftAssetType
+    ) internal returns (IRoyaltiesProvider.Part[] memory) {
         (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
         return royaltiesRegistry.getRoyalties(token, tokenId);
     }
