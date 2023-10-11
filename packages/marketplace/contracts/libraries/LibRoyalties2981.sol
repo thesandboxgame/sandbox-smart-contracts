@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.21;
 
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 /// @title library for constants and functions related to ERC2891
 /// @notice standard for signature validation

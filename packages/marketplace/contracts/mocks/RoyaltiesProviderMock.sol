@@ -3,7 +3,7 @@
 pragma solidity 0.8.21;
 
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 contract RoyaltiesProviderMock is IRoyaltiesProvider {
     mapping(address => mapping(uint256 => LibPart.Part[])) internal royaltiesTest;
