@@ -297,7 +297,7 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
     await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'invalid length'
+      'ExchangeMatch cant be empty'
     );
   });
 
@@ -3927,7 +3927,7 @@ describe('Exchange.sol', function () {
 
       await expect(
         ExchangeContractAsUser.matchOrders(rightOrders)
-      ).to.be.revertedWith('invalid exchange match quantities');
+      ).to.be.revertedWith('too many ExchangeMatch');
     });
   });
 
