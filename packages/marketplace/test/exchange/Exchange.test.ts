@@ -16,7 +16,6 @@ import {
   OrderDefault,
   signOrder,
   UINT256_MAX_VALUE,
-  convertEventOrder,
 } from '../utils/order.ts';
 import {ZeroAddress, AbiCoder} from 'ethers';
 
@@ -615,14 +614,52 @@ describe('Exchange.sol', function () {
       },
     ]);
 
-    function isMatchLeftOrderWellFormed(x: Order): boolean {
-      return JSON.stringify(convertEventOrder(x)) === JSON.stringify(orderLeft);
+    async function isMatchLeftOrderWellFormed(
+      x: Order
+    ): Promise<Promise<Promise<boolean>>> {
+      const makerAsset = await AssetERC20(
+        x.makeAsset.assetClass,
+        x.makeAsset.value
+      );
+      const takerAsset = await AssetERC20(
+        x.takeAsset.assetClass,
+        x.takeAsset.value
+      );
+
+      const eventOrder = await OrderDefault(
+        x.maker,
+        makerAsset,
+        x.taker,
+        takerAsset,
+        x.salt,
+        x.start,
+        x.end
+      );
+      return JSON.stringify(eventOrder) === JSON.stringify(orderLeft);
     }
 
-    function isMatchRightOrderWellFormed(x: Order): boolean {
-      return (
-        JSON.stringify(convertEventOrder(x)) === JSON.stringify(orderRight)
+    async function isMatchRightOrderWellFormed(
+      x: Order
+    ): Promise<Promise<Promise<boolean>>> {
+      const makerAsset = await AssetERC20(
+        x.makeAsset.assetClass,
+        x.makeAsset.value
       );
+      const takerAsset = await AssetERC20(
+        x.takeAsset.assetClass,
+        x.takeAsset.value
+      );
+
+      const eventOrder = await OrderDefault(
+        x.maker,
+        makerAsset,
+        x.taker,
+        takerAsset,
+        x.salt,
+        x.start,
+        x.end
+      );
+      return JSON.stringify(eventOrder) === JSON.stringify(orderRight);
     }
 
     await expect(tx)
