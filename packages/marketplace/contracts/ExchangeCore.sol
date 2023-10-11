@@ -61,7 +61,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
     /// @notice event for setting a new limit for orders that can be matched in one transaction
     /// @param newMatchOrdersLimit new limit
-    event MatchOrdersLimitSet(uint256 newMatchOrdersLimit);
+    event MatchOrdersLimitSet(uint256 indexed newMatchOrdersLimit);
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -116,8 +116,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0, "invalid length");
-        require(len <= matchOrdersLimit, "invalid exchange match quantities");
+        require(len > 0, "ExchangeMatch can't be empty");
+        require(len <= matchOrdersLimit, "too many ExchangeMatch");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
