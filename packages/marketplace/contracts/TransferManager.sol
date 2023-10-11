@@ -253,7 +253,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
         if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
             address token = abi.decode(asset.assetType.data, (address));
-            //slither-disable-next-line arbitrary-send-erc20
+            // slither-disable-next-line arbitrary-send-erc20
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
@@ -271,6 +271,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param from address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
 
-    //slither-disable-next-line unused-state
+    // slither-disable-next-line unused-state
     uint256[46] private __gap;
 }

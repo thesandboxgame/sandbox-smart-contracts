@@ -227,6 +227,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         }
     }
 
-    //slither-disable-next-line unused-state
+    // slither-disable-next-line unused-state
     uint256[49] private __gap;
 }

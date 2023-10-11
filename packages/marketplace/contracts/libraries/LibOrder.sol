@@ -61,9 +61,9 @@ library LibOrder {
     /// @param order whose time we want to validate
     // solhint-disable not-rely-on-time
     function validateOrderTime(Order memory order) internal view {
-        //slither-disable-next-line timestamp
+        // slither-disable-next-line timestamp
         require(order.start == 0 || order.start < block.timestamp, "Order start validation failed");
-        //slither-disable-next-line timestamp
+        // slither-disable-next-line timestamp
         require(order.end == 0 || order.end > block.timestamp, "Order end validation failed");
     }
     // solhint-enable not-rely-on-time

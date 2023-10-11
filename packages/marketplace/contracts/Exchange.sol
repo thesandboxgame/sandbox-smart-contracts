@@ -178,7 +178,7 @@ contract Exchange is
         return ERC2771HandlerUpgradeable._msgSender();
     }
 
-    //slither-disable-next-line dead-code needed because of inheritance
+    // slither-disable-next-line dead-code needed because of inheritance
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
     }
