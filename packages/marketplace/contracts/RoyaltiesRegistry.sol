@@ -262,5 +262,6 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
     }
 
+    //slither-disable-next-line unused-state
     uint256[46] private __gap;
 }

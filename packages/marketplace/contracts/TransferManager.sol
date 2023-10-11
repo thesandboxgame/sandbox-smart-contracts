@@ -251,19 +251,19 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param to account that will receive the asset
     /// @dev this is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
-        if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
-            //not using transfer proxy when transferring from this contract
+        if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
+            address token = abi.decode(asset.assetType.data, (address));
+            //slither-disable-next-line arbitrary-send-erc20
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
+        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
             IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
-            //not using transfer proxy when transferring from this contract
-            address token = abi.decode(asset.assetType.data, (address));
-            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else {
-            //not using transfer proxy when transferring from this contract
+        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
+        } else {
+            revert("invalid asset class");
         }
     }
 
@@ -271,5 +271,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param from address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
 
+    //slither-disable-next-line unused-state
     uint256[46] private __gap;
 }

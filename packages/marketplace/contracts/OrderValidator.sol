@@ -89,5 +89,6 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         }
     }
 
+    //slither-disable-next-line unused-state
     uint256[50] private __gap;
 }

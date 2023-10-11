@@ -14,9 +14,8 @@ library LibRoyalties2981 {
     /// @notice method for converting amount to percent and forming LibPart
     /// @param to recipient of royalties
     /// @param amount of royalties
-    /// @return LibPart with account and value
-    function calculateRoyalties(address to, uint256 amount) internal pure returns (LibPart.Part[] memory) {
-        LibPart.Part[] memory result;
+    /// @return result LibPart with account and value
+    function calculateRoyalties(address to, uint256 amount) internal pure returns (LibPart.Part[] memory result) {
         if (amount == 0) {
             return result;
         }

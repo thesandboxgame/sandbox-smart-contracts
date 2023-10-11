@@ -60,7 +60,7 @@ contract Exchange is
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider,
         IOrderValidator orderValidatorAddress,
-        uint256 matchOrdersLimit
+        uint256 newMatchOrdersLimit
     ) external initializer {
         __ERC2771Handler_init_unchained(newTrustedForwarder);
         __AccessControlEnumerable_init_unchained();
@@ -71,7 +71,7 @@ contract Exchange is
             newDefaultFeeReceiver,
             newRoyaltiesProvider
         );
-        __ExchangeCoreInitialize(orderValidatorAddress, matchOrdersLimit);
+        __ExchangeCoreInitialize(orderValidatorAddress, newMatchOrdersLimit);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -115,9 +115,9 @@ contract Exchange is
     }
 
     /// @notice setter for max transfer value
-    /// @param matchOrdersLimit new vaue of max orders that can be matched
-    function setMatchOrdersLimit(uint256 matchOrdersLimit) external onlyRole(EXCHANGE_ADMIN_ROLE) {
-        _setMatchOrdersLimit(matchOrdersLimit);
+    /// @param newMatchOrdersLimit new vaue of max orders that can be matched
+    function setMatchOrdersLimit(uint256 newMatchOrdersLimit) external onlyRole(EXCHANGE_ADMIN_ROLE) {
+        _setMatchOrdersLimit(newMatchOrdersLimit);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-transactions
@@ -178,6 +178,7 @@ contract Exchange is
         return ERC2771HandlerUpgradeable._msgSender();
     }
 
+    //slither-disable-next-line dead-code needed because of inheritance
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
         return ERC2771HandlerUpgradeable._msgData();
     }
