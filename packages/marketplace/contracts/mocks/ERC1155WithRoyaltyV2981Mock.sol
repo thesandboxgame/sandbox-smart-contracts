@@ -31,8 +31,8 @@ contract ERC1155WithRoyaltyV2981Mock is
         bytes4 interfaceId
     ) public view virtual override(ERC1155Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
-            interfaceId == IERC2981.royaltyInfo.selector ||
-            interfaceId == IMultiRoyaltyRecipients.getRecipients.selector ||
+            interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             Royalties2981ImplMock.supportsInterface(interfaceId);
     }

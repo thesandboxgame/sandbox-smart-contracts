@@ -236,7 +236,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
         (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
-        try IERC165Upgradeable(token).supportsInterface(IRoyaltyUGC.getCreatorAddress.selector) returns (bool result) {
+        try IERC165Upgradeable(token).supportsInterface(type(IRoyaltyUGC).interfaceId) returns (bool result) {
             if (result) {
                 creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
             }
