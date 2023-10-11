@@ -34,8 +34,8 @@ contract ERC721WithRoyaltyWithoutIROYALTYUGCMock is Initializable, Royalties2981
         bytes4 interfaceId
     ) public view virtual override(ERC721Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
-            interfaceId == IMultiRoyaltyRecipients.getRecipients.selector ||
-            interfaceId == IERC2981.royaltyInfo.selector ||
+            interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
+            interfaceId == type(IERC2981).interfaceId ||
             ERC721Upgradeable.supportsInterface(interfaceId) ||
             Royalties2981ImplMock.supportsInterface(interfaceId);
     }
