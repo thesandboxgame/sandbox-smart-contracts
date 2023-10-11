@@ -13,7 +13,6 @@ import {WhiteList} from "./WhiteList.sol";
 /// @title contract for order validation
 /// @notice validate orders and contains a white list of tokens
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, WhiteList {
-    using AddressUpgradeable for address;
     using SignatureCheckerUpgradeable for address;
 
     /// @dev this protects the implementation contract from being initialized.
