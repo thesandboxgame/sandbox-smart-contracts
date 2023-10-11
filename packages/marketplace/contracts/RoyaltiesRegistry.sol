@@ -223,6 +223,12 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
     }
 
+    /// @notice try to get the royalties recipients and do the royalties calculations
+    /// @param token address of token
+    /// @param tokenId Id of the token
+    /// @param receiver address of the royalty receiver
+    /// @param royaltyAmount royalty amount to be paid
+    /// @return royalties 2981 royalty array
     function _getRecipients(
         address token,
         uint256 tokenId,
@@ -248,6 +254,9 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
         }
     }
 
+    /// @notice check if the token supports the INTERFACE_ID_GET_RECIPIENTS
+    /// @param token address of token
+    /// @return true or false
     function _checkGetRecipientsInterface(address token) internal view returns (bool) {
         try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
             if (result) {
