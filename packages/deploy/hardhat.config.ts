@@ -15,9 +15,9 @@ const importedPackages = {
   '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/marketplace': [
-    'contracts/royalties-registry/RoyaltiesRegistry.sol',
-    'contracts/exchange/OrderValidator.sol',
-    'contracts/exchange/Exchange.sol',
+    'contracts/RoyaltiesRegistry.sol',
+    'contracts/OrderValidator.sol',
+    'contracts/Exchange.sol',
   ],
   '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
   '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
