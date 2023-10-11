@@ -5,7 +5,6 @@ pragma solidity 0.8.19;
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {WhiteList} from "./WhiteList.sol";
@@ -13,7 +12,6 @@ import {WhiteList} from "./WhiteList.sol";
 /// @title contract for order validation
 /// @notice validate orders and contains a white list of tokens
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, WhiteList {
-    using AddressUpgradeable for address;
     using SignatureCheckerUpgradeable for address;
 
     /// @dev this protects the implementation contract from being initialized.
