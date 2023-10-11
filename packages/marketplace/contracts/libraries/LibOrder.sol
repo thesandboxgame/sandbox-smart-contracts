@@ -93,9 +93,9 @@ library LibOrder {
         (uint256 rightMakeValue, uint256 rightTakeValue) = calculateRemaining(rightOrder, rightOrderFill);
 
         if (rightTakeValue > leftMakeValue) {
-            return fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset.value, rightOrder.takeAsset.value);
+            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset.value, rightOrder.takeAsset.value);
         }
-        return fillRight(leftOrder.makeAsset.value, leftOrder.takeAsset.value, rightMakeValue, rightTakeValue);
+        return _fillRight(leftOrder.makeAsset.value, leftOrder.takeAsset.value, rightMakeValue, rightTakeValue);
     }
 
     /// @notice calculate the remaining fill from orders
@@ -111,7 +111,7 @@ library LibOrder {
         makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);
     }
 
-    function fillRight(
+    function _fillRight(
         uint256 leftMakeValue,
         uint256 leftTakeValue,
         uint256 rightMakeValue,
@@ -122,7 +122,7 @@ library LibOrder {
         return FillResult(rightTakeValue, makerValue);
     }
 
-    function fillLeft(
+    function _fillLeft(
         uint256 leftMakeValue,
         uint256 leftTakeValue,
         uint256 rightMakeValue,
