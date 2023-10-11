@@ -7,9 +7,9 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
-import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 
@@ -18,7 +18,6 @@ import {LibAsset} from "./libraries/LibAsset.sol";
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
-    bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
     uint256 internal constant PROTOCOL_FEE_SHARE_LIMIT = 5000;
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
@@ -232,12 +231,12 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         return royaltiesRegistry.getRoyalties(token, tokenId);
     }
 
-    /// @notice return the creator of the token if the token supports INTERFACE_ID_IROYALTYUGC
+    /// @notice return the creator of the token if the token supports IRoyaltyUGC
     /// @param assetType asset type
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
         (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
-        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
+        try IERC165Upgradeable(token).supportsInterface(IRoyaltyUGC.getCreatorAddress.selector) returns (bool result) {
             if (result) {
                 creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
             }
