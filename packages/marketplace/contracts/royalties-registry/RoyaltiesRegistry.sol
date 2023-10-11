@@ -14,12 +14,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
 contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
-    /// @notice deprecated
-    /// @param token deprecated
-    /// @param tokenId deprecated
-    /// @param royalties deprecated
-    event RoyaltiesSetForToken(address indexed token, uint256 indexed tokenId, LibPart.Part[] royalties);
-
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
