@@ -3,8 +3,8 @@
 pragma solidity 0.8.21;
 
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {LibRoyalties2981} from "../royalties/LibRoyalties2981.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibRoyalties2981} from "../libraries/LibRoyalties2981.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 /// @title Royalties2981ImplMock Contract
 /// @dev serves as an implementation of the IERC2981

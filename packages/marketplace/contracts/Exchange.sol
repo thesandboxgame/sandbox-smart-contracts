@@ -8,9 +8,9 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
-import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
-import {TransferManager, IRoyaltiesProvider} from "../transfer-manager/TransferManager.sol";
-import {LibOrder} from "../lib-order/LibOrder.sol";
+import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
+import {TransferManager, IRoyaltiesProvider} from "./TransferManager.sol";
+import {LibOrder} from "./libraries/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @title Exchange contract with meta transactions
@@ -162,10 +162,10 @@ contract Exchange is
             AccessControlEnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
-    /// @dev Apply the fees & royalties only for users NOT granted with the role EXCHANGE_ADMIN_ROLE
+    /// @dev Skip the fees & royalties only for users granted with the role EXCHANGE_ADMIN_ROLE
     /// @param from address to check
-    function _applyFees(address from) internal view override returns (bool) {
-        return !hasRole(EXCHANGE_ADMIN_ROLE, from);
+    function _mustSkipFees(address from) internal view override returns (bool) {
+        return hasRole(EXCHANGE_ADMIN_ROLE, from);
     }
 
     function _msgSender()

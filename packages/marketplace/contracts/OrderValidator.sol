@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.21;
 
-import {LibOrder} from "../lib-order/LibOrder.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
+import {LibOrder} from "./libraries/LibOrder.sol";
+import {LibAsset} from "./libraries/LibAsset.sol";
 import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
-import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
+import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {WhiteList} from "./WhiteList.sol";
 
 /// @title contract for order validation
