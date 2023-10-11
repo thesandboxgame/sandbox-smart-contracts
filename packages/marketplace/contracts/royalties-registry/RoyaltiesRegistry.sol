@@ -27,15 +27,11 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
 
     bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
 
-    /// @notice deprecated
-    mapping(bytes32 => RoyaltiesSet) public royaltiesByTokenAndTokenId;
-
     /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
-    mapping(address => RoyaltiesSet) public royaltiesByToken;
+    mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;
 
     /// @notice stores external provider and royalties type for token contract
-    /// @return royaltiesProviders external providers
-    mapping(address => uint256) public royaltiesProviders;
+    mapping(address token => uint256 provider) public royaltiesProviders;
 
     uint256 internal constant ROYALTIES_TYPE_UNSET = 0;
     uint256 internal constant ROYALTIES_TYPE_BY_TOKEN = 1;

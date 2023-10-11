@@ -32,8 +32,7 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
-    /// @return order fill
-    mapping(bytes32 => uint256) public fills;
+    mapping(bytes32 orderKeyHash => uint256 orderFillValue) public fills;
 
     /// @notice event signaling that an order was canceled
     /// @param  orderKeyHash order hash
