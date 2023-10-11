@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import {LibOrder} from "../lib-order/LibOrder.sol";
+import {LibOrder} from "../libraries/LibOrder.sol";
 
 /// @title interface for the OrderValidator contract
 /// @notice contains the signature for validate, isPurchaseValid and verifyERC20Whitelist functions

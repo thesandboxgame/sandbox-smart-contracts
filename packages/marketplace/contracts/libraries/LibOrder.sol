@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import {LibAsset} from "../lib-asset/LibAsset.sol";
+import {LibAsset} from "../libraries/LibAsset.sol";
 
 /// @title library for Order
 /// @notice contains structs and functions related to Order

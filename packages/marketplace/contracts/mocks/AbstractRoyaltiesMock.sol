@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import {LibPart} from "../lib-part/LibPart.sol";
+import {LibPart} from "../libraries/LibPart.sol";
 
 abstract contract AbstractRoyaltiesMock {
     mapping(uint256 => LibPart.Part[]) internal royalties;

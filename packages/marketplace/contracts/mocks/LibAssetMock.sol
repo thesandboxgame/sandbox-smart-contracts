@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import {LibAsset} from "../lib-asset/LibAsset.sol";
+import {LibAsset} from "../libraries/LibAsset.sol";
 
 contract LibAssetMock {
     function getFeeSide(

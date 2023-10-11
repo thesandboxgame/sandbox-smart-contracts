@@ -4,16 +4,14 @@ pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LibFill} from "./libraries/LibFill.sol";
-import {TransferExecutor} from "../transfer-manager/TransferExecutor.sol";
-import {LibAsset} from "../lib-asset/LibAsset.sol";
-import {LibOrder} from "../lib-order/LibOrder.sol";
-import {LibPart} from "../lib-part/LibPart.sol";
-import {ITransferManager} from "../transfer-manager/interfaces/ITransferManager.sol";
-import {IOrderValidator} from "../interfaces/IOrderValidator.sol";
+import {LibAsset} from "./libraries/LibAsset.sol";
+import {LibOrder} from "./libraries/LibOrder.sol";
+import {ITransferManager} from "./interfaces/ITransferManager.sol";
+import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
 /// @notice ExchangeCore contract
 /// @dev contains the main functions for the marketplace
-abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferManager {
+abstract contract ExchangeCore is Initializable, ITransferManager {
     // a list of left/right orders that match each other
     // left and right are symmetrical except for fees that are taken from left side first.
     struct ExchangeMatch {
@@ -28,7 +26,6 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     IOrderValidator public orderValidator;
 
     uint256 private constant UINT256_MAX = type(uint256).max;
-    uint256 internal constant BASIS_POINTS = 10000;
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
@@ -164,28 +161,10 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
         LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
-            ITransferManager.DealSide({
-                asset: LibAsset.Asset({assetType: makeMatch, value: newFill.leftValue}),
-                payouts: _payToMaker(orderLeft),
-                from: orderLeft.maker
-            }),
-            ITransferManager.DealSide({
-                asset: LibAsset.Asset(takeMatch, newFill.rightValue),
-                payouts: _payToMaker(orderRight),
-                from: orderRight.maker
-            }),
+            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
+            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue), orderRight.maker),
             LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
-    }
-
-    /// @notice create a payout array that pays to maker 100%
-    /// @param order the order from which the maker is taken
-    /// @return an array with just one entry that pays to order.maker
-    function _payToMaker(LibOrder.Order memory order) internal pure returns (LibPart.Part[] memory) {
-        LibPart.Part[] memory payout = new LibPart.Part[](1);
-        payout[0].account = order.maker;
-        payout[0].value = uint96(BASIS_POINTS);
-        return payout;
     }
 
     /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()

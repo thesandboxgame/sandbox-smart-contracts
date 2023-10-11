@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import {IWhiteList} from "../interfaces/IWhiteList.sol";
+import {IWhiteList} from "./interfaces/IWhiteList.sol";
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
