@@ -143,3 +143,27 @@ export async function signOrder(
     order
   );
 }
+
+export function convertEventOrder(eventOrder: ArrayLike<string>): Order {
+  return {
+    maker: eventOrder[0],
+    makeAsset: {
+      assetType: {
+        assetClass: '0x' + eventOrder[1][0][0].toString(),
+        data: eventOrder[1][0][1],
+      },
+      value: Number(eventOrder[1][1]),
+    },
+    taker: eventOrder[2],
+    takeAsset: {
+      assetType: {
+        assetClass: '0x' + eventOrder[3][0][0].toString(),
+        data: eventOrder[3][0][1],
+      },
+      value: Number(eventOrder[3][1]),
+    },
+    salt: Number(eventOrder[4]),
+    start: Number(eventOrder[5]),
+    end: Number(eventOrder[6]),
+  };
+}

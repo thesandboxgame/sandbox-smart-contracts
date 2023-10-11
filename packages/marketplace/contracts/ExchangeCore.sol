@@ -37,22 +37,18 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
     /// @notice event when orders match
     /// @param from _msgSender or operator if used with approve and call
-    /// @param leftHash left order hash
-    /// @param rightHash right order hash
+    /// @param orderLeft left order
+    /// @param orderRight right order
     /// @param newFill fill for left order
     /// @param totalFillLeft total fill left
     /// @param totalFillRight total fill right
-    /// @param valueLeft asset value for left order
-    /// @param valueRight asset value for right order
     event Match(
         address indexed from,
-        bytes32 leftHash,
-        bytes32 rightHash,
+        LibOrder.Order orderLeft,
+        LibOrder.Order orderRight,
         LibFill.FillResult newFill,
         uint256 totalFillLeft,
-        uint256 totalFillRight,
-        uint256 valueLeft,
-        uint256 valueRight
+        uint256 totalFillRight
     );
 
     /// @notice event for setting a new order validator contract
@@ -205,13 +201,11 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
         emit Match({
             from: sender,
-            leftHash: leftOrderKeyHash,
-            rightHash: rightOrderKeyHash,
+            orderLeft: orderLeft,
+            orderRight: orderRight,
             newFill: newFill,
             totalFillLeft: fills[leftOrderKeyHash],
-            totalFillRight: fills[rightOrderKeyHash],
-            valueLeft: orderLeft.makeAsset.value,
-            valueRight: orderRight.makeAsset.value
+            totalFillRight: fills[rightOrderKeyHash]
         });
         return newFill;
     }
