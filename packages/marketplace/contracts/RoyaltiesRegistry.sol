@@ -14,12 +14,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
 contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
-    /// @notice deprecated
-    /// @param token deprecated
-    /// @param tokenId deprecated
-    /// @param royalties deprecated
-    event RoyaltiesSetForToken(address indexed token, uint256 indexed tokenId, LibPart.Part[] royalties);
-
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
@@ -33,15 +27,11 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
 
     bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
 
-    /// @notice deprecated
-    mapping(bytes32 => RoyaltiesSet) public royaltiesByTokenAndTokenId;
-
     /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
-    mapping(address => RoyaltiesSet) public royaltiesByToken;
+    mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;
 
     /// @notice stores external provider and royalties type for token contract
-    /// @return royaltiesProviders external providers
-    mapping(address => uint256) public royaltiesProviders;
+    mapping(address token => uint256 provider) public royaltiesProviders;
 
     uint256 internal constant ROYALTIES_TYPE_UNSET = 0;
     uint256 internal constant ROYALTIES_TYPE_BY_TOKEN = 1;
@@ -97,7 +87,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param token address of token
     function clearRoyaltiesType(address token) external {
         _checkOwner(token);
-        royaltiesProviders[token] = uint(uint160(getProvider(token)));
+        royaltiesProviders[token] = uint256(uint160(getProvider(token)));
     }
 
     /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1
@@ -139,8 +129,9 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param royaltiesType uint256 of royalty type
     /// @param royaltiesProvider address of royalty provider
     function _setRoyaltiesType(address token, uint256 royaltiesType, address royaltiesProvider) internal {
-        require(royaltiesType > 0 && royaltiesType <= ROYALTIES_TYPES_AMOUNT, "wrong royaltiesType");
-        royaltiesProviders[token] = uint(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);
+        require(royaltiesType > 0, "wrong royaltiesType");
+        require(royaltiesType <= ROYALTIES_TYPES_AMOUNT, "invalid royaltiesType amount");
+        royaltiesProviders[token] = uint256(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);
     }
 
     /// @notice checks if msg.sender is owner of this contract or owner of the token contract

@@ -29,8 +29,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
-    /// @return order fill
-    mapping(bytes32 => uint256) public fills;
+    mapping(bytes32 orderKeyHash => uint256 orderFillValue) public fills;
 
     /// @notice event signaling that an order was canceled
     /// @param  orderKeyHash order hash
@@ -55,11 +54,20 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 valueLeft,
         uint256 valueRight
     );
+
+    /// @notice event for setting a new order validator contract
+    /// @param contractAddress new contract address
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
     /// @notice event for setting a new limit for orders that can be matched in one transaction
     /// @param newMatchOrdersLimit new limit
-    event MatchOrdersLimitSet(uint256 newMatchOrdersLimit);
+    event MatchOrdersLimitSet(uint256 indexed newMatchOrdersLimit);
+
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice initializer for ExchangeCore
     /// @param newOrderValidatorAddress new OrderValidator contract address
@@ -108,7 +116,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0 && len <= matchOrdersLimit, "invalid exchange match quantities");
+        require(len > 0, "ExchangeMatch cant be empty");
+        require(len <= matchOrdersLimit, "too many ExchangeMatch");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);

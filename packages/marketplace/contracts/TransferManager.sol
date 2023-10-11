@@ -43,15 +43,21 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice event for when protocol fees are set
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
-    event ProtocolFeeSet(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary);
+    event ProtocolFeeSet(uint256 indexed newProtocolFeePrimary, uint256 indexed newProtocolFeeSecondary);
 
     /// @notice event for when a royalties registry is set
     /// @param newRoyaltiesRegistry address of new royalties registry
-    event RoyaltiesRegistrySet(IRoyaltiesProvider newRoyaltiesRegistry);
+    event RoyaltiesRegistrySet(IRoyaltiesProvider indexed newRoyaltiesRegistry);
 
     /// @notice event for when a default fee receiver is set
     /// @param newDefaultFeeReceiver address that gets the fees
-    event DefaultFeeReceiverSet(address newDefaultFeeReceiver);
+    event DefaultFeeReceiverSet(address indexed newDefaultFeeReceiver);
+
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice initializer for TransferExecutor
     /// @param newProtocolFeePrimary fee for primary market
@@ -119,7 +125,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice setter for default fee receiver
     /// @param newDefaultFeeReceiver address that gets the fees
     function _setDefaultFeeReceiver(address newDefaultFeeReceiver) internal {
-        require(address(newDefaultFeeReceiver) != address(0), "invalid default fee receiver");
+        require(newDefaultFeeReceiver != address(0), "invalid default fee receiver");
         defaultFeeReceiver = newDefaultFeeReceiver;
 
         emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
@@ -204,13 +210,13 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param remainder amount left from amount after fees are discounted
     /// @param total total price for asset
     /// @param percentageInBp fee in base points to be deducted
-    /// @return newValue remainder after fee subtraction
-    /// @return realFee fee value (not percentage)
+    /// @return remainder after fee subtraction
+    /// @return fee value (not percentage)
     function _subFeeInBp(
         uint256 remainder,
         uint256 total,
         uint256 percentageInBp
-    ) internal pure returns (uint256 newValue, uint256 realFee) {
+    ) internal pure returns (uint256, uint256) {
         uint256 fee = (total * percentageInBp) / LibMath.BASIS_POINTS;
         if (remainder > fee) {
             return (remainder - fee, fee);
