@@ -213,36 +213,51 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
             address receiver,
             uint256 royaltyAmount
         ) {
-            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
-                if (result) {
-                    try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
-                        Recipient[] memory multiRecipients
-                    ) {
-                        uint256 multiRecipientsLength = multiRecipients.length;
-                        royalties = new LibPart.Part[](multiRecipientsLength);
-                        uint256 sum = 0;
-                        for (uint256 i; i < multiRecipientsLength; i++) {
-                            Recipient memory splitRecipient = multiRecipients[i];
-                            royalties[i].account = splitRecipient.recipient;
-                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;
-                            royalties[i].value = uint96(splitAmount);
-                            sum += splitAmount;
-                        }
-                        // sum can be less than amount, otherwise small-value listings can break
-                        require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
-                        return royalties;
-                    } catch {
-                        return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
-                    }
-                } else {
-                    return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
-                }
-            } catch {
+            if (_checkGetRecipientsInterface(token)) {
+                royalties = _getRecipients(token, tokenId, receiver, royaltyAmount);
+            } else {
                 return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
             }
         } catch {
             return new LibPart.Part[](0);
         }
+    }
+
+    function _getRecipients(
+        address token,
+        uint256 tokenId,
+        address receiver,
+        uint256 royaltyAmount
+    ) internal view returns (LibPart.Part[] memory royalties) {
+        try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
+            uint256 multiRecipientsLength = multiRecipients.length;
+            royalties = new LibPart.Part[](multiRecipientsLength);
+            uint256 sum = 0;
+            for (uint256 i; i < multiRecipientsLength; i++) {
+                Recipient memory splitRecipient = multiRecipients[i];
+                royalties[i].account = splitRecipient.recipient;
+                uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;
+                royalties[i].value = uint96(splitAmount);
+                sum += splitAmount;
+            }
+            // sum can be less than amount, otherwise small-value listings can break
+            require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
+            return royalties;
+        } catch {
+            return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+        }
+    }
+
+    function _checkGetRecipientsInterface(address token) internal view returns (bool) {
+        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
+            if (result) {
+                return true;
+            }
+        } catch {
+            return false;
+        }
+
+        return false;
     }
 
     /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
