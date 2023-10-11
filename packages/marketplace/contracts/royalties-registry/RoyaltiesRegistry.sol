@@ -230,7 +230,6 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
                         }
                         // sum can be less than amount, otherwise small-value listings can break
                         require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
-                        
                     } catch {
                         return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
                     }

@@ -12,7 +12,7 @@ abstract contract ITransferManager is ITransferExecutor {
         LibPart.Part[] payouts;
         address from;
     }
-    
+
     /// @notice executes transfers for 2 matched orders
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)

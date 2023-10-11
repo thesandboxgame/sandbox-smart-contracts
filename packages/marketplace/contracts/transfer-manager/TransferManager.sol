@@ -241,11 +241,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param value amount left from amount after fees are discounted
     /// @param total total price for asset
     /// @param feeInBp fee in basepoint to be deducted
-    function _subFeeInBp(
-        uint256 value,
-        uint256 total,
-        uint256 feeInBp
-    ) internal pure returns (uint256, uint256) {
+    function _subFeeInBp(uint256 value, uint256 total, uint256 feeInBp) internal pure returns (uint256, uint256) {
         return _subFee(value, total.bp(feeInBp));
     }
 
