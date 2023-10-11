@@ -245,7 +245,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 value,
         uint256 total,
         uint256 feeInBp
-    ) internal pure returns (uint256 newValue, uint256 realFee) {
+    ) internal pure returns (uint256, uint256) {
         return _subFee(value, total.bp(feeInBp));
     }
 
