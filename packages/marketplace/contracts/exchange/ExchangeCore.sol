@@ -111,7 +111,8 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0 && len <= matchOrdersLimit, "invalid exchange match quantities");
+        require(len > 0, "invalid length");
+        require(len <= matchOrdersLimit, "invalid exchange match quantities");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);

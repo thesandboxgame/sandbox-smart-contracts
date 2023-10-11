@@ -297,7 +297,7 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
     await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'invalid exchange match quantities'
+      'invalid length'
     );
   });
 

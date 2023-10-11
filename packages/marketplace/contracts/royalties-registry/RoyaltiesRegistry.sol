@@ -139,7 +139,8 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param royaltiesType uint256 of royalty type
     /// @param royaltiesProvider address of royalty provider
     function _setRoyaltiesType(address token, uint256 royaltiesType, address royaltiesProvider) internal {
-        require(royaltiesType > 0 && royaltiesType <= ROYALTIES_TYPES_AMOUNT, "wrong royaltiesType");
+        require(royaltiesType > 0, "wrong royaltiesType");
+        require(royaltiesType <= ROYALTIES_TYPES_AMOUNT, "invalid royaltiesType amount");
         royaltiesProviders[token] = uint256(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);
     }
 
