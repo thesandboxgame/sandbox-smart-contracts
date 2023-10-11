@@ -23,9 +23,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         Part[] royalties;
     }
 
-    bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
-    bytes4 internal constant INTERFACE_ID_ROYALTIES = 0x2a55205a;
-
     /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
     mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;
 
@@ -145,7 +142,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param royaltiesProvider address of royalty provider
     /// @return royalty type
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (uint256) {
-        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_ROYALTIES) returns (bool result2981) {
+        try IERC165Upgradeable(token).supportsInterface(IERC2981.royaltyInfo.selector) returns (bool result2981) {
             if (result2981) {
                 return ROYALTIES_TYPE_EIP2981;
             }
@@ -203,7 +200,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @return royalties 2981 royalty array
     function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
-            try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
+            try IERC165Upgradeable(token).supportsInterface(IMultiRoyaltyRecipients.getRecipients.selector) returns (
+                bool result
+            ) {
                 if (result) {
                     try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
                         Recipient[] memory multiRecipients

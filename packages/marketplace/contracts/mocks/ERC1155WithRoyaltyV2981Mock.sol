@@ -5,12 +5,13 @@ pragma solidity 0.8.19;
 import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {AbstractRoyaltiesMock} from "./AbstractRoyaltiesMock.sol";
 import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
 
 /// @title ERC1155WithRoyaltyV2981Mock contract
-/// @dev contract that supports INTERFACE_ID_GET_RECIPIENTS but do not implements getRecipients function.
+/// @dev contract that supports IMultiRoyaltyRecipients but do not implements getRecipients function.
 contract ERC1155WithRoyaltyV2981Mock is
     Initializable,
     Royalties2981ImplMock,
@@ -31,7 +32,7 @@ contract ERC1155WithRoyaltyV2981Mock is
     ) public view virtual override(ERC1155Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
             interfaceId == IERC2981.royaltyInfo.selector ||
-            interfaceId == INTERFACE_ID_GET_RECIPIENTS ||
+            interfaceId == IMultiRoyaltyRecipients.getRecipients.selector ||
             ERC1155Upgradeable.supportsInterface(interfaceId) ||
             Royalties2981ImplMock.supportsInterface(interfaceId);
     }
