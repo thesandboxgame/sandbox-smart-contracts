@@ -192,7 +192,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param nftAssetType NFT Asset Type to calculate royalties for
     /// @return calculated royalties (Array of LibPart.Part)
     function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
-        (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
+        (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint256));
         return royaltiesRegistry.getRoyalties(token, tokenId);
     }
 
@@ -268,7 +268,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param assetType asset type
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
-        (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
+        (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint256));
         try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
             if (result) {
                 creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);

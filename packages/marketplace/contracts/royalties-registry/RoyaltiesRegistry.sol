@@ -97,7 +97,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param token address of token
     function clearRoyaltiesType(address token) external {
         _checkOwner(token);
-        royaltiesProviders[token] = uint(uint160(getProvider(token)));
+        royaltiesProviders[token] = uint256(uint160(getProvider(token)));
     }
 
     /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1
@@ -140,7 +140,7 @@ contract RoyaltiesRegistry is IRoyaltiesProvider, OwnableUpgradeable {
     /// @param royaltiesProvider address of royalty provider
     function _setRoyaltiesType(address token, uint256 royaltiesType, address royaltiesProvider) internal {
         require(royaltiesType > 0 && royaltiesType <= ROYALTIES_TYPES_AMOUNT, "wrong royaltiesType");
-        royaltiesProviders[token] = uint(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);
+        royaltiesProviders[token] = uint256(uint160(royaltiesProvider)) + 2 ** (256 - royaltiesType);
     }
 
     /// @notice checks if msg.sender is owner of this contract or owner of the token contract
