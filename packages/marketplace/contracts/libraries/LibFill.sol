@@ -53,7 +53,7 @@ library LibFill {
         uint256 leftTakeValue,
         uint256 rightMakeValue,
         uint256 rightTakeValue
-    ) internal pure returns (FillResult memory) {
+    ) internal pure returns (FillResult memory result) {
         uint256 makerValue = LibMath.safeGetPartialAmountFloor(rightTakeValue, leftMakeValue, leftTakeValue);
         require(makerValue <= rightMakeValue, "fillRight: unable to fill");
         return FillResult(rightTakeValue, makerValue);
@@ -64,7 +64,7 @@ library LibFill {
         uint256 leftTakeValue,
         uint256 rightMakeValue,
         uint256 rightTakeValue
-    ) internal pure returns (FillResult memory) {
+    ) internal pure returns (FillResult memory result) {
         uint256 rightTake = LibMath.safeGetPartialAmountFloor(leftTakeValue, rightMakeValue, rightTakeValue);
         require(rightTake <= leftMakeValue, "fillLeft: unable to fill");
         return FillResult(leftMakeValue, leftTakeValue);

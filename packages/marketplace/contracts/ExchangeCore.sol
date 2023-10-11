@@ -55,9 +55,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 valueLeft,
         uint256 valueRight
     );
-
-    /// @notice event for setting a new order validator contract
-    /// @param contractAddress new contract address
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
     /// @notice event for setting a new limit for orders that can be matched in one transaction
