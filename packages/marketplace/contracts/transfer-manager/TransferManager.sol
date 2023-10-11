@@ -110,7 +110,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @notice setter for default fee receiver
     /// @param newDefaultFeeReceiver address that gets the fees
     function _setDefaultFeeReceiver(address newDefaultFeeReceiver) internal {
-        require(address(newDefaultFeeReceiver) != address(0), "invalid default fee receiver");
+        require(newDefaultFeeReceiver != address(0), "invalid default fee receiver");
         defaultFeeReceiver = newDefaultFeeReceiver;
 
         emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
