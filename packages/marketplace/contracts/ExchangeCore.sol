@@ -24,7 +24,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @return OrderValidator address
     IOrderValidator public orderValidator;
 
-    uint256 private constant UINT256_MAX = type(uint256).max;
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
@@ -101,7 +100,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         require(order.salt != 0, "0 salt can't be used");
         bytes32 _orderKeyHash = LibOrder.hashKey(order);
         require(_orderKeyHash == orderKeyHash, "Invalid orderHash");
-        fills[orderKeyHash] = UINT256_MAX;
+        fills[orderKeyHash] = type(uint256).max;
         emit Cancel(orderKeyHash, order);
     }
 
