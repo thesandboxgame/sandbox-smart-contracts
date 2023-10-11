@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.21;
+pragma solidity 0.8.19;
 
 /// @title RoyaltyInfoMock Contract
 /// @dev Implements royaltyInfo function but not supportInferace.
