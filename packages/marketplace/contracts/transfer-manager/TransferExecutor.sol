@@ -13,6 +13,11 @@ import {ITransferExecutor} from "./interfaces/ITransferExecutor.sol";
 /// @title abstract contract for TransferExecutor
 /// @notice contains transfer functions for any assets as well as ERC20 tokens
 abstract contract TransferExecutor is Initializable, ITransferExecutor {
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
     /// @notice function should be able to transfer any supported Asset
     /// @param asset Asset to be transferred
     /// @param from account holding the asset

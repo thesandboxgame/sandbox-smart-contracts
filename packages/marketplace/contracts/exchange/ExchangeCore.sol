@@ -64,6 +64,12 @@ abstract contract ExchangeCore is Initializable, TransferExecutor, ITransferMana
     /// @param newMatchOrdersLimit new limit
     event MatchOrdersLimitSet(uint256 newMatchOrdersLimit);
 
+    /// @dev this protects the implementation contract from being initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice initializer for ExchangeCore
     /// @param newOrderValidatorAddress new OrderValidator contract address
     /// @param newMatchOrdersLimit limit of orders that can be matched in one transaction
