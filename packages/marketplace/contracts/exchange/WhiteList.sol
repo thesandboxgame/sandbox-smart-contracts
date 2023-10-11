@@ -40,7 +40,7 @@ contract WhiteList is Initializable, IWhiteList, AccessControlEnumerableUpgradea
     /// @param partners boolean indicating that partner tokens are accepted
     /// @param open boolean indicating that all tokens are accepted
     /// @param erc20List boolean indicating that there is a restriction for ERC20 tokens
-    event PermissionSet(bool tsbOnly, bool partners, bool open, bool erc20List);
+    event PermissionSet(bool indexed tsbOnly, bool indexed partners, bool open, bool indexed erc20List);
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
