@@ -143,3 +143,25 @@ export async function signOrder(
     order
   );
 }
+
+export async function isOrderEqual(x: Order, order: Order): boolean {
+  const makerAsset = await AssetERC20(
+    x.makeAsset.assetClass,
+    x.makeAsset.value
+  );
+  const takerAsset = await AssetERC20(
+    x.takeAsset.assetClass,
+    x.takeAsset.value
+  );
+
+  const eventOrder = await OrderDefault(
+    x.maker,
+    makerAsset,
+    x.taker,
+    takerAsset,
+    x.salt,
+    x.start,
+    x.end
+  );
+  return JSON.stringify(eventOrder) === JSON.stringify(order);
+}

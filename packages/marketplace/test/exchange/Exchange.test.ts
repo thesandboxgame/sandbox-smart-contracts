@@ -16,6 +16,7 @@ import {
   OrderDefault,
   signOrder,
   UINT256_MAX_VALUE,
+  isOrderEqual,
 } from '../utils/order.ts';
 import {ZeroAddress, AbiCoder} from 'ethers';
 
@@ -614,7 +615,7 @@ describe('Exchange.sol', function () {
       },
     ]);
 
-    async function isMatchLeftOrderWellFormed(
+    /* async function isMatchLeftOrderWellFormed(
       x: Order
     ): Promise<Promise<Promise<boolean>>> {
       const makerAsset = await AssetERC20(
@@ -636,9 +637,9 @@ describe('Exchange.sol', function () {
         x.end
       );
       return JSON.stringify(eventOrder) === JSON.stringify(orderLeft);
-    }
+    } */
 
-    async function isMatchRightOrderWellFormed(
+    /* async function isMatchRightOrderWellFormed(
       x: Order
     ): Promise<Promise<Promise<boolean>>> {
       const makerAsset = await AssetERC20(
@@ -660,14 +661,22 @@ describe('Exchange.sol', function () {
         x.end
       );
       return JSON.stringify(eventOrder) === JSON.stringify(orderRight);
+    } */
+
+    function verifyOrderLeft(eventOrder: Order): boolean {
+      return isOrderEqual(eventOrder, orderLeft);
+    }
+
+    function verifyOrderRight(eventOrder: Order): boolean {
+      return isOrderEqual(eventOrder, orderRight);
     }
 
     await expect(tx)
       .to.emit(ExchangeContractAsUser, 'Match')
       .withArgs(
         user.address,
-        isMatchLeftOrderWellFormed,
-        isMatchRightOrderWellFormed,
+        verifyOrderLeft,
+        verifyOrderRight,
         [123000000, 456000000],
         456000000,
         123000000
