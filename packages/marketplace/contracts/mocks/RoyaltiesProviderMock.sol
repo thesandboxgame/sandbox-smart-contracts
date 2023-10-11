@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.21;
+pragma solidity 0.8.19;
 
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {LibPart} from "../lib-part/LibPart.sol";
