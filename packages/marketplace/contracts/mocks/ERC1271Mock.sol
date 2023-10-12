@@ -9,11 +9,6 @@ import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interface
 contract ERC1271Mock is IERC1271Upgradeable {
     bool private returnSuccessfulValidSignature;
 
-    /// @notice ERC1271 interface id
-    /// @dev this.isValidSignature.selector
-    /// @return the interface id
-    bytes4 public constant ERC1271_INTERFACE_ID = 0xfb855dc9;
-
     /// @notice valid id signature
     /// @return return ERC1271_RETURN_VALID_SIGNATURE
     bytes4 public constant ERC1271_RETURN_VALID_SIGNATURE = 0x1626ba7e;

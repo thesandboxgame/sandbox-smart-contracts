@@ -101,7 +101,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         5
       )
-    ).to.be.revertedWith('invalid royaltiesType amount');
+    ).to.be.revertedWithoutReason();
   });
 
   it('should be able to force set royalties type', async function () {

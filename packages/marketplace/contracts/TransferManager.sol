@@ -7,20 +7,17 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IRoyaltiesProvider} from "./interfaces/IRoyaltiesProvider.sol";
-import {IRoyaltyUGC} from "./interfaces/IRoyaltyUGC.sol";
+import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
-import {LibMath} from "./libraries/LibMath.sol";
-import {LibPart} from "./libraries/LibPart.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
-    bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
     uint256 internal constant PROTOCOL_FEE_SHARE_LIMIT = 5000;
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
@@ -170,11 +167,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        LibPart.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
+        IRoyaltiesProvider.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
-            LibPart.Part memory r = royalties[i];
+            IRoyaltiesProvider.Part memory r = royalties[i];
             totalRoyalties = totalRoyalties + r.value;
             if (r.account == nftSide.account) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
@@ -217,7 +214,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 total,
         uint256 percentageInBp
     ) internal pure returns (uint256, uint256) {
-        uint256 fee = (total * percentageInBp) / LibMath.BASIS_POINTS;
+        uint256 fee = (total * percentageInBp) / BASIS_POINTS;
         if (remainder > fee) {
             return (remainder - fee, fee);
         }
@@ -226,18 +223,20 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
     /// @notice calculates royalties by asset type.
     /// @param nftAssetType NFT Asset Type to calculate royalties for
-    /// @return calculated royalties (Array of LibPart.Part)
-    function _getRoyaltiesByAssetType(LibAsset.AssetType memory nftAssetType) internal returns (LibPart.Part[] memory) {
+    /// @return calculated royalties (Array of IRoyaltiesProvider.Part)
+    function _getRoyaltiesByAssetType(
+        LibAsset.AssetType memory nftAssetType
+    ) internal returns (IRoyaltiesProvider.Part[] memory) {
         (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
         return royaltiesRegistry.getRoyalties(token, tokenId);
     }
 
-    /// @notice return the creator of the token if the token supports INTERFACE_ID_IROYALTYUGC
+    /// @notice return the creator of the token if the token supports IRoyaltyUGC
     /// @param assetType asset type
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
         (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
-        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_IROYALTYUGC) returns (bool result) {
+        try IERC165Upgradeable(token).supportsInterface(type(IRoyaltyUGC).interfaceId) returns (bool result) {
             if (result) {
                 creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
             }

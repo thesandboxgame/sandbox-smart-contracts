@@ -4,22 +4,13 @@ pragma solidity 0.8.19;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {LibRoyalties2981} from "../libraries/LibRoyalties2981.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
+import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
+import {BASIS_POINTS} from "../interfaces/IRoyaltiesProvider.sol";
 
-contract ERC721WithRoyaltyV2981MultiMock is
-    Initializable,
-    Royalties2981ImplMock,
-    ERC721Upgradeable,
-    OwnableUpgradeable
-{
-    uint256 internal constant BASIS_POINTS = 10000;
-
-    bytes4 internal constant INTERFACE_ID_IROYALTYUGC = 0xa30b4db9;
-
-    bytes4 internal constant INTERFACE_ID_GET_RECIPIENTS = 0xfd90e897;
-
+contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock, ERC721Upgradeable {
     struct Recipient {
         address payable recipient;
         uint16 bps;
@@ -41,9 +32,9 @@ contract ERC721WithRoyaltyV2981MultiMock is
         bytes4 interfaceId
     ) public view virtual override(ERC721Upgradeable, Royalties2981ImplMock) returns (bool) {
         return
-            interfaceId == INTERFACE_ID_GET_RECIPIENTS ||
-            interfaceId == LibRoyalties2981._INTERFACE_ID_ROYALTIES ||
-            interfaceId == INTERFACE_ID_IROYALTYUGC ||
+            interfaceId == type(IMultiRoyaltyRecipients).interfaceId ||
+            interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == type(IRoyaltyUGC).interfaceId ||
             ERC721Upgradeable.supportsInterface(interfaceId) ||
             Royalties2981ImplMock.supportsInterface(interfaceId);
     }

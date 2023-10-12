@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {LibFill} from "./libraries/LibFill.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -25,7 +24,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @return OrderValidator address
     IOrderValidator public orderValidator;
 
-    uint256 private constant UINT256_MAX = type(uint256).max;
     uint256 private matchOrdersLimit;
 
     /// @notice stores the fills for orders
@@ -46,7 +44,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         address indexed from,
         LibOrder.Order orderLeft,
         LibOrder.Order orderRight,
-        LibFill.FillResult newFill,
+        LibOrder.FillResult newFill,
         uint256 totalFillLeft,
         uint256 totalFillRight
     );
@@ -102,7 +100,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         require(order.salt != 0, "0 salt can't be used");
         bytes32 _orderKeyHash = LibOrder.hashKey(order);
         require(_orderKeyHash == orderKeyHash, "Invalid orderHash");
-        fills[orderKeyHash] = UINT256_MAX;
+        fills[orderKeyHash] = type(uint256).max;
         emit Cancel(orderKeyHash, order);
     }
 
@@ -163,7 +161,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             orderRight.makeAsset.assetType
         );
 
-        LibFill.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
+        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
             ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
@@ -181,13 +179,13 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         address sender,
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight
-    ) internal returns (LibFill.FillResult memory newFill) {
+    ) internal returns (LibOrder.FillResult memory newFill) {
         bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
         bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
 
         uint256 leftOrderFill = _getOrderFill(orderLeft.salt, leftOrderKeyHash);
         uint256 rightOrderFill = _getOrderFill(orderRight.salt, rightOrderKeyHash);
-        newFill = LibFill.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
+        newFill = LibOrder.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
 
         require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
 

@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 library LibMath {
-    uint256 internal constant BASIS_POINTS = 10000;
+    uint256 internal constant ACCEPTABLE_RELATIVE_ERROR = 1000;
 
     /// @dev Calculates partial value given a numerator and denominator rounded down.
     ///      Reverts if rounding error is >= 0.1%
@@ -63,6 +63,6 @@ library LibMath {
         // so we have a rounding error iff:
         //        1000 * remainder  >=  numerator * target
         uint256 remainder = mulmod(target, numerator, denominator);
-        isError = remainder * BASIS_POINTS >= numerator * target;
+        isError = remainder * ACCEPTABLE_RELATIVE_ERROR >= numerator * target;
     }
 }
