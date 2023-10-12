@@ -19,8 +19,8 @@ library LibAsset {
     }
 
     /// @dev if the asset class is ERC721 or ERC1155 we get token address and token id
-    struct NFTInfo {
-        address token;
+    struct TokenInfo {
+        address tokenAddress;
         uint256 tokenId;
     }
 
@@ -95,20 +95,20 @@ library LibAsset {
     /// @notice check and get the token address and tokenId for an ERC1155 or ERC721 token
     /// @param asset that will be checked
     /// @return nft info the decoded address and token id of the token
-    function getNFTInfo(Asset memory asset) internal pure returns (NFTInfo memory) {
+    function decodeToken(Asset memory asset) internal pure returns (TokenInfo memory) {
         require(
             asset.assetType.assetClass == LibAsset.AssetClass.ERC721 ||
                 asset.assetType.assetClass == LibAsset.AssetClass.ERC1155,
             "asset is not an NFT"
         );
-        (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-        return NFTInfo(token, tokenId);
+        (address tokenAddress, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+        return TokenInfo(tokenAddress, tokenId);
     }
 
     /// @notice check and get the ERC20 token address
     /// @param asset that will be checked
     /// @return token address
-    function getERC20Info(Asset memory asset) internal pure returns (address) {
+    function decodeAddress(Asset memory asset) internal pure returns (address) {
         require(asset.assetType.assetClass == LibAsset.AssetClass.ERC20, "asset is not an ERC20");
         return abi.decode(asset.assetType.data, (address));
     }
