@@ -3,7 +3,12 @@ import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {AssetERC20, AssetERC721} from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder} from '../utils/order.ts';
+import {
+  isOrderEqual,
+  hashKey,
+  OrderDefault,
+  signOrder,
+} from '../utils/order.ts';
 import {ZeroAddress} from 'ethers';
 
 describe('ExchangeCore.sol', function () {
@@ -56,7 +61,7 @@ describe('ExchangeCore.sol', function () {
     const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
     await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'invalid exchange match quantities'
+      'ExchangeMatch cant be empty'
     );
   });
 
@@ -260,5 +265,91 @@ describe('ExchangeCore.sol', function () {
         },
       ])
     ).to.be.revertedWith('nothing to fill');
+  });
+
+  it('should emit a Match event', async function () {
+    const {
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      ERC20Contract2,
+      user,
+      user1: maker,
+      user2: taker,
+    } = await loadFixture(deployFixtures);
+
+    await ERC20Contract.mint(maker.address, 123000000);
+    await ERC20Contract.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      123000000
+    );
+
+    await ERC20Contract2.mint(taker.address, 456000000);
+    await ERC20Contract2.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      456000000
+    );
+
+    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(123000000);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(456000000);
+
+    const makerAsset = await AssetERC20(ERC20Contract, 123000000);
+    const takerAsset = await AssetERC20(ERC20Contract2, 456000000);
+    const orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    const orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+
+    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+    const tx = await ExchangeContractAsUser.matchOrders([
+      {
+        orderLeft,
+        signatureLeft: makerSig,
+        orderRight,
+        signatureRight: takerSig,
+      },
+    ]);
+
+    function verifyOrderLeft(eventOrder: Order): boolean {
+      return isOrderEqual(eventOrder, orderLeft);
+    }
+
+    function verifyOrderRight(eventOrder: Order): boolean {
+      return isOrderEqual(eventOrder, orderRight);
+    }
+
+    await expect(tx)
+      .to.emit(ExchangeContractAsUser, 'Match')
+      .withArgs(
+        user.address,
+        verifyOrderLeft,
+        verifyOrderRight,
+        [123000000, 456000000],
+        456000000,
+        123000000
+      );
+
+    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(123000000);
+    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(456000000);
+    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
   });
 });
