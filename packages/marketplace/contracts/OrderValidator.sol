@@ -24,18 +24,18 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param admin OrderValidator and Whiteist admin
     /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
     /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract
-    /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract
     /// @param newErc20 boolean to activate the white list of ERC20 tokens
+    /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         address admin,
         bool newTsbOnly,
         bool newPartners,
-        bool newOpen,
-        bool newErc20
+        bool newErc20,
+        bool newOpen
     ) public initializer {
         __EIP712_init_unchained("Exchange", "1");
-        __Whitelist_init(admin, newTsbOnly, newPartners, newOpen, newErc20);
+        __Whitelist_init(admin, newTsbOnly, newPartners, newErc20, newOpen);
     }
 
     /// @notice verifies order
@@ -46,10 +46,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
-        address makeToken = LibAsset.decodeAddress(order.makeAsset.assetType);
-        if (order.makeAsset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            _verifyERC20Whitelist(makeToken);
-        } else _verifyWhiteList(makeToken);
+        _verifyWhiteList(order.makeAsset);
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
@@ -66,23 +63,25 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
-    /// @notice if ERC20 token is accepted
-    /// @param tokenAddress ERC20 token address
-    function _verifyERC20Whitelist(address tokenAddress) internal view {
-        if (erc20List && !hasRole(ERC20_ROLE, tokenAddress)) {
-            revert("payment token not allowed");
-        }
-    }
-
     /// @notice if token is whitelisted
-    /// @param tokenAddress ERC20 token address
-    function _verifyWhiteList(address tokenAddress) internal view {
-        if (open) {
-            return;
-        } else if ((tsbOnly && hasRole(TSB_ROLE, tokenAddress)) || (partners && hasRole(PARTNER_ROLE, tokenAddress))) {
-            return;
+    /// @param asset make asset to be verifyed
+    function _verifyWhiteList(LibAsset.Asset calldata asset) internal view {
+        address makeToken = abi.decode(asset.assetType.data, (address));
+        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
+            if (roleEnabled[ERC20_ROLE] && !hasRole(ERC20_ROLE, makeToken)) {
+                revert("payment token not allowed");
+            }
         } else {
-            revert("not allowed");
+            if (open) {
+                return;
+            } else if (
+                (roleEnabled[TSB_ROLE] && hasRole(TSB_ROLE, makeToken)) ||
+                (roleEnabled[PARTNER_ROLE] && hasRole(PARTNER_ROLE, makeToken))
+            ) {
+                return;
+            } else {
+                revert("not allowed");
+            }
         }
     }
 

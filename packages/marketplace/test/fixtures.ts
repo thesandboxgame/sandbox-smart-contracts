@@ -28,7 +28,7 @@ async function deploy() {
   );
   const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
-    [admin.address, false, false, true, false],
+    [admin.address, false, false, false, true],
     {
       initializer: '__OrderValidator_init_unchained',
     }
