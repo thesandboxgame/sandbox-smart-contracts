@@ -227,13 +227,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         Recipient[] memory multiRecipients;
         try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory retrievedRecipients) {
             multiRecipients = retrievedRecipients;
-
-            // Check that the sum of basis points doesn't exceed 100%
-            uint16 totalBps = 0;
-            for (uint256 i = 0; i < multiRecipients.length; i++) {
-                totalBps += multiRecipients[i].bps;
-            }
-            require(totalBps <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
         } catch {
             // If retrieving multiple recipients fails, default to a single receiver
             multiRecipients = new Recipient[](1);
@@ -301,8 +294,8 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         // Check to ensure valid splits
         require(sum <= amount, "RoyaltiesRegistry: Invalid split");
 
-        uint256 percent = (sum * BASIS_POINTS) / WEIGHT_VALUE;
-        require(percent <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
+        // uint256 percent = (sum * BASIS_POINTS) / WEIGHT_VALUE;
+        // require(percent <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
 
         return royalties;
     }
