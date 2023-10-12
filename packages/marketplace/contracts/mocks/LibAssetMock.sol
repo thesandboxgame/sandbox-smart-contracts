@@ -6,8 +6,8 @@ import {LibAsset} from "../libraries/LibAsset.sol";
 
 contract LibAssetMock {
     function getFeeSide(
-        LibAsset.AssetClassType leftClass,
-        LibAsset.AssetClassType rightClass
+        LibAsset.AssetClass leftClass,
+        LibAsset.AssetClass rightClass
     ) external pure returns (LibAsset.FeeSide) {
         return LibAsset.getFeeSide(leftClass, rightClass);
     }

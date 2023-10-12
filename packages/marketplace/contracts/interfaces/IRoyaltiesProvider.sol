@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.19;
 
-uint256 constant WEIGHT_VALUE = 1e6;
+// The IRoyaltiesProvider.Part.value represents percentages in base points: 2.5 % == 0.025 * 10000 == 250.
+// We expect external contracts to return the values with this precision.
 uint256 constant BASIS_POINTS = 10000;
 
 /// @title interface for the RoyaltiesProvider contract
