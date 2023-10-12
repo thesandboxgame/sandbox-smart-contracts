@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, BASIS_POINTS, WEIGHT_VALUE} from "./interfaces/IRoyaltiesProvider.sol";
@@ -12,6 +13,7 @@ import {IRoyaltiesProvider, BASIS_POINTS, WEIGHT_VALUE} from "./interfaces/IRoya
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
+    using ERC165CheckerUpgradeable for address;
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
@@ -245,13 +247,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token address of token
     /// @return true or false
     function _checkGetRecipientsInterface(address token) internal view returns (bool) {
-        try IERC165Upgradeable(token).supportsInterface(type(IMultiRoyaltyRecipients).interfaceId) returns (
-            bool result
-        ) {
-            return result;
-        } catch {
-            return false;
-        }
+        return token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId);
     }
 
     /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
