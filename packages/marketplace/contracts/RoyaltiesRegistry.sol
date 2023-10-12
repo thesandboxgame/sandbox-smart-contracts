@@ -7,7 +7,7 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {IRoyaltiesProvider, BASIS_POINTS, WEIGHT_VALUE} from "./interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
@@ -30,6 +30,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         EIP2981,
         UNSUPPORTED_NONEXISTENT
     }
+
+    /// used to call EIP2981 royaltyInfo to calculate the royalties percentage
+    uint256 public constant WEIGHT_VALUE = 1e6;
 
     /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
     mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;

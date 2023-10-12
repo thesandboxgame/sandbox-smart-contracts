@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-uint256 constant WEIGHT_VALUE = 1e6;
 uint256 constant BASIS_POINTS = 10000;
 
 /// @title interface for the RoyaltiesProvider contract

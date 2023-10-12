@@ -18,6 +18,7 @@ import {LibAsset} from "./libraries/LibAsset.sol";
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
+    uint256 public constant PROTOCOL_FEES_MULTIPLIER = 10000;
     uint256 internal constant PROTOCOL_FEE_SHARE_LIMIT = 5000;
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
@@ -142,7 +143,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             remainder = _transferRoyalties(remainder, paymentSide, nftSide);
         }
         if (fees > 0 && remainder > 0) {
-            remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees);
+            remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEES_MULTIPLIER);
         }
         if (remainder > 0) {
             _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
@@ -167,7 +168,8 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        IRoyaltiesProvider.Part[] memory royalties = _getRoyaltiesByAssetType(nftSide.asset.assetType);
+        (address token, uint256 tokenId) = LibAsset.getNFTInfo(nftSide.asset);
+        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
@@ -177,7 +179,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }
-            remainder = _transferPercentage(remainder, paymentSide, r.account, r.value);
+            remainder = _transferPercentage(remainder, paymentSide, r.account, r.value, BASIS_POINTS);
         }
         require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
         return remainder;
@@ -187,48 +189,29 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
     /// @param to account that will receive the asset
-    /// @param percentageInBp percentage to be transferred in base points
+    /// @param percentage percentage to be transferred multiplied by the multiplier
+    /// @param multiplier percentage is multiplied by this number to avoid rounding (2.5% == 0.025) * multiplier
     /// @return How much left after current transfer
     function _transferPercentage(
         uint256 remainder,
         DealSide memory paymentSide,
         address to,
-        uint256 percentageInBp
+        uint256 percentage,
+        uint256 multiplier
     ) internal returns (uint256) {
         LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
-        (remainder, payment.value) = _subFeeInBp(remainder, paymentSide.asset.value, percentageInBp);
+        uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
+        if (remainder > fee) {
+            remainder = remainder - fee;
+            payment.value = fee;
+        } else {
+            remainder = 0;
+            payment.value = remainder;
+        }
         if (payment.value > 0) {
             _transfer(payment, paymentSide.account, to);
         }
         return remainder;
-    }
-
-    /// @notice subtract fees in BP, or base point
-    /// @param remainder amount left from amount after fees are discounted
-    /// @param total total price for asset
-    /// @param percentageInBp fee in base points to be deducted
-    /// @return remainder after fee subtraction
-    /// @return fee value (not percentage)
-    function _subFeeInBp(
-        uint256 remainder,
-        uint256 total,
-        uint256 percentageInBp
-    ) internal pure returns (uint256, uint256) {
-        uint256 fee = (total * percentageInBp) / BASIS_POINTS;
-        if (remainder > fee) {
-            return (remainder - fee, fee);
-        }
-        return (0, remainder);
-    }
-
-    /// @notice calculates royalties by asset type.
-    /// @param nftAssetType NFT Asset Type to calculate royalties for
-    /// @return calculated royalties (Array of IRoyaltiesProvider.Part)
-    function _getRoyaltiesByAssetType(
-        LibAsset.AssetType memory nftAssetType
-    ) internal returns (IRoyaltiesProvider.Part[] memory) {
-        (address token, uint256 tokenId) = abi.decode(nftAssetType.data, (address, uint));
-        return royaltiesRegistry.getRoyalties(token, tokenId);
     }
 
     /// @notice return the creator of the token if the token supports IRoyaltyUGC

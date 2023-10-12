@@ -79,10 +79,23 @@ library LibAsset {
         return keccak256(abi.encode(ASSET_TYPE_TYPEHASH, assetType.assetClass, keccak256(assetType.data)));
     }
 
-    ///    @notice calculate hash of asset
-    ///    @param asset to be hashed
-    ///    @return hash of asset
+    /// @notice calculate hash of asset
+    /// @param asset to be hashed
+    /// @return hash of asset
     function hash(Asset memory asset) internal pure returns (bytes32) {
         return keccak256(abi.encode(ASSET_TYPEHASH, hash(asset.assetType), asset.value));
+    }
+
+    /// @notice check and get the tokenAddress and tokenId for an ERC1155 or ERC721 token
+    /// @param asset that will be checked
+    /// @return tokenAddress the decoded address of the token
+    /// @return tokenId the decoded id of the token
+    function getNFTInfo(Asset memory asset) internal pure returns (address, uint256) {
+        require(
+            asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS ||
+                asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS,
+            "asset is not an NFT"
+        );
+        return abi.decode(asset.assetType.data, (address, uint));
     }
 }
