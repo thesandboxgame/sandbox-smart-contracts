@@ -4067,8 +4067,11 @@ describe('Exchange.sol', function () {
         0
       );
 
-      await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
-
+      //await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
+      await OrderValidatorAsAdmin.setPermissions(
+        OrderValidatorAsAdmin.ERC20_ROLE(),
+        true
+      );
       const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       const takerSig = await signOrder(
         orderRight,
@@ -4135,9 +4138,10 @@ describe('Exchange.sol', function () {
         0
       );
 
-      await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
-      await OrderValidatorAsAdmin.addERC20(ERC20Contract);
-      await OrderValidatorAsAdmin.addERC20(ERC20Contract2);
+      const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(ERC20_ROLE, true);
+      await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
+      await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract2);
 
       const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       const takerSig = await signOrder(
@@ -4156,7 +4160,7 @@ describe('Exchange.sol', function () {
       ]);
     });
 
-    it('should NOT allow ERC721 tokens exchange if tsbOnly is activated and token is not whitelisted', async function () {
+    it('should NOT allow ERC721 tokens exchange if TSB_ROLE is activated and token is not whitelisted', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -4220,7 +4224,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setPermissions(true, false, false, false);
+      await OrderValidatorAsAdmin.setOpen(false);
+      const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
 
       await expect(
         ExchangeContractAsUser.matchOrders([
@@ -4234,7 +4240,7 @@ describe('Exchange.sol', function () {
       ).to.be.revertedWith('not allowed');
     });
 
-    it('should allow ERC721 tokens exchange if tsbOnly is activated and token is whitelisted', async function () {
+    it('should allow ERC721 tokens exchange if TSB_ROLE is activated and token is whitelisted', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -4298,8 +4304,10 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setPermissions(true, false, false, false);
-      await OrderValidatorAsAdmin.addTSB(ERC721WithRoyaltyV2981);
+      await OrderValidatorAsAdmin.setOpen(false);
+      const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
+      await OrderValidatorAsAdmin.grantRole(TSB_ROLE, ERC721WithRoyaltyV2981);
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -4311,7 +4319,7 @@ describe('Exchange.sol', function () {
       ]);
     });
 
-    it('should NOT allow ERC721 tokens exchange if partners is activated and token is not whitelisted', async function () {
+    it('should NOT allow ERC721 tokens exchange if PARTNER_ROLE is activated and token is not whitelisted', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -4375,7 +4383,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setPermissions(false, true, false, false);
+      await OrderValidatorAsAdmin.setOpen(false);
+      const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
 
       await expect(
         ExchangeContractAsUser.matchOrders([
@@ -4389,7 +4399,7 @@ describe('Exchange.sol', function () {
       ).to.be.revertedWith('not allowed');
     });
 
-    it('should allow ERC721 tokens exchange if partners is activated and token is whitelisted', async function () {
+    it('should allow ERC721 tokens exchange if PARTNERS is activated and token is whitelisted', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -4453,8 +4463,13 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setPermissions(false, true, false, false);
-      await OrderValidatorAsAdmin.addPartner(ERC721WithRoyaltyV2981);
+      await OrderValidatorAsAdmin.setOpen(false);
+      const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
+      await OrderValidatorAsAdmin.grantRole(
+        PARTNER_ROLE,
+        ERC721WithRoyaltyV2981
+      );
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -4466,7 +4481,7 @@ describe('Exchange.sol', function () {
       ]);
     });
 
-    it('should allow ERC721 tokens exchange if tsbOnly and partners are activated but so is open', async function () {
+    it('should allow ERC721 tokens exchange if TSB_ROLE and PARTNER_ROLE are activated but so is open', async function () {
       const {
         ExchangeContractAsUser,
         OrderValidatorAsAdmin,
@@ -4530,7 +4545,10 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setPermissions(true, true, true, false);
+      const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
+      const TSB_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
+      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
 
       await ExchangeContractAsUser.matchOrders([
         {

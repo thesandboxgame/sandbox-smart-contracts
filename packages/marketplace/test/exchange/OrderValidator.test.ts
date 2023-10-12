@@ -236,7 +236,7 @@ describe('OrderValidator.sol', function () {
       .not.be.reverted;
   });
 
-  it('should validate when open is disabled, tsbOnly is enabled and makeTokenAddress have TSB_ROLE', async function () {
+  it('should validate when open is disabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
     const {
       OrderValidatorAsUser,
       OrderValidatorAsAdmin,
@@ -246,12 +246,12 @@ describe('OrderValidator.sol', function () {
     } = await loadFixture(deployFixtures);
 
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(false);
 
-    await OrderValidatorAsAdmin.setPermissions(true, false, false, false);
-
+    await OrderValidatorAsAdmin.setPermissions(TSBRole, true);
+    await OrderValidatorAsAdmin.setOpen(false);
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(true);
 
     expect(
       await OrderValidatorAsUser.hasRole(
@@ -299,12 +299,16 @@ describe('OrderValidator.sol', function () {
     } = await loadFixture(deployFixtures);
 
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+      false
+    );
 
-    await OrderValidatorAsAdmin.setPermissions(false, true, false, false);
-
+    await OrderValidatorAsAdmin.setOpen(false);
+    await OrderValidatorAsAdmin.setPermissions(PartnerRole, true);
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+      true
+    );
 
     expect(
       await OrderValidatorAsUser.hasRole(
@@ -345,7 +349,7 @@ describe('OrderValidator.sol', function () {
   it('should not set permission for token if caller is not owner', async function () {
     const {OrderValidatorAsUser, user} = await loadFixture(deployFixtures);
     await expect(
-      OrderValidatorAsUser.setPermissions(true, true, true, true)
+      OrderValidatorAsUser.setPermissions(TSBRole, true)
     ).to.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -353,17 +357,28 @@ describe('OrderValidator.sol', function () {
 
   it('should be able to set permission for token', async function () {
     const {OrderValidatorAsAdmin} = await loadFixture(deployFixtures);
-    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+      false
+    );
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.erc20List()).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.roleEnabled(ERC20Role)).to.be.equal(
+      false
+    );
 
-    await OrderValidatorAsAdmin.setPermissions(true, true, false, true);
+    await OrderValidatorAsAdmin.setPermissions(TSBRole, true);
+    await OrderValidatorAsAdmin.setPermissions(PartnerRole, true);
+    await OrderValidatorAsAdmin.setPermissions(ERC20Role, true);
+    await OrderValidatorAsAdmin.setOpen(false);
 
-    expect(await OrderValidatorAsAdmin.tsbOnly()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.partners()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+      true
+    );
     expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.erc20List()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.roleEnabled(ERC20Role)).to.be.equal(
+      true
+    );
   });
 
   it('should not be able to add token to tsb list if caller is not owner', async function () {
@@ -371,7 +386,7 @@ describe('OrderValidator.sol', function () {
       deployFixtures
     );
     await expect(
-      OrderValidatorAsUser.addTSB(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.grantRole(TSBRole, await ERC20Contract.getAddress())
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -387,7 +402,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      TSBRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         TSBRole,
@@ -401,7 +419,7 @@ describe('OrderValidator.sol', function () {
       deployFixtures
     );
     await expect(
-      OrderValidatorAsUser.removeTSB(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.revokeRole(TSBRole, await ERC20Contract.getAddress())
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -417,7 +435,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      TSBRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         TSBRole,
@@ -425,7 +446,10 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsAdmin.removeTSB(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.revokeRole(
+      TSBRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         TSBRole,
@@ -439,7 +463,10 @@ describe('OrderValidator.sol', function () {
       deployFixtures
     );
     await expect(
-      OrderValidatorAsUser.addPartner(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.grantRole(
+        PartnerRole,
+        await ERC20Contract.getAddress()
+      )
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -455,7 +482,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addPartner(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      PartnerRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
@@ -469,7 +499,10 @@ describe('OrderValidator.sol', function () {
       deployFixtures
     );
     await expect(
-      OrderValidatorAsUser.removePartner(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.revokeRole(
+        PartnerRole,
+        await ERC20Contract.getAddress()
+      )
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -485,7 +518,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addPartner(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      PartnerRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
@@ -493,7 +529,10 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsAdmin.removePartner(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.revokeRole(
+      PartnerRole,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         PartnerRole,
@@ -508,7 +547,10 @@ describe('OrderValidator.sol', function () {
     );
 
     await expect(
-      OrderValidatorAsUser.addERC20(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.grantRole(
+        ERC20Role,
+        await ERC20Contract.getAddress()
+      )
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -524,7 +566,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addERC20(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
@@ -538,7 +583,10 @@ describe('OrderValidator.sol', function () {
       deployFixtures
     );
     await expect(
-      OrderValidatorAsUser.removeERC20(await ERC20Contract.getAddress())
+      OrderValidatorAsUser.revokeRole(
+        ERC20Role,
+        await ERC20Contract.getAddress()
+      )
     ).to.be.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -554,7 +602,10 @@ describe('OrderValidator.sol', function () {
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(false);
-    await OrderValidatorAsAdmin.addERC20(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
@@ -562,7 +613,10 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(true);
 
-    await OrderValidatorAsAdmin.removeERC20(await ERC20Contract.getAddress());
+    await OrderValidatorAsAdmin.revokeRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
     expect(
       await OrderValidatorAsAdmin.hasRole(
         ERC20Role,
