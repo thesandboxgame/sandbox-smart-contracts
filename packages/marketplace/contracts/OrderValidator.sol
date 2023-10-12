@@ -47,9 +47,8 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
         LibOrder.validateOrderTime(order);
         address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
-        if (order.makeAsset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
-            _verifyERC20Whitelist(makeToken);
-        } else _verifyWhiteList(makeToken);
+       
+        verify(order.makeAsset);
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
@@ -69,15 +68,15 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         );
     }
 
-    /// @notice if ERC20 token is accepted
+    /* /// @notice if ERC20 token is accepted
     /// @param tokenAddress ERC20 token address
     function _verifyERC20Whitelist(address tokenAddress) internal view {
         if (erc20List && !hasRole(ERC20_ROLE, tokenAddress)) {
             revert("payment token not allowed");
         }
-    }
+    } */
 
-    /// @notice if token is whitelisted
+    /* /// @notice if token is whitelisted
     /// @param tokenAddress ERC20 token address
     function _verifyWhiteList(address tokenAddress) internal view {
         if (open) {
@@ -87,7 +86,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         } else {
             revert("not allowed");
         }
-    }
+    } */
 
     // slither-disable-next-line unused-state
     uint256[50] private __gap;
