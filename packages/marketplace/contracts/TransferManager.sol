@@ -18,16 +18,22 @@ import {LibAsset} from "./libraries/LibAsset.sol";
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
-    uint256 public constant PROTOCOL_FEES_MULTIPLIER = 10000;
+    /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
+    uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
+
+    /// @notice Fees cannot exceed 50%
     uint256 internal constant PROTOCOL_FEE_SHARE_LIMIT = 5000;
+
+    /// @notice Royalties are represented in IRoyaltiesProvider.BASE_POINT, they
+    /// @notice cannot exceed 50% == 0.5 * BASE_POINTS == 5000
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
     /// @notice fee for primary sales
-    /// @return uint256 of primary sale fee
+    /// @return uint256 of primary sale fee in PROTOCOL_FEE_MULTIPLIER units
     uint256 public protocolFeePrimary;
 
     /// @notice fee for secondary sales
-    /// @return uint256 of secondary sale fee
+    /// @return uint256 of secondary sale fee in PROTOCOL_FEE_MULTIPLIER units
     uint256 public protocolFeeSecondary;
 
     /// @notice Registry for the different royalties
@@ -143,7 +149,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             remainder = _transferRoyalties(remainder, paymentSide, nftSide);
         }
         if (fees > 0 && remainder > 0) {
-            remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEES_MULTIPLIER);
+            remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
             _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
