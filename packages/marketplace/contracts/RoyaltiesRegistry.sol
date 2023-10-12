@@ -248,14 +248,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         try IERC165Upgradeable(token).supportsInterface(type(IMultiRoyaltyRecipients).interfaceId) returns (
             bool result
         ) {
-            if (result) {
-                return true;
-            }
+            return result;
         } catch {
             return false;
         }
-
-        return false;
     }
 
     /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
